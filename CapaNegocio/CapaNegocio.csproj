@@ -88,6 +88,7 @@
   <ItemGroup>
     <Compile Include="NegBoolean.cs" />
     <Compile Include="NegCargaFamiliar.cs" />
+    <Compile Include="NegCodigoCIE.cs" />
     <Compile Include="NegContrato.cs" />
     <Compile Include="NegCosteoServicio.cs" />
     <Compile Include="NegCuentaContable.cs" />

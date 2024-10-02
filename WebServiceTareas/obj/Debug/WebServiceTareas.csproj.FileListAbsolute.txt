@@ -1,0 +1,352 @@
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\WebServiceTareas.dll.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\WebServiceTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\WebServiceTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csi.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csi.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\csi.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.AppContext.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Console.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.IO.Compression.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Claims.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.ValueTuple.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\vbc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\vbc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\vbc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\Newtonsoft.Json.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\Newtonsoft.Json.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\bin\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\obj\Debug\WebServiceTareas.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\obj\Debug\WebServiceTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\WebServiceTareas\obj\Debug\WebServiceTareas.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.AppContext.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Console.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Compression.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Claims.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.ValueTuple.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.pdb
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.pdb
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.rsp
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.rsp
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.AppContext.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Collections.Immutable.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Console.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.Process.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Compression.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Pipes.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Reflection.Metadata.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.AccessControl.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Claims.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Principal.Windows.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Threading.Thread.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.ValueTuple.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XmlDocument.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.rsp
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.pdb
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.pdb
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.xml
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.pdb
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe.config
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csprojAssemblyReference.cache
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CoreCompileInputs.cache
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CopyComplete
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.dll
+D:\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.AppContext.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Collections.Immutable.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Console.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.Process.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Compression.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Pipes.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Reflection.Metadata.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.AccessControl.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Claims.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Principal.Windows.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Threading.Thread.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.ValueTuple.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XmlDocument.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csprojAssemblyReference.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CopyComplete
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\WebServiceTareas.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csc.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\csi.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.AppContext.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Console.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Compression.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.IO.Pipes.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Claims.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Threading.Thread.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.ValueTuple.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\vbc.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaNegocio.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Newtonsoft.Json.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.AssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\obj\Debug\WebServiceTareas.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\EPPlus.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\NPOI.Core.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\NPOI.OOXML.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\EPPlus.Interfaces.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\EPPlus.System.Drawing.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\NPOI.OpenXml4Net.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\WebServiceTareas\bin\NPOI.OpenXmlFormats.dll

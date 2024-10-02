@@ -1,0 +1,703 @@
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaDato.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojResolveAssemblyReference.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.XmlSerializers.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.XmlSerializers.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\ReporteTareas.dll.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csi.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csi.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\csi.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Console.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\vbc.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\vbc.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\vbc.rsp
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\Newtonsoft.Json.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\SendGridMail.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Web.Http.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\Newtonsoft.Json.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Web.Http.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\obj\Release\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\FastMember.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SendGridMail.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.IO.FileSystem.Primitives.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.IO.Packaging.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csprojAssemblyReference.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\FastMember.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SendGridMail.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.IO.FileSystem.Primitives.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.IO.Packaging.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.XmlSerializers.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.XmlSerializers.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\libeay32.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\libgcc_s_dw2-1.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\mingwm10.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ssleay32.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\wkhtmltox0.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Common.Logging.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.dll
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\libeay32.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\libgcc_s_dw2-1.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\mingwm10.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ssleay32.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\wkhtmltox0.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.XmlSerializers.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ReporteTareas.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csc.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\csi.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Build.Tasks.CodeAnalysis.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.CSharp.Scripting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.Scripting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CodeAnalysis.VisualBasic.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.CSharp.Core.targets
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.amd64.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.DiaSymReader.Native.x86.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.VisualBasic.Core.targets
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\Microsoft.Win32.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.AppContext.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Collections.Immutable.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Console.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.FileVersionInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.Process.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Diagnostics.StackTrace.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Compression.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.DriveInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.FileSystem.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.IO.Pipes.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Reflection.Metadata.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.AccessControl.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Claims.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Algorithms.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Encoding.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Cryptography.X509Certificates.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Security.Principal.Windows.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Text.Encoding.CodePages.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Threading.Thread.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.ValueTuple.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.ReaderWriter.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XmlDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\System.Xml.XPath.XDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\vbc.rsp
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\roslyn\VBCSCompiler.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Common.Logging.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\FastMember.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SendGridMail.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.IO.Packaging.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaNegocio.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ClosedXML.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\DocumentFormat.OpenXml.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\ExcelNumberFormat.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Gma.QrCodeNet.Encoding.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Newtonsoft.Json.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Net.Http.Formatting.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\System.Web.Http.WebHost.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Net.Http.Formatting.resources.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.resources.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\es\System.Web.Http.WebHost.resources.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.AssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\obj\Release\ReporteTareas.XmlSerializers.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\HtmlRenderer.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\HtmlRenderer.PdfSharp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\PdfSharp.Charting.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\PdfSharp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\HtmlRenderer.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\HtmlRenderer.PdfSharp.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\PdfSharp.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\PdfSharp.Charting.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\de\PdfSharp.resources.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\de\PdfSharp.Charting.resources.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SqlServerTypes\x64\msvcr120.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SqlServerTypes\x64\SqlServerSpatial140.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SqlServerTypes\x86\msvcr120.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\SqlServerTypes\x86\SqlServerSpatial140.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\Microsoft.SqlServer.Types.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\EPPlus.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\NPOI.Core.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\NPOI.OOXML.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\EPPlus.Interfaces.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\EPPlus.System.Drawing.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\NPOI.OpenXml4Net.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\ReporteTareas\bin\NPOI.OpenXmlFormats.dll

@@ -1,0 +1,388 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:wsap="http://schemas.xmlsoap.org/ws/2004/08/addressing/policy" xmlns:wsa10="http://www.w3.org/2005/08/addressing" xmlns:tns="http://172.16.0.102/" xmlns:msc="http://schemas.microsoft.com/ws/2005/12/wsdl/contract" xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex" xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy" xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata" xmlns:wsa="http://schemas.xmlsoap.org/ws/2004/08/addressing" xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" name="ActualizarCuentaAD" targetNamespace="http://172.16.0.102/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <xs:schema elementFormDefault="qualified" targetNamespace="http://172.16.0.102/" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="ExtraerDatosUsuario">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ExtraerDatosUsuarioResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ExtraerDatosUsuarioResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CambiarContrasenia">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Nuevopassword" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Confirpassword" type="xs:string" />
+            <xs:element minOccurs="1" maxOccurs="1" name="EstadoProceso" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="CambiarContraseniaResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="CambiarContraseniaResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DesbloquearUsuario">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="datosUsuarios" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="DesbloquearUsuarioResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="DesbloquearUsuarioResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ValidarCuenta">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="datosUsuarios" type="xs:string" />
+            <xs:element minOccurs="1" maxOccurs="1" name="EstadoProceso" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ValidarCuentaResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ValidarCuentaResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="VerUsuario">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="datosUsuarios" type="xs:string" />
+            <xs:element minOccurs="1" maxOccurs="1" name="EstadoProceso" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="VerUsuarioResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="VerUsuarioResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="FechaCaducidad">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="FechaCaducidadResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="FechaCaducidadResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GenerarUsuarios">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="datosUsuarios" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="GenerarUsuariosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="GenerarUsuariosResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ActualizarUsuarios">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="datosUsuarios" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+            <xs:element minOccurs="1" maxOccurs="1" name="EstadoProceso" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ActualizarUsuariosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ActualizarUsuariosResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListarUsuarios">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="server" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="dominio" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="usuario" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="password" type="xs:string" />
+            <xs:element minOccurs="0" maxOccurs="1" name="Carpeta" type="xs:string" />
+            <xs:element minOccurs="1" maxOccurs="1" name="EstadoProceso" type="xs:int" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListarUsuariosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListarUsuariosResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="ListaUsuarios">
+        <xs:complexType />
+      </xs:element>
+      <xs:element name="ListaUsuariosResponse">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element minOccurs="0" maxOccurs="1" name="ListaUsuariosResult" type="xs:string" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="ActualizarCuentaAD_ExtraerDatosUsuario_InputMessage">
+    <wsdl:part name="parameters" element="tns:ExtraerDatosUsuario" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ExtraerDatosUsuario_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ExtraerDatosUsuarioResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_CambiarContrasenia_InputMessage">
+    <wsdl:part name="parameters" element="tns:CambiarContrasenia" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_CambiarContrasenia_OutputMessage">
+    <wsdl:part name="parameters" element="tns:CambiarContraseniaResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_DesbloquearUsuario_InputMessage">
+    <wsdl:part name="parameters" element="tns:DesbloquearUsuario" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_DesbloquearUsuario_OutputMessage">
+    <wsdl:part name="parameters" element="tns:DesbloquearUsuarioResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ValidarCuenta_InputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarCuenta" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ValidarCuenta_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ValidarCuentaResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_VerUsuario_InputMessage">
+    <wsdl:part name="parameters" element="tns:VerUsuario" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_VerUsuario_OutputMessage">
+    <wsdl:part name="parameters" element="tns:VerUsuarioResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_FechaCaducidad_InputMessage">
+    <wsdl:part name="parameters" element="tns:FechaCaducidad" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_FechaCaducidad_OutputMessage">
+    <wsdl:part name="parameters" element="tns:FechaCaducidadResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_GenerarUsuarios_InputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarUsuarios" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_GenerarUsuarios_OutputMessage">
+    <wsdl:part name="parameters" element="tns:GenerarUsuariosResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ActualizarUsuarios_InputMessage">
+    <wsdl:part name="parameters" element="tns:ActualizarUsuarios" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ActualizarUsuarios_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ActualizarUsuariosResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ListarUsuarios_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListarUsuarios" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ListarUsuarios_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListarUsuariosResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ListaUsuarios_InputMessage">
+    <wsdl:part name="parameters" element="tns:ListaUsuarios" />
+  </wsdl:message>
+  <wsdl:message name="ActualizarCuentaAD_ListaUsuarios_OutputMessage">
+    <wsdl:part name="parameters" element="tns:ListaUsuariosResponse" />
+  </wsdl:message>
+  <wsdl:portType name="ActualizarCuentaAD">
+    <wsdl:operation name="ExtraerDatosUsuario">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ExtraerDatosUsuario" message="tns:ActualizarCuentaAD_ExtraerDatosUsuario_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ExtraerDatosUsuarioResponse" message="tns:ActualizarCuentaAD_ExtraerDatosUsuario_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="CambiarContrasenia">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/CambiarContrasenia" message="tns:ActualizarCuentaAD_CambiarContrasenia_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/CambiarContraseniaResponse" message="tns:ActualizarCuentaAD_CambiarContrasenia_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="DesbloquearUsuario">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/DesbloquearUsuario" message="tns:ActualizarCuentaAD_DesbloquearUsuario_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/DesbloquearUsuarioResponse" message="tns:ActualizarCuentaAD_DesbloquearUsuario_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ValidarCuenta">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ValidarCuenta" message="tns:ActualizarCuentaAD_ValidarCuenta_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ValidarCuentaResponse" message="tns:ActualizarCuentaAD_ValidarCuenta_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="VerUsuario">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/VerUsuario" message="tns:ActualizarCuentaAD_VerUsuario_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/VerUsuarioResponse" message="tns:ActualizarCuentaAD_VerUsuario_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="FechaCaducidad">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/FechaCaducidad" message="tns:ActualizarCuentaAD_FechaCaducidad_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/FechaCaducidadResponse" message="tns:ActualizarCuentaAD_FechaCaducidad_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="GenerarUsuarios">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/GenerarUsuarios" message="tns:ActualizarCuentaAD_GenerarUsuarios_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/GenerarUsuariosResponse" message="tns:ActualizarCuentaAD_GenerarUsuarios_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ActualizarUsuarios">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ActualizarUsuarios" message="tns:ActualizarCuentaAD_ActualizarUsuarios_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ActualizarUsuariosResponse" message="tns:ActualizarCuentaAD_ActualizarUsuarios_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListarUsuarios">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ListarUsuarios" message="tns:ActualizarCuentaAD_ListarUsuarios_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ListarUsuariosResponse" message="tns:ActualizarCuentaAD_ListarUsuarios_OutputMessage" />
+    </wsdl:operation>
+    <wsdl:operation name="ListaUsuarios">
+      <wsdl:input wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ListaUsuarios" message="tns:ActualizarCuentaAD_ListaUsuarios_InputMessage" />
+      <wsdl:output wsaw:Action="http://172.16.0.102/ActualizarCuentaAD/ListaUsuariosResponse" message="tns:ActualizarCuentaAD_ListaUsuarios_OutputMessage" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="BasicHttpBinding_ActualizarCuentaAD" type="tns:ActualizarCuentaAD">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="ExtraerDatosUsuario">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/ExtraerDatosUsuario" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="CambiarContrasenia">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/CambiarContrasenia" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DesbloquearUsuario">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/DesbloquearUsuario" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ValidarCuenta">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/ValidarCuenta" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerUsuario">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/VerUsuario" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="FechaCaducidad">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/FechaCaducidad" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GenerarUsuarios">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/GenerarUsuarios" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActualizarUsuarios">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/ActualizarUsuarios" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListarUsuarios">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/ListarUsuarios" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListaUsuarios">
+      <soap:operation soapAction="http://172.16.0.102/ActualizarCuentaAD/ListaUsuarios" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="ActualizarCuentaAD">
+    <wsdl:port name="BasicHttpBinding_ActualizarCuentaAD" binding="tns:BasicHttpBinding_ActualizarCuentaAD">
+      <soap:address location="http://portaldeservicios.dos.com.ec/ConsultarAD/ActualizarCuentaAD.svc" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

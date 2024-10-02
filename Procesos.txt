@@ -1,0 +1,17 @@
+insert into [dbo].[ClientesPedidos]([Nombres],[FechaIngreso],[Estado])
+SELECT distinct CLIENTE,GETDATE(),1 FROM [dbo].[Pedido] where CLIENTE is not null
+
+insert into [dbo].[ClasificacionPedido]([Descripcion],[FechaIngreso],[Estado])
+SELECT distinct CLASIFICACION,GETDATE(),1  FROM [dbo].[Pedido] where CLASIFICACION is not null
+
+insert into [dbo].[GerenteCuentasPedido]([Nombres],[FechaIngreso],[Estado])
+SELECT distinct VENDEDOR,GETDATE(),1  FROM [dbo].[Pedido] where CLASIFICACION is not null
+
+insert into [dbo].[GerenteProductoPedido]([Nombres],[FechaIngreso],[Estado])
+SELECT distinct GERENTE_DE_PRODUCTO,GETDATE(),1  FROM [dbo].[Pedido] where GERENTE_DE_PRODUCTO is not null
+
+
+update Pedido set IdVendedor=g.IdGerenteCuenta
+
+from Pedido P INNER JOIN [dbo].[GerenteCuentasPedido] G
+ON P.VENDEDOR=G.Nombres

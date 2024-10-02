@@ -1,0 +1,99 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{65433848-A192-4C78-A511-59E085007B34}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CapaDato</RootNamespace>
+    <AssemblyName>CapaDato</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="CapaDato, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\WinCorreo\WinCorreo\bin\Debug\CapaDato.exe</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="DaoADBUsuario.cs" />
+    <Compile Include="DaoArandaDb.cs" />
+    <Compile Include="DaoCargaFamiliar.cs" />
+    <Compile Include="DaoConexion.cs" />
+    <Compile Include="DaoContrato.cs" />
+    <Compile Include="DaoCosteoServicio.cs" />
+    <Compile Include="DaoCuentaContable.cs" />
+    <Compile Include="DaoCuotaAnual.cs" />
+    <Compile Include="DaoEgresoInventario.cs" />
+    <Compile Include="DaoEmpleado.cs" />
+    <Compile Include="DaoForeCast.cs" />
+    <Compile Include="DaoHistoriaClinica.cs" />
+    <Compile Include="DaoInfoAdicionalHisClinica.cs" />
+    <Compile Include="DaoInfoContrato.cs" />
+    <Compile Include="DaoInfoFactProv.cs" />
+    <Compile Include="DaoInventario.cs" />
+    <Compile Include="DaoMantenimiento.cs" />
+    <Compile Include="DaoMensajeForeCast.cs" />
+    <Compile Include="DaoMenuDos.cs" />
+    <Compile Include="DaoModulo.cs" />
+    <Compile Include="DaoMenu.cs" />
+    <Compile Include="DaoOrdenServicio.cs" />
+    <Compile Include="DaoPedido.cs" />
+    <Compile Include="DaoPerfiles.cs" />
+    <Compile Include="DaoPoliza.cs" />
+    <Compile Include="DaoProvinciasCiudades.cs" />
+    <Compile Include="DaoRebates.cs" />
+    <Compile Include="DaoRegistroTrabajo.cs" />
+    <Compile Include="DaoReporTareaAranda.cs" />
+    <Compile Include="DaoReporteGe.cs" />
+    <Compile Include="DaoRTAUsuario.cs" />
+    <Compile Include="DaoParametrosConfiguracion.cs" />
+    <Compile Include="DaoSolicitud.cs" />
+    <Compile Include="DaoTareas.cs" />
+    <Compile Include="DaoTransaccion.cs" />
+    <Compile Include="DaoVacaciones.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\CapaEntidad\CapaEntidad.csproj">
+      <Project>{74cb46fc-75cc-4c3a-be1c-6a16fda79638}</Project>
+      <Name>CapaEntidad</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

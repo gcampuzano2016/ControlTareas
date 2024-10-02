@@ -1,0 +1,130 @@
+﻿/* Estilos para el modal */
+
+.modal-body {
+    margin: 0 1rem 0 1rem;
+    padding: 0 0 0 0;
+    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 10px;
+}
+
+.modal-body .letra-bold{
+    font-weight: bold;
+}
+
+
+/* Estilos específicos para los elementos dentro del modal */
+.modal-body .container {
+    display: block;
+}
+
+.modal-body .row {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    padding: 0;
+}
+.modal-body .row-mitad {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 1rem;
+    padding: 0;
+}
+.modal-body .row-flex {
+    display:flex;
+    justify-content:center;
+    padding: 0;
+}
+
+.modal-body .columna {
+    border: 2px solid black;
+}
+
+.modal-body .col-80 {
+    flex-grow: 1; /* Ocupa todo el espacio restante */
+    max-width: 90%; /* Límite máximo del 90% */
+}
+
+.modal-body .div1 {
+    grid-column: span 6;
+}
+
+.modal-body .div2 {
+    flex-grow: 1;
+}
+
+.modal-body .div1-mitad {
+    flex-grow: 1;
+    display: grid;
+    grid-gap: 1rem;
+    padding: 0;
+}
+
+.modal-body .image-container {
+    grid-column: span 2;
+}
+
+.modal-body .text-container {
+    grid-column: span 3;
+}
+
+.modal-body .div1-mitad img {
+    width: 50%;
+}
+
+.modal-body .centered-element {
+    display: grid;
+    place-items: center;
+}
+
+.modal-body .doble-columna {
+    display: flex;
+}
+
+.modal-body .flex-half {
+    flex: 1 1 50%;
+}
+
+/* Estilos específicos para la tabla dentro del modal */
+.modal-body .table {
+    width: 100%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body td:nth-child(1) {
+    width: 10%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body td:nth-child(2) {
+    width: 36%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body td:nth-child(3) {
+    width: 18%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body td:nth-child(4) {
+    width: 18%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body td:nth-child(5) {
+    width: 18%;
+    padding-bottom: 0.2rem;
+    padding-top: 0.2rem;
+}
+
+.modal-body .titulosTabla {
+    text-align:center; 
+    padding-bottom: 0.2rem; 
+    padding-top: 0.2rem;
+}

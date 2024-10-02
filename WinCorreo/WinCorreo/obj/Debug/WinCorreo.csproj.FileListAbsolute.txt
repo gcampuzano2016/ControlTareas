@@ -1,0 +1,55 @@
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe.config
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\bin\Debug\WinCorreo.pdb
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csprojAssemblyReference.cache
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Form1.resources
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Properties.Resources.resources
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.GenerateResource.cache
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CoreCompileInputs.cache
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CopyComplete
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\WinCorreo\WinCorreo\obj\Debug\WinCorreo.pdb
+E:\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe.config
+E:\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe
+E:\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.pdb
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Form1.resources
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Properties.Resources.resources
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.GenerateResource.cache
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CoreCompileInputs.cache
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CopyComplete
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.exe
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.pdb
+E:\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe.config
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\bin\Debug\WinCorreo.pdb
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Form1.resources
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Properties.Resources.resources
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.GenerateResource.cache
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.exe
+C:\Desarrollo\Desarrollo\WinCorreo\WinCorreo\obj\Debug\WinCorreo.pdb
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe.config
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\bin\Debug\WinCorreo.pdb
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Form1.resources
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Properties.Resources.resources
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.GenerateResource.cache
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\WinCorreo\WinCorreo\obj\Debug\WinCorreo.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Debug\WinCorreo.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Debug\WinCorreo.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Form1.resources
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.Properties.Resources.resources
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.GenerateResource.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Debug\WinCorreo.pdb

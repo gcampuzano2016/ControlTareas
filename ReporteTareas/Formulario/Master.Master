@@ -1,0 +1,148 @@
+﻿<%@ Master Language="C#" AutoEventWireup="true" CodeBehind="Master.master.cs" Inherits="ReporteTareas.Formulario.Master" %>
+
+<!DOCTYPE html>
+
+<html>
+<head runat="server">
+
+
+
+    <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="DOS">
+    <title>Sistema de Gesti&oacute;n Interno</title>
+    <link rel="icon" type="image/png" href="../Img/iconoDos.png" sizes="16x16">
+    <link href="../bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" />
+
+    <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet" />
+    <link href="../dist/css/timeline.css" rel="stylesheet" />
+    <link href="../dist/css/sb-admin-2.css" rel="stylesheet" />
+
+
+
+    <link href="../bower_components/morrisjs/morris.css" rel="stylesheet" />
+    <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+
+
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+
+    <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+    <asp:ContentPlaceHolder ID="head" runat="server">
+    </asp:ContentPlaceHolder>
+</head>
+<body>
+
+
+
+    <form id="form1" runat="server">
+
+
+
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <div id="wrapper">
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                        <span class="sr-only">Toggle navigation</span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="http://www.dos.com.ec/">
+                        <img src="../Img/IcoDos.png" /></a>
+                    <p></p>
+                </div>
+                <ul class="nav navbar-top-links navbar-right">
+
+                    <li class="dropdown">
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                            <i class="fa fa-user fa-fw"></i><i class="fa fa-caret-down"></i>
+                        </a>
+                        <ul class="dropdown-menu dropdown-user">
+                            <li><a href="#"><i class="fa fa-user fa-fw"></i>Perfil Usuario</a>
+                            </li>
+                            <li class="divider"></li>
+                            <li><a href="Login.aspx"><i class="fa fa-sign-out fa-fw"></i>Salir</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                <lu class="nav navbar-top-links navbar-right">
+                    <div class="pull-right" style="vertical-align: middle; padding: 15px;">
+                        <li style="color: #750202">
+                            <i class="fa fa-clock-o"></i>&nbsp;&nbsp;<% = Session["Nom_Usuario"] %>&nbsp;&nbsp;
+                        </li>
+                    </div>
+                </lu>
+                <div class="navbar-default sidebar" role="navigation">
+                    <div class="sidebar-nav navbar-collapse">
+                        <asp:Label ID="lblCargarMenu" runat="server" Text=""></asp:Label>
+                    </div>
+                </div>
+            </nav>
+        </div>
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <!--<Formularios>-->
+
+
+
+
+
+
+        <div>
+            <asp:ContentPlaceHolder ID="ContentPlaceHolder1" runat="server">
+            </asp:ContentPlaceHolder>
+        </div>
+
+
+
+        <!--</Formularios>-->
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <div>
+            <asp:HiddenField ID="Hid1" runat="server" Visible="false" />
+        </div>
+        <div id="morris-area-chart"></div>
+        <div id="morris-bar-chart"></div>
+        <div id="morris-donut-chart"></div>
+        <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+    </form>
+    <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+    <%--    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>--%>
+
+    <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>
+    <script src="../bower_components/raphael/raphael-min.js"></script>
+    <script src="../bower_components/morrisjs/morris.js"></script>
+    <%-- <script src="../js/morris-data.js"></script>--%>
+
+    <script src="../bower_components/assets/js/select2.min.js"></script>
+    <script src="../bower_components/assets/js/bootstrap-multiselect.min.js"></script>
+
+    <script src="../dist/js/sb-admin-2.js"></script>
+    <!-- Latest jQuery minified -->
+    <!-- Latest compiled and minified JavaScript -->
+    <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
+    <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
+    <!-- Script Personalizado -->
+    <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+
+
+
+
+
+
+</body>
+</html>

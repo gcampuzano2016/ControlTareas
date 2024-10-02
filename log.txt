@@ -1,0 +1,48 @@
+A fecha de : 29/10/2021 20:00:51: path: LDAP://ASERTIA-DC011
+A fecha de : 29/10/2021 20:00:51: cadena[0]doris.delacruz
+A fecha de : 29/10/2021 20:00:51: cadena[1]Asertia22*
+A fecha de : 29/10/2021 20:00:51: PASO1 : 
+A fecha de : 29/10/2021 20:00:51: PASO2 : 
+A fecha de : 29/10/2021 20:00:51: PASO3 : 
+A fecha de : 29/10/2021 20:00:51: val : 66048
+A fecha de : 29/10/2021 20:00:51: contador : 0
+A fecha de : 29/10/2021 20:00:51: displayname : Doris De la Cruz
+A fecha de : 29/10/2021 20:00:51: Resultado :  Existe el usuario;66048;Doris De la Cruz;
+A fecha de : 29/10/2021 20:00:51: path :  Existe el usuario;66048;Doris De la Cruz;
+A fecha de : 29/10/2021 20:00:52: cadena[0] : doris.delacruz
+A fecha de : 29/10/2021 20:00:52: cadena[1] : Asertia22*
+A fecha de : 29/10/2021 20:00:52: distinguishedName : CN=Doris De la Cruz,OU=Usuarios,OU=QUITO,OU=ASERTIA,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:00:52: grupoPertenece : OU=Usuarios
+A fecha de : 29/10/2021 20:00:52: myEntry.Properties[memberof].Count : 2
+A fecha de : 29/10/2021 20:00:52: Admin : 0
+A fecha de : 29/10/2021 20:00:52: resultado : CN=GPR_RDP_ASERTIA,CN=Users,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:00:52: cadena3[0].ToString(2) : CN=GPR_RDP_ASERTIA
+A fecha de : 29/10/2021 20:00:52: resultado : CN=GPR_navegacion_media,CN=Users,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:00:52: cadena3[0].ToString(2) : CN=GPR_navegacion_media
+A fecha de : 29/10/2021 20:00:52: ex.Message : Índice fuera de los límites de la matriz.
+A fecha de : 29/10/2021 20:00:52: Admin : 0
+A fecha de : 29/10/2021 20:00:52: Resultado Final:  Existe el usuario;66048;Doris De la Cruz;Existe la cuenta;0;OU=Usuarios↨CN=Doris De la Cruz,OU=Usuarios,OU=QUITO,OU=ASERTIA,DC=lan,DC=asertia,DC=com,DC=ec;0
+A fecha de : 29/10/2021 20:05:45: path: LDAP://ASERTIA-DC011
+A fecha de : 29/10/2021 20:05:45: cadena[0]doris.delacruz
+A fecha de : 29/10/2021 20:05:45: cadena[1]Asertia22*
+A fecha de : 29/10/2021 20:05:45: PASO1 : 
+A fecha de : 29/10/2021 20:05:45: PASO2 : 
+A fecha de : 29/10/2021 20:05:45: PASO3 : 
+A fecha de : 29/10/2021 20:05:45: val : 66048
+A fecha de : 29/10/2021 20:05:45: contador : 0
+A fecha de : 29/10/2021 20:05:45: displayname : Doris De la Cruz
+A fecha de : 29/10/2021 20:05:45: Resultado :  Existe el usuario;66048;Doris De la Cruz;
+A fecha de : 29/10/2021 20:05:45: path :  Existe el usuario;66048;Doris De la Cruz;
+A fecha de : 29/10/2021 20:05:45: cadena[0] : doris.delacruz
+A fecha de : 29/10/2021 20:05:45: cadena[1] : Asertia22*
+A fecha de : 29/10/2021 20:05:45: distinguishedName : CN=Doris De la Cruz,OU=Usuarios,OU=QUITO,OU=ASERTIA,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:05:45: grupoPertenece : OU=Usuarios
+A fecha de : 29/10/2021 20:05:45: myEntry.Properties[memberof].Count : 2
+A fecha de : 29/10/2021 20:05:45: Admin : 0
+A fecha de : 29/10/2021 20:05:45: resultado : CN=GPR_RDP_ASERTIA,CN=Users,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:05:45: cadena3[0].ToString(2) : CN=GPR_RDP_ASERTIA
+A fecha de : 29/10/2021 20:05:45: resultado : CN=GPR_navegacion_media,CN=Users,DC=lan,DC=asertia,DC=com,DC=ec
+A fecha de : 29/10/2021 20:05:45: cadena3[0].ToString(2) : CN=GPR_navegacion_media
+A fecha de : 29/10/2021 20:05:45: ex.Message : Índice fuera de los límites de la matriz.
+A fecha de : 29/10/2021 20:05:45: Admin : 0
+A fecha de : 29/10/2021 20:05:45: Resultado Final:  Existe el usuario;66048;Doris De la Cruz;Existe la cuenta;0;OU=Usuarios↨CN=Doris De la Cruz,OU=Usuarios,OU=QUITO,OU=ASERTIA,DC=lan,DC=asertia,DC=com,DC=ec;0

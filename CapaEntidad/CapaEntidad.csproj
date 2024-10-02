@@ -1,0 +1,100 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{74CB46FC-75CC-4C3A-BE1C-6A16FDA79638}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>CapaEntidad</RootNamespace>
+    <AssemblyName>CapaEntidad</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EntBoolean.cs" />
+    <Compile Include="EntCargaFamiliar.cs" />
+    <Compile Include="EntClienteEgrInventario.cs" />
+    <Compile Include="EntContrato.cs" />
+    <Compile Include="EntCosteoServicio.cs" />
+    <Compile Include="EntCuentaContable.cs" />
+    <Compile Include="EntCuotaAnual.cs" />
+    <Compile Include="EntDetalleInventario.cs" />
+    <Compile Include="EntEgresoInventario.cs" />
+    <Compile Include="EntEmpleado.cs" />
+    <Compile Include="EntForeCast.cs" />
+    <Compile Include="EntInfoAdicionalHisClinica.cs" />
+    <Compile Include="EntInfoContrato.cs" />
+    <Compile Include="EntInfoFacturaProv.cs" />
+    <Compile Include="EntInventario.cs" />
+    <Compile Include="EntMantenimiento.cs" />
+    <Compile Include="EntMensajeForeCast.cs" />
+    <Compile Include="EntMenuDos.cs" />
+    <Compile Include="EntMenuSubmenu.cs" />
+    <Compile Include="EntMenu.cs" />
+    <Compile Include="EntOrdenServicio.cs" />
+    <Compile Include="EntPedido.cs" />
+    <Compile Include="EntPerfiles.cs" />
+    <Compile Include="EntPoliza.cs" />
+    <Compile Include="EntProvinciaCiudad.cs" />
+    <Compile Include="EntRebates.cs" />
+    <Compile Include="EntReporteGe.cs" />
+    <Compile Include="EntSolicitud.cs" />
+    <Compile Include="EntTareaPrincipal.cs" />
+    <Compile Include="EntItemValor.cs" />
+    <Compile Include="EntArchivoTarea.cs" />
+    <Compile Include="EntParametrosCorreo.cs" />
+    <Compile Include="EntCatalogo.cs" />
+    <Compile Include="EntRespuesta.cs" />
+    <Compile Include="EntDetTarea.cs" />
+    <Compile Include="EntError.cs" />
+    <Compile Include="EntDetalleTarea.cs" />
+    <Compile Include="EntHisTarea.cs" />
+    <Compile Include="EntModulo.cs" />
+    <Compile Include="EntKpi.cs" />
+    <Compile Include="EntTareas.cs" />
+    <Compile Include="EntTransaccion.cs" />
+    <Compile Include="EntParametrosConfiguracion.cs" />
+    <Compile Include="EntCombo.cs" />
+    <Compile Include="EntUsuario.cs" />
+    <Compile Include="EntVacaciones.cs" />
+    <Compile Include="ERegistroTrabajo.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

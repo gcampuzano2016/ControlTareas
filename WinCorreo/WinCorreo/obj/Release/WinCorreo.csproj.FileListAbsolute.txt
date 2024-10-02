@@ -1,0 +1,15 @@
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\WinCorreo.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\WinCorreo.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\bin\Release\SendGridMail.dll
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.Form1.resources
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.Properties.Resources.resources
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.csproj.GenerateResource.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\WinCorreo\WinCorreo\obj\Release\WinCorreo.pdb

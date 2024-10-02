@@ -1,0 +1,709 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://ArandaCMDBService.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://ArandaCMDBService.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://ArandaCMDBService.org/">
+      <s:element name="GetUserbyId">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserbyIdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetUserbyIdResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="UserInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Language" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Email" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Login" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Password" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ProfileId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="RoleId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ActiveUser" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="EmailAssistant" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="PasswordChangeDate" nillable="true" type="s:dateTime" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="GetUserbyName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetUserbyNameResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetUserbyNameResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserLanguage">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="language" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserLanguageResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateUserPassword">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="oldPassword" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserPasswordResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="UpdateUserPasswordResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserEmail">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="email" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserEmailResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateUserName">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="name" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserNameResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateUserResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ActivateUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ActivateUserResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UnactivateUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UnactivateUserResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="AutenticateUserAD">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="domain" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AutenticateUserADResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AutenticateUserADResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetDomains">
+        <s:complexType />
+      </s:element>
+      <s:element name="GetDomainsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetDomainsResult" type="tns:ArrayOfString" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfString">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="string" nillable="true" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AutenticateUserDB">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AutenticateUserDBResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AutenticateUserDBResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AutenticateUserDBEncrip">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AutenticateUserDBEncripResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AutenticateUserDBEncripResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListServers">
+        <s:complexType />
+      </s:element>
+      <s:element name="ListServersResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListServersResult" type="tns:ArrayOfLdapInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfLdapInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="LdapInfo" nillable="true" type="tns:LdapInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="LdapInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Path" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UserString" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Security" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ConnectionType" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="AutenticateUser">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="serverId" type="s:int" />
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+            <s:element minOccurs="0" maxOccurs="1" name="password" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AutenticateUserResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="AutenticateUserResult" type="tns:UserInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RememberPassword">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="userName" type="s:string" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="RememberPasswordResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="RememberPasswordResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="GetUserbyIdSoapIn">
+    <wsdl:part name="parameters" element="tns:GetUserbyId" />
+  </wsdl:message>
+  <wsdl:message name="GetUserbyIdSoapOut">
+    <wsdl:part name="parameters" element="tns:GetUserbyIdResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetUserbyNameSoapIn">
+    <wsdl:part name="parameters" element="tns:GetUserbyName" />
+  </wsdl:message>
+  <wsdl:message name="GetUserbyNameSoapOut">
+    <wsdl:part name="parameters" element="tns:GetUserbyNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserLanguageSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateUserLanguage" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserLanguageSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateUserLanguageResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserPasswordSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateUserPassword" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserPasswordSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateUserPasswordResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserEmailSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateUserEmail" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserEmailSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateUserEmailResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserNameSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateUserName" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserNameSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateUserNameResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateUser" />
+  </wsdl:message>
+  <wsdl:message name="UpdateUserSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="ActivateUserSoapIn">
+    <wsdl:part name="parameters" element="tns:ActivateUser" />
+  </wsdl:message>
+  <wsdl:message name="ActivateUserSoapOut">
+    <wsdl:part name="parameters" element="tns:ActivateUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="UnactivateUserSoapIn">
+    <wsdl:part name="parameters" element="tns:UnactivateUser" />
+  </wsdl:message>
+  <wsdl:message name="UnactivateUserSoapOut">
+    <wsdl:part name="parameters" element="tns:UnactivateUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserADSoapIn">
+    <wsdl:part name="parameters" element="tns:AutenticateUserAD" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserADSoapOut">
+    <wsdl:part name="parameters" element="tns:AutenticateUserADResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetDomainsSoapIn">
+    <wsdl:part name="parameters" element="tns:GetDomains" />
+  </wsdl:message>
+  <wsdl:message name="GetDomainsSoapOut">
+    <wsdl:part name="parameters" element="tns:GetDomainsResponse" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserDBSoapIn">
+    <wsdl:part name="parameters" element="tns:AutenticateUserDB" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserDBSoapOut">
+    <wsdl:part name="parameters" element="tns:AutenticateUserDBResponse" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserDBEncripSoapIn">
+    <wsdl:part name="parameters" element="tns:AutenticateUserDBEncrip" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserDBEncripSoapOut">
+    <wsdl:part name="parameters" element="tns:AutenticateUserDBEncripResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListServersSoapIn">
+    <wsdl:part name="parameters" element="tns:ListServers" />
+  </wsdl:message>
+  <wsdl:message name="ListServersSoapOut">
+    <wsdl:part name="parameters" element="tns:ListServersResponse" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserSoapIn">
+    <wsdl:part name="parameters" element="tns:AutenticateUser" />
+  </wsdl:message>
+  <wsdl:message name="AutenticateUserSoapOut">
+    <wsdl:part name="parameters" element="tns:AutenticateUserResponse" />
+  </wsdl:message>
+  <wsdl:message name="RememberPasswordSoapIn">
+    <wsdl:part name="parameters" element="tns:RememberPassword" />
+  </wsdl:message>
+  <wsdl:message name="RememberPasswordSoapOut">
+    <wsdl:part name="parameters" element="tns:RememberPasswordResponse" />
+  </wsdl:message>
+  <wsdl:portType name="AuthenticationSoap">
+    <wsdl:operation name="GetUserbyId">
+      <wsdl:input message="tns:GetUserbyIdSoapIn" />
+      <wsdl:output message="tns:GetUserbyIdSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetUserbyName">
+      <wsdl:input message="tns:GetUserbyNameSoapIn" />
+      <wsdl:output message="tns:GetUserbyNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserLanguage">
+      <wsdl:input message="tns:UpdateUserLanguageSoapIn" />
+      <wsdl:output message="tns:UpdateUserLanguageSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserPassword">
+      <wsdl:input message="tns:UpdateUserPasswordSoapIn" />
+      <wsdl:output message="tns:UpdateUserPasswordSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserEmail">
+      <wsdl:input message="tns:UpdateUserEmailSoapIn" />
+      <wsdl:output message="tns:UpdateUserEmailSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserName">
+      <wsdl:input message="tns:UpdateUserNameSoapIn" />
+      <wsdl:output message="tns:UpdateUserNameSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUser">
+      <wsdl:input message="tns:UpdateUserSoapIn" />
+      <wsdl:output message="tns:UpdateUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ActivateUser">
+      <wsdl:input message="tns:ActivateUserSoapIn" />
+      <wsdl:output message="tns:ActivateUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UnactivateUser">
+      <wsdl:input message="tns:UnactivateUserSoapIn" />
+      <wsdl:output message="tns:UnactivateUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserAD">
+      <wsdl:input message="tns:AutenticateUserADSoapIn" />
+      <wsdl:output message="tns:AutenticateUserADSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetDomains">
+      <wsdl:input message="tns:GetDomainsSoapIn" />
+      <wsdl:output message="tns:GetDomainsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDB">
+      <wsdl:input message="tns:AutenticateUserDBSoapIn" />
+      <wsdl:output message="tns:AutenticateUserDBSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDBEncrip">
+      <wsdl:input message="tns:AutenticateUserDBEncripSoapIn" />
+      <wsdl:output message="tns:AutenticateUserDBEncripSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListServers">
+      <wsdl:input message="tns:ListServersSoapIn" />
+      <wsdl:output message="tns:ListServersSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUser">
+      <wsdl:input message="tns:AutenticateUserSoapIn" />
+      <wsdl:output message="tns:AutenticateUserSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="RememberPassword">
+      <wsdl:input message="tns:RememberPasswordSoapIn" />
+      <wsdl:output message="tns:RememberPasswordSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="AuthenticationSoap" type="tns:AuthenticationSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetUserbyId">
+      <soap:operation soapAction="http://ArandaCMDBService.org/GetUserbyId" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserbyName">
+      <soap:operation soapAction="http://ArandaCMDBService.org/GetUserbyName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserLanguage">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UpdateUserLanguage" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserPassword">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UpdateUserPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserEmail">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UpdateUserEmail" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserName">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UpdateUserName" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUser">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UpdateUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivateUser">
+      <soap:operation soapAction="http://ArandaCMDBService.org/ActivateUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UnactivateUser">
+      <soap:operation soapAction="http://ArandaCMDBService.org/UnactivateUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserAD">
+      <soap:operation soapAction="http://ArandaCMDBService.org/AutenticateUserAD" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDomains">
+      <soap:operation soapAction="http://ArandaCMDBService.org/GetDomains" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDB">
+      <soap:operation soapAction="http://ArandaCMDBService.org/AutenticateUserDB" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDBEncrip">
+      <soap:operation soapAction="http://ArandaCMDBService.org/AutenticateUserDBEncrip" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListServers">
+      <soap:operation soapAction="http://ArandaCMDBService.org/ListServers" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUser">
+      <soap:operation soapAction="http://ArandaCMDBService.org/AutenticateUser" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RememberPassword">
+      <soap:operation soapAction="http://ArandaCMDBService.org/RememberPassword" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="AuthenticationSoap12" type="tns:AuthenticationSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="GetUserbyId">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/GetUserbyId" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetUserbyName">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/GetUserbyName" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserLanguage">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UpdateUserLanguage" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserPassword">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UpdateUserPassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserEmail">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UpdateUserEmail" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUserName">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UpdateUserName" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateUser">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UpdateUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ActivateUser">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/ActivateUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UnactivateUser">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/UnactivateUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserAD">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/AutenticateUserAD" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetDomains">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/GetDomains" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDB">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/AutenticateUserDB" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUserDBEncrip">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/AutenticateUserDBEncrip" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListServers">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/ListServers" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AutenticateUser">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/AutenticateUser" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="RememberPassword">
+      <soap12:operation soapAction="http://ArandaCMDBService.org/RememberPassword" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Authentication">
+    <wsdl:port name="AuthenticationSoap" binding="tns:AuthenticationSoap">
+      <soap:address location="https://portaldeservicios.dos.com.ec/CMDBWS/Authentication.asmx" />
+    </wsdl:port>
+    <wsdl:port name="AuthenticationSoap12" binding="tns:AuthenticationSoap12">
+      <soap12:address location="https://portaldeservicios.dos.com.ec/CMDBWS/Authentication.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

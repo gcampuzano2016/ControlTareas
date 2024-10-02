@@ -1,0 +1,83 @@
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaDato.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\obj\Release\CapaDato.csprojResolveAssemblyReference.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaDato.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\obj\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaDato\obj\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csprojAssemblyReference.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\bin\Release\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.AssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Release\CapaDato.pdb

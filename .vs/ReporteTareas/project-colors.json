@@ -1,0 +1,16 @@
+{
+  "Version": 1,
+  "ProjectMap": {
+    "65433848-a192-4c78-a511-59e085007b34": {
+      "ProjectGuid": "65433848-a192-4c78-a511-59e085007b34",
+      "DisplayName": "CapaDato",
+      "ColorIndex": 0
+    },
+    "67c950c5-f45f-49ae-858c-b91bc4f9d2e2": {
+      "ProjectGuid": "67c950c5-f45f-49ae-858c-b91bc4f9d2e2",
+      "DisplayName": "ReporteTareas",
+      "ColorIndex": 1
+    }
+  },
+  "NextColorIndex": 2
+}

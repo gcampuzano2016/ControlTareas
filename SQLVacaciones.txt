@@ -1,0 +1,35 @@
+Tablas
+Vacaciones
+PrmEstadoSolicitud
+PrmTipoSolicitud
+
+SP
+Sp_RTAComboContrato
+Sp_RTAInsertaNuevaSolicitud
+Sp_RTAListaSolicitud
+Sp_RTAConsultaDatosEmpleados
+Sp_RTAConsultarSaldoVacaciones
+Sp_RTActualizarSolicitud
+Sp_RTANotificarSolicitud
+
+OTROS CAMBIOS
+
+Sp_RTAInsertaNuevoCliente
+
+Sp_RTAInsertaCodigoSeguridad
+Sp_RTAConsultarCodigoSeguridad
+Sp_RTAActualizarRutaRide
+Sp_RTAListaArchivosSolicitud
+
+
+Sp_RTAInsertaNuevoPedido
+Sp_RTAListaPedido
+
+https://ourcodeworld.co/articulos/leer/366/como-generar-un-pdf-a-partir-de-html-usando-wkhtmltopdf-con-c-sharp-en-winforms
+
+https://www.youtube.com/watch?v=z1lZKV705CU
+
+
+--------------------------------------
+crear sp
+Sp_RTACorreoUsuarioPlanificacionVac

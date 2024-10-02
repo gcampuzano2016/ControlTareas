@@ -1,0 +1,39 @@
+INSERT INTO [dbo].[R_Usuarios]
+           ([Cod_Usuario]
+           ,[Nom_Usuario]
+           ,[Log_Usuario]
+           ,[Pass_Usuario]
+           ,[Cod_Perfil]
+           ,[E_Mail]
+           ,[Rol_Usuario]
+           ,[Fec_Creacion]
+           ,[Usuario_Estado]
+           ,[Cod_Jefe_Inm]
+           ,[MailCodJefeInm]
+           ,[Cod_Sap]
+           ,[Id_Perfil]
+           ,[IdCliente])
+SELECT 
+      [Cod_Usuario]
+      ,[Nom_Usuario]
+      ,[Log_Usuario]
+      ,[Pass_Usuario]
+      ,[Cod_Perfil]
+      ,[E_Mail]
+      ,[Rol_Usuario]
+      ,[Fec_Creacion]
+      ,[Usuario_Estado]
+      ,[Cod_Jefe_Inm]
+      ,[MailCodJefeInm]
+      ,[Cod_Sap]
+      ,[Id_Perfil]
+      ,[IdCliente]
+  FROM [dbo].[R_Usuarios]
+  WHERE Cod_Usuario='4089'
+
+  SELECT * FROM [dbo].[R_Usuarios] WHERE Id_Usuario=78
+  update [dbo].[R_Usuarios] set IdCliente=187,Nom_Usuario='Password.1',Log_Usuario='SERTRACENDELECUADOR S.A. ',
+  Pass_Usuario='Password.1'
+  WHERE Id_Usuario=78
+
+  SELECT * FROM Clientes WHERE IdCliente=187

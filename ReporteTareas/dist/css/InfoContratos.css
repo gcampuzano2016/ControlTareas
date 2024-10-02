@@ -1,0 +1,608 @@
+﻿body {
+}
+
+hr {
+    border: 0;
+    height: 2px;
+    background: #96A6B0; /* Color de la línea */
+}
+
+/*  Sweeetalert aumento de tamaño */
+.swal2-popup {
+    font-size: 1.6rem !important;
+    font-weight: 400;
+}
+.btn-custom:hover {
+    background-image: linear-gradient(to bottom, #587EDD, #7E38D8);
+}
+.btn-custom {
+    background-image: linear-gradient(to bottom, #29CAE4, #08759B);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+}
+.btn-custom.active {
+     background-image: none;
+     background-color: #587EDD;
+     color: white;
+}
+.horizontal-group-special {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+}
+
+.horizontal-group-around {
+    display: flex;
+    justify-content: space-around;
+    justify-items: stretch;
+}
+
+.horizontal-group-evenly {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+/* =============================================================
+    Especificaciones generales para InformacionContratos.aspx
+===============================================================*/
+.generalesInfoContratos {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.generalesInfoContratos h2 {
+    font-weight: 700;
+    font-style: italic;
+}
+.select-dorado {
+    background-color: #FCBA4D;
+}
+.input-azulobscuro {
+    background-color: #0C5C82;
+}
+.ingresosTitulos {
+    font-weight: 700;
+}
+
+/*.pagina {
+  transition: opacity 0.5s ease;
+  opacity: 1;
+}
+
+.pagina.oculto {
+  opacity: 0;
+}*/
+
+/* Fondos */
+.fondo-rojo {
+    background-image: linear-gradient(rgba(63,63,63,0.55), rgba(109,109,109,0.55)), url('../../carrusel/imagenes/Fondo_color1.jpg');
+    background-size: cover; /* Para ajustar la imagen al tamaño del well */
+    background-repeat: no-repeat;
+}
+
+    .fondo-rojo span {
+        border: none;
+    }
+
+    .fondo-rojo input,
+    .fondo-rojo textarea {
+        background-color: rgba(15, 15, 15, 0.6); /* Color de fondo con opacidad */
+        color: white; /* Hereda el color del texto del elemento padre */
+        border-color: darkgoldenrod;
+        padding: 1rem;
+    }
+
+        .fondo-rojo input::placeholder,
+        .fondo-rojo textarea::placeholder {
+            color: gainsboro; /* Hereda el color del texto del elemento padre para el marcador de posición */
+        }
+
+
+.fondo-dorado {
+    background-image: linear-gradient(rgba(63,63,63,0.5), rgba(109,109,109,0.2)), url('../../carrusel/imagenes/fondo5.jpg');
+    background-size: cover; /* Para ajustar la imagen al tamaño del well */
+    background-repeat: no-repeat;
+}
+
+    .fondo-dorado span {
+        border: none;
+    }
+
+    .fondo-dorado input,
+    .fondo-dorado textarea {
+        background-color: rgba(15, 15, 15, 0.5); /* Color de fondo con opacidad */
+        color: white; /* Hereda el color del texto del elemento padre */
+        border-color: tan;
+        padding: 1rem;
+    }
+
+        .fondo-dorado input::placeholder,
+        .fondo-dorado textarea::placeholder {
+            color: gainsboro; /* Hereda el color del texto del elemento padre para el marcador de posición */
+        }
+
+.fondo-azul {
+    background-image: linear-gradient(rgba(100,100,100,0.05), rgba(100,100,100,0.4)), url('../../carrusel/imagenes/fondoCiudad3.jpg');
+    background-size: cover; /* Para ajustar la imagen al tamaño del well */
+    background-repeat: no-repeat;
+}
+
+    .fondo-azul span {
+        border: none;
+    }
+
+    .fondo-azul label {
+        color: antiquewhite;
+    }
+
+    .fondo-azul input,
+    .fondo-azul textarea,
+    .fondo-azul select {
+        background-color: rgba(15, 15, 15, 0.6); /* Color de fondo con opacidad */
+        color: white; /* Hereda el color del texto del elemento padre */
+        border-color: tan;
+        padding: 1rem;
+    }
+
+        .fondo-azul input::placeholder,
+        .fondo-azul textarea::placeholder {
+            color: gainsboro; /* Hereda el color del texto del elemento padre para el marcador de posición */
+        }
+
+/*  Ponemos un margen a la izq y der de 2rem*/
+.marg-2 {
+    margin-left: 2rem; 
+    margin-right: 2rem;
+}
+/* Agrupar 2 elemntos de manera horizontal en Contratos */
+.horizontal-group-contrato {
+    display: flex;
+    margin-left: 2rem;
+    margin-right: 2rem;
+    gap: 2rem;
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 20px;
+}
+
+.horizontal {
+    display: flex;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.horizontal-cuadriculado-flow {
+    display: flow-root;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.horizontal-simple {
+    display: table-row;
+    align-items: center;
+}
+
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+
+.horizontal-group-simple {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.horizontal-group-special {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+}
+
+.horizontal-group-around {
+    display: flex;
+    justify-content: space-around;
+    justify-items: stretch;
+}
+
+.horizontal-group-evenly {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+
+.horizontal-group-end {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+}
+
+.horizontal-group-start {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+
+.centrar-elemento {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+
+.input-basic {
+    width: 25px;
+}
+
+.input-basic3 {
+    width: 30px;
+}
+
+.input-medium {
+    width: 45px;
+}
+
+
+/*      Valores que solo afectan al modal de ver en PDF     */
+/* Estilos para el modal específico */
+/*#ModalEgresoInventarioPDF .modal-body {
+    margin: 0 1rem 0 1rem;
+    padding: 0 0 0 0;
+    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 11px;
+}
+
+    #ModalEgresoInventarioPDF .modal-body .letra-bold {
+        font-weight: bold;
+    }
+    */
+
+    /* Estilos específicos para los elementos dentro del modal */
+    /*#ModalEgresoInventarioPDF .modal-body .container {
+        display: block;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .row {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        padding: 0;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .row-mitad {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 1rem;
+        padding: 0;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .row-flex {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .columna {
+        border: 2px solid black;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .col-80 {
+        flex-grow: 1;
+        max-width: 90%; 
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .div1 {
+        grid-column: span 6;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .div2 {
+        flex-grow: 1;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .div1-mitad {
+        flex-grow: 1;
+        display: grid;
+        grid-gap: 1rem;
+        padding: 0;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .image-container {
+        grid-column: span 2;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .text-container {
+        grid-column: span 3;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .div1-mitad img {
+        width: 50%;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .centered-element {
+        display: grid;
+        place-items: center;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .doble-columna {
+        display: flex;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .flex-half {
+        flex: 1 1 50%;
+    }
+
+        */
+    /* Estilos específicos para la tabla dentro del modal */
+    /*#ModalEgresoInventarioPDF .modal-body .table {
+        width: 100%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body td:nth-child(1) {
+        width: 10%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body td:nth-child(2) {
+        width: 36%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body td:nth-child(3) {
+        width: 18%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body td:nth-child(4) {
+        width: 18%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body td:nth-child(5) {
+        width: 18%;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .titulosTabla {
+        text-align: center;
+        padding-bottom: 0.2rem;
+        padding-top: 0.2rem;
+    }*/
+
+
+
+/* Estilos específicos para los elementos dentro del modal #msgCargarArchivos */
+/* Estilos para el modal */
+/* Estilos generales para el modal #msgCargarArchivos */
+#msgCargarArchivos.modal.fade {
+    background-color: rgba(0, 0, 0, 0.6); /* Fondo oscuro con transparencia */
+}
+
+#msgCargarArchivos .modal-dialog {
+    max-width: 600px;
+    margin: 30px auto;
+}
+
+#msgCargarArchivos .modal-content {
+    border-radius: 10px; /* Bordes redondeados */
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Sombra sutil */
+    transition: transform 0.3s;
+}
+
+#msgCargarArchivos .modal-content:hover {
+    transform: scale(1.02); /* Escala al pasar el mouse */
+}
+
+#msgCargarArchivos .modal-header {
+    background-color: #1c6893; /* Color de fondo azul */
+    color: #fff; /* Color de texto blanco */
+    padding: 15px 20px;
+}
+
+
+#msgCargarArchivos .modal-title {
+    margin: 0;
+    font-size: 24px; /* Tamaño de fuente más grande */
+    font-weight: bold;
+}
+
+#msgCargarArchivos .modal-body {
+    padding: 20px;
+    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 16px; /* Tamaño de fuente más grande */
+}
+
+#msgCargarArchivos .letra-bold {
+    font-weight: bold;
+}
+
+/* Estilos específicos para los elementos dentro del modal */
+#msgCargarArchivos .container {
+    display: block;
+}
+
+#msgCargarArchivos .div1 {
+    grid-column: span 6;
+}
+
+#msgCargarArchivos .div2 {
+    flex-grow: 1;
+}
+
+#msgCargarArchivos .div1-mitad {
+    flex-grow: 1;
+    display: grid;
+    grid-gap: 1rem;
+    padding: 0;
+}
+
+#msgCargarArchivos .image-container {
+    grid-column: span 2;
+}
+
+#msgCargarArchivos .text-container {
+    grid-column: span 3;
+}
+
+#msgCargarArchivos .div1-mitad img {
+    width: 50%;
+}
+
+#msgCargarArchivos .centered-element {
+    display: grid;
+    place-items: center;
+}
+
+#msgCargarArchivos .doble-columna {
+    display: flex;
+}
+
+#msgCargarArchivos .flex-half {
+    flex: 1 1 50%;
+}
+
+/* Estilos adicionales */
+#msgCargarArchivos .btn-info {
+    background-color: #007bff;
+    border-color: #007bff;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px; /* Bordes redondeados */
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#msgCargarArchivos .btn-info:hover {
+    background-color: #0056b3; /* Cambio de color al pasar el mouse */
+}
+
+#msgCargarArchivos #fileProgress {
+    width: 100%;
+    height: 20px;
+    border-radius: 4px;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    margin-bottom: 20px;
+}
+
+#msgCargarArchivos #fileProgress::-webkit-progress-bar {
+    background-color: #f5f5f5;
+}
+
+#msgCargarArchivos #fileProgress::-webkit-progress-value {
+    background-color: #007bff;
+}
+
+#msgCargarArchivos #fileProgress::-moz-progress-bar {
+    background-color: #007bff;
+}
+
+#msgCargarArchivos #lblMessage {
+    color: green;
+    display: block;
+    margin-bottom: 10px;
+}
+
+#msgCargarArchivos .help-block {
+    color: #6c757d;
+    font-size: 12px;
+    margin-top: 10px;
+}
+
+
+
+/*  Indicar que campos son requeridos   */
+.asterisk {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: red;
+    pointer-events: none;
+}
+
+input:valid + .asterisk {
+    color: aliceblue;
+}
+
+input:invalid + .asterisk {
+    color: red;
+}
+
+
+.dynamic-table-container {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+.dynamic-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.dynamic-table th, .dynamic-table td {
+    border: 1px solid #8f8787;
+    padding: 10px;
+    text-align: center;
+}
+
+/* Estilo para los inputs dentro de las celdas de la tabla */
+.dynamic-table td input[type="number"],
+.dynamic-table td input[type="text"] {
+    width: calc(100% - 20px); /* Restamos 20px para tener en cuenta el padding y margen */
+    padding: 5px;
+    margin: 0;
+    box-sizing: border-box; /* Asegura que el padding se incluya en el ancho total */
+}
+
+.dynamic-button {
+    padding: 10px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.dynamic-button:hover {
+    background-color: #45a049;
+}
+
+.delete-button {
+    background-color: rgba(15, 15, 15, 1);
+    color: white;
+    border: none;
+    cursor: pointer;
+    padding: 5px 10px;
+    border-radius: 5px;
+}
+
+.delete-button:hover {
+    background-color: darkred;
+}
+
+#remainingValue {
+    margin-top: 20px;
+    font-weight: bold;
+}
+
+
+/*   Ponemos estilo a la lista de Ordenes de Servicio     */

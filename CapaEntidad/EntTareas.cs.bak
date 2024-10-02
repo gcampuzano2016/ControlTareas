@@ -1,0 +1,36 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CapaEntidad
+{
+    public class EntTareas
+    {
+
+        public Int32 Id_RegTareasHorasExtras { get; set; }
+        public Int32 Id_RegTareas { get; set; }
+        public int Tipo { get; set; }
+        public string Num_OrdenServicio { get; set; }
+        public string Id_CompAranda { get; set; }
+        public string Fch_Registro { get; set; }
+        public string Fch_EstAtencion { get; set; }
+        public string Fch_EstSolucion { get; set; }
+        public string Id_Responsable { get; set; }
+        public string Nom_Responsable { get; set; }
+        public string Nom_Empresa { get; set; }
+        public string Nom_SlaAranda { get; set; }
+        public string Det_Tarea { get; set; }
+        public string Estado { get; set; }
+        public string Categoria { get; set; }
+        public string SubCategoria { get; set; }
+        public string EstadoApro { get; set; }
+        public string Estado2 { get; set; }
+        public string ResponsableAprobacion { get; set; }
+        public string MailResponsableAprobacion { get; set; }
+        public string MailAprobacionTitulo { get; set; }
+        public Int32 TipoAprobacion { get; set; }
+
+    }
+}

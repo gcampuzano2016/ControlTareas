@@ -1,0 +1,120 @@
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojResolveAssemblyReference.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.AssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.Interfaces.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.System.Drawing.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.Core.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OOXML.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe.config

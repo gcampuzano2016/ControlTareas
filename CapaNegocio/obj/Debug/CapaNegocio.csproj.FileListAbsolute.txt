@@ -1,0 +1,183 @@
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojResolveAssemblyReference.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\Users\GUILLO\Desktop\Nueva carpeta\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+E:\Desarrollo\Proyecto\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+D:\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+D:\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+D:\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+D:\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+D:\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+D:\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csprojAssemblyReference.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.AssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe.config

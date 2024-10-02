@@ -1,0 +1,26 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace CapaEntidad
+{
+    public class EntDetTarea
+    {
+
+            public string Num_OrdenServicio { get; set; }
+            public string Nom_Cliente { get; set; }
+            public string Id_Responsable { get; set; }
+            public string Det_Tarea { get; set; }
+            public string Det_Fecha { get; set; }
+            public string Det_Fch_RegDetalleIni { get; set; }
+            public string Det_Fch_RegDetalleFin { get; set; }
+            public string Det_Tiempo { get; set; }
+            public string Det_Det_Tarea { get; set; }
+            public string Det_Det_TareaFin { get; set; }
+
+
+
+    }
+}

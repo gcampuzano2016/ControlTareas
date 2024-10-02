@@ -1,0 +1,75 @@
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojResolveAssemblyReference.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\DesarrolloSistema\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+E:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+D:\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+D:\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+D:\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+D:\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+D:\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+D:\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+D:\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csprojAssemblyReference.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.AssemblyReference.cache

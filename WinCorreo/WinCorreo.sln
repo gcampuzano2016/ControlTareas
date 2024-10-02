@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.271
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinCorreo", "WinCorreo\WinCorreo.csproj", "{2BB990EF-2A74-41C7-BF20-4CB32A29062C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WinSerEnvioCorreo", "WinSerEnvioCorreo\WinSerEnvioCorreo.csproj", "{6FB3703C-645D-4C18-B73C-81A373536C44}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2BB990EF-2A74-41C7-BF20-4CB32A29062C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BB990EF-2A74-41C7-BF20-4CB32A29062C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BB990EF-2A74-41C7-BF20-4CB32A29062C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BB990EF-2A74-41C7-BF20-4CB32A29062C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6FB3703C-645D-4C18-B73C-81A373536C44}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6FB3703C-645D-4C18-B73C-81A373536C44}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6FB3703C-645D-4C18-B73C-81A373536C44}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6FB3703C-645D-4C18-B73C-81A373536C44}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {2C60934E-9915-4B2C-8637-1CD9CA4A2127}
+	EndGlobalSection
+EndGlobal

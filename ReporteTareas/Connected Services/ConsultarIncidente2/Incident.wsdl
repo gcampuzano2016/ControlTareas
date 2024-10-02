@@ -1,0 +1,1837 @@
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/" xmlns:mime="http://schemas.xmlsoap.org/wsdl/mime/" xmlns:tns="http://ArandaCMDBWebService.org/" xmlns:s="http://www.w3.org/2001/XMLSchema" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tm="http://microsoft.com/wsdl/mime/textMatching/" xmlns:http="http://schemas.xmlsoap.org/wsdl/http/" xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/" targetNamespace="http://ArandaCMDBWebService.org/" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/">
+  <wsdl:types>
+    <s:schema elementFormDefault="qualified" targetNamespace="http://ArandaCMDBWebService.org/">
+      <s:element name="List">
+        <s:complexType />
+      </s:element>
+      <s:element name="ListResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfIncidentInfo">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IncidentInfo" nillable="true" type="tns:IncidentInfo" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IncidentInfo">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="currentTime" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="currentProgress" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Solved" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="canceled" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Reason" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Servicio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Edificio" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Sede" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Pais" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Ciudad" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Piso" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Departamento" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Author" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdbyProject" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProjectName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ProjectId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="StatusName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CustomerName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CompanyName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ProviderName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CategoryName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ResponsibleName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ExpiredDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="PriorityName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="GroupName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="ForegroundColor" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="BackgroundColor" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="BackgroundColorRgb" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ForegroundColorRgb" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="UrgencyName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ServiceName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="SlaName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="RegistryTypeName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="ImpactName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CategoryHierarchy" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="AutorName" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CiName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="OpenedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ClosedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AttentionEstimatedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AttentionRealDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="0" maxOccurs="1" name="ReceptorName" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="StateId" nillable="true" type="s:long" />
+          <s:element minOccurs="1" maxOccurs="1" name="SolutionRealDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="FinalStatus" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="StatusId" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="Estatisitcs">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EstatisitcsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EstatisitcsResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EstatisitcsExpress">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EstatisitcsExpressResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EstatisitcsExpressResult">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Estatisitcs2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Estatisitcs2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="Estatisitcs2Result">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EstatisitcsExpress2">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="EstatisitcsExpress2Response">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="EstatisitcsExpress2Result">
+              <s:complexType>
+                <s:sequence>
+                  <s:element ref="s:schema" />
+                  <s:any />
+                </s:sequence>
+              </s:complexType>
+            </s:element>
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="VerifyDBFactory">
+        <s:complexType />
+      </s:element>
+      <s:element name="VerifyDBFactoryResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="VerifyDBFactoryResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrd">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="codUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrdResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListGrdResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationArticle">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="articleId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationArticleResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRelationArticleResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfIncidentDescription">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="IncidentDescription" nillable="true" type="tns:IncidentDescription" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="IncidentDescription">
+        <s:complexContent mixed="false">
+          <s:extension base="tns:Incident">
+            <s:sequence>
+              <s:element minOccurs="1" maxOccurs="1" name="effort" nillable="true" type="s:decimal" />
+              <s:element minOccurs="0" maxOccurs="1" name="ProjectName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CategoryHierarchy" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="BackgroundColorRgb" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ForegroundColorRgb" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="AutorName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="RegistryTypeName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="PriorityName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="GroupName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ResponsibleName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CategoryName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CompanyName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CustomerName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="StatusName" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="BackgroundColor" nillable="true" type="s:int" />
+              <s:element minOccurs="1" maxOccurs="1" name="ForegroundColor" nillable="true" type="s:int" />
+              <s:element minOccurs="0" maxOccurs="1" name="ServiceName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="CiName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ClosureName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ImpactName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ModifierName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="ReceptorName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="SlaName" type="s:string" />
+              <s:element minOccurs="0" maxOccurs="1" name="UrgencyName" type="s:string" />
+              <s:element minOccurs="1" maxOccurs="1" name="RelationChild" nillable="true" type="s:boolean" />
+              <s:element minOccurs="1" maxOccurs="1" name="emaildate" nillable="true" type="s:dateTime" />
+              <s:element minOccurs="1" maxOccurs="1" name="FinalStatus" type="s:int" />
+            </s:sequence>
+          </s:extension>
+        </s:complexContent>
+      </s:complexType>
+      <s:complexType name="Incident">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="AuthorId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ProcedureId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ClosureId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CategoryId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="StatusId" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Subject" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="CustomerId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ReceptorId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ResponsibleId" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Commentary" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="interfaceId" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Description" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FormatDescription" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="EstimatedCost" nillable="true" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="OpenedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AttentionRealDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="AttentionEstimatedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="SolutionRealDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ClosedDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="ExpiredDate" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="IdbyProject" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ModifierId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ProjectId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="GroupId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ImpactId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="InvolvedCi" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="InvolvedCompany" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="InvolvedUser" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="PriorityId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CurrentProgress" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="RealCost" nillable="true" type="s:decimal" />
+          <s:element minOccurs="1" maxOccurs="1" name="RegistryTypeId" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="ServiceId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SlaId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CurrentTime" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UrgencyId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CompanyId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="CiId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="UcId" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="AttentionTime" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SolutionTime" nillable="true" type="s:int" />
+          <s:element minOccurs="1" maxOccurs="1" name="SdbLastShot" nillable="true" type="s:dateTime" />
+          <s:element minOccurs="1" maxOccurs="1" name="RoutingType" nillable="true" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="DescriptionNoHtml" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="CommentaryNoHtml" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListGrdbyProject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrdbyProjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListGrdbyProjectResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrdNextToEnd">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="codUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrdNextToEndResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListGrdNextToEndResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListbyGroup">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="codUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListbyGroupResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListbyGroupResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListClosed">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="codUser" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListClosedResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListClosedResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListbyClient">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="codClient" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListbyClientResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListbyClientResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetObject">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="id" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="GetObjectResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="GetObjectResult" type="tns:IncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Add">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:Incident" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="AddResult" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="Update">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="item" type="tns:Incident" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="UpdateResult" type="s:boolean" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListGrdSearch">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="lstItem" type="tns:ArrayOfSearchCondition" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchCondition">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchCondition" nillable="true" type="tns:SearchCondition" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchCondition">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="ConditionOperatorTxt" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FieldTxt" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FilterOperator" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Field" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="FieldValueTxt" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListGrdSearchResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListGrdSearchResult" type="tns:ArrayOfIncidentInfo" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationProblem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="problemId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationProblemResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRelationProblemResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationServiceCall">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="serviceId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationServiceCallResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRelationServiceCallResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRelationProblem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="problemId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRelationProblemResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="AddRelationChange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="changeId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRelationChangeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="AddRelationServiceCall">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="serviceId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRelationServiceCallResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeleteRelationProblem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="problemId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteRelationProblemResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeleteRelationChange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="changeId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteRelationChangeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeleteRelationServiceCall">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="serviceId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteRelationServiceCallResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateRelationProblem">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="problemId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateRelationProblemResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="AddRelationIncident">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenParentId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="userId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="AddRelationIncidentResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="DeleteRelationIncident">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenParentId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="DeleteRelationIncidentResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateRelationIncident">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenParentId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateRelationIncidentResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateRelationChange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="changeId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateRelationChangeResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="UpdateRelationServiceCall">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidenId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="serviceId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="relationCause" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="UpdateRelationServiceCallResponse">
+        <s:complexType />
+      </s:element>
+      <s:element name="ListRelationIncident">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="incidentId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationIncidentResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRelationIncidentResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationChange">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="chanId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRelationChangeResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRelationChangeResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListFields">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="language" type="s:string" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListFieldsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListFieldsResult" type="tns:ArrayOfSearchField" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchField">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchField" nillable="true" type="tns:SearchField" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchField">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Key" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Type" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Mask" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListOperators">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="fieldId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListOperatorsResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListOperatorsResult" type="tns:ArrayOfSearchOperator" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchOperator">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchOperator" nillable="true" type="tns:SearchOperator" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchOperator">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListValues">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="fieldId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListValuesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListValuesResult" type="tns:ArrayOfSearchValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchValue" nillable="true" type="tns:SearchValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="1" name="Value" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="0" maxOccurs="1" name="Stbe_ecab" type="s:string" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListRecursiveValues">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="fieldId" type="s:int" />
+            <s:element minOccurs="1" maxOccurs="1" name="projectId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListRecursiveValuesResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListRecursiveValuesResult" type="tns:ArrayOfSearchRecursiveValue" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:complexType name="ArrayOfSearchRecursiveValue">
+        <s:sequence>
+          <s:element minOccurs="0" maxOccurs="unbounded" name="SearchRecursiveValue" nillable="true" type="tns:SearchRecursiveValue" />
+        </s:sequence>
+      </s:complexType>
+      <s:complexType name="SearchRecursiveValue">
+        <s:sequence>
+          <s:element minOccurs="1" maxOccurs="1" name="Id" type="s:int" />
+          <s:element minOccurs="0" maxOccurs="1" name="Name" type="s:string" />
+          <s:element minOccurs="1" maxOccurs="1" name="Parent" type="s:int" />
+        </s:sequence>
+      </s:complexType>
+      <s:element name="ListIncidentbyCi">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="1" maxOccurs="1" name="ciId" type="s:int" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+      <s:element name="ListIncidentbyCiResponse">
+        <s:complexType>
+          <s:sequence>
+            <s:element minOccurs="0" maxOccurs="1" name="ListIncidentbyCiResult" type="tns:ArrayOfIncidentDescription" />
+          </s:sequence>
+        </s:complexType>
+      </s:element>
+    </s:schema>
+  </wsdl:types>
+  <wsdl:message name="ListSoapIn">
+    <wsdl:part name="parameters" element="tns:List" />
+  </wsdl:message>
+  <wsdl:message name="ListSoapOut">
+    <wsdl:part name="parameters" element="tns:ListResponse" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsSoapIn">
+    <wsdl:part name="parameters" element="tns:Estatisitcs" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsSoapOut">
+    <wsdl:part name="parameters" element="tns:EstatisitcsResponse" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsExpressSoapIn">
+    <wsdl:part name="parameters" element="tns:EstatisitcsExpress" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsExpressSoapOut">
+    <wsdl:part name="parameters" element="tns:EstatisitcsExpressResponse" />
+  </wsdl:message>
+  <wsdl:message name="Estatisitcs2SoapIn">
+    <wsdl:part name="parameters" element="tns:Estatisitcs2" />
+  </wsdl:message>
+  <wsdl:message name="Estatisitcs2SoapOut">
+    <wsdl:part name="parameters" element="tns:Estatisitcs2Response" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsExpress2SoapIn">
+    <wsdl:part name="parameters" element="tns:EstatisitcsExpress2" />
+  </wsdl:message>
+  <wsdl:message name="EstatisitcsExpress2SoapOut">
+    <wsdl:part name="parameters" element="tns:EstatisitcsExpress2Response" />
+  </wsdl:message>
+  <wsdl:message name="VerifyDBFactorySoapIn">
+    <wsdl:part name="parameters" element="tns:VerifyDBFactory" />
+  </wsdl:message>
+  <wsdl:message name="VerifyDBFactorySoapOut">
+    <wsdl:part name="parameters" element="tns:VerifyDBFactoryResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdSoapIn">
+    <wsdl:part name="parameters" element="tns:ListGrd" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdSoapOut">
+    <wsdl:part name="parameters" element="tns:ListGrdResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationArticleSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRelationArticle" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationArticleSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRelationArticleResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdbyProjectSoapIn">
+    <wsdl:part name="parameters" element="tns:ListGrdbyProject" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdbyProjectSoapOut">
+    <wsdl:part name="parameters" element="tns:ListGrdbyProjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdNextToEndSoapIn">
+    <wsdl:part name="parameters" element="tns:ListGrdNextToEnd" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdNextToEndSoapOut">
+    <wsdl:part name="parameters" element="tns:ListGrdNextToEndResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListbyGroupSoapIn">
+    <wsdl:part name="parameters" element="tns:ListbyGroup" />
+  </wsdl:message>
+  <wsdl:message name="ListbyGroupSoapOut">
+    <wsdl:part name="parameters" element="tns:ListbyGroupResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListClosedSoapIn">
+    <wsdl:part name="parameters" element="tns:ListClosed" />
+  </wsdl:message>
+  <wsdl:message name="ListClosedSoapOut">
+    <wsdl:part name="parameters" element="tns:ListClosedResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListbyClientSoapIn">
+    <wsdl:part name="parameters" element="tns:ListbyClient" />
+  </wsdl:message>
+  <wsdl:message name="ListbyClientSoapOut">
+    <wsdl:part name="parameters" element="tns:ListbyClientResponse" />
+  </wsdl:message>
+  <wsdl:message name="GetObjectSoapIn">
+    <wsdl:part name="parameters" element="tns:GetObject" />
+  </wsdl:message>
+  <wsdl:message name="GetObjectSoapOut">
+    <wsdl:part name="parameters" element="tns:GetObjectResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddSoapIn">
+    <wsdl:part name="parameters" element="tns:Add" />
+  </wsdl:message>
+  <wsdl:message name="AddSoapOut">
+    <wsdl:part name="parameters" element="tns:AddResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateSoapIn">
+    <wsdl:part name="parameters" element="tns:Update" />
+  </wsdl:message>
+  <wsdl:message name="UpdateSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdSearchSoapIn">
+    <wsdl:part name="parameters" element="tns:ListGrdSearch" />
+  </wsdl:message>
+  <wsdl:message name="ListGrdSearchSoapOut">
+    <wsdl:part name="parameters" element="tns:ListGrdSearchResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationProblemSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRelationProblem" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationProblemSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRelationProblemResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationServiceCallSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRelationServiceCall" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationServiceCallSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRelationServiceCallResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationProblemSoapIn">
+    <wsdl:part name="parameters" element="tns:AddRelationProblem" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationProblemSoapOut">
+    <wsdl:part name="parameters" element="tns:AddRelationProblemResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationChangeSoapIn">
+    <wsdl:part name="parameters" element="tns:AddRelationChange" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationChangeSoapOut">
+    <wsdl:part name="parameters" element="tns:AddRelationChangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationServiceCallSoapIn">
+    <wsdl:part name="parameters" element="tns:AddRelationServiceCall" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationServiceCallSoapOut">
+    <wsdl:part name="parameters" element="tns:AddRelationServiceCallResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationProblemSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteRelationProblem" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationProblemSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteRelationProblemResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationChangeSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteRelationChange" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationChangeSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteRelationChangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationServiceCallSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteRelationServiceCall" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationServiceCallSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteRelationServiceCallResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationProblemSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateRelationProblem" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationProblemSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateRelationProblemResponse" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationIncidentSoapIn">
+    <wsdl:part name="parameters" element="tns:AddRelationIncident" />
+  </wsdl:message>
+  <wsdl:message name="AddRelationIncidentSoapOut">
+    <wsdl:part name="parameters" element="tns:AddRelationIncidentResponse" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationIncidentSoapIn">
+    <wsdl:part name="parameters" element="tns:DeleteRelationIncident" />
+  </wsdl:message>
+  <wsdl:message name="DeleteRelationIncidentSoapOut">
+    <wsdl:part name="parameters" element="tns:DeleteRelationIncidentResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationIncidentSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateRelationIncident" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationIncidentSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateRelationIncidentResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationChangeSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateRelationChange" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationChangeSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateRelationChangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationServiceCallSoapIn">
+    <wsdl:part name="parameters" element="tns:UpdateRelationServiceCall" />
+  </wsdl:message>
+  <wsdl:message name="UpdateRelationServiceCallSoapOut">
+    <wsdl:part name="parameters" element="tns:UpdateRelationServiceCallResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationIncidentSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRelationIncident" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationIncidentSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRelationIncidentResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationChangeSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRelationChange" />
+  </wsdl:message>
+  <wsdl:message name="ListRelationChangeSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRelationChangeResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListFieldsSoapIn">
+    <wsdl:part name="parameters" element="tns:ListFields" />
+  </wsdl:message>
+  <wsdl:message name="ListFieldsSoapOut">
+    <wsdl:part name="parameters" element="tns:ListFieldsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListOperatorsSoapIn">
+    <wsdl:part name="parameters" element="tns:ListOperators" />
+  </wsdl:message>
+  <wsdl:message name="ListOperatorsSoapOut">
+    <wsdl:part name="parameters" element="tns:ListOperatorsResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListValuesSoapIn">
+    <wsdl:part name="parameters" element="tns:ListValues" />
+  </wsdl:message>
+  <wsdl:message name="ListValuesSoapOut">
+    <wsdl:part name="parameters" element="tns:ListValuesResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListRecursiveValuesSoapIn">
+    <wsdl:part name="parameters" element="tns:ListRecursiveValues" />
+  </wsdl:message>
+  <wsdl:message name="ListRecursiveValuesSoapOut">
+    <wsdl:part name="parameters" element="tns:ListRecursiveValuesResponse" />
+  </wsdl:message>
+  <wsdl:message name="ListIncidentbyCiSoapIn">
+    <wsdl:part name="parameters" element="tns:ListIncidentbyCi" />
+  </wsdl:message>
+  <wsdl:message name="ListIncidentbyCiSoapOut">
+    <wsdl:part name="parameters" element="tns:ListIncidentbyCiResponse" />
+  </wsdl:message>
+  <wsdl:portType name="IncidentSoap">
+    <wsdl:operation name="List">
+      <wsdl:input message="tns:ListSoapIn" />
+      <wsdl:output message="tns:ListSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs">
+      <wsdl:input message="tns:EstatisitcsSoapIn" />
+      <wsdl:output message="tns:EstatisitcsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress">
+      <wsdl:input message="tns:EstatisitcsExpressSoapIn" />
+      <wsdl:output message="tns:EstatisitcsExpressSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs2">
+      <wsdl:input message="tns:Estatisitcs2SoapIn" />
+      <wsdl:output message="tns:Estatisitcs2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress2">
+      <wsdl:input message="tns:EstatisitcsExpress2SoapIn" />
+      <wsdl:output message="tns:EstatisitcsExpress2SoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="VerifyDBFactory">
+      <wsdl:input message="tns:VerifyDBFactorySoapIn" />
+      <wsdl:output message="tns:VerifyDBFactorySoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListGrd">
+      <wsdl:input message="tns:ListGrdSoapIn" />
+      <wsdl:output message="tns:ListGrdSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationArticle">
+      <wsdl:input message="tns:ListRelationArticleSoapIn" />
+      <wsdl:output message="tns:ListRelationArticleSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdbyProject">
+      <wsdl:input message="tns:ListGrdbyProjectSoapIn" />
+      <wsdl:output message="tns:ListGrdbyProjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdNextToEnd">
+      <wsdl:input message="tns:ListGrdNextToEndSoapIn" />
+      <wsdl:output message="tns:ListGrdNextToEndSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListbyGroup">
+      <wsdl:input message="tns:ListbyGroupSoapIn" />
+      <wsdl:output message="tns:ListbyGroupSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListClosed">
+      <wsdl:input message="tns:ListClosedSoapIn" />
+      <wsdl:output message="tns:ListClosedSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListbyClient">
+      <wsdl:input message="tns:ListbyClientSoapIn" />
+      <wsdl:output message="tns:ListbyClientSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="GetObject">
+      <wsdl:input message="tns:GetObjectSoapIn" />
+      <wsdl:output message="tns:GetObjectSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Add">
+      <wsdl:input message="tns:AddSoapIn" />
+      <wsdl:output message="tns:AddSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="Update">
+      <wsdl:input message="tns:UpdateSoapIn" />
+      <wsdl:output message="tns:UpdateSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdSearch">
+      <wsdl:input message="tns:ListGrdSearchSoapIn" />
+      <wsdl:output message="tns:ListGrdSearchSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationProblem">
+      <wsdl:input message="tns:ListRelationProblemSoapIn" />
+      <wsdl:output message="tns:ListRelationProblemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationServiceCall">
+      <wsdl:input message="tns:ListRelationServiceCallSoapIn" />
+      <wsdl:output message="tns:ListRelationServiceCallSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationProblem">
+      <wsdl:input message="tns:AddRelationProblemSoapIn" />
+      <wsdl:output message="tns:AddRelationProblemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationChange">
+      <wsdl:input message="tns:AddRelationChangeSoapIn" />
+      <wsdl:output message="tns:AddRelationChangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationServiceCall">
+      <wsdl:input message="tns:AddRelationServiceCallSoapIn" />
+      <wsdl:output message="tns:AddRelationServiceCallSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationProblem">
+      <wsdl:input message="tns:DeleteRelationProblemSoapIn" />
+      <wsdl:output message="tns:DeleteRelationProblemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationChange">
+      <wsdl:input message="tns:DeleteRelationChangeSoapIn" />
+      <wsdl:output message="tns:DeleteRelationChangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationServiceCall">
+      <wsdl:input message="tns:DeleteRelationServiceCallSoapIn" />
+      <wsdl:output message="tns:DeleteRelationServiceCallSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationProblem">
+      <wsdl:input message="tns:UpdateRelationProblemSoapIn" />
+      <wsdl:output message="tns:UpdateRelationProblemSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationIncident">
+      <wsdl:input message="tns:AddRelationIncidentSoapIn" />
+      <wsdl:output message="tns:AddRelationIncidentSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationIncident">
+      <wsdl:input message="tns:DeleteRelationIncidentSoapIn" />
+      <wsdl:output message="tns:DeleteRelationIncidentSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationIncident">
+      <wsdl:input message="tns:UpdateRelationIncidentSoapIn" />
+      <wsdl:output message="tns:UpdateRelationIncidentSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationChange">
+      <wsdl:input message="tns:UpdateRelationChangeSoapIn" />
+      <wsdl:output message="tns:UpdateRelationChangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationServiceCall">
+      <wsdl:input message="tns:UpdateRelationServiceCallSoapIn" />
+      <wsdl:output message="tns:UpdateRelationServiceCallSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationIncident">
+      <wsdl:input message="tns:ListRelationIncidentSoapIn" />
+      <wsdl:output message="tns:ListRelationIncidentSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationChange">
+      <wsdl:input message="tns:ListRelationChangeSoapIn" />
+      <wsdl:output message="tns:ListRelationChangeSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListFields">
+      <wsdl:input message="tns:ListFieldsSoapIn" />
+      <wsdl:output message="tns:ListFieldsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListOperators">
+      <wsdl:input message="tns:ListOperatorsSoapIn" />
+      <wsdl:output message="tns:ListOperatorsSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListValues">
+      <wsdl:input message="tns:ListValuesSoapIn" />
+      <wsdl:output message="tns:ListValuesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListRecursiveValues">
+      <wsdl:input message="tns:ListRecursiveValuesSoapIn" />
+      <wsdl:output message="tns:ListRecursiveValuesSoapOut" />
+    </wsdl:operation>
+    <wsdl:operation name="ListIncidentbyCi">
+      <wsdl:input message="tns:ListIncidentbyCiSoapIn" />
+      <wsdl:output message="tns:ListIncidentbyCiSoapOut" />
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="IncidentSoap" type="tns:IncidentSoap">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="List">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/List" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/Estatisitcs" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/EstatisitcsExpress" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs2">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/Estatisitcs2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress2">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/EstatisitcsExpress2" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyDBFactory">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/VerifyDBFactory" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrd">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListGrd" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationArticle">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRelationArticle" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdbyProject">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListGrdbyProject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdNextToEnd">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListGrdNextToEnd" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListbyGroup">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListbyGroup" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListClosed">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListClosed" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListbyClient">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListbyClient" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetObject">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/GetObject" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Add">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/Add" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Update">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/Update" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdSearch">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListGrdSearch" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationProblem">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRelationProblem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationServiceCall">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationProblem">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/AddRelationProblem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationChange">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/AddRelationChange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationServiceCall">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/AddRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationProblem">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationProblem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationChange">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationChange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationServiceCall">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationProblem">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationProblem" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationIncident">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/AddRelationIncident" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationIncident">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationIncident" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationIncident">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationIncident" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationChange">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationChange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationServiceCall">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationIncident">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRelationIncident" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationChange">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRelationChange" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListFields">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListFields" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListOperators">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListOperators" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListValues">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListValues" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRecursiveValues">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListRecursiveValues" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListIncidentbyCi">
+      <soap:operation soapAction="http://ArandaCMDBWebService.org/ListIncidentbyCi" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:binding name="IncidentSoap12" type="tns:IncidentSoap">
+    <soap12:binding transport="http://schemas.xmlsoap.org/soap/http" />
+    <wsdl:operation name="List">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/List" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/Estatisitcs" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/EstatisitcsExpress" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Estatisitcs2">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/Estatisitcs2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="EstatisitcsExpress2">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/EstatisitcsExpress2" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="VerifyDBFactory">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/VerifyDBFactory" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrd">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListGrd" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationArticle">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRelationArticle" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdbyProject">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListGrdbyProject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdNextToEnd">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListGrdNextToEnd" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListbyGroup">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListbyGroup" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListClosed">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListClosed" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListbyClient">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListbyClient" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="GetObject">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/GetObject" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Add">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/Add" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="Update">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/Update" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListGrdSearch">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListGrdSearch" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationProblem">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRelationProblem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationServiceCall">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationProblem">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/AddRelationProblem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationChange">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/AddRelationChange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationServiceCall">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/AddRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationProblem">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationProblem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationChange">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationChange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationServiceCall">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationProblem">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationProblem" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="AddRelationIncident">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/AddRelationIncident" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="DeleteRelationIncident">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/DeleteRelationIncident" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationIncident">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationIncident" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationChange">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationChange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="UpdateRelationServiceCall">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/UpdateRelationServiceCall" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationIncident">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRelationIncident" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRelationChange">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRelationChange" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListFields">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListFields" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListOperators">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListOperators" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListValues">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListValues" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListRecursiveValues">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListRecursiveValues" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+    <wsdl:operation name="ListIncidentbyCi">
+      <soap12:operation soapAction="http://ArandaCMDBWebService.org/ListIncidentbyCi" style="document" />
+      <wsdl:input>
+        <soap12:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap12:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="Incident">
+    <wsdl:port name="IncidentSoap" binding="tns:IncidentSoap">
+      <soap:address location="https://portaldeservicios.dos.com.ec/CMDBWS/Incident.asmx" />
+    </wsdl:port>
+    <wsdl:port name="IncidentSoap12" binding="tns:IncidentSoap12">
+      <soap12:address location="https://portaldeservicios.dos.com.ec/CMDBWS/Incident.asmx" />
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

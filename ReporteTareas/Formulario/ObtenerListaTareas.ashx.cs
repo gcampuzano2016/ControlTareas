@@ -817,6 +817,59 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(ConsultarProvinciasCiudades(parameters));
                 }
 
+                //----------------------------------- cambios -----------------------------------------
+                if (Action == "BuscarEmpleadoPorCedula")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarEmpleadoPorCedula(parameters));
+                }
+                if (Action == "BuscarContactoEmpleadoPorCedula")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarContactoEmpleadoPorCedula(parameters));
+                }
+                if (Action == "BuscarCodigoCIE")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarCodigoCIE(parameters));
+                }
+                if (Action == "BuscarListaEmpleados")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarListaEmpleados(parameters));
+                }
+
+                if (Action == "BuscarListaEmpleadosDescargar")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarListaEmpleadosDescargar(parameters));
+                }
+
+                if (Action == "BuscarListaCargaFam")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarListaCargaFam(parameters));
+                }
+
+                if (Action == "GuardarContactoEmergencia")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarContactoEmergencia(parameters));
+                }
+                if (Action == "EliminarEmpleado")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarEmpleado(parameters));
+                }
+
+                if (Action == "EliminarCargaFam")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarCargaFam(parameters));
+                }
+
+
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger", ""));
@@ -10520,6 +10573,307 @@ namespace JsonJQueryNetTareas
             // Add the selected option to the JSON response
             dynamic jsonData = new { resultados = Ent1, selectedOption = campos["opcion"] };
             return JsonConvert.SerializeObject(jsonData);
+        }
+
+        //----------------------  cambios  -------------------------------
+        public string BuscarEmpleadoPorCedula(dynamic parameters)
+        {
+
+            List<EntEmpleado> Lista = null;
+            EntEmpleado empleado = new EntEmpleado();
+            EntRespuesta respuesta = new EntRespuesta();
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            string cedula = parameters["session"].ToString();
+            string IdUsuarioSession = "";
+            try
+            {
+                Lista = NegEmpleado.Sp_RTA_ConsultarEmpleadoPorCedula(cedula);
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+
+
+        public string BuscarContactoEmpleadoPorCedula(dynamic parameters)
+        {
+            List<EntInfoAdicionalHisClinica> Lista = null;
+            EntRespuesta respuesta = new EntRespuesta();
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            string cedula = parameters["session"].ToString();
+            string IdUsuarioSession = "";
+
+            try
+            {
+                Lista = NegInfoAdicionalHisClinica.Sp_RTA_ConsultarInfoPorId(cedula);
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+        public string BuscarCodigoCIE(dynamic parameters)
+        {
+
+            List<EntCodigoCIE> Lista = null;
+            EntRespuesta respuesta = new EntRespuesta();
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            string codigo = parameters["session"].ToString();
+
+            try
+            {
+                Lista = NegCodigoCIE.Sp_RTA_ConsultarCodigoCIE(codigo);
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+        public string BuscarListaEmpleados(dynamic parameters)
+        {
+            List<EntEmpleado> Lista = null;
+            EntEmpleado empleado = new EntEmpleado();
+            EntRespuesta respuesta = new EntRespuesta();
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            string session = parameters["session"].ToString();
+            string IdUsuarioSession = "";
+            IdUsuarioSession = seguridad.Desencripta(session.ToString());
+
+            string descripcion = parameters["descripcion"].ToString();
+            int tipo = Convert.ToInt32(parameters["tipo"].ToString());
+
+            try
+            {
+                if (tipo == 14 || tipo == 18)
+                {
+                    if (descripcion == "Lista")
+                    {
+                        tipo = 0;
+                        IdUsuarioSession = "";
+                    }
+                }
+                Lista = NegEmpleado.Sp_RTAConsultarListaEmpleados(IdUsuarioSession, tipo);
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+
+        public string BuscarListaEmpleadosDescargar(dynamic parameters)
+        {
+
+            string rutaCarpetaDescargas = "";
+            string nombreArchivo = "";
+            string urlDescargas = "";
+            DataTable dtResultados = null;
+
+            List<EntEmpleado> Lista = null;
+            EntRespuesta respuesta = new EntRespuesta();
+            string descripcion = parameters["descripcion"].ToString();
+            int tipo = Convert.ToInt32(parameters["tipo"].ToString());
+
+            try
+            {
+                respuesta = NegEmpleado.Consulta_Sp_RTAConsultarListaEmpleadosDescargar();
+                try
+                {
+                    if (respuesta.estado == "1")
+                    {
+                        dtResultados = respuesta.resultadoTabla;
+
+                        // Creación de archivo XLS
+                        var workbook = new XLWorkbook();
+                        var worksheet = workbook.Worksheets.Add("Reporte Lista de Empleados");
+
+                        int numeroColumna = 1;
+                        foreach (DataColumn column in dtResultados.Columns)
+                        {
+                            worksheet.Cell(1, numeroColumna).Value = column.ColumnName;
+                            worksheet.Columns(1, numeroColumna).Width = 20;
+                            worksheet.Rows(1, numeroColumna).AdjustToContents();
+                            numeroColumna += 1;
+                        }
+
+                        rutaCarpetaDescargas = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CARPETA_DESCARGAS");
+
+                        worksheet.Cell(2, 1).Value = dtResultados;
+                        //worksheet.RangeUsed().SetAutoFilter();
+
+                        // Guardo archivo en carpeta publica
+                        DateTime fechaActual = DateTime.Now;
+                        nombreArchivo = "F-CS-001 Reporte de lista empleados" + fechaActual.Year.ToString() + fechaActual.Month.ToString() + fechaActual.Day.ToString() + "_" + fechaActual.Hour.ToString() + fechaActual.Minute.ToString() + fechaActual.Second.ToString() + ".xlsx";
+                        workbook.SaveAs(rutaCarpetaDescargas + nombreArchivo);
+                    }
+                    else
+                    {
+                        return respuesta.SerializaToJson().ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            dtResultados = null;
+
+
+            urlDescargas = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_DESCARGAS");
+
+            return responseMessage("1", urlDescargas + nombreArchivo, "success", "");
+
+            return Lista.SerializaToJson();
+        }
+
+        public string BuscarListaCargaFam(dynamic parameters)
+        {
+            List<EntCargaFamiliar> Lista = null;
+            EntRespuesta respuesta = new EntRespuesta();
+            string descripcion = parameters["descripcion"].ToString();
+            int tipo = Convert.ToInt32(parameters["tipo"].ToString());
+
+            try
+            {
+                Lista = NegCargaFamiliar.Sp_RTAConsultarCargaFamPorId(tipo);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+
+        public string GuardarContactoEmergencia(dynamic campos)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+            /*SeguridadHelper seguridad = new SeguridadHelper();
+
+
+            string IdUsuarioSession = "";
+            IdUsuarioSession = seguridad.Desencripta(campos["session"]);*/
+
+            var opc = campos["txtOpcion"];
+            try
+            {
+                EntInfoAdicionalHisClinica reg = new EntInfoAdicionalHisClinica();
+
+
+                if (opc == "1")
+                {
+                    reg.IdInfo = 1;
+                    reg.IdEmpleado = campos["session"];
+                    reg.Lentes = campos["txtLentes"];
+                    reg.GruposVulnerables = campos["txtGrpVulnerables"];
+                    reg.RegistraAlergias = campos["txtAlergias"];
+                    reg.NombreAlergia = campos["txtNombreAlergia"];
+                    reg.TipoAlergia = campos["txtTipoAlergia"];
+                    reg.ReaccionesAlergia = campos["txtReaccionesAlergia"];
+
+                    respuesta = NegInfoAdicionalHisClinica.Sp_InsUpdInfoAdicional(reg, 1);
+
+                }
+                if (opc == "2")
+                {
+                    reg.IdInfo = 1;
+                    reg.IdEmpleado = campos["session"];
+                    reg.NomContactoEmergencia = campos["txtNombreContacto"];
+                    reg.TelfContactoEmergencia = campos["txtTelfContacto"];
+                    reg.ParentescoContacto = campos["txtParentescoContacto"];
+
+                    respuesta = NegInfoAdicionalHisClinica.Sp_InsUpdInfoAdicional(reg, 2);
+                }
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            //GuardarHistoria();
+
+            return respuesta.SerializaToJson();
+            //return "";
+
+        }
+
+        public string EliminarEmpleado(dynamic campos)
+        {
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+            //EntUsuario usuario = new EntUsuario();
+            //string IdUsuarioSession = "";
+            //IdUsuarioSession = seguridad.Desencripta(campos["session"]);
+            //usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
+
+            int tipo = Convert.ToInt32(campos["tipo"].ToString());
+            string est = campos["descripcion"].ToString();
+
+            try
+            {
+
+                respuesta = NegEmpleado.Consulta_Sp_RTACambiarEstadoEmpleado(tipo, est);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+
+            }
+
+            return respuesta.SerializaToJson();
+
+        }
+
+        public string EliminarCargaFam(dynamic campos)
+        {
+
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+            //EntUsuario usuario = new EntUsuario();
+            //string IdUsuarioSession = "";
+            //IdUsuarioSession = seguridad.Desencripta(campos["session"]);
+            //usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
+
+            //int tipo = Convert.ToInt32(campos["tipo"].ToString());
+            string Nombre = campos["Nombre"].ToString();
+            //string descripcion = campos["descripcion"].ToString();
+
+            try
+            {
+
+                respuesta = NegCargaFamiliar.Consulta_Sp_RTACambiarEstadoCargaFam(Nombre);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+
+            }
+
+            return respuesta.SerializaToJson();
+
         }
 
     }

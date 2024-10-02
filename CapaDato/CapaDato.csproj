@@ -50,6 +50,7 @@
     <Compile Include="DaoADBUsuario.cs" />
     <Compile Include="DaoArandaDb.cs" />
     <Compile Include="DaoCargaFamiliar.cs" />
+    <Compile Include="DaoCodigoCIE.cs" />
     <Compile Include="DaoConexion.cs" />
     <Compile Include="DaoContrato.cs" />
     <Compile Include="DaoCosteoServicio.cs" />

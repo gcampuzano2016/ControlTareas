@@ -46,6 +46,7 @@
     <Compile Include="EntBoolean.cs" />
     <Compile Include="EntCargaFamiliar.cs" />
     <Compile Include="EntClienteEgrInventario.cs" />
+    <Compile Include="EntCodigoCIE.cs" />
     <Compile Include="EntContrato.cs" />
     <Compile Include="EntCosteoServicio.cs" />
     <Compile Include="EntCuentaContable.cs" />

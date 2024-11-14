@@ -7,6 +7,7 @@ let txtLentes, txtExam1, txtExam2, txtExam3, txtExam4, txtExam5, txtExam6, metPl
 let txtMedicacionHabSelect, txtCualMedicamento1, txtCantdidadMed1, txtCualMedicamento2, txtCantdidadMed2, txtCualMedicamento3, txtCantdidadMed3;
 let contadorMedicacion = 0;
 let IdPerfil = 0;
+var inputActivoNum = null; // Variable global para rastrear el input usado en DIAGNOSTICO
 
 function MensajeIncorrecto(resultado) {
     sweetAlert("Error", resultado, "error");
@@ -79,8 +80,6 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
-
-
 /* =================================================================================
  *                      Cargar datos de la base al Historial
  * =================================================================================*/
@@ -140,6 +139,10 @@ function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
 
     if (tipoControl == "tableSelectBusqueda") {
         contenido = RecorreJSONTableSelectBusqueda(json, boton, idSeleccionado);
+        $(div).html(contenido);
+    }
+    if (tipoControl == "tableSelectBusquedaCIE") {
+        contenido = RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado);
         $(div).html(contenido);
     }
     return contenido;
@@ -664,7 +667,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Agregar la funcionalidad a cada contenedor
     dropdownContainers.forEach(function (container) {
         const dropdownButton = container.querySelector('.dropdown-button');
-        const dropdownContent = container.querySelector('.dropdown-content');
+        const dropdownContent = container.querySelector('.dropdown-content, .dropdown-content2');
 
         dropdownButton.addEventListener('click', function (event) {
             event.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
@@ -680,40 +683,84 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Obtén referencias a los elementos relevantes
-    var aptitudSelect = document.getElementById("txtAptitudSelect");
-    var descObservacion = document.getElementById("descObservacion");
-    var descLimitacion = document.getElementById("descLimitacion");
-    var txtDescObservacion = document.getElementById("txtDescObservacion");
-    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+/*=====================================================================
+ *          Buscamos los codigos CIE en la base de datos
+ *====================================================================*/
 
-    // Agrega un controlador de eventos change al campo select
-    aptitudSelect.addEventListener("change", toggleAptitudDiv);
-
-    // Función para mostrar u ocultar los campos según la selección
-    function toggleAptitudDiv() {
-        if (aptitudSelect.value === "aptoObservacion") {
-            descObservacion.style.display = "block";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = false;
-            txtDescLimitacion.disabled = true;
-        } else if (aptitudSelect.value === "aptoLimitacion") {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "block";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = false;
-        } else {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = true;
-        }
+function BuscarCodigosCIE() {
+    let txtDiagDescripcion = document.getElementById(`txtDiagDescripcion${inputActivoNum}`);
+    if (txtDiagDescripcion.value.length > 2) {
+        let CIEBuscar = txtDiagDescripcion.value;
+        idSeleccionado = 0;
+        ObtenerListaCodigosCIE(CIEBuscar, "", "", inputActivoNum);
+    } else {
+        document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
     }
+}
 
-    // Llama a la función inicialmente para manejar el estado inicial
-    toggleAptitudDiv();
-});
+function ObtenerListaCodigosCIE(codigo, descripcion, idproceso) {
+    var Datos = "[{ \"action\": \"BuscarCodigoCIE\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + codigo + "\"} }]";
+    CargarPagina(`#comboCodigos${inputActivoNum}`, 'ObtenerListaTareas.ashx', Datos, "tableSelectBusquedaCIE", idproceso);
+}
+
+function CargarCodigoCIE(CODIGO, DESCRIPCION) {
+    // Mostrar el código seguido por la descripción
+    document.getElementById(`txtDiagDescripcion${inputActivoNum}`).value = `${DESCRIPCION}`;
+
+    // Colocar el código en el campo CIE y desactivar la edición
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).value = CODIGO;
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).disabled = true;
+
+    // Ocultar la lista desplegable
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
+}
+
+function RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado) {
+    var x = "";
+    $.each(json, function (i, item) {
+        x = x + `<li><a role='option' onclick='CargarCodigoCIE("${item.Codigo}","${item.DescCodigo}");'>${item.Codigo} - ${item.DescCodigo}</a></li>`;
+    });
+    document.getElementById(`comboCodigos${inputActivoNum}`).innerHTML = x;
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "block";
+}
+function setInputActivo(num) {
+    inputActivoNum = num;
+}
+
+//document.addEventListener("DOMContentLoaded", function () {
+//    // Obtén referencias a los elementos relevantes
+//    var aptitudSelect = document.getElementById("txtAptitudSelect");
+//    var descObservacion = document.getElementById("descObservacion");
+//    var descLimitacion = document.getElementById("descLimitacion");
+//    var txtDescObservacion = document.getElementById("txtDescObservacion");
+//    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+
+//    // Agrega un controlador de eventos change al campo select
+//    aptitudSelect.addEventListener("change", toggleAptitudDiv);
+
+//    // Función para mostrar u ocultar los campos según la selección
+//    function toggleAptitudDiv() {
+//        if (aptitudSelect.value === "aptoObservacion") {
+//            descObservacion.style.display = "block";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = false;
+//            txtDescLimitacion.disabled = true;
+//        } else if (aptitudSelect.value === "aptoLimitacion") {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "block";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = false;
+//        } else {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = true;
+//        }
+//    }
+
+//    // Llama a la función inicialmente para manejar el estado inicial
+//    toggleAptitudDiv();
+//});
 
 
 
@@ -775,12 +822,12 @@ function GuardarPeriodica() {
     if ($('#numarchivo').val() == "") {
         mensajeVerificacion += "- Debe ingresar la Edad ";
         contadorVerificacion += 1;
-    }*/
+    }
 
     if ($('#txtNombre').val() == "") {
         mensajeVerificacion += "- Debe ingresar el Nombre ";
         contadorVerificacion += 1;
-    }
+    }*/
 
     /*if ($('#txtReligion').val() == "") {
         mensajeVerificacion += "- Debe ingresar la religión ";
@@ -803,11 +850,11 @@ function GuardarPeriodica() {
     if ($('#txtIdentidadGenero').val() == "") {
         mensajeVerificacion += "- Debe ingresar el Sexo ";
         contadorVerificacion += 1;
-    }*/
+    }
     if ($('#txtMotivoConsulta').val() == "") {
         mensajeVerificacion += "- Debe ingresar el motivo de la consulta";
         contadorVerificacion += 1;
-    }
+    }*/
     /*if ($('#txtAntecedentesPersonales').val() == "") {
         mensajeVerificacion += "- Debe ingresar el campo Antecedentes personales";
         contadorVerificacion += 1;
@@ -815,79 +862,86 @@ function GuardarPeriodica() {
     if ($('#txtAntecedentesFamiliares').val() == "") {
         mensajeVerificacion += "- Debe ingresar el campo Antecedentes familiares";
         contadorVerificacion += 1;
-    }*/    
+    }*/
 
+    // Obtener las fechas completas de los elementos
+    const fechaCompletaAccTrab = document.getElementById("fechaAccTrab").value;
+    const fechaCompletaEnfProf = document.getElementById("fechaEnfProf").value;
 
-    if ($('#tabacoSelect').val() == "si") {
+    // Dividir las fechas y asignar valores, si están vacías asignar ""
+    const [fechaAccTrabAnio, fechaAccTrabMes, fechaAccTrabDia] = fechaCompletaAccTrab ? fechaCompletaAccTrab.split("-") : ["", "", ""];
+    const [fechaEnfProfAnio, fechaEnfProfMes, fechaEnfProfDia] = fechaCompletaEnfProf ? fechaCompletaEnfProf.split("-") : ["", "", ""];
 
-        if ($('#txtTiempoconsumoTabaco').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Tabaco ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadTabaco').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaTabaco').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#alcoholSelect').val() == "si") {
+    //if ($('#tabacoSelect').val() == "si") {
 
-        if ($('#txtTiempoconsumoAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Alcohol ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Alcohol";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Alcohol";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#otraSelect').val() == "si") {
+    //    if ($('#txtTiempoconsumoTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Tabaco ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#alcoholSelect').val() == "si") {
 
-        if ($('#txtOtraSustancia').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el nombre de Otra ssubstancia ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoconsumoOtra').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Otra ssubstancia ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadOtra').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Otra ssubstancia";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaOtra').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Otra ssubstancia";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#txtActividadFisiscaSelect').val() == "si") {
-        if ($('#txtCualActividad').val() == "") {
-            mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtFrecuenciaActividad').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
-            contadorVerificacion += 1;
-        }
-    }
+    //    if ($('#txtTiempoconsumoAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Alcohol ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Alcohol";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Alcohol";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#otraSelect').val() == "si") {
 
-    if ($('#txtMedicacionHabSelect').val() == "si") {
-        if ($('#txtCualMedicamento1').val() == "") {
-            mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantdidadMed1').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
-            contadorVerificacion += 1;
-        }
-    }
+    //    if ($('#txtOtraSustancia').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el nombre de Otra ssubstancia ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoconsumoOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Otra ssubstancia ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Otra ssubstancia";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Otra ssubstancia";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#txtActividadFisiscaSelect').val() == "si") {
+    //    if ($('#txtCualActividad').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtFrecuenciaActividad').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+
+    //if ($('#txtMedicacionHabSelect').val() == "si") {
+    //    if ($('#txtCualMedicamento1').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantdidadMed1').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
 
     if ($('#MedicacionHabSelect').val() == "") {
         mensajeVerificacion += "- Debe seleccionar si hay o no medicación habitual";
@@ -926,55 +980,55 @@ function GuardarPeriodica() {
         txtCualMedicamento3 = "";
         txtCantdidadMed3 = "";
     }
-    if ($('#AccidentesTrabajoSelect').val() == "si") {
-        if ($('#txtEspecificarAccidentesTrabajoSelect').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la entidad que calificó el accidente de trabajo";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#EnfermedadesProfSelect').val() == "si") {
-        if ($('#txtEspecificarEnfermedadesProfSelect').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la entidad que calificó la enfermedad Profesional";
-            contadorVerificacion += 1;
-        }
-    }
+    //if ($('#AccidentesTrabajoSelect').val() == "si") {
+    //    if ($('#txtEspecificarAccidentesTrabajoSelect').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la entidad que calificó el accidente de trabajo";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#EnfermedadesProfSelect').val() == "si") {
+    //    if ($('#txtEspecificarEnfermedadesProfSelect').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la entidad que calificó la enfermedad Profesional";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
 
-    if ($('#txtConstPresionArterial').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la presión arterial";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTemperatura').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la temperatura";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaCardicaca').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstSaturacionOxigeno').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPeso').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el peso actual";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTalla').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la talla";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstMasaCorporal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPerimetroAbdominal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtConstPresionArterial').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la presión arterial";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTemperatura').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la temperatura";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaCardicaca').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstSaturacionOxigeno').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPeso').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el peso actual";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTalla').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la talla";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstMasaCorporal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPerimetroAbdominal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
+    //    contadorVerificacion += 1;
+    //}
 
 
     if (contadorVerificacion > 0) {
@@ -988,13 +1042,25 @@ function GuardarPeriodica() {
     datosFormulario = {
         'formulario': "2",
         'session': $("#ContentPlaceHolder1_txtUsuario").val(),
+        'txtNumHistoria': $('#txtNumHistoria').val(),
+        'txtNumArchivo': $('#txtNumArchivo').val(),
         'txtNombre': $('#txtNombre').val(),
         'txtEdad': $('#txtEdad').val(),
         'txtSexo': $('#txtSexo').val(),
         'txtAreaTrabajo': $('#txtAreaTrabajo').val(),
+        'txtPuestoTrabajo': $('#txtPuestoTrabajo').val(),
         'txtMotivoConsulta': $('#txtMotivoConsulta').val(),
         'txtAntecedentesPersonales': $('#txtAntecedentesPersonales').val(),
+        'AntFamA': $('#AntFamA').prop('checked'),
+        'AntFamB': $('#AntFamB').prop('checked'),
+        'AntFamC': $('#AntFamC').prop('checked'),
+        'AntFamD': $('#AntFamD').prop('checked'),
+        'AntFamE': $('#AntFamE').prop('checked'),
+        'AntFamF': $('#AntFamF').prop('checked'),
+        'AntFamG': $('#AntFamG').prop('checked'),
+        'AntFamH': $('#AntFamH').prop('checked'),
         'txtAntecedentesFamiliares': $('#txtAntecedentesFamiliares').val(),
+        'txtHbtsIncidentes': $('#txtHbtsIncidentes').val(),
         'txtPuestoTrabajo1': $('#txtPuestoTrabajo1').val(),
         'txtActividadesTrabajo1': $('#txtActividadesTrabajo1').val(),
         'txtFisicoSelect1': $('#txtFisicoSelect1').val(),
@@ -1023,7 +1089,16 @@ function GuardarPeriodica() {
         'txtPSicosocialSelect3': $('#txtPSicosocialSelect3').val(),
         'txtMedidadPreventiva3': $('#txtMedidadPreventiva3').val(),
         'txtEnfermedadActual': $('#txtEnfermedadActual').val(),
-        'txtPatologia': $('#txtPatologia').val(),
+        'RevicionA': $('#RevicionA').prop('checked'),
+        'RevicionB': $('#RevicionB').prop('checked'),
+        'RevicionC': $('#RevicionC').prop('checked'),
+        'RevicionD': $('#RevicionD').prop('checked'),
+        'RevicionE': $('#RevicionE').prop('checked'),
+        'RevicionF': $('#RevicionF').prop('checked'),
+        'RevicionG': $('#RevicionG').prop('checked'),
+        'RevicionH': $('#RevicionH').prop('checked'),
+        'RevicionI': $('#RevicionI').prop('checked'),
+        'RevicionJ': $('#RevicionJ').prop('checked'),
         'txtRevisionOrganos': $('#txtRevisionOrganos').val(),
         'txtConstPresionArterial': $('#txtConstPresionArterial').val(),
         'txtConstTemperatura': $('#txtConstTemperatura').val(),
@@ -1082,7 +1157,7 @@ function GuardarPeriodica() {
         'txtTipoExamenSelect2': $('#txtTipoExamenSelect2').val(),
         'txtNomExamen2': $('#txtNomExamen2').val(),
         'fechaExam2': $('#fechaExam2').val(),
-        'txtResExamen2': $('#txtResExamen2').val(),        
+        'txtResExamen2': $('#txtResExamen2').val(),
         'txtExamenbservacion': $('#txtExamenbservacion').val(),
         'txtDiagDescripcion1': $('#txtDiagDescripcion1').val(),
         'txtDiagCIE1': $('#txtDiagCIE1').val(),
@@ -1168,9 +1243,15 @@ function GuardarPeriodica() {
         'txtCantdidadMed3': txtCantdidadMed3,
         'AccidentesTrabajoSelect': $('#AccidentesTrabajoSelect').val(),
         'txtEspecificarAccidentesTrabajoSelect': $('#txtEspecificarAccidentesTrabajoSelect').val(),
+        'txtfechaAccTrabAnio': fechaAccTrabAnio,
+        'txtfechaAccTrabMes': fechaAccTrabMes,
+        'txtfechaAccTrabDia': fechaAccTrabDia,
         'txtObservacionesAccTrabajo': $('#txtObservacionesAccTrabajo').val(),
         'EnfermedadesProfSelect': $('#EnfermedadesProfSelect').val(),
         'txtEspecificarEnfermedadesProfSelect': $('#txtEspecificarEnfermedadesProfSelect').val(),
+        'txtfechaEnfProfAnio': fechaEnfProfAnio,
+        'txtfechaEnfProfMes': fechaEnfProfMes,
+        'txtfechaEnfProfDia': fechaEnfProfDia,
         'txtObservacionesEnfermedadesProf': $('#txtObservacionesEnfermedadesProf').val(),
         'fechaUltimaMens': "",
         'txtAntEmpresa1': "",
@@ -1196,7 +1277,7 @@ function GuardarPeriodica() {
         'txtAntActividades4': "",
         'txtAntTiempoTrabajo4': "",
         'riesgoTrabajoSelect4': "",
-        'txtObservacion4': "",        
+        'txtObservacion4': "",
         'txtActividadesExtraLaborales': "",
         'txtTipoExamenSelect3': "",
         'txtNomExamen3': "",
@@ -1205,7 +1286,9 @@ function GuardarPeriodica() {
         'txtTipoExamenSelect4': "",
         'txtNomExamen4': "",
         'fechaExam4': "",
-        'txtResExamen4': "",          
+        'txtResExamen4': "",
+        'txtfechaFormulario': $('#fechaFormulario').val(),
+        'txthoraFormulario': $('#horaFormulario').val(),
         'nombre': $("#ContentPlaceHolder1_txtLoginUsuario").val()
     };
 

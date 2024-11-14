@@ -7315,6 +7315,8 @@ namespace JsonJQueryNetTareas
                 respuesta = NegEmpleado.Sp_InsertarActualizarEmpleado(registro);*/
 
                 // Creamos variables con los mismos nombres de las etiquetas en el formulario de Excel
+                string numhistoria = "";
+                string numarchivo = "";
                 string primerNombre = "";
                 string segundoNombre = "";
                 string primerApellido = "";
@@ -7345,10 +7347,19 @@ namespace JsonJQueryNetTareas
                 string discapacidadno = "";
                 string discapacidadtipo = "";
                 string discapacidadporcentaje = "";
-                string fechaingresotrabajo = "";
+                string txtfechaIng = "";
                 string puestotrabajo = "";
                 string areatrabajo = "";
                 string actividadesrelevantes = "";
+
+                string fechaUltimoDia = "";
+                string txtTotalDias = "";
+                string fechaReintegro = "";
+                string txtCausaSalida = "";
+
+                string fechaInicioLab = "";
+                string fechaSalida = "";
+                string txtTotalMeses = "";
 
                 string motivoconsulta = "";
                 string antpersonales = "";
@@ -7482,13 +7493,30 @@ namespace JsonJQueryNetTareas
                 string antriesgopsicosocial4 = "";
                 string antobservaciones4 = "";
 
+                string antFam1 = "";
+                string antFam2 = "";
+                string antFam3 = "";
+                string antFam4 = "";
+                string antFam5 = "";
+                string antFam6 = "";
+                string antFam7 = "";
+                string antFam8 = "";
+
+                string HbtsIncidentes = "";
+
                 string accidentestrabajoSi = "";
                 string accidentestrabajoNo = "";
                 string especificaracctrabajo = "";
+                string accTrabAnio = "";
+                string accTrabMes = "";
+                string accTrabDia = "";
                 string acctrabajoobservaciones = "";
                 string enfermedadesprofSi = "";
                 string enfermedadesprofNo = "";
                 string especificarenfermedadesprof = "";
+                string enfProfAnio = "";
+                string enfProfMes = "";
+                string enfProfDia = "";
                 string enfermedadesprofobservaciones = "";
 
                 string factoresriesgopuestotrabajo1 = "";
@@ -7777,6 +7805,7 @@ namespace JsonJQueryNetTareas
                 string aptitudNoapto = "";
                 string aptitudObservacionDesc = "";
                 string aptitudLimitacionDesc = "";
+                string aptitudReubicacionDesc = "";
                 string descRecomendaciones = "";
 
                 string primerNombreDoc = "";
@@ -7807,6 +7836,8 @@ namespace JsonJQueryNetTareas
                 string relacionNo = "";
                 string relacionNoAplica = "";
 
+                string fechaFormulario = "";
+                string horaFormulario = "";
                 string aptitudAptoDesc = "";
 
                 string descAptitud = "";
@@ -7814,6 +7845,8 @@ namespace JsonJQueryNetTareas
 
                 var info = new DataTable();
 
+                numhistoria = campos["txtNumHistoria"];
+                numarchivo = campos["txtNumArchivo"];
 
                 // Guardamos los datos obtenidos del JSON generado en Departamento.js y los guardamos en las variables previamente creadas.
                 var nombreCompleto = campos["txtNombre"];
@@ -7835,7 +7868,10 @@ namespace JsonJQueryNetTareas
                 {
                     sexo = "M";
                 }
-
+                if (campos["formulario"] == "4")
+                {
+                    puestotrabajo = campos["txtPuestoTrabajo"];
+                }
                 if (campos["formulario"] == "5")
                 {
                     puestotrabajo = campos["txtPuestoTrabajo"];
@@ -7946,6 +7982,35 @@ namespace JsonJQueryNetTareas
                 }
                 discapacidadtipo = campos["txtTipoDiscapacidad"];
                 discapacidadporcentaje = campos["txtPorcentajeDiscapacidad"];
+                if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+                {
+                    puestotrabajo = campos["txtPuestoTrabajo"];
+                    if (campos["formulario"] == "1")
+                    {
+                        actividadesrelevantes = campos["txtActRelevantes"];
+                        txtfechaIng = campos["txtfechaIng"];
+                        if (DateTime.TryParse(txtfechaIng, out DateTime fecha))
+                        {
+                            // Formatear la fecha en aaaa/mm/dd
+                            txtfechaIng = fecha.ToString("yyyy/MM/dd");
+                        }
+                    }
+                    if (campos["formulario"] == "3")
+                    {
+                        fechaUltimoDia = campos["fechaUltimoDia"];
+                        txtTotalDias = campos["txtTotalDias"];
+                        fechaReintegro = campos["fechaReintegro"];
+                        txtCausaSalida = campos["txtCausaSalida"];
+                    }
+                }
+
+                if (campos["formulario"] == "4")
+                {
+                    fechaInicioLab = campos["fechaInicioLab"];
+                    fechaSalida = campos["fechaSalida"];
+                    txtTotalMeses = campos["txtTotalMeses"];
+
+                }
                 motivoconsulta = campos["txtMotivoConsulta"];
                 antpersonales = campos["txtAntecedentesPersonales"];
                 menarquia = campos["txtMenarquia"];
@@ -8083,6 +8148,7 @@ namespace JsonJQueryNetTareas
                 otrasdrogasCantidad = campos["txtCantidadOtra"];
                 otrasdrogasExconsumidor = campos["exConsumidorSelectOtra"];
                 otrasdrogasTiempoabst = campos["txtTiempoAbstinenciaOtra"];
+                HbtsIncidentes = campos["txtHbtsIncidentes"];
                 if (campos["txtActividadFisiscaSelect"] == "si")
                 {
                     actividadfisicaSi = "X";
@@ -8238,6 +8304,12 @@ namespace JsonJQueryNetTareas
                     accidentestrabajoNo = "X";
                 }
                 especificaracctrabajo = campos["txtEspecificarAccidentesTrabajoSelect"];
+
+                accTrabAnio = campos["txtfechaAccTrabAnio"];
+                accTrabMes = campos["txtfechaAccTrabMes"];
+                accTrabDia = campos["txtfechaAccTrabDia"];
+
+
                 acctrabajoobservaciones = campos["txtObservacionesAccTrabajo"];
                 if (campos["EnfermedadesProfSelect"] == "si")
                 {
@@ -8248,7 +8320,46 @@ namespace JsonJQueryNetTareas
                     enfermedadesprofNo = "X";
                 }
                 especificarenfermedadesprof = campos["txtEspecificarEnfermedadesProfSelect"];
+                enfProfAnio = campos["txtfechaEnfProfAnio"];
+                enfProfMes = campos["txtfechaEnfProfMes"];
+                enfProfDia = campos["txtfechaEnfProfDia"];
                 enfermedadesprofobservaciones = campos["txtObservacionesEnfermedadesProf"];
+
+                if (campos["formulario"] == "1" || campos["formulario"] == "2")
+                {
+                    if (campos["AntFamA"] == true)
+                    {
+                        antFam1 = "X";
+                    }
+                    if (campos["AntFamB"] == true)
+                    {
+                        antFam2 = "X";
+                    }
+                    if (campos["AntFamC"] == true)
+                    {
+                        antFam3 = "X";
+                    }
+                    if (campos["AntFamD"] == true)
+                    {
+                        antFam4 = "X";
+                    }
+                    if (campos["AntFamE"] == true)
+                    {
+                        antFam5 = "X";
+                    }
+                    if (campos["AntFamF"] == true)
+                    {
+                        antFam6 = "X";
+                    }
+                    if (campos["AntFamG"] == true)
+                    {
+                        antFam7 = "X";
+                    }
+                    if (campos["AntFamH"] == true)
+                    {
+                        antFam8 = "X";
+                    }
+                }
 
                 antfamiliares = campos["txtAntecedentesFamiliares"];
                 actextralaborales = campos["txtActividadesExtraLaborales"];
@@ -8423,7 +8534,7 @@ namespace JsonJQueryNetTareas
 
                 switch (campos["txtPSicosocialSelect1"])
                 {
-                    case "MonotoniaTrabajo ":
+                    case "MonotoniaTrabajo":
                         psicosocialmonotonia1 = "X";
                         break;
                     case "SobrecargaLaboral":
@@ -8890,40 +9001,48 @@ namespace JsonJQueryNetTareas
                 }
                 medidaspreventivas3 = campos["txtMedidadPreventiva3"];
 
-                switch (campos["txtPatologia"])
+                if (campos["formulario"] == "1" || campos["formulario"] == "2")
                 {
-                    case "1":
+                    if (campos["RevicionA"] == true)
+                    {
                         revisionpiel = "X";
-                        break;
-                    case "2":
+                    }
+                    if (campos["RevicionB"] == true)
+                    {
                         revisionsentidos = "X";
-                        break;
-                    case "3":
+                    }
+                    if (campos["RevicionC"] == true)
+                    {
                         revisionrespiratorio = "X";
-                        break;
-                    case "4":
+                    }
+                    if (campos["RevicionD"] == true)
+                    {
                         revisioncardio = "X";
-                        break;
-                    case "5":
+                    }
+                    if (campos["RevicionE"] == true)
+                    {
                         revisiondigestivo = "X";
-                        break;
-                    case "6":
+                    }
+                    if (campos["RevicionF"] == true)
+                    {
                         revisiongenito = "X";
-                        break;
-                    case "7":
+                    }
+                    if (campos["RevicionG"] == true)
+                    {
                         revisionmusculo = "X";
-                        break;
-                    case "8":
+                    }
+                    if (campos["RevicionH"] == true)
+                    {
                         revisionendocrino = "X";
-                        break;
-                    case "9":
+                    }
+                    if (campos["RevicionI"] == true)
+                    {
                         revisionhemo = "X";
-                        break;
-                    case "10":
+                    }
+                    if (campos["RevicionJ"] == true)
+                    {
                         revisionnervioso = "X";
-                        break;
-                    default:
-                        break;
+                    }
                 }
 
                 revisionorganosdescripcion = campos["txtRevisionOrganos"];
@@ -9182,7 +9301,10 @@ namespace JsonJQueryNetTareas
                 aptitudObservacionDesc = campos["txtDescObservacion"];
                 aptitudLimitacionDesc = campos["txtDescLimitacion"];
 
-
+                if (campos["formulario"] == "3")
+                {
+                    aptitudReubicacionDesc = campos["txtDescReubicacion"];
+                }
                 if (campos["formulario"] == "4")
                 {
                     actividades1 = campos["actividades1"];
@@ -9205,24 +9327,24 @@ namespace JsonJQueryNetTareas
 
                 if (campos["formulario"] == "5")
                 {
-                    aptitudAptoDesc = campos["txtDescAptitud"];
+                    descAptitud = campos["txtDescAptitud"];
                     switch (campos["txtAptitudSelect"])
                     {
                         case "apto":
                             aptitudApto = "X";
-                            descAptitud = aptitudAptoDesc;
+                            //descAptitud = aptitudAptoDesc;
                             break;
                         case "aptoObservacion":
                             aptitudObservacion = "X";
-                            descAptitud = aptitudObservacionDesc;
+                            //descAptitud = aptitudObservacionDesc;
                             break;
                         case "aptoLimitacion":
                             aptitudLimitaciones = "X";
-                            descAptitud = aptitudLimitacionDesc;
+                            //descAptitud = aptitudLimitacionDesc;
                             break;
                         case "noApto":
                             aptitudNoapto = "X";
-                            descAptitud = aptitudAptoDesc;
+                            //descAptitud = aptitudAptoDesc;
                             break;
                         default:
                             break;
@@ -9268,6 +9390,15 @@ namespace JsonJQueryNetTareas
                             break;
                     }
                 }
+                if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
+                {
+                    fechaFormulario = campos["txtfechaFormulario"];
+                    if (DateTime.TryParse(fechaFormulario, out DateTime fecha))
+                    {
+                        fechaFormulario = fecha.ToString("yyyy/MM/dd");
+                    }
+                    horaFormulario = campos["txthoraFormulario"];
+                }
                 descRecomendaciones = campos["txtRecomendacion"];
 
 
@@ -9294,6 +9425,10 @@ namespace JsonJQueryNetTareas
                     info.Columns.Add("segundonombre");
                     info.Columns.Add("sexo");
 
+                    if (campos["formulario"] == "5")
+                    {
+                        info.Columns.Add("puestotrabajo");
+                    }
                     if (campos["formulario"] == "1" || campos["formulario"] == "3")
                     {
                         info.Columns.Add("edad");
@@ -9323,7 +9458,11 @@ namespace JsonJQueryNetTareas
                             info.Columns.Add("discapacidadporcentaje");
                         }
                     }
-                    info.Columns.Add("puestotrabajo");
+                    if (campos["formulario"] == "1")
+                    {
+                        info.Columns.Add("fechaingresotrabajo");
+                    }
+
 
                     if (campos["formulario"] == "5")
                     {
@@ -9355,9 +9494,31 @@ namespace JsonJQueryNetTareas
                     {
                         info.Columns.Add("areatrabajo");
                     }
-                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+
+                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
                     {
-                        info.Columns.Add("motivoconsulta");
+                        if (campos["formulario"] == "4")
+                        {
+                            info.Columns.Add("fechaInicioLab");
+                            info.Columns.Add("fechaSalida");
+                            info.Columns.Add("txtTotalMeses");
+                        }
+                        info.Columns.Add("puestotrabajo");
+                        if (campos["formulario"] == "1")
+                        {
+                            info.Columns.Add("actividadesrelevantes");
+                        }
+                        if (campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("fechaUltimoDia"); //aaaa / mm / dd
+                            info.Columns.Add("fechaReintegro");
+                            info.Columns.Add("totalDias");
+                            info.Columns.Add("causaSalida");
+                        }
+                        if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("motivoconsulta");
+                        }
                     }
 
                     if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "4")
@@ -9453,6 +9614,10 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("cantidadMedicamento1");
                         info.Columns.Add("cantidadMedicamento2");
                         info.Columns.Add("cantidadMedicamento3");
+                        if (campos["formulario"] == "2")
+                        {
+                            info.Columns.Add("HbtsIncidentes");
+                        }
                     }
 
                     if (campos["formulario"] == "1")
@@ -9511,14 +9676,29 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("accidentestrabajoSi");
                         info.Columns.Add("accidentestrabajoNo");
                         info.Columns.Add("especificaracctrabajo");
+                        info.Columns.Add("accTrabAnio");
+                        info.Columns.Add("accTrabMes");
+                        info.Columns.Add("accTrabDia");
                         info.Columns.Add("acctrabajoobservaciones");
                         info.Columns.Add("enfermedadesprofSi");
                         info.Columns.Add("enfermedadesprofNo");
                         info.Columns.Add("especificarenfermedadesprof");
+                        info.Columns.Add("enfProfAnio");
+                        info.Columns.Add("enfProfMes");
+                        info.Columns.Add("enfProfDia");
                         info.Columns.Add("enfermedadesprofobservaciones");
                     }
                     if (campos["formulario"] == "1" || campos["formulario"] == "2")
                     {
+                        info.Columns.Add("antFam1");
+                        info.Columns.Add("antFam2");
+                        info.Columns.Add("antFam3");
+                        info.Columns.Add("antFam4");
+                        info.Columns.Add("antFam5");
+                        info.Columns.Add("antFam6");
+                        info.Columns.Add("antFam7");
+                        info.Columns.Add("antFam8");
+
                         info.Columns.Add("antfamiliares");
                         info.Columns.Add("factoresriesgopuestotrabajo1");
                         info.Columns.Add("factoresriesgoactividades1");
@@ -9841,8 +10021,20 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("aptitudNoapto");
                         info.Columns.Add("aptitudObservacionDesc");
                         info.Columns.Add("aptitudLimitacionDesc");
+                        if (campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("aptitudReubicacionDesc");
+                        }
 
                     }
+                    //if (campos["formulario"] == "5")
+                    //{
+                    //    info.Columns.Add("aptitudApto");
+                    //    info.Columns.Add("aptitudObservacion");
+                    //    info.Columns.Add("aptitudLimitaciones");
+                    //    info.Columns.Add("aptitudNoapto");
+                    //    info.Columns.Add("aptitudObservacionDesc");
+                    //}
                     if (campos["formulario"] == "4")
                     {
                         info.Columns.Add("EvalRetiroSi");
@@ -9852,15 +10044,18 @@ namespace JsonJQueryNetTareas
 
                     info.Columns.Add("descRecomendaciones");
 
-
-
+                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
+                    {
+                        info.Columns.Add("fechaFormulario");
+                        info.Columns.Add("horaFormulario");
+                    }
                     // FORMULARIO TIPO 1
                     if (campos["formulario"] == "1")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, catolica, evangelica, testigo, mormona, otrareligion, gruposanguineo, lateralidad,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, catolica, evangelica, testigo, mormona, otrareligion, gruposanguineo, lateralidad,
                                  orientlesbiana, orientgay, orientbisexual, orientheterosexual, orientnosabe, identfemenino, identmasculino, identransfem, identransmasc, identnosabe, discapacidadsi,
-                                 discapacidadno, discapacidadtipo, discapacidadporcentaje, puestotrabajo, areatrabajo, motivoconsulta, antpersonales, menarquia, ciclos, ultmenstruacion, gestas, partos, cesareas, abortos, hijosvivosF, hijosmuertosF, vidaSxActivaSi, vidaSxActivaNo,
+                                 discapacidadno, discapacidadtipo, discapacidadporcentaje, txtfechaIng, puestotrabajo, areatrabajo, actividadesrelevantes, motivoconsulta, antpersonales, menarquia, ciclos, ultmenstruacion, gestas, partos, cesareas, abortos, hijosvivosF, hijosmuertosF, vidaSxActivaSi, vidaSxActivaNo,
                                  metodoplanfamSi1, metodoplanfamNo1, metodoplanfamTipo1, papnicolaouSi, papnicolaouNo, papnicolaouTiempo, papnicolaouResultado, ecomamaSi, ecomamaNo, ecomamaTiempo, ecomamaResultado,
                                  colposcopiaSi, colposcopiaNo, colposcopiaTiempo, colposcopiaResultado, mamografiaSi, mamografiaNo, mamografiaTiempo, mamografiaResultado, antigenoprostSi, antigenoprostNo, antigenoprostTiempo,
                                  antigenoprostResultado, ecoprostaticoSi, ecoprostaticoNo, ecoprostaticoTiempo, ecoprostaticoResultado, metodoplanfamSi2, metodoplanfamNo2, metodoplanfamTipo2, hijosvivosM, hijosmuertosM,
@@ -9871,8 +10066,8 @@ namespace JsonJQueryNetTareas
                                  antobservaciones1, antempresa2, antpuestotrabajo2, antactividad2, anttiempotrabajo2, antriesgofisico2, antriesgomecanico2, antriesgoquimico2, antriesgobiologico2, antriesgoergonomico2, antriesgopsicosocial2,
                                  antobservaciones2, antempresa3, antpuestotrabajo3, antactividad3, anttiempotrabajo3, antriesgofisico3, antriesgomecanico3, antriesgoquimico3, antriesgobiologico3, antriesgoergonomico3, antriesgopsicosocial3,
                                  antobservaciones3, antempresa4, antpuestotrabajo4, antactividad4, anttiempotrabajo4, antriesgofisico4, antriesgomecanico4, antriesgoquimico4, antriesgobiologico4, antriesgoergonomico4, antriesgopsicosocial4,
-                                 antobservaciones4, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones,
-                                 antfamiliares, factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1,
+                                 antobservaciones4, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabAnio, accTrabMes, accTrabDia, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfAnio, enfProfMes, enfProfDia, enfermedadesprofobservaciones,
+                                 antFam1, antFam2, antFam3, antFam4, antFam5, antFam6, antFam7, antFam8, antfamiliares, factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1,
                                  fisicoelectrico1, fisicootros1, mecatrapmaquinas1, mecatrapsuperficies1, mecatrapobjetos1, meccaidasdeobjetos1, meccaidasmismonivel1, meccaidasdiferentenivel1, meccontactoelectrico1,
                                  meccontacosuperficies1, mecproyeccionparticulas1, mecproyeccionfluidos1, mecpinchazos1, meccortes1, mecatropellamientovehiculo1, mecchoquescolision1, mecanicootros1, quimicosolidos1, quimicopolvos1, quimicohumos1,
                                  quimicoliquidos1, quimicovapores1, quimicoaerosoles1, quimiconeblinas1, quimicogaseosos1, quimicootros1, biologicovirus1, biologicohongos1, biologicobacterias1, biologicoparasitos1, biologicoexpovectores1,
@@ -9897,7 +10092,7 @@ namespace JsonJQueryNetTareas
                                  examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB,
                                  examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examNom3, examFecha3, examResultado3, examNom4,
                                  examFecha4, examResultado4, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones,
-                                 aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                                 aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -9907,11 +10102,11 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "2")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, motivoconsulta, antpersonales,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, motivoconsulta, antpersonales,
                             tabacoSi, tabacoNo, tabacoTiempo, tabacoCantidad, tabacoExconsumidor, tabacoTiempoabst, actividadfisicaSi, actividadfisicaNo, actividadfisicaCual, tiempoActividadFisica, alcoholSi, alcoholNo, alcoholTiempo, alcoholCantidad, alcoholExconsumidor, alcoholTiempoabst,
                             nombreOtrasDrogas, otrasdrogasSi, otrasdrogasNo, otrasdrogasTiempo, otrasdrogasCantidad, otrasdrogasExconsumidor, otrasdrogasTiempoabst,
-                            medicacionhabSi, medicacionhabNo, medicacionhabCual1, medicacionhabCual2, medicacionhabCual3, cantidadMedicamento1, cantidadMedicamento2, cantidadMedicamento3,
-                            accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones, antfamiliares,
+                            medicacionhabSi, medicacionhabNo, medicacionhabCual1, medicacionhabCual2, medicacionhabCual3, cantidadMedicamento1, cantidadMedicamento2, cantidadMedicamento3, HbtsIncidentes,
+                            accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabAnio, accTrabMes, accTrabDia, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfAnio, enfProfMes, enfProfDia, enfermedadesprofobservaciones, antFam1, antFam2, antFam3, antFam4, antFam5, antFam6, antFam7, antFam8, antfamiliares,
 
                             factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1, fisicoelectrico1, fisicootros1,
                             mecatrapmaquinas1, mecatrapsuperficies1, mecatrapobjetos1, meccaidasdeobjetos1, meccaidasmismonivel1, meccaidasdiferentenivel1, meccontactoelectrico1, meccontacosuperficies1, mecproyeccionparticulas1, mecproyeccionfluidos1, mecpinchazos1, meccortes1, mecatropellamientovehiculo1, mecchoquescolision1, mecanicootros1,
@@ -9948,7 +10143,7 @@ namespace JsonJQueryNetTareas
 
                             DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3,
 
-                            aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                            aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 2
                         info.TableName = "info";
@@ -9958,26 +10153,26 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "3")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, puestotrabajo, motivoconsulta, enfermedadactual, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, puestotrabajo, fechaUltimoDia, fechaReintegro, txtTotalDias, txtCausaSalida, motivoconsulta, enfermedadactual, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria,
                                  constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE, examfisicooidoA, examfisicooidoB,
                                  examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB, examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A,
                                  examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB,
                                  examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examNom3, examFecha3, examResultado3, examObservaciones,
-                                 DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                                 DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, aptitudReubicacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
                     }
 
-
                     // FORMULARIO TIPO 4
                     if (campos["formulario"] == "4")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, actividades1, factoresriesgoactividades1, actividades2, factoresriesgoactividades2, actividades3, factoresriesgoactividades3, antpersonales, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones,
-                            constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria, constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE, examfisicooidoA, examfisicooidoB, examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB,
-                            examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A, examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB, examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1,
-                            examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, EvalRetiroSi, EvalRetiroNo, EvalRetiroObservacion, descRecomendaciones);
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, fechaInicioLab, fechaSalida, txtTotalMeses, puestotrabajo, actividades1, factoresriesgoactividades1, actividades2, factoresriesgoactividades2, actividades3, factoresriesgoactividades3, antpersonales, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabDia, accTrabMes, accTrabAnio, acctrabajoobservaciones,
+                            enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfDia, enfProfMes, enfProfAnio, enfermedadesprofobservaciones, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria, constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE,
+                            examfisicooidoA, examfisicooidoB, examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB, examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A, examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC,
+                            examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB, examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3,
+                            DiagDef3, EvalRetiroSi, EvalRetiroNo, EvalRetiroObservacion, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -9987,7 +10182,7 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "5")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fecEmision, evaIngreso, evaPeriodico, evaReintegro, evaRetiro, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, descAptitud, retiroSi, retiroNo, diagPresuntiva, diagDefinitiva, diagNoAplica, relacionSi, relacionNo, relacionNoAplica, descRecomendaciones);
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fecEmision, evaIngreso, evaPeriodico, evaReintegro, evaRetiro, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, descAptitud, retiroSi, retiroNo, diagPresuntiva, diagDefinitiva, diagNoAplica, relacionSi, relacionNo, relacionNoAplica, descRecomendaciones);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -10125,9 +10320,6 @@ namespace JsonJQueryNetTareas
 
         }
 
-
-
-
         public string GuardarHisInmunizaciones(dynamic campos)
         {
 
@@ -10141,7 +10333,8 @@ namespace JsonJQueryNetTareas
                 string primerApellido = "";
                 string segundoApellido = "";
 
-
+                string numhistoria = campos["txtNumHistoria"];
+                string numarchivo = campos["txtNumArchivo"];
                 // Guardamos los datos obtenidos del JSON generado en Departamento.js y los guardamos en las variables previamente creadas.
                 var nombreCompleto = campos["txtNombre"];
 
@@ -10154,7 +10347,17 @@ namespace JsonJQueryNetTareas
                 primerNombre = palabras.Length > 2 ? palabras[2] : "";
                 segundoNombre = palabras.Length > 3 ? palabras[3] : "";
 
-                string sexo = campos["txtSexo"];
+                string sexo = "";
+
+                if (campos["txtSexo"] == "Femenino" || campos["txtSexo"] == "FEMENINO")
+                {
+                    sexo = "F";
+                }
+                else if (campos["txtSexo"] == "Masculino" || campos["txtSexo"] == "MASCULINO")
+                {
+                    sexo = "M";
+                }
+
                 string puestotrabajo = campos["txtPuestoTrabajo1"];
                 //string areatrabajo = "";
 
@@ -10338,6 +10541,266 @@ namespace JsonJQueryNetTareas
                 string obsSarampion2 = campos["txtobsSarampion2"];
 
 
+
+                // INM EXTRAS 1
+
+                string txtNuevaDosis1 = campos["txtNuevaDosis1"];
+
+                string fechaNuevo1 = campos["fechaNuevo1"];
+                string txtNuevoLote1 = campos["txtNuevoLote1"];
+                string txtNuevoNombre1 = campos["txtNuevoNombre1"];
+                string txtNuevoEstablecimiento1 = campos["txtNuevoEstablecimiento1"];
+                string txtNuevoObs1 = campos["txtNuevoObs1"];
+
+                string fechaNuevo2 = campos["fechaNuevo2"];
+                string txtNuevoLote2 = campos["txtNuevoLote2"];
+                string txtNuevoNombre2 = campos["txtNuevoNombre2"];
+                string txtNuevoEstablecimiento2 = campos["txtNuevoEstablecimiento2"];
+                string txtNuevoObs2 = campos["txtNuevoObs2"];
+
+                string fechaNuevo3 = campos["fechaNuevo3"];
+                string txtNuevoLote3 = campos["txtNuevoLote3"];
+                string txtNuevoNombre3 = campos["txtNuevoNombre3"];
+                string txtNuevoEstablecimiento3 = campos["txtNuevoEstablecimiento3"];
+                string txtNuevoObs3 = campos["txtNuevoObs3"];
+
+                string fechaNuevo4 = campos["fechaNuevo4"];
+                string txtNuevoLote4 = campos["txtNuevoLote4"];
+                string txtNuevoNombre4 = campos["txtNuevoNombre4"];
+                string txtNuevoEstablecimiento4 = campos["txtNuevoEstablecimiento4"];
+                string txtNuevoObs4 = campos["txtNuevoObs4"];
+
+                string fechaNuevo5 = campos["fechaNuevo5"];
+                string txtNuevoLote5 = campos["txtNuevoLote5"];
+                string txtNuevoNombre5 = campos["txtNuevoNombre5"];
+                string txtNuevoEstablecimiento5 = campos["txtNuevoEstablecimiento5"];
+                string txtNuevoObs5 = campos["txtNuevoObs5"];
+
+                // INM EXTRAS 2
+                string txtNuevaDosis12 = campos["txtNuevaDosis12"];
+
+                string fechaNuevo1Inm2 = campos["fechaNuevo1Inm2"];
+                string txtNuevoLote1Inm2 = campos["txtNuevoLote1Inm2"];
+                string txtNuevoNombre1Inm2 = campos["txtNuevoNombre1Inm2"];
+                string txtNuevoEstablecimiento1Inm2 = campos["txtNuevoEstablecimiento1Inm2"];
+                string txtNuevoObs1Inm2 = campos["txtNuevoObs1Inm2"];
+
+                string fechaNuevo2Inm2 = campos["fechaNuevo2Inm2"];
+                string txtNuevoLote2Inm2 = campos["txtNuevoLote2Inm2"];
+                string txtNuevoNombre2Inm2 = campos["txtNuevoNombre2Inm2"];
+                string txtNuevoEstablecimiento2Inm2 = campos["txtNuevoEstablecimiento2Inm2"];
+                string txtNuevoObs2Inm2 = campos["txtNuevoObs2Inm2"];
+
+                string fechaNuevo3Inm2 = campos["fechaNuevo3Inm2"];
+                string txtNuevoLote3Inm2 = campos["txtNuevoLote3Inm2"];
+                string txtNuevoNombre3Inm2 = campos["txtNuevoNombre3Inm2"];
+                string txtNuevoEstablecimiento3Inm2 = campos["txtNuevoEstablecimiento3Inm2"];
+                string txtNuevoObs3Inm2 = campos["txtNuevoObs3Inm2"];
+
+                string fechaNuevo4Inm2 = campos["fechaNuevo4Inm2"];
+                string txtNuevoLote4Inm2 = campos["txtNuevoLote4Inm2"];
+                string txtNuevoNombre4Inm2 = campos["txtNuevoNombre4Inm2"];
+                string txtNuevoEstablecimiento4Inm2 = campos["txtNuevoEstablecimiento4Inm2"];
+                string txtNuevoObs4Inm2 = campos["txtNuevoObs4Inm2"];
+
+                string fechaNuevo5Inm2 = campos["fechaNuevo5Inm2"];
+                string txtNuevoLote5Inm2 = campos["txtNuevoLote5Inm2"];
+                string txtNuevoNombre5Inm2 = campos["txtNuevoNombre5Inm2"];
+                string txtNuevoEstablecimiento5Inm2 = campos["txtNuevoEstablecimiento5Inm2"];
+                string txtNuevoObs5Inm2 = campos["txtNuevoObs5Inm2"];
+
+                // INM EXTRAS 3
+                string txtNuevaDosis13 = campos["txtNuevaDosis13"];
+
+                string fechaNuevo1Inm3 = campos["fechaNuevo1Inm3"];
+                string txtNuevoLote1Inm3 = campos["txtNuevoLote1Inm3"];
+                string txtNuevoNombre1Inm3 = campos["txtNuevoNombre1Inm3"];
+                string txtNuevoEstablecimiento1Inm3 = campos["txtNuevoEstablecimiento1Inm3"];
+                string txtNuevoObs1Inm3 = campos["txtNuevoObs1Inm3"];
+
+                string fechaNuevo2Inm3 = campos["fechaNuevo2Inm3"];
+                string txtNuevoLote2Inm3 = campos["txtNuevoLote2Inm3"];
+                string txtNuevoNombre2Inm3 = campos["txtNuevoNombre2Inm3"];
+                string txtNuevoEstablecimiento2Inm3 = campos["txtNuevoEstablecimiento2Inm3"];
+                string txtNuevoObs2Inm3 = campos["txtNuevoObs2Inm3"];
+
+                string fechaNuevo3Inm3 = campos["fechaNuevo3Inm3"];
+                string txtNuevoLote3Inm3 = campos["txtNuevoLote3Inm3"];
+                string txtNuevoNombre3Inm3 = campos["txtNuevoNombre3Inm3"];
+                string txtNuevoEstablecimiento3Inm3 = campos["txtNuevoEstablecimiento3Inm3"];
+                string txtNuevoObs3Inm3 = campos["txtNuevoObs3Inm3"];
+
+                string fechaNuevo4Inm3 = campos["fechaNuevo4Inm3"];
+                string txtNuevoLote4Inm3 = campos["txtNuevoLote4Inm3"];
+                string txtNuevoNombre4Inm3 = campos["txtNuevoNombre4Inm3"];
+                string txtNuevoEstablecimiento4Inm3 = campos["txtNuevoEstablecimiento4Inm3"];
+                string txtNuevoObs4Inm3 = campos["txtNuevoObs4Inm3"];
+
+                string fechaNuevo5Inm3 = campos["fechaNuevo5Inm3"];
+                string txtNuevoLote5Inm3 = campos["txtNuevoLote5Inm3"];
+                string txtNuevoNombre5Inm3 = campos["txtNuevoNombre5Inm3"];
+                string txtNuevoEstablecimiento5Inm3 = campos["txtNuevoEstablecimiento5Inm3"];
+                string txtNuevoObs5Inm3 = campos["txtNuevoObs5Inm3"];
+
+                // INM EXTRAS 4
+                string txtNuevaDosis123 = campos["txtNuevaDosis123"];
+
+                string fechaNuevo1Inm2Inm3 = campos["fechaNuevo1Inm2Inm3"];
+                string txtNuevoLote1Inm2Inm3 = campos["txtNuevoLote1Inm2Inm3"];
+                string txtNuevoNombre1Inm2Inm3 = campos["txtNuevoNombre1Inm2Inm3"];
+                string txtNuevoEstablecimiento1Inm2Inm3 = campos["txtNuevoEstablecimiento1Inm2Inm3"];
+                string txtNuevoObs1Inm2Inm3 = campos["txtNuevoObs1Inm2Inm3"];
+
+                string fechaNuevo2Inm2Inm3 = campos["fechaNuevo2Inm2Inm3"];
+                string txtNuevoLote2Inm2Inm3 = campos["txtNuevoLote2Inm2Inm3"];
+                string txtNuevoNombre2Inm2Inm3 = campos["txtNuevoNombre2Inm2Inm3"];
+                string txtNuevoEstablecimiento2Inm2Inm3 = campos["txtNuevoEstablecimiento2Inm2Inm3"];
+                string txtNuevoObs2Inm2Inm3 = campos["txtNuevoObs2Inm2Inm3"];
+
+                string fechaNuevo3Inm2Inm3 = campos["fechaNuevo3Inm2Inm3"];
+                string txtNuevoLote3Inm2Inm3 = campos["txtNuevoLote3Inm2Inm3"];
+                string txtNuevoNombre3Inm2Inm3 = campos["txtNuevoNombre3Inm2Inm3"];
+                string txtNuevoEstablecimiento3Inm2Inm3 = campos["txtNuevoEstablecimiento3Inm2Inm3"];
+                string txtNuevoObs3Inm2Inm3 = campos["txtNuevoObs3Inm2Inm3"];
+
+                string fechaNuevo4Inm2Inm3 = campos["fechaNuevo4Inm2Inm3"];
+                string txtNuevoLote4Inm2Inm3 = campos["txtNuevoLote4Inm2Inm3"];
+                string txtNuevoNombre4Inm2Inm3 = campos["txtNuevoNombre4Inm2Inm3"];
+                string txtNuevoEstablecimiento4Inm2Inm3 = campos["txtNuevoEstablecimiento4Inm2Inm3"];
+                string txtNuevoObs4Inm2Inm3 = campos["txtNuevoObs4Inm2Inm3"];
+
+                string fechaNuevo5Inm2Inm3 = campos["fechaNuevo5Inm2Inm3"];
+                string txtNuevoLote5Inm2Inm3 = campos["txtNuevoLote5Inm2Inm3"];
+                string txtNuevoNombre5Inm2Inm3 = campos["txtNuevoNombre5Inm2Inm3"];
+                string txtNuevoEstablecimiento5Inm2Inm3 = campos["txtNuevoEstablecimiento5Inm2Inm3"];
+                string txtNuevoObs5Inm2Inm3 = campos["txtNuevoObs5Inm2Inm3"];
+
+                string SelectNuevoEsquema1 = "";
+
+                if (campos["txtSelectNuevoEsquema1"] == "SI")
+                {
+                    SelectNuevoEsquema1 = "X";
+                }
+
+                string SelectNuevoEsquema2 = "";
+                if (campos["txtSelectNuevoEsquema2"] == "SI")
+                {
+                    SelectNuevoEsquema2 = "X";
+                }
+
+                string SelectNuevoEsquema3 = "";
+                if (campos["txtSelectNuevoEsquema3"] == "SI")
+                {
+                    SelectNuevoEsquema3 = "X";
+                }
+
+                string SelectNuevoEsquema4 = "";
+                if (campos["txtSelectNuevoEsquema4"] == "SI")
+                {
+                    SelectNuevoEsquema4 = "X";
+                }
+
+                string SelectNuevoEsquema5 = "";
+                if (campos["txtSelectNuevoEsquema5"] == "SI")
+                {
+                    SelectNuevoEsquema5 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm2 = "";
+                if (campos["txtSelectNuevoEsquema1Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm2 = "";
+                if (campos["txtSelectNuevoEsquema2Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm2 = "";
+                if (campos["txtSelectNuevoEsquema3Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm2 = "";
+                if (campos["txtSelectNuevoEsquema4Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm2 = "";
+                if (campos["txtSelectNuevoEsquema5Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm2 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm3 = "";
+                if (campos["txtSelectNuevoEsquema1Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm3 = "";
+                if (campos["txtSelectNuevoEsquema3Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm3 = "";
+                if (campos["txtSelectNuevoEsquema4Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm3 = "";
+                if (campos["txtSelectNuevoEsquema5Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm3 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema1Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema2Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema3Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema4Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema5Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm2Inm3 = "X";
+                }
+
+
+
                 string primerApellidoDoc = "";
                 string segundoApellidoDoc = "";
                 string primerNombreDoc = "";
@@ -10452,7 +10915,6 @@ namespace JsonJQueryNetTareas
                 info.Columns.Add("obsHepB2");
                 info.Columns.Add("obsHepB3");
 
-
                 info.Columns.Add("fechaInfluenza");
                 info.Columns.Add("fechaFiebre");
                 info.Columns.Add("fechaSarampion1");
@@ -10483,15 +10945,195 @@ namespace JsonJQueryNetTareas
                 info.Columns.Add("obsSarampion1");
                 info.Columns.Add("obsSarampion2");
 
+                //Nuevas Inmunizaciones
+
+                info.Columns.Add("Inmnombre1");
+
+                info.Columns.Add("Inm1fecha1");
+                info.Columns.Add("Inm1lote1");
+                info.Columns.Add("Inm1esquema1");
+                info.Columns.Add("Inm1nombre1");
+                info.Columns.Add("Inm1establecimiento1");
+                info.Columns.Add("Inm1obs1");
+
+                info.Columns.Add("Inm1fecha2");
+                info.Columns.Add("Inm1lote2");
+                info.Columns.Add("Inm1esquema2");
+                info.Columns.Add("Inm1nombre2");
+                info.Columns.Add("Inm1establecimiento2");
+                info.Columns.Add("Inm1obs2");
+
+                info.Columns.Add("Inm1fecha3");
+                info.Columns.Add("Inm1lote3");
+                info.Columns.Add("Inm1esquema3");
+                info.Columns.Add("Inm1nombre3");
+                info.Columns.Add("Inm1establecimiento3");
+                info.Columns.Add("Inm1obs3");
+
+                info.Columns.Add("Inm1fecha4");
+                info.Columns.Add("Inm1lote4");
+                info.Columns.Add("Inm1esquema4");
+                info.Columns.Add("Inm1nombre4");
+                info.Columns.Add("Inm1establecimiento4");
+                info.Columns.Add("Inm1obs4");
+
+                info.Columns.Add("Inm1fecha5");
+                info.Columns.Add("Inm1lote5");
+                info.Columns.Add("Inm1esquema5");
+                info.Columns.Add("Inm1nombre5");
+                info.Columns.Add("Inm1establecimiento5");
+                info.Columns.Add("Inm1obs5");
+
+                info.Columns.Add("Inmnombre2");
+
+                info.Columns.Add("Inm2fecha1");
+                info.Columns.Add("Inm2lote1");
+                info.Columns.Add("Inm2esquema1");
+                info.Columns.Add("Inm2nombre1");
+                info.Columns.Add("Inm2establecimiento1");
+                info.Columns.Add("Inm2obs1");
+
+                info.Columns.Add("Inm2fecha2");
+                info.Columns.Add("Inm2lote2");
+                info.Columns.Add("Inm2esquema2");
+                info.Columns.Add("Inm2nombre2");
+                info.Columns.Add("Inm2establecimiento2");
+                info.Columns.Add("Inm2obs2");
+
+                info.Columns.Add("Inm2fecha3");
+                info.Columns.Add("Inm2lote3");
+                info.Columns.Add("Inm2esquema3");
+                info.Columns.Add("Inm2nombre3");
+                info.Columns.Add("Inm2establecimiento3");
+                info.Columns.Add("Inm2obs3");
+
+                info.Columns.Add("Inm2fecha4");
+                info.Columns.Add("Inm2lote4");
+                info.Columns.Add("Inm2esquema4");
+                info.Columns.Add("Inm2nombre4");
+                info.Columns.Add("Inm2establecimiento4");
+                info.Columns.Add("Inm2obs4");
+
+                info.Columns.Add("Inm2fecha5");
+                info.Columns.Add("Inm2lote5");
+                info.Columns.Add("Inm2esquema5");
+                info.Columns.Add("Inm2nombre5");
+                info.Columns.Add("Inm2establecimiento5");
+                info.Columns.Add("Inm2obs5");
+
+                info.Columns.Add("Inmnombre3");
+
+                info.Columns.Add("Inm3fecha1");
+                info.Columns.Add("Inm3lote1");
+                info.Columns.Add("Inm3esquema1");
+                info.Columns.Add("Inm3nombre1");
+                info.Columns.Add("Inm3establecimiento1");
+                info.Columns.Add("Inm3obs1");
+
+                info.Columns.Add("Inm3fecha2");
+                info.Columns.Add("Inm3lote2");
+                info.Columns.Add("Inm3esquema2");
+                info.Columns.Add("Inm3nombre2");
+                info.Columns.Add("Inm3establecimiento2");
+                info.Columns.Add("Inm3obs2");
+
+                info.Columns.Add("Inm3fecha3");
+                info.Columns.Add("Inm3lote3");
+                info.Columns.Add("Inm3esquema3");
+                info.Columns.Add("Inm3nombre3");
+                info.Columns.Add("Inm3establecimiento3");
+                info.Columns.Add("Inm3obs3");
+
+                info.Columns.Add("Inm3fecha4");
+                info.Columns.Add("Inm3lote4");
+                info.Columns.Add("Inm3esquema4");
+                info.Columns.Add("Inm3nombre4");
+                info.Columns.Add("Inm3establecimiento4");
+                info.Columns.Add("Inm3obs4");
+
+                info.Columns.Add("Inm3fecha5");
+                info.Columns.Add("Inm3lote5");
+                info.Columns.Add("Inm3esquema5");
+                info.Columns.Add("Inm3nombre5");
+                info.Columns.Add("Inm3establecimiento5");
+                info.Columns.Add("Inm3obs5");
+
+                info.Columns.Add("Inmnombre4");
+
+                info.Columns.Add("Inm4fecha1");
+                info.Columns.Add("Inm4lote1");
+                info.Columns.Add("Inm4esquema1");
+                info.Columns.Add("Inm4nombre1");
+                info.Columns.Add("Inm4establecimiento1");
+                info.Columns.Add("Inm4obs1");
+
+                info.Columns.Add("Inm4fecha2");
+                info.Columns.Add("Inm4lote2");
+                info.Columns.Add("Inm4esquema2");
+                info.Columns.Add("Inm4nombre2");
+                info.Columns.Add("Inm4establecimiento2");
+                info.Columns.Add("Inm4obs2");
+
+                info.Columns.Add("Inm4fecha3");
+                info.Columns.Add("Inm4lote3");
+                info.Columns.Add("Inm4esquema3");
+                info.Columns.Add("Inm4nombre3");
+                info.Columns.Add("Inm4establecimiento3");
+                info.Columns.Add("Inm4obs3");
+
+                info.Columns.Add("Inm4fecha4");
+                info.Columns.Add("Inm4lote4");
+                info.Columns.Add("Inm4esquema4");
+                info.Columns.Add("Inm4nombre4");
+                info.Columns.Add("Inm4establecimiento4");
+                info.Columns.Add("Inm4obs4");
+
+                info.Columns.Add("Inm4fecha5");
+                info.Columns.Add("Inm4lote5");
+                info.Columns.Add("Inm4esquema5");
+                info.Columns.Add("Inm4nombre5");
+                info.Columns.Add("Inm4establecimiento5");
+                info.Columns.Add("Inm4obs5");
+
 
                 // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fechaTetanos1, fechaTetanos2, fechaTetanos3, fechaTetanos4, fechaTetanos5,
+                info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fechaTetanos1, fechaTetanos2, fechaTetanos3, fechaTetanos4, fechaTetanos5,
                     loteTetanos1, loteTetanos2, loteTetanos3, loteTetanos4, loteTetanos5, esquemaTetanos1, esquemaTetanos2, esquemaTetanos3, esquemaTetanos4, esquemaTetanos5, nombreTetanos1, nombreTetanos2, nombreTetanos3, nombreTetanos4,
                     nombreTetanos5, establecimientoTetanos1, establecimientoTetanos2, establecimientoTetanos3, establecimientoTetanos4, establecimientoTetanos5, obsTetanos1, obsTetanos2, obsTetanos3, obsTetanos4, obsTetanos5, fechaHepA1,
                     fechaHepA2, fechaHepA3, fechaHepB1, fechaHepB2, fechaHepB3, loteHepA1, loteHepA2, loteHepA3, loteHepB1, loteHepB2, loteHepB3, esquemaHepA1, esquemaHepA2, esquemaHepA3, esquemaHepB1, esquemaHepB2, esquemaHepB3, nombreHepA1,
                     nombreHepA2, nombreHepA3, nombreHepB1, nombreHepB2, nombreHepB3, establecimientoHepA1, establecimientoHepA2, establecimientoHepA3, establecimientoHepB1, establecimientoHepB2, establecimientoHepB3, obsHepA1, obsHepA2,
                     obsHepA3, obsHepB1, obsHepB2, obsHepB3, fechaInfluenza, fechaFiebre, fechaSarampion1, fechaSarampion2, loteInfluenza, loteFiebre, loteSarampion1, loteSarampion2, esquemaInfluenza, esquemaFiebre, esquemaSarampion1,
-                    esquemaSarampion2, nombreInfluenza, nombreFiebre, nombreSarampion1, nombreSarampion2, establecimientoInfluenza, establecimientoFiebre, establecimientoSarampion1, establecimientoSarampion2, obsInfluenza, obsFiebre, obsSarampion1, obsSarampion2);
+                    esquemaSarampion2, nombreInfluenza, nombreFiebre, nombreSarampion1, nombreSarampion2, establecimientoInfluenza, establecimientoFiebre, establecimientoSarampion1, establecimientoSarampion2, obsInfluenza, obsFiebre, obsSarampion1, obsSarampion2,
+                    // INM EXTRAS 1
+                    txtNuevaDosis1,
+                    fechaNuevo1, txtNuevoLote1, SelectNuevoEsquema1, txtNuevoNombre1, txtNuevoEstablecimiento1, txtNuevoObs1,
+                    fechaNuevo2, txtNuevoLote2, SelectNuevoEsquema2, txtNuevoNombre2, txtNuevoEstablecimiento2, txtNuevoObs2,
+                    fechaNuevo3, txtNuevoLote3, SelectNuevoEsquema3, txtNuevoNombre3, txtNuevoEstablecimiento3, txtNuevoObs3,
+                    fechaNuevo4, txtNuevoLote4, SelectNuevoEsquema4, txtNuevoNombre4, txtNuevoEstablecimiento4, txtNuevoObs4,
+                    fechaNuevo5, txtNuevoLote5, SelectNuevoEsquema5, txtNuevoNombre5, txtNuevoEstablecimiento5, txtNuevoObs5,
+                    // INM EXTRAS 2
+                    txtNuevaDosis12,
+                    fechaNuevo1Inm2, txtNuevoLote1Inm2, SelectNuevoEsquema1Inm2, txtNuevoNombre1Inm2, txtNuevoEstablecimiento1Inm2, txtNuevoObs1Inm2,
+                    fechaNuevo2Inm2, txtNuevoLote2Inm2, SelectNuevoEsquema2Inm2, txtNuevoNombre2Inm2, txtNuevoEstablecimiento2Inm2, txtNuevoObs2Inm2,
+                    fechaNuevo3Inm2, txtNuevoLote3Inm2, SelectNuevoEsquema3Inm2, txtNuevoNombre3Inm2, txtNuevoEstablecimiento3Inm2, txtNuevoObs3Inm2,
+                    fechaNuevo4Inm2, txtNuevoLote4Inm2, SelectNuevoEsquema4Inm2, txtNuevoNombre4Inm2, txtNuevoEstablecimiento4Inm2, txtNuevoObs4Inm2,
+                    fechaNuevo5Inm2, txtNuevoLote5Inm2, SelectNuevoEsquema5Inm2, txtNuevoNombre5Inm2, txtNuevoEstablecimiento5Inm2, txtNuevoObs5Inm2,
+                    // INM EXTRAS 3
+                    txtNuevaDosis13,
+                    fechaNuevo1Inm3, txtNuevoLote1Inm3, SelectNuevoEsquema1Inm3, txtNuevoNombre1Inm3, txtNuevoEstablecimiento1Inm3, txtNuevoObs1Inm3,
+                    fechaNuevo2Inm3, txtNuevoLote2Inm3, SelectNuevoEsquema2Inm3, txtNuevoNombre2Inm3, txtNuevoEstablecimiento2Inm3, txtNuevoObs2Inm3,
+                    fechaNuevo3Inm3, txtNuevoLote3Inm3, SelectNuevoEsquema3Inm3, txtNuevoNombre3Inm3, txtNuevoEstablecimiento3Inm3, txtNuevoObs3Inm3,
+                    fechaNuevo4Inm3, txtNuevoLote4Inm3, SelectNuevoEsquema4Inm3, txtNuevoNombre4Inm3, txtNuevoEstablecimiento4Inm3, txtNuevoObs4Inm3,
+                    fechaNuevo5Inm3, txtNuevoLote5Inm3, SelectNuevoEsquema5Inm3, txtNuevoNombre5Inm3, txtNuevoEstablecimiento5Inm3, txtNuevoObs5Inm3,
+                    // INM EXTRAS 4
+                    txtNuevaDosis123,
+                    fechaNuevo1Inm2Inm3, txtNuevoLote1Inm2Inm3, SelectNuevoEsquema1Inm2Inm3, txtNuevoNombre1Inm2Inm3, txtNuevoEstablecimiento1Inm2Inm3, txtNuevoObs1Inm2Inm3,
+                    fechaNuevo2Inm2Inm3, txtNuevoLote2Inm2Inm3, SelectNuevoEsquema2Inm2Inm3, txtNuevoNombre2Inm2Inm3, txtNuevoEstablecimiento2Inm2Inm3, txtNuevoObs2Inm2Inm3,
+                    fechaNuevo3Inm2Inm3, txtNuevoLote3Inm2Inm3, SelectNuevoEsquema3Inm2Inm3, txtNuevoNombre3Inm2Inm3, txtNuevoEstablecimiento3Inm2Inm3, txtNuevoObs3Inm2Inm3,
+                    fechaNuevo4Inm2Inm3, txtNuevoLote4Inm2Inm3, SelectNuevoEsquema4Inm2Inm3, txtNuevoNombre4Inm2Inm3, txtNuevoEstablecimiento4Inm2Inm3, txtNuevoObs4Inm2Inm3,
+                    fechaNuevo5Inm2Inm3, txtNuevoLote5Inm2Inm3, SelectNuevoEsquema5Inm2Inm3, txtNuevoNombre5Inm2Inm3, txtNuevoEstablecimiento5Inm2Inm3, txtNuevoObs5Inm2Inm3
+
+                    );
 
                 // Registramos los ingresos si el formulario es tipo 1
                 info.TableName = "info";
@@ -10523,13 +11165,27 @@ namespace JsonJQueryNetTareas
                 string tipoFormulario = "";
                 string archivo = "";
 
+                string nombreArchPaciente = campos["archivo"];
+                string op = campos["operacion"];
+
                 nomHoja = "Form 083 Registro Inmunizacione";
                 tipoFormulario = "INMUNIZACIONES";
                 archivo = "TemplateInmunizaciones.xlsx";
 
+                string nombreArchivo = "";
 
-                // Nombre del archivo de la historia clínica
-                string nombreArchivo = $"{tipoFormulario}_{nombrePaciente}_{DateTime.Now.ToString("yyyyMMdd_HHmm")}.xlsx";
+                if (op == "0")
+                {
+                    // Nombre del archivo de la historia clínica
+                    nombreArchivo = $"{tipoFormulario}_{nombrePaciente}_{DateTime.Now.ToString("yyyyMMdd_HHmm")}.xlsx";
+                }
+                else if (op == "1")
+                {
+                    // Nombre del archivo de la historia clínica
+                    nombreArchivo = nombreArchPaciente;
+                }
+
+
 
                 // Ruta completa del archivo de salida, que incluye la carpeta del paciente
                 string outputPath = Path.Combine(pacienteFolder, nombreArchivo);
@@ -10552,6 +11208,49 @@ namespace JsonJQueryNetTareas
             return respuesta.SerializaToJson();
         }
 
+        public string InformacionMedica(dynamic parameters)
+        {
+            string jsonResponse = string.Empty;
+            try
+            {
+                // Obtener los parámetros
+                string nomCarpeta = "HistoriasClinicas";
+                string nombreArchivo = parameters["nombreArchivo"];
+                string nombreHoja = parameters["nombreHoja"];
+                string nombre = parameters["nombre"];
+
+                if (parameters["campos"] == null)
+                {
+                    throw new ArgumentException("El parámetro 'campos' es obligatorio.");
+                }
+
+                var campos = new Dictionary<string, string>();
+
+                foreach (var campo in parameters["campos"])
+                {
+                    string nombreCampo = campo["nombre"];
+                    string celda = campo["celda"];
+                    campos.Add(nombreCampo, celda);
+                }
+
+                // Suponiendo que los datos se reciben como una cadena de texto JSON
+                string jsonData = EditExcel.ObtenerDatosFormulario(nomCarpeta, nombre, nombreArchivo, nombreHoja, campos);
+
+                // Deserializar directamente en el objeto InmunizacionData
+                var data = JsonConvert.DeserializeObject<EntInmunizacionesData>(jsonData);
+
+                // Convertir el objeto data a JSON para enviarlo como respuesta
+                jsonResponse = JsonConvert.SerializeObject(data, Formatting.Indented);
+
+
+            }
+            catch (Exception ex)
+            {
+                jsonResponse = $"{{ \"error\": \"Error al obtener información médica.\", \"details\": \"{ex.Message}\", \"stackTrace\": \"{ex.StackTrace}\" }}";
+            }
+
+            return jsonResponse;
+        }
 
         private string ConsultarProvinciasCiudades(dynamic campos)
         {
@@ -10598,7 +11297,6 @@ namespace JsonJQueryNetTareas
 
             return Lista.SerializaToJson();
         }
-
 
         public string BuscarContactoEmpleadoPorCedula(dynamic parameters)
         {
@@ -10675,8 +11373,7 @@ namespace JsonJQueryNetTareas
             }
 
             return Lista.SerializaToJson();
-        }
-
+        }        
         public string BuscarListaEmpleadosDescargar(dynamic parameters)
         {
 
@@ -10747,7 +11444,6 @@ namespace JsonJQueryNetTareas
 
             return Lista.SerializaToJson();
         }
-
         public string BuscarListaCargaFam(dynamic parameters)
         {
             List<EntCargaFamiliar> Lista = null;
@@ -10846,7 +11542,6 @@ namespace JsonJQueryNetTareas
             return respuesta.SerializaToJson();
 
         }
-
         public string EliminarCargaFam(dynamic campos)
         {
 

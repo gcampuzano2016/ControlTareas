@@ -7,6 +7,7 @@ let txtLentes, txtExam1, txtExam2, txtExam3, txtExam4, txtExam5, txtExam6, metPl
 let txtMedicacionHabSelect, txtCualMedicamento1, txtCantdidadMed1, txtCualMedicamento2, txtCantdidadMed2, txtCualMedicamento3, txtCantdidadMed3;
 let contadorMedicacion = 0;
 let IdPerfil = 0;
+var inputActivoNum = null; // Variable global para rastrear el input usado en DIAGNOSTICO
 
 function MensajeIncorrecto(resultado) {
     sweetAlert("Error", resultado, "error");
@@ -109,6 +110,10 @@ function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
 
     if (tipoControl == "tableSelectBusqueda") {
         contenido = RecorreJSONTableSelectBusqueda(json, boton, idSeleccionado);
+        $(div).html(contenido);
+    }
+    if (tipoControl == "tableSelectBusquedaCIE") {
+        contenido = RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado);
         $(div).html(contenido);
     }
     return contenido;
@@ -291,41 +296,116 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Obtén referencias a los elementos relevantes
-    var aptitudSelect = document.getElementById("txtAptitudSelect");
-    var descObservacion = document.getElementById("descObservacion");
-    var descLimitacion = document.getElementById("descLimitacion");
-    var txtDescObservacion = document.getElementById("txtDescObservacion");
-    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+//document.addEventListener("DOMContentLoaded", function () {
+//    // Obtén referencias a los elementos relevantes
+//    var aptitudSelect = document.getElementById("txtAptitudSelect");
+//    var descObservacion = document.getElementById("descObservacion");
+//    var descLimitacion = document.getElementById("descLimitacion");
+//    var txtDescObservacion = document.getElementById("txtDescObservacion");
+//    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
 
-    // Agrega un controlador de eventos change al campo select
-    aptitudSelect.addEventListener("change", toggleAptitudDiv);
+//    // Agrega un controlador de eventos change al campo select
+//    aptitudSelect.addEventListener("change", toggleAptitudDiv);
 
-    // Función para mostrar u ocultar los campos según la selección
-    function toggleAptitudDiv() {
-        if (aptitudSelect.value === "aptoObservacion") {
-            descObservacion.style.display = "block";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = false;
-            txtDescLimitacion.disabled = true;
-        } else if (aptitudSelect.value === "aptoLimitacion") {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "block";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = false;
-        } else {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = true;
-        }
+//    // Función para mostrar u ocultar los campos según la selección
+//    function toggleAptitudDiv() {
+//        if (aptitudSelect.value === "aptoObservacion") {
+//            descObservacion.style.display = "block";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = false;
+//            txtDescLimitacion.disabled = true;
+//        } else if (aptitudSelect.value === "aptoLimitacion") {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "block";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = false;
+//        } else {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = true;
+//        }
+//    }
+
+//    // Llama a la función inicialmente para manejar el estado inicial
+//    toggleAptitudDiv();
+//});
+
+/*=====================================================================
+ *          Buscamos los codigos CIE en la base de datos
+ *====================================================================*/
+
+function BuscarCodigosCIE() {
+    let txtDiagDescripcion = document.getElementById(`txtDiagDescripcion${inputActivoNum}`);
+    if (txtDiagDescripcion.value.length > 2) {
+        let CIEBuscar = txtDiagDescripcion.value;
+        idSeleccionado = 0;
+        ObtenerListaCodigosCIE(CIEBuscar, "", "", inputActivoNum);
+    } else {
+        document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
     }
+}
 
-    // Llama a la función inicialmente para manejar el estado inicial
-    toggleAptitudDiv();
-});
+function ObtenerListaCodigosCIE(codigo, descripcion, idproceso) {
+    var Datos = "[{ \"action\": \"BuscarCodigoCIE\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + codigo + "\"} }]";
+    CargarPagina(`#comboCodigos${inputActivoNum}`, 'ObtenerListaTareas.ashx', Datos, "tableSelectBusquedaCIE", idproceso);
+}
 
+function CargarCodigoCIE(CODIGO, DESCRIPCION) {
+    // Mostrar el código seguido por la descripción
+    document.getElementById(`txtDiagDescripcion${inputActivoNum}`).value = `${DESCRIPCION}`;
+
+    // Colocar el código en el campo CIE y desactivar la edición
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).value = CODIGO;
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).disabled = true;
+
+    // Ocultar la lista desplegable
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
+}
+
+function RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado) {
+    var x = "";
+    $.each(json, function (i, item) {
+        x = x + `<li><a role='option' onclick='CargarCodigoCIE("${item.Codigo}","${item.DescCodigo}");'>${item.Codigo} - ${item.DescCodigo}</a></li>`;
+    });
+    document.getElementById(`comboCodigos${inputActivoNum}`).innerHTML = x;
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "block";
+}
+function setInputActivo(num) {
+    inputActivoNum = num;
+}
+
+/* =================================================================================
+ *                 Funcion para calcular el numero de meses
+ * ===============================================================================*/
+function calcularMeses() {
+    const fechaInicioLab = document.getElementById('fechaInicioLab').value;
+    const fechaSalida = document.getElementById('fechaSalida').value;
+
+    if (fechaInicioLab && fechaSalida) {
+        const txtFechaInicioLab = new Date(fechaInicioLab);
+        const txtFechaSalida = new Date(fechaSalida);
+
+        // Verificar que la fecha de salida sea posterior a la de inicio
+        if (txtFechaSalida <= txtFechaInicioLab) {
+            alert("La fecha de Salida debe ser posterior a la fecha de Inicio de labores.");
+            document.getElementById('txtTotalMeses').value = ""; // Limpiar campo de total de meses
+            return;
+        }
+
+        // Calcular la diferencia en meses
+        let aniosDiferencia = txtFechaSalida.getFullYear() - txtFechaInicioLab.getFullYear();
+        let mesesDiferencia = txtFechaSalida.getMonth() - txtFechaInicioLab.getMonth();
+        let totalMeses = aniosDiferencia * 12 + mesesDiferencia;
+
+        document.getElementById('txtTotalMeses').value = totalMeses;
+    } else {
+        document.getElementById('txtTotalMeses').value = "";
+    }
+}
+
+// Ejecutar la función al iniciar la página
+document.addEventListener("DOMContentLoaded", calcularMeses);
 
 
 /* =================================================================================
@@ -402,6 +482,27 @@ function GuardarRetiro() {
         contadorVerificacion += 1;
     }*/
 
+    //**** Obtener los valores de las fechas
+    const fechaInicioLab = $('#fechaInicioLab').val();
+    const fechaSalida = $('#fechaSalida').val();
+
+    // Convertir las fechas a objetos Date para comparar
+    const fechaInicio = new Date(fechaInicioLab);
+    const fechaFin = new Date(fechaSalida);
+
+    // Validar que la fecha de salida sea posterior a la fecha de inicio
+    if (fechaInicioLab && fechaSalida && fechaFin <= fechaInicio) {
+        mensajeVerificacion += "- La fecha de Salida debe ser posterior a la fecha de Inicio de labores\n";
+        contadorVerificacion++;
+    }
+
+    //*** Obtener las fechas completas de los elementos
+    const fechaCompletaAccTrab = document.getElementById("fechaAccTrab").value;
+    const fechaCompletaEnfProf = document.getElementById("fechaEnfProf").value;
+
+    // Dividir las fechas y asignar valores, si están vacías asignar ""
+    const [fechaAccTrabAnio, fechaAccTrabMes, fechaAccTrabDia] = fechaCompletaAccTrab ? fechaCompletaAccTrab.split("-") : ["", "", ""];
+    const [fechaEnfProfAnio, fechaEnfProfMes, fechaEnfProfDia] = fechaCompletaEnfProf ? fechaCompletaEnfProf.split("-") : ["", "", ""];
 
     /*if ($('#tabacoSelect').val() == "si") {
 
@@ -562,8 +663,15 @@ function GuardarRetiro() {
     datosFormulario = {
         'formulario': "4",
         'session': $("#ContentPlaceHolder1_txtUsuario").val(),
+        'txtNumHistoria': $('#txtNumHistoria').val(),
+        'txtNumArchivo': $('#txtNumArchivo').val(),
         'txtNombre': $('#txtNombre').val(),
         'txtSexo': $('#txtSexo').val(),
+
+        'fechaInicioLab': $('#fechaInicioLab').val(),
+        'fechaSalida': $('#fechaSalida').val(),
+        'txtTotalMeses': $('#txtTotalMeses').val(),
+        'txtPuestoTrabajo': $('#txtPuestoTrabajo').val(),
         'actividades1': $('#txtActividad1').val(),
         'txtActividadesTrabajo1': $('#txtFactorRiesgo1').val(),
         'actividades2': $('#txtActividad2').val(),
@@ -586,7 +694,7 @@ function GuardarRetiro() {
         'txtConstTalla': $('#txtConstTalla').val(),
         'txtConstMasaCorporal': $('#txtConstMasaCorporal').val(),
         'txtConstPerimetroAbdominal': $('#txtConstPerimetroAbdominal').val(),
-              
+
         'txtpielA': $('#pielA').prop('checked'),
         'txtpielB': $('#pielB').prop('checked'),
         'txtpielC': $('#pielC').prop('checked'),
@@ -647,7 +755,7 @@ function GuardarRetiro() {
         'txtDiagCIE3': $('#txtDiagCIE3').val(),
         'txtDiagnositicoSelect3': $('#txtDiagnositicoSelect3').val(),
         'EvalRetiroSelect': $('#EvaluacionRetiroSelect').val(),
-        'EvalRetiroObservacion': $('#txtEvaluacionRetiroObservacion').val(),        
+        'EvalRetiroObservacion': $('#txtEvaluacionRetiroObservacion').val(),
         'txtRecomendacion': $('#txtRecomendacion').val(),
 
         'txtEdad': "",
@@ -662,7 +770,7 @@ function GuardarRetiro() {
         'fechaUltimaMens': "",
         'txtAreaTrabajo': "",
         'txtAntecedentesFamiliares': "",
-        'txtPuestoTrabajo1': "",        
+        'txtPuestoTrabajo1': "",
         'txtFisicoSelect1': "",
         'txtMecanicoSelect1': "",
         'txtQuimicoSelect1': "",
@@ -670,7 +778,7 @@ function GuardarRetiro() {
         'txtErgonomicoSelect1': "",
         'txtPSicosocialSelect1': "",
         'txtMedidadPreventiva1': "",
-        'txtPuestoTrabajo2': "",        
+        'txtPuestoTrabajo2': "",
         'txtFisicoSelect2': "",
         'txtMecanicoSelect2': "",
         'txtQuimicoSelect2': "",
@@ -786,6 +894,15 @@ function GuardarRetiro() {
         'txtAptitudSelect': "",
         'txtDescObservacion': "",
         'txtDescLimitacion': "",
+        'txtHbtsIncidentes': "",
+        'txtfechaAccTrabAnio': fechaAccTrabAnio,
+        'txtfechaAccTrabMes': fechaAccTrabMes,
+        'txtfechaAccTrabDia': fechaAccTrabDia,
+        'txtfechaEnfProfAnio': fechaEnfProfAnio,
+        'txtfechaEnfProfMes': fechaEnfProfMes,
+        'txtfechaEnfProfDia': fechaEnfProfDia,
+        'txtfechaFormulario': $('#fechaFormulario').val(),
+        'txthoraFormulario': $('#horaFormulario').val(),
         'nombre': $("#ContentPlaceHolder1_txtLoginUsuario").val()
     };
 

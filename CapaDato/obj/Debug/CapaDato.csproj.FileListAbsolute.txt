@@ -132,3 +132,13 @@ C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Debug\CapaDat
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Debug\CapaDato.csproj.CopyComplete
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Debug\CapaDato.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaDato\obj\Debug\CapaDato.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\bin\Debug\CapaDato.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\bin\Debug\CapaDato.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\bin\Debug\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\bin\Debug\CapaEntidad.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\bin\Debug\CapaEntidad.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\obj\Debug\CapaDato.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\obj\Debug\CapaDato.csproj.CoreCompileInputs.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\obj\Debug\CapaDato.csproj.CopyComplete
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\obj\Debug\CapaDato.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaDato\obj\Debug\CapaDato.pdb

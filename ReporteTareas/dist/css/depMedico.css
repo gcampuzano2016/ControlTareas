@@ -1,13 +1,15 @@
 ﻿body {
-    display: flex;
+    /*display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: center;*/
 }
+
 hr {
     border: 0;
     height: 2px;
     background: #96A6B0; /* Color de la línea */
 }
+
 .contenedor-horizontal {
     margin: 0 2rem;
     padding-top: 0;
@@ -17,7 +19,7 @@ hr {
 .titulo-pag {
     margin: 1rem 0 0 0;
     list-style: none;
-    background-color: #f5f5f5;
+    8 background-color: #f5f5f5;
     border-radius: 4px;
 }
 
@@ -58,6 +60,43 @@ hr {
     font-weight: bold;
 }
 
+/*----------------------------------------------------------------------------------------
+        Estilos para el Spinner para esperar que termine de cargar la informacion
+-----------------------------------------------------------------------------------------*/
+.overlay {
+    position: fixed; /* Posicionamos el overlay en toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Fondo oscuro y transparente */
+    z-index: 1; /* Posicionamos el overlay debajo del spinner */
+}
+
+.spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2; /* Posicionamos el spinner encima del overlay */
+}
+
+.spinner {
+    border: 8px solid #f3f3f3; /* Color de fondo */
+    border-top: 8px solid #3498db; /* Color de la parte superior */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1.5s linear infinite;
+    margin: 20px auto; /* Centrando el spinner */
+}
+
+.loading-text {
+    font-size: 18px;
+    color: #333;
+    margin-top: 10px;
+}
 
 
 .grid {
@@ -66,67 +105,81 @@ hr {
     grid-template-rows: repeat(5, 1fr);
     gap: 20px;
 }
+
 .horizontal {
     display: flex;
     align-items: center;
     margin-top: 2rem;
 }
+
 .horizontal-cuadriculado-flow {
     display: flow-root;
     align-items: center;
     justify-content: space-between;
 }
+
 .horizontal-simple {
     display: table-row;
     align-items: center;
 }
+
 .horizontal-group {
     display: flex;
     align-items: center;
     justify-content: space-between;
     margin-top: 2rem;
 }
+
 .horizontal-group-simple {
     display: flex;
     align-items: center;
     justify-content: space-between;
 }
+
 .horizontal-group-special {
     display: flex;
     justify-content: space-around;
     margin-top: 2rem;
 }
+
 .horizontal-group-around {
     display: flex;
     justify-content: space-around;
     justify-items: stretch;
 }
+
 .horizontal-group-evenly {
     display: flex;
     align-items: center;
     justify-content: space-evenly;
 }
+
 .horizontal-group-end {
     display: flex;
     align-items: center;
-    justify-content:end;
+    justify-content: end;
 }
+
 .horizontal-group-start {
     display: flex;
     align-items: center;
     justify-content: start;
 }
+
 .centrar-elemento {
     margin-left: auto;
     margin-right: auto;
     display: block;
 }
+
 .input-basic {
     width: 25px;
 }
+
 .input-basic3 {
     width: 30px;
 }
+
 .input-medium {
     width: 45px;
 }
@@ -140,14 +193,15 @@ hr {
 }
 
 .columna {
-    width:50%;
-    margin-top:1rem;
+    width: 50%;
+    margin-top: 1rem;
 }
 
 /* Estilo para los botones SI / NO */
 .btn-custom:hover {
     background-image: linear-gradient(to bottom, #587EDD, #7E38D8);
 }
+
 .btn-custom {
     background-image: linear-gradient(to bottom, #29CAE4, #08759B);
     color: black;
@@ -156,6 +210,7 @@ hr {
     padding: 10px 18px;
     cursor: pointer;
 }
+
     .btn-custom.active {
         background-image: none;
         background-color: #587EDD;
@@ -175,8 +230,7 @@ hr {
 /* Estilo de titulos para labels*/
 .titulo-cuadros {
     font-size: smaller;
-    text-align:center;
-
+    text-align: center;
 }
 
 /*  Boton flotante de regreso en todas las paginas*/
@@ -191,9 +245,9 @@ hr {
     background-position: center;
     background-repeat: no-repeat;
     position: absolute;
-    bottom: 30px;
-    right: 30px;    
-    cursor:pointer;
+    bottom: 33px;
+    right: 30px;
+    cursor: pointer;
 }
 
 /*  grupo de input vertical*/
@@ -219,20 +273,27 @@ hr {
     /*background: radial-gradient(to bottom, #EADAE5, #DCB0BA);*/
     background-color: #DFD5E8;
 }
+
 .color-well2 {
     background-color: #EECDF9;
 }
+
 .color-well3 {
     background-color: #D6D9EC;
 }
+
 .color-well4 {
     /*background: linear-gradient(to bottom, #D5DFE8, #F8DDFC);*/
     /*background: linear-gradient(to bottom, #DF33A8, #351E3E);*/
-    background: radial-gradient(ellipse at 50% 50%, #DF33A8 0%, #351E3E 100%);
+    background: radial-gradient(ellipse at 50% 50%, #D21696 0%, #180A1E 100%); /*DF33A8 351E3E*/
+    border: none;
+    border-radius: 8px;
 }
+
 .color-opaco {
     background-color: rgba(255, 255, 255, 0.9);
 }
+
 
 /* Cuadros de ingreso con formato de col-sm-2 sin padding*/
 .cuadros-ingreso-normal {
@@ -267,6 +328,7 @@ hr {
     left: 0px;
     float: left;
 }
+
 .cuadros-ingreso-normal5 {
     width: 40%;
     position: relative;
@@ -277,6 +339,7 @@ hr {
     left: 0px;
     float: left;
 }
+
 .cuadros-ingreso-normal6 {
     width: 60%;
     position: relative;
@@ -287,6 +350,7 @@ hr {
     left: 0px;
     float: left;
 }
+
 .cuadros-ingreso-normal7 {
     width: 70%;
     position: relative;
@@ -298,7 +362,7 @@ hr {
     float: left;
 }
 /* Cuadros de ingreso con formato de sin padding*/
-.cuadros-ingreso-normalX {    
+.cuadros-ingreso-normalX {
     position: relative;
     min-height: 1px;
     /* padding-right: 15px; */
@@ -310,15 +374,19 @@ hr {
 .select-principal {
     background-color: #FAE6F2;
 }
+
 .select-temas {
     background-color: #DDDCDF;
 }
+
 .select-medidas {
     background-color: #e1e8f5;
 }
+
 .select-otros {
     background-color: #E5FAEA;
 }
+
 .select-vacio {
     background-color: #fdfdcff2;
 }
@@ -327,18 +395,23 @@ hr {
 .select-dorado {
     background-color: #FCBA4D;
 }
+
 .input-azul {
     background-color: #CECAE5;
 }
+
 .input-nombre {
     background-color: #E4E7FD;
 }
+
 .input-azulmedio {
     background-color: #D3DDEC;
 }
+
 .input-azulobscuro {
     background-color: #0C5C82;
 }
+
 .input-rosado {
     background-color: #c153aa;
     color: white;
@@ -351,19 +424,23 @@ hr {
 }
 
 
-/*  Menu desplegable de opciones*/
+/*==============  Menu desplegable de opciones =================*/
+
 /* Estilo para el contenedor del menú desplegable */
 .dropdown {
     position: relative;
     display: inline-block;
 }
+
 /* Estilo para el botón del menú */
 .dropdown-button {
     background-color: #f1f1f1;
     border: 1px solid #aeaeb1;
     padding: 8px 16px;
     cursor: pointer;
+    z-index: 5; /* Asegura que el botón esté en un nivel superior */
 }
+
 /* Estilo para la lista de opciones */
 .dropdown-content {
     display: none;
@@ -371,23 +448,38 @@ hr {
     background-color: #02043ea1;
     color: #fff3f3;
     border: 1px solid #919397;
-    z-index: 1;
+    z-index: 1000; /* Aumenta el z-index para que esté sobre otros elementos */
     width: 100%;
 }
+
+.dropdown-content2 {
+    display: none;
+    position: absolute;
+    background-color: #102044f0;
+    color: #fff3f3;
+    border: 1px solid #919397;
+    z-index: 1000; /* Aumenta el z-index para que esté sobre otros elementos */
+    width: 100%;
+}
+
 /* Estilo para los elementos de la lista */
 .dropdown-option {
     padding: 10px;
     display: flex;
     align-items: center;
+    z-index: 1000; /* Asegura que los elementos también estén en un nivel superior */
 }
+
 /* Estilo para las casillas de verificación */
 .checkbox {
     margin-right: 10px;
 }
-/* Estilo para la casilla de verificación cuando está seleccionada */
-.checkbox:checked + label {
-    font-weight: bold;
-}
+
+    /* Estilo para la casilla de verificación cuando está seleccionada */
+    .checkbox:checked + label {
+        font-weight: bold;
+    }
+
 .icon-box {
     width: 100px; /* Ancho del cuadro */
     height: 100px; /* Alto del cuadro */
@@ -395,14 +487,25 @@ hr {
     border-radius: 15px; /* Bordes redondeados */
     display: flex;
     align-items: center;
-    justify-content: center;    
+    justify-content: center;
 }
+
+.icon-box2 {
+    width: 100px; /* Ancho del cuadro */
+    height: 100px; /* Alto del cuadro */
+    background-color: #e61293;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .icon-seleccion {
     font-size: 45px; /* Tamaño del icono */
     color: #fff; /* Color del icono */
 }
 
-/* Cuadros de seleccion de formulario */
+/*======= Cuadros de seleccion de formulario ============*/
 .box-link {
     display: block; /* Hace que el enlace sea un bloque, ocupando todo el espacio del contenedor */
     text-decoration: none; /* Elimina el subrayado predeterminado en el enlace */
@@ -417,11 +520,11 @@ hr {
         padding-bottom: 1rem;
         margin: 0 0.1rem 10px 0.1rem;
     }
+
     .titulo-antecedente-especial {
         width: 16.66666667%; /* Cambiado el ancho para que ocupen toda la fila */
         padding-top: 1rem;
         margin: 0 0.1rem 10px 0.1rem;
-
     }
 }
 
@@ -433,6 +536,7 @@ hr {
         width: 16.66666667%;
         position: relative;
     }
+
     .titulo-antecedente-especial {
         padding-top: 1.5rem;
         padding-bottom: 1rem;
@@ -444,4 +548,61 @@ hr {
 .swal2-popup {
     font-size: 1.6rem !important;
     font-weight: 400;
+}
+
+/*  estableccer el tamaño de la lista par los CIE*/
+#comboCodigos2 {
+    max-height: 100px; /* Limita la altura del <ul> a 100px */
+    overflow-y: auto; /* Activa el desplazamiento vertical */
+    position: absolute; /* Asegura que el <ul> se despliegue sobre otros elementos */
+    width: 100%; /* Asegura que ocupe todo el ancho del contenedor */
+    background-color: #fff; /* Fondo blanco para mayor visibilidad */
+    border: 1px solid #ccc; /* Borde para distinguir el menú */
+    z-index: 1000; /* Coloca el menú sobre otros elementos */
+}
+
+
+/* ---------------------------------------------
+    Estilos para la tabla de Inmunizaciones 
+   --------------------------------------------*/
+/* Cambia el color del texto de los labels */
+.dataTables_length label, .dataTables_filter label {
+    color: #04cefd; /* Cambia a dorado */
+    font-weight: bold; /* Opción para hacer el texto en negrita */
+    margin-left: 2rem;
+}
+/* Centrar texto en las columnas especificadas */
+#tbl_Formularios td:nth-child(1),
+#tbl_Formularios td:nth-child(2),
+#tbl_Formularios td:nth-child(3),
+#tbl_Formularios td:nth-child(4),
+#tbl_Formularios td:nth-child(5),
+#tbl_Formularios td:nth-child(6) {
+    text-align: center;
+}
+/* Colores alternados para las filas de la tabla Empleados */
+#tbl_Formularios tbody tr:nth-child(odd) {
+    background-color: #e4e4e5; /* Color para las filas impares */
+}
+
+#tbl_Formularios tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Color para las filas pares */
+}
+
+/* Ajustar la altura de la fila de encabezados */
+#tbl_Formularios th {
+    height: 40px;
+}
+/* Aplicar una altura mínima a las celdas de la tabla */
+#tbl_Formularios td,
+#tbl_Formularios th {
+    min-height: 50px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Estilo para los encabezados de la tabla */
+.header-custom {
+    background-color: black; /* Cambia a tu color preferido */
+    color: white; /* Cambia el color del texto si es necesario */
 }

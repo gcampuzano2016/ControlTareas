@@ -181,3 +181,25 @@ C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\Capa
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Debug\CapaNegocio.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaNegocio.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaNegocio.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaNegocio.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaDato.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaDato.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaDato.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaEntidad.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\CapaEntidad.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Debug\CapaNegocio.csproj.CopyComplete
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Debug\CapaNegocio.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Debug\CapaNegocio.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\EPPlus.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\EPPlus.Interfaces.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\EPPlus.System.Drawing.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\Microsoft.IO.RecyclableMemoryStream.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\Newtonsoft.Json.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\EPPlus.xml
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\Microsoft.IO.RecyclableMemoryStream.xml
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Debug\Newtonsoft.Json.xml

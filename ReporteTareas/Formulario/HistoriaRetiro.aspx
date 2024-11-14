@@ -139,48 +139,61 @@
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
+                                                    <span class="input-group-addon select-temas" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
                                                     <input type="text" class="form-control" style="" id="txtSexo" name="txtSexo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-basic3" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
+                                                    <span class="input-group-addon input-basic3 select-temas" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
                                                     <input type="text" class="form-control" style="" id="fechaNac" name="fechaNac" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-basic"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
                                                     <input id="txtEdad" type="number" class="form-control" name="edad" placeholder="0" readonly>
                                                 </div>
                                             </div>
 
                                             <div class="horizontal">                                                
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
                                                     <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
                                                 </div>    
                                                 <div class="input-group col-sm-5" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
                                                     <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal-group">
                                                 <div class="input-group col-sm-8">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
                                                     <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
                                                 </div>                                                
                                             </div>
+                                            <div class="horizontal">  
+                                                <div class="input-group col-sm-5">
+                                                    <span class="input-group-addon input-azulmedio"><i class="	fa fa-h-square"></i>  Num de Historia:</span>
+                                                    <input id="txtNumHistoria" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div>   
+                                            </div>
+                                            <div class="horizontal">                                                    
+                                                <div class="input-group col-sm-5">
+                                                    <span class="input-group-addon input-azulmedio"><i class="fa fa-file-text"></i>  Num de Archivo:</span>
+                                                    <input id="txtNumArchivo" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div>
+                                            </div>
                                             <!-- ... otros campos ... -->
+
                                         </div>
 
                                         <div class="col-sm-3" style="text-align: center;">
@@ -188,8 +201,26 @@
                                             <!--img id="imgEmpleado" src="../carrusel/imagenes/usuarios.png" alt="Imagen de Empleado" height="200" width="200"-->
                                         </div>
 
+
                                     </formview>
-                                </div>       
+
+
+                                </div>   
+                                <div class="horizontal-group-evenly" style="margin-top:3rem; margin-bottom:1rem;">
+                                    <div class="cuadros-ingreso-normal4">
+                                         <span class="input-group-addon select-medidas"><i class="fa fa-briefcase" style="margin-right:1rem;"></i>Fecha de Inicio de labores:</span>
+                                         <input type="date" class="form-control" id="fechaInicioLab" style="text-align:center;" onchange="calcularMeses()">
+                                    </div>
+                                    <div class="cuadros-ingreso-normal4">
+                                        <span class="input-group-addon select-medidas"><i class="glyphicon glyphicon-remove-circle" style="margin-right:1rem;"></i>Fecha de Salida:</span>
+                                        <input type="date" class="form-control" id="fechaSalida" style="text-align:center;" onchange="calcularMeses()">
+                                    </div>
+                                    <div class="cuadros-ingreso-normal3">
+                                        <span class="input-group-addon select-medidas"><i class="fa fa-cogs" style="margin-right:1rem;"></i>Tiempo (meses):</span>
+                                        <input id="txtTotalMeses" type="number" class="form-control" placeholder="0" value="" disabled style="text-align:center;">
+                                    </div>
+                                </div>                            
+
                         </div>
 
 
@@ -262,7 +293,7 @@ antecedentes quirúrgicos, detallar las principales intervenciones quirúrgicas 
                                 <div class="horizontal-group-simple">
                                     <div class="input-group col-sm-2">
                                         <span class="input-group-addon" style="width: 25%;">Fecha:</span>
-                                        <input type="date" class="form-control" id="fechaInst1" name="fechaInst1">
+                                        <input type="date" class="form-control" id="fechaAccTrab">
                                     </div>
                                     <div class="col-sm-1 text-center input-group">
                                         <select id="AccidentesTrabajoSelect" class="form-control" onchange="handleAccidentesTrabajoSelect()">
@@ -292,7 +323,7 @@ antecedentes quirúrgicos, detallar las principales intervenciones quirúrgicas 
                                 <div class="horizontal-group-simple">
                                     <div class="input-group col-sm-2">
                                         <span class="input-group-addon" style="width: 25%;">Fecha:</span>
-                                        <input type="date" class="form-control" id="fechaInst2" name="fechaInst2">
+                                        <input type="date" class="form-control" id="fechaEnfProf">
                                     </div>
                                     <div class="col-sm-1 text-center input-group">
                                         <select id="EnfermedadesProfSelect" class="form-control" onchange="handleEfermedadesProfSelect()">
@@ -724,7 +755,8 @@ puesto de trabajo, área, datos sobre la enfermedad, así también colocar el di
                                 <div class="cuadros-ingreso-normal7" >
                                     <div class="grupo-input text-center">
                                         <label for="disabledTextInput">DESCRIPCIÓN</label>
-                                        <input id="txtDiagDescripcion1" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+                                        <input id="txtDiagDescripcion1" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(1)" oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos1"></ul>
                                     </div>
                                 </div> 
                                 <div class="cuadros-ingreso-normal3">
@@ -746,8 +778,9 @@ puesto de trabajo, área, datos sobre la enfermedad, así también colocar el di
                             </div>
                             <div class="horizontal-group-simple" style="margin-left:3rem; margin-right:3rem;">
                                 <div class="cuadros-ingreso-normal7" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+                                    <div class="grupo-input text-center">
+                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(2)" oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" id="comboCodigos2"></ul>
                                     </div>
                                 </div> 
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
@@ -767,8 +800,9 @@ puesto de trabajo, área, datos sobre la enfermedad, así también colocar el di
                             </div>
                             <div class="horizontal-group-simple" style="margin-left:3rem; margin-right:3rem; margin-bottom: 4rem;">
                                 <div class="cuadros-ingreso-normal7" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtDiagDescripcion3" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+                                    <div class="grupo-input text-center">
+                                        <input id="txtDiagDescripcion3" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(3)"  oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos3"></ul>
                                     </div>
                                 </div> 
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
@@ -792,15 +826,13 @@ puesto de trabajo, área, datos sobre la enfermedad, así también colocar el di
                                 <div class="horizontal-group-simple" style="margin:0 1rem 0 1rem;">                                    
                                     <div class="text-center input-group" style="width:30%;">
                                         <select id="EvaluacionRetiroSelect" class="form-control" onchange="handleAccidentesTrabajoSelect()">
-                                             <option value="" selected hidden>SE REALIZÓ LA EVALUACIÓN?</option>
-                                             <option value="" >- Seleccionar -</option>
+                                             <option style="background-color:gainsboro;" value="" selected>SE REALIZÓ LA EVALUACIÓN?</option>
                                              <option value="si">SI</option>
                                              <option value="no">NO</option>
                                         </select>
                                     </div>
                                     <div class="col-sm-8 input-group">
-                                        <textarea id="txtEvaluacionRetiroObservacion" rows="3" style="width: 100%; resize: vertical;" placeholder="En la sección de observaciones colocar todo los datos relacionados con
-la condición de salud del usuario al momento de la salida." disabled></textarea>
+                                        <textarea id="txtEvaluacionRetiroObservacion" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Observaciones; Colocar todo los datos relacionados con la condición de salud del usuario al momento de la salida."></textarea>
                                     </div>
 
                                 </div>
@@ -808,19 +840,33 @@ la condición de salud del usuario al momento de la salida." disabled></textarea
 
                             <div class="form-group" style="margin: 0 2rem;">
                                 <label for="disabledTextInput" class="col-form-label">RECOMENDACIONES Y/O TRATAMIENTO</label>
-                                <textarea id="txtRecomendacion" rows="4" style="width: 100%; resize: vertical;" value="" placeholder="De acuerdo a la valoración médica efectuada colocar las recomendaciones y/o tratamiento
-farmacológico y no farmacológico."></textarea>
+                                <textarea id="txtRecomendacion" rows="4" style="width: 100%; resize: vertical;" value="" placeholder="De acuerdo a la valoración médica efectuada colocar las recomendaciones y/o tratamiento farmacológico y no farmacológico."></textarea>
                             </div>
 
                         </div>                    
 
                 </div>
-                <div class="" id="btnCarga" style="display:none; justify-content:center;">
-                    <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosPersonales" onclick="GuardarRetiro()" style="width: 25%; margin: 3rem;">Cargar Datos</button>
+
+                <div class="horizontal-group-start" id="btnCarga" style="display:none; margin-top:4rem; margin-bottom:3rem;">
+                    <div class="col-sm-4" style="color:whitesmoke; display:flex; justify-content:space-between; padding-left:0; padding-right:0;">
+                        <div class="col-sm-6 text-center input-group horizontal-group-start">       
+                            <label class="control-label">fecha: </label>
+                            <input type="date" style="margin-left:0.5rem;" class="form-control" id="fechaFormulario" value="">
+                        </div>
+                        <div class="col-sm-5 input-group horizontal-group-end" style="padding-right:1rem;">  
+                            <label class="control-label">hora: </label>
+                            <input type="text" style="margin-left:0.5rem;" class="form-control" id="horaFormulario" placeholder="00:00" value="">
+                        </div>
+                    </div>
+
+                    <!--div class="" id="btnCarga" style="display:none; justify-content:center;"-->
+                        <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosPersonales" onclick="GuardarRetiro()" style="width: 25%; margin-left:5rem;">Cargar Datos</button>
+                    <!--/div-->        
+                
+                    <!-- Boton flotante de regreso-->
+                    <div><a id="btnRegresar" class="text-center chat-button"></a></div>                        
                 </div>
 
-                <!-- Boton flotante de regreso-->
-                <a id="btnRegresar" class="chat-button"></a>
 
                 <!-- Modal de advertencia -->
                 <div id="confirmModal" class="modal fade" role="dialog">

@@ -53,3 +53,9 @@ C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Release\Ca
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Release\CapaEntidad.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Release\CapaEntidad.pdb
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Release\CapaEntidad.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Release\CapaEntidad.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Release\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Release\CapaEntidad.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Release\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Release\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Release\CapaEntidad.pdb

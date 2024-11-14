@@ -20,8 +20,10 @@ namespace CapaDato
         public SqlConnection conectar()
         {
             SqlConnection cn = new SqlConnection();
-            cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ARANDADB; User Id=sa; Password=CAfKsUBnD0s";
+            //cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ARANDADB; User Id=sa; Password=CAfKsUBnD0s";
             //cn.ConnectionString = "Data Source=CARLOS-PC; Initial Catalog=FBillWeb; User Id=BillWeb; Password=BillWeb";
+            cn.ConnectionString = "Data Source=LSALAZARN\\SQLEXPRESS; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
+
             return cn;
         }
 

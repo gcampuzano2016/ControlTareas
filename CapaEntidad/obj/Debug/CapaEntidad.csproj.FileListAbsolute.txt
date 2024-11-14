@@ -73,3 +73,10 @@ C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\Capa
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Debug\CapaEntidad.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Debug\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\bin\Debug\CapaEntidad.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Debug\CapaEntidad.csproj.CoreCompileInputs.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Debug\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaEntidad\obj\Debug\CapaEntidad.pdb

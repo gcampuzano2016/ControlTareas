@@ -7,7 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script src="../js/HistoriaClinica.js?v=5"></script>
+    <script src="../js/HistoriaClinica.js?v=4"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -64,19 +64,25 @@
                         <li data-target="#myCarousel" data-slide-to="2"></li>
                         <li data-target="#myCarousel" data-slide-to="3"></li>
                         <li data-target="#myCarousel" data-slide-to="4"></li>
-
+                        <li data-target="#myCarousel" data-slide-to="5"></li>
                     </ol>
 
                     <!-- Imagenes del carrusel  -->
                     <div class="carousel-inner">
                         <div class="item active">
-                            <img src="../carrusel/imagenes/slogan2.png">
+                            <img src="../carrusel/imagenes/medicina6.jpg">
                             <div class="carousel-caption">
                             </div>
                         </div>
 
                         <div class="item ">
-                            <img src="../carrusel/imagenes/medicina6.jpg">
+                            <img src="../carrusel/imagenes/medicina2.jpg">
+                            <div class="carousel-caption">
+                            </div>
+                        </div>
+
+                        <div class="item ">
+                            <img src="../carrusel/imagenes/medicina4.jpg">
                             <div class="carousel-caption">
                             </div>
                         </div>
@@ -94,7 +100,7 @@
                         </div>
 
                         <div class="item ">
-                            <img src="../carrusel/imagenes/medicina4.jpg">
+                            <img src="../carrusel/imagenes/slogan2.png">
                             <div class="carousel-caption">
                             </div>
                         </div>
@@ -121,8 +127,7 @@
                 </div>
 
                 <div class="" style="background-color: #9DA8AD; padding: 1rem 1rem 0.2rem 1rem;">
-              
-                                      
+                                                    
                         <!--  Cuadro Datos personales  -->
                         <div class="well" style="margin-bottom: 10px; margin-top: 0; padding-top: 1rem;">
                             <div class="well-header" style="margin-top: 0;">
@@ -142,44 +147,44 @@
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
+                                                    <span class="input-group-addon  select-temas" style="width: 25px; text-align:left;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
                                                     <input type="text" class="form-control" style="" id="txtSexo" name="txtSexo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-basic3" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
+                                                    <span class="input-group-addon input-basic3 select-temas" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
                                                     <input type="text" class="form-control" style="" id="fechaNac" name="fechaNac" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-basic"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
                                                     <input id="txtEdad" type="number" class="form-control" name="edad" placeholder="0" readonly>
                                                 </div>
                                             </div>
 
-                                            <div class="horizontal">                                                
-                                                <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
-                                                    <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
-                                                </div>    
-                                                <div class="input-group col-sm-5" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
+                                            <div class="horizontal">   
+                                                <div class="input-group col-sm-6" >
+                                                    <span class="input-group-addon input-medium select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
                                                     <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
                                                 </div>
+                                                <div class="input-group col-sm-4" style="margin-left: 6rem;">
+                                                    <span class="input-group-addon select-temas" ><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
+                                                    <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
+                                                </div>  
                                             </div>
                                             <div class="horizontal-group">
                                                 <div class="input-group col-sm-8">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas" style="text-align:left;"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
                                                     <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
                                                 </div>                                                
                                             </div>
@@ -193,8 +198,7 @@
                                         </div>
 
                                     </formview>
-                                </div>                                                    
-
+                                </div>    
                         </div>                        
 
 
@@ -293,10 +297,7 @@ privada dentro de los 5 días posteriores a su salida.</p>
                                 
                                 <div class="cuadros-ingreso-normal7">
                                     <h3>Certificado de salud en el trabajo</h3>
-                                    <p>Una vez ejecutadas las evaluaciones médicas preocupacional – inicio, periódica, reintegro, y retiro
-como resultado de todo el proceso, se emitirá el <strong>certificado</strong> en dos (2) copias originales, una de las
-cuales será archivada como parte de la historia clínica ocupacional y la otra entregada al usuario para
-los fines pertinentes.</p>
+                                    <p>Una vez ejecutadas las evaluaciones médicas preocupacional – inicio, periódica, reintegro, y retiro como resultado de todo el proceso, se emitirá el <strong>certificado</strong> en dos (2) copias originales, una de las cuales será archivada como parte de la historia clínica ocupacional y la otra entregada al usuario para los fines pertinentes.</p>
                                 </div>
                             </div>
                             
@@ -321,6 +322,7 @@ los fines pertinentes.</p>
                                                      <option value="PREOCUPACIONAL">Evaluación Preocupacional</option>
                                                      <option value="PERIODICA">Evaluación Periodica</option>     
                                                      <option value="REINTEGRO">Evaluación de Reintegro</option> 
+                                                     <option value="INMUNIZACIONES">Formulario de Inmunizaciones</option> 
                                                      <option value="Todas">Todas</option>
                                                </select>
                                          </fieldset>

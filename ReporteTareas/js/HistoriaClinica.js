@@ -18,7 +18,7 @@ function alerta(respuesta) {
 
 function VerSeleccionFormulario() {
     document.getElementById("cuadroFormularios").style.display = "block";
-    document.getElementById("cuadroListaForms").style.display = "none"; 
+    document.getElementById("cuadroListaForms").style.display = "none";
 }
 function VerListaFormulario() {
     document.getElementById("cuadroFormularios").style.display = "none";
@@ -52,7 +52,7 @@ function seleccionarPestania(pestaniaId) {
                 break;
             case 'pestania3':
                 VerFormConsulta();
-                break;            
+                break;
             default:
                 break;
         }
@@ -95,7 +95,7 @@ function BuscarEmpleado2() {
     if ($('#txtEmpleado').val().length > 4) {
         let cedulaBuscar = document.getElementById("txtEmpleado").value;
         idSeleccionado = 0;
-        ObtenerListaEmpleados2(cedulaBuscar, "","");
+        ObtenerListaEmpleados2(cedulaBuscar, "", "");
     }
     else {
         document.getElementById("comboEmpleados2").style.display = "none";
@@ -118,20 +118,20 @@ function RecorreJSONTableSelectEmpleado(json, boton, idSeleccionado) {
 
     var x = "";
 
-        $.each(json, function (i, item) {
-            x = x + "<li><a role='option' onclick='CargarEmpleado2(\"" + item.Cedula + "\", \"" + item.Nombre + "\");'>" + item.Nombre + "</a></li>";
-        });
+    $.each(json, function (i, item) {
+        x = x + "<li><a role='option' onclick='CargarEmpleado2(\"" + item.Cedula + "\", \"" + item.Nombre + "\");'>" + item.Nombre + "</a></li>";
+    });
 
     document.getElementById("comboEmpleados2").innerHTML = x;
     document.getElementById("comboEmpleados2").style.display = "block";
-    
+
 }
 
 
 // Obtener la cedula ingresada de cualquier formulario
 document.addEventListener('DOMContentLoaded', () => {
     //const txtEmpleado = document.getElementById('txtEmpleado');
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const cedulaEmpleado = urlParams.get('cedula');
 
@@ -152,7 +152,7 @@ function BuscarEmpleado(cedulaBuscar) {
     if (!cedulaBuscar) {
         cedulaBuscar = document.getElementById("txtEmpleado").value;
     }
-
+    document.getElementById("cuadroListaForms").style.display = "none";
     // Muestra las pestañas y los formularios
     document.getElementById("pestanias").style.display = "block";
     document.getElementById("cuadroFormularios").style.display = "block";
@@ -170,7 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById("txtEmpleado").value = cedulaEmpleado;
         BuscarEmpleado(cedulaEmpleado); // Llama a la función con la cédula del campo oculto
-    } 
+    }
 });
 
 
@@ -259,7 +259,7 @@ function dtEmpleados(json) {
         let Sexo = item.Sexo;
         document.getElementById("txtSexo").value = Sexo;
 
-        let EstadoCivil = item.EstadoCivil; 
+        let EstadoCivil = item.EstadoCivil;
         document.getElementById("txtEstadoCivil").value = EstadoCivil;
         let PuestoTrabajo = item.PuestoTrabajo;
         document.getElementById("txtPuestoTrabajo").value = PuestoTrabajo;
@@ -274,7 +274,7 @@ function dtEmpleados(json) {
         } else {
             console.error("El formato del nombre no es válido");
         }
-        document.getElementById("txtNombreUsuario").textContent = Nombre; 
+        document.getElementById("txtNombreUsuario").textContent = Nombre;
         document.getElementById("txtIdEmpleado").textContent = Cedula;
     });
 }
@@ -432,7 +432,7 @@ function dtFormularios(json) {
             { data: 'Tipo' },
             { data: 'Fecha' },
             { defaultContent: "<a title='Ver archivo' class='btn btn-abrirFormulario btn-xs'><i class='fa fa-eye' aria-hidden='true'></i></a>" }
-         ],
+        ],
 
         language: {
             "decimal": ",",
@@ -487,11 +487,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Recorre cada cuadro y aplica el comportamiento
     boxes.forEach((box) => {
         const originalColor = box.style.backgroundColor;
-        
+
         box.addEventListener('mouseenter', () => {
             // Oscurece el color del cuadro actual
             const darkerColor = darkenColor(originalColor, 0.1); // Puedes ajustar el valor para oscurecer más o menos
-            box.style.backgroundColor = darkerColor;            
+            box.style.backgroundColor = darkerColor;
             // Cambia el cursor a una mano
             box.style.cursor = 'pointer';
         });
@@ -523,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnEvaluacionPeriodica = document.getElementById('btnEvaluacionPeriodica');
     const btnEvaluacionReintegro = document.getElementById('btnEvaluacionReintegro');
     const btnEvaluacionRetiro = document.getElementById('btnEvaluacionRetiro');
-    const btnRegInmunizaciones = document.getElementById('btnRegInmunizaciones'); 
+    const btnRegInmunizaciones = document.getElementById('btnRegInmunizaciones');
     const btnCertificado = document.getElementById('btnCertificado');
 
     const sendPostRequest = (actionUrl) => {
@@ -581,71 +581,71 @@ document.addEventListener('DOMContentLoaded', () => {
  * =============================================================================== */
 function GuardarContacto() {
 
-        var url = "ObtenerListaTareas.ashx";
-        var datos = "";
-        var mensajeVerificacion = "";
-        var tipoMensaje = "warning";
-        var contadorVerificacion = 0;
+    var url = "ObtenerListaTareas.ashx";
+    var datos = "";
+    var mensajeVerificacion = "";
+    var tipoMensaje = "warning";
+    var contadorVerificacion = 0;
 
 
-        if ($('#txtNombreContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el Nombre de Contacto";
-            contadorVerificacion += 1;
-        }
+    if ($('#txtNombreContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el Nombre de Contacto";
+        contadorVerificacion += 1;
+    }
 
-        if ($('#txtTelefonoContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el teléfono de Contacto ";
-            contadorVerificacion += 1;
-        }
+    if ($('#txtTelefonoContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el teléfono de Contacto ";
+        contadorVerificacion += 1;
+    }
 
-        if ($('#txtParentescoContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el parentesco de Contacto ";
-            contadorVerificacion += 1;
-        } 
+    if ($('#txtParentescoContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el parentesco de Contacto ";
+        contadorVerificacion += 1;
+    }
 
-        if (contadorVerificacion > 0) {
-            alerta(mensajeVerificacion);
-            return;
-        }
-
-        var datosInfoAdicional = "";
-
-        datosInfoAdicional = {
-            'txtOpcion': "2",
-            'session': $("#txtEmpleado").val(),
-            'txtNombreContacto': $('#txtNombreContacto').val(),
-            'txtTelfContacto': $('#txtTelefonoContacto').val(),
-            'txtParentescoContacto': $('#txtParentescoContacto').val()
-        };
-
-        var datos = JSON.stringify([{ 'action': 'GuardarContactoEmergencia', 'parameters': datosInfoAdicional }]);
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: datos,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            beforeSend: function () {
-                $("#divMensajes").html("Guardando Información...");
-            },
-            success: function (respuesta) {
-                var mensaje = "";
-                if (respuesta.estado == "1") {
-                    MensajeCorrecto(respuesta.mensaje);
-                    $("#divMensajes").html("");
-                }
-                else if (respuesta.estado == "0") {
-                    MensajeIncorrecto(respuesta.mensaje);
-                }
-            },
-            error: function (objeto, msgError, objError) {
-                var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
-                MensajeIncorrecto(mesnajeError);
-            }
-        });
-
+    if (contadorVerificacion > 0) {
+        alerta(mensajeVerificacion);
         return;
+    }
+
+    var datosInfoAdicional = "";
+
+    datosInfoAdicional = {
+        'txtOpcion': "2",
+        'session': $("#txtEmpleado").val(),
+        'txtNombreContacto': $('#txtNombreContacto').val(),
+        'txtTelfContacto': $('#txtTelefonoContacto').val(),
+        'txtParentescoContacto': $('#txtParentescoContacto').val()
+    };
+
+    var datos = JSON.stringify([{ 'action': 'GuardarContactoEmergencia', 'parameters': datosInfoAdicional }]);
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                MensajeCorrecto(respuesta.mensaje);
+                $("#divMensajes").html("");
+            }
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
+
+    return;
 }
 
 
@@ -679,7 +679,7 @@ function MensajeContactoEmergencia() {
     let cedulaBu = document.getElementById("txtEmpleado").value;
     //document.getElementById("pestanias").style.display = "block";
     //document.getElementById("cuadroFormularios").style.display = "block";
-    ObtenerListaContactos(cedulaBu, "", "");      
+    ObtenerListaContactos(cedulaBu, "", "");
 }
 
 

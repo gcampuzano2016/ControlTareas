@@ -2,7 +2,7 @@
 // Obtener el elemento del botón
 var btnBuscar = document.getElementById("btnBuscarDatosPersonales");
 var buttons = document.querySelectorAll(".btn-custom"); // Obtener todos los botones
-var txtLentes, txtAlergias, txtExam1, txtExam2, txtExam3, txtExam4, metPlanifiacionM, tipoPlanificacionM, vidaSxActiva , txtExam5, txtExam6, metPlanifiacionF, tipoPlanificacionF, txtNumHijosVivosM, txtNumHijosMuertosM = "";
+let txtLentes, txtAlergias, txtExam1, txtExam2, txtExam3, txtExam4, metPlanifiacionM, tipoPlanificacionM, vidaSxActiva, txtExam5, txtExam6, metPlanifiacionF, tipoPlanificacionF, txtNumHijosVivosM, txtNumHijosMuertosM = "";
 let txtMedicacionHabSelect, txtCualMedicamento1, txtCantdidadMed1, txtCualMedicamento2, txtCantdidadMed2, txtCualMedicamento3, txtCantdidadMed3;
 let contadorMedicacion = 0;
 let IdPerfil = 0;
@@ -188,7 +188,7 @@ function VerFormTrabajo() {
     document.getElementById("pestaniaResultados").style.display = "none";
 }
 //----------------  Activar Pestaña 4 ------------------------
-function VerFormResultados() {    
+function VerFormResultados() {
     document.getElementById("pestaniaDatosPersonales").style.display = "none";
     document.getElementById("pestaniaConsulta").style.display = "none";
     document.getElementById("pestaniaTrabajo").style.display = "none";
@@ -201,7 +201,7 @@ function VerFormResultados() {
 // Función para ir a la página anterior
 function irAPaginaAnterior(pagina) {
     switch (pagina) {
-        case 1:            
+        case 1:
             break;
         case 2:
             VerFormDatosPersonales();
@@ -234,7 +234,7 @@ function irAPaginaSiguiente(pagina) {
 
 // Obtener la cedula ingresada en la pagina principal HistoriaClinica
 document.addEventListener('DOMContentLoaded', function () {
-    
+
     var cedulaEmpleado = $("#ContentPlaceHolder1_hiddenCedulaField").val();
     if (cedulaEmpleado) {
         BuscarEmpleado(cedulaEmpleado); // Ejecuta la función BuscarEmpleado
@@ -260,7 +260,7 @@ function BuscarEmpleado(cedula) {
 }
 function ObtenerListaEmpleados(cedula, descripcion, tipo2) {
 
-    var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" +cedula+ "\"} }]";
+    var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
 
     CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
 }
@@ -321,15 +321,15 @@ function dtEmpleados(json) {
     $.each(json, function (i, item) {
 
         let Cedula = item.Cedula;
-        document.getElementById("txtCedula").value = Cedula; 
+        document.getElementById("txtCedula").value = Cedula;
         let Nombre = item.Nombre;
-        document.getElementById("txtNombre").value = Nombre;        
+        document.getElementById("txtNombre").value = Nombre;
         let FechaNacimiento = item.Fecha_Nacimiento
         document.getElementById("fechaNac").value = FechaNacimiento;
         let Sociedad = item.Sociedad
         document.getElementById("txtSociedad").value = Sociedad;
         let AreaTrabajo = item.AreaTrabajo
-        document.getElementById("txtAreaTrabajo").value = AreaTrabajo; 
+        document.getElementById("txtAreaTrabajo").value = AreaTrabajo;
         let Edad = calcularEdad(FechaNacimiento);
         document.getElementById("txtEdad").value = Edad;
         let Sexo = item.Sexo;
@@ -350,14 +350,14 @@ function dtEmpleados(json) {
         // Llama a la función para cargar la imagen del empleado
         var nombreApellido = Nombre.split(" ");
         if (nombreApellido.length >= 4) {
-            var primerApellido  = nombreApellido[0];
-            var primerNombre  = nombreApellido[2];
+            var primerApellido = nombreApellido[0];
+            var primerNombre = nombreApellido[2];
             var segundoNombre = nombreApellido[3];
             cargarImagen(primerNombre, segundoNombre, primerApellido);
         } else {
             console.error("El formato del nombre no es válido");
-        }        
-    });    
+        }
+    });
 }
 
 
@@ -448,7 +448,7 @@ function toggleButtonColor(buttonId) {
     var button = document.getElementById(buttonId);
 
     // Define variables para almacenar texto (inicialmente vacío)
-    txtLentes, txtAlergias, txtExam1, txtExam2, txtExam3, txtExam4, txtExam5, txtExam6 = "";
+    //txtLentes, txtAlergias, txtExam1, txtExam2, txtExam3, txtExam4, txtExam5, txtExam6 = "";
 
     // Variable para almacenar el ID del otro botón (para alternar entre "Si" y "No")
     var otherButtonId;
@@ -543,6 +543,9 @@ $(document).ready(function () {
         } else {
             $('#contenedorMetodo2').hide();
             // Realiza otras acciones si es necesario
+            document.getElementById("txtTipoPlanificacion2").value = "";
+            document.getElementById("txtNumHijosVivosM").value = "";
+            document.getElementById("txtNumHijosMuertosM").value = "";
         }
     });
 
@@ -737,7 +740,7 @@ function handleMedicacionSelect() {
 function handleAccidentesTrabajoSelect() {
     var AccidentesTrabajoSelect = document.getElementById("AccidentesTrabajoSelect");
     var txtEspecificarAccidentesTrabajoSelect = document.getElementById("txtEspecificarAccidentesTrabajoSelect");
-    var txtObservacionesAccTrabajo = document.getElementById("txtObservacionesAccTrabajo");    
+    var txtObservacionesAccTrabajo = document.getElementById("txtObservacionesAccTrabajo");
 
     if (AccidentesTrabajoSelect.value === "si") {
         txtEspecificarAccidentesTrabajoSelect.disabled = false;
@@ -783,11 +786,11 @@ document.addEventListener("DOMContentLoaded", function () {
     var otrofisico2 = document.getElementById("txtOtrosFisico2");
     var otromecanico2 = document.getElementById("txOtrosMecanico2");
 
-    var fisicoSelect3= document.getElementById("txtFisicoSelect3");
+    var fisicoSelect3 = document.getElementById("txtFisicoSelect3");
     var mecanicoSelect3 = document.getElementById("txtMecanicoSelect3");
     var otrosDiv3 = document.getElementById("otros3");
     var otrofisico3 = document.getElementById("txtOtrosFisico3");
-    var otromecanico3 = document.getElementById("txOtrosMecanico3");    
+    var otromecanico3 = document.getElementById("txOtrosMecanico3");
 
     // Agrega controladores de eventos change a los campos select
     fisicoSelect1.addEventListener("change", toggleOtrosDiv);
@@ -981,7 +984,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
 function BuscarCodigosCIE() {
     let txtDiagDescripcion = document.getElementById(`txtDiagDescripcion${inputActivoNum}`);
-    if (txtDiagDescripcion.value.length > 3) {
+    if (txtDiagDescripcion.value.length > 2) {
         let CIEBuscar = txtDiagDescripcion.value;
         idSeleccionado = 0;
         ObtenerListaCodigosCIE(CIEBuscar, "", "", inputActivoNum);
@@ -1031,7 +1034,8 @@ document.addEventListener('DOMContentLoaded', function () {
     // Agregar la funcionalidad a cada contenedor
     dropdownContainers.forEach(function (container) {
         const dropdownButton = container.querySelector('.dropdown-button');
-        const dropdownContent = container.querySelector('.dropdown-content');
+
+        const dropdownContent = container.querySelector('.dropdown-content, .dropdown-content2');
 
         dropdownButton.addEventListener('click', function (event) {
             event.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
@@ -1047,40 +1051,40 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Obtén referencias a los elementos relevantes
-    var aptitudSelect = document.getElementById("txtAptitudSelect");
-    var descObservacion = document.getElementById("descObservacion");
-    var descLimitacion = document.getElementById("descLimitacion");
-    var txtDescObservacion = document.getElementById("txtDescObservacion");
-    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+//document.addEventListener("DOMContentLoaded", function () {
+//    // Obtén referencias a los elementos relevantes
+//    var aptitudSelect = document.getElementById("txtAptitudSelect");
+//    var descObservacion = document.getElementById("descObservacion");
+//    var descLimitacion = document.getElementById("descLimitacion");
+//    var txtDescObservacion = document.getElementById("txtDescObservacion");
+//    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
 
-    // Agrega un controlador de eventos change al campo select
-    aptitudSelect.addEventListener("change", toggleAptitudDiv);
+//    // Agrega un controlador de eventos change al campo select
+//    aptitudSelect.addEventListener("change", toggleAptitudDiv);
 
-    // Función para mostrar u ocultar los campos según la selección
-    function toggleAptitudDiv() {
-        if (aptitudSelect.value === "aptoObservacion") {
-            descObservacion.style.display = "block";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = false;
-            txtDescLimitacion.disabled = true;
-        } else if (aptitudSelect.value === "aptoLimitacion") {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "block";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = false;
-        } else {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = true;
-        }
-    }
+//    // Función para mostrar u ocultar los campos según la selección
+//    function toggleAptitudDiv() {
+//        if (aptitudSelect.value === "aptoObservacion") {
+//            descObservacion.style.display = "block";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = false;
+//            txtDescLimitacion.disabled = true;
+//        } else if (aptitudSelect.value === "aptoLimitacion") {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "block";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = false;
+//        } else {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = true;
+//        }
+//    }
 
-    // Llama a la función inicialmente para manejar el estado inicial
-    toggleAptitudDiv();
-});
+//    // Llama a la función inicialmente para manejar el estado inicial
+//    toggleAptitudDiv();
+//});
 
 
 
@@ -1134,7 +1138,7 @@ function GuardarHistoria() {
     var datos = "";
     var mensajeVerificacion = "";
     var tipoMensaje = "warning";
-    var contadorVerificacion = 0;    
+    var contadorVerificacion = 0;
 
 
     /*if ($('#txtnumhistoria').val() == "") {
@@ -1147,51 +1151,52 @@ function GuardarHistoria() {
         contadorVerificacion += 1;
     }*/
 
-    if ($('#txtNombre').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el Nombre ";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtNombre').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el Nombre ";
+    //    contadorVerificacion += 1;
+    //}
 
-    if ($('#txtReligion').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la religión ";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtGruposanguineo').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el Nombre ";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtReligion').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la religión ";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtGruposanguineo').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el Nombre ";
+    //    contadorVerificacion += 1;
+    //}
 
-    if ($('#txtLateralidad').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la Edad ";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtOrientacionSexual').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el Sexo ";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtLateralidad').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la Edad ";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtOrientacionSexual').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el Sexo ";
+    //    contadorVerificacion += 1;
+    //}
 
-    if ($('#txtIdentidadGenero').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el Sexo ";
-        contadorVerificacion += 1;
-    }
-    if (!$('input[name="discapacidad"]:checked').val()) {
-        mensajeVerificacion += "- Debe seleccionar si tiene discapacidad o no ";
-        contadorVerificacion += 1;
+    //if ($('#txtIdentidadGenero').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el Sexo ";
+    //    contadorVerificacion += 1;
+    //}
+    //if (!$('input[name="discapacidad"]:checked').val()) {
+    //    mensajeVerificacion += "- Debe seleccionar si tiene discapacidad o no ";
+    //    contadorVerificacion += 1;
 
-        if ($('#txtTipoDiscapacidad').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tipo de discapacidad ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtPorcentajeDiscapacidad').text() == "") {
-            mensajeVerificacion += "- Debe seleccionar el porcentaje de discapacidad";
-            contadorVerificacion += 1;
-        }
-    }
+    //    if ($('#txtTipoDiscapacidad').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tipo de discapacidad ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtPorcentajeDiscapacidad').text() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar el porcentaje de discapacidad";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
 
-    if ($('#txtMotivoConsulta').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el motivo de la consulta";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtMotivoConsulta').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el motivo de la consulta";
+    //    contadorVerificacion += 1;
+    //}
+
     /*if ($('#txtAntecedentesPersonales').val() == "") {
         mensajeVerificacion += "- Debe ingresar el campo Antecedentes personales";
         contadorVerificacion += 1;
@@ -1201,168 +1206,198 @@ function GuardarHistoria() {
         contadorVerificacion += 1;
     }*/
 
+    // Obtener las fechas completas de los elementos
+    const fechaCompletaAccTrab = document.getElementById("fechaAccTrab").value;
+    const fechaCompletaEnfProf = document.getElementById("fechaEnfProf").value;
+
+    // Dividir las fechas y asignar valores, si están vacías asignar ""
+    const [fechaAccTrabAnio, fechaAccTrabMes, fechaAccTrabDia] = fechaCompletaAccTrab ? fechaCompletaAccTrab.split("-") : ["", "", ""];
+    const [fechaEnfProfAnio, fechaEnfProfMes, fechaEnfProfDia] = fechaCompletaEnfProf ? fechaCompletaEnfProf.split("-") : ["", "", ""];
+
     if ($('#txtSexo').val() == "FEMENINO") {
         txtExam5 = "";
         txtExam6 = "";
-        if ($('#txtMenarquia').val() == "") {
-            mensajeVerificacion += "- Debe ingresar la menarquia";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCiclos').val() == "") {
-            mensajeVerificacion += "- Debe ingresar los ciclos";
-            contadorVerificacion += 1;
-        }
-        if ($('#fechaUltimaMens').val() == "") {
-            mensajeVerificacion += "- Debe ingresar fecha ultima menstruación";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumGestas').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # gestas";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumPartos').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # partos";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumCesareas').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # cesareas";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumAbortos').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # abortos";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumHijosVivos').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # hijos vivos";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumHijosMuertos').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # hijos muertos";
-            contadorVerificacion += 1;
-        }
-        if (!$('input[name="metodoplanif1"]:checked').val()) {
+        //if ($('#txtMenarquia').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar la menarquia";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtCiclos').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar los ciclos";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#fechaUltimaMens').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar fecha ultima menstruación";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumGestas').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # gestas";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumPartos').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # partos";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumCesareas').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # cesareas";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumAbortos').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # abortos";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumHijosVivos').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # hijos vivos";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumHijosMuertos').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # hijos muertos";
+        //    contadorVerificacion += 1;
+        //}
+        //if (!$('input[name="metodoplanif1"]:checked').val()) {
 
-            mensajeVerificacion += "- Debe seleccionar si tiene metodo de planificacion ";
-            contadorVerificacion += 1;
+        //    mensajeVerificacion += "- Debe seleccionar si tiene metodo de planificacion ";
+        //    contadorVerificacion += 1;
 
-            if ($('#txtTipoPlanificacion1').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el tipo de planificación";
-                contadorVerificacion += 1;
-            }
-        }
+        //    if ($('#txtTipoPlanificacion1').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el tipo de planificación";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
         if (txtLentes == undefined) {
             txtLentes = "";
-            mensajeVerificacion += "- Debe seleccionar SI o No usa Lentes";
+            //mensajeVerificacion += "- Debe seleccionar SI o No usa Lentes";
             contadorVerificacion += 1;
         }
 
-        if (txtExam1 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen Papanicolaou";
-            contadorVerificacion += 1;
-        } else if (txtExam1 == "SI") {
-            if ($('#txtanioExam1').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen Papanicolaou";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam1').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen Papanicolaou";
-                contadorVerificacion += 1;
-            }
+        if (txtExam1 == undefined) {
+            txtExam1 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen Papanicolaou";
+            //contadorVerificacion += 1;
+        }
+        //else if (txtExam1 == "SI") {
+        //    if ($('#txtanioExam1').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen Papanicolaou";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam1').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen Papanicolaou";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
+
+        if (txtExam2 == undefined) {
+            txtExam2 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
+            //contadorVerificacion += 1;
+        }
+        //else if (txtExam2 == "SI") {
+        //    if ($('#txtanioExam2').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam2').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
+
+        if (txtExam3 == undefined) {
+            txtExam3 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
+            //contadorVerificacion += 1;
+        }
+        //else if (txtExam3 == "SI") {
+        //    if ($('#txtanioExam3').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam3').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
+
+        if (txtExam4 == undefined) {
+            txtExam4 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
+            //contadorVerificacion += 1;
+        }
+        //else if (txtExam4 == "SI") {
+        //    if ($('#txtanioExam4').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam4').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
+
+        //txtExam5 = "";
+        //txtExam6 = "";
+        if ($("input[name='vidaSxActiva']:checked").val() == undefined) {
+            vidaSxActiva = "";
+        } else {
+            vidaSxActiva = $("input[name='vidaSxActiva']:checked").val();
         }
 
-        if (txtExam2 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
-            contadorVerificacion += 1;
-        } else if (txtExam2 == "SI") {
-            if ($('#txtanioExam2').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam2').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
+        if ($("input[name='metodoplanif1']:checked").val() == undefined) {
+            metPlanifiacionF = "";
+        } else {
+            metPlanifiacionF = $("input[name='metodoplanif1']:checked").val();
         }
 
-        if (txtExam3 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
-            contadorVerificacion += 1;
-        } else if (txtExam3 == "SI") {
-            if ($('#txtanioExam3').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam3').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
-        }
-
-        if (txtExam4 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen Eco Mamario";
-            contadorVerificacion += 1;
-        } else if (txtExam4 == "SI") {
-            if ($('#txtanioExam4').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam4').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen Eco Mamario";
-                contadorVerificacion += 1;
-            }
-        }
-
-        txtExam5 = "";
-        txtExam6 = "";
-        vidaSxActiva = $("input[name='vidaSxActiva']:checked").val();
-        metPlanifiacionF = $("input[name='metodoplanif1']:checked").val();
         tipoPlanificacionF = $('#txtTipoPlanificacion1').val();
         metPlanifiacionM = "";
         tipoPlanificacionM = "";
         txtNumHijosVivosM = "";
-        txtNumHijosMuertosM = "";    
+        txtNumHijosMuertosM = "";
     }
     if ($('#txtSexo').val() == "MASCULINO") {
 
 
-        if (txtExam5 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen ANTÍGENO PROSTÁTICO";
-            contadorVerificacion += 1;
-        } else if (txtExam5 == "SI") {
-            if ($('#txtanioExam5').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen ANTÍGENO PROSTÁTICO";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam5').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen ANTÍGENO PROSTÁTICO";
-                contadorVerificacion += 1;
-            }
+        if (txtExam5 == undefined) {
+            txtExam5 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen ANTÍGENO PROSTÁTICO";
+            //contadorVerificacion += 1;
         }
+        //else if (txtExam5 == "SI") {
+        //    if ($('#txtanioExam5').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen ANTÍGENO PROSTÁTICO";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam5').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen ANTÍGENO PROSTÁTICO";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
 
-        if (txtExam6 == "") {
-            mensajeVerificacion += "- Debe seleccionar SI o No en Examen ECO PROSTÁTICO";
-            contadorVerificacion += 1;
-        } else if (txtExam6 == "SI") {
-            if ($('#txtanioExam6').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el año de examen ECO PROSTÁTICO";
-                contadorVerificacion += 1;
-            }
-            if ($('#txtResultadoExam6').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el resultado del examen ECO PROSTÁTICO";
-                contadorVerificacion += 1;
-            }
+        if (txtExam6 == undefined) {
+            txtExam6 = "";
+            //mensajeVerificacion += "- Debe seleccionar SI o No en Examen ECO PROSTÁTICO";
+            //contadorVerificacion += 1;
         }
+        //else if (txtExam6 == "SI") {
+        //    if ($('#txtanioExam6').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el año de examen ECO PROSTÁTICO";
+        //        contadorVerificacion += 1;
+        //    }
+        //    if ($('#txtResultadoExam6').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el resultado del examen ECO PROSTÁTICO";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
 
-        if (!$('input[name="metodoplanif2"]:checked').val()) {
+        //if (!$('input[name="metodoplanif2"]:checked').val()) {
 
-            mensajeVerificacion += "- Debe seleccionar si tiene metodo de planificacion ";
-            contadorVerificacion += 1;
+        //    mensajeVerificacion += "- Debe seleccionar si tiene metodo de planificacion ";
+        //    contadorVerificacion += 1;
 
-            if ($('#txtTipoPlanificacion2').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el tipo de planificación";
-                contadorVerificacion += 1;
-            }
-        }
+        //    if ($('#txtTipoPlanificacion2').val() == "") {
+        //        mensajeVerificacion += "- Debe ingresar el tipo de planificación";
+        //        contadorVerificacion += 1;
+        //    }
+        //}
         txtExam1 = "";
         txtExam2 = "";
         txtExam3 = "";
@@ -1370,97 +1405,105 @@ function GuardarHistoria() {
         vidaSxActiva = "";
         metPlanifiacionF = "";
         tipoPlanificacionF = "";
-        metPlanifiacionM = $("input[name='metodoplanif2']:checked").val();
+
+
+        if ($("input[name='metodoplanif2']:checked").val() == undefined) {
+            metPlanifiacionM = "";
+        } else {
+            metPlanifiacionM = $("input[name='metodoplanif2']:checked").val();
+        }
+
         tipoPlanificacionM = $('#txtTipoPlanificacion2').val();
-        if ($('#txtNumHijosVivosM').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # hijos vivos";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtNumHijosMuertosM').val() == "") {
-            mensajeVerificacion += "- Debe ingresar # hijos muertos";
-            contadorVerificacion += 1;
-        }
+        //if ($('#txtNumHijosVivosM').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # hijos vivos";
+        //    contadorVerificacion += 1;
+        //}
+        //if ($('#txtNumHijosMuertosM').val() == "") {
+        //    mensajeVerificacion += "- Debe ingresar # hijos muertos";
+        //    contadorVerificacion += 1;
+        //}
     }
     txtNumHijosVivosM = $('#txtNumHijosVivosM').val();
     txtNumHijosMuertosM = $('#txtNumHijosMuertosM').val();
 
-    if ($('#tabacoSelect').val() == "si") {
+    //if ($('#tabacoSelect').val() == "si") {
 
-        if ($('#txtTiempoconsumoTabaco').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Tabaco ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadTabaco').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaTabaco').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#alcoholSelect').val() == "si") {
+    //    if ($('#txtTiempoconsumoTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Tabaco ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaTabaco').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Tabaco";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#alcoholSelect').val() == "si") {
 
-        if ($('#txtTiempoconsumoAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Alcohol ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Alcohol";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaAlcohol').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Alcohol";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#otraSelect').val() == "si") {
-        
-        if ($('#txtOtraSustancia').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el nombre de Otra ssubstancia ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoconsumoOtra').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo de consumo Otra ssubstancia ";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantidadOtra').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la cantidad de Otra ssubstancia";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtTiempoAbstinenciaOtra').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Otra ssubstancia";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#txtActividadFisiscaSelect').val() == "si") {
-        if ($('#txtCualActividad').val() == "") {
-            mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtFrecuenciaActividad').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
-            contadorVerificacion += 1;
-        }
-    }
+    //    if ($('#txtTiempoconsumoAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Alcohol ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Alcohol";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaAlcohol').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Alcohol";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#otraSelect').val() == "si") {
 
-    if ($('#txtMedicacionHabSelect').val() == "si") {
-        if ($('#txtCualMedicamento1').val() == "") {
-            mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
-            contadorVerificacion += 1;
-        }
-        if ($('#txtCantdidadMed1').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
-            contadorVerificacion += 1;
-        }
-    }
+    //    if ($('#txtOtraSustancia').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el nombre de Otra ssubstancia ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoconsumoOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo de consumo Otra ssubstancia ";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantidadOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la cantidad de Otra ssubstancia";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtTiempoAbstinenciaOtra').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar el tiempo de abstinencia de Otra ssubstancia";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#txtActividadFisiscaSelect').val() == "si") {
+    //    if ($('#txtCualActividad').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtFrecuenciaActividad').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
 
-    if ($('#MedicacionHabSelect').val() == "") {
-        mensajeVerificacion += "- Debe seleccionar si hay o no medicación habitual";
-        contadorVerificacion += 1;
-    } else if ($('#MedicacionHabSelect').val() == "si") {
+    //if ($('#txtMedicacionHabSelect').val() == "si") {
+    //    if ($('#txtCualMedicamento1').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar cual actividad física realiza";
+    //        contadorVerificacion += 1;
+    //    }
+    //    if ($('#txtCantdidadMed1').val() == "") {
+    //        mensajeVerificacion += "- Debe ingresar el tiempo que realiza la actividad física";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+
+    //if ($('#MedicacionHabSelect').val() == "") {
+    //    mensajeVerificacion += "- Debe seleccionar si hay o no medicación habitual";
+    //    contadorVerificacion += 1;
+    //} else
+    if ($('#MedicacionHabSelect').val() == "si") {
         txtMedicacionHabSelect = $('#MedicacionHabSelect').val();
-        if (contadorMedicacion === 0) {            
+        if (contadorMedicacion === 0) {
             txtCualMedicamento1 = $('#txtCualMedicamento1').val();
             txtCantdidadMed1 = $('#txtCantdidadMed1').val();
             txtCualMedicamento2 = "";
@@ -1492,66 +1535,66 @@ function GuardarHistoria() {
         txtCualMedicamento3 = "";
         txtCantdidadMed3 = "";
     }
-    if ($('#txtEnfermedadActual').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la descripción de la enfermedad actual";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtEnfermedadActual').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la descripción de la enfermedad actual";
+    //    contadorVerificacion += 1;
+    //}
 
-    if ($('#AccidentesTrabajoSelect').val() == "si") {
-        if ($('#txtEspecificarAccidentesTrabajoSelect').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la entidad que calificó el accidente de trabajo";
-            contadorVerificacion += 1;
-        }
-    }
-    if ($('#EnfermedadesProfSelect').val() == "si") {
-        if ($('#txtEspecificarEnfermedadesProfSelect').val() == "") {
-            mensajeVerificacion += "- Debe seleccionar la entidad que calificó la enfermedad Profesional";
-            contadorVerificacion += 1;
-        }
-    }
+    //if ($('#AccidentesTrabajoSelect').val() == "si") {
+    //    if ($('#txtEspecificarAccidentesTrabajoSelect').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la entidad que calificó el accidente de trabajo";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
+    //if ($('#EnfermedadesProfSelect').val() == "si") {
+    //    if ($('#txtEspecificarEnfermedadesProfSelect').val() == "") {
+    //        mensajeVerificacion += "- Debe seleccionar la entidad que calificó la enfermedad Profesional";
+    //        contadorVerificacion += 1;
+    //    }
+    //}
 
-    if ($('#txtConstPresionArterial').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la presión arterial";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTemperatura').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la temperatura";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaCardicaca').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstSaturacionOxigeno').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPeso').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el peso actual";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTalla').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la talla";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstMasaCorporal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPerimetroAbdominal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtConstPresionArterial').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la presión arterial";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTemperatura').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la temperatura";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaCardicaca').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstSaturacionOxigeno').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPeso').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el peso actual";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTalla').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la talla";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstMasaCorporal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPerimetroAbdominal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
+    //    contadorVerificacion += 1;
+    //}
 
     //----- revisar
-    if ($('#txtConstPerimetroAbdominal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtConstPerimetroAbdominal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
+    //    contadorVerificacion += 1;
+    //}
 
 
     if (contadorVerificacion > 0) {
@@ -1562,6 +1605,17 @@ function GuardarHistoria() {
 
 
     // datos adicionales para ingresar a la base de datos
+
+    if (txtAlergias == undefined) {
+        txtAlergias = "";
+        //mensajeVerificacion += "- Debe seleccionar SI o No en Examen ECO PROSTÁTICO";
+        //contadorVerificacion += 1;
+    }
+    if (txtLentes == undefined) {
+        txtLentes = "";
+        //mensajeVerificacion += "- Debe seleccionar SI o No en Examen ECO PROSTÁTICO";
+        //contadorVerificacion += 1;
+    }
 
     var datosInfoAdicional = "";
 
@@ -1615,6 +1669,8 @@ function GuardarHistoria() {
     datosFormulario = {
         'formulario': "1",
         'session': $("#ContentPlaceHolder1_txtUsuario").val(),
+        'txtNumHistoria': $('#txtNumHistoria').val(),
+        'txtNumArchivo': $('#txtNumArchivo').val(),
         'txtNombre': $('#txtNombre').val(),
         'txtEdad': $('#txtEdad').val(),
         'txtSexo': $('#txtSexo').val(),
@@ -1626,9 +1682,20 @@ function GuardarHistoria() {
         'txtDiscapacidad': $("input[name='discapacidad']:checked").val(),
         'txtTipoDiscapacidad': $('#txtTipoDiscapacidad').val(),
         'txtPorcentajeDiscapacidad': $('#txtPorcentajeDiscapacidad').text(),
+        'txtfechaIng': $('#fechaIng').val(),
+        'txtPuestoTrabajo': $('#txtPuestoTrabajo').val(),
         'txtAreaTrabajo': $('#txtAreaTrabajo').val(),
+        'txtActRelevantes': $('#txtActRelevantes').val(),
         'txtMotivoConsulta': $('#txtMotivoConsulta').val(),
         'txtAntecedentesPersonales': $('#txtAntecedentesPersonales').val(),
+        'AntFamA': $('#AntFamA').prop('checked'),
+        'AntFamB': $('#AntFamB').prop('checked'),
+        'AntFamC': $('#AntFamC').prop('checked'),
+        'AntFamD': $('#AntFamD').prop('checked'),
+        'AntFamE': $('#AntFamE').prop('checked'),
+        'AntFamF': $('#AntFamF').prop('checked'),
+        'AntFamG': $('#AntFamG').prop('checked'),
+        'AntFamH': $('#AntFamH').prop('checked'),
         'txtMenarquia': $('#txtMenarquia').val(),
         'txtCiclos': $('#txtCiclos').val(),
         'fechaUltimaMens': $('#fechaUltimaMens').val(),
@@ -1716,11 +1783,19 @@ function GuardarHistoria() {
         'txtObservacion4': $('#txtObservacion4').val(),
         'AccidentesTrabajoSelect': $('#AccidentesTrabajoSelect').val(),
         'txtEspecificarAccidentesTrabajoSelect': $('#txtEspecificarAccidentesTrabajoSelect').val(),
+        'txtfechaAccTrabAnio': fechaAccTrabAnio,
+        'txtfechaAccTrabMes': fechaAccTrabMes,
+        'txtfechaAccTrabDia': fechaAccTrabDia,
         'txtObservacionesAccTrabajo': $('#txtObservacionesAccTrabajo').val(),
+
         'EnfermedadesProfSelect': $('#EnfermedadesProfSelect').val(),
         'txtEspecificarEnfermedadesProfSelect': $('#txtEspecificarEnfermedadesProfSelect').val(),
+        'txtfechaEnfProfAnio': fechaEnfProfAnio,
+        'txtfechaEnfProfMes': fechaEnfProfMes,
+        'txtfechaEnfProfDia': fechaEnfProfDia,
         'txtObservacionesEnfermedadesProf': $('#txtObservacionesEnfermedadesProf').val(),
         'txtAntecedentesFamiliares': $('#txtAntecedentesFamiliares').val(),
+
         'txtPuestoTrabajo1': $('#txtPuestoTrabajo1').val(),
         'txtActividadesTrabajo1': $('#txtActividadesTrabajo1').val(),
         'txtFisicoSelect1': $('#txtFisicoSelect1').val(),
@@ -1750,7 +1825,16 @@ function GuardarHistoria() {
         'txtMedidadPreventiva3': $('#txtMedidadPreventiva3').val(),
         'txtActividadesExtraLaborales': $('#txtActividadesExtraLaborales').val(),
         'txtEnfermedadActual': $('#txtEnfermedadActual').val(),
-        'txtPatologia': $('#txtPatologia').val(),
+        'RevicionA': $('#RevicionA').prop('checked'),
+        'RevicionB': $('#RevicionB').prop('checked'),
+        'RevicionC': $('#RevicionC').prop('checked'),
+        'RevicionD': $('#RevicionD').prop('checked'),
+        'RevicionE': $('#RevicionE').prop('checked'),
+        'RevicionF': $('#RevicionF').prop('checked'),
+        'RevicionG': $('#RevicionG').prop('checked'),
+        'RevicionH': $('#RevicionH').prop('checked'),
+        'RevicionI': $('#RevicionI').prop('checked'),
+        'RevicionJ': $('#RevicionJ').prop('checked'),
         'txtRevisionOrganos': $('#txtRevisionOrganos').val(),
         'txtConstPresionArterial': $('#txtConstPresionArterial').val(),
         'txtConstTemperatura': $('#txtConstTemperatura').val(),
@@ -1835,39 +1919,42 @@ function GuardarHistoria() {
         'txtDescObservacion': $('#txtDescObservacion').val(),
         'txtDescLimitacion': $('#txtDescLimitacion').val(),
         'txtRecomendacion': $('#txtRecomendacion').val(),
+        'txtfechaFormulario': $('#fechaFormulario').val(),
+        'txthoraFormulario': $('#horaFormulario').val(),
+        'txtHbtsIncidentes': "",
         'nombre': $("#ContentPlaceHolder1_txtLoginUsuario").val()
-        };
+    };
 
-        var datos = JSON.stringify([{ 'action': 'GuardarNuevaHistoria', 'parameters': datosFormulario }]);
+    var datos = JSON.stringify([{ 'action': 'GuardarNuevaHistoria', 'parameters': datosFormulario }]);
 
 
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: datos,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            beforeSend: function () {
-                $("#divMensajes").html("Guardando Información...");
-            },
-            success: function (respuesta) {
-                var mensaje = "";
-                if (respuesta.estado == "1") {
-                    MensajeCorrecto(respuesta.mensaje);
-                    //VerListaEmpleados();
-                    $("#divMensajes").html("");
-                }
-                else if (respuesta.estado == "0") {
-                    MensajeIncorrecto(respuesta.mensaje);
-                }
-            },
-            error: function (objeto, msgError, objError) {
-                var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
-                MensajeIncorrecto(mesnajeError);
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                MensajeCorrecto(respuesta.mensaje);
+                //VerListaEmpleados();
+                $("#divMensajes").html("");
             }
-        });
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
 
-        return;    
+    return;
 }
 
 
@@ -1918,7 +2005,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 $(function () {
-      
+
     IdPerfil = $("#ContentPlaceHolder1_txtPerfil").val();
     //let cedulaBuscar = document.getElementById("txtEmpleado").value;
 

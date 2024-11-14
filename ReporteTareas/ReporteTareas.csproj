@@ -1083,6 +1083,7 @@
     <Content Include="Formulario\EgresoInventario.aspx" />
     <Content Include="Formulario\ForeCastDetalle.aspx" />
     <Content Include="Formulario\FrmRptReporteGerencial.aspx" />
+    <Content Include="Formulario\HistoriaCertificado.aspx" />
     <Content Include="Formulario\HistoriaClinica.aspx" />
     <Content Include="Formulario\HistoriaClinicaArchivosRRHH.aspx" />
     <Content Include="Formulario\HistoriaInmunizaciones.aspx" />
@@ -1518,6 +1519,13 @@
     </Compile>
     <Compile Include="Formulario\FrmRptReporteGerencial.aspx.designer.cs">
       <DependentUpon>FrmRptReporteGerencial.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\HistoriaCertificado.aspx.cs">
+      <DependentUpon>HistoriaCertificado.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\HistoriaCertificado.aspx.designer.cs">
+      <DependentUpon>HistoriaCertificado.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\HistoriaClinica.aspx.cs">
       <DependentUpon>HistoriaClinica.aspx</DependentUpon>

@@ -58,6 +58,7 @@
     <Compile Include="EntInfoAdicionalHisClinica.cs" />
     <Compile Include="EntInfoContrato.cs" />
     <Compile Include="EntInfoFacturaProv.cs" />
+    <Compile Include="EntInmunizacionesData.cs" />
     <Compile Include="EntInventario.cs" />
     <Compile Include="EntMantenimiento.cs" />
     <Compile Include="EntMensajeForeCast.cs" />

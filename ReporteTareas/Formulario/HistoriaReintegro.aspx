@@ -140,48 +140,83 @@
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
+                                                    <span class="input-group-addon select-temas" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
                                                     <input type="text" class="form-control" style="" id="txtSexo" name="txtSexo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-basic3" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
+                                                    <span class="input-group-addon input-basic3 select-temas" style="text-align:left;"><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
                                                     <input type="text" class="form-control" style="" id="fechaNac" name="fechaNac" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-basic"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
                                                     <input id="txtEdad" type="number" class="form-control" name="edad" placeholder="0" readonly>
                                                 </div>
                                             </div>
 
                                             <div class="horizontal">                                                
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
                                                     <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
                                                 </div>    
                                                 <div class="input-group col-sm-5" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
-                                                    <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
+                                                    <span class="input-group-addon input-azulmedio"><i class="	fa fa-h-square"></i>  Num de Historia:</span>
+                                                    <input id="txtNumHistoria" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div> 
+                                            </div>  
+                                            <div class="horizontal">
+                                                <div class="input-group col-sm-6">
+                                                    <span class="input-group-addon input-medium select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
+                                                    <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
+                                                </div>   
+                                                <div class="input-group col-sm-5" style="margin-left: 6rem;">
+                                                    <span class="input-group-addon input-azulmedio"><i class="fa fa-file-text"></i>  Num de Archivo:</span>
+                                                    <input id="txtNumArchivo" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
                                                 </div>
                                             </div>
                                             <div class="horizontal-group">
-                                                <div class="input-group col-sm-8">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
-                                                    <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
+                                                <div class="input-group col-sm-9">
+                                                    <span class="input-group-addon input-medium  select-temas" style="width: 30%; text-align:left;"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
+                                                    <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
                                                 </div>                                                
                                             </div>
+                                            <div class="horizontal-group">   
+                                                <div class="input-group col-sm-9">
+                                                    <span class="input-group-addon select-medidas" style="width: 30%; text-align:left;"><i class="glyphicon glyphicon-home"></i> Causa de salida:</span>
+                                                    <input id="txtCausaSalida" type="text" class="form-control"  value="">
+                                                </div> 
+                                            </div>  
+                                            
                                             <!-- ... otros campos ... -->
+
+                                            <div class="horizontal">    
+                                                <div class="input-group col-sm-6">
+                                                    <span class="input-group-addon input-basic3 select-medidas" style="width: 60%;text-align:left;"><i class="glyphicon glyphicon-remove-circle"></i> Fecha Último día laboral:</span>                                                    
+                                                    <input type="date" class="form-control" id="fechaUltimoDia" value="" style="cursor:pointer;">                                              
+                                                </div>                                                  
+                                            </div>
+                                            <div class="horizontal">    
+                                                <div class="input-group col-sm-6">
+                                                    <span class="input-group-addon input-basic3 select-medidas" style="width: 60%; text-align:left;"><i class="glyphicon glyphicon-ok-circle"></i>  Fecha de Reingreso:</span>                                                    
+                                                    <input type="date" class="form-control" id="fechaReintegro" value="" onchange="calcularDias()" style="cursor:pointer;">                                               
+                                                </div>   
+                                                <div class="input-group col-sm-4" style="margin-left:6rem;">
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Total (dias}:</span>
+                                                    <input id="txtTotalDias" type="number" class="form-control" placeholder="0" value="" disabled>
+                                                </div>
+                                            </div>                                        
+
                                         </div>
 
                                         <div class="col-sm-3" style="text-align: center;">
@@ -191,9 +226,11 @@
                                         </div>
 
                                     </formview>
-                                </div>                                                      
-
+                                </div>    
+                                                        
                         </div>
+
+                        
 
                         <!--  Cuadro de Consulta  -->
                         <div class="well" style="padding-top: 1rem;">
@@ -202,14 +239,13 @@
                                     <h4 class="well-title">Actualización de Consulta</h4>
                                 </div>
                             </div>
-                            <div class="" style="">
-                                
-                                <div class="horizontal-group-special contenedor-horizontal" style="justify-content:flex-start; margin-top:0; ">
+                            <div class="" style="">                                
+                                <%--<div class="horizontal-group-special contenedor-horizontal" style="justify-content:flex-start; margin-top:0; ">
                                     <div class="horizontal-group-simple form-group col-sm-3" style="text-align:center; margin-bottom:0;">
                                         <label class="control-label" >Fecha actual:</label>
                                         <h4 for="txtFechaActual" style="color:darkblue;">12/05/2023</h4>
                                     </div>  
-                                </div>    
+                                </div>--%>    
 
                                 <div style="text-align:center;padding:0 0; background-color: #333; border-radius: 10px; margin: 1rem 3rem 20px 3rem; ">
                                     <h3><a style="text-decoration:none;color:white;" href="https://www.zeitverschiebung.net/es/city/3652462"><br />Quito, Ecuador</a></h3>
@@ -656,34 +692,7 @@ efectuados, entre otros datos que puedan aportar y dar indicios de la patología
                                     </div>
                                 </div> 
                            </div> 
-                            <div class="horizontal-group-simple" style="margin:0 3rem;">
-
-                                <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
-                                    <fieldset class="grupo-input text-center">
-                                            <select id="txtTipoExamenSelect4" class="form-control">
-                                                <option value="" selected>- Seleccionar -</option>
-                                                <option value="ExamenGeneral">Exámenes generales</option>
-                                                <option value="ExamenEspecifico">Exámenes específicos</option>                                                
-                                            </select>
-                                     </fieldset>
-                                </div>
-                                <div class="cuadros-ingreso-normal4" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtNomExamen4" type="text" class="form-control select-principal" placeholder="examen" value="">
-                                    </div>
-                                </div>    
-                                <div class="cuadros-ingreso-normal" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center">
-                                        <input type="date" class="form-control" id="fechaExam4" value="">
-                                    </div>
-                                </div>
-                                <div class="cuadros-ingreso-normal5" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtResExamen4" type="text" class="form-control select-medidas" placeholder="Resultado" value="">
-                                    </div>
-                                </div> 
-                           </div> 
-                            
+                                                        
                             <div class="form-group row" style="margin: 0 2rem;">
                                 <label for="disabledTextInput" class="col-form-label">Observaciones</label>
                                 <textarea id="txtExamenbservacion" rows="2" style="width: 100%; resize: vertical;" value="" placeholder="En la sección de “observaciones”, detallar la patología encontrada."></textarea>
@@ -693,75 +702,80 @@ efectuados, entre otros datos que puedan aportar y dar indicios de la patología
 
                          <!-- Cuadro de Diagnosticos " -->
                         <div class="well" style="margin-bottom: 10px; margin-top: 0; padding-top: 1rem;">
-                            <div class="well-header" style="margin-top: 0;">
+                            <div class="well-header" style="margin-top: 4rem;">
                                 <div>
                                     <h4 class="well-title">DIAGNÓSTICO</h4>
                                 </div>
                             </div>
-                            <div class="horizontal-group-simple" style="margin: 0 3rem;">
-                                <div class="cuadros-ingreso-normal6" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
+                            <div class="horizontal-group-simple" style="margin: 1rem 2rem 0 2rem;">
+                                <div class="cuadros-ingreso-normal7">
+                                    <div class="grupo-input text-center">
                                         <label for="disabledTextInput">DESCRIPCIÓN</label>
-                                        <input id="txtDiagDescripcion1" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+                                        <input id="txtDiagDescripcion1" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(1)" oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos1"></ul>
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal4" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
+                                </div>
+                                <div class="cuadros-ingreso-normal3">
+                                    <div class="grupo-input text-center">
                                         <label for="disabledTextInput">CÓDIGO CIE</label>
                                         <input id="txtDiagCIE1" type="text" class="form-control" placeholder="CIE" value="">
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal2" style="margin-bottom: 10px;">
+                                </div>
+                                <div class="cuadros-ingreso-normal2">
                                     <fieldset class="grupo-input text-center">
                                         <label for="disabledTextInput">Diagnóstico</label>
-                                            <select id="txtDiagnositicoSelect1" class="form-control">
-                                                <option value="" selected>- Seleccionar -</option>
-                                                <option value="PRE">Presuntivo</option>
-                                                <option value="DEF">Definitivo</option>                                                
-                                            </select>
-                                     </fieldset>
+                                        <select id="txtDiagnositicoSelect1" class="form-control">
+                                            <option value="" selected>- Seleccionar -</option>
+                                            <option value="PRE">Presuntivo</option>
+                                            <option value="DEF">Definitivo</option>
+                                        </select>
+                                    </fieldset>
                                 </div>
                             </div>
-                            <div class="horizontal-group-simple" style="margin: 0 3rem;">
-                                <div class="cuadros-ingreso-normal6" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+
+                            <div class="horizontal-group-simple" style="margin: 1rem 2rem 0 2rem;">
+                                <div class="cuadros-ingreso-normal7">
+                                    <div class="grupo-input text-center">
+                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(2)"  oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos2"></ul>
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal4" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
+                                </div>
+                                <div class="cuadros-ingreso-normal3">
+                                    <div class="grupo-input text-center">
                                         <input id="txtDiagCIE2" type="text" class="form-control" placeholder="CIE" value="">
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal2" style="margin-bottom: 10px;">
+                                </div>
+                                <div class="cuadros-ingreso-normal2">
                                     <fieldset class="grupo-input text-center">
-                                            <select id="txtDiagnositicoSelect2" class="form-control">
-                                                <option value="" selected>- Seleccionar -</option>
-                                                <option value="PRE">Presuntivo</option>
-                                                <option value="DEF">Definitivo</option>                                                
-                                            </select>
-                                     </fieldset>
+                                        <select id="txtDiagnositicoSelect2" class="form-control">
+                                            <option value="" selected>- Seleccionar -</option>
+                                            <option value="PRE">Presuntivo</option>
+                                            <option value="DEF">Definitivo</option>
+                                        </select>
+                                    </fieldset>
                                 </div>
                             </div>
-                            <div class="horizontal-group-simple" style="margin: 0 3rem;">
-                                <div class="cuadros-ingreso-normal6" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
-                                        <input id="txtDiagDescripcion3" type="text" class="form-control select-medidas" placeholder="Descripción" value="">
+
+                            <div class="horizontal-group-simple" style="margin: 1rem 2rem 0 2rem;">
+                                <div class="cuadros-ingreso-normal7">
+                                    <div class="grupo-input text-center">
+                                        <input id="txtDiagDescripcion3" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(3)"  oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos3"></ul>
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal4" style="margin-bottom: 10px;">
-                                    <div class="grupo-input text-center" >
+                                </div>
+                                <div class="cuadros-ingreso-normal3">
+                                    <div class="grupo-input text-center">
                                         <input id="txtDiagCIE3" type="text" class="form-control" placeholder="CIE" value="">
                                     </div>
-                                </div> 
-                                <div class="cuadros-ingreso-normal2" style="margin-bottom: 10px;">
+                                </div>
+                                <div class="cuadros-ingreso-normal2">
                                     <fieldset class="grupo-input text-center">
-                                            <select id="txtDiagnositicoSelect3" class="form-control">
-                                                <option value="" selected>- Seleccionar -</option>
-                                                <option value="PRE">Presuntivo</option>
-                                                <option value="DEF">Definitivo</option>                                                
-                                            </select>
-                                     </fieldset>
+                                        <select id="txtDiagnositicoSelect3" class="form-control">
+                                            <option value="" selected>- Seleccionar -</option>
+                                            <option value="PRE">Presuntivo</option>
+                                            <option value="DEF">Definitivo</option>
+                                        </select>
+                                    </fieldset>
                                 </div>
                             </div>
 
@@ -777,30 +791,38 @@ efectuados, entre otros datos que puedan aportar y dar indicios de la patología
 
                             <div class="horizontal-group-simple" style="margin: 2rem 3rem;">
 
-                                <div class="cuadros-ingreso-normal5" style="padding-right: 3rem;">
+                                <div class="col-sm-4" style="padding-right: 1rem;">
                                     <fieldset class="grupo-input text-center">
                                         <label for="disabledTextInput">APTITUD</label>
                                             <select id="txtAptitudSelect" class="form-control">
                                                 <option value="" selected>- Seleccionar -</option>
                                                 <option value="apto">APTO </option>
-                                                <option value="aptoObservacion">APTO EN OBSERVACIÓN</option>      
+                                                <option value="aptoObservacion">APTO CON OBSERVACIÓN</option>      
                                                 <option value="aptoLimitacion">APTO CON LIMITACIONES </option>   
                                                 <option value="noApto">NO APTO</option>   
                                             </select>
                                      </fieldset>
                                 </div>
-                                <div class="cuadros-ingreso-normal6" id="descObservacion">
-                                    <div class="grupo-input text-center" >
-                                        <label for="disabledTextInput">Observación</label>
-                                        <input id="txtDescObservacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
-                                    </div>
-                                </div>     
-                                <div class="cuadros-ingreso-normal6" id="descLimitacion">
-                                    <div class="grupo-input text-center" >
-                                        <label for="disabledTextInput">Limitación</label>
-                                        <input id="txtDescLimitacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
-                                    </div>
-                                </div>  
+                                <div class="col-sm-8">
+                                    <div class="col-sm-12" id="descObservacion">
+                                        <div class="grupo-input text-center" >
+                                            <label for="disabledTextInput">Observación</label>
+                                            <input id="txtDescObservacion" type="text" class="form-control select-temas" placeholder="Descripción" value="">
+                                        </div>
+                                    </div>     
+                                    <div class="col-sm-12" id="descLimitacion" style="margin-top:1rem;">
+                                        <div class="grupo-input text-center" >
+                                            <label for="disabledTextInput">Limitación</label>
+                                            <input id="txtDescLimitacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
+                                        </div>
+                                    </div> 
+                                    <div class="col-sm-12" id="descReubicacion" style="margin-top:1rem;">
+                                        <div class="grupo-input text-center" >
+                                            <label for="disabledTextInput">Reubicación</label>
+                                            <input id="txtDescReubicacion" type="text" class="form-control input-azulmedio" placeholder="Descripción" value="">
+                                        </div>
+                                    </div> 
+                                </div> 
                            </div>
 
                             <div class="form-group" style="margin: 0 2rem;">
@@ -814,12 +836,26 @@ farmacológico y no farmacológico."></textarea>
                      </div>
                  </div>
 
-                 <div class="" id="btnCarga" style="display:none; justify-content:center;">
-                     <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosReintegro" onclick="GuardarReintegro()" style="width: 25%; margin: 3rem;">Guardar Datos</button>
-                 </div>
+                <div class="horizontal-group-start" id="btnCarga" style="display:none; margin-top:4rem; margin-bottom:3rem;">
+                    <div class="col-sm-4" style="color:whitesmoke; display:flex; justify-content:space-between; padding-left:0; padding-right:0;">
+                        <div class="col-sm-6 text-center input-group horizontal-group-start">       
+                            <label class="control-label">fecha: </label>
+                            <input type="date" style="margin-left:0.5rem;" class="form-control" id="fechaFormulario" value="">
+                        </div>
+                        <div class="col-sm-5 input-group horizontal-group-end" style="padding-right:1rem;">  
+                            <label class="control-label">hora: </label>
+                            <input type="text" style="margin-left:0.5rem;" class="form-control" id="horaFormulario" placeholder="00:00" value="">
+                        </div>
+                    </div>
 
-                <!-- Boton flotante de regreso-->
-                <a id="btnRegresar" class="chat-button"></a>
+                    <!--div class="" id="btnCarga" style="display:none; justify-content:center;"-->
+                     <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosReintegro" onclick="GuardarReintegro()" style="width: 25%; margin-left:5rem;">Guardar Datos</button>
+                    <!--/div-->           
+                
+                    <!-- Boton flotante de regreso-->
+                    <div><a id="btnRegresar" class="text-center chat-button"></a></div>
+                        
+                </div>
 
                 <!-- Modal de advertencia -->
                 <div id="confirmModal" class="modal fade" role="dialog">
@@ -847,3 +883,4 @@ farmacológico y no farmacológico."></textarea>
     
 
 </asp:Content>
+

@@ -118,3 +118,25 @@ C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NP
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaNegocio.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaDato.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaEntidad.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\EPPlus.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\EPPlus.Interfaces.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\EPPlus.System.Drawing.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\NPOI.Core.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\NPOI.OOXML.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.dll
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.AssemblyReference.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.exe.config
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\LEO\Sis Interno DOS\ControlTareas\CapaNegocio\obj\Release\CapaNegocio.pdb

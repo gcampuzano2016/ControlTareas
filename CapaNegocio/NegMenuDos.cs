@@ -1,10 +1,7 @@
-using CapaEntidad;
 using CapaDato;
+using CapaEntidad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaNegocio
 {
@@ -21,10 +18,10 @@ namespace CapaNegocio
             return DaoMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(tipo);
         }
 
-        public static EntRespuesta Sp_RTA_InsertarMenuNuevo(int tipoMenu, String Titulo, String Descripcion, String Icono, String Referencia,int MenuPadre)
+        public static EntRespuesta Sp_RTA_InsertarMenuNuevo(int tipoMenu, String Titulo, String Descripcion, String Icono, String Referencia, int MenuPadre)
         {
             EntRespuesta respuesta = new EntRespuesta();
-            respuesta= DaoMenuDos.Sp_RTA_InsertarMenuNuevo(tipoMenu, Titulo, Descripcion, Icono,Referencia, MenuPadre);
+            respuesta = DaoMenuDos.Sp_RTA_InsertarMenuNuevo(tipoMenu, Titulo, Descripcion, Icono, Referencia, MenuPadre);
             return respuesta;
         }
 

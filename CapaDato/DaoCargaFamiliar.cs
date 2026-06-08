@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -31,7 +28,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@IdEmpleado", objCargar.IdEmpleado);
                 cmd.Parameters.AddWithValue("@Parentesco", objCargar.Parentesco);
                 cmd.Parameters.AddWithValue("@Nombre", objCargar.Nombre);
-                cmd.Parameters.AddWithValue("@Fecha_nacimiento", Convert.ToDateTime ( objCargar.fecha_nacimiento));
+                cmd.Parameters.AddWithValue("@Fecha_nacimiento", Convert.ToDateTime(objCargar.fecha_nacimiento));
                 cmd.Parameters.AddWithValue("@Operacion", objCargar.Operacion);
 
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -133,40 +130,40 @@ namespace CapaDato
         }
 
         public static List<EntCargaFamiliar> ConsultaSp_RTAConsultarCargaFamPorId(int IdEmpleado)
-        {      
+        {
 
-                List<EntCargaFamiliar> listaTareas = null;
+            List<EntCargaFamiliar> listaTareas = null;
 
-                SqlCommand cmd = null;
-                SqlDataReader dr = null;
-                try
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+
+                cmd = new SqlCommand("Sp_RTAConsultarCargaFamPorId", cnx);
+                cmd.Parameters.AddWithValue("@IdEmpleado", IdEmpleado);
+                //cmd.Parameters.AddWithValue("@tipo", tipo);
+
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+                listaTareas = new List<EntCargaFamiliar>();
+
+                while (dr.Read())
                 {
-                    DaoReporTareaAranda cn = new DaoReporTareaAranda();
-                    SqlConnection cnx = cn.conectar();
-                    cnx.Open();
-
-                    cmd = new SqlCommand("Sp_RTAConsultarCargaFamPorId", cnx);
-                    cmd.Parameters.AddWithValue("@IdEmpleado", IdEmpleado);
-                    //cmd.Parameters.AddWithValue("@tipo", tipo);
-
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    dr = cmd.ExecuteReader();
-                    listaTareas = new List<EntCargaFamiliar>();
-
-                    while (dr.Read())
-                    {
-                        EntCargaFamiliar Tarea = new EntCargaFamiliar();
-                        Tarea.IdCargaFam = Convert.ToInt32(dr["IdCargaFam"].ToString());
-                        Tarea.IdEmpleado = Convert.ToInt32(dr["IdEmpleado"].ToString());
-                        Tarea.Parentesco = dr["PARENTESCO"].ToString();
-                        Tarea.Nombre = dr["NOMBRE"].ToString();
-                        Tarea.fecha_nacimiento = dr["FECHA_NACIMIENTO"].ToString(); //date
-                        Tarea.Estado = dr["ESTADO"].ToString();
+                    EntCargaFamiliar Tarea = new EntCargaFamiliar();
+                    Tarea.IdCargaFam = Convert.ToInt32(dr["IdCargaFam"].ToString());
+                    Tarea.IdEmpleado = Convert.ToInt32(dr["IdEmpleado"].ToString());
+                    Tarea.Parentesco = dr["PARENTESCO"].ToString();
+                    Tarea.Nombre = dr["NOMBRE"].ToString();
+                    Tarea.fecha_nacimiento = dr["FECHA_NACIMIENTO"].ToString(); //date
+                    Tarea.Estado = dr["ESTADO"].ToString();
 
                     listaTareas.Add(Tarea);
-                    }
-
                 }
+
+            }
             catch (Exception ex)
             {
                 listaTareas = null;

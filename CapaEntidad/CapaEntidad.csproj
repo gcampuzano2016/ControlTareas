@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CapaEntidad</RootNamespace>
     <AssemblyName>CapaEntidad</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntActividad.cs" />
     <Compile Include="EntBoolean.cs" />
     <Compile Include="EntCargaFamiliar.cs" />
     <Compile Include="EntClienteEgrInventario.cs" />
@@ -51,13 +52,17 @@
     <Compile Include="EntCosteoServicio.cs" />
     <Compile Include="EntCuentaContable.cs" />
     <Compile Include="EntCuotaAnual.cs" />
+    <Compile Include="EntDatosMed.cs" />
     <Compile Include="EntDetalleInventario.cs" />
     <Compile Include="EntEgresoInventario.cs" />
     <Compile Include="EntEmpleado.cs" />
     <Compile Include="EntForeCast.cs" />
+    <Compile Include="EntHsCln.cs" />
     <Compile Include="EntInfoAdicionalHisClinica.cs" />
     <Compile Include="EntInfoContrato.cs" />
     <Compile Include="EntInfoFacturaProv.cs" />
+    <Compile Include="EntInfoRelevanteSalud.cs" />
+    <Compile Include="EntInmunizacionesData.cs" />
     <Compile Include="EntInventario.cs" />
     <Compile Include="EntMantenimiento.cs" />
     <Compile Include="EntMensajeForeCast.cs" />
@@ -70,6 +75,7 @@
     <Compile Include="EntPoliza.cs" />
     <Compile Include="EntProvinciaCiudad.cs" />
     <Compile Include="EntRebates.cs" />
+    <Compile Include="EntRegistroBiometrico.cs" />
     <Compile Include="EntReporteGe.cs" />
     <Compile Include="EntSolicitud.cs" />
     <Compile Include="EntTareaPrincipal.cs" />
@@ -79,6 +85,7 @@
     <Compile Include="EntCatalogo.cs" />
     <Compile Include="EntRespuesta.cs" />
     <Compile Include="EntDetTarea.cs" />
+    <Compile Include="EntUsuarioHorario.cs" />
     <Compile Include="EntError.cs" />
     <Compile Include="EntDetalleTarea.cs" />
     <Compile Include="EntHisTarea.cs" />

@@ -1,0 +1,55 @@
+GuardarNuevoInfoContrato
+
+registro.opcion = usuario;
+                registro.CLIENTE = campos["txtCliente"];
+                registro.CLI_NOMBRE = campos["txtNomContacto"];
+                registro.CLI_TELEFONO = campos["txtTelefono"];
+                registro.CLI_DIRECCION = campos["txtDireccion"];
+                registro.CLI_CORREO = campos["txtCorreo"];
+                registro.NUM_CONTRATO = campos["txtNumContrato"];
+                registro.NUM_PEDIDO = campos["txtNumPedido"];
+                registro.OBJETO = campos["txtObjeto"];
+                registro.VALOR_TOTAL_CONTRATO = Convert.ToDecimal(campos["txtValorContrato"], CultureInfo.InvariantCulture);
+                registro.ALCANCE = campos["txtAlcance"];
+                //registro.MARGEN = Convert.ToDecimal(campos["txtConMargen"], CultureInfo.InvariantCulture);
+                decimal? margen = null; // Permitir valores nulos
+
+                if (!string.IsNullOrWhiteSpace(campos["txtConMargen"]))
+                {
+                    if (decimal.TryParse(campos["txtConMargen"], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal tempMargen))
+                    {
+                        margen = tempMargen;
+                    }
+                }
+
+                registro.HARDWARE = campos["txtHardware"];
+                registro.LICENCIAS = campos["txtLicencias"];
+                registro.SERVICIOS_FABRICANTE = campos["txtServiciosFab"];
+                //registro.SERVICIO_DOS = campos["txtServiciosDOS"];
+                registro.SERVICIO_EXTERNOS = campos["txtServiciosExt"];
+                registro.POLIZAS = campos["txtPolizas"];
+                //registro.TERMINOS_TDR = campos["txtTDR"];
+                registro.FORMA_PAGO = campos["selectFormaPago"];
+                registro.FECHA_SUSCRIPCION_CONTRATO = campos["fechaSuscripContrato"];
+                registro.FECHA_NOTIF_ANTICIPO = campos["fechaNotifAnticipo"];
+                registro.FECHA_INICIO_GARANTIA = campos["fechaIniActivacion"];
+                registro.FECHA_FIN_GARANTIA = campos["fechaFinActivacion"];
+
+                registro.ITEMS = campos["txtItems"];
+
+                //registro.PLAZO_ACTIVACION = campos["txtPlazoActGarantia"];
+                //registro.PLAZO_ACTIVACION_LIC = campos["txtPlazoActLicencia"];
+                //registro.DURACION_VIGENCIA_TEC = campos["txtDuracionVigTec"];
+
+                registro.OBS_NUM_CONTRATO = campos["txtNumContratoObs"];
+                registro.OBS_VALOR_TOTAL = campos["txtValorContratoObs"];
+                registro.OBS_OBJETO = campos["txtObjetoObs"];
+                registro.OBS_ALCANCE = campos["txtAlcanceObjetoObs"];
+                registro.OBS_HARDWARE = campos["txtHardwareObs"];
+                registro.OBS_LICENCIAS = campos["txtLicenciasObs"];
+                registro.OBS_SERVICIOS_FABRICANTE = campos["txtServiciosFabObs"];
+                registro.OBS_SERVICIO_DOS = campos["txtServiciosDOSObs"];
+                registro.OBS_SERVICIO_EXTERNOS = campos["txtServiciosExternosObs"];
+                registro.OBS_POLIZAS = campos["txtPolizasObs"];
+                //registro.OBS_TERMINOS_TDR = campos["txtTerminosObs"];
+                registro.OBS_FORMA_PAGO = campos["txtFormaPagoObs"];

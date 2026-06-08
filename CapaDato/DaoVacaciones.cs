@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -47,7 +42,7 @@ namespace CapaDato
             return Respuesta;
         }
 
-        public static List<EntVacaciones> ConsultarSaldoVacaciones(string CodSap,int tipo)
+        public static List<EntVacaciones> ConsultarSaldoVacaciones(string CodSap, int tipo)
         {
             List<EntVacaciones> listaTareas = null;
 

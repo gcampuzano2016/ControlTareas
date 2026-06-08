@@ -1,120 +1,176 @@
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojResolveAssemblyReference.cache
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-C:\Users\cxlopez\Desktop\ProyectoDOS\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-E:\Desarrollo\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\Proyecto Tareas\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-E:\Desarrollo\ReporteTareasVersion2\ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaDato.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\Proyecto Reporte de Tareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-C:\Desarrollo\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csprojAssemblyReference.cache
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-D:\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe.config
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Microsoft.Win32.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\netstandard.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.AppContext.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Collections.Concurrent.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Collections.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Collections.NonGeneric.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Collections.Specialized.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ComponentModel.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ComponentModel.EventBasedAsync.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ComponentModel.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ComponentModel.TypeConverter.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Console.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Data.Common.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.Contracts.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.Debug.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.FileVersionInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.Process.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.StackTrace.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.TextWriterTraceListener.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.Tools.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.TraceSource.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Diagnostics.Tracing.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Drawing.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Dynamic.Runtime.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Globalization.Calendars.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Globalization.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Globalization.Extensions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.Compression.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.Compression.ZipFile.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.FileSystem.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.FileSystem.DriveInfo.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.FileSystem.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.FileSystem.Watcher.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.IsolatedStorage.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.MemoryMappedFiles.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.Pipes.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.IO.UnmanagedMemoryStream.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Linq.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Linq.Expressions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Linq.Parallel.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Linq.Queryable.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Http.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.NameResolution.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.NetworkInformation.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Ping.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Requests.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Security.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.Sockets.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.WebHeaderCollection.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.WebSockets.Client.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Net.WebSockets.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ObjectModel.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Reflection.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Reflection.Extensions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Reflection.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Resources.Reader.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Resources.ResourceManager.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Resources.Writer.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.CompilerServices.VisualC.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Extensions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Handles.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.InteropServices.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.InteropServices.RuntimeInformation.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Numerics.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Serialization.Formatters.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Serialization.Json.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Serialization.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.Serialization.Xml.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Claims.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Algorithms.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Csp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Encoding.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Primitives.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.X509Certificates.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Principal.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.SecureString.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Text.Encoding.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Text.Encoding.Extensions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Text.RegularExpressions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Overlapped.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Tasks.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Tasks.Parallel.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Thread.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.ThreadPool.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Timer.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.ValueTuple.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.ReaderWriter.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.XDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.XmlDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.XmlSerializer.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.XPath.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Xml.XPath.XDocument.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\BouncyCastle.Cryptography.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.AssemblyReference.cache
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
-C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Enums.NET.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.Interfaces.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.System.Drawing.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ExtendedNumerics.BigDecimal.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ICSharpCode.SharpZipLib.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\MathNet.Numerics.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Microsoft.Bcl.Cryptography.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Microsoft.IO.RecyclableMemoryStream.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Newtonsoft.Json.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.Core.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OOXML.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.dll
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NSax.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\SixLabors.Fonts.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\SixLabors.ImageSharp.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Buffers.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Formats.Asn1.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Memory.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Numerics.Vectors.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.CompilerServices.Unsafe.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.AccessControl.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Cng.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Pkcs.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Xml.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Principal.Windows.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Text.Encoding.CodePages.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Tasks.Extensions.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ZString.dll
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaDato.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\CapaEntidad.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\BouncyCastle.Cryptography.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Enums.NET.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Enums.NET.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\EPPlus.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ExtendedNumerics.BigDecimal.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ICSharpCode.SharpZipLib.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ICSharpCode.SharpZipLib.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\MathNet.Numerics.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Microsoft.Bcl.Cryptography.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Microsoft.IO.RecyclableMemoryStream.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\Newtonsoft.Json.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.Core.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.Core.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OOXML.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OOXML.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXml4Net.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.pdb
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\NPOI.OpenXmlFormats.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\SixLabors.Fonts.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\SixLabors.ImageSharp.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Buffers.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Formats.Asn1.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Memory.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Numerics.Vectors.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Runtime.CompilerServices.Unsafe.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.AccessControl.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Cng.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Pkcs.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Cryptography.Xml.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Security.Principal.Windows.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Text.Encoding.CodePages.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\System.Threading.Tasks.Extensions.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\bin\Release\ZString.xml
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.AssemblyReference.cache
 C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe.config
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CoreCompileInputs.cache
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.csproj.CopyComplete
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.exe
+C:\respaldodisco\Desarrollo\PRY_Sistema ReporteTareas\CapaNegocio\obj\Release\CapaNegocio.pdb

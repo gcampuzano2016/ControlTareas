@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SendGridMail;
-using SendGridMail.Transport;
-using System.Net.Mail;
-using System.Net;
-using System.Security.Cryptography;
-using System.IO;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using PDF;
 using ReporteTareas.clases;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CorreoHelper
 {
@@ -201,7 +197,7 @@ namespace CorreoHelper
                 parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
                 parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
 
-               contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
+                contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
 
                 respuestaEnvioCorreo = EnviarCorreoForeCast(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, Notificacion, "Notificación - Sistema de Gestión Interno");
 
@@ -358,7 +354,7 @@ namespace CorreoHelper
                     if (parametrosContenido.Item == "texto2")
                     {
                         Colaborador = parametrosContenido.Valor;
-                       //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
+                        //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
                     }
                     //cedula
                     else if (parametrosContenido.Item == "texto11")
@@ -377,7 +373,7 @@ namespace CorreoHelper
                     string rutaQR = generarRide.GenerarCodigoQR(Cedula + " " + Colaborador);
 
                     //VerErrores("rutaQR: " + rutaQR, "Log", "Detalle");
-                    
+
                     listaCampos.Add(new EntItemValor() { Item = "textoQR", Valor = "'" + rutaQR + "'" });
 
                     contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
@@ -392,8 +388,9 @@ namespace CorreoHelper
                     generarRide.EnvioCorreoEncuesta(contenidoCorreo, codigoSolicitud);
                     //pdfLista.CrearPDF(contenidoCorreo, codigoSolicitud);
                 }
-                else {
-                    
+                else
+                {
+
                     contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
 
                     foreach (EntItemValor parametrosContenido in listaCampos)
@@ -569,7 +566,7 @@ namespace CorreoHelper
                         smtp.Send(mail);
                         Temp = true;
                     }
-                     catch (Exception ex)
+                    catch (Exception ex)
                     {
                         Temp = false;
                         ErrorProceso = ex.Message.ToString().Trim();
@@ -582,7 +579,7 @@ namespace CorreoHelper
             return Temp;
         }
 
-        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo,string RutaDocumento)
+        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
         {
             bool Temp = false;
 

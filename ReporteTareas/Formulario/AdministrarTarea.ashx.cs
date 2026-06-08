@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web;
-using System.Web.Services;
-using JSONHelper;
-using System.Text;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
-using System.Web.Script.Serialization;
-using System.Globalization;
 using CorreoHelper;
-using ReporteTareas.ConsultarTicket2;
+using JSONHelper;
 using ReporteTareas.ConsultarIncidente2;
-using System.IO;
-using System.Data;
+using ReporteTareas.ConsultarTicket2;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using System.Web;
+using System.Web.Script.Serialization;
+using System.Web.Services;
 
 namespace JsonJQueryNetAdministrarTarea
 {
@@ -24,7 +22,7 @@ namespace JsonJQueryNetAdministrarTarea
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class AdministrarTarea : IHttpHandler
     {
-        
+
         public void ProcessRequest(HttpContext context)
         {
             dynamic parametros;
@@ -57,7 +55,7 @@ namespace JsonJQueryNetAdministrarTarea
                     responseAction.Append(GuardarDetalleTarea(parameters));
                 }
 
-                if(Action == "EnviarEmailPoliza")
+                if (Action == "EnviarEmailPoliza")
                 {
                     existAction = true;
                     responseAction.Append(EnviarEmailPolizas(parameters));
@@ -86,7 +84,7 @@ namespace JsonJQueryNetAdministrarTarea
                     existAction = true;
                     responseAction.Append(GuardarDetalleTareaCambioEstado(parameters));
                 }
-                
+
                 if (Action == "AprobarTarea")
                 {
                     existAction = true;
@@ -123,7 +121,7 @@ namespace JsonJQueryNetAdministrarTarea
                     existAction = true;
                     responseAction.Append(AprobarTareaRevisor(parameters));
                 }
-                
+
                 if (Action == "AnularAprobacionTareasRevisor")
                 {
                     existAction = true;
@@ -139,7 +137,7 @@ namespace JsonJQueryNetAdministrarTarea
 
             }
 
- 
+
 
             context.Response.ContentType = "application/json";
             context.Response.Charset = "utf-8";
@@ -151,7 +149,7 @@ namespace JsonJQueryNetAdministrarTarea
 
             SeguridadHelper seguridad = new SeguridadHelper();
             EntRespuesta respuesta = new EntRespuesta();
-            EntRespuesta respuestaActualizaHorasExtras = new EntRespuesta(); 
+            EntRespuesta respuestaActualizaHorasExtras = new EntRespuesta();
             EntDetalleTarea registro = new EntDetalleTarea();
             EntDetalleTarea registroOriginal = new EntDetalleTarea();
             EntTareas objTarea = new EntTareas();
@@ -161,7 +159,7 @@ namespace JsonJQueryNetAdministrarTarea
             EntItemValor campoCorreo = new EntItemValor();
             EntUsuario usuario = new EntUsuario();
             string IdUsuarioSession = "";
-            string IpCliente = ""; 
+            string IpCliente = "";
 
 
             try
@@ -197,7 +195,7 @@ namespace JsonJQueryNetAdministrarTarea
                 registro.Det_Nom_Empresa = objTarea.Nom_Empresa;
                 registro.Id_RegTareas = objTarea.Id_RegTareas;
 
-                registro.Cod_CatalogoTareaSap = Convert.ToInt32(campos["frmCmbTipoActividad"]); 
+                registro.Cod_CatalogoTareaSap = Convert.ToInt32(campos["frmCmbTipoActividad"]);
                 registro.Id_RegDetTareas = Convert.ToInt32(campos["frmTxtCodigo"]);
                 registro.Det_Det_Tarea = campos["frmTxtTareaDetalle"];
                 string fechaInicio = campos["frmTxtFecha"] + " " + campos["frmTxtHoraDesde"];
@@ -287,13 +285,13 @@ namespace JsonJQueryNetAdministrarTarea
                     {
                         // Se envia el codigo de la solicitud y el valor 1-Solicitud Horas Extras Enviada
                         respuestaActualizaHorasExtras = NegTareas.RTAActualizarEstadoHorasExtras(registro.Id_RegDetTareas, 1);
-                        if(respuestaActualizaHorasExtras.estado == "0")
+                        if (respuestaActualizaHorasExtras.estado == "0")
                         {
                             return responseMessage("0", "Se guardo correctamente los datos y se envía correo con solicitud, pero no se pudo cambiar el estado de la solicitud.", "warning");
                         }
 
                     }
-                    
+
                 }
 
             }
@@ -541,7 +539,7 @@ namespace JsonJQueryNetAdministrarTarea
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
                 correo = campos["correo"];
-                detalle = campos["detalle"]+"↨" + usuario.Nom_Usuario;
+                detalle = campos["detalle"] + "↨" + usuario.Nom_Usuario;
                 detalleBody = detalle;
                 bool respuestaEnvioCorreo = false;
                 EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
@@ -620,7 +618,7 @@ namespace JsonJQueryNetAdministrarTarea
                 objTarea.Det_Ip_Modificacion = ipCliente;
 
                 //actualizar observacion
-                objTarea.EstadoTarea = detalleTarea +":  " + observacionTarea;
+                objTarea.EstadoTarea = detalleTarea + ":  " + observacionTarea;
                 objTarea.Tipo = 1;
                 objTarea.Id_RegTareas = idTareaPrincipal;
                 NegTareas.RTA_ActualizarRequerimiento(objTarea);
@@ -904,7 +902,7 @@ namespace JsonJQueryNetAdministrarTarea
             string idUsuarioResponsable = campos["txtCodigo"].ToString();
             string fechaDesde = campos["txtFechaDesde"].ToString();
             string fechaHasta = campos["txtFechaHasta"].ToString();
-            
+
             try
             {
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
@@ -926,7 +924,7 @@ namespace JsonJQueryNetAdministrarTarea
                 }
                 else
                 {
-                    if(respuesta.mensaje == null)
+                    if (respuesta.mensaje == null)
                     {
                         respuesta.mensaje = "No se realizó la Aprobación de Tareas. Si las tareas seleccionadas ya estan aprobadas puede recibir este mensaje.";
                     }

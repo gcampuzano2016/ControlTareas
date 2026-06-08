@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -180,7 +175,7 @@ namespace CapaDato
 
         }
 
-        public static List<EntMantenimiento> ConsultSp_RTAConsultaMantenimientoContrato(string FchIni, string FchFin, string orden, int tipo,int IdRequerimiento)
+        public static List<EntMantenimiento> ConsultSp_RTAConsultaMantenimientoContrato(string FchIni, string FchFin, string orden, int tipo, int IdRequerimiento)
         {
             List<EntMantenimiento> listaTareas = null;
 
@@ -230,7 +225,7 @@ namespace CapaDato
 
             return listaTareas;
         }
-        public static List<EntMantenimiento> ConsultSp_RTAListaMantenimientoContrato(string FchIni, string FchFin, string orden,int IdCliente, string Clasificacion, int tipo)
+        public static List<EntMantenimiento> ConsultSp_RTAListaMantenimientoContrato(string FchIni, string FchFin, string orden, int IdCliente, string Clasificacion, int tipo)
         {
             List<EntMantenimiento> listaTareas = null;
 
@@ -265,7 +260,7 @@ namespace CapaDato
                     Tarea.Descripcion = dr["Descripcion"].ToString();
                     Tarea.Clasificacion = dr["Clasificacion"].ToString();
                     Tarea.conteoArchivosAdjuntos = Convert.ToInt32(dr["conteoArchivosAdjuntos"].ToString());
-                    Tarea.Valor =Convert.ToDouble(dr["Valor"].ToString());
+                    Tarea.Valor = Convert.ToDouble(dr["Valor"].ToString());
                     listaTareas.Add(Tarea);
                 }
 
@@ -310,8 +305,8 @@ namespace CapaDato
                 Respuesta.estado = "1";
                 Respuesta.mensaje = "OK";
                 Respuesta.tipoMensaje = "success";
-                Respuesta.resultadoTabla = dtResultados; 
-                
+                Respuesta.resultadoTabla = dtResultados;
+
 
             }
             catch (Exception ex)

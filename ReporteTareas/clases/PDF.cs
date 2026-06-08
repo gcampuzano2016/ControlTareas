@@ -1,26 +1,14 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using Pechkin;
-
-using System.Web;
-using System.Web.Services;
-using System.Web.Script.Serialization;
-
 using CapaEntidad;
 using CapaNegocio;
-
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
-
+using Pechkin;
+using Pechkin.Synchronized;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using Pechkin.Synchronized;
+using System.IO;
+using System.Web;
 
 namespace PDF
 {
@@ -59,7 +47,7 @@ namespace PDF
                     pdfBuffer = pechkin.Convert(contenidohtml);
                     VerErrores("Paso 5: " + "Paso 5", "Log", "Detalle");
                     // PDF simple de cadena
-                   
+
                     //pdfBuffer = new SimplePechkin(new GlobalConfig()).Convert(contenidohtml);
 
                     // Carpeta donde se creará el archivo
@@ -81,7 +69,7 @@ namespace PDF
                         registro.Ruta_Archivo = directory;
                         registro.Descripcion_Archivo = filename;
                         int result = NegSolicitud.RTA_ActualizarRutaRide(registro);
-                      
+
                     }
                     else
                     {
@@ -123,7 +111,7 @@ namespace PDF
             catch (Exception _Exception)
             {
                 //Console.WriteLine("Excepción detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
-                VerErrores("Exception: "+ _Exception.ToString(), "Log", "Detalle");
+                VerErrores("Exception: " + _Exception.ToString(), "Log", "Detalle");
             }
 
             return false;

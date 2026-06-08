@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
+﻿using CapaEntidad;
 using ReporteTareas.Controles;
-using System.Data;
 using SeguridadAppHelper;
-using System.Text;
+using System;
+using System.Collections.Generic;
 
 namespace ReporteTareas.Formulario
 {
@@ -43,7 +36,7 @@ namespace ReporteTareas.Formulario
                             {
                                 //idGerente.Visible = true;
                                 //Detalle.Visible = true;
-                                txtIdCliente.Text= IdCliente.ToString();
+                                txtIdCliente.Text = IdCliente.ToString();
                             }
                             else
                             {
@@ -58,7 +51,7 @@ namespace ReporteTareas.Formulario
                     { }
                 }
             }
-            
+
         }
 
 

@@ -1,12 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
 
 namespace CapaDato
 {
@@ -96,7 +92,7 @@ namespace CapaDato
                 cmd = new SqlCommand("Sp_RTAInsertaCodigoSeguridad", cnx);
                 cmd.Parameters.AddWithValue("@CodigoReset", objUsuario.CodigoReset);
                 cmd.Parameters.AddWithValue("@Log_Usuario", objUsuario.Log_Usuario);
-                
+
                 cmd.CommandType = CommandType.StoredProcedure;
                 cnx.Open();
                 dr = cmd.ExecuteReader();
@@ -237,7 +233,7 @@ namespace CapaDato
                 objUsuario = new EntUsuario();
                 dr.Read();
 
-                //objUsuario.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
+                objUsuario.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
                 objUsuario.Cod_Usuario = dr["Cod_Usuario"].ToString();
                 objUsuario.Nom_Usuario = dr["Nom_Usuario"].ToString();
                 objUsuario.Log_Usuario = dr["Log_Usuario"].ToString();
@@ -281,7 +277,7 @@ namespace CapaDato
                 dr.Read();
 
                 resultado = dr["usuarioEsJefe"].ToString();
-                if(resultado == "true")
+                if (resultado == "true")
                 {
                     usuarioEsJefe = true;
                 }
@@ -333,7 +329,7 @@ namespace CapaDato
                 cmd.Connection.Close();
             }
             return resultado;
-        }        
+        }
         public static string RTA_CorreoUsuario(string IdUsuario)
         {
 
@@ -390,7 +386,7 @@ namespace CapaDato
 
                     cmbUsuarios.Add(usuario);
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -402,7 +398,44 @@ namespace CapaDato
             }
             return cmbUsuarios;
         }
-        public static List<EntCombo> ConsultarDatosEmpleado(string Cod_Usuario,int Tipo)
+
+        public static List<EntCombo> ListaUsuariosComboSap(string Idusuario)
+        {
+            List<EntCombo> cmbUsuarios = null;
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cmd = new SqlCommand("Sp_RTAConsultaUsuarioPorJefeSap", cnx);
+                cmd.Parameters.AddWithValue("@Cod_Jefe_Inm", Idusuario);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cnx.Open();
+                dr = cmd.ExecuteReader();
+                cmbUsuarios = new List<EntCombo>();
+                while (dr.Read())
+                {
+                    EntCombo usuario = new EntCombo();
+
+                    usuario.Id = dr["Cod_Usuario"].ToString();
+                    usuario.Valor = dr["Nom_Usuario"].ToString();
+
+                    cmbUsuarios.Add(usuario);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                cmbUsuarios = null;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+            return cmbUsuarios;
+        }
+        public static List<EntCombo> ConsultarDatosEmpleado(string Cod_Usuario, int Tipo)
         {
             List<EntCombo> cmbUsuarios = null;
             SqlCommand cmd = null;

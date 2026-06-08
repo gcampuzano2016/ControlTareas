@@ -1,19 +1,14 @@
+using CapaEntidad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
     public class DaoContrato
     {
-        public static EntRespuesta ConsultaSp_RTAListaContratosDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado,string area)
+        public static EntRespuesta ConsultaSp_RTAListaContratosDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado, string area)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -61,7 +56,7 @@ namespace CapaDato
 
             return Respuesta;
         }
-        public static List<EntContrato> ConsultaSp_RTAListaContratos(string FchIni, string FchFin,string busqueda,int IdCliente,int IdGerenteCuenta,int IdGestorResponsable,string sucursal,string estado, string area,int IdClasificacion)
+        public static List<EntContrato> ConsultaSp_RTAListaContratos(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado, string area, int IdClasificacion)
         {
             List<EntContrato> listaTareas = null;
 
@@ -111,7 +106,7 @@ namespace CapaDato
                     Tarea.COSTO_REAL = dr["COSTO_REAL"].ToString();
                     Tarea.SALDO_DE_COSTOS = dr["SALDO_DE_COSTOS"].ToString();
                     Tarea.ESTATUS = dr["ESTATUS"].ToString();
-                    Tarea.FECHA_ESTIMADA_DE_CIERRE =dr["FECHA_ESTIMADA_DE_CIERRE"].ToString();
+                    Tarea.FECHA_ESTIMADA_DE_CIERRE = dr["FECHA_ESTIMADA_DE_CIERRE"].ToString();
                     Tarea.FECHA_CIERRE = dr["FECHA_CIERRE"].ToString();
                     Tarea.MANTENIMIENTO = dr["MANTENIMIENTO"].ToString();
                     Tarea.MANT_ENTREGADOS = dr["MANT_ENTREGADOS"].ToString();
@@ -136,7 +131,7 @@ namespace CapaDato
 
             return listaTareas;
         }
-        public static List<EntContrato> ConsultaSp_RTAConsultarContratos(int IdServicio,string orden,int tipo)
+        public static List<EntContrato> ConsultaSp_RTAConsultarContratos(int IdServicio, string orden, int tipo)
         {
             List<EntContrato> listaTareas = null;
 
@@ -242,10 +237,10 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@SALDO_DE_COSTOS", objEntContrato.SALDO_DE_COSTOS);
                 cmd.Parameters.AddWithValue("@ESTATUS", objEntContrato.ESTATUS);
                 cmd.Parameters.AddWithValue("@FECHA_ESTIMADA_DE_CIERRE", Convert.ToDateTime(objEntContrato.FECHA_ESTIMADA_DE_CIERRE));
-                if(objEntContrato.FECHA_CIERRE=="")
+                if (objEntContrato.FECHA_CIERRE == "")
                 {
                     cmd.Parameters.AddWithValue("@FECHA_CIERRE", Convert.ToDateTime("1900-01-01"));
-                }   
+                }
                 else
                 {
                     cmd.Parameters.AddWithValue("@FECHA_CIERRE", Convert.ToDateTime(objEntContrato.FECHA_CIERRE));
@@ -335,8 +330,8 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@CLASIFICACION", objEntContrato.CLASIFICACION);
                 cmd.Parameters.AddWithValue("@DESCRIPCION_DE_SERVICIO", objEntContrato.DESCRIPCION_DE_SERVICIO);
                 cmd.Parameters.AddWithValue("@SLA_CONTRATO", objEntContrato.SLA_CONTRATO);
-                cmd.Parameters.AddWithValue("@HORAS_CONTRATADAS", Convert.ToDouble( objEntContrato.HORAS_CONTRATADAS));
-                cmd.Parameters.AddWithValue("@HORAS_ENTREGADAS", Convert.ToDouble( objEntContrato.HORAS_ENTREGADAS));
+                cmd.Parameters.AddWithValue("@HORAS_CONTRATADAS", Convert.ToDouble(objEntContrato.HORAS_CONTRATADAS));
+                cmd.Parameters.AddWithValue("@HORAS_ENTREGADAS", Convert.ToDouble(objEntContrato.HORAS_ENTREGADAS));
                 cmd.Parameters.AddWithValue("@HORAS_DISPONIBLES", Convert.ToDouble(objEntContrato.HORAS_DISPONIBLES));
                 cmd.Parameters.AddWithValue("@COSTO_PLAN", Convert.ToDouble(objEntContrato.COSTO_PLAN));
                 cmd.Parameters.AddWithValue("@COSTO_REAL", Convert.ToDouble(objEntContrato.COSTO_REAL));
@@ -496,7 +491,7 @@ namespace CapaDato
             return Respuesta;
 
         }
-        public static List<EntCombo> RTAListaComboContrato(Int32 Tipo,string Cod_Usuario, Int32 IdSucursal,Int32 IdCliente,string IdSucursalGerente)
+        public static List<EntCombo> RTAListaComboContrato(Int32 Tipo, string Cod_Usuario, Int32 IdSucursal, Int32 IdCliente, string IdSucursalGerente, string Mes)
         {
             List<EntCombo> cmbEstados = null;
             SqlCommand cmd = null;
@@ -513,6 +508,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@IdSucursal", IdSucursal);
                 cmd.Parameters.AddWithValue("@IdCliente", IdCliente);
                 cmd.Parameters.AddWithValue("@IdSucursalGerente", IdSucursalGerente);
+                cmd.Parameters.AddWithValue("@Mes", Mes);
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
                 cmbEstados = new List<EntCombo>();

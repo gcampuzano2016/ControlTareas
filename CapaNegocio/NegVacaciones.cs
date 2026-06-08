@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace CapaNegocio
@@ -20,7 +19,7 @@ namespace CapaNegocio
         }
 
         #region EscribirLog
-        public void EscribirLog(string valor, string Carpeta, string rucEmpresa,bool EstadoProceso)
+        public void EscribirLog(string valor, string Carpeta, string rucEmpresa, bool EstadoProceso)
         {
             try
             {

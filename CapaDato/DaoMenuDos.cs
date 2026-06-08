@@ -1,11 +1,8 @@
-using System;
 using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data.SqlClient;
 using System.Data;
+using System.Data.SqlClient;
 
 namespace CapaDato
 {
@@ -56,7 +53,7 @@ namespace CapaDato
             return listaTareas;
         }
 
-        public static EntRespuesta Sp_RTA_InsertarMenuNuevo(int tipoMenu, String Titulo, String Descripcion, String Icono,String Referencia, int MenuPadre)
+        public static EntRespuesta Sp_RTA_InsertarMenuNuevo(int tipoMenu, String Titulo, String Descripcion, String Icono, String Referencia, int MenuPadre)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             int respuestaSP = 0;
@@ -187,7 +184,7 @@ namespace CapaDato
                     Tarea.Titulo = dr["Titulo"].ToString();
                     Tarea.Estado = Convert.ToInt32(dr["Estado"].ToString());
                     Tarea.Id_MenuPadre = Convert.ToInt32(dr["Id_MenuPadre"].ToString());
-                    Tarea.Class_Icon= dr["Class_Icon"].ToString();
+                    Tarea.Class_Icon = dr["Class_Icon"].ToString();
                     Tarea.Href = dr["Href"].ToString();
                     listaTareas.Add(Tarea);
 
@@ -316,9 +313,9 @@ namespace CapaDato
         }
 
 
-    
 
-}
+
+    }
 
 
 }

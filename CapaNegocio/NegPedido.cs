@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -26,12 +24,12 @@ namespace CapaNegocio
             return respuesta;
         }
 
-        public static List<EntPedido> ConsultaSp_RTAListaPedido(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses,int idFecha,int IdRenovacion)
+        public static List<EntPedido> ConsultaSp_RTAListaPedido(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses, int idFecha, int IdRenovacion)
         {
             return DaoPedido.ConsultaSp_RTAListaPedido(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorProducto, sucursal, estado, IdClasificacion, Anio, meses, idFecha, IdRenovacion);
         }
 
-        public static EntRespuesta ConsultaSp_RTAListaPedidoDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses,int idFecha,int IdRenovacion)
+        public static EntRespuesta ConsultaSp_RTAListaPedidoDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses, int idFecha, int IdRenovacion)
         {
             return DaoPedido.ConsultaSp_RTAListaPedidoDescargar(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorProducto, sucursal, estado, IdClasificacion, Anio, meses, idFecha, IdRenovacion);
         }

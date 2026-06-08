@@ -1,12 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
 using System.Globalization;
 
 namespace CapaDato
@@ -75,7 +71,7 @@ namespace CapaDato
                 {
                     cmd.Parameters.AddWithValue("@FechaInicioProyecto", Convert.ToDateTime(objEntForeCast.FechaInicioProyecto));
                 }
-             
+
                 if (objEntForeCast.FechaFacturacionProyecto == "")
                 {
                     cmd.Parameters.AddWithValue("@FechaFacturacionProyecto", Convert.ToDateTime("1900-01-01"));
@@ -329,7 +325,7 @@ namespace CapaDato
 
         }
 
-        public static List<EntForeCast> ConsultaSp_RTAListaForeCast(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal,string SegmentodeMercado, string StrIdPrioridad,string Idusuario,int idFecha, int Anio,string cierrenegocio,int IdPrioProyecto,int ProyecEstrategico,string TipoProyecto)
+        public static List<EntForeCast> ConsultaSp_RTAListaForeCast(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico, string TipoProyecto, string semana)
         {
             List<EntForeCast> listaTareas = null;
 
@@ -358,6 +354,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@ActivarPrioridad", IdPrioProyecto);
                 cmd.Parameters.AddWithValue("@ProyecEstrategico", ProyecEstrategico);
                 cmd.Parameters.AddWithValue("@TipoProyecto", TipoProyecto);
+                cmd.Parameters.AddWithValue("@semana", semana);
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
                 listaTareas = new List<EntForeCast>();
@@ -509,7 +506,7 @@ namespace CapaDato
 
             return listaTareas;
         }
-        public static EntRespuesta ConsultaSp_RTAListaForeCastDescargar(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio,int IdPrioProyecto, int ProyecEstrategico,string TipoProyecto)
+        public static EntRespuesta ConsultaSp_RTAListaForeCastDescargar(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico, string TipoProyecto)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -912,7 +909,7 @@ namespace CapaDato
                         Tarea.IdForeCast = Convert.ToInt32(dr["IdForeCast"].ToString());
                         listaTareas.Add(Tarea);
                     }
-                    else if(tipo == 2)
+                    else if (tipo == 2)
                     {
                         Tarea.TipoEmpresa = dr["TipoEmpresa"].ToString();
                         Tarea.SegmentodeMercado = dr["SegmentodeMercado"].ToString();
@@ -933,5 +930,138 @@ namespace CapaDato
             return listaTareas;
         }
 
+        public static EntRespuesta InsertarModificarEliminarRegistroBiometrico(EntRegistroBiometrico biometrico)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            DataTable dtResultados = new DataTable();
+
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+                cmd = new SqlCommand("InsertarModificarEliminarRegistroBiometrico", cnx);
+                cmd.Parameters.AddWithValue("@IdProceso", biometrico.IdProceso);
+                cmd.Parameters.AddWithValue("@Id_Usuario", biometrico.Id_Usuario);
+                cmd.Parameters.AddWithValue("@FechaEntrada", biometrico.FechaEntrada);
+                cmd.Parameters.AddWithValue("@FechaAlmorzar", biometrico.FechaAlmorzar);
+                cmd.Parameters.AddWithValue("@FechaRegAlmorzar", biometrico.FechaRegAlmorzar);
+                cmd.Parameters.AddWithValue("@FechaSalida", biometrico.FechaSalida);
+                cmd.Parameters.AddWithValue("@FechaRegistro", biometrico.FechaRegistro);
+                cmd.Parameters.AddWithValue("@Estado", biometrico.Estado);
+                cmd.Parameters.AddWithValue("@Observacion", biometrico.Observacion);
+                cmd.Parameters.AddWithValue("@Tipo", biometrico.Tipo);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+                dtResultados.Load(dr);
+                Respuesta.estado = dtResultados.Rows[0][1].ToString();
+                Respuesta.mensaje = dtResultados.Rows[0][0].ToString();
+                Respuesta.tipoMensaje = "success";
+                //Respuesta.resultadoTabla = dtResultados;
+
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = ex.Message.ToString();
+                Respuesta.tipoMensaje = "danger";
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return Respuesta;
+        }
+
+        public static EntRespuesta InsertarModificarEliminarRegistroActividad(EntActividad actividad)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            DataTable dtResultados = new DataTable();
+
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+                cmd = new SqlCommand("InsertarModificarEliminarRegistroActividad", cnx);
+                cmd.Parameters.AddWithValue("@IdProceso", actividad.IdProceso);
+                cmd.Parameters.AddWithValue("@FechaInicio", actividad.FechaInicio);
+                cmd.Parameters.AddWithValue("@FechaFinal", actividad.FechaFinal);
+                cmd.Parameters.AddWithValue("@FechaLimite", actividad.FechaLimite);
+                cmd.Parameters.AddWithValue("@Estado", actividad.Estado);
+                cmd.Parameters.AddWithValue("@Observacion", actividad.Observacion);
+                cmd.Parameters.AddWithValue("@Tipo", actividad.Tipo);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+                dtResultados.Load(dr);
+                Respuesta.estado = dtResultados.Rows[0][1].ToString();
+                Respuesta.mensaje = dtResultados.Rows[0][0].ToString();
+                Respuesta.tipoMensaje = "success";
+                //Respuesta.resultadoTabla = dtResultados;
+
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = ex.Message.ToString();
+                Respuesta.tipoMensaje = "danger";
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return Respuesta;
+        }
+
+        public static List<EntRegistroBiometrico> Sp_RTAConsultaBiometria(int Id_Usuario, DateTime FechaRegistro)
+        {
+            List<EntRegistroBiometrico> listaTareas = null;
+
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+
+                cmd = new SqlCommand("Sp_RTAConsultaBiometria", cnx);
+                cmd.Parameters.AddWithValue("@Id_Usuario", Id_Usuario);
+                cmd.Parameters.AddWithValue("@FechaRegistro", FechaRegistro);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+                listaTareas = new List<EntRegistroBiometrico>();
+
+                while (dr.Read())
+                {
+                    EntRegistroBiometrico Tarea = new EntRegistroBiometrico();
+                    Tarea.IdProceso = Convert.ToInt32(dr["IdProceso"].ToString());
+                    Tarea.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
+                    Tarea.FechaEntrada = Convert.ToDateTime(dr["FechaEntrada"].ToString());
+                    Tarea.FechaAlmorzar = Convert.ToDateTime(dr["FechaAlmorzar"].ToString());
+                    Tarea.FechaRegAlmorzar = Convert.ToDateTime(dr["FechaRegAlmorzar"].ToString());
+                    Tarea.FechaSalida = Convert.ToDateTime(dr["FechaSalida"].ToString());
+                    Tarea.FechaRegistro = Convert.ToDateTime(dr["FechaRegistro"].ToString());
+                    listaTareas.Add(Tarea);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                listaTareas = null;
+            }
+            finally
+            {
+                cmd.Connection.Close();
+            }
+
+            return listaTareas;
+        }
     }
 }

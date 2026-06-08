@@ -1,14 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using iTextSharp.text.pdf;
+using Microsoft.Reporting.WinForms;
+using System;
+using System.Data;
+using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Web;
 using System.Xml;
-using System.Data;
-using System.IO;
-using System.Drawing;
-using OnBarcode.Barcode;
-using Microsoft.Reporting.WinForms;
-using iTextSharp.text.pdf;
 
 
 namespace ReporteTareas.clases
@@ -52,7 +50,7 @@ namespace ReporteTareas.clases
         #endregion
 
         #region xml
-        public XmlDocument xml(string DatosCliente, string Detalle, string seriedocumento,string Observacion,string LoginUsuario, string rucUsuario)
+        public XmlDocument xml(string DatosCliente, string Detalle, string seriedocumento, string Observacion, string LoginUsuario, string rucUsuario)
         {
             XmlDocument Doc = new XmlDocument();
             try
@@ -76,7 +74,7 @@ namespace ReporteTareas.clases
                 string codDoc = "06";
                 string estab = "001";
                 string ptoEmi = "001";
-                string Secuencial = seriedocumento.PadLeft(9, '0'); 
+                string Secuencial = seriedocumento.PadLeft(9, '0');
                 XmlDocument xdoc = new XmlDocument();
 
                 XmlDocument xml = new XmlDocument();
@@ -180,7 +178,7 @@ namespace ReporteTareas.clases
 
                 XmlElement elementoinfoDetalledirPartida = xml.CreateElement(string.Empty, "dirPartida", string.Empty);
                 XmlText textdirPartida = null;
-                
+
                 textdirPartida = xml.CreateTextNode(dirPartida);
                 elementoinfoDetalledirPartida.AppendChild(textdirPartida);
                 elementoinfoFactura.AppendChild(elementoinfoDetalledirPartida);
@@ -407,9 +405,9 @@ namespace ReporteTareas.clases
             }
             catch (Exception ex)
             {
-                
+
             }
-                return Doc;
+            return Doc;
         }
         #endregion
 
@@ -457,7 +455,7 @@ namespace ReporteTareas.clases
         #endregion
 
         #region PasarXmlDataset
-        public byte[] PasarXmlDataset(string DirecionXml, string TipoDocumento, string Logo, string RutaRide, string tipoRide, ref string MensajeError, ref string RutaPdf,ref string Archivo)
+        public byte[] PasarXmlDataset(string DirecionXml, string TipoDocumento, string Logo, string RutaRide, string tipoRide, ref string MensajeError, ref string RutaPdf, ref string Archivo)
         {
             string RIDE = "";
             DataSet dataSet = new DataSet();
@@ -512,7 +510,7 @@ namespace ReporteTareas.clases
                     s = s.Replace("<infoGuiaRemision>", "").Replace("</infoTributaria>", "");
                     s = s.Replace("</infoGuiaRemision>", "</infoTributaria>");
                     dataSet.ReadXml(new XmlTextReader(new StringReader(s)));
-                    buffer2 = GenerarDocumento(GenerarDataSetGuiaRemision(dataSet, "0000000000000000000000000000000000000000000000000", fecha, RutaDeArchivosLogo(Logo), ref MensajeError), RutaDeArchivosRide(RutaRide), TipoDocumento, ref MensajeError,ref RutaPdf,ref Archivo);
+                    buffer2 = GenerarDocumento(GenerarDataSetGuiaRemision(dataSet, "0000000000000000000000000000000000000000000000000", fecha, RutaDeArchivosLogo(Logo), ref MensajeError), RutaDeArchivosRide(RutaRide), TipoDocumento, ref MensajeError, ref RutaPdf, ref Archivo);
                 }
                 #endregion
 
@@ -868,7 +866,7 @@ namespace ReporteTareas.clases
         #endregion
 
         #region GenerarDocumento
-        public byte[] GenerarDocumento(DataSet Data, string RutaRide, string TipoDocumento, ref string mensaje, ref string rutaPdf ,ref string Archivo)
+        public byte[] GenerarDocumento(DataSet Data, string RutaRide, string TipoDocumento, ref string mensaje, ref string rutaPdf, ref string Archivo)
         {
 
             byte[] buffer2 = null;

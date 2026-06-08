@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
+using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace CapaNegocio
@@ -95,7 +95,7 @@ namespace CapaNegocio
             return respuesta;
         }
 
- 
+
         public static EntRespuesta RTA_BorrarDetalleTarea(Int32 idRegDetTareas)
         {
             EntRespuesta respuesta = new EntRespuesta();
@@ -118,9 +118,9 @@ namespace CapaNegocio
 
         public static EntRespuesta BorrarArchivosTarea(Int32 IdArchivo)
         {
-            EntRespuesta respuesta = new EntRespuesta(); 
+            EntRespuesta respuesta = new EntRespuesta();
 
-             respuesta = DaoTareas.RTA_BorrarArchivosTarea(IdArchivo);
+            respuesta = DaoTareas.RTA_BorrarArchivosTarea(IdArchivo);
 
             return respuesta;
         }
@@ -229,7 +229,7 @@ namespace CapaNegocio
             return DaoTareas.ConsultaHorasExtrasPorAutorizar(FchIni, FchFin, IdResponsable, Det_Horas_Extras_Estado, IdUsuarioJefe);
         }
 
-        public static List<EntTareas> ConsultaTareasGeneradas(string FchIni, string FchFin, int Tipo, int Id_RegTareas,string registro, string busqueda)
+        public static List<EntTareas> ConsultaTareasGeneradas(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string busqueda)
         {
             return DaoTareas.ConsultaTareasGeneradas(FchIni, FchFin, Tipo, Id_RegTareas, registro, busqueda);
         }
@@ -240,7 +240,7 @@ namespace CapaNegocio
         }
 
 
-        public static List<EntTareas> ConsultaTareasGeneradasContrato(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS,int idCliente,int idProceso)
+        public static List<EntTareas> ConsultaTareasGeneradasContrato(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS, int idCliente, int idProceso)
         {
             return DaoTareas.ConsultaTareasGeneradasContrato(FchIni, FchFin, Tipo, Id_RegTareas, registro, numeroOS, idCliente, idProceso);
         }
@@ -250,13 +250,13 @@ namespace CapaNegocio
             return DaoTareas.ConsultaHorasContratadas(FchIni, FchFin, Tipo, Id_RegTareas, registro, numeroOS, idCliente, idProceso);
         }
 
-        public static EntRespuesta ConsultaTareasGeneradasContratoDescargar(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS,int idCliente, int idProceso)
+        public static EntRespuesta ConsultaTareasGeneradasContratoDescargar(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS, int idCliente, int idProceso)
         {
             return DaoTareas.ConsultaTareasGeneradasContratoDescargar(FchIni, FchFin, Tipo, Id_RegTareas, registro, numeroOS, idCliente, idProceso);
         }
 
 
-        public static EntRespuesta ObtenerReporteGPFGeneradasDescargar(string FchIni, string FchFin,int idtipo)
+        public static EntRespuesta ObtenerReporteGPFGeneradasDescargar(string FchIni, string FchFin, int idtipo)
         {
             return DaoTareas.ObtenerReporteGPFGeneradasDescargar(FchIni, FchFin, idtipo);
         }
@@ -265,8 +265,8 @@ namespace CapaNegocio
             return DaoTareas.ConsultaHorasExtrasPorAutorizarDescargar(FchIni, FchFin, IdResponsable, Det_Horas_Extras_Estado, IdUsuarioJefe);
         }
 
-   
-        public static List<EntDetTarea> ListaDetTareas(string Idusuario, string FchIni, string FchFin, string Det_Nom_Empresa, string Det_Num_OrdenServicio, int IdTipoGasto,int idTareaAprobada,int idTareaAprobadaQA,int idFecha, int Tipo)
+
+        public static List<EntDetTarea> ListaDetTareas(string Idusuario, string FchIni, string FchFin, string Det_Nom_Empresa, string Det_Num_OrdenServicio, int IdTipoGasto, int idTareaAprobada, int idTareaAprobadaQA, int idFecha, int Tipo)
         {
             return DaoTareas.ListaDetTareas(Idusuario, FchIni, FchFin, Det_Nom_Empresa, Det_Num_OrdenServicio, IdTipoGasto, idTareaAprobada, idTareaAprobadaQA, idFecha, Tipo);
         }
@@ -278,7 +278,22 @@ namespace CapaNegocio
 
         public static EntRespuesta ListaHorasRecursosPorJefatura(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
         {
-            return DaoTareas.ListaHorasRecursosPorJefatura(Idusuario, FchIni, FchFin, Tipo,estado);
+            return DaoTareas.ListaHorasRecursosPorJefatura(Idusuario, FchIni, FchFin, Tipo, estado);
+        }
+
+        public static EntRespuesta ListaHorasRecursosPorAsistencia(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            return DaoTareas.ListaHorasRecursosPorAsistencia(Idusuario, FchIni, FchFin, Tipo, estado);
+        }
+
+        public static EntRespuesta ListaHorasRecursosPorActividad(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            return DaoTareas.ListaHorasRecursosPorActividad(Idusuario, FchIni, FchFin, Tipo, estado);
+        }
+
+        public static EntRespuesta ListaHorasRecursosPorAsistenciaDescarga(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            return DaoTareas.ListaHorasRecursosPorAsistenciaDescarga(Idusuario, FchIni, FchFin, Tipo, estado);
         }
 
         public static EntRespuesta ListaDetalleTareasDescarga(string Idusuario, string FchIni, string FchFin, string Det_Nom_Empresa, string Det_Num_OrdenServicio, int IdTipoGasto, int idTareaAprobada, int idTareaAprobadaQA, int idFecha, int Tipo)
@@ -305,7 +320,7 @@ namespace CapaNegocio
             return respuesta;
         }
 
-        
+
         public static EntRespuesta RTA_CambioEstadoAprobacionTareaIndividual(string IdUsuarioJefe, string fechaDesde, string fechaHasta, string idUsuarioResponsable, string IdUsuarioSession, string ipCliente, Int32 estadoAprobacion, Int32 idDetalleTarea)
         {
             EntRespuesta respuesta = new EntRespuesta();
@@ -368,7 +383,7 @@ namespace CapaNegocio
             return DaoTareas.ListaDetTareasHorasExtras(Idusuario, FchIni, FchFin, Tipo);
         }
 
-        public static DataSet RTAConsultaCatalogo( Int32 IdEstado)
+        public static DataSet RTAConsultaCatalogo(Int32 IdEstado)
         {
             return DaoTareas.RTAConsultaCatalogo(IdEstado);
         }
@@ -383,7 +398,7 @@ namespace CapaNegocio
             return DaoTareas.RTAListaEstadosCombo(idEstado, IdProyecto);
         }
 
-        
+
         public static List<EntCombo> ListaCatalogoCombo(Int32 idTipoCatalogo)
         {
             return DaoTareas.RTAListaCatalogoCombo(idTipoCatalogo);

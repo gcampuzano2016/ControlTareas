@@ -1,16 +1,14 @@
-﻿using System;
+﻿using CapaEntidad;
+using CapaNegocio;
+using ReporteTareas.Controles;
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Data;
+using System.IO;
+using System.Reflection;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
-using ReporteTareas.Controles;
-using System.IO;
-using System.Data;
-using System.Text;
-using System.Reflection;
 
 
 namespace ReporteTareas.Formulario

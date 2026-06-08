@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -204,7 +201,7 @@ namespace CapaDato
             }
             catch (Exception ex)
             {
-                listaTareas = null;
+                throw new Exception("Error en Consulta_Sp_RTAConsultarListaEmpleados: " + ex.Message);
             }
             finally
             {
@@ -346,6 +343,9 @@ namespace CapaDato
                     objEmpleado.EstadoCivil = dr["ESTADOCIVIL"].ToString();
                     objEmpleado.PuestoTrabajo = dr["PUESTOTRABAJO"].ToString();
                     objEmpleado.Correo = dr["CORREO"].ToString();
+
+                    objEmpleado.PerVulnerable = dr["hsCln_PerVul"] != DBNull.Value ? Convert.ToBoolean(dr["hsCln_PerVul"]) : false;
+
                     listaTareas.Add(objEmpleado);
                 }
 

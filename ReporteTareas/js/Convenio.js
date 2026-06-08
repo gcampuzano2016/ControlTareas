@@ -211,6 +211,15 @@ function EditarSolicitud(idvacaciones, tipoVacacion) {
     document.getElementById("IdCargarArchivo").style.display = "block";
 }
 
+function CambiarEstado(idvacaciones, tipoVacacion) {
+    idVacaciones = idvacaciones;
+    BuscarSolicitudEditar("VACACIONES_PLA");
+    ObtenerSolicitudIndividual(idvacaciones);
+    ListadoArchivosSolicitud("#divArchivosAdjuntosAnteriores", idvacaciones);
+    document.getElementById("IdCargarArchivo").style.display = "block";
+}
+
+
 function ActualizarProceso() {
     if ($('#cboEstado2').val() == "-- SELECCIONE --") {
         alerta("Debe seleccionar un estado");
@@ -341,6 +350,8 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
         info = info + "&nbsp;|&nbsp;";
         info = info + "<button type='button' value='Actualizar' title='Editar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='EditarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>";
         info = info + "&nbsp;|&nbsp;";
+        info = info + "<button type='button' value='Actualizar' title='Cambiar estado de Planificación a Vacaciones' class='btn btn-btn-editClientes btn-xs' onclick='CambiarEstado(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-cubes' aria-hidden='true'></i></button>";
+        info = info + "&nbsp;|&nbsp;";
         if (item.conteoArchivosAdjuntos != '0') {
             info = info + "<button type=\"button\" class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
         }
@@ -447,6 +458,21 @@ function BuscarSolicitudEditar(seleccionarTipo) {
         EstadoSolicitud = selectedSolicitud;
         ObtenerDatosEmpleado(1, 1);
         document.getElementById("btnGuardar2").innerHTML = "Actualizar";
+    }
+    else if (selectedSolicitud == "VACACIONES_PLA") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
+        document.getElementById("IdFeriado").style.display = "block";
+
+        //document.getElementById("Vacaciones").style.display = "block";
+        //document.getElementById("Planificacion").style.display = "none";
+
+        document.getElementById("btnGuardar1").innerHTML = "Cambiar a Vacaciones";
     }
     else if (selectedSolicitud == "VACACIONES") {
         BtnVacaciones();
@@ -706,7 +732,7 @@ function RecorreDatosDiasSolicitados(json) {
 
 function ObtenerListaSolicitud(tipo, idRegistro, fechaInicio, fechaFinal, pagina, estadosolicitud) {
 
-    var Datos = "[{ \"action\": \"ReporteListaSolicitud\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + "0" + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + estadosolicitud + "\", usuario: \"" + "0" + "\" } }]";
+    var Datos = "[{ \"action\": \"ReporteListaSolicitud\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + "0" + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + estadosolicitud + "\", usuario: \"" + "0" + "\", tipofecha: \"" + "0" + "\" } }]";
     CargarPagina('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "tableSelect", tipo);
 }
 
@@ -838,6 +864,9 @@ function GuardarSolicitud1() {
     else if (document.getElementById('btnGuardar1').innerHTML == "Actualizar")
     {
         GuardarSolicitudVacaciones(1);
+    }
+    else if (document.getElementById('btnGuardar1').innerHTML == "Cambiar a Vacaciones") {
+        GuardarSolicitudVacaciones(5);
     }
     else if (document.getElementById('btnGuardar1').innerHTML == "Eliminar") {
         GuardarSolicitudVacaciones(4);
@@ -1301,7 +1330,12 @@ function GuardarSolicitudVacaciones(tipo) {
     datosFormulario = datosFormulario + "{";
     datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
     datosFormulario = datosFormulario + "'IdVacaciones': '" + idVacaciones + "',";
-    datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + $('#cboSolicitud').val() + "',";
+    if (tipo == 5) {
+        datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + "2" + "',";
+    }
+    else {
+        datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + $('#cboSolicitud').val() + "',";
+    }
     datosFormulario = datosFormulario + "'txtfechaV': '" + $('#txtfechaV').val() + "',";
     datosFormulario = datosFormulario + "'txtCedulaV': '" + $('#txtCedulaV').val() + "',";
     datosFormulario = datosFormulario + "'txtNombreColaboradorV': '" + $('#txtNombreColaboradorV').val() + "',";

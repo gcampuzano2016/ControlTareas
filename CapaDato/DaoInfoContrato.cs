@@ -1,11 +1,9 @@
 ﻿using CapaEntidad;
+using SeguridadAppHelper;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -32,8 +30,10 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@CLI_DIRECCION", objContrato.CLI_DIRECCION ?? "");
                 cmd.Parameters.AddWithValue("@CLI_CORREO", objContrato.CLI_CORREO ?? "");
                 cmd.Parameters.AddWithValue("@Con_Numero", objContrato.NUM_CONTRATO);
+                cmd.Parameters.AddWithValue("@Con_Pedido", objContrato.NUM_PEDIDO);
                 cmd.Parameters.AddWithValue("@Con_Objeto", objContrato.OBJETO ?? "");
                 cmd.Parameters.AddWithValue("@Con_ValorTotal", objContrato.VALOR_TOTAL_CONTRATO);
+                cmd.Parameters.AddWithValue("@Con_Margen", objContrato.MARGEN);
                 cmd.Parameters.AddWithValue("@Con_Alcance", objContrato.ALCANCE ?? "");
                 cmd.Parameters.AddWithValue("@Con_Hardware", objContrato.HARDWARE ?? "");
                 cmd.Parameters.AddWithValue("@Con_Licencias", objContrato.LICENCIAS ?? "");
@@ -46,7 +46,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@Con_ActaPreguntas", objContrato.ACTA_PREGUNTAS ?? "");
                 cmd.Parameters.AddWithValue("@Con_ActaAdjudicacion", objContrato.ACTA_ADJUDICACION ?? "");
                 cmd.Parameters.AddWithValue("@Con_ActaNegociacion", objContrato.ACTA_NEGOCIACION ?? "");
-                //cmd.Parameters.AddWithValue("@Con_ValorAgregado", objContrato.Con_ValorAgregado ?? "");
+
                 cmd.Parameters.AddWithValue("@Con_BomSolucion", objContrato.BOM_SOLUCION ?? "");
                 cmd.Parameters.AddWithValue("@Con_AcuerdosMay", objContrato.ACUERDOS_MAY ?? "");
                 cmd.Parameters.AddWithValue("@Con_AcuerdosFab", objContrato.ACUERDOS_FAB ?? "");
@@ -126,14 +126,14 @@ namespace CapaDato
                     cmd.Parameters.AddWithValue("@Con_FechaFinActivacionGar", DBNull.Value);
                 }
 
-                cmd.Parameters.AddWithValue("@Con_PlazoActivacion", objContrato.PLAZO_ACTIVACION ?? ""); 
+                cmd.Parameters.AddWithValue("@Con_PlazoActivacion", objContrato.PLAZO_ACTIVACION ?? "");
                 cmd.Parameters.AddWithValue("@Con_PlazoActivacionLic", objContrato.PLAZO_ACTIVACION_LIC ?? "");
                 cmd.Parameters.AddWithValue("@Con_DuracionVigencia", objContrato.DURACION_VIGENCIA_TEC ?? "");
                 cmd.Parameters.AddWithValue("@Con_EntregaLicTemporales", objContrato.ENTREGA_LIC_TEMPORALES ?? "");
                 cmd.Parameters.AddWithValue("@Con_OrdenesServicio", objContrato.ORDEN_SERVICIO ?? "");
 
                 cmd.Parameters.AddWithValue("@ConObs_Cliente", objContrato.OBS_CLIENTE ?? "");
-                cmd.Parameters.AddWithValue("@ConObs_Numero", objContrato.OBS_NUM_CONTRATO ?? ""); 
+                cmd.Parameters.AddWithValue("@ConObs_Numero", objContrato.OBS_NUM_CONTRATO ?? "");
                 cmd.Parameters.AddWithValue("@ConObs_ValorTotal", objContrato.OBS_VALOR_TOTAL ?? "");
                 cmd.Parameters.AddWithValue("@ConObs_Objeto", objContrato.OBS_OBJETO ?? "");
                 cmd.Parameters.AddWithValue("@ConObs_Alcance", objContrato.OBS_ALCANCE ?? "");
@@ -155,13 +155,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@ConObs_GarantiasFin", objContrato.OBS_GARANTIAS_FIN ?? "");
                 cmd.Parameters.AddWithValue("@ConObs_GarantiasTEC", objContrato.OBS_GARANTIAS_TEC ?? "");
                 cmd.Parameters.AddWithValue("@ConObs_GeneracionPedidos", objContrato.OBS_GENERACION_PEDIDOS ?? "");
-
-                /*cmd.Parameters.AddWithValue("@ConObs_PlazoActivacion", objContrato.ConObs_PlazoActivacion ?? ""); 
-                cmd.Parameters.AddWithValue("@ConObs_FechaSuscripcion", objContrato.OBS_FECHA_SUSCRIPCION_CONTRATO ?? "");
-                cmd.Parameters.AddWithValue("@ConObs_FechaNotificacion", objContrato.OBS_FECHA_NOTIF_ANTICIPO ?? "");               
-                cmd.Parameters.AddWithValue("@ConObs_FechaIniActivacionGar", objContrato.ConObs_FechaIniActivacionGar ?? "");
-                cmd.Parameters.AddWithValue("@ConObs_FechaFinActivacionGar", objContrato.ConObs_FechaFinActivacionGar ?? "");
-                cmd.Parameters.AddWithValue("@ConObs_EntregaLicTemporales", objContrato.ConObs_EntregaLicTemporales ?? "");*/
+                cmd.Parameters.AddWithValue("@Con_Items", objContrato.ITEMS ?? "");
 
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
@@ -245,7 +239,7 @@ namespace CapaDato
                     listaTareas.Add(objContrato);
                 }
 
-            }        
+            }
             catch (Exception ex)
             {
                 listaTareas = null;
@@ -301,9 +295,11 @@ namespace CapaDato
 
             return objContrato;
         }
-        
-        public static EntInfoContrato Consulta_Sp_RTAConsultarContratoNum(string numContrato)
+
+        public static EntInfoContrato Consulta_Sp_RTAConsultarContratoNum(string numContrato, int op)
         {
+            SeguridadHelper seguridad = new SeguridadHelper();
+
             SqlCommand cmd = null;
             SqlDataReader dr = null;
             EntInfoContrato objContrato = new EntInfoContrato();
@@ -314,7 +310,8 @@ namespace CapaDato
                 SqlConnection cnx = cn.conectar();
                 cnx.Open();
                 cmd = new SqlCommand("Sp_RTAConsultarContratosPorNum", cnx);
-                cmd.Parameters.AddWithValue("@NumContrato", numContrato);
+                cmd.Parameters.AddWithValue("@TipoBusqueda", op);
+                cmd.Parameters.AddWithValue("@NumBusqueda", numContrato);
 
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
@@ -323,12 +320,22 @@ namespace CapaDato
                 {
                     objContrato.NUM_CONTRATO = dr["Con_Numero"].ToString();
                     objContrato.CLIENTE = dr["Con_Cliente"].ToString();
+
+                    //objContrato.CLI_NOMBRE = seguridad.Desencripta(dr["CLI_NOMBRE"].ToString());
+                    //objContrato.CLI_TELEFONO = seguridad.Desencripta(dr["CLI_TELEFONO"].ToString());
+                    //objContrato.CLI_DIRECCION = seguridad.Desencripta(dr["CLI_DIRECCION"].ToString());
+                    //objContrato.CLI_CORREO = seguridad.Desencripta(dr["CLI_CORREO"].ToString());
+                    //objContrato.OBJETO = seguridad.Desencripta(dr["Con_Objeto"].ToString());
+
                     objContrato.CLI_NOMBRE = dr["CLI_NOMBRE"].ToString();
                     objContrato.CLI_TELEFONO = dr["CLI_TELEFONO"].ToString();
                     objContrato.CLI_DIRECCION = dr["CLI_DIRECCION"].ToString();
                     objContrato.CLI_CORREO = dr["CLI_CORREO"].ToString();
                     objContrato.OBJETO = dr["Con_Objeto"].ToString();
+
+                    objContrato.NUM_PEDIDO = dr["Con_Pedido"].ToString();
                     objContrato.VALOR_TOTAL_CONTRATO = dr.IsDBNull(dr.GetOrdinal("ValorTotal")) ? 0 : dr.GetDecimal(dr.GetOrdinal("ValorTotal"));
+                    objContrato.MARGEN = dr.IsDBNull(dr.GetOrdinal("Con_Margen")) ? 0 : dr.GetDecimal(dr.GetOrdinal("Con_Margen"));
                     objContrato.ALCANCE = dr["Con_Alcance"].ToString();
                     objContrato.HARDWARE = dr["Con_Hardware"].ToString();
                     objContrato.LICENCIAS = dr["Con_Licencias"].ToString();
@@ -348,16 +355,18 @@ namespace CapaDato
                     objContrato.GARANTIAS_TEC = dr["Con_GarantiasTEC"].ToString();
                     objContrato.GENERACION_PEDIDOS = dr["Con_GeneracionPedidos"].ToString();
                     objContrato.FECHA_SUSCRIPCION_CONTRATO = dr["Con_FechaSuscripcion"].ToString();
-                    objContrato.FECHA_NOTIF_ANTICIPO = dr["Con_FechaNotificacion"].ToString();                    
+                    objContrato.FECHA_NOTIF_ANTICIPO = dr["Con_FechaNotificacion"].ToString();
                     objContrato.FECHA_INICIO_GARANTIA = dr["Con_FechaIniActivacionGar"].ToString();
-                    objContrato.FECHA_FIN_GARANTIA = dr["Con_FechaFinActivacionGar"].ToString(); 
+                    objContrato.FECHA_FIN_GARANTIA = dr["Con_FechaFinActivacionGar"].ToString();
                     objContrato.PLAZO_ACTIVACION = dr["Con_PlazoActivacion"].ToString();
                     objContrato.PLAZO_ACTIVACION_LIC = dr["Con_PlazoActivacionLic"].ToString();
                     objContrato.DURACION_VIGENCIA_TEC = dr["Con_DuracionVigencia"].ToString();
                     objContrato.ENTREGA_LIC_TEMPORALES = dr["Con_EntregaLicTemporales"].ToString();
+                    objContrato.ORDEN_SERVICIO = dr["Con_OrdenesServicio"].ToString();
+                    objContrato.ITEMS = dr["Con_items"].ToString();
 
                     objContrato.OBS_CLIENTE = dr["ConObs_Cliente"].ToString();
-                    objContrato.OBS_NUM_CONTRATO = dr["ConObs_Numero"].ToString(); 
+                    objContrato.OBS_NUM_CONTRATO = dr["ConObs_Numero"].ToString();
                     objContrato.OBS_VALOR_TOTAL = dr["ConObs_ValorTotal"].ToString();
                     objContrato.OBS_OBJETO = dr["ConObs_Objeto"].ToString();
                     objContrato.OBS_ALCANCE = dr["ConObs_Alcance"].ToString();
@@ -378,7 +387,6 @@ namespace CapaDato
                     objContrato.OBS_GARANTIAS_FIN = dr["ConObs_GarantiasFin"].ToString();
                     objContrato.OBS_GARANTIAS_TEC = dr["ConObs_GarantiasTEC"].ToString();
                     objContrato.OBS_GENERACION_PEDIDOS = dr["ConObs_GeneracionPedidos"].ToString();
-                    objContrato.ORDEN_SERVICIO = dr["Con_OrdenesServicio"].ToString();
                 }
             }
             catch (Exception ex)
@@ -398,8 +406,58 @@ namespace CapaDato
             return objContrato;
         }
 
+        public static List<EntInfoContrato> Consulta_Sp_RTAConsultarContratos(string numContrato)
+        {
+            List<EntInfoContrato> listaContratos = new List<EntInfoContrato>();
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+                cmd = new SqlCommand("Sp_RTAConsultarContratosPorCliente", cnx);
+                cmd.Parameters.AddWithValue("@Cliente", numContrato);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+
+                while (dr.Read())
+                {
+                    EntInfoContrato objContrato = new EntInfoContrato();
+                    objContrato.NUM_CONTRATO = dr["Con_Numero"].ToString();
+                    objContrato.CLIENTE = dr["Con_Cliente"].ToString();
+                    objContrato.OBJETO = dr["Con_Objeto"].ToString();
+                    objContrato.NUM_PEDIDO = dr["Con_Pedido"].ToString();
+                    objContrato.VALOR_TOTAL_CONTRATO = dr.IsDBNull(dr.GetOrdinal("ValorTotal")) ? 0 : dr.GetDecimal(dr.GetOrdinal("ValorTotal"));
+                    objContrato.MARGEN = dr.IsDBNull(dr.GetOrdinal("Con_Margen")) ? 0 : dr.GetDecimal(dr.GetOrdinal("Con_Margen"));
+                    objContrato.FECHA_SUSCRIPCION_CONTRATO = dr["Con_FechaSuscripcion"].ToString();
+                    objContrato.FECHA_NOTIF_ANTICIPO = dr["Con_FechaNotificacion"].ToString();
+                    objContrato.FECHA_INICIO_GARANTIA = dr["Con_FechaIniActivacionGar"].ToString();
+                    objContrato.FECHA_FIN_GARANTIA = dr["Con_FechaFinActivacionGar"].ToString();
+                    objContrato.ORDEN_SERVICIO = dr["Con_OrdenesServicio"].ToString();
+                    objContrato.ITEMS = dr["Con_items"].ToString();
+                    listaContratos.Add(objContrato);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ocurrió un error: " + ex.Message);
+                Console.WriteLine("Detalles del error: " + ex.ToString());
+            }
+            finally
+            {
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
+            }
+            return listaContratos;
+        }
+
+
         public static List<EntOrdenServicio> Consulta_Sp_ConsultarOrdenServicio(float pedido)
-{
+        {
             List<EntOrdenServicio> listaOrdenServicio = null;
 
             SqlCommand cmd = null;
@@ -421,11 +479,11 @@ namespace CapaDato
                 while (dr.Read())
                 {
                     EntOrdenServicio objOrdenServicio = new EntOrdenServicio();
-                    objOrdenServicio.IdServicio = dr["IdServicio"]!= DBNull.Value? (Int64)dr["IdServicio"] : 0;
-                    objOrdenServicio.IdClasificacion = dr["IdClasificacion"]!= DBNull.Value? (Int64)dr["IdClasificacion"] : 0;
-                    objOrdenServicio.IdCliente = dr["IdCliente"]!= DBNull.Value? (Int64)dr["IdCliente"] : 0;
-                    objOrdenServicio.IdGerenteCuenta = dr["IdGerenteCuenta"]!= DBNull.Value? (Int64)dr["IdGerenteCuenta"] : 0;
-                    objOrdenServicio.IdGestorResponsable = dr["IdGestorResponsable"]!= DBNull.Value? (Int64)dr["IdGestorResponsable"] : 0;
+                    objOrdenServicio.IdServicio = dr["IdServicio"] != DBNull.Value ? (Int64)dr["IdServicio"] : 0;
+                    objOrdenServicio.IdClasificacion = dr["IdClasificacion"] != DBNull.Value ? (Int64)dr["IdClasificacion"] : 0;
+                    objOrdenServicio.IdCliente = dr["IdCliente"] != DBNull.Value ? (Int64)dr["IdCliente"] : 0;
+                    objOrdenServicio.IdGerenteCuenta = dr["IdGerenteCuenta"] != DBNull.Value ? (Int64)dr["IdGerenteCuenta"] : 0;
+                    objOrdenServicio.IdGestorResponsable = dr["IdGestorResponsable"] != DBNull.Value ? (Int64)dr["IdGestorResponsable"] : 0;
                     objOrdenServicio.TiempoRespuesta = dr["TiempoRespuesta"].ToString();
                     objOrdenServicio.TiempoSolucion = dr["TiempoSolucion"].ToString();
                     objOrdenServicio.TiempoDiagnostico = dr["TiempoDiagnostico"].ToString();

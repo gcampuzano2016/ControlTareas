@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
 using CorreoHelper;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
 
 
 namespace ReporteTareas.Formulario
@@ -29,7 +25,7 @@ namespace ReporteTareas.Formulario
                     Label1.Text = "";
                 }
 
-                txt_login.Focus();              
+                txt_login.Focus();
                 Session["Id_Usuario"] = "";
                 Session["Cod_Usuario"] = "";
                 Session["Nom_Usuario"] = "";
@@ -58,7 +54,7 @@ namespace ReporteTareas.Formulario
 
         public string EnviarCodigo()
         {
-            string strcodigo="";
+            string strcodigo = "";
             strcodigo = Guid.NewGuid().ToString("N").Substring(1, 5);
 
             #region EnvioMail
@@ -102,7 +98,7 @@ namespace ReporteTareas.Formulario
             EntUsuario objUsuario = new EntUsuario();
             string AuxClave = txt_pass.Text.Trim();
             SeguridadHelper seguridad = new SeguridadHelper();
-            txt_pass.Text=seguridad.GetMd5Hash(AuxClave);
+            txt_pass.Text = seguridad.GetMd5Hash(AuxClave);
             objUsuario = NegUsuario.RTA_ConsultaUsuarioRTA(txt_login.Text.Trim());
             if (objUsuario != null)
             {
@@ -168,6 +164,8 @@ namespace ReporteTareas.Formulario
                                     Session["Id_Usuario"] = 20;
                                 else if (objUsuario.Id_Perfil == 21) //Logistica
                                     Session["Id_Usuario"] = 21;
+                                else if (objUsuario.Id_Perfil == 41) //Doctor
+                                    Session["Id_Usuario"] = 41;
                                 else
                                     Session["Id_Usuario"] = 0;
 

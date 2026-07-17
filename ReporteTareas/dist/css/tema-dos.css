@@ -32,3 +32,37 @@ h1, h2, h3, h4, h5 { font-family: var(--dos-font); font-weight: 600; color: var(
 
 /* Neutraliza <font> heredado sin tener que borrarlo del markup viejo */
 font { font-size: inherit !important; color: inherit !important; font-family: inherit !important; }
+
+/* ---- Botones ---- */
+.btn { border-radius: var(--dos-radius); font-weight: 600; padding: 6px 16px; border: 1px solid transparent; transition: background-color .15s, box-shadow .15s; }
+.btn-primary { background: var(--dos-primary); border-color: var(--dos-primary); }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background: var(--dos-primary-600); border-color: var(--dos-primary-700); }
+.btn-success { background: var(--dos-success); border-color: var(--dos-success); }
+.btn-danger  { background: var(--dos-danger);  border-color: var(--dos-danger); }
+.btn-default { background: var(--dos-surface); border-color: var(--dos-border); color: var(--dos-ink); }
+.btn-default:hover { background: var(--dos-bg); }
+
+/* ---- Formularios ---- */
+.form-control { border-radius: var(--dos-radius); border: 1px solid var(--dos-border); box-shadow: none; height: 38px; }
+.form-control:focus { border-color: var(--dos-primary); box-shadow: 0 0 0 3px var(--dos-primary-050); }
+label, .control-label { font-weight: 600; color: var(--dos-ink); margin-bottom: 4px; }
+.form-group { margin-bottom: var(--dos-space); }
+
+/* ---- Cards / Panels (unifica ambos patrones) ---- */
+.panel, .card { border: 1px solid var(--dos-border); border-radius: var(--dos-radius); box-shadow: var(--dos-shadow-sm); background: var(--dos-surface); }
+.panel-heading, .card-header { background: var(--dos-surface); border-bottom: 1px solid var(--dos-border); border-top-left-radius: var(--dos-radius); border-top-right-radius: var(--dos-radius); font-weight: 600; color: var(--dos-ink); }
+.panel-default > .panel-heading { color: var(--dos-ink); }
+.card-primary > .card-header { background: var(--dos-primary); color: #fff; }
+.panel-body, .card-body { padding: var(--dos-space); }
+
+/* ---- Tablas ---- */
+.table { background: var(--dos-surface); }
+.table > thead > tr > th { background: var(--dos-bg); color: var(--dos-ink); border-bottom: 2px solid var(--dos-border); font-weight: 600; }
+.table-striped > tbody > tr:nth-of-type(odd) { background: #FAFAFB; }
+.table-hover > tbody > tr:hover { background: var(--dos-primary-050); }
+.table > tbody > tr > td { vertical-align: middle; }
+
+/* ---- Modales ---- */
+.modal-content { border-radius: var(--dos-radius); box-shadow: var(--dos-shadow-md); border: none; }
+.modal-header { border-bottom: 1px solid var(--dos-border); background: var(--dos-surface) !important; }
+.modal-title { font-weight: 600; }

@@ -110,7 +110,46 @@
                 </div>
             </div>
         </section>
-        <!-- Task 3 añade chrome aquí -->
+        <hr>
+        <section id="preview-chrome">
+            <h2>Chrome — navbar + sidebar</h2>
+            <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom:0">
+                <div class="navbar-header">
+                    <a class="navbar-brand" href="#">
+                        <img src="../ReporteTareas/Img/iconoDos.png" alt="DOS">
+                    </a>
+                </div>
+                <ul class="nav navbar-top-links navbar-right">
+                    <li><a href="#"><i class="fa fa-sign-in"></i> Entrada</a></li>
+                    <li><a href="#"><i class="fa fa-sign-out"></i> Salida</a></li>
+                    <li><p class="navbar-text">Usuario de ejemplo</p></li>
+                </ul>
+            </nav>
+
+            <div class="navbar-default sidebar" role="navigation" style="width:250px">
+                <div class="sidebar-nav navbar-collapse">
+                    <div class="dos-menu-search">
+                        <input type="text" id="dos-menu-filtro" placeholder="Buscar en el menú..." autocomplete="off">
+                    </div>
+                    <ul class="nav" id="side-menu">
+                        <li>
+                            <a href="#"><i class="fa fa-clock-o"></i>   Horarios<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li class="active"><a href="ParametrizacionHorarioUsuario.aspx"><i class="fa fa-user"></i>   Parametrización de horario por usuario</a></li>
+                                <li><a href="ParametrizacionHorario.aspx"><i class="fa fa-calendar"></i>   Parametrización de horario</a></li>
+                            </ul>
+                        </li>
+                        <li>
+                            <a href="#"><i class="fa fa-file-text-o"></i>   Reportes<span class="fa arrow"></span></a>
+                            <ul class="nav nav-second-level">
+                                <li><a href="ReporteHorasExtras.aspx"><i class="fa fa-list"></i>   Reporte Horas Extras</a></li>
+                                <li><a href="ReporteTareas.aspx"><i class="fa fa-tasks"></i>   Reporte de Tareas</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
     </div>
 </body>
 </html>

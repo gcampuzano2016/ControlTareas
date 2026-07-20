@@ -30,6 +30,7 @@
     <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />
     <script src="../bower_components/sweetalert/js/sweetalert.min.js"></script>
     <script src="../bower_components/sweetalert/js/sweetalert.init.js"></script>
+    <link href="../dist/css/tema-dos.css" rel="stylesheet" />
     <style>
         /* centra verticalmente los botones en la barra */
         .navbar .navbar-btn {
@@ -92,6 +93,9 @@
                 </ul>
                 <div class="navbar-default sidebar" role="navigation">
                     <div class="sidebar-nav navbar-collapse">
+                        <div class="dos-menu-search">
+                            <input type="text" id="dos-menu-filtro" placeholder="Buscar en el menú..." autocomplete="off" />
+                        </div>
                         <asp:Label ID="lblCargarMenu" runat="server" Text=""></asp:Label>
                     </div>
                 </div>
@@ -130,6 +134,7 @@
     <!-- Latest compiled and minified JavaScript -->
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->
     <script type="text/javascript" src="https://cdn.datatables.net/v/bs/dt-1.10.15/datatables.min.js"></script>
+    <script src="../js/menuBuscador.js"></script>
     <!-- Script Personalizado -->
     <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
 </body>

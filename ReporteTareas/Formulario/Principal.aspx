@@ -6,13 +6,11 @@
     <div id="page-wrapper">
         <div class="row">
             <div class="col-lg-12">
-                <div class="panel-body">
+                <div class="panel panel-default">
+                    <div class="panel-body">
                     <div class="row">
-                        <font color="#930001" face="”Arial”" size="70">
-                            <h1><b>Bienvenidos al Sistema de Gesti&oacute;n Interno </b></h1>
-                        </font>
-                        <font color="black" face="”Arial”" size="5">
-                            <small>Este es el Sistema de Gesti&oacute;n Interno de DOS.</small></font>&nbsp;                                           
+                        <h1 style="color: var(--dos-primary-600); font-weight: 700">Bienvenidos al Sistema de Gesti&oacute;n Interno</h1>
+                        <p class="text-muted">Este es el Sistema de Gesti&oacute;n Interno de DOS.</p>
                     </div>
                     <div id="myCarousel" class="carousel slide" data-ride="carousel">
                         <!-- Target para los slide lde las imagenes  -->
@@ -67,20 +65,14 @@
                             <span class="sr-only">Next</span>
                         </a>
                     </div>
-                    <div align="center">
-                        <font face="”Arial”">
-                            <h2 align="center"><b>
-                                <br />
-                                30 años como la empresa de tecnología líder del Ecuador<br />
-                            </b></h2>
-                        </font>
-                        <font color="black" face="”Arial”" size="4">
-                            <p align="left">Hemos crecido como aliados de nuestros clientes apoyando su gestión empresarial con talento humano altamente calificado, brindando servicios de asesoría, data center, cloud computing, almacenamiento, mantenimiento preventivo y correctivo, redes empresariales y mucho m&aacute;s. M&aacute;s de tres d&eacute;cadas nos respaldan como la empresa de tecnolog&iacute;a m&aacute;s importante del Ecuador. Somos representantes autorizados de las mejores marcas del mundo: Microsoft, HP y HPE, Cisco, Oracle, Xerox, Red Hat, F5, Veeam, Simplivity, VMware, Micro Focus y Cylance.</p>
-                        </font>
-                        <video controls muted width="80%" height="50%">
+                    <div class="text-center">
+                        <h2 style="font-weight: 700; margin: 24px 0">30 años como la empresa de tecnología líder del Ecuador</h2>
+                        <p class="text-left">Hemos crecido como aliados de nuestros clientes apoyando su gestión empresarial con talento humano altamente calificado, brindando servicios de asesoría, data center, cloud computing, almacenamiento, mantenimiento preventivo y correctivo, redes empresariales y mucho m&aacute;s. M&aacute;s de tres d&eacute;cadas nos respaldan como la empresa de tecnolog&iacute;a m&aacute;s importante del Ecuador. Somos representantes autorizados de las mejores marcas del mundo: Microsoft, HP y HPE, Cisco, Oracle, Xerox, Red Hat, F5, Veeam, Simplivity, VMware, Micro Focus y Cylance.</p>
+                        <video controls muted width="80%" style="max-width: 100%; height: auto">
                             <source src="../carrusel/imagenes/VideoDOS.mp4" type="video/mp4">
                         </video>
                     </div>
+                </div>
                 </div>
             </div>
         </div>

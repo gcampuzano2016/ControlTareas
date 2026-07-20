@@ -51,7 +51,9 @@ label, .control-label { font-weight: 600; color: var(--dos-ink); margin-bottom: 
 /* ---- Cards / Panels (unifica ambos patrones) ---- */
 .panel, .card { border: 1px solid var(--dos-border); border-radius: var(--dos-radius); box-shadow: var(--dos-shadow-sm); background: var(--dos-surface); }
 .panel-heading, .card-header { background: var(--dos-surface); border-bottom: 1px solid var(--dos-border); border-top-left-radius: var(--dos-radius); border-top-right-radius: var(--dos-radius); font-weight: 600; color: var(--dos-ink); }
-.panel-default > .panel-heading { color: var(--dos-ink); }
+/* El Bootstrap personalizado del proyecto pinta .panel-default > .panel-heading en marron (#726464);
+   este selector (misma especificidad, cargado despues) lo devuelve a la superficie del tema. */
+.panel-default > .panel-heading { background: var(--dos-surface); border-bottom: 1px solid var(--dos-border); color: var(--dos-ink); }
 .card-primary > .card-header { background: var(--dos-primary); color: #fff; }
 .panel-body, .card-body { padding: var(--dos-space); }
 

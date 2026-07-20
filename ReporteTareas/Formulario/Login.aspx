@@ -17,6 +17,7 @@
     <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="../dist/css/tema-dos.css" rel="stylesheet">
     <script>
         window.onload = function () {
             const hostname = window.location.hostname;
@@ -37,21 +38,21 @@
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <div class="login-panel panel panel-info">
-                            <div class="panel-heading" style="text-align: center; background-color: white">
-                                <img src="../Img/iconoDos.png" height="120" /><br />
-                                <h1 class="text-center panel-collapse"><font color="#6F6F6F" size="5">Sistema de Gesti&oacute;n Interno </font></h1>
-                                <font color="6F6F6F">Versión 2.5</font>
+                            <div class="panel-heading" style="text-align: center; background: var(--dos-surface)">
+                                <img src="../Img/iconoDos.png" height="110" alt="DOS" /><br />
+                                <h1 class="text-center" style="font-size: 22px; margin: 12px 0 4px">Sistema de Gesti&oacute;n Interno</h1>
+                                <small class="text-muted">Versión 2.5</small>
                             </div>
-                            <div class="panel-body" style="background-color: #d3d3d3">
+                            <div class="panel-body" style="background: var(--dos-surface)">
                                 <fieldset>
                                     <div class="form-group">
-                                        <h4 class="panel-title text-left"><font color="#E53935" size="3"><b>Usuario </b></font></h4>
+                                        <h4 class="panel-title text-left"><label>Usuario</label></h4>
                                         <%--<asp:TextBox ID="txt_login" runat="server" CssClass="form-control center-block tam-text-box" OnTextChanged="txt_login_TextChanged"></asp:TextBox>--%>
                                         <asp:TextBox ID="txt_login" runat="server" CssClass="form-control center-block tam-text-box"></asp:TextBox>
                                     </div>
                                     <div class="form-group">
                                         <h4 class="panel-title text-left">
-                                            <asp:Label ID="lab2" runat="server" Enabled="False"> <FONT COLOR="#E53935" size="3"><b> Contraseña</b></FONT></asp:Label></h4>
+                                            <asp:Label ID="lab2" runat="server" Enabled="False"><b>Contraseña</b></asp:Label></h4>
                                         <%--<asp:TextBox ID="txt_pass" runat="server" Visible="false" CssClass="form-control center-block tam-text-box" AutoPostBack="true" TextMode="Password" Enabled="false" OnTextChanged="txt_pass_TextChanged"></asp:TextBox>--%>
                                         <asp:TextBox ID="txt_pass" runat="server" CssClass="form-control center-block tam-text-box" TextMode="Password"></asp:TextBox>
 

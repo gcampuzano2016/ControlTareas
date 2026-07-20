@@ -8,10 +8,9 @@
         <div class="row">
             <div class="col-lg-12">
 
-                <div class="panel-body">
-
-                    <div class="row">
-                        <h1>Reporte Horas Extras</h1>
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <h3 style="margin: 6px 0">Reporte Horas Extras</h3>
                     </div>
                 </div>
 
@@ -79,7 +78,7 @@
                             </div>
 
                             <div class="row">
-                                <div class="row" style="padding-top: 10px; padding-top: 10px;">
+                                <div class="row" style="padding-top: 10px">
                                     <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="text-align:center">
                                         <asp:Button ID="btn_consulta" runat="server" Text="Consultar" OnClick="btn_consulta_Click"  CssClass="btn btn-primary"/>
                                     </div>
@@ -90,7 +89,7 @@
 
                             </div>
                             <div class="row">
-                                <div class="row" style="padding-top: 10px; padding-top: 10px;">
+                                <div class="row" style="padding-top: 10px">
                                     <div id="divMensajes" class="">
                                     </div>
                                 </div>
@@ -101,7 +100,7 @@
                             </div>
                             <div class="row">
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                    <asp:GridView ID="dgv_Tareas" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None" CssClass="table-responsive table-striped table-bordered table-hover" AutoGenerateColumns="False" Width="100%">
+                                    <asp:GridView ID="dgv_Tareas" runat="server" CssClass="table table-striped table-bordered table-hover table-responsive" AutoGenerateColumns="False" Width="100%">
                                         <Columns>
                                             <asp:BoundField DataField="Nom_Cliente" HeaderText="Nom. Cliente" Visible="true" />
                                             <asp:BoundField DataField="Num_OrdenServicio" HeaderText="N° OS" Visible="true" />

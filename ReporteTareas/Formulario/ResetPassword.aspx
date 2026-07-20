@@ -29,7 +29,7 @@
     <script src="https://code.jquery.com/jquery-1.9.1.js"></script>
     <script src="https://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 
-	
+	<link href="../dist/css/tema-dos.css" rel="stylesheet" />
     <!--//////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
 </head>
 <body>
@@ -39,9 +39,9 @@
                 <div class="row">
                     <div class="col-md-4 col-md-offset-4">
                         <div class="login-panel panel panel-info">
-							<div class="panel-heading" style="text-align: center">
+							<div class="panel-heading" style="text-align: center; background: var(--dos-surface)">
 								<img src="../Img/logo_ct.png" height="50" /><br/>
-								<h2 class="text-center panel-collapse">Actualizar Clave</h2>Versión 2.5
+								<h2 class="text-center">Actualizar Clave</h2><small class="text-muted">Versión 2.5</small>
 							</div>						
                             <div class="panel-body">
                                 <fieldset>

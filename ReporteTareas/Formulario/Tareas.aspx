@@ -22,7 +22,7 @@
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 
                                     <%--<asp:GridView ID="dgv_Detalle" runat="server" CssClass="table-responsive table-striped table-bordered table-hover" AutoGenerateColumns="False" OnSelectedIndexChanged="dgv_Detalle_SelectedIndexChanged" >--%>
-                                    <asp:GridView ID="dgv_Tareas" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None" CssClass="table-responsive table-striped table-bordered table-hover" AutoGenerateColumns="False" OnSelectedIndexChanged="dgv_Tareas_SelectedIndexChanged" Width="100%">
+                                    <asp:GridView ID="dgv_Tareas" runat="server" CssClass="table table-striped table-bordered table-hover table-responsive" AutoGenerateColumns="False" OnSelectedIndexChanged="dgv_Tareas_SelectedIndexChanged" Width="100%">
                                         <%--<asp:GridView ID="dgv_Tareas" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None"  class="table table-condensed table-bordered table-hover" AutoGenerateColumns="False" OnSelectedIndexChanged="dgv_Tareas_SelectedIndexChanged" Width="100%">--%>
                                         <Columns>
                                             <asp:CommandField ButtonType="Image" SelectImageUrl="~/Img/modificar.png" SelectText=" " ShowSelectButton="True"  />

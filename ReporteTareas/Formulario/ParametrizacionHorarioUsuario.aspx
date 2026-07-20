@@ -5,18 +5,18 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <div id="page-wrapper" style="padding: 0px">
+    <div id="page-wrapper">
         <div class="row">
-            <div class="col-lg-12" style="padding: 20px">
-                <div class="card card-primary">
-                    <div class="card-header" style="text-align: center">
-                        <h3>Parametrización de horario por usuario</h3>
+            <div class="col-lg-12">
+                <div class="panel panel-default">
+                    <div class="panel-heading" style="text-align: center">
+                        <h3 style="margin: 6px 0">Parametrización de horario por usuario</h3>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-12" style="padding: 0px">
+        <div class="col-lg-12">
             <div class="panel panel-default">
                 <div class="panel-heading">
                     Asignación de horario laboral
@@ -38,13 +38,13 @@
                         </div>
                     </div>
 
-                    <div class="col-lg-12" style="padding: 0px">
+                    <div class="col-lg-12">
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 <h4 id="listTitleLabel">Usuarios y su horario vigente</h4>
                             </div>
                             <div class="panel-body" style="height: 430px; overflow-y: auto; overflow-x: auto;">
-                                <div id="datosTablaUsuarios" style="padding: 0px">
+                                <div id="datosTablaUsuarios">
                                 </div>
                             </div>
                         </div>
@@ -57,7 +57,7 @@
         <div class="modal fade" id="modalAsignar" tabindex="-1" role="dialog" aria-labelledby="modalAsignarLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #fcf8e3">
+                    <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="modalAsignarLabel">Asignar horario laboral</h4>
                     </div>
@@ -94,7 +94,7 @@
         <div class="modal fade" id="modalMensajeInformativo" tabindex="-1" role="dialog" aria-labelledby="modalMensajeInformativoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #fcf8e3" id="modalMensajeInformativoTipo">
+                    <div class="modal-header" id="modalMensajeInformativoTipo">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="myModalLabel">Informativo</h4>
                     </div>

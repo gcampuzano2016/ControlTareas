@@ -38,7 +38,7 @@ namespace ReporteTareas.Formulario
                 foreach (DataRow data in dtPadres.Rows)
                 {
                     plan1 = plan1 + "<li>";
-                    plan1 = plan1 + "<a href = '#'><i class='" + data["Class_Icon"].ToString() + "'></i>" + "   " + data["Titulo"].ToString() + "<span class='fa arrow'></span></a>";
+                    plan1 = plan1 + "<a href='#'><i class='" + data["Class_Icon"].ToString() + "'></i>   " + data["Titulo"].ToString() + "<span class='fa arrow'></span></a>";
                     DataTable dtChild = new DataTable();
                     DataView view2 = dtPrincipal.DefaultView;
                     view2.RowFilter = "Id_MenuPadre=" + data["id_Menu"] + "";
@@ -47,7 +47,7 @@ namespace ReporteTareas.Formulario
                     foreach (DataRow detalle in dtChild.Rows)
                     {
                         plan1 = plan1 + "<li>";
-                        plan1 = plan1 + "<a href ='" + detalle["Href"].ToString() + "'> <i class='" + detalle["Class_Icon"].ToString() + "'></i>" + "   " + detalle["Titulo"].ToString() + "</a>";
+                        plan1 = plan1 + "<a href='" + detalle["Href"].ToString() + "'><i class='" + detalle["Class_Icon"].ToString() + "'></i>   " + detalle["Titulo"].ToString() + "</a>";
                         plan1 = plan1 + "</li>";
                     }
                     plan1 = plan1 + "</ul>";

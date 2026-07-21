@@ -85,6 +85,7 @@
     <Compile Include="DaoSolicitud.cs" />
     <Compile Include="DaoTareas.cs" />
     <Compile Include="DaoUsuarioHorario.cs" />
+    <Compile Include="DaoVentanaAprobacion.cs" />
     <Compile Include="DaoTransaccion.cs" />
     <Compile Include="DaoVacaciones.cs" />
     <Compile Include="FileEncryptionService.cs" />

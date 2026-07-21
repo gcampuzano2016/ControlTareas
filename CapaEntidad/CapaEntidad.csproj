@@ -86,6 +86,7 @@
     <Compile Include="EntRespuesta.cs" />
     <Compile Include="EntDetTarea.cs" />
     <Compile Include="EntUsuarioHorario.cs" />
+    <Compile Include="EntVentanaAprobacionJefe.cs" />
     <Compile Include="EntError.cs" />
     <Compile Include="EntDetalleTarea.cs" />
     <Compile Include="EntHisTarea.cs" />

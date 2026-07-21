@@ -830,7 +830,7 @@
         <div class="modal fade" id="modalMensajeInformativo" tabindex="-1" role="dialog" aria-labelledby="modalMensajeInformativoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #fcf8e3" id="modalMensajeInformativoTipo">
+                    <div class="modal-header" id="modalMensajeInformativoTipo">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="myModalLabel">Informativo</h4>
                     </div>
@@ -851,7 +851,7 @@
         <div class="modal fade" id="modalMensajeAprobar" tabindex="-1" role="dialog" aria-labelledby="modalMensajeAprobarLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #d9edf7" id="modalMensajeAprobarTipo">
+                    <div class="modal-header" id="modalMensajeAprobarTipo">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="modalMensajeAprobarLabelTitulo">Registrar Requerimientos</h4>
                     </div>
@@ -948,7 +948,7 @@
         <div class="modal fade" id="modalMensajeConfirmacion" tabindex="-1" role="dialog" aria-labelledby="modalMensajeConfirmacionLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #fcf8e3" id="modalMensajeConfirmacionTipo">
+                    <div class="modal-header" id="modalMensajeConfirmacionTipo">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="myModalConfirmacionLabel">Confirmación</h4>
                     </div>
@@ -970,7 +970,7 @@
         <div class="modal fade" id="modalMensajeAprobar2" tabindex="-1" role="dialog" aria-labelledby="modalMensajeAprobarLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
-                    <div class="modal-header" style="background: #d9edf7" id="modalMensajeAprobarTipo">
+                    <div class="modal-header" id="modalMensajeAprobarTipo">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
                         <h4 class="modal-title" id="modalMensajeAprobarLabelTitulo">Registro Cliente</h4>
                     </div>

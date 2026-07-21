@@ -66,7 +66,9 @@ label, .control-label { font-weight: 600; color: var(--dos-ink); margin-bottom: 
 
 /* ---- Modales ---- */
 .modal-content { border-radius: var(--dos-radius); box-shadow: var(--dos-shadow-md); border: none; }
-.modal-header { border-bottom: 1px solid var(--dos-border); background: var(--dos-surface) !important; }
+/* Sin !important: el default es superficie (blanco), pero MostrarMensajeDialogo (JS) puede
+   colorear el header inline por tipo de mensaje (warning/danger/info/success). */
+.modal-header { border-bottom: 1px solid var(--dos-border); background: var(--dos-surface); }
 .modal-title { font-weight: 600; }
 
 /* ---- Navbar ---- */

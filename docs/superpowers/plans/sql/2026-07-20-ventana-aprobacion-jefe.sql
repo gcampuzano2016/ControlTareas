@@ -49,7 +49,8 @@ BEGIN
     OUTER APPLY (
         SELECT TOP 1 ru.Nom_Usuario
         FROM dbo.R_Usuarios ru
-        WHERE ru.E_Mail = j.MailJefe
+        WHERE LTRIM(RTRIM(ru.E_Mail)) = j.MailJefe
+        ORDER BY ru.Cod_Usuario
     ) u
     LEFT JOIN dbo.RTA_VentanaAprobacionJefe v
         ON v.MailJefe = j.MailJefe AND v.Estado = 1
@@ -84,23 +85,34 @@ BEGIN
         SELECT Respuestas = 0, Mensaje = 'La fecha hasta no puede ser menor que la fecha desde.'; RETURN;
     END
 
-    IF EXISTS (SELECT 1 FROM dbo.RTA_VentanaAprobacionJefe WHERE MailJefe = @MailJefe)
-    BEGIN
-        UPDATE dbo.RTA_VentanaAprobacionJefe
-           SET FechaDesde = @FechaDesde,
-               FechaHasta = @FechaHasta,
-               Estado = 1,
-               UsuarioRegistro = @UsuarioRegistro,
-               FechaRegistro = GETDATE()
-         WHERE MailJefe = @MailJefe;
-        SET @Respuestas = 1; SET @Mensaje = 'Ventana de aprobación actualizada correctamente.';
-    END
-    ELSE
-    BEGIN
-        INSERT INTO dbo.RTA_VentanaAprobacionJefe (MailJefe, FechaDesde, FechaHasta, Estado, UsuarioRegistro, FechaRegistro)
-        VALUES (@MailJefe, @FechaDesde, @FechaHasta, 1, @UsuarioRegistro, GETDATE());
-        SET @Respuestas = 1; SET @Mensaje = 'Ventana de aprobación registrada correctamente.';
-    END
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        IF EXISTS (SELECT 1 FROM dbo.RTA_VentanaAprobacionJefe WITH (UPDLOCK, HOLDLOCK) WHERE MailJefe = @MailJefe)
+        BEGIN
+            UPDATE dbo.RTA_VentanaAprobacionJefe
+               SET FechaDesde = @FechaDesde,
+                   FechaHasta = @FechaHasta,
+                   Estado = 1,
+                   UsuarioRegistro = @UsuarioRegistro,
+                   FechaRegistro = GETDATE()
+             WHERE MailJefe = @MailJefe;
+            SET @Respuestas = 1; SET @Mensaje = 'Ventana de aprobación actualizada correctamente.';
+        END
+        ELSE
+        BEGIN
+            INSERT INTO dbo.RTA_VentanaAprobacionJefe (MailJefe, FechaDesde, FechaHasta, Estado, UsuarioRegistro, FechaRegistro)
+            VALUES (@MailJefe, @FechaDesde, @FechaHasta, 1, @UsuarioRegistro, GETDATE());
+            SET @Respuestas = 1; SET @Mensaje = 'Ventana de aprobación registrada correctamente.';
+        END
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
+        SET @Respuestas = 0;
+        SET @Mensaje = 'No se pudo guardar la ventana: ' + ERROR_MESSAGE();
+    END CATCH
 
     SELECT Respuestas = @Respuestas, Mensaje = @Mensaje;
 END

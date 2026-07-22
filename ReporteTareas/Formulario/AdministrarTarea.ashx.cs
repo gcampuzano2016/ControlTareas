@@ -908,9 +908,16 @@ namespace JsonJQueryNetAdministrarTarea
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
 
+                // Ventana de aprobación del jefe (opt-in): si tiene ventana y hoy está fuera, no aprueba.
+                EntRespuesta valVentana = NegVentanaAprobacion.ValidarVentana(usuario.E_Mail, DateTime.Now);
+                if (valVentana.estado == "0")
+                {
+                    return valVentana.SerializaToJson();
+                }
+
                 Int32 estadoAprobacion = 2;
 
-                // Actualización de tareas con estado de aprobación. 
+                // Actualización de tareas con estado de aprobación.
                 respuestaAprobacion = NegTareas.RTA_CambioEstadoAprobacionTarea(IdUsuarioSession, fechaDesde, fechaHasta, idUsuarioResponsable, IdUsuarioSession, ipCliente, estadoAprobacion);
 
                 //
@@ -963,9 +970,16 @@ namespace JsonJQueryNetAdministrarTarea
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
 
+                // Ventana de aprobación del jefe (opt-in): si tiene ventana y hoy está fuera, no aprueba.
+                EntRespuesta valVentana = NegVentanaAprobacion.ValidarVentana(usuario.E_Mail, DateTime.Now);
+                if (valVentana.estado == "0")
+                {
+                    return valVentana.SerializaToJson();
+                }
+
                 Int32 estadoAprobacion = 2;
 
-                // Actualización de tareas con estado de aprobación. 
+                // Actualización de tareas con estado de aprobación.
                 respuestaAprobacion = NegTareas.RTA_CambioEstadoAprobacionTareaIndividual(IdUsuarioSession, fechaDesde, fechaHasta, idUsuarioResponsable, IdUsuarioSession, ipCliente, estadoAprobacion, idDetalleTarea);
 
                 //

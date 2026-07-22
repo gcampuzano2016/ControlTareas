@@ -20,6 +20,7 @@
 
 SET NOCOUNT ON;
 SET XACT_ABORT ON;
+SET QUOTED_IDENTIFIER ON;   -- requerido por FOR XML PATH(...).value(); sqlcmd lo deja en OFF
 
 DECLARE @Aplicar BIT = 0;   -- <<<<<< 0 = simulación (rollback) | 1 = aplicar cambios
 
@@ -38,17 +39,17 @@ BEGIN
     RETURN;
 END
 
-IF COL_LENGTH('dbo.PerfilMenu', 'Id_Perfil') IS NULL
+IF COL_LENGTH('dbo.PerfilMenu', 'IdPerfil') IS NULL
     OR COL_LENGTH('dbo.PerfilMenu', 'Id_Menu') IS NULL
     OR COL_LENGTH('dbo.PerfilMenu', 'Estado') IS NULL
 BEGIN
     -- Si falla, ejecutar esto y ajustar el nombre de la columna de perfil en el script:
     --   SELECT c.name FROM sys.columns c WHERE c.object_id = OBJECT_ID('dbo.PerfilMenu') ORDER BY c.column_id;
-    RAISERROR('dbo.PerfilMenu no tiene las columnas esperadas (Id_Perfil/Id_Menu/Estado). Revisar el esquema antes de continuar.', 16, 1);
+    RAISERROR('dbo.PerfilMenu no tiene las columnas esperadas (IdPerfil/id_Menu/Estado). Revisar el esquema antes de continuar.', 16, 1);
     RETURN;
 END
 
--- Los INSERT sobre PerfilMenu solo informan Id_Menu, Id_Perfil y Estado. Si la
+-- Los INSERT sobre PerfilMenu solo informan id_Menu, IdPerfil y Estado. Si la
 -- tabla tuviera otra columna obligatoria sin DEFAULT, el MERGE fallaría con un
 -- error poco claro; se avisa aquí antes de empezar.
 IF EXISTS (SELECT 1
@@ -57,13 +58,13 @@ IF EXISTS (SELECT 1
              AND  c.is_nullable = 0
              AND  c.is_identity = 0
              AND  c.default_object_id = 0
-             AND  c.name NOT IN ('Id_Menu', 'Id_Perfil', 'Estado'))
+             AND  c.name NOT IN ('id_Menu', 'IdPerfil', 'Estado'))
 BEGIN
     SELECT 'Columna obligatoria no contemplada' AS Problema, c.name
     FROM   sys.columns c
     WHERE  c.object_id = OBJECT_ID('dbo.PerfilMenu')
       AND  c.is_nullable = 0 AND c.is_identity = 0 AND c.default_object_id = 0
-      AND  c.name NOT IN ('Id_Menu', 'Id_Perfil', 'Estado');
+      AND  c.name NOT IN ('id_Menu', 'IdPerfil', 'Estado');
     RAISERROR('dbo.PerfilMenu tiene columnas NOT NULL sin DEFAULT que este script no informa (ver resultado). Añadirlas a los INSERT del MERGE antes de aplicar.', 16, 1);
     RETURN;
 END
@@ -87,18 +88,18 @@ PRINT 'Id_MenuPadre (grupo)     = ' + CAST(@idPadre  AS VARCHAR(20));
    Revisar esta lista antes de aplicar.
    --------------------------------------------------------------------------- */
 SELECT  'IMPACTO: se volverá visible' AS Advertencia,
-        pm.Id_Perfil,
+        pm.IdPerfil,
         m.Id_Menu,
         m.Titulo,
         m.Href
 FROM    dbo.PerfilMenu pm
-JOIN    dbo.MenuDos    m ON m.Id_Menu = pm.Id_Menu
+JOIN    dbo.MenuDos    m ON m.Id_Menu = pm.id_Menu
 WHERE   m.Id_MenuPadre = @idPadre
-  AND   pm.Id_Perfil IN (2, 19)
+  AND   pm.IdPerfil IN (2, 19)
   AND   pm.Estado = '0'
   AND   NOT EXISTS (SELECT 1 FROM dbo.PerfilMenu p
-                    WHERE p.Id_Menu = @idPadre AND p.Id_Perfil = pm.Id_Perfil AND p.Estado = '0')
-ORDER BY pm.Id_Perfil, m.Id_Menu;
+                    WHERE p.id_Menu = @idPadre AND p.IdPerfil = pm.IdPerfil AND p.Estado = '0')
+ORDER BY pm.IdPerfil, m.Id_Menu;
 
 /* ---------------------------------------------------------------------------
    Cambios
@@ -154,24 +155,24 @@ END
 
 /* 3) Visibilidad de la NUEVA opción para los perfiles 1, 2, 18, 19 */
 MERGE dbo.PerfilMenu AS t
-USING (VALUES (1), (2), (18), (19)) AS p(Id_Perfil)
-   ON  t.Id_Menu = @idNuevo AND t.Id_Perfil = p.Id_Perfil
+USING (VALUES (1), (2), (18), (19)) AS p(IdPerfil)
+   ON  t.id_Menu = @idNuevo AND t.IdPerfil = p.IdPerfil
 WHEN MATCHED THEN
     UPDATE SET t.Estado = '0'
 WHEN NOT MATCHED BY TARGET THEN
-    INSERT (Id_Menu, Id_Perfil, Estado) VALUES (@idNuevo, p.Id_Perfil, '0');
+    INSERT (id_Menu, IdPerfil, Estado) VALUES (@idNuevo, p.IdPerfil, '0');
 
 PRINT 'Permisos de la opción asegurados para perfiles 1, 2, 18, 19.';
 
 /* 4) Visibilidad del GRUPO PADRE para los mismos perfiles (sin esto, los
       perfiles 2 y 19 no verían la opción aunque tengan permiso propio). */
 MERGE dbo.PerfilMenu AS t
-USING (VALUES (1), (2), (18), (19)) AS p(Id_Perfil)
-   ON  t.Id_Menu = @idPadre AND t.Id_Perfil = p.Id_Perfil
+USING (VALUES (1), (2), (18), (19)) AS p(IdPerfil)
+   ON  t.id_Menu = @idPadre AND t.IdPerfil = p.IdPerfil
 WHEN MATCHED THEN
     UPDATE SET t.Estado = '0'
 WHEN NOT MATCHED BY TARGET THEN
-    INSERT (Id_Menu, Id_Perfil, Estado) VALUES (@idPadre, p.Id_Perfil, '0');
+    INSERT (id_Menu, IdPerfil, Estado) VALUES (@idPadre, p.IdPerfil, '0');
 
 PRINT 'Permisos del grupo padre asegurados para perfiles 1, 2, 18, 19.';
 
@@ -182,12 +183,12 @@ SELECT  'RESULTADO' AS Seccion, m.Id_Menu, m.Id_MenuPadre, m.Titulo, m.Href
 FROM    dbo.MenuDos m
 WHERE   m.Id_Menu IN (@idNuevo, @idPadre);
 
-SELECT  'PERMISOS' AS Seccion, pm.Id_Menu, pm.Id_Perfil, pm.Estado,
-        CASE WHEN pm.Id_Menu = @idPadre THEN 'grupo padre' ELSE 'opción' END AS Nivel
+SELECT  'PERMISOS' AS Seccion, pm.id_Menu, pm.IdPerfil, pm.Estado,
+        CASE WHEN pm.id_Menu = @idPadre THEN 'grupo padre' ELSE 'opción' END AS Nivel
 FROM    dbo.PerfilMenu pm
-WHERE   pm.Id_Menu IN (@idNuevo, @idPadre)
-  AND   pm.Id_Perfil IN (1, 2, 18, 19)
-ORDER BY Nivel DESC, pm.Id_Perfil;
+WHERE   pm.id_Menu IN (@idNuevo, @idPadre)
+  AND   pm.IdPerfil IN (1, 2, 18, 19)
+ORDER BY Nivel DESC, pm.IdPerfil;
 
 IF @Aplicar = 1
 BEGIN
@@ -215,5 +216,5 @@ GO
    Ajustar el Id_Menu impreso por el script.
    ============================================================================ */
 -- DECLARE @id INT = (SELECT MIN(Id_Menu) FROM dbo.MenuDos WHERE Href = 'ParametrizacionVentanaAprobacion.aspx');
--- DELETE FROM dbo.PerfilMenu WHERE Id_Menu = @id;
+-- DELETE FROM dbo.PerfilMenu WHERE id_Menu = @id;
 -- DELETE FROM dbo.MenuDos    WHERE Id_Menu = @id;

@@ -1125,6 +1125,7 @@
     <Content Include="Formulario\RegistroProyecto.aspx" />
     <Content Include="Formulario\ReporteHorarioLaboral.aspx" />
     <Content Include="Formulario\ParametrizacionHorarioUsuario.aspx" />
+    <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
     <Content Include="Formulario\ReporteSalud.aspx" />
     <Content Include="Formulario\ReportesSap.aspx" />
     <Content Include="Formulario\RRHHEmpleados.aspx" />
@@ -1290,6 +1291,7 @@
     <Content Include="Formulario\ActualizarTareas.aspx" />
     <Content Include="Formulario\AdministrarTarea.ashx" />
     <Content Include="Formulario\AdministrarHorarioUsuario.ashx" />
+    <Content Include="Formulario\AdministrarVentanaAprobacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
     <Content Include="Formulario\AprobarHorasExtraPendientes.aspx" />
@@ -1377,6 +1379,7 @@
     <Content Include="js\morris-data.js" />
     <Content Include="js\cambiarEstadoTarea.js" />
     <Content Include="js\parametrizacionHorarioUsuario.js" />
+    <Content Include="js\parametrizacionVentanaAprobacion.js" />
     <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />
     <Content Include="js\obj\Debug\BillWeb.dll" />
     <Content Include="js\obj\Debug\BillWeb.pdb" />
@@ -1424,6 +1427,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarHorarioUsuario.ashx.cs">
       <DependentUpon>AdministrarHorarioUsuario.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarVentanaAprobacion.ashx.cs">
+      <DependentUpon>AdministrarVentanaAprobacion.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AprobacionTareasJefatura.aspx.cs">
       <DependentUpon>AprobacionTareasJefatura.aspx</DependentUpon>
@@ -1853,6 +1859,13 @@
     </Compile>
     <Compile Include="Formulario\ParametrizacionHorarioUsuario.aspx.designer.cs">
       <DependentUpon>ParametrizacionHorarioUsuario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionVentanaAprobacion.aspx.cs">
+      <DependentUpon>ParametrizacionVentanaAprobacion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionVentanaAprobacion.aspx.designer.cs">
+      <DependentUpon>ParametrizacionVentanaAprobacion.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ReporteHorasExtras.aspx.cs">
       <DependentUpon>ReporteHorasExtras.aspx</DependentUpon>

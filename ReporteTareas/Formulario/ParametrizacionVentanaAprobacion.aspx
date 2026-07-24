@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionVentanaAprobacion.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionVentanaAprobacion" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionVentanaAprobacion.js?v=1" type="text/javascript"></script>
+    <script src="../js/parametrizacionVentanaAprobacion.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

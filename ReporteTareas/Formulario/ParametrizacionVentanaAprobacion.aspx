@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionVentanaAprobacion.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionVentanaAprobacion" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionVentanaAprobacion.js?v=2" type="text/javascript"></script>
+    <script src="../js/parametrizacionVentanaAprobacion.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -35,6 +35,11 @@
                         <div class="form-group col-lg-3" style="padding-top: 25px">
                             <button id="btnBuscar" onclick="BuscarJefes()" type="button" class="btn btn-primary">Buscar</button>
                             <button id="btnRefrescar" onclick="LimpiarBusqueda()" type="button" class="btn btn-default">Mostrar todos</button>
+                        </div>
+                        <div class="form-group col-lg-4" style="padding-top: 25px">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" id="chkMostrarInactivos" onchange="BuscarJefes()" /> Mostrar inactivos
+                            </label>
                         </div>
                     </div>
 

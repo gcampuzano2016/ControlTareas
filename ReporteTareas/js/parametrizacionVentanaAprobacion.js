@@ -28,11 +28,12 @@ function PostVentana(action, parameters, onSuccess) {
     });
 }
 
-/* Lista jefes aplicando el filtro del cuadro de busqueda */
+/* Lista jefes aplicando el filtro y el checkbox de inactivos */
 function BuscarJefes() {
     var filtro = $("#txtBuscar").val();
+    var incluirInactivos = $("#chkMostrarInactivos").is(":checked");
 
-    PostVentana("ListaJefes", { "filtro": filtro }, function (respuesta) {
+    PostVentana("ListaJefes", { "filtro": filtro, "incluirInactivos": incluirInactivos }, function (respuesta) {
         if (respuesta != null && typeof respuesta.estado != "undefined") {
             MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
             return;
@@ -52,7 +53,7 @@ function RenderTablaJefes(lista) {
     var info = "";
     info += "<table width='100%' class='table table-striped table-bordered table-hover dataTable no-footer'>";
     info += "<thead><tr role='row'>";
-    info += "<th style='text-align:center'>Asignar</th>";
+    info += "<th style='text-align:center'>Acciones</th>";
     info += "<th>Jefe</th>";
     info += "<th>Correo</th>";
     info += "<th style='text-align:center'>Colaboradores</th>";
@@ -64,15 +65,27 @@ function RenderTablaJefes(lista) {
     }
 
     $.each(lista, function (i, item) {
+        var esInactivo = (item.Inactivo == 1);
+
         var ventana = (item.TieneVentana == 1)
             ? (Escapar(item.FechaDesde) + " a " + Escapar(item.FechaHasta))
             : "<span class='label label-default'>Sin ventana</span>";
 
-        info += "<tr role='row'>";
-        info += "<td style='text-align:center'>";
-        info += "<i class='fa fa-hand-o-right' title='Asignar ventana' style='cursor:pointer' onclick='AbrirAsignar(" + i + ")'></i>";
-        info += "</td>";
-        info += "<td>" + Escapar(item.NombreJefe) + "</td>";
+        var acciones = "";
+        if (esInactivo) {
+            acciones += "<i class='fa fa-check' title='Reactivar' style='cursor:pointer;color:#3c763d' onclick='ActivarJefe(" + i + ")'></i>";
+        } else {
+            acciones += "<i class='fa fa-hand-o-right' title='Asignar ventana' style='cursor:pointer' onclick='AbrirAsignar(" + i + ")'></i>";
+            acciones += " &nbsp; ";
+            acciones += "<i class='fa fa-ban' title='Inactivar de este módulo' style='cursor:pointer;color:#a94442' onclick='InactivarJefe(" + i + ")'></i>";
+        }
+
+        var estiloFila = esInactivo ? " style='opacity:0.55'" : "";
+        var etiquetaInactivo = esInactivo ? " <span class='label label-default'>Inactivo</span>" : "";
+
+        info += "<tr role='row'" + estiloFila + ">";
+        info += "<td style='text-align:center'>" + acciones + "</td>";
+        info += "<td>" + Escapar(item.NombreJefe) + etiquetaInactivo + "</td>";
         info += "<td>" + Escapar(item.MailJefe) + "</td>";
         info += "<td style='text-align:center'>" + Escapar(String(item.NumColaboradores)) + "</td>";
         info += "<td>" + ventana + "</td>";
@@ -95,6 +108,40 @@ function AbrirAsignar(indice) {
     $("#txtFechaDesde").val(item.TieneVentana == 1 ? item.FechaDesde : FechaHoyISO());
     $("#txtFechaHasta").val(item.TieneVentana == 1 ? item.FechaHasta : FechaHoyISO());
     $("#modalAsignar").modal("show");
+}
+
+/* Inactiva/reactiva un jefe en este módulo (acción directa) */
+function InactivarJefe(indice) {
+    var item = _jefes[indice];
+    if (item == null) { return; }
+    CambiarEstadoJefe(item.MailJefe, 1);
+}
+
+function ActivarJefe(indice) {
+    var item = _jefes[indice];
+    if (item == null) { return; }
+    CambiarEstadoJefe(item.MailJefe, 0);
+}
+
+function CambiarEstadoJefe(mailJefe, excluir) {
+    var usuarioRegistro = $("#ContentPlaceHolder1_txtLoginUsuario").val();
+
+    var parameters = {
+        "mailJefe": mailJefe,
+        "excluir": excluir,
+        "usuarioRegistro": usuarioRegistro
+    };
+
+    PostVentana("ExcluirJefe", parameters, function (respuesta) {
+        if (respuesta == null) {
+            MostrarMensaje("No se recibió respuesta del servidor.", "danger");
+            return;
+        }
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado == "1") {
+            BuscarJefes();
+        }
+    });
 }
 
 /* Envia la ventana al handler */

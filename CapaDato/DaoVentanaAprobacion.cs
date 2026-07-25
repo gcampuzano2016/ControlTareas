@@ -9,7 +9,7 @@ namespace CapaDato
     public class DaoVentanaAprobacion
     {
         /// <summary>Lista los jefes inmediatos (MailCodJefeInm) con su ventana vigente.</summary>
-        public static List<EntVentanaAprobacionJefe> ListarJefes(string filtro)
+        public static List<EntVentanaAprobacionJefe> ListarJefes(string filtro, bool incluirInactivos)
         {
             List<EntVentanaAprobacionJefe> lista = new List<EntVentanaAprobacionJefe>();
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
@@ -19,6 +19,7 @@ namespace CapaDato
             {
                 cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@Filtro", SqlDbType.VarChar, 150).Value = filtro ?? string.Empty;
+                cmd.Parameters.Add("@IncluirInactivos", SqlDbType.Bit).Value = incluirInactivos;
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
@@ -32,13 +33,76 @@ namespace CapaDato
                             NumColaboradores = Convert.ToInt32(dr["NumColaboradores"].ToString()),
                             FechaDesde = dr["FechaDesde"] == DBNull.Value ? "" : dr["FechaDesde"].ToString(),
                             FechaHasta = dr["FechaHasta"] == DBNull.Value ? "" : dr["FechaHasta"].ToString(),
-                            TieneVentana = Convert.ToInt32(dr["TieneVentana"].ToString())
+                            TieneVentana = Convert.ToInt32(dr["TieneVentana"].ToString()),
+                            Inactivo = Convert.ToInt32(dr["Inactivo"].ToString())
                         });
                     }
                 }
             }
 
             return lista;
+        }
+
+        /// <summary>Activa (excluir=true) o quita (excluir=false) la exclusión del jefe en este módulo.</summary>
+        public static EntRespuesta ExcluirJefe(string mailJefe, bool excluir, string usuarioRegistro)
+        {
+            EntRespuesta respuesta = new EntRespuesta()
+            {
+                estado = "0",
+                resultado = "0",
+                tipoMensaje = "danger",
+                mensaje = ""
+            };
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_ExcluirJefeVentana", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@MailJefe", SqlDbType.VarChar, 150).Value = mailJefe ?? string.Empty;
+                    cmd.Parameters.Add("@Excluir", SqlDbType.Bit).Value = excluir;
+                    cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 100).Value = (object)usuarioRegistro ?? DBNull.Value;
+
+                    cnx.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            int respuestaSP = Convert.ToInt32(dr["Respuestas"].ToString());
+                            respuesta.resultado = respuestaSP.ToString();
+                            respuesta.mensaje = dr["Mensaje"].ToString();
+
+                            if (respuestaSP > 0)
+                            {
+                                respuesta.estado = "1";
+                                respuesta.tipoMensaje = "success";
+                            }
+                            else
+                            {
+                                respuesta.estado = "0";
+                                respuesta.tipoMensaje = "warning";
+                            }
+                        }
+                        else
+                        {
+                            respuesta.mensaje = "El procedimiento no devolvió información.";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.resultado = "0";
+                respuesta.tipoMensaje = "danger";
+                respuesta.mensaje = "Ocurrió un error al actualizar el estado del jefe. Detalle: " + ex.Message;
+            }
+
+            return respuesta;
         }
 
         /// <summary>Inserta o actualiza (una por jefe) la ventana de aprobación.</summary>

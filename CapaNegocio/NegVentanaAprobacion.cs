@@ -7,9 +7,14 @@ namespace CapaNegocio
 {
     public class NegVentanaAprobacion
     {
-        public static List<EntVentanaAprobacionJefe> ListarJefes(string filtro)
+        public static List<EntVentanaAprobacionJefe> ListarJefes(string filtro, bool incluirInactivos)
         {
-            return DaoVentanaAprobacion.ListarJefes(filtro);
+            return DaoVentanaAprobacion.ListarJefes(filtro, incluirInactivos);
+        }
+
+        public static EntRespuesta ExcluirJefe(string mailJefe, bool excluir, string usuarioRegistro)
+        {
+            return DaoVentanaAprobacion.ExcluirJefe(mailJefe, excluir, usuarioRegistro);
         }
 
         public static EntRespuesta GuardarVentana(string mailJefe, string fechaDesde, string fechaHasta, string usuarioRegistro)

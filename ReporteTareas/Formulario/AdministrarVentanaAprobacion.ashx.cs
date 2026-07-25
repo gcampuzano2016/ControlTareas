@@ -10,7 +10,7 @@ namespace JsonJQueryNetVentanaAprobacion
 {
     /// <summary>
     /// Handler de la pantalla "Parametrización de ventana de aprobación por jefe".
-    /// Acciones: ListaJefes, GuardarVentana.
+    /// Acciones: ListaJefes, GuardarVentana, ExcluirJefe.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -44,6 +44,12 @@ namespace JsonJQueryNetVentanaAprobacion
                     responseAction.Append(GuardarVentana(parameters));
                 }
 
+                if (Action == "ExcluirJefe")
+                {
+                    existAction = true;
+                    responseAction.Append(ExcluirJefe(parameters));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -51,6 +57,9 @@ namespace JsonJQueryNetVentanaAprobacion
             }
 
             context.Response.ContentType = "application/json";
+            // La app corre en windows-1252; forzamos UTF-8 en los bytes para que
+            // coincidan con el charset declarado y las tildes/ñ lleguen intactas.
+            context.Response.ContentEncoding = Encoding.UTF8;
             context.Response.Charset = "utf-8";
             context.Response.Write(responseAction.ToString());
         }
@@ -63,7 +72,11 @@ namespace JsonJQueryNetVentanaAprobacion
                 try { filtro = Convert.ToString(campos["filtro"]); }
                 catch { filtro = ""; }
 
-                return ToJson(NegVentanaAprobacion.ListarJefes(filtro));
+                bool incluirInactivos = false;
+                try { incluirInactivos = Convert.ToBoolean(campos["incluirInactivos"]); }
+                catch { incluirInactivos = false; }
+
+                return ToJson(NegVentanaAprobacion.ListarJefes(filtro, incluirInactivos));
             }
             catch (Exception ex)
             {
@@ -99,6 +112,37 @@ namespace JsonJQueryNetVentanaAprobacion
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrió un error al guardar la ventana. " + ex.Message, "danger");
+            }
+
+            return ToJson(respuesta);
+        }
+
+        private string ExcluirJefe(dynamic campos)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            try
+            {
+                string mailJefe = Convert.ToString(campos["mailJefe"]).Trim();
+
+                bool excluir = false;
+                try { excluir = Convert.ToBoolean(campos["excluir"]); }
+                catch { excluir = false; }
+
+                string usuarioRegistro = "";
+                try { usuarioRegistro = Convert.ToString(campos["usuarioRegistro"]).Trim(); }
+                catch { usuarioRegistro = ""; }
+
+                if (string.IsNullOrWhiteSpace(mailJefe))
+                {
+                    return responseMessage("0", "Debe seleccionar un jefe.", "warning");
+                }
+
+                respuesta = NegVentanaAprobacion.ExcluirJefe(mailJefe, excluir, usuarioRegistro);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrió un error al actualizar el estado del jefe. " + ex.Message, "danger");
             }
 
             return ToJson(respuesta);

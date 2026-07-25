@@ -8,5 +8,6 @@ namespace CapaEntidad
         public string FechaDesde { get; set; }
         public string FechaHasta { get; set; }
         public int TieneVentana { get; set; }
+        public int Inactivo { get; set; }
     }
 }

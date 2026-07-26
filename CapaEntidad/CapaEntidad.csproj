@@ -71,6 +71,7 @@
     <Compile Include="EntMenu.cs" />
     <Compile Include="EntOrdenServicio.cs" />
     <Compile Include="EntPedido.cs" />
+    <Compile Include="EntPerfilInicio.cs" />
     <Compile Include="EntPerfiles.cs" />
     <Compile Include="EntPoliza.cs" />
     <Compile Include="EntProvinciaCiudad.cs" />

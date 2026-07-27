@@ -83,6 +83,12 @@ BEGIN
     BEGIN
         SELECT Respuestas = 0, Mensaje = 'Debe indicar la pagina de inicio.'; RETURN;
     END
+    /* La pagina de inicio debe ser una pantalla real registrada en MenuDos
+       (mismo universo que el desplegable), para evitar redirecciones invalidas. */
+    IF NOT EXISTS (SELECT 1 FROM dbo.MenuDos WHERE Href = @Href AND Href NOT LIKE 'Es Men%')
+    BEGIN
+        SELECT Respuestas = 0, Mensaje = 'La pagina de inicio no es valida.'; RETURN;
+    END
 
     BEGIN TRY
         BEGIN TRANSACTION;

@@ -60,7 +60,7 @@ function OpcionesPagina(hrefSeleccionado) {
     var html = "<option value=''>-- Seleccione --</option>";
     $.each(_paginas, function (i, p) {
         var sel = (p.Href === hrefSeleccionado) ? " selected" : "";
-        html += "<option value='" + Escapar(p.Href) + "'" + sel + ">" + Escapar(p.Titulo) + "</option>";
+        html += "<option value='" + EscaparAttr(p.Href) + "'" + sel + ">" + Escapar(p.Titulo) + "</option>";
     });
     return html;
 }
@@ -85,7 +85,7 @@ function RenderTablaPerfiles(lista) {
         info += "<td style='text-align:center'>" + Escapar(String(item.IdPerfil)) + "</td>";
         info += "<td>" + Escapar(item.NombrePerfil) + "</td>";
         info += "<td><select id='pag_" + i + "' class='form-control'>" + OpcionesPagina(item.Href) + "</select></td>";
-        info += "<td style='text-align:center'><input id='tipo_" + i + "' type='number' class='form-control' style='width:110px;display:inline-block' value='" + Escapar(String(item.IdTipo)) + "' /></td>";
+        info += "<td style='text-align:center'><input id='tipo_" + i + "' type='number' class='form-control' style='width:110px;display:inline-block' value='" + EscaparAttr(String(item.IdTipo)) + "' /></td>";
         info += "<td style='text-align:center'><button type='button' class='btn btn-success btn-sm' onclick='GuardarPerfil(" + i + ")'>Guardar</button></td>";
         info += "</tr>";
     });
@@ -144,4 +144,8 @@ function MostrarMensaje(mensaje, tipo) {
 function Escapar(texto) {
     if (texto == null) { return ""; }
     return $("<div>").text(texto).html();
+}
+
+function EscaparAttr(texto) {
+    return Escapar(texto).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 }

@@ -1127,6 +1127,7 @@
     <Content Include="Formulario\ParametrizacionHorarioUsuario.aspx" />
     <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
     <Content Include="Formulario\ParametrizacionPerfilInicio.aspx" />
+    <Content Include="Formulario\ParametrizacionMenuPerfil.aspx" />
     <Content Include="Formulario\ReporteSalud.aspx" />
     <Content Include="Formulario\ReportesSap.aspx" />
     <Content Include="Formulario\RRHHEmpleados.aspx" />
@@ -1384,6 +1385,7 @@
     <Content Include="js\parametrizacionHorarioUsuario.js" />
     <Content Include="js\parametrizacionVentanaAprobacion.js" />
     <Content Include="js\parametrizacionPerfilInicio.js" />
+    <Content Include="js\parametrizacionMenuPerfil.js" />
     <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />
     <Content Include="js\obj\Debug\BillWeb.dll" />
     <Content Include="js\obj\Debug\BillWeb.pdb" />
@@ -1883,6 +1885,13 @@
     </Compile>
     <Compile Include="Formulario\ParametrizacionPerfilInicio.aspx.designer.cs">
       <DependentUpon>ParametrizacionPerfilInicio.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuPerfil.aspx.cs">
+      <DependentUpon>ParametrizacionMenuPerfil.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuPerfil.aspx.designer.cs">
+      <DependentUpon>ParametrizacionMenuPerfil.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ReporteHorasExtras.aspx.cs">
       <DependentUpon>ReporteHorasExtras.aspx</DependentUpon>

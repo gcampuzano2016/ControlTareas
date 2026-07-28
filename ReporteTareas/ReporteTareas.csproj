@@ -1294,6 +1294,7 @@
     <Content Include="Formulario\AdministrarHorarioUsuario.ashx" />
     <Content Include="Formulario\AdministrarVentanaAprobacion.ashx" />
     <Content Include="Formulario\AdministrarPerfilInicio.ashx" />
+    <Content Include="Formulario\AdministrarMenuPerfil.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
     <Content Include="Formulario\AprobarHorasExtraPendientes.aspx" />
@@ -1436,6 +1437,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarPerfilInicio.ashx.cs">
       <DependentUpon>AdministrarPerfilInicio.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarMenuPerfil.ashx.cs">
+      <DependentUpon>AdministrarMenuPerfil.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AprobacionTareasJefatura.aspx.cs">
       <DependentUpon>AprobacionTareasJefatura.aspx</DependentUpon>

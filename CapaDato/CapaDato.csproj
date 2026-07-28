@@ -73,6 +73,7 @@
     <Compile Include="DaoMenu.cs" />
     <Compile Include="DaoOrdenServicio.cs" />
     <Compile Include="DaoPedido.cs" />
+    <Compile Include="DaoMenuPerfil.cs" />
     <Compile Include="DaoPerfilInicio.cs" />
     <Compile Include="DaoPerfiles.cs" />
     <Compile Include="DaoPoliza.cs" />

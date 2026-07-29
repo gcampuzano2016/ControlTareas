@@ -327,6 +327,51 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnvioCorreoMarcacion
+        /// <summary>Correo de confirmación de una marcación (accion: 1=entrada, 2=salida).</summary>
+        public bool EnvioCorreoMarcacion(string correoDestino, string nombreUsuario, int accion, DateTime fechaHora)
+        {
+            EntParametrosCorreo parametrosServidorCorreo = new EntParametrosCorreo();
+            bool respuestaEnvioCorreo = false;
+
+            try
+            {
+                parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametrosServidorCorreo.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                string tipo = (accion == 1) ? "entrada" : "salida";
+                string fecha = fechaHora.ToString("dd/MM/yyyy");
+                string hora = fechaHora.ToString("HH:mm");
+
+                string titulo = "Registro de " + tipo + " - " + fecha + " " + hora;
+
+                string contenido =
+                    "<p>Estimado(a) " + nombreUsuario + ",</p>" +
+                    "<p>Se registró su <b>" + tipo + "</b> con los siguientes datos:</p>" +
+                    "<table cellpadding='6' style='border-collapse:collapse'>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Tipo</b></td><td style='border:1px solid #ddd'>" + tipo + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Fecha</b></td><td style='border:1px solid #ddd'>" + fecha + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Hora</b></td><td style='border:1px solid #ddd'>" + hora + "</td></tr>" +
+                    "</table>" +
+                    "<p>Si usted no reconoce este registro, comuníquese con Talento Humano.</p>" +
+                    "<p style='color:#888;font-size:11px'>Mensaje automático del Sistema de Gestión Interno. No responda a este correo.</p>";
+
+                respuestaEnvioCorreo = EnviarCorreo(correoDestino, titulo, contenido, parametrosServidorCorreo);
+            }
+            catch (Exception ex)
+            {
+                ErrorProceso = ex.Message.ToString().Trim();
+                respuestaEnvioCorreo = false;
+            }
+
+            return respuestaEnvioCorreo;
+        }
+        #endregion
+
         #region EnvioCorreoSolicitudEmpleado
         public bool EnvioCorreoSolicitudEmpleado(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, List<EntItemValor> listaCampos, string nombreArchivo, int codigoSolicitud)
         {

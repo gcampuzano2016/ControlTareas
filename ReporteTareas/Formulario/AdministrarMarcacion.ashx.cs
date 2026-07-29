@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using CorreoHelper;
 using SeguridadAppHelper;
 using System;
 using System.Text;
@@ -79,6 +80,30 @@ namespace JsonJQueryNetMarcacion
 
                 if (resultado.Respuestas == 1)
                 {
+                    // Los datos se capturan ANTES de encolar: en el hilo del ThreadPool
+                    // no existe HttpContext.Current y nada puede leerse de la sesión ahí.
+                    string correoDestino = (usuario.E_Mail ?? string.Empty).Trim();
+                    string nombreUsuario = (usuario.Nom_Usuario ?? string.Empty).Trim();
+                    int accionCorreo = accion;
+                    DateTime fechaHoraCorreo = resultado.FechaHora;
+
+                    if (correoDestino != string.Empty)
+                    {
+                        System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                        {
+                            // try/catch TOTAL y obligatorio: una excepción sin capturar en un
+                            // hilo del ThreadPool tumba el worker process de ASP.NET.
+                            try
+                            {
+                                EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
+                                envioCorreo.EnvioCorreoMarcacion(correoDestino, nombreUsuario, accionCorreo, fechaHoraCorreo);
+                            }
+                            catch (Exception)
+                            {
+                            }
+                        });
+                    }
+
                     return responseMessage("1", resultado.Mensaje, "success");
                 }
 

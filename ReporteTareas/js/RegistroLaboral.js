@@ -45,7 +45,7 @@ $(document).on('click', '#btnSalida', function (e) {
 
 function RegistrarEvento(Accion) {
 
-    var url = "ObtenerListaTareas.ashx";
+    var url = "AdministrarMarcacion.ashx";
     var datos = "";
     var mensajeVerificacion = "";
     var tipoMensaje = "warning";
@@ -62,12 +62,11 @@ function RegistrarEvento(Accion) {
 
     datosFormulario = datosFormulario + "{";
     datosFormulario = datosFormulario + "'session': '" + valor + "',";
-    datosFormulario = datosFormulario + "'IdProceso': '" + IdProceso + "',";
     datosFormulario = datosFormulario + "'Accion': '" + Accion + "'";
 
     datosFormulario = datosFormulario + "}";
 
-    datos = "[{'action': 'RegistrarEvento', 'parameters' : " + datosFormulario + " }]";
+    datos = "[{'action': 'RegistrarMarcacion', 'parameters' : " + datosFormulario + " }]";
 
     $.ajax({
         type: "POST",

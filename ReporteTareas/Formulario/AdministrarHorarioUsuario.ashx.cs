@@ -59,6 +59,9 @@ namespace JsonJQueryNetHorarioUsuario
             }
 
             context.Response.ContentType = "application/json";
+            // La app corre en windows-1252; forzamos UTF-8 en los bytes para que
+            // coincidan con el charset declarado y las tildes/ñ lleguen intactas.
+            context.Response.ContentEncoding = Encoding.UTF8;
             context.Response.Charset = "utf-8";
             context.Response.Write(responseAction.ToString());
         }

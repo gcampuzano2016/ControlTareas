@@ -12,7 +12,7 @@
 
 - **Sin framework de pruebas automatizadas.** Verificación manual: MSBuild EXIT 0, `sqlcmd`, navegador.
 - **La BD de desarrollo ES la de producción.** `CapaDato/DaoReporTareaAranda.cs:22` apunta a `192.168.11.14 / ReporTarea`. Toda prueba de datos va **dentro de una transacción con `ROLLBACK`**.
-- **Base de datos:** `-S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea` (conectividad intermitente — reintentar si da timeout).
+- **Base de datos:** `-S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea` (conectividad intermitente — reintentar si da timeout). La contraseña **no se escribe en este documento**: definir `SQLPASS` en el entorno antes de correr los comandos (bash: `export SQLPASS='...'`; PowerShell: usar `$env:SQLPASS` en lugar de `$SQLPASS`). Este repositorio es público.
 - **MSBuild:** `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe`, `ReporteTareas.sln`, `Debug`. Ejecutar **vía PowerShell** (`& $msb ...`) por el espacio en la ruta.
 - **Scripts SQL con `SET QUOTED_IDENTIFIER ON;`** al inicio.
 - **Mensajes fijos de SP sin tildes.** Los textos en C# sí llevan tildes.
@@ -184,7 +184,7 @@ GO
 
 Run:
 ```bash
-cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-29-marcacion-registrar.sql"
+cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-29-marcacion-registrar.sql"
 ```
 Expected: sin errores. Si da timeout de login, reintentar (la conectividad es intermitente).
 
@@ -216,7 +216,7 @@ PRINT '--- filas creadas en la transaccion (debe ser 1) ---';
 SELECT FilasHoy=COUNT(*) FROM dbo.RegistroBiometrico WHERE Id_Usuario=@U AND CONVERT(DATE,FechaRegistro)=CONVERT(DATE,GETDATE());
 ROLLBACK TRANSACTION;
 PRINT '--- ROLLBACK hecho ---';
-"@; sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -W -s "|" -l 30 -Q $q
+"@; sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -b -W -s "|" -l 30 -Q $q
 ```
 
 Expected:
@@ -235,7 +235,7 @@ Expected:
 
 Run:
 ```bash
-cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT TotalFilas=COUNT(*) FROM dbo.RegistroBiometrico;"
+cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT TotalFilas=COUNT(*) FROM dbo.RegistroBiometrico;"
 ```
 Expected: el mismo total que antes de la prueba (17.822 al momento de escribir este plan; el número crece con el uso normal, lo que importa es que la prueba no lo haya alterado ni borrado filas del día).
 
@@ -596,7 +596,7 @@ EXEC dbo.Sp_RTAConsultaParametroConfiguracion @NombreParametro='emailFrom';
 EXEC dbo.Sp_RTAConsultaParametroConfiguracion @NombreParametro='emailFromName';
 EXEC dbo.Sp_RTAConsultaParametroConfiguracion @NombreParametro='portNumber';
 EXEC dbo.Sp_RTAConsultaParametroConfiguracion @NombreParametro='enableSSL';
-"@; sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s "|" -l 30 -Q $q
+"@; sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -W -s "|" -l 30 -Q $q
 ```
 Expected: los cinco devuelven un `Valor` no vacío. **Si alguno falta o viene vacío, detenerse y reportarlo al usuario**: hay que cargarlo en la tabla de parámetros antes de que esta funcionalidad sirva de algo. `portNumber` debe ser un entero y `enableSSL` un valor que `Convert.ToBoolean` acepte (`True`/`False`).
 
@@ -803,7 +803,7 @@ Abrir `Principal.aspx` con sesión iniciada y **Ctrl+F5** (para saltar el caché
 4. **Salida repetida:** volver a presionar "Salida" → mensaje *"Ya registro su salida hoy a las HH:mm."* — antes de este cambio, aquí no aparecía **nada**.
 5. Confirmar en BD que quedó **una sola fila** del día con entrada y salida correctas:
 ```bash
-sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT IdProceso, Id_Usuario, FechaEntrada, FechaSalida FROM dbo.RegistroBiometrico WHERE CONVERT(DATE,FechaRegistro)=CONVERT(DATE,GETDATE()) ORDER BY IdProceso DESC;"
+sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT IdProceso, Id_Usuario, FechaEntrada, FechaSalida FROM dbo.RegistroBiometrico WHERE CONVERT(DATE,FechaRegistro)=CONVERT(DATE,GETDATE()) ORDER BY IdProceso DESC;"
 ```
 
 - [ ] **Step 6: Orden de despliegue a producción**

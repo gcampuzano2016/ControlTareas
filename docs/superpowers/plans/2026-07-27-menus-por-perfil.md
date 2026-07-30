@@ -17,7 +17,7 @@
 - **Invariante:** hijo activo para un perfil ⇒ su padre también activo. Se fuerza en `Sp_RTA_GuardarMenuPerfil` y se repara en el script de datos.
 - **Codificación:** `.js` en **UTF-8 con BOM**; handler `context.Response.ContentEncoding = Encoding.UTF8`; usar `EscaparAttr` (codifica comillas) para valores de atributos en el JS. Mensajes fijos de SP **sin tildes**.
 - **Scripts SQL con `SET QUOTED_IDENTIFIER ON;`** al inicio (requerido por XML/MERGE y por el patrón de menú de esta BD).
-- **Base de datos:** `-S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea` (sólo responde por TCP desde esta máquina; conectividad intermitente — reintentar si da timeout).
+- **Base de datos:** `-S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea` (sólo responde por TCP desde esta máquina; conectividad intermitente — reintentar si da timeout). La contraseña **no se escribe en este documento**: definir `SQLPASS` en el entorno antes de correr los comandos (bash: `export SQLPASS='...'`; PowerShell: usar `$env:SQLPASS` en lugar de `$SQLPASS`). Este repositorio es público.
 - **MSBuild:** `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe`, `ReporteTareas.sln`, `Debug`. Ejecutar **vía PowerShell** (`& $msb ...`) por el espacio en la ruta.
 - **App local:** requiere **IIS Express de 32 bits**; el `SqlClient` de la app puede no alcanzar la BD desde esta máquina, así que HTTP/navegador se difieren al entorno del usuario cuando dependan de datos.
 - **No modificar** `Master.Master.cs` ni `PruebaMenu.aspx`.
@@ -221,8 +221,8 @@ WHERE pm.Estado = 0 AND ISNULL(child.Id_MenuPadre,0) <> 0
 Run:
 ```bash
 cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && SQL="tcp:192.168.11.14,1433"
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil.sql" && echo "SPs OK"
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil-fix-datos.sql"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil.sql" && echo "SPs OK"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil-fix-datos.sql"
 ```
 Expected: SPs sin errores; el fix imprime `CasosAntes` (≥0) y `CasosDespues = 0`. (Si da timeout, reintentar — la conexión es intermitente.)
 
@@ -232,13 +232,13 @@ Run (usa un perfil real, p. ej. 1):
 ```bash
 cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && SQL="tcp:192.168.11.14,1433"
 echo "=== perfiles ==="
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPerfiles;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPerfiles;"
 echo "=== menus del perfil 1 (algunas filas) ==="
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT TOP 10 * FROM (SELECT * FROM (SELECT Id_Menu,Id_MenuPadre,Titulo,Class_Icon,Activo=CASE WHEN pm.id_Menu IS NOT NULL THEN 1 ELSE 0 END FROM dbo.MenuDos m LEFT JOIN dbo.PerfilMenu pm ON pm.id_Menu=m.Id_Menu AND pm.IdPerfil=1 AND pm.Estado=0) z) y;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT TOP 10 * FROM (SELECT * FROM (SELECT Id_Menu,Id_MenuPadre,Titulo,Class_Icon,Activo=CASE WHEN pm.id_Menu IS NOT NULL THEN 1 ELSE 0 END FROM dbo.MenuDos m LEFT JOIN dbo.PerfilMenu pm ON pm.id_Menu=m.Id_Menu AND pm.IdPerfil=1 AND pm.Estado=0) z) y;"
 echo "=== guardar: activar SOLO un hijo (p.ej. 3, hijo de 2) para un perfil de prueba y ver que activa el padre ==="
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarMenuPerfil @IdPerfil=1, @ActivosCsv='3';"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarMenuPerfil @IdPerfil=1, @ActivosCsv='3';"
 echo "=== confirmar que 2 (padre) y 3 (hijo) quedaron activos para perfil 1 ==="
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT id_Menu, Estado FROM dbo.PerfilMenu WHERE IdPerfil=1 AND id_Menu IN (2,3) ORDER BY id_Menu;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT id_Menu, Estado FROM dbo.PerfilMenu WHERE IdPerfil=1 AND id_Menu IN (2,3) ORDER BY id_Menu;"
 ```
 Expected: `Sp_RTA_ListarMenuPerfil` trae los menús con `Activo` 0/1; el guardar con `@ActivosCsv='3'` devuelve `Respuestas=1` y deja `id_Menu` 2 **y** 3 con `Estado=0` (el padre 2 se activó por la invariante).
 
@@ -1171,7 +1171,7 @@ SELECT Id_Menu = @IdMenu, Href = @Href;
 
 Run:
 ```bash
-cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil-menu.sql"
+cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-27-menus-por-perfil-menu.sql"
 ```
 Expected: devuelve el `Id_Menu` insertado; sin errores.
 
@@ -1180,7 +1180,7 @@ Expected: devuelve el `Id_Menu` insertado; sin errores.
 Run:
 ```bash
 cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && SQL="tcp:192.168.11.14,1433"
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT m.Id_Menu, m.Titulo, m.Id_MenuPadre, m.Href FROM dbo.MenuDos m WHERE m.Href='ParametrizacionMenuPerfil.aspx'; SELECT pm.IdPerfil, pm.id_Menu, pm.Estado FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu=pm.id_Menu WHERE m.Href='ParametrizacionMenuPerfil.aspx' ORDER BY pm.IdPerfil;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT m.Id_Menu, m.Titulo, m.Id_MenuPadre, m.Href FROM dbo.MenuDos m WHERE m.Href='ParametrizacionMenuPerfil.aspx'; SELECT pm.IdPerfil, pm.id_Menu, pm.Estado FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu=pm.id_Menu WHERE m.Href='ParametrizacionMenuPerfil.aspx' ORDER BY pm.IdPerfil;"
 ```
 Expected: 1 fila en MenuDos con `Id_MenuPadre=20042`; 4 filas en PerfilMenu (perfiles 1,2,18,19) con `Estado=0`.
 

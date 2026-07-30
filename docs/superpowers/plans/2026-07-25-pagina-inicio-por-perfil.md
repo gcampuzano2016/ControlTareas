@@ -15,7 +15,7 @@
 - **Identidad del perfil:** `IdPerfil` = `R_Perfil.Id_Perfil` = `Session["Id_Perfil"]` = `PerfilMenu.IdPerfil`.
 - **Fallback fail-safe:** un perfil sin configuración o cualquier error ⇒ `Href='Principal.aspx'`, `IdTipo=0`. El login nunca se bloquea por este módulo.
 - **Origen de la página de inicio:** desplegable poblado desde `MenuDos` (Titulo + Href). No texto libre.
-- **Base de datos:** `Data Source=192.168.11.14; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s`. Desde esta máquina el server responde por `tcp:192.168.11.14,1433` (usar ese `-S` en sqlcmd).
+- **Base de datos:** `Data Source=192.168.11.14; Initial Catalog=ReporTarea; User Id=sa; Password=$SQLPASS`. Desde esta máquina el server responde por `tcp:192.168.11.14,1433` (usar ese `-S` en sqlcmd). La contraseña **no se escribe en este documento**: definir `SQLPASS` en el entorno antes de correr los comandos (bash: `export SQLPASS='...'`; PowerShell: usar `$env:SQLPASS` en lugar de `$SQLPASS`). Este repositorio es público.
 - **MSBuild:** `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe`, solución `ReporteTareas.sln`, configuración `Debug`. Ejecutar vía PowerShell (`& $msb ...`) para evitar el quoting de la ruta con espacios.
 - **App local para pruebas:** requiere **IIS Express de 32 bits** (`C:\Program Files (x86)\IIS Express\iisexpress.exe`) por la dependencia x86 `Pechkin`. Lanzar con `/path:` a `...\ReporteTareas` y `/port:51037`. Nota: desde esta máquina el `SqlClient` de la app puede no alcanzar la BD (negocia Named Pipes); las pruebas HTTP/navegador que dependen de datos pueden requerir el entorno real del usuario. El nivel SQL y la compilación sí se verifican aquí.
 - **Mensajes fijos de SP sin tildes** ("configuracion", "pagina") para evitar cualquier riesgo de codificación al ejecutar el script.
@@ -204,7 +204,7 @@ GO
 
 Run:
 ```bash
-cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-25-pagina-inicio-por-perfil.sql"
+cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-25-pagina-inicio-por-perfil.sql"
 ```
 Expected: sin errores (EXIT 0). Crea tabla, seed y 4 SPs.
 
@@ -214,19 +214,19 @@ Run:
 ```bash
 cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && SQL="tcp:192.168.11.14,1433"
 # Listar (debe traer perfiles; los sembrados con Href=Principal.aspx)
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPerfilInicio;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPerfilInicio;"
 # Obtener perfil configurado (2) -> Principal.aspx / 1
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=2;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=2;"
 # Obtener perfil NO configurado (9999) -> fallback Principal.aspx / 0
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=9999;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=9999;"
 # Guardar (upsert) perfil 5 -> ReporteGerencia.aspx / 99
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarPerfilInicio @IdPerfil=5, @Href='ReporteGerencia.aspx', @IdTipo=99, @UsuarioRegistro='test';"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarPerfilInicio @IdPerfil=5, @Href='ReporteGerencia.aspx', @IdTipo=99, @UsuarioRegistro='test';"
 # Obtener 5 -> ReporteGerencia.aspx / 99
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=5;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ObtenerPerfilInicio @IdPerfil=5;"
 # Restaurar 5 a su seed
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarPerfilInicio @IdPerfil=5, @Href='Principal.aspx', @IdTipo=5, @UsuarioRegistro='test';"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_GuardarPerfilInicio @IdPerfil=5, @Href='Principal.aspx', @IdTipo=5, @UsuarioRegistro='test';"
 # Paginas (debe traer titulos+href, sin los 'Es Menu Principal...')
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPaginasMenu;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "EXEC dbo.Sp_RTA_ListarPaginasMenu;"
 ```
 Expected: `ListarPerfilInicio` sin filas duplicadas por perfil; `ObtenerPerfilInicio` siempre 1 fila; el guardar de 5 devuelve `Respuestas=1`; el fallback de 9999 devuelve `Principal.aspx`/`0`.
 
@@ -1190,7 +1190,7 @@ SELECT Id_Menu = @IdMenu, Href = @Href;
 
 Run:
 ```bash
-cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "CAfKsUBnD0s" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-25-pagina-inicio-por-perfil-menu.sql"
+cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && sqlcmd -S "tcp:192.168.11.14,1433" -U sa -P "$SQLPASS" -d ReporTarea -b -i "docs/superpowers/plans/sql/2026-07-25-pagina-inicio-por-perfil-menu.sql"
 ```
 Expected: devuelve el `Id_Menu` insertado; sin errores.
 
@@ -1199,7 +1199,7 @@ Expected: devuelve el `Id_Menu` insertado; sin errores.
 Run:
 ```bash
 cd "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas" && SQL="tcp:192.168.11.14,1433"
-sqlcmd -S "$SQL" -U sa -P "CAfKsUBnD0s" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT m.Id_Menu, m.Titulo, m.Id_MenuPadre, m.Href FROM dbo.MenuDos m WHERE m.Href='ParametrizacionPerfilInicio.aspx'; SELECT pm.IdPerfil, pm.id_Menu, pm.Estado FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu=pm.id_Menu WHERE m.Href='ParametrizacionPerfilInicio.aspx' ORDER BY pm.IdPerfil;"
+sqlcmd -S "$SQL" -U sa -P "$SQLPASS" -d ReporTarea -W -s"|" -Q "SET NOCOUNT ON; SELECT m.Id_Menu, m.Titulo, m.Id_MenuPadre, m.Href FROM dbo.MenuDos m WHERE m.Href='ParametrizacionPerfilInicio.aspx'; SELECT pm.IdPerfil, pm.id_Menu, pm.Estado FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu=pm.id_Menu WHERE m.Href='ParametrizacionPerfilInicio.aspx' ORDER BY pm.IdPerfil;"
 ```
 Expected: 1 fila en MenuDos con `Id_MenuPadre=20042`; 4 filas en PerfilMenu (perfiles 1,2,18,19) con `Estado=0`.
 

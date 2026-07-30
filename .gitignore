@@ -1,0 +1,8 @@
+# Estado de la interfaz de Visual Studio (ventanas abiertas, breakpoints).
+# Es por maquina y por usuario: no aporta nada al repo y ensucia el diff
+# cada vez que se abre la solucion.
+*.suo
+.vs/**/suo*.tmp
+
+# OJO: bin/ y obj/ se trackean a proposito en este repo — el despliegue a
+# produccion se hace desde ahi. No agregarlos aqui.

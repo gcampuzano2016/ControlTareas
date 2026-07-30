@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionMenuPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionMenuPerfil" ResponseEncoding="utf-8" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionMenuPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionMenuPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="../js/parametrizacionMenuPerfil.js?v=1" type="text/javascript"></script>

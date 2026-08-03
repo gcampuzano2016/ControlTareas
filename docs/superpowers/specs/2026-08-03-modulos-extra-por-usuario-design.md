@@ -38,7 +38,7 @@ Hoy el menú lateral se decide **solo por perfil**: todos los usuarios de un per
   ```
 
 - El `IF EXISTS` es redundante: si el perfil no tiene filas en `PerfilMenu`, el `SELECT` no devuelve nada de todos modos. Quitarlo **no cambia el comportamiento actual** y es necesario para que un usuario cuyo perfil no tiene menús pueda ver sus extras.
-- `Master.Master.cs` consume las columnas por nombre: `id_Menu`, `Titulo`, `Class_Icon`, `Href`, y filtra por `Id_MenuPadre`. **El alias `id_Menu` (con `i` minúscula) y la forma del result set deben conservarse exactamente.**
+- `CapaDato/DaoMenuDos.cs:183-188` lee las **seis** columnas por nombre (la búsqueda es insensible a mayúsculas, así que `id_Menu` vs `Id_Menu` da igual). **Lo que sí es contrato es que las seis sigan estando:** si falta una, el lector lanza excepción, el `catch` de la línea 195 la traga y devuelve `null`, y `Master.Master.cs:29` revienta al tocar `dtPrincipal` — el resultado sería el menú en blanco para todos.
 
 ### Los dos catálogos de perfiles (hallazgo)
 

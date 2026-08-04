@@ -199,6 +199,7 @@
     <Compile Include="NegPedido.cs" />
     <Compile Include="NegMarcacion.cs" />
     <Compile Include="NegMenuPerfil.cs" />
+    <Compile Include="NegMenuUsuario.cs" />
     <Compile Include="NegPerfilInicio.cs" />
     <Compile Include="NegPerfiles.cs" />
     <Compile Include="NegPoliza.cs" />

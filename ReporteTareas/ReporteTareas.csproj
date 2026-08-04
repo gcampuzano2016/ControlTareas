@@ -1389,6 +1389,7 @@
     <Content Include="js\parametrizacionVentanaAprobacion.js" />
     <Content Include="js\parametrizacionPerfilInicio.js" />
     <Content Include="js\parametrizacionMenuPerfil.js" />
+    <Content Include="js\parametrizacionMenuUsuario.js" />
     <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />
     <Content Include="js\obj\Debug\BillWeb.dll" />
     <Content Include="js\obj\Debug\BillWeb.pdb" />

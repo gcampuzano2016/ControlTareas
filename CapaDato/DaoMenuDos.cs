@@ -157,7 +157,7 @@ namespace CapaDato
             return listaTareas;
         }
 
-        public static List<EntMenuDos> Sp_RTA_ConsultarMenuPerfilUsuario(int tipo)
+        public static List<EntMenuDos> Sp_RTA_ConsultarMenuPerfilUsuario(int tipo, string codUsuario = null)
         {
             List<EntMenuDos> listaTareas = null;
 
@@ -171,6 +171,8 @@ namespace CapaDato
 
                 cmd = new SqlCommand("Sp_RTA_ConsultarMenuPerfilUsuario", cnx);
                 cmd.Parameters.AddWithValue("@tipoPerfil", tipo);
+                cmd.Parameters.AddWithValue("@CodUsuario",
+                    string.IsNullOrEmpty(codUsuario) ? (object)DBNull.Value : codUsuario);
 
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();

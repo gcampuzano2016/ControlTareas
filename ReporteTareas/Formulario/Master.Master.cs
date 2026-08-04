@@ -22,7 +22,7 @@ namespace ReporteTareas.Formulario
             txtUsuario.Text = seguridad.Encripta(CodUnico.ToString());
 
             List<EntMenuDos> menuDos = new List<EntMenuDos>();
-            menuDos = NegMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(Idperfil);
+            menuDos = NegMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(Idperfil, CodUnico);
             var json = JsonConvert.SerializeObject(menuDos);
             DataTable dtPadres = new DataTable();
             DataTable dtPrincipal = (DataTable)JsonConvert.DeserializeObject(json, (typeof(DataTable)));

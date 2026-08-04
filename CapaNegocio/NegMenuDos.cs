@@ -13,9 +13,9 @@ namespace CapaNegocio
             return DaoMenuDos.Sp_RTA_ConsultarMenuDos(tipo);
         }
 
-        public static List<EntMenuDos> Sp_RTA_ConsultarMenuPerfilUsuario(int tipo)
+        public static List<EntMenuDos> Sp_RTA_ConsultarMenuPerfilUsuario(int tipo, string codUsuario = null)
         {
-            return DaoMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(tipo);
+            return DaoMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(tipo, codUsuario);
         }
 
         public static EntRespuesta Sp_RTA_InsertarMenuNuevo(int tipoMenu, String Titulo, String Descripcion, String Icono, String Referencia, int MenuPadre)

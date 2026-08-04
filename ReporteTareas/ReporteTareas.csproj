@@ -1128,6 +1128,7 @@
     <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
     <Content Include="Formulario\ParametrizacionPerfilInicio.aspx" />
     <Content Include="Formulario\ParametrizacionMenuPerfil.aspx" />
+    <Content Include="Formulario\ParametrizacionMenuUsuario.aspx" />
     <Content Include="Formulario\ReporteSalud.aspx" />
     <Content Include="Formulario\ReportesSap.aspx" />
     <Content Include="Formulario\RRHHEmpleados.aspx" />
@@ -1901,6 +1902,13 @@
     </Compile>
     <Compile Include="Formulario\ParametrizacionMenuPerfil.aspx.designer.cs">
       <DependentUpon>ParametrizacionMenuPerfil.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuUsuario.aspx.cs">
+      <DependentUpon>ParametrizacionMenuUsuario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuUsuario.aspx.designer.cs">
+      <DependentUpon>ParametrizacionMenuUsuario.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ReporteHorasExtras.aspx.cs">
       <DependentUpon>ReporteHorasExtras.aspx</DependentUpon>

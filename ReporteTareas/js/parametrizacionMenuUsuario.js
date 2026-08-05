@@ -107,14 +107,30 @@ function RenderArbol(lista) {
 
     var info = "";
     $.each(padres, function (i, padre) {
+        var hijos = $.grep(lista, function (m) { return m.Id_MenuPadre == padre.Id_Menu; });
+
         info += "<div style='margin:4px 0'>";
+
+        /* El icono de plegado va FUERA del <label>: dentro, cualquier clic sobre el
+           marcaria el checkbox asociado. Las ramas sin hijos llevan un hueco del
+           mismo ancho para que los titulos queden alineados. */
+        if (hijos.length > 0) {
+            info += "<i class='fa fa-chevron-down ramaCarro' style='cursor:pointer; width:14px; color:#777'";
+            info += " data-rama='" + EscaparAttr(String(padre.Id_Menu)) + "'";
+            info += " title='Contraer o expandir'";
+            info += " onclick='ToggleRama(" + padre.Id_Menu + ")'></i> ";
+        } else {
+            info += "<span style='display:inline-block; width:14px'></span> ";
+        }
+
         info += "<label style='font-weight:bold'>";
         info += PintarCheck(padre, "chkPadre", 0);
         info += "<i class='" + EscaparAttr(padre.Class_Icon) + "'></i> " + Escapar(padre.Titulo);
         info += "</label>";
         info += Etiqueta(padre);
+        info += "<span class='ramaResumen' data-rama='" + EscaparAttr(String(padre.Id_Menu)) + "'></span>";
 
-        var hijos = $.grep(lista, function (m) { return m.Id_MenuPadre == padre.Id_Menu; });
+        info += "<div class='ramaHijos' data-rama='" + EscaparAttr(String(padre.Id_Menu)) + "'>";
         $.each(hijos, function (j, hijo) {
             info += "<div style='margin-left:28px'>";
             info += "<label>";
@@ -125,9 +141,59 @@ function RenderArbol(lista) {
             info += "</div>";
         });
         info += "</div>";
+
+        info += "</div>";
     });
 
     $("#datosArbolMenu").html(info);
+}
+
+/* ------------------------- plegado del arbol ----------------------------- */
+
+/* Contrae o expande la rama de un padre. */
+function ToggleRama(idPadre) {
+    var $rama = $(".ramaHijos[data-rama='" + idPadre + "']");
+    if ($rama.length === 0) { return; }
+
+    if ($rama.is(":visible")) {
+        $rama.hide();
+    } else {
+        $rama.show();
+    }
+    SincronizarRama(idPadre);
+}
+
+function ExpandirTodo() {
+    $(".ramaHijos").show();
+    $(".ramaCarro").each(function () {
+        SincronizarRama($(this).attr("data-rama"));
+    });
+}
+
+function ContraerTodo() {
+    $(".ramaHijos").hide();
+    $(".ramaCarro").each(function () {
+        SincronizarRama($(this).attr("data-rama"));
+    });
+}
+
+/* Deja el icono y el resumen coherentes con el estado real de la rama.
+   Una rama contraida muestra cuantos extras esconde, para que plegar no oculte
+   justo lo que se esta administrando. */
+function SincronizarRama(idPadre) {
+    var $rama = $(".ramaHijos[data-rama='" + idPadre + "']");
+    var $icono = $(".ramaCarro[data-rama='" + idPadre + "']");
+    var $resumen = $(".ramaResumen[data-rama='" + idPadre + "']");
+    var expandida = $rama.is(":visible");
+
+    $icono.toggleClass("fa-chevron-down", expandida).toggleClass("fa-chevron-right", !expandida);
+
+    var extras = $(".chkHijo[data-padre='" + idPadre + "']:checked").not(":disabled").length;
+    if (!expandida && extras > 0) {
+        $resumen.html(" <span class='label label-success'>" + extras + " extra" + (extras === 1 ? "" : "s") + "</span>");
+    } else {
+        $resumen.html("");
+    }
 }
 
 /* Heredado del perfil -> marcado y deshabilitado. Extra -> marcado y editable. */
@@ -165,14 +231,18 @@ function OnHijoChange(idPadre) {
     if (algunHijo) {
         $(".chkPadre[data-menu='" + idPadre + "']").not(":disabled").prop("checked", true);
     }
+    SincronizarRama(idPadre);
 }
 
-/* Desmarcar un padre editable desmarca sus hijos editables. */
+/* Desmarcar un padre editable desmarca sus hijos editables.
+   El padre sigue siendo clicable con la rama contraida, asi que hay que
+   refrescar el resumen: si no, quedaria anunciando extras que ya se quitaron. */
 function OnPadreChange(idPadre) {
     var padreChecked = $(".chkPadre[data-menu='" + idPadre + "']").is(":checked");
     if (!padreChecked) {
         $(".chkHijo[data-padre='" + idPadre + "']").not(":disabled").prop("checked", false);
     }
+    SincronizarRama(idPadre);
 }
 
 function GuardarModulos() {

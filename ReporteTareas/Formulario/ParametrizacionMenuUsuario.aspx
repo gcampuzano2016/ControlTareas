@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionMenuUsuario.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionMenuUsuario" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionMenuUsuario.js?v=1" type="text/javascript"></script>
+    <script src="../js/parametrizacionMenuUsuario.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -67,6 +67,14 @@
                                 <div style="margin-bottom: 8px">
                                     <span class="label label-default">Perfil</span> heredado, no se puede desmarcar &nbsp;
                                     <span class="label label-success">Extra</span> asignado a este usuario
+                                    <span class="pull-right">
+                                        <button id="btnExpandirTodo" onclick="ExpandirTodo()" type="button" class="btn btn-default btn-xs">
+                                            <i class="fa fa-chevron-down"></i> Expandir todo
+                                        </button>
+                                        <button id="btnContraerTodo" onclick="ContraerTodo()" type="button" class="btn btn-default btn-xs">
+                                            <i class="fa fa-chevron-right"></i> Contraer todo
+                                        </button>
+                                    </span>
                                 </div>
                                 <div style="height: 400px; overflow-y: auto; overflow-x: auto;">
                                     <div id="datosArbolMenu" style="padding: 0px"></div>

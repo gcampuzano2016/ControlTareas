@@ -21,7 +21,12 @@ namespace JsonJQueryNetMenuUsuario
         {
             StringBuilder responseAction = new StringBuilder();
 
-            if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
+            // Endpoint de control de accesos: sin sesión válida no se ejecuta ninguna acción.
+            if (context.Session == null || context.Session["UserLogin"] == null)
+            {
+                responseAction.Append(responseMessage("0", "Su sesión ha expirado. Vuelva a iniciar sesión.", "danger"));
+            }
+            else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
                 var inputStream = new System.IO.StreamReader(context.Request.InputStream);
                 var inputJson = inputStream.ReadToEnd();
@@ -114,20 +119,36 @@ namespace JsonJQueryNetMenuUsuario
                 }
 
                 // 'extras' es un arreglo de ids (enteros). Se arma un CSV validado.
-                List<string> ids = new List<string>();
+                // Un arreglo vacío es válido (quita todos los extras); lo que NO es
+                // válido es que falte la clave, o que algún elemento no sea un entero
+                // positivo. En ninguno de esos dos casos se debe guardar nada: un
+                // elemento inválido no puede vaciar en silencio la lista ya acumulada.
+                object extras;
                 try
                 {
-                    var extras = campos["extras"];
-                    if (extras != null)
-                    {
-                        foreach (var v in extras)
-                        {
-                            int id = Convert.ToInt32(v);
-                            if (id > 0) { ids.Add(id.ToString()); }
-                        }
-                    }
+                    extras = campos["extras"];
                 }
-                catch { ids = new List<string>(); }
+                catch
+                {
+                    extras = null;
+                }
+
+                if (extras == null)
+                {
+                    return responseMessage("0", "Falta el listado de módulos extra.", "warning");
+                }
+
+                List<string> ids = new List<string>();
+                foreach (var v in (System.Collections.IEnumerable)extras)
+                {
+                    int id;
+                    if (!int.TryParse(Convert.ToString(v), out id) || id <= 0)
+                    {
+                        return responseMessage("0", "El listado de módulos extra contiene un valor inválido.", "warning");
+                    }
+
+                    ids.Add(id.ToString());
+                }
 
                 string csv = string.Join(",", ids);
 

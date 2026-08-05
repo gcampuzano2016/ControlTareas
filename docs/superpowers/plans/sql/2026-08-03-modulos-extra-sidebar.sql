@@ -20,15 +20,19 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
-    /* Las seis columnas y su orden son contrato: DaoMenuDos.cs las lee por nombre. */
-    SELECT P.id_Menu, M.Titulo, P.Estado, M.Id_MenuPadre, M.Class_Icon, M.Href
+    /* Las seis columnas y su orden son contrato: DaoMenuDos.cs las lee por nombre.
+       Id_MenuPadre se protege con ISNULL: la columna es nullable, y si llegara NULL,
+       DaoMenuDos.cs:188 (Convert.ToInt32) lanzaria FormatException, el catch la
+       traga y devuelve null, y Master.Master.cs:29 revienta con NullReferenceException
+       para TODOS los usuarios (no solo el que tuviera la fila NULL). */
+    SELECT P.id_Menu, M.Titulo, P.Estado, ISNULL(M.Id_MenuPadre, 0) AS Id_MenuPadre, M.Class_Icon, M.Href
     FROM dbo.PerfilMenu P
     INNER JOIN dbo.MenuDos M ON P.id_Menu = M.Id_Menu
     WHERE P.IdPerfil = @tipoPerfil AND P.Estado = 0
 
     UNION
 
-    SELECT UM.Id_Menu, M.Titulo, 0 AS Estado, M.Id_MenuPadre, M.Class_Icon, M.Href
+    SELECT UM.Id_Menu, M.Titulo, 0 AS Estado, ISNULL(M.Id_MenuPadre, 0) AS Id_MenuPadre, M.Class_Icon, M.Href
     FROM dbo.R_UsuarioMenu UM
     INNER JOIN dbo.MenuDos M ON UM.Id_Menu = M.Id_Menu
     WHERE @CodUsuario IS NOT NULL

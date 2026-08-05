@@ -1764,4 +1764,5 @@ y volver a compilar. El SP de la Tarea 3 puede quedarse: con `@CodUsuario` en `N
 ## Notas de despliegue
 
 - Los scripts SQL se aplican **antes** de publicar los binarios: la Tarea 5 llama al SP con un parámetro que solo existe después de la Tarea 3.
+- **Dentro de los scripts SQL, el orden entre ellos importa:** `2026-08-03-modulos-extra-por-usuario.sql` (que crea la tabla `R_UsuarioMenu`) debe aplicarse **antes** que `2026-08-03-modulos-extra-sidebar.sql`. Por resolución diferida de nombres, el `CREATE PROCEDURE` de `Sp_RTA_ConsultarMenuPerfilUsuario` en el script del sidebar compila igual aunque la tabla no exista todavía; el error solo aparece en la primera ejecución, con `Invalid object name 'dbo.R_UsuarioMenu'` — es decir, apagón total del menú para todos los usuarios en el primer request después de desplegar.
 - Al publicar, verificar que `parametrizacionMenuUsuario.js` llegó al servidor. Si la pantalla sale sin comportamiento, revisar el `?v=` del `.aspx` y forzar recarga con Ctrl+F5.

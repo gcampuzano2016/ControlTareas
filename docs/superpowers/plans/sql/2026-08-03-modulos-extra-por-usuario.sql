@@ -35,31 +35,47 @@ BEGIN
     SET NOCOUNT ON;
     SET @Filtro = LTRIM(RTRIM(ISNULL(@Filtro,'')));
 
+    /* Cod_Usuario NO es unico en R_Usuarios: hay usuarios activos con varias filas
+       (distintos perfiles). Se agrupa por Cod_Usuario para devolver una sola fila
+       por usuario. Id_Perfil toma el mayor de los perfiles del usuario (mismo
+       criterio deterministico que Sp_RTA_ListarMenuUsuario y
+       Sp_RTA_GuardarMenuUsuario), y NombrePerfil se resuelve para ESE Id_Perfil,
+       no con un MAX() independiente que podria mezclar perfil de una fila con
+       nombre de otra. */
     SELECT
-        u.Cod_Usuario,
-        u.Nom_Usuario,
-        Cedula       = ISNULL(u.Cedula,''),
-        Id_Perfil    = u.Id_Perfil,
+        g.Cod_Usuario,
+        g.Nom_Usuario,
+        g.Cedula,
+        g.Id_Perfil,
         NombrePerfil = ISNULL(p.NombrePerfil,'Sin perfil'),
         TotalExtras  = ISNULL(x.Total,0)
-    FROM dbo.R_Usuarios u
+    FROM
+    (
+        SELECT
+            u.Cod_Usuario,
+            Nom_Usuario = MAX(u.Nom_Usuario),
+            Cedula      = MAX(ISNULL(u.Cedula,'')),
+            Id_Perfil   = MAX(u.Id_Perfil)
+        FROM dbo.R_Usuarios u
+        WHERE u.Usuario_Estado = 'A'
+          AND
+          (
+              @Filtro = ''
+              OR u.Nom_Usuario LIKE '%' + @Filtro + '%'
+              OR u.Cod_Usuario LIKE '%' + @Filtro + '%'
+              OR ISNULL(u.Cedula,'') LIKE '%' + @Filtro + '%'
+          )
+        GROUP BY u.Cod_Usuario
+    ) g
     LEFT JOIN dbo.Perfiles p
-        ON p.IdPerfiles = u.Id_Perfil
+        ON p.IdPerfiles = g.Id_Perfil
     OUTER APPLY
     (
         SELECT Total = COUNT(*)
         FROM dbo.R_UsuarioMenu um
-        WHERE um.Cod_Usuario = u.Cod_Usuario AND um.Estado = 'A'
+        WHERE um.Cod_Usuario = g.Cod_Usuario AND um.Estado = 'A'
     ) x
-    WHERE u.Usuario_Estado = 'A'
-      AND
-      (
-          @Filtro = ''
-          OR u.Nom_Usuario LIKE '%' + @Filtro + '%'
-          OR u.Cod_Usuario LIKE '%' + @Filtro + '%'
-          OR ISNULL(u.Cedula,'') LIKE '%' + @Filtro + '%'
-      )
-    ORDER BY u.Nom_Usuario;
+    ORDER BY g.Nom_Usuario;
 END
 GO
 
@@ -73,8 +89,14 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    /* Cod_Usuario no es unico en R_Usuarios (hay usuarios activos con varias filas
+       y perfiles distintos): se toma el mayor Id_Perfil de forma deterministica,
+       mismo criterio que Sp_RTA_ListarUsuariosMenu y Sp_RTA_GuardarMenuUsuario. */
     DECLARE @IdPerfil BIGINT;
-    SELECT @IdPerfil = Id_Perfil FROM dbo.R_Usuarios WHERE Cod_Usuario = @CodUsuario;
+    SELECT TOP 1 @IdPerfil = Id_Perfil
+    FROM dbo.R_Usuarios
+    WHERE Cod_Usuario = @CodUsuario
+    ORDER BY Id_Perfil DESC;
 
     SELECT
         m.Id_Menu,
@@ -114,8 +136,15 @@ BEGIN
     BEGIN TRY
         BEGIN TRANSACTION;
 
+        /* Cod_Usuario no es unico en R_Usuarios (hay usuarios activos con varias
+           filas y perfiles distintos): se toma el mayor Id_Perfil de forma
+           deterministica, mismo criterio que Sp_RTA_ListarUsuariosMenu y
+           Sp_RTA_ListarMenuUsuario. */
         DECLARE @IdPerfil BIGINT;
-        SELECT @IdPerfil = Id_Perfil FROM dbo.R_Usuarios WHERE Cod_Usuario = @CodUsuario;
+        SELECT TOP 1 @IdPerfil = Id_Perfil
+        FROM dbo.R_Usuarios
+        WHERE Cod_Usuario = @CodUsuario
+        ORDER BY Id_Perfil DESC;
 
         DECLARE @Extras TABLE (IdMenu INT PRIMARY KEY);
 
@@ -132,10 +161,6 @@ BEGIN
         /* solo ids que existan en MenuDos */
         DELETE FROM @Extras
         WHERE IdMenu NOT IN (SELECT Id_Menu FROM dbo.MenuDos);
-
-        /* descartar los que ya vienen del perfil: la tabla guarda solo excepciones reales */
-        DELETE FROM @Extras
-        WHERE IdMenu IN (SELECT id_Menu FROM dbo.PerfilMenu WHERE IdPerfil = @IdPerfil AND Estado = 0);
 
         /* invariante hijo=>padre: si el padre no lo da el perfil ni esta en el set, agregarlo.
            Master.Master.cs no dibuja un hijo cuyo padre no exista en el resultado. */

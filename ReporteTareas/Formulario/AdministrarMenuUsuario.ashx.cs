@@ -138,8 +138,18 @@ namespace JsonJQueryNetMenuUsuario
                     return responseMessage("0", "Falta el listado de módulos extra.", "warning");
                 }
 
+                // Debe ser un arreglo de verdad. Un string también implementa IEnumerable,
+                // así que sin esta comprobación {"extras":""} se iteraría como cero
+                // elementos y borraría en silencio todos los extras del usuario, y
+                // {"extras":"12"} activaría los módulos 1 y 2 carácter por carácter.
+                System.Collections.IEnumerable listaExtras = extras as System.Collections.IEnumerable;
+                if (listaExtras == null || extras is string)
+                {
+                    return responseMessage("0", "El listado de módulos extra no es válido.", "warning");
+                }
+
                 List<string> ids = new List<string>();
-                foreach (var v in (System.Collections.IEnumerable)extras)
+                foreach (var v in listaExtras)
                 {
                     int id;
                     if (!int.TryParse(Convert.ToString(v), out id) || id <= 0)

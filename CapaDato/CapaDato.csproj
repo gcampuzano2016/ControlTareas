@@ -76,6 +76,7 @@
     <Compile Include="DaoMarcacion.cs" />
     <Compile Include="DaoMenuPerfil.cs" />
     <Compile Include="DaoMenuUsuario.cs" />
+    <Compile Include="DaoUsuarioAdmin.cs" />
     <Compile Include="DaoPerfilInicio.cs" />
     <Compile Include="DaoPerfiles.cs" />
     <Compile Include="DaoPoliza.cs" />

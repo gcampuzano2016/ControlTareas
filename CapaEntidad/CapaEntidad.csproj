@@ -74,6 +74,8 @@
     <Compile Include="EntMarcacion.cs" />
     <Compile Include="EntMenuPerfil.cs" />
     <Compile Include="EntMenuUsuario.cs" />
+    <Compile Include="EntUsuarioAdmin.cs" />
+    <Compile Include="EntUsuarioBitacora.cs" />
     <Compile Include="EntUsuarioMenuBusqueda.cs" />
     <Compile Include="EntPerfil.cs" />
     <Compile Include="EntPerfilInicio.cs" />

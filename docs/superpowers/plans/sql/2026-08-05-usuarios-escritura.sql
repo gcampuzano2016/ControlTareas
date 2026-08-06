@@ -73,15 +73,20 @@ BEGIN
                @oMailJefe = ISNULL(MailCodJefeInm,'')
         FROM dbo.R_Usuarios WHERE Id_Usuario = @Id_Usuario;
 
+        /* La collation de la base (SQL_Latin1_General_CP1_CI_AS) es case-insensitive
+           y no distingue acentos. Se fuerza collation binaria en ambos lados de cada
+           comparacion para que un cambio de mayusculas/minusculas o de acentos (p.ej.
+           en Cod_Sap o Cod_Jefe_Inm, que son codigos de sistemas externos) SI se
+           detecte como cambio real. No quitar esta collation. */
         DECLARE @Detalle VARCHAR(2000) = '';
-        IF @oNom      <> @Nom_Usuario    SET @Detalle = @Detalle + 'Nombre: [' + @oNom + '] -> [' + @Nom_Usuario + ']; ';
-        IF @oMail     <> @E_Mail         SET @Detalle = @Detalle + 'Correo: [' + @oMail + '] -> [' + @E_Mail + ']; ';
-        IF @oCed      <> @Cedula         SET @Detalle = @Detalle + 'Cedula: [' + @oCed + '] -> [' + @Cedula + ']; ';
-        IF @oDep      <> @Departamento   SET @Detalle = @Detalle + 'Departamento: [' + @oDep + '] -> [' + @Departamento + ']; ';
-        IF @oEmp      <> @Empresa        SET @Detalle = @Detalle + 'Empresa: [' + @oEmp + '] -> [' + @Empresa + ']; ';
-        IF @oSap      <> @Cod_Sap        SET @Detalle = @Detalle + 'Cod SAP: [' + @oSap + '] -> [' + @Cod_Sap + ']; ';
-        IF @oJefe     <> @Cod_Jefe_Inm   SET @Detalle = @Detalle + 'Jefe inmediato: [' + @oJefe + '] -> [' + @Cod_Jefe_Inm + ']; ';
-        IF @oMailJefe <> @MailCodJefeInm SET @Detalle = @Detalle + 'Correo jefe: [' + @oMailJefe + '] -> [' + @MailCodJefeInm + ']; ';
+        IF @oNom      COLLATE Latin1_General_BIN <> @Nom_Usuario    COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Nombre: [' + @oNom + '] -> [' + @Nom_Usuario + ']; ';
+        IF @oMail     COLLATE Latin1_General_BIN <> @E_Mail         COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Correo: [' + @oMail + '] -> [' + @E_Mail + ']; ';
+        IF @oCed      COLLATE Latin1_General_BIN <> @Cedula         COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Cedula: [' + @oCed + '] -> [' + @Cedula + ']; ';
+        IF @oDep      COLLATE Latin1_General_BIN <> @Departamento   COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Departamento: [' + @oDep + '] -> [' + @Departamento + ']; ';
+        IF @oEmp      COLLATE Latin1_General_BIN <> @Empresa        COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Empresa: [' + @oEmp + '] -> [' + @Empresa + ']; ';
+        IF @oSap      COLLATE Latin1_General_BIN <> @Cod_Sap        COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Cod SAP: [' + @oSap + '] -> [' + @Cod_Sap + ']; ';
+        IF @oJefe     COLLATE Latin1_General_BIN <> @Cod_Jefe_Inm   COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Jefe inmediato: [' + @oJefe + '] -> [' + @Cod_Jefe_Inm + ']; ';
+        IF @oMailJefe COLLATE Latin1_General_BIN <> @MailCodJefeInm COLLATE Latin1_General_BIN SET @Detalle = @Detalle + 'Correo jefe: [' + @oMailJefe + '] -> [' + @MailCodJefeInm + ']; ';
 
         IF @Detalle = ''
         BEGIN

@@ -69,7 +69,7 @@ Fecha_Registro   DATETIME      NOT NULL DEFAULT GETDATE()
 
 Índice por `Id_Usuario, Fecha_Registro DESC` para consultar el historial de un usuario.
 
-**`RESET_PASSWORD` no es alcanzable desde esta pantalla:** el botón de restablecer contraseña se quitó (ver Decisión, más abajo). El valor queda documentado porque `Sp_RTA_RestablecerPassword` y la columna siguen existiendo en la base, por si el login migra a autenticar contra `Pass_Usuario` en el futuro. Si alguna vez se usa, el `Detalle` guardaría solo el hecho (`'Contrasena restablecida'`), nunca la contraseña ni el hash.
+**`RESET_PASSWORD` no es alcanzable desde esta pantalla:** el botón de restablecer contraseña se quitó (ver "Decisiones de diseño", más arriba). El valor queda documentado porque `Sp_RTA_RestablecerPassword` y la columna siguen existiendo en la base, por si el login migra a autenticar contra `Pass_Usuario` en el futuro. Si alguna vez se usa, el `Detalle` guardaría solo el hecho (`'Contrasena restablecida'`), nunca la contraseña ni el hash.
 
 ### 2. Stored procedures
 

@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionUsuarios.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionUsuarios" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionUsuarios.js?v=1" type="text/javascript"></script>
+    <script src="../js/parametrizacionUsuarios.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -110,39 +110,11 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <button id="btnGuardar" onclick="GuardarUsuario()" type="button" class="btn btn-success">Guardar</button>
-                                        <button id="btnRestablecer" onclick="AbrirModalPassword()" type="button" class="btn btn-warning">Restablecer contraseña</button>
                                         <button id="btnHistorial" onclick="VerHistorial()" type="button" class="btn btn-default">Ver historial</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal de contraseña -->
-        <div class="modal fade" id="modalPassword" tabindex="-1" role="dialog" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title">Restablecer contraseña</h4>
-                    </div>
-                    <div class="modal-body">
-                        <p>La contraseña actual no se puede consultar. Al guardar, se reemplaza por la nueva.</p>
-                        <div class="form-group">
-                            <label>Nueva contraseña (mínimo 6 caracteres):</label>
-                            <input type="password" class="form-control" id="txtClaveNueva" maxlength="50" />
-                        </div>
-                        <div class="form-group">
-                            <label>Confirmar contraseña:</label>
-                            <input type="password" class="form-control" id="txtClaveConfirma" maxlength="50" />
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
-                        <button id="btnConfirmarClave" onclick="ConfirmarPassword()" type="button" class="btn btn-warning">Restablecer</button>
                     </div>
                 </div>
             </div>

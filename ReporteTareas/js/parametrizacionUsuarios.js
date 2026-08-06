@@ -1,8 +1,8 @@
 ﻿/* ============================================================================
    Pantalla: Administracion de usuarios
    Handler : AdministrarUsuarios.ashx
-   La contrasena actual nunca se consulta ni se muestra: solo se restablece,
-   y el hash lo calcula el servidor.
+   Esta pantalla no restablece contrasenas: el login autentica contra Active
+   Directory, no contra R_Usuarios.Pass_Usuario.
    ============================================================================ */
 
 var _usuarios = [];
@@ -158,47 +158,6 @@ function GuardarUsuario() {
     });
 }
 
-function AbrirModalPassword() {
-    var idUsuario = $("#txtIdUsuarioSel").val();
-    if (idUsuario == null || idUsuario === "") {
-        MostrarMensaje("Debe seleccionar un usuario.", "warning");
-        return;
-    }
-    $("#txtClaveNueva").val("");
-    $("#txtClaveConfirma").val("");
-    $("#modalPassword").modal("show");
-}
-
-function ConfirmarPassword() {
-    var idUsuario = $("#txtIdUsuarioSel").val();
-    var clave = $("#txtClaveNueva").val();
-    var confirma = $("#txtClaveConfirma").val();
-
-    if (clave == null || clave.length < 6) {
-        MostrarMensaje("La contraseña debe tener al menos 6 caracteres.", "warning");
-        return;
-    }
-    if (clave !== confirma) {
-        MostrarMensaje("Las dos contraseñas no coinciden.", "warning");
-        return;
-    }
-
-    $("#btnConfirmarClave").prop("disabled", true);
-    PostUsuario("RestablecerPassword", { "idUsuario": idUsuario, "clave": clave }, function (respuesta) {
-        $("#btnConfirmarClave").prop("disabled", false);
-        /* No dejar la clave en el DOM despues de enviarla. */
-        $("#txtClaveNueva").val("");
-        $("#txtClaveConfirma").val("");
-        $("#modalPassword").modal("hide");
-
-        if (respuesta == null) {
-            MostrarMensaje("No se recibió respuesta del servidor.", "danger");
-            return;
-        }
-        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
-    });
-}
-
 function VerHistorial() {
     var idUsuario = $("#txtIdUsuarioSel").val();
     if (idUsuario == null || idUsuario === "") {
@@ -243,7 +202,7 @@ function MostrarMensaje(mensaje, tipo) {
     if (tipo == "danger") { color = "#f2dede"; }
     if (tipo == "warning") { color = "#fcf8e3"; }
     $("#modalMensajeInformativoTipo").css("background", color);
-    $("#MensajeInformativo").html(mensaje);
+    $("#MensajeInformativo").text(mensaje);
     $("#modalMensajeInformativo").modal("show");
 }
 

@@ -7,7 +7,7 @@
 
 ## Objetivo
 
-Poder **ver la tabla `R_Usuarios` y editar los datos de los usuarios ya registrados** desde una pantalla, sin entrar a la base de datos. Incluye restablecer la contraseña de un usuario que la olvidó.
+Poder **ver la tabla `R_Usuarios` y editar los datos de los usuarios ya registrados** desde una pantalla, sin entrar a la base de datos.
 
 ## Contexto verificado (contra la base `ReporTarea`, 2026-08-05)
 
@@ -39,8 +39,8 @@ Poder **ver la tabla `R_Usuarios` y editar los datos de los usuarios ya registra
 ### Hallazgos que condicionan el diseño
 
 1. **`Id_Usuario` es la PK y es única** (244/244). **`Cod_Usuario` NO es única:** 2 usuarios activos tienen filas duplicadas con perfiles distintos (hallazgo heredado del módulo de módulos extra). Por eso **toda la edición va por `Id_Usuario`**.
-2. **Las contraseñas son MD5 hexadecimal en minúsculas, sin sal.** Se calculan en `ReporteTareas/clases/SeguridadHelper.cs` (`namespace SeguridadAppHelper`, método `GetMd5Hash(string)`: `MD5.ComputeHash(Encoding.UTF8.GetBytes(input))` formateado con `ToString("x2")`), y el login las usa en `Login.aspx.cs:101`. `Sp_RTAAutenticaUsuario` compara `Pass_Usuario = @Passw` **tal cual**, sin transformar.
-3. **15 de 244 contraseñas están en texto plano** (largos 8, 10, 13 y 15; las otras 229 son 32 caracteres hexadecimales válidos). Esos usuarios no pueden iniciar sesión porque el login envía el hash. **Queda fuera de alcance**, anotado como pendiente.
+2. **El login NO compara contra `Pass_Usuario` para la inmensa mayoría de los usuarios.** `Login.aspx.cs:105-109` autentica contra Active Directory (`Autentificacion2.AuthenticationSoapClient.AutenticateUserAD(...)`) cuando `objUsuario.IdCliente == 0`, y **239 de los 244 usuarios tienen `IdCliente` nulo**. `Sp_RTAAutenticaUsuario` y su envoltorio `NegUsuario.RTA_AutenticaUsuario` (`CapaDato/DaoRTAUsuario.cs:144`, `CapaNegocio/NegUsuario.cs:132`), que sí compararían `Pass_Usuario` hasheado con MD5 (`ReporteTareas/clases/SeguridadHelper.cs`, `namespace SeguridadAppHelper`, `GetMd5Hash(string)`), **no los llama nadie en el flujo de login actual**. Cualquier operación que escriba `Pass_Usuario` es, en la práctica, invisible para el login de los 239 usuarios que entran por AD.
+3. **15 de 244 contraseñas están en texto plano** (largos 8, 10, 13 y 15; las otras 229 son 32 caracteres hexadecimales válidos). Esto es irrelevante para el login real (que no lee esta columna en la mayoría de los casos), pero se deja anotado porque documenta el estado de la columna.
 4. **Columnas duplicadas y ambiguas:** `Cod_Perfil` **y** `Id_Perfil`; `Usuario_Estado` (`'A'`/`'I'`) **y** `EstadoUsuario` (int). El módulo **no expone ninguna de las cuatro** para edición, precisamente para no dejarlas inconsistentes.
 5. **Ya existe solape parcial:** `Perfiles.aspx` (con `js/Perfiles.js`) lista usuarios por perfil y edita **perfil y correo**, guardando con `Sp_RTActualizarPerfil(@IdCambioPerfil, @IdUsuario, @CorreoCambio)` — que también trabaja por `Id_Usuario`. **Esa pantalla no se toca.** El correo queda editable desde dos lugares; se documenta a propósito porque unificarlas es un trabajo aparte.
 6. `R_Usuarios` **no tiene columnas de auditoría** (no hay `Usuario_Modificacion` ni `Fecha_Modificacion`). Por eso el rastro va en una tabla nueva.
@@ -48,12 +48,11 @@ Poder **ver la tabla `R_Usuarios` y editar los datos de los usuarios ya registra
 ## Decisiones de diseño (acordadas)
 
 1. **Solo ver y editar.** No se crean usuarios, no se eliminan y no se inactivan.
-2. **Ocho campos editables**, todos de datos personales u organizativos, ninguno de control de acceso:
-   `Nom_Usuario`, `E_Mail`, `Cedula`, `Departamento`, `Empresa`, `Cod_Sap`, `Cod_Jefe_Inm`, `MailCodJefeInm`.
+2. **Ocho campos editables**, de datos personales u organizativos. **No son todos ajenos al control de acceso**: `Cod_Jefe_Inm` y `MailCodJefeInm` determinan el enrutamiento de aprobaciones y notificaciones (`CapaDato/DaoSolicitud.cs:13,136,448`; `CapaDato/DaoVentanaAprobacion.cs:11`; `CapaDato/DaoRTAUsuario.cs:517`), y son texto libre **sin validar contra usuarios existentes**: un dígito mal tecleado redirige aprobaciones en silencio, sin que la pantalla lo detecte. El resto —
+   `Nom_Usuario`, `E_Mail`, `Cedula`, `Departamento`, `Empresa`, `Cod_Sap` — sí son solo datos descriptivos.
 3. **Solo lectura en pantalla:** `Id_Usuario`, `Cod_Usuario`, `Log_Usuario`, nombre del perfil y estado. Se muestran para dar contexto. **`Cod_Usuario` no se edita nunca**: es la llave con la que `R_UsuarioHorarioLaboral` y `R_UsuarioMenu` asocian horarios y módulos extra, y cambiarlo rompería esas asignaciones en silencio.
-4. **Contraseña: solo restablecer.** Nunca se lee, ni se muestra, ni se envía al navegador. El hash se calcula **en el servidor** reutilizando `SeguridadHelper.GetMd5Hash`, para que quede idéntico a lo que el login espera.
-5. **Bitácora en tabla nueva** `R_UsuarioBitacora`, con quién, cuándo, qué acción y qué campos cambiaron.
-6. **Se listan todos los usuarios**, activos e inactivos, con el estado visible en la tabla. Es una pantalla de administración: ocultar filas sería sorprendente, y como no se puede cambiar el estado desde aquí, no hay riesgo de confusión.
+4. **Bitácora en tabla nueva** `R_UsuarioBitacora`, con quién, cuándo, qué acción y qué campos cambiaron.
+5. **Se listan todos los usuarios**, activos e inactivos, con el estado visible en la tabla. Es una pantalla de administración: ocultar filas sería sorprendente, y como no se puede cambiar el estado desde aquí, no hay riesgo de confusión.
 
 ## Arquitectura
 
@@ -70,7 +69,7 @@ Fecha_Registro   DATETIME      NOT NULL DEFAULT GETDATE()
 
 Índice por `Id_Usuario, Fecha_Registro DESC` para consultar el historial de un usuario.
 
-**En `RESET_PASSWORD` el `Detalle` guarda solo el hecho** (`'Contrasena restablecida'`), nunca la contraseña ni el hash.
+**`RESET_PASSWORD` no es alcanzable desde esta pantalla:** el botón de restablecer contraseña se quitó (ver Decisión, más abajo). El valor queda documentado porque `Sp_RTA_RestablecerPassword` y la columna siguen existiendo en la base, por si el login migra a autenticar contra `Pass_Usuario` en el futuro. Si alguna vez se usa, el `Detalle` guardaría solo el hecho (`'Contrasena restablecida'`), nunca la contraseña ni el hash.
 
 ### 2. Stored procedures
 
@@ -89,9 +88,6 @@ Fecha_Registro   DATETIME      NOT NULL DEFAULT GETDATE()
   5. Si cambió algo: `UPDATE` de los ocho campos + `INSERT` en `R_UsuarioBitacora` con `Accion='EDICION'`, todo en una `TRANSACTION` con `TRY/CATCH`.
   6. Devuelve `Respuestas INT, Mensaje VARCHAR(300)` — mismo contrato que el resto de los módulos. Mensajes fijos **sin tildes**.
 
-- **`Sp_RTA_RestablecerPassword @Id_Usuario NUMERIC(5), @HashMd5 VARCHAR(32), @UsuarioRegistro VARCHAR(50)`**
-  Valida que el usuario exista y que `@HashMd5` tenga **exactamente 32 caracteres hexadecimales** (defensa en profundidad: si algún día alguien llamara al SP con texto plano, se rechaza). `UPDATE Pass_Usuario` + `INSERT` en la bitácora con `Accion='RESET_PASSWORD'` y `Detalle='Contrasena restablecida'`, en transacción.
-
 - **`Sp_RTA_ListarBitacoraUsuario @Id_Usuario NUMERIC(5)`**
   Devuelve `Accion, Detalle, Usuario_Registro, Fecha_Registro` de los últimos 50 movimientos, para ver el historial del usuario seleccionado en la propia pantalla.
 
@@ -99,7 +95,7 @@ Fecha_Registro   DATETIME      NOT NULL DEFAULT GETDATE()
 
 - `CapaEntidad/EntUsuarioAdmin.cs` — los 14 campos que devuelve el listado.
 - `CapaEntidad/EntUsuarioBitacora.cs` — `Accion, Detalle, Usuario_Registro, Fecha_Registro`.
-- `CapaDato/DaoUsuarioAdmin.cs` — `ListarUsuarios(string filtro)`, `ActualizarUsuario(EntUsuarioAdmin, string usuarioRegistro)`, `RestablecerPassword(decimal idUsuario, string hashMd5, string usuarioRegistro)`, `ListarBitacora(decimal idUsuario)`.
+- `CapaDato/DaoUsuarioAdmin.cs` — `ListarUsuarios(string filtro)`, `ActualizarUsuario(EntUsuarioAdmin, string usuarioRegistro)`, `ListarBitacora(decimal idUsuario)`.
 - `CapaNegocio/NegUsuarioAdmin.cs` — pass-through.
 
 `Id_Usuario` viaja como `decimal` en C# porque en la base es `numeric(5)`.
@@ -108,15 +104,14 @@ Fecha_Registro   DATETIME      NOT NULL DEFAULT GETDATE()
 
 - `ReporteTareas/Formulario/AdministrarUsuarios.ashx` (+ `.ashx.cs`, namespace `JsonJQueryNetUsuarios`), patrón del handler de módulos extra **ya corregido**:
   - **Exige sesión en la primera línea de `ProcessRequest`**: si `context.Session` o `Session["UserLogin"]` son nulos, responde error y no ejecuta nada. Implementa `IRequiresSessionState`.
-  - Acciones: `BuscarUsuarios {filtro}`, `GuardarUsuario {…8 campos + idUsuario}`, `RestablecerPassword {idUsuario, clave}`, `VerBitacora {idUsuario}`.
-  - **`RestablecerPassword` recibe la contraseña en claro y la hashea en el servidor** con `SeguridadHelper.GetMd5Hash`. El cliente nunca calcula el hash.
+  - Acciones: `BuscarUsuarios {filtro}`, `GuardarUsuario {…8 campos + idUsuario}`, `VerBitacora {idUsuario}`.
+  - **`GuardarUsuario` exige que las ocho claves editables vengan presentes en el payload** (aunque su valor sea vacío); si falta alguna, rechaza sin guardar. Un valor vacío sí se acepta, porque significa borrar ese campo a propósito.
   - `Usuario_Registro` sale de `Session["Cod_Usuario"]`, nunca del payload.
   - `Response.ContentEncoding = Encoding.UTF8`.
 - `ReporteTareas/Formulario/ParametrizacionUsuarios.aspx` (+ `.cs`, `.designer.cs`) — patrón `Page_Load` con `GenLogin.RedireccionarALogin`.
 - `ReporteTareas/js/parametrizacionUsuarios.js` (UTF-8 **con BOM**, con `Escapar`/`EscaparAttr`):
   - Buscador + tabla (código, nombre, login, perfil, estado, correo).
   - Al elegir un usuario se abre el formulario con los 8 campos editables y los 5 de solo lectura deshabilitados.
-  - Botón **Restablecer contraseña**: pide la nueva y su confirmación en un modal; exige mínimo 6 caracteres y que ambas coincidan antes de enviar.
   - Botón **Ver historial**: muestra la bitácora del usuario.
 
 ### 5. Validaciones
@@ -133,9 +128,10 @@ Se validan en el handler (servidor) y se avisan en el JS (comodidad, no segurida
 | `Cod_Sap` | máximo 50 |
 | `Cod_Jefe_Inm` | máximo 100 |
 | `MailCodJefeInm` | vacío o con formato válido, máximo 100 |
-| contraseña nueva | mínimo 6 caracteres, y confirmación idéntica |
 
 Los máximos evitan que SQL Server trunque en silencio al guardar.
+
+Además, el handler exige que las **ocho claves editables estén presentes en el payload** de `GuardarUsuario` (no solo con formato válido): si falta una, rechaza sin guardar nada. Esto es aparte de la validación de formato, porque un payload parcial pasaría las reglas de la tabla de arriba (un campo ausente no viola ningún máximo) y aun así borraría columnas mediante `NULLIF(@x,'')` en el SP.
 
 ### 6. Registro en el menú
 
@@ -149,7 +145,7 @@ Pantalla → `AdministrarUsuarios.ashx` → `NegUsuarioAdmin` → `DaoUsuarioAdm
 
 - Escrituras atómicas con `TRY/CATCH` + `ROLLBACK`; contrato `Respuestas/Mensaje` traducido a `EntRespuesta` en el handler.
 - `@Id_Usuario` inexistente → error controlado, sin escritura.
-- Hash con formato inválido → el SP rechaza antes de tocar la tabla.
+- Payload de `GuardarUsuario` sin alguna de las ocho claves editables → el handler rechaza antes de tocar `NegUsuarioAdmin`/la base, con mensaje de advertencia y sin invocar el SP.
 - Guardar sin cambios → mensaje informativo, sin fila de bitácora.
 - Codificación: mensajes de SP sin tildes; handler UTF-8; `.js` y `.aspx` con BOM.
 
@@ -160,14 +156,10 @@ Pantalla → `AdministrarUsuarios.ashx` → `NegUsuarioAdmin` → `DaoUsuarioAdm
 2. `Sp_RTA_ActualizarUsuario` cambiando un solo campo → la fila se actualiza y la bitácora registra **solo ese campo**, con valor anterior y nuevo.
 3. Llamarlo de nuevo con los **mismos** valores → mensaje de "sin cambios" y **ninguna** fila nueva en la bitácora.
 4. Con `@Id_Usuario` inexistente → error, sin escritura.
-5. `Sp_RTA_RestablecerPassword` con un hash de 32 hex → actualiza y registra `RESET_PASSWORD` sin exponer el valor. Con `'123456'` (no hexadecimal de 32) → **rechaza**.
-6. Al terminar, revertir los datos de prueba a sus valores originales.
+5. Al terminar, revertir los datos de prueba a sus valores originales.
 
 **Handler**
-POST a cada acción; y un POST **sin sesión** debe ser rechazado sin tocar la base.
-
-**Contraseña (la prueba que importa)**
-Restablecer la contraseña de un usuario de prueba desde la pantalla y **verificar que puede iniciar sesión con la nueva**. Es lo único que demuestra que el hash coincide con lo que el login espera.
+POST a cada acción; y un POST **sin sesión** debe ser rechazado sin tocar la base. Además, un POST a `GuardarUsuario` con una de las ocho claves editables faltante (no solo vacía, ausente del JSON) debe devolver advertencia sin llamar a `NegUsuarioAdmin.ActualizarUsuario`, y un POST con las ocho claves vacías sí debe guardar (vacío es un valor válido, borra el campo a propósito).
 
 **Navegador**
 Buscar, editar los ocho campos, guardar, releer y confirmar que persistieron; ver el historial; confirmar tildes correctas.

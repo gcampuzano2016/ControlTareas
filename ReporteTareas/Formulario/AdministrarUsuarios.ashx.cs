@@ -1,6 +1,5 @@
 using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -12,7 +11,7 @@ namespace JsonJQueryNetUsuarios
 {
     /// <summary>
     /// Handler de la pantalla "Administración de usuarios".
-    /// Acciones: BuscarUsuarios, GuardarUsuario, RestablecerPassword, VerBitacora.
+    /// Acciones: BuscarUsuarios, GuardarUsuario, VerBitacora.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -49,12 +48,6 @@ namespace JsonJQueryNetUsuarios
                 {
                     existAction = true;
                     responseAction.Append(GuardarUsuario(context, parameters));
-                }
-
-                if (Action == "RestablecerPassword")
-                {
-                    existAction = true;
-                    responseAction.Append(RestablecerPassword(context, parameters));
                 }
 
                 if (Action == "VerBitacora")
@@ -106,6 +99,9 @@ namespace JsonJQueryNetUsuarios
             }
         }
 
+        /// <summary>Las ocho claves que debe traer todo GuardarUsuario, aunque su valor venga vacío.</summary>
+        private static readonly string[] ClavesUsuario = { "nombre", "correo", "cedula", "departamento", "empresa", "codSap", "jefe", "correoJefe" };
+
         private string GuardarUsuario(HttpContext context, dynamic campos)
         {
             try
@@ -114,6 +110,14 @@ namespace JsonJQueryNetUsuarios
                 if (idUsuario <= 0)
                 {
                     return responseMessage("0", "Debe seleccionar un usuario.", "warning");
+                }
+
+                foreach (string clave in ClavesUsuario)
+                {
+                    if (!Existe(campos, clave))
+                    {
+                        return responseMessage("0", "Faltan datos del usuario: no se recibió el campo '" + clave + "'.", "warning");
+                    }
                 }
 
                 EntUsuarioAdmin u = new EntUsuarioAdmin()
@@ -141,35 +145,6 @@ namespace JsonJQueryNetUsuarios
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrió un error al guardar el usuario. " + ex.Message, "danger");
-            }
-        }
-
-        private string RestablecerPassword(HttpContext context, dynamic campos)
-        {
-            try
-            {
-                decimal idUsuario = Numero(campos, "idUsuario");
-                if (idUsuario <= 0)
-                {
-                    return responseMessage("0", "Debe seleccionar un usuario.", "warning");
-                }
-
-                string clave = Texto(campos, "clave");
-                if (clave.Length < 6)
-                {
-                    return responseMessage("0", "La contraseña debe tener al menos 6 caracteres.", "warning");
-                }
-
-                // El hash se calcula aquí, con la misma clase que usa el login.
-                SeguridadHelper seguridad = new SeguridadHelper();
-                string hash = seguridad.GetMd5Hash(clave);
-
-                EntRespuesta respuesta = NegUsuarioAdmin.RestablecerPassword(idUsuario, hash, UsuarioSesion(context));
-                return ToJson(respuesta);
-            }
-            catch (Exception ex)
-            {
-                return responseMessage("0", "Ocurrió un error al restablecer la contraseña. " + ex.Message, "danger");
             }
         }
 
@@ -205,6 +180,18 @@ namespace JsonJQueryNetUsuarios
                 return context.Session["Cod_Usuario"].ToString();
             }
             return "SISTEMA";
+        }
+
+        /// <summary>
+        /// Distingue "la clave no vino en el payload" de "vino con valor vacío".
+        /// Texto() no puede: colapsa ambos casos en "". Un valor vacío es válido
+        /// (borra el campo a propósito); una clave ausente no lo es.
+        /// </summary>
+        private bool Existe(dynamic campos, string clave)
+        {
+            var diccionario = campos as System.Collections.Generic.IDictionary<string, object>;
+            if (diccionario == null) { return false; }
+            return diccionario.ContainsKey(clave);
         }
 
         private string Texto(dynamic campos, string clave)

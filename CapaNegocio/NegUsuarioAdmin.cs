@@ -20,10 +20,5 @@ namespace CapaNegocio
         {
             return DaoUsuarioAdmin.ActualizarUsuario(u, usuarioRegistro);
         }
-
-        public static EntRespuesta RestablecerPassword(decimal idUsuario, string hashMd5, string usuarioRegistro)
-        {
-            return DaoUsuarioAdmin.RestablecerPassword(idUsuario, hashMd5, usuarioRegistro);
-        }
     }
 }

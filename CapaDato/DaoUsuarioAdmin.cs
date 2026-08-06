@@ -119,38 +119,6 @@ namespace CapaDato
             return respuesta;
         }
 
-        /// <summary>Guarda el hash MD5 de la nueva contraseña. Nunca recibe la clave en claro.</summary>
-        public static EntRespuesta RestablecerPassword(decimal idUsuario, string hashMd5, string usuarioRegistro)
-        {
-            EntRespuesta respuesta = NuevaRespuesta();
-
-            try
-            {
-                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
-
-                using (SqlConnection cnx = conexion.conectar())
-                using (SqlCommand cmd = new SqlCommand("Sp_RTA_RestablecerPassword", cnx))
-                {
-                    cmd.CommandType = CommandType.StoredProcedure;
-                    cmd.Parameters.Add("@Id_Usuario", SqlDbType.Decimal).Value = idUsuario;
-                    cmd.Parameters.Add("@HashMd5", SqlDbType.VarChar, 50).Value = hashMd5 ?? string.Empty;
-                    cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 50).Value = usuarioRegistro ?? "SISTEMA";
-
-                    cnx.Open();
-                    LeerRespuesta(cmd, respuesta);
-                }
-            }
-            catch (Exception ex)
-            {
-                respuesta.estado = "0";
-                respuesta.resultado = "0";
-                respuesta.tipoMensaje = "danger";
-                respuesta.mensaje = "Ocurrió un error al restablecer la contraseña. Detalle: " + ex.Message;
-            }
-
-            return respuesta;
-        }
-
         private static EntRespuesta NuevaRespuesta()
         {
             return new EntRespuesta()

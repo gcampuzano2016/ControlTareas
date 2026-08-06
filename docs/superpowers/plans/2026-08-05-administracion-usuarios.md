@@ -1695,11 +1695,9 @@ function Escapar(texto) {
     if (texto == null) { return ""; }
     return $("<div>").text(texto).html();
 }
-
-function EscaparAttr(texto) {
-    return Escapar(texto).replace(/'/g, "&#39;").replace(/"/g, "&quot;");
-}
 ```
+
+**Nota:** esta pantalla **no** lleva `EscaparAttr` (el helper de las otras pantallas) porque no inyecta ningún valor del servidor dentro de un atributo HTML: los `onclick` usan el índice del arreglo, que es un entero generado por el propio JS. Agregarlo sería código muerto.
 
 - [ ] **Paso 2: Verificar el BOM**
 

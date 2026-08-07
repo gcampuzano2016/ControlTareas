@@ -258,6 +258,20 @@ textarea:focus-visible,
     color: #FFFFFF;
 }
 
+/* Se usa 45 veces como accion secundaria. Sin esto conserva el celeste de
+   Bootstrap 3, que es el unico color del sistema que no sale de la marca. */
+.btn-info {
+    background-color: #FFFFFF;
+    border-color: var(--dos-acero);
+    color: var(--dos-grafito);
+}
+
+.btn-info:hover, .btn-info:focus {
+    background-color: var(--dos-niebla);
+    border-color: var(--dos-grafito);
+    color: var(--dos-grafito);
+}
+
 .btn-danger {
     background-color: var(--dos-rojo-hondo);
     border-color: var(--dos-rojo-hondo);
@@ -313,14 +327,14 @@ textarea:focus-visible,
     color: var(--dos-tenue);
 }
 
+/* Deliberadamente sobrio: hay 74 pantallas con etiquetas de todo tipo, desde
+   una palabra hasta frases completas. La microetiqueta en versalitas queda
+   reservada para las cabeceras de tabla, donde el ancho si es escaso. */
 .form-group > label,
 .control-label {
-    font-family: var(--dos-dato);
-    font-size: 10px;
-    letter-spacing: .09em;
-    text-transform: uppercase;
-    color: var(--dos-tenue);
-    font-weight: normal;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--dos-grafito);
     margin-bottom: 4px;
 }
 

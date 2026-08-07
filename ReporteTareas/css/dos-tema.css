@@ -270,6 +270,24 @@ textarea:focus-visible,
 
 .btn[disabled], .btn.disabled { opacity: .45; }
 
+/* Excepcion deliberada: Entrada / Salida de la barra superior.
+   Ahi el par verde-rojo no es decoracion, es el significado: la gente marca
+   su jornada de un vistazo y lleva años leyendo esos dos colores. Si ambos
+   heredaran el bermellon de marca, los dos botones se verian iguales. */
+.navbar-top-links .btn-success {
+    background-color: var(--dos-verde);
+    border-color: var(--dos-verde);
+    color: #FFFFFF;
+}
+
+.navbar-top-links .btn-success:hover,
+.navbar-top-links .btn-success:focus {
+    background-color: #17603A;
+    border-color: #17603A;
+}
+
+.navbar-top-links .btn i.fa { margin-right: 6px; }
+
 /* ============================================================================
    6. Formularios
    ============================================================================ */

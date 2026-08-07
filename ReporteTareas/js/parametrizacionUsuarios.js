@@ -51,16 +51,21 @@ function RenderTablaUsuarios(lista) {
     info += "<th>Perfil</th>";
     info += "<th>Correo</th>";
     info += "<th style='text-align:center'>Estado</th>";
+    info += "<th style='text-align:center'>Selectores</th>";
     info += "</tr></thead><tbody>";
 
     if (lista.length === 0) {
-        info += "<tr><td colspan='7' style='text-align:center'>No existen usuarios para esta búsqueda.</td></tr>";
+        info += "<tr><td colspan='8' style='text-align:center'>No existen usuarios para esta búsqueda.</td></tr>";
     }
 
     $.each(lista, function (i, item) {
         var estado = (item.Usuario_Estado === "A")
             ? "<span class='label label-success'>Activo</span>"
             : "<span class='label label-default'>Inactivo</span>";
+
+        var selectores = EsActivoEnSelectores(item)
+            ? "<span class='label label-success'>Visible</span>"
+            : "<span class='label label-warning'>Oculto</span>";
 
         info += "<tr role='row'>";
         info += "<td style='text-align:center'>";
@@ -72,11 +77,19 @@ function RenderTablaUsuarios(lista) {
         info += "<td>" + Escapar(item.NombrePerfil) + "</td>";
         info += "<td>" + Escapar(item.E_Mail) + "</td>";
         info += "<td style='text-align:center'>" + estado + "</td>";
+        info += "<td style='text-align:center'>" + selectores + "</td>";
         info += "</tr>";
     });
 
     info += "</tbody></table>";
     $("#datosTablaUsuarios").html(info);
+}
+
+/* EstadoUsuario llega como cadena: vacía = NULL en la tabla = activo.
+   Cualquier otro valor (0, 1, lo que sea) lo deja fuera de los selectores,
+   porque los SPs del sistema filtran con "EstadoUsuario IS NULL". */
+function EsActivoEnSelectores(item) {
+    return item.EstadoUsuario == null || item.EstadoUsuario === "";
 }
 
 function SeleccionarUsuario(indice) {
@@ -98,7 +111,62 @@ function SeleccionarUsuario(indice) {
     $("#txtJefe").val(u.Cod_Jefe_Inm);
     $("#txtCorreoJefe").val(u.MailCodJefeInm);
 
+    /* El botón dice lo que va a hacer, no el estado en el que está. */
+    var visible = EsActivoEnSelectores(u);
+    $("#txtSelectoresSel").val(visible ? "Visible" : "Oculto");
+    $("#btnCambiarEstado")
+        .text(visible ? "Inactivar usuario" : "Activar usuario")
+        .removeClass("btn-warning btn-info")
+        .addClass(visible ? "btn-warning" : "btn-info");
+
     $("#panelDetalle").show();
+}
+
+/* Abre la confirmación. El texto explica el efecto real y aclara lo que NO hace,
+   porque "inactivar" suena a bloquear el acceso y aquí no lo bloquea. */
+function CambiarEstado() {
+    var idUsuario = $("#txtIdUsuarioSel").val();
+    if (idUsuario == null || idUsuario === "") {
+        MostrarMensaje("Debe seleccionar un usuario.", "warning");
+        return;
+    }
+
+    var visible = ($("#txtSelectoresSel").val() === "Visible");
+    var nombre = $("#txtNombre").val();
+
+    var aviso = "";
+    if (visible) {
+        aviso += "<p>¿Inactivar a <strong>" + Escapar(nombre) + "</strong>?</p>";
+        aviso += "<p>Dejará de aparecer en los selectores de jefe, en el autocompletado y en las listas de solicitudes.</p>";
+        aviso += "<p class='text-muted'>Esto <strong>no</strong> le impide iniciar sesión: el acceso lo controla el dominio.</p>";
+    } else {
+        aviso += "<p>¿Activar a <strong>" + Escapar(nombre) + "</strong>?</p>";
+        aviso += "<p>Volverá a aparecer en los selectores de jefe, en el autocompletado y en las listas de solicitudes.</p>";
+    }
+
+    $("#MensajeConfirmarEstado").html(aviso);
+    $("#btnConfirmarEstado").text(visible ? "Inactivar" : "Activar");
+    $("#modalConfirmarEstado").modal("show");
+}
+
+function ConfirmarCambioEstado() {
+    var idUsuario = $("#txtIdUsuarioSel").val();
+    var visible = ($("#txtSelectoresSel").val() === "Visible");
+
+    $("#btnConfirmarEstado").prop("disabled", true);
+    PostUsuario("CambiarEstadoUsuario", { "idUsuario": idUsuario, "inactivar": visible }, function (respuesta) {
+        $("#btnConfirmarEstado").prop("disabled", false);
+        $("#modalConfirmarEstado").modal("hide");
+
+        if (respuesta == null) {
+            MostrarMensaje("No se recibió respuesta del servidor.", "danger");
+            return;
+        }
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado == "1") {
+            BuscarUsuarios();
+        }
+    });
 }
 
 /* Vacio es valido: el correo es opcional. */

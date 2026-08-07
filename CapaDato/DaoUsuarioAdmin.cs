@@ -40,7 +40,8 @@ namespace CapaDato
                             MailCodJefeInm = dr["MailCodJefeInm"].ToString(),
                             Id_Perfil = Convert.ToInt64(dr["Id_Perfil"]),
                             NombrePerfil = dr["NombrePerfil"].ToString(),
-                            Usuario_Estado = dr["Usuario_Estado"].ToString()
+                            Usuario_Estado = dr["Usuario_Estado"].ToString(),
+                            EstadoUsuario = dr["EstadoUsuario"].ToString()
                         });
                     }
                 }
@@ -114,6 +115,42 @@ namespace CapaDato
                 respuesta.resultado = "0";
                 respuesta.tipoMensaje = "danger";
                 respuesta.mensaje = "Ocurrió un error al guardar los datos del usuario. Detalle: " + ex.Message;
+            }
+
+            return respuesta;
+        }
+
+        /// <summary>
+        /// Inactiva (EstadoUsuario = 0) o activa (EstadoUsuario = NULL) al usuario.
+        /// Controla si aparece en selectores de jefe, autocompletado y solicitudes;
+        /// NO controla el inicio de sesión, que va contra Active Directory.
+        /// </summary>
+        public static EntRespuesta CambiarEstado(decimal idUsuario, bool inactivar, string usuarioRegistro)
+        {
+            EntRespuesta respuesta = NuevaRespuesta();
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_CambiarEstadoUsuario", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@Id_Usuario", SqlDbType.Decimal).Value = idUsuario;
+                    cmd.Parameters.Add("@Inactivar", SqlDbType.Bit).Value = inactivar;
+                    cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 50).Value = usuarioRegistro ?? "SISTEMA";
+
+                    cnx.Open();
+                    LeerRespuesta(cmd, respuesta);
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.resultado = "0";
+                respuesta.tipoMensaje = "danger";
+                respuesta.mensaje = "Ocurrió un error al cambiar el estado del usuario. Detalle: " + ex.Message;
             }
 
             return respuesta;

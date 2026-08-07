@@ -50,6 +50,12 @@ namespace JsonJQueryNetUsuarios
                     responseAction.Append(GuardarUsuario(context, parameters));
                 }
 
+                if (Action == "CambiarEstadoUsuario")
+                {
+                    existAction = true;
+                    responseAction.Append(CambiarEstadoUsuario(context, parameters));
+                }
+
                 if (Action == "VerBitacora")
                 {
                     existAction = true;
@@ -145,6 +151,41 @@ namespace JsonJQueryNetUsuarios
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrió un error al guardar el usuario. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Inactiva o activa al usuario en los selectores del sistema.
+        /// La clave 'inactivar' debe venir explícita: sin ella no se asume nada,
+        /// porque el valor por defecto decidiría por su cuenta si alguien queda fuera.
+        /// </summary>
+        private string CambiarEstadoUsuario(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                decimal idUsuario = Numero(campos, "idUsuario");
+                if (idUsuario <= 0)
+                {
+                    return responseMessage("0", "Debe seleccionar un usuario.", "warning");
+                }
+
+                if (!Existe(campos, "inactivar"))
+                {
+                    return responseMessage("0", "Falta indicar si se debe activar o inactivar.", "warning");
+                }
+
+                bool inactivar;
+                if (!bool.TryParse(Texto(campos, "inactivar"), out inactivar))
+                {
+                    return responseMessage("0", "El valor de activar o inactivar no es válido.", "warning");
+                }
+
+                EntRespuesta respuesta = NegUsuarioAdmin.CambiarEstado(idUsuario, inactivar, UsuarioSesion(context));
+                return ToJson(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrió un error al cambiar el estado del usuario. " + ex.Message, "danger");
             }
         }
 

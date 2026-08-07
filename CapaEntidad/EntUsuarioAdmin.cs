@@ -16,5 +16,7 @@ namespace CapaEntidad
         public long Id_Perfil { get; set; }
         public string NombrePerfil { get; set; }
         public string Usuario_Estado { get; set; }
+        /// <summary>Cadena vacía = activo (NULL en la tabla). Cualquier otro valor = inactivo.</summary>
+        public string EstadoUsuario { get; set; }
     }
 }

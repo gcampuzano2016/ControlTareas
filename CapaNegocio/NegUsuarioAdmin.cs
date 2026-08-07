@@ -20,5 +20,10 @@ namespace CapaNegocio
         {
             return DaoUsuarioAdmin.ActualizarUsuario(u, usuarioRegistro);
         }
+
+        public static EntRespuesta CambiarEstado(decimal idUsuario, bool inactivar, string usuarioRegistro)
+        {
+            return DaoUsuarioAdmin.CambiarEstado(idUsuario, inactivar, usuarioRegistro);
+        }
     }
 }

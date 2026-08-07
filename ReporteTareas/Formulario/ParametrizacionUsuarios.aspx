@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionUsuarios.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionUsuarios" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionUsuarios.js?v=2" type="text/javascript"></script>
+    <script src="../js/parametrizacionUsuarios.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -60,13 +60,17 @@
                                         <label>Login:</label>
                                         <input type="text" class="form-control" id="txtLoginSel" disabled />
                                     </div>
-                                    <div class="form-group col-lg-3">
+                                    <div class="form-group col-lg-2">
                                         <label>Perfil:</label>
                                         <input type="text" class="form-control" id="txtPerfilSel" disabled />
                                     </div>
-                                    <div class="form-group col-lg-3">
+                                    <div class="form-group col-lg-2">
                                         <label>Estado:</label>
                                         <input type="text" class="form-control" id="txtEstadoSel" disabled />
+                                    </div>
+                                    <div class="form-group col-lg-2">
+                                        <label title="Si aparece en selectores de jefe, autocompletado y solicitudes">Selectores:</label>
+                                        <input type="text" class="form-control" id="txtSelectoresSel" disabled />
                                     </div>
                                 </div>
                                 <div class="row">
@@ -110,11 +114,35 @@
                                 <div class="row">
                                     <div class="col-lg-12">
                                         <button id="btnGuardar" onclick="GuardarUsuario()" type="button" class="btn btn-success">Guardar</button>
+                                        <button id="btnCambiarEstado" onclick="CambiarEstado()" type="button" class="btn btn-warning">Inactivar usuario</button>
                                         <button id="btnHistorial" onclick="VerHistorial()" type="button" class="btn btn-default">Ver historial</button>
+                                        <p class="text-muted" style="margin-top: 8px">
+                                            <strong>Estado</strong> filtra los listados de menús y horarios.
+                                            <strong>Selectores</strong> controla si el usuario aparece en los selectores de jefe,
+                                            el autocompletado y las listas de solicitudes; es el que cambia este botón.
+                                            Ninguno de los dos impide iniciar sesión: eso lo controla el dominio.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de confirmación de estado -->
+        <div class="modal fade" id="modalConfirmarEstado" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Confirmar cambio de estado</h4>
+                    </div>
+                    <div class="modal-body" id="MensajeConfirmarEstado"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button id="btnConfirmarEstado" onclick="ConfirmarCambioEstado()" type="button" class="btn btn-warning">Inactivar</button>
                     </div>
                 </div>
             </div>

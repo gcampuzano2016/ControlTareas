@@ -1090,6 +1090,7 @@
     <Content Include="carrusel\imagenes\usuarios.png" />
     <Content Include="carrusel\imagenes\VideoDOS.mp4" />
     <Content Include="carrusel\js\carruseJava.js" />
+    <Content Include="css\dos-tema.css" />
     <Content Include="dist\css\depMedico.css" />
     <Content Include="dist\css\InfoContratos.css" />
     <Content Include="dist\css\Montos.css" />

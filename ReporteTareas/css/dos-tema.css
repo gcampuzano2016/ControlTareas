@@ -1,0 +1,457 @@
+/* ============================================================================
+   Tema DOS — capa visual sobre SB Admin 2
+   ----------------------------------------------------------------------------
+   Se carga DESPUES de sb-admin-2.css y solo redefine apariencia: color,
+   tipografia, espaciado y estados. No toca posicionamiento ni display, para no
+   romper metisMenu ni el colapso responsive de Bootstrap.
+
+   Ninguna de las 74 pantallas cambia de markup. Para revertir, basta con quitar
+   el <link> de Master.Master.
+
+   La paleta esta muestreada del archivo Img/logo_dos.png, no elegida a ojo.
+
+   Tipografia: se usan las fuentes del sistema a proposito, para no depender de
+   internet ni de un CDN. Si mas adelante se quiere instalar IBM Plex Sans
+   Condensed, basta con dejar los .woff2 en ReporteTareas/fonts/, declarar el
+   @font-face y anteponerla en --dos-titulo: el resto del tema no cambia.
+   ============================================================================ */
+
+:root {
+    /* --- Marca (muestreada del logo) --- */
+    --dos-bermellon:   #E53212;  /* el diafragma */
+    --dos-rojo-hondo:  #921913;  /* la sombra metalica */
+    --dos-acero:       #9C9B9B;  /* el logotipo */
+    --dos-acero-claro: #BEBDBD;
+
+    /* --- Neutros: gris con sesgo calido hacia el bermellon --- */
+    --dos-grafito:     #262523;
+    --dos-grafito-alt: #34312E;
+    --dos-niebla:      #F1F0EE;
+    --dos-linea:       #E2E0DD;
+    --dos-linea-suave: #F0EEEC;
+    --dos-tenue:       #7C7873;
+
+    /* --- Semanticos: separados del rojo de marca a proposito --- */
+    --dos-verde: #1E7A4B;
+    --dos-ambar: #9A6100;
+
+    /* --- Tipografia --- */
+    --dos-titulo: "Segoe UI Semibold", "Segoe UI", "Arial Narrow", Arial, sans-serif;
+    --dos-texto:  "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --dos-dato:   Consolas, "Lucida Console", "Courier New", monospace;
+}
+
+/* ============================================================================
+   1. Base
+   ============================================================================ */
+
+body {
+    font-family: var(--dos-texto);
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: var(--dos-grafito);
+    background-color: var(--dos-niebla);
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+    font-family: var(--dos-titulo);
+    color: var(--dos-grafito);
+    letter-spacing: -.005em;
+}
+
+h3 { font-size: 20px; }
+h4 { font-size: 15px; }
+
+a { color: var(--dos-rojo-hondo); }
+a:hover, a:focus { color: var(--dos-bermellon); }
+
+/* Foco visible en todo lo operable. El anillo bermellon es el guino al
+   diafragma del logo: donde esta puesta la atencion. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--dos-bermellon);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* ============================================================================
+   2. Barra superior
+   ============================================================================ */
+
+.navbar-static-top {
+    background: #FFFFFF;
+    border: 0;
+    border-bottom: 1px solid var(--dos-linea);
+    box-shadow: none;
+}
+
+.navbar-default .navbar-brand,
+.navbar-top-links > li > a {
+    color: var(--dos-grafito);
+}
+
+.navbar-top-links > li > a:hover,
+.navbar-top-links > li > a:focus {
+    background-color: var(--dos-niebla);
+    color: var(--dos-bermellon);
+}
+
+/* ============================================================================
+   3. Barra lateral
+   ============================================================================ */
+
+.navbar-default.sidebar,
+.sidebar ul.nav {
+    background-color: var(--dos-grafito);
+}
+
+.sidebar .nav > li > a,
+.sidebar .nav-second-level li a {
+    color: #C9C5C1;
+    border-bottom: 0;
+    border-left: 3px solid transparent;
+    font-size: 13px;
+}
+
+.sidebar .nav > li > a:hover,
+.sidebar .nav > li > a:focus,
+.sidebar .nav-second-level li a:hover,
+.sidebar .nav-second-level li a:focus {
+    background-color: var(--dos-grafito-alt);
+    color: #FFFFFF;
+}
+
+/* El bermellon marca UNA sola cosa: donde estoy. */
+.sidebar .nav > li > a.active,
+.sidebar .nav > li.active > a,
+.sidebar .nav-second-level li a.active {
+    background-color: var(--dos-grafito-alt);
+    border-left-color: var(--dos-bermellon);
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.sidebar .nav-second-level li a { padding-left: 34px; }
+
+.sidebar .nav > li > a i.fa,
+.sidebar .nav-second-level li a i.fa {
+    color: var(--dos-acero);
+    width: 18px;
+}
+
+.sidebar .nav > li > a:hover i.fa,
+.sidebar .nav > li > a.active i.fa,
+.sidebar .nav > li.active > a i.fa {
+    color: var(--dos-bermellon);
+}
+
+.sidebar .arrow { color: var(--dos-tenue); }
+
+/* ============================================================================
+   4. Paneles
+   ============================================================================ */
+
+.panel {
+    border: 1px solid var(--dos-linea);
+    border-radius: 3px;
+    box-shadow: none;
+}
+
+.panel-default > .panel-heading,
+.panel-primary > .panel-heading {
+    background: #FFFFFF;
+    background-image: none;
+    border-bottom: 1px solid var(--dos-linea-suave);
+    color: var(--dos-grafito);
+    padding: 11px 15px;
+}
+
+.panel-primary { border-color: var(--dos-linea); }
+
+.panel-heading h4,
+.panel-heading h3 {
+    font-family: var(--dos-titulo);
+    font-size: 13px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+    color: var(--dos-tenue);
+    margin: 0;
+}
+
+.card, .card-primary {
+    border: 1px solid var(--dos-linea);
+    border-radius: 3px;
+    background: #FFFFFF;
+}
+
+.card-header {
+    border-bottom: 1px solid var(--dos-linea-suave);
+    padding: 14px 16px;
+}
+
+.card-header h3 {
+    font-family: var(--dos-titulo);
+    font-size: 20px;
+    margin: 0;
+}
+
+/* ============================================================================
+   5. Botones
+   ============================================================================ */
+
+.btn {
+    border-radius: 2px;
+    font-family: var(--dos-texto);
+    font-weight: 600;
+    font-size: 13px;
+    padding: 7px 15px;
+    background-image: none;
+    text-shadow: none;
+    box-shadow: none;
+}
+
+/* La accion que ejecuto: bermellon. En esta aplicacion "primary" y "success"
+   se usan indistintamente para el boton principal de cada pantalla. */
+.btn-primary,
+.btn-success {
+    background-color: var(--dos-bermellon);
+    border-color: var(--dos-bermellon);
+    color: #FFFFFF;
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-success:hover, .btn-success:focus, .btn-success:active {
+    background-color: var(--dos-rojo-hondo);
+    border-color: var(--dos-rojo-hondo);
+    color: #FFFFFF;
+}
+
+.btn-default {
+    background-color: #FFFFFF;
+    border-color: #CFCCC8;
+    color: var(--dos-grafito);
+}
+
+.btn-default:hover, .btn-default:focus {
+    background-color: var(--dos-niebla);
+    border-color: var(--dos-acero);
+    color: var(--dos-grafito);
+}
+
+/* Cautelar: cambia el estado de alguien mas. */
+.btn-warning {
+    background-color: #FFFFFF;
+    border-color: var(--dos-ambar);
+    color: var(--dos-ambar);
+}
+
+.btn-warning:hover, .btn-warning:focus {
+    background-color: var(--dos-ambar);
+    border-color: var(--dos-ambar);
+    color: #FFFFFF;
+}
+
+.btn-danger {
+    background-color: var(--dos-rojo-hondo);
+    border-color: var(--dos-rojo-hondo);
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    background-color: #7A140F;
+    border-color: #7A140F;
+}
+
+.btn[disabled], .btn.disabled { opacity: .45; }
+
+/* ============================================================================
+   6. Formularios
+   ============================================================================ */
+
+.form-control {
+    border: 1px solid #CFCCC8;
+    border-radius: 2px;
+    box-shadow: none;
+    height: 34px;
+    padding: 6px 11px;
+    font-size: 13px;
+    color: var(--dos-grafito);
+}
+
+.form-control:focus {
+    border-color: var(--dos-bermellon);
+    box-shadow: 0 0 0 3px rgba(229, 50, 18, .16);
+}
+
+.form-control[disabled],
+.form-control[readonly] {
+    background-color: #F4F2F0;
+    color: var(--dos-tenue);
+}
+
+.form-group > label,
+.control-label {
+    font-family: var(--dos-dato);
+    font-size: 10px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--dos-tenue);
+    font-weight: normal;
+    margin-bottom: 4px;
+}
+
+/* ============================================================================
+   7. Tablas
+   ============================================================================ */
+
+.table {
+    font-size: 12.5px;
+    /* Las cifras se comparan en columna: un digito de mas salta a la vista. */
+    font-variant-numeric: tabular-nums;
+}
+
+.table > thead > tr > th {
+    font-family: var(--dos-titulo);
+    font-size: 10.5px;
+    letter-spacing: .09em;
+    text-transform: uppercase;
+    color: var(--dos-tenue);
+    font-weight: 600;
+    background: #FAF9F8;
+    border-bottom: 1px solid var(--dos-linea);
+    border-top: 0;
+    padding: 9px 12px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.table > tbody > tr > td {
+    border-top: 1px solid var(--dos-linea-suave);
+    padding: 8px 12px;
+    vertical-align: middle;
+}
+
+/* Hairlines en vez de cebra: menos ruido cuando hay muchas filas. */
+.table-striped > tbody > tr:nth-of-type(odd) { background-color: transparent; }
+.table-hover > tbody > tr:hover { background-color: #FDF3F1; }
+.table-bordered, .table-bordered > tbody > tr > td, .table-bordered > thead > tr > th {
+    border-color: var(--dos-linea-suave);
+}
+
+/* ============================================================================
+   8. Estados — la firma del sistema
+   ----------------------------------------------------------------------------
+   Un solo tratamiento para todos los estados de la aplicacion: riel de color
+   mas etiqueta monoespaciada. El color codifica la familia del estado y nunca
+   compite con el bermellon, que esta reservado para navegacion y accion.
+   ============================================================================ */
+
+.label {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 0;
+    border-radius: 0;
+    background: transparent !important;
+    font-family: var(--dos-dato);
+    font-size: 10px;
+    font-weight: normal;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    text-shadow: none;
+    white-space: nowrap;
+    color: var(--dos-tenue);
+    vertical-align: middle;
+}
+
+.label::before {
+    content: "";
+    width: 3px;
+    height: 13px;
+    border-radius: 1px;
+    background: var(--dos-acero);
+    flex: none;
+}
+
+.label-success            { color: var(--dos-verde); }
+.label-success::before    { background: var(--dos-verde); }
+
+.label-warning            { color: var(--dos-ambar); }
+.label-warning::before    { background: var(--dos-ambar); }
+
+.label-danger             { color: var(--dos-rojo-hondo); }
+.label-danger::before     { background: var(--dos-rojo-hondo); }
+
+.label-info               { color: var(--dos-verde); }
+.label-info::before       { background: var(--dos-verde); }
+
+.label-default            { color: var(--dos-tenue); }
+.label-default::before    { background: var(--dos-acero); }
+
+/* Las insignias numericas (contadores) siguen siendo pildoras: ahi el numero
+   es el dato, no el estado. */
+.badge {
+    background-color: var(--dos-grafito);
+    font-family: var(--dos-dato);
+    font-size: 10.5px;
+    font-variant-numeric: tabular-nums;
+    border-radius: 9px;
+}
+
+/* ============================================================================
+   9. Modales y avisos
+   ============================================================================ */
+
+.modal-content {
+    border: 0;
+    border-radius: 3px;
+    box-shadow: 0 18px 44px rgba(0, 0, 0, .22);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--dos-linea);
+    padding: 14px 18px;
+}
+
+.modal-title {
+    font-family: var(--dos-titulo);
+    font-size: 16px;
+    color: var(--dos-grafito);
+}
+
+.modal-footer { border-top: 1px solid var(--dos-linea); }
+
+.alert { border-radius: 2px; border-width: 1px; }
+
+/* ============================================================================
+   10. Detalles heredados del tema anterior que ya no aplican
+   ============================================================================ */
+
+/* SB Admin 2 trae degradados y sombras internas de su epoca. */
+.panel-heading,
+.navbar-static-top,
+.btn {
+    filter: none;
+}
+
+/* Paginacion y pestanas alineadas a la marca. */
+.pagination > .active > a,
+.pagination > .active > a:hover,
+.pagination > .active > span {
+    background-color: var(--dos-bermellon);
+    border-color: var(--dos-bermellon);
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    border-top: 2px solid var(--dos-bermellon);
+    color: var(--dos-grafito);
+    font-weight: 600;
+}

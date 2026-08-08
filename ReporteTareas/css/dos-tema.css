@@ -215,6 +215,84 @@ textarea:focus-visible,
 }
 
 /* ============================================================================
+   3c. Ubicacion actual en la barra superior
+   ----------------------------------------------------------------------------
+   Responde "donde estoy" sin depender de la barra lateral. Es lo que sostiene
+   que esconder el menu no desoriente: el nombre de la pantalla sigue arriba.
+   El texto lo toma el JS del propio menu, asi que no hay que mantenerlo aparte.
+   ============================================================================ */
+
+.dos-ubicacion {
+    display: none;
+    float: left;
+    line-height: 50px;
+    padding-left: 6px;
+    font-size: 13px;
+    color: var(--dos-grafito);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46vw;
+}
+
+.dos-ubicacion-grupo { color: var(--dos-tenue); }
+
+.dos-ubicacion-sep {
+    color: var(--dos-acero-claro);
+    margin: 0 7px;
+}
+
+.dos-ubicacion-hoja {
+    font-family: var(--dos-titulo);
+    font-weight: 600;
+}
+
+@media (min-width: 768px) {
+    .dos-ubicacion { display: block; }
+}
+
+/* ============================================================================
+   3d. Filtro del menu
+   ----------------------------------------------------------------------------
+   Hay 48 pantallas repartidas en grupos que arrancan cerrados. Sin esto, dar
+   con una que no se visita seguido significa abrir grupo por grupo.
+   ============================================================================ */
+
+.dos-filtro {
+    padding: 11px 12px 9px;
+    border-bottom: 1px solid #3A3835;
+    background: var(--dos-grafito);
+}
+
+.dos-filtro input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #1E1C1B;
+    border: 1px solid #43403C;
+    border-radius: 2px;
+    color: #EDEBE8;
+    font-family: var(--dos-texto);
+    font-size: 12.5px;
+    padding: 6px 10px;
+}
+
+.dos-filtro input::placeholder { color: #7C7873; }
+.dos-filtro input::-ms-input-placeholder { color: #7C7873; }
+
+.dos-filtro input:focus {
+    outline: 0;
+    border-color: var(--dos-bermellon);
+    box-shadow: 0 0 0 3px rgba(229, 50, 18, .22);
+}
+
+.dos-filtro-vacio {
+    display: none;
+    padding-top: 8px;
+    font-size: 12px;
+    color: var(--dos-acero);
+}
+
+/* ============================================================================
    4. Paneles
    ============================================================================ */
 

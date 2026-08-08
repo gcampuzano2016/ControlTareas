@@ -1,17 +1,18 @@
 /* ============================================================================
-   Hamburguesa de escritorio — Sistema de Tareas DOS
+   Navegación — Sistema de Tareas DOS
    ----------------------------------------------------------------------------
-   Muestra u oculta la barra lateral y recuerda la eleccion.
+   Tres cosas, todas sobre el menu que ya genera Master.Master.cs. No cambia el
+   markup del servidor ni depende de jQuery.
 
-   Por que se recuerda: cada clic de esta aplicacion recarga la pagina completa
-   (WebForms). Sin memoria, el menu se volveria a abrir en cada pantalla y el
-   boton no serviria de nada.
+   1. Hamburguesa de escritorio, con la eleccion recordada.
+   2. Nombre de la pantalla actual en la barra superior. Hace falta sobre todo
+      cuando el menu esta escondido: sin el, no queda ninguna pista de donde
+      esta parado el usuario.
+   3. Filtro rapido del menu. Hay 48 pantallas repartidas en varios grupos, y
+      sin el hay que abrir grupo por grupo para encontrar una.
 
-   El parpadeo al cargar lo evita un script en linea dentro del <head> de
-   Master.Master, que aplica la clase antes del primer pintado. Este archivo
-   solo se encarga del boton.
-
-   Se escribe sin depender de jQuery para que funcione aunque cambie la version.
+   Quien marca la pantalla actual es sb-admin-2.js, que ya pone .active en el
+   enlace y abre su grupo. Aqui solo se lee ese trabajo, no se repite.
    ============================================================================ */
 
 (function () {
@@ -20,11 +21,29 @@
     var CLAVE = "dosMenuOculto";
     var raiz = document.documentElement;
 
+    /* ---------------------------------------------------------------- utiles */
+
+    function texto(nodo) {
+        return (nodo.textContent || nodo.innerText || "").replace(/\s+/g, " ").trim();
+    }
+
+    /* Compara sin distinguir mayusculas ni acentos: quien busca "administracion"
+       debe encontrar "Administración". */
+    function normalizar(cadena) {
+        cadena = cadena.toLowerCase();
+        if (cadena.normalize) {
+            cadena = cadena.normalize("NFD").replace(/[̀-ͯ]/g, "");
+        }
+        return cadena;
+    }
+
+    /* ------------------------------------------------------------ hamburguesa */
+
     function estaOculto() {
         return raiz.className.indexOf("menu-oculto") !== -1;
     }
 
-    function aplicar(oculto) {
+    function aplicarOculto(oculto) {
         /* Sin classList.toggle(clase, fuerza): IE11 ignora el segundo argumento. */
         if (oculto) {
             if (!estaOculto()) { raiz.className += " menu-oculto"; }
@@ -44,29 +63,166 @@
         try {
             window.localStorage.setItem(CLAVE, oculto ? "1" : "0");
         } catch (e) {
-            /* Modo privado o almacenamiento bloqueado: el boton sigue
-               funcionando, solo que la eleccion no sobrevive a la recarga. */
+            /* Modo privado o almacenamiento bloqueado: el boton sigue sirviendo,
+               solo que la eleccion no sobrevive a la recarga. */
         }
     }
 
-    function iniciar() {
+    function iniciarHamburguesa() {
         var boton = document.getElementById("dosMenuBoton");
         if (!boton) { return; }
 
-        /* El <head> ya aplico la clase; aqui solo se sincronizan los atributos. */
-        aplicar(estaOculto());
+        aplicarOculto(estaOculto());
 
         boton.onclick = function () {
             var oculto = !estaOculto();
-            aplicar(oculto);
+            aplicarOculto(oculto);
             recordar(oculto);
             return false;
         };
     }
 
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", iniciar);
-    } else {
+    /* ------------------------------------------------- pantalla actual arriba */
+
+    function iniciarTitulo() {
+        var menu = document.getElementById("side-menu");
+        var cabecera = document.querySelector(".navbar-header");
+        if (!menu || !cabecera) { return; }
+
+        var activo = menu.querySelector("a.active");
+        if (!activo) { return; }
+
+        var nombre = texto(activo);
+        if (!nombre) { return; }
+
+        /* El grupo padre da el contexto: "Manejo de perfiles / Usuarios". */
+        var grupo = "";
+        var contenedor = activo.parentNode;
+        while (contenedor && contenedor !== menu) {
+            if (contenedor.className && contenedor.className.indexOf("nav-second-level") !== -1) {
+                var padre = contenedor.parentNode.querySelector("a");
+                if (padre) { grupo = texto(padre); }
+                break;
+            }
+            contenedor = contenedor.parentNode;
+        }
+
+        var caja = document.createElement("span");
+        caja.className = "dos-ubicacion";
+        if (grupo) {
+            caja.innerHTML = "<span class='dos-ubicacion-grupo'></span>" +
+                             "<span class='dos-ubicacion-sep'>/</span>" +
+                             "<span class='dos-ubicacion-hoja'></span>";
+            caja.firstChild.appendChild(document.createTextNode(grupo));
+            caja.lastChild.appendChild(document.createTextNode(nombre));
+        } else {
+            caja.appendChild(document.createTextNode(nombre));
+        }
+        cabecera.appendChild(caja);
+    }
+
+    /* -------------------------------------------------------- filtro del menu */
+
+    function iniciarFiltro() {
+        var menu = document.getElementById("side-menu");
+        if (!menu || !menu.parentNode) { return; }
+
+        var grupos = menu.children;
+        if (grupos.length < 4) { return; }   /* con pocos items no aporta nada */
+
+        var caja = document.createElement("div");
+        caja.className = "dos-filtro";
+        caja.innerHTML =
+            "<label class='sr-only' for='dosFiltroMenu'>Buscar en el menú</label>" +
+            "<input type='text' id='dosFiltroMenu' autocomplete='off' placeholder='Buscar pantalla...'>" +
+            "<span class='dos-filtro-vacio'>Ninguna pantalla coincide</span>";
+        menu.parentNode.insertBefore(caja, menu);
+
+        var entrada = document.getElementById("dosFiltroMenu");
+        var aviso = caja.querySelector(".dos-filtro-vacio");
+
+        /* Estado original, para poder devolver el menu como estaba al limpiar. */
+        var abiertosAlInicio = [];
+        var i;
+        for (i = 0; i < grupos.length; i++) {
+            var sub = grupos[i].querySelector("ul");
+            abiertosAlInicio.push(sub && sub.className.indexOf("in") !== -1);
+        }
+
+        function mostrar(elemento, visible) {
+            elemento.style.display = visible ? "" : "none";
+        }
+
+        function abrir(sub, abierto) {
+            if (!sub) { return; }
+            if (abierto) {
+                if (sub.className.indexOf("in") === -1) { sub.className += " in"; }
+            } else {
+                sub.className = sub.className.replace(/\s*\bin\b/g, "");
+            }
+        }
+
+        function filtrar() {
+            var busqueda = normalizar(entrada.value.trim());
+            var hallazgos = 0;
+            var g, sub, hijos, j, coincideGrupo, coincidenHijos;
+
+            for (g = 0; g < grupos.length; g++) {
+                sub = grupos[g].querySelector("ul");
+                hijos = sub ? sub.children : [];
+                coincideGrupo = false;
+                coincidenHijos = 0;
+
+                if (busqueda === "") {
+                    mostrar(grupos[g], true);
+                    for (j = 0; j < hijos.length; j++) { mostrar(hijos[j], true); }
+                    abrir(sub, abiertosAlInicio[g]);
+                    continue;
+                }
+
+                var enlaceGrupo = grupos[g].querySelector("a");
+                if (enlaceGrupo && normalizar(texto(enlaceGrupo)).indexOf(busqueda) !== -1) {
+                    coincideGrupo = true;
+                }
+
+                for (j = 0; j < hijos.length; j++) {
+                    var visible = coincideGrupo ||
+                        normalizar(texto(hijos[j])).indexOf(busqueda) !== -1;
+                    mostrar(hijos[j], visible);
+                    if (visible) { coincidenHijos++; }
+                }
+
+                var vale = coincideGrupo || coincidenHijos > 0;
+                mostrar(grupos[g], vale);
+                abrir(sub, vale);          /* si coincide, se abre para verlo */
+                if (vale) { hallazgos++; }
+            }
+
+            aviso.style.display = (busqueda !== "" && hallazgos === 0) ? "block" : "none";
+        }
+
+        entrada.oninput = filtrar;
+        entrada.onkeydown = function (evento) {
+            if (evento.keyCode === 27) {   /* Escape limpia y devuelve el foco */
+                entrada.value = "";
+                filtrar();
+            }
+        };
+    }
+
+    /* ------------------------------------------------------------------ arranque */
+
+    function iniciar() {
+        iniciarHamburguesa();
+        iniciarTitulo();
+        iniciarFiltro();
+    }
+
+    /* sb-admin-2.js marca la pagina actual dentro de su propio $(function).
+       Se espera a load para leer el resultado ya aplicado, no a medias. */
+    if (document.readyState === "complete") {
         iniciar();
+    } else {
+        window.addEventListener("load", iniciar);
     }
 })();

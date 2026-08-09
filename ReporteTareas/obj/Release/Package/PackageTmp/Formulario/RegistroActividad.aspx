@@ -124,6 +124,14 @@
                                                         </select>
                                                         <p class="help-block"></p>
                                                     </div>
+                                                    <div class="form-group col-lg-3">
+                                                        <label>Estado</label>
+                                                        <select id="cboEmpres" class="form-control">
+                                                            <option value="DOS">DOS</option>
+                                                            <option value="AGILITY">AGILITY</option>
+                                                        </select>
+                                                        <p class="help-block"></p>
+                                                    </div>
                                                 </div>
                                                 <div class="row">
                                                     <div class="form-group col-lg-12">

@@ -45,7 +45,7 @@ $(document).on('click', '#btnSalida', function (e) {
 
 function RegistrarEvento(Accion) {
 
-    var url = "ObtenerListaTareas.ashx";
+    var url = "AdministrarMarcacion.ashx";
     var datos = "";
     var mensajeVerificacion = "";
     var tipoMensaje = "warning";
@@ -58,16 +58,15 @@ function RegistrarEvento(Accion) {
 
     var datosFormulario = "";
 
-    var valor =  document.getElementById('txtUsuario').value.trim();
+    var valor = document.getElementById('txtUsuario').value.trim();
 
     datosFormulario = datosFormulario + "{";
     datosFormulario = datosFormulario + "'session': '" + valor + "',";
-    datosFormulario = datosFormulario + "'IdProceso': '" + IdProceso + "',";
     datosFormulario = datosFormulario + "'Accion': '" + Accion + "'";
 
     datosFormulario = datosFormulario + "}";
 
-    datos = "[{'action': 'RegistrarEvento', 'parameters' : " + datosFormulario + " }]";
+    datos = "[{'action': 'RegistrarMarcacion', 'parameters' : " + datosFormulario + " }]";
 
     $.ajax({
         type: "POST",
@@ -158,7 +157,8 @@ function RecorreJSONTable(json) {
     $.each(json, function (i, item) {
         document.getElementById('btnSalida').disabled = true;
         if (item.IdProceso == 0) {
-
+            document.getElementById('btnEntrada').disabled = false;
+            document.getElementById('btnSalida').disabled = true;
         }
         else {
             IdProceso = item.IdProceso;
@@ -268,7 +268,7 @@ function MostrarMensajeDialogo(divModalTipo, divMensaje, divModal, mensaje, tipo
 
 $(function () {
     const rutaActual = window.location.pathname;
-    if (rutaActual == "/Formulario/Principal.aspx") {
+    if (rutaActual.endsWith("/Formulario/Principal.aspx")) {
         ConsultarEvento();
     }
     else {

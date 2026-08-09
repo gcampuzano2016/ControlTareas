@@ -197,7 +197,7 @@
                                                     </textarea>
                                                     <p class="help-block"></p>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-lg-12" style="display:none">
                                                     <label>¿Hora extra?</label>
                                                     <select id="frmcmbHorasExtras" class="form-control">
                                                         <option value="0"></option>

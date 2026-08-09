@@ -242,15 +242,21 @@ textarea:focus-visible,
    colapsa a cero, asi que #wrapper media 624px cuando su contenido media 1400.
    Sin altura real ningun fondo puede llegar abajo. El clearfix lo devuelve a
    su altura verdadera; es la correccion estandar y no mueve nada de sitio. */
-#wrapper::after,
 #page-wrapper::after {
     content: "";
     display: table;
     clear: both;
 }
 
+/* El degradado va en el BODY, no en #wrapper. En Master.Master el
+   <div id="wrapper"> cierra justo despues del <nav>: contiene la barra
+   superior y el menu, pero NO el contenido de las pantallas, que cuelga de un
+   <div> hermano. Pintarlo ahi solo cubriria el alto de la barra.
+
+   La clase app-dos la pone el <body> de Master.Master. Login.aspx no la lleva,
+   que es como esa pantalla queda fuera de esta regla sin necesidad de :has(). */
 @media (min-width: 768px) {
-    #wrapper {
+    body.app-dos {
         min-height: 100vh;
         background-image: linear-gradient(to right,
             var(--crm-lateral) 0,
@@ -260,7 +266,7 @@ textarea:focus-visible,
     }
 
     /* Con el menu escondido no debe quedar una franja oscura vacia. */
-    html.menu-oculto #wrapper { background-image: none; }
+    html.menu-oculto body.app-dos { background-image: none; }
 }
 
 .sidebar .nav > li > a,
@@ -1274,3 +1280,118 @@ hr { border-top-color: var(--crm-linea-suave); }
 
 .swal2-icon.swal2-warning { border-color: var(--crm-ambar) !important; color: var(--crm-ambar) !important; }
 .swal2-icon.swal2-info    { border-color: var(--crm-tinta-suave) !important; color: var(--crm-tinta-suave) !important; }
+
+/* ============================================================================
+   12. Login
+   ----------------------------------------------------------------------------
+   Es la primera pantalla que ve todo el mundo y la unica que no usa
+   Master.Master, asi que hasta ahora quedaba fuera del tema.
+
+   Su markup trae etiquetas <font color> y estilos inline de otra epoca, y el
+   code-behind depende de los IDs de los controles asp:. Por eso NO se toca el
+   markup: lo unico que se agrego a Login.aspx es el <link> a este archivo. Todo
+   lo de abajo neutraliza esos atributos por selector. Un !important en hoja
+   gana a un style= inline, que es como se desarma el fondo gris #d3d3d3.
+   ============================================================================ */
+
+body:has(.login-panel) { background-color: var(--crm-fondo); }
+
+/* Respaldo para navegadores sin :has() — el contenedor pinta igual. */
+.login-panel { margin-top: 6vh; }
+
+.login-panel.panel,
+.login-panel.panel-info {
+    border: 0;
+    border-radius: var(--crm-r-tarjeta);
+    box-shadow: var(--crm-sombra-2);
+    overflow: hidden;
+}
+
+/* La cabecera lleva el logo y el nombre del sistema. Aca el riel de diafragma
+   no va: es la pantalla de entrada, no hay "donde estoy" que marcar. */
+.login-panel > .panel-heading {
+    background-color: var(--crm-superficie) !important;
+    border-bottom: 1px solid var(--crm-linea-suave);
+    padding: 30px 28px 24px;
+}
+
+.login-panel > .panel-heading::before { content: none; }
+
+/* El archivo Img/iconoDos.png trae una linea gris de 1px en su borde superior:
+   medidos sus pixeles, la fila y=0 da brillo 220 y de y=1 en adelante da 255.
+   Sobre la tarjeta blanca esa linea se ve como una raya suelta encima del logo.
+   Se recorta aca en vez de editar la imagen. Si algun dia se reemplaza el
+   archivo por uno limpio, esta regla se puede borrar sin mas. */
+.login-panel > .panel-heading img {
+    max-width: 168px;
+    height: auto !important;
+    clip-path: inset(1px 0 0 0);
+}
+
+.login-panel h1 {
+    font-family: var(--crm-titulo);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--crm-tinta);
+    margin: 18px 0 4px;
+}
+
+/* Desarma los <font color> y <font size> del markup heredado. */
+.login-panel font {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+}
+
+/* La version es un dato secundario, no un titulo. */
+.login-panel > .panel-heading > font {
+    display: inline-block;
+    font-size: 12px !important;
+    color: var(--crm-tinta-suave) !important;
+}
+
+/* El gris #d3d3d3 viene en un style= inline; el !important lo desarma. */
+.login-panel > .panel-body {
+    background-color: var(--crm-superficie) !important;
+    padding: 26px 28px 30px;
+}
+
+.login-panel fieldset { border: 0; margin: 0; padding: 0; }
+
+/* Las etiquetas eran <h4> rojos. Pasan a ser etiquetas de campo. */
+.login-panel .panel-title {
+    font-family: var(--crm-texto);
+    font-size: 12.5px !important;
+    font-weight: 600;
+    color: var(--crm-tinta-media) !important;
+    margin: 0 0 6px;
+    text-align: left;
+}
+
+.login-panel .panel-title b { font-weight: 600; }
+
+.login-panel .form-control { width: 100%; }
+
+/* Entrar es la unica accion de la pantalla: ocupa todo el ancho. */
+.login-panel .btn-primary {
+    width: 100%;
+    padding: 11px 18px;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.login-panel .text-danger {
+    color: var(--crm-rojo) !important;
+    font-size: 13px;
+    display: block;
+}
+
+/* El markup deja <br> sueltos que abren huecos cuando no hay mensaje. */
+.login-panel .panel-body > .form-group:last-child { margin-bottom: 0; }
+
+@media (max-width: 767px) {
+    .login-panel { margin-top: 3vh; }
+    .login-panel > .panel-heading { padding: 22px 20px 18px; }
+    .login-panel > .panel-body { padding: 20px; }
+}

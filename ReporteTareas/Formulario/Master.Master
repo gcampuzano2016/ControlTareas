@@ -44,7 +44,7 @@
     </style>
     <!-- Tema DOS: va al final a proposito, para ganarle a sb-admin-2.css.
          Quitar esta linea revierte todo el cambio visual. -->
-    <link href="../css/dos-tema.css?v=4" rel="stylesheet" />
+    <link href="../css/dos-tema.css?v=5" rel="stylesheet" />
     <%-- Aplica la preferencia del menu ANTES del primer pintado. Si esto fuera
          al final del body, la barra lateral parpadearia en cada pantalla. --%>
     <script>

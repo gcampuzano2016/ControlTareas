@@ -226,6 +226,43 @@ textarea:focus-visible,
 
 .sidebar ul.nav { padding-top: 6px; }
 
+/* La barra lateral es position:absolute (sb-admin-2.css:171), asi que su alto
+   es el de sus opciones y no el de la pagina. En cuanto el contenido es mas
+   largo que el menu, debajo de la ultima opcion aparece el blanco de la pagina
+   y la columna se ve cortada por la mitad.
+
+   En vez de tocar el posicionamiento, se pinta la franja de 250px en el
+   contenedor raiz: el fondo llega hasta abajo aunque el menu se acabe antes.
+   El min-height cubre el caso contrario, cuando la pagina es mas corta que la
+   ventana.
+
+   Antes hay que resolver un problema de fondo: las columnas de Bootstrap son
+   flotantes, y varias pantallas ponen .col-lg-12 SIN un .row que lo contenga
+   (por ejemplo ActualizarTareas.aspx). Un contenedor con solo hijos flotantes
+   colapsa a cero, asi que #wrapper media 624px cuando su contenido media 1400.
+   Sin altura real ningun fondo puede llegar abajo. El clearfix lo devuelve a
+   su altura verdadera; es la correccion estandar y no mueve nada de sitio. */
+#wrapper::after,
+#page-wrapper::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+@media (min-width: 768px) {
+    #wrapper {
+        min-height: 100vh;
+        background-image: linear-gradient(to right,
+            var(--crm-lateral) 0,
+            var(--crm-lateral) 250px,
+            var(--crm-fondo) 250px);
+        background-repeat: no-repeat;
+    }
+
+    /* Con el menu escondido no debe quedar una franja oscura vacia. */
+    html.menu-oculto #wrapper { background-image: none; }
+}
+
 .sidebar .nav > li > a,
 .sidebar .nav-second-level li a {
     color: var(--crm-lateral-tinta);

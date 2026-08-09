@@ -1365,7 +1365,8 @@ namespace CapaDato
                 DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
                 using (SqlConnection cnx = conexion.conectar())
-                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
+                //using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
+                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandTimeout = 60;

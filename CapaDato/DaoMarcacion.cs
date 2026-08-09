@@ -63,5 +63,37 @@ namespace CapaDato
 
             return resultado;
         }
+
+        /// <summary>
+        /// Deja constancia del intento de envio del correo de una marcacion.
+        /// Resultado: ENVIADO | FALLIDO | SIN_CORREO.
+        /// Nunca lanza: la bitacora no puede tumbar la marcacion ni el hilo que la escribe.
+        /// </summary>
+        public static void RegistrarLogCorreo(long idProceso, decimal idUsuario, int accion,
+                                              string destinatario, string resultado, string mensaje)
+        {
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_RegistrarLogCorreoMarcacion", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@IdProceso", SqlDbType.BigInt).Value =
+                        (idProceso > 0) ? (object)idProceso : DBNull.Value;
+                    cmd.Parameters.Add("@Id_Usuario", SqlDbType.Decimal).Value = idUsuario;
+                    cmd.Parameters.Add("@Accion", SqlDbType.Int).Value = accion;
+                    cmd.Parameters.Add("@Destinatario", SqlDbType.VarChar, 200).Value = destinatario ?? string.Empty;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.VarChar, 20).Value = resultado ?? string.Empty;
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Value = mensaje ?? string.Empty;
+                    cnx.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
     }
 }

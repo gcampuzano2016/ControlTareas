@@ -6037,38 +6037,24 @@ namespace JsonJQueryNetTareas
             return Lista.SerializaToJson();
         }
 
+        /// <summary>
+        /// CAMINO VIEJO DE MARCACIÓN — CERRADO.
+        ///
+        /// Registraba la entrada/salida sin enviar el correo de confirmación y sin
+        /// distinguir qué botón se presionó. Fue reemplazado por
+        /// AdministrarMarcacion.ashx (acción RegistrarMarcacion).
+        ///
+        /// Sigue existiendo porque un navegador con RegistroLaboral.js cacheado de
+        /// antes del despliegue todavía puede llamarlo. En ese caso NO se registra la
+        /// marcación: se devuelve un mensaje que obliga a recargar la página, porque
+        /// grabar por aquí significaba que el usuario nunca recibiera su correo.
+        /// </summary>
         public string RegistrarEvento(dynamic campos)
         {
-            SeguridadHelper seguridad = new SeguridadHelper();
-            EntRespuesta respuesta = new EntRespuesta();
-            EntUsuario usuario = new EntUsuario();
-            string IdUsuarioSession = "";
-            IdUsuarioSession = seguridad.Desencripta(campos["session"]);
-            usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
-            try
-            {
-                DateTime ahora = DateTime.Now;
-                EntRegistroBiometrico biometrico = new EntRegistroBiometrico();
-                biometrico.IdProceso = Convert.ToInt32(campos["IdProceso"]);
-                biometrico.Id_Usuario = Convert.ToDecimal(usuario.Id_Usuario);
-                biometrico.FechaEntrada = Convert.ToDateTime("1900-01-01");
-                biometrico.FechaAlmorzar = Convert.ToDateTime("1900-01-01");
-                biometrico.FechaRegAlmorzar = Convert.ToDateTime("1900-01-01");
-                biometrico.FechaSalida = Convert.ToDateTime("1900-01-01");
-                biometrico.FechaRegistro = Convert.ToDateTime(ahora);
-                biometrico.Estado = 1;
-                biometrico.Tipo = 1;
-                respuesta = NegForeCast.InsertarModificarEliminarRegistroBiometrico(biometrico);
-                return respuesta.SerializaToJson();
-            }
-            catch (Exception ex)
-            {
-                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
-
-            }
-
-            return respuesta.SerializaToJson();
-
+            return responseMessage("0",
+                "Su navegador está usando una versión anterior del sistema y su marcación no fue registrada. " +
+                "Presione Ctrl+F5 para recargar la página y vuelva a marcar.",
+                "warning", "");
         }
 
         public string RegistrarEvento3(dynamic campos)

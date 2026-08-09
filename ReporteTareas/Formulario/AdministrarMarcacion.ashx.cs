@@ -86,8 +86,37 @@ namespace JsonJQueryNetMarcacion
                     string nombreUsuario = (usuario.Nom_Usuario ?? string.Empty).Trim();
                     int accionCorreo = accion;
                     DateTime fechaHoraCorreo = resultado.FechaHora;
+                    long idProcesoCorreo = resultado.IdProceso;
+                    decimal idUsuarioCorreo = Convert.ToDecimal(usuario.Id_Usuario);
 
-                    if (correoDestino != string.Empty)
+                    // Aviso que se agrega al mensaje de éxito cuando se sabe, ya mismo, que
+                    // el correo no va a llegar. La marcación sí quedó registrada: se le dice
+                    // para que no quede esperando un correo que nunca va a llegar.
+                    string avisoCorreo = string.Empty;
+
+                    if (correoDestino == string.Empty)
+                    {
+                        // Sin correo cargado no hay nada que enviar, pero SI queda constancia:
+                        // este era el caso que antes desaparecía en silencio.
+                        NegMarcacion.RegistrarLogCorreo(idProcesoCorreo, idUsuarioCorreo, accionCorreo,
+                            string.Empty, "SIN_CORREO",
+                            "El usuario no tiene E_Mail registrado en R_Usuarios.");
+
+                        avisoCorreo = " No se le envió la notificación por correo porque usted no tiene una " +
+                                      "dirección registrada. Comuníquese con el administrador del sistema.";
+                    }
+                    else if (!CorreoTieneFormatoValido(correoDestino))
+                    {
+                        // El formato se valida aquí y no en el hilo del envío para poder
+                        // avisarle en la misma pantalla, en vez de fallar en silencio.
+                        NegMarcacion.RegistrarLogCorreo(idProcesoCorreo, idUsuarioCorreo, accionCorreo,
+                            correoDestino, "FALLIDO",
+                            "La direccion registrada en R_Usuarios no tiene un formato valido.");
+
+                        avisoCorreo = " No se le envió la notificación por correo porque su dirección registrada (" +
+                                      correoDestino + ") no es válida. Comuníquese con el administrador del sistema.";
+                    }
+                    else
                     {
                         System.Threading.ThreadPool.QueueUserWorkItem(delegate
                         {
@@ -96,15 +125,28 @@ namespace JsonJQueryNetMarcacion
                             try
                             {
                                 EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
-                                envioCorreo.EnvioCorreoMarcacion(correoDestino, nombreUsuario, accionCorreo, fechaHoraCorreo);
+                                bool enviado = envioCorreo.EnvioCorreoMarcacion(correoDestino, nombreUsuario, accionCorreo, fechaHoraCorreo);
+
+                                NegMarcacion.RegistrarLogCorreo(idProcesoCorreo, idUsuarioCorreo, accionCorreo,
+                                    correoDestino,
+                                    enviado ? "ENVIADO" : "FALLIDO",
+                                    enviado ? string.Empty : (envioCorreo.ErrorProceso ?? "Error no informado por el helper."));
                             }
-                            catch (Exception)
+                            catch (Exception ex)
                             {
+                                try
+                                {
+                                    NegMarcacion.RegistrarLogCorreo(idProcesoCorreo, idUsuarioCorreo, accionCorreo,
+                                        correoDestino, "FALLIDO", ex.Message);
+                                }
+                                catch (Exception)
+                                {
+                                }
                             }
                         });
                     }
 
-                    return responseMessage("1", resultado.Mensaje, "success");
+                    return responseMessage("1", resultado.Mensaje + avisoCorreo, "success");
                 }
 
                 return responseMessage("0", resultado.Mensaje, "warning");
@@ -112,6 +154,33 @@ namespace JsonJQueryNetMarcacion
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrió un error al registrar la marcación. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Valida la dirección con el MISMO parser que usa el envío
+        /// (MailAddressCollection, que además parte por comas), para que la pantalla
+        /// no prometa un correo que después va a fallar al armar el destinatario.
+        /// </summary>
+        private static bool CorreoTieneFormatoValido(string correo)
+        {
+            try
+            {
+                System.Net.Mail.MailAddressCollection destinatarios = new System.Net.Mail.MailAddressCollection();
+
+                foreach (string parte in (correo ?? string.Empty).Split(new Char[] { ';' }))
+                {
+                    if (parte.Trim() != string.Empty)
+                    {
+                        destinatarios.Add(parte.Trim());
+                    }
+                }
+
+                return destinatarios.Count > 0;
+            }
+            catch (Exception)
+            {
+                return false;
             }
         }
 

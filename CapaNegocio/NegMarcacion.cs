@@ -9,5 +9,11 @@ namespace CapaNegocio
         {
             return DaoMarcacion.RegistrarMarcacion(idUsuario, accion);
         }
+
+        public static void RegistrarLogCorreo(long idProceso, decimal idUsuario, int accion,
+                                              string destinatario, string resultado, string mensaje)
+        {
+            DaoMarcacion.RegistrarLogCorreo(idProceso, idUsuario, accion, destinatario, resultado, mensaje);
+        }
     }
 }

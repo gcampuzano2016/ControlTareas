@@ -590,22 +590,33 @@ namespace CorreoHelper
 
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
                 using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
                 {
+                    // El armado de destinatarios va DENTRO del try: una direccion mal
+                    // formada hace que mail.To.Add lance FormatException, y si eso ocurre
+                    // fuera del try la excepcion sube sin dejar rastro de por que no salio
+                    // el correo. Aqui se convierte en un false con ErrorProceso y bitacora.
                     try
                     {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in (correosDestinatarios ?? string.Empty).Split(new Char[] { ';' }))
+                        {
+                            if (correoIndividual.Trim() != "")
+                            {
+                                mail.To.Add(correoIndividual.Trim());
+                            }
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
                         smtp.Credentials = new NetworkCredential(emailFrom, password);
                         smtp.EnableSsl = enableSSL;
                         smtp.Send(mail);
@@ -615,7 +626,7 @@ namespace CorreoHelper
                     {
                         Temp = false;
                         ErrorProceso = ex.Message.ToString().Trim();
-                        VerErrores("ErrorProceso: " + ErrorProceso, "Log", "Detalle");
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
                     }
                 }
             }

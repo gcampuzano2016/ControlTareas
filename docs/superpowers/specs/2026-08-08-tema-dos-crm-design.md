@@ -123,9 +123,11 @@ los caracteres `‹` y `›`, así que funcionan con CDN o sin él.
 
 ## Verificación
 
-Hecha en navegador sobre `ReporteTareas/dos-tema-demo.html`, una página que carga los
-CSS y las librerías reales del proyecto y reproduce el markup real de
-`ActualizarTareas.aspx`. No está en el `.csproj`: no se publica ni afecta el build.
+Hecha en navegador sobre una página de vista previa desechable
+(`ReporteTareas/dos-tema-demo.html`) que cargaba los CSS y las librerías reales del
+proyecto y reproducía el markup real de `ActualizarTareas.aspx`. Se borró al terminar
+la verificación: nunca se commiteó ni estuvo en el `.csproj`. Para repetir la prueba
+basta con recrear una página equivalente.
 
 **Comprobado funcionando:** barra superior con el par Entrada/Salida, menú lateral con
 el riel en el ítem activo, tarjetas con su riel de título, tabla con filas altas y

@@ -108,7 +108,12 @@
                     </li>
                 </ul>
                 <div class="navbar-default sidebar" role="navigation">
-                    <div class="sidebar-nav navbar-collapse">
+                    <%-- La clase "collapse" hace que el menu arranque CERRADO en celular.
+                         Sin ella se desplegaba siempre y empujaba el contenido hacia abajo.
+                         El boton .navbar-toggle de aca arriba ya lo abre y lo cierra.
+                         En escritorio no cambia nada: bootstrap.css:4104, dentro de
+                         @media (min-width: 768px), lo fuerza a display:block. --%>
+                    <div class="sidebar-nav collapse navbar-collapse">
                         <asp:Label ID="lblCargarMenu" runat="server" Text=""></asp:Label>
                     </div>
                 </div>

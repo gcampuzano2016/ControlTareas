@@ -1301,6 +1301,7 @@
     <Content Include="Formulario\AdministrarMenuPerfil.ashx" />
     <Content Include="Formulario\AdministrarMenuUsuario.ashx" />
     <Content Include="Formulario\AdministrarUsuarios.ashx" />
+    <Content Include="Formulario\AdministrarPerfiles.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
@@ -1458,6 +1459,10 @@
     </Compile>
     <Compile Include="Formulario\AdministrarUsuarios.ashx.cs">
       <DependentUpon>AdministrarUsuarios.ashx</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Formulario\AdministrarPerfiles.ashx.cs">
+      <DependentUpon>AdministrarPerfiles.ashx</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Formulario\AdministrarMarcacion.ashx.cs">

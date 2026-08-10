@@ -9,6 +9,11 @@
 
 var _perfiles = [];
 
+function Escapar(texto) {
+    if (texto == null) { return ""; }
+    return $("<div>").text(texto).html();
+}
+
 function PostPerfil(action, parameters, onSuccess) {
     var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
     $.ajax({
@@ -68,7 +73,7 @@ function RenderTablaPerfiles(lista) {
             : "<button type='button' class='btn btn-danger btn-xs' disabled title='Tiene " + p.Usuarios + " usuarios asignados'>Eliminar</button>";
 
         info += "<tr>";
-        info += "<td>" + p.NombrePerfil + "</td>";
+        info += "<td>" + Escapar(p.NombrePerfil) + "</td>";
         info += "<td>" + etiqueta + "</td>";
         info += "<td style='text-align:center'>" + p.Usuarios + "</td>";
         info += "<td style='text-align:center'><button type='button' class='btn btn-info btn-xs' onclick='EditarPerfil(" + p.IdPerfil + ")'>Editar</button></td>";

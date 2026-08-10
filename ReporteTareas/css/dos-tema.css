@@ -1426,3 +1426,63 @@ body:has(.login-panel) { background-color: var(--crm-fondo); }
     .login-panel > .panel-heading { padding: 22px 20px 18px; }
     .login-panel > .panel-body { padding: 20px; }
 }
+
+/* ----------------------------------------------------------------------------
+   Espera del inicio de sesion
+   ----------------------------------------------------------------------------
+   El login valida contra Active Directory, asi que entre el clic y la respuesta
+   pasan varios segundos sin ninguna senal. Sin aviso la gente vuelve a apretar
+   Ingresar creyendo que no tomo.
+
+   La capa tapa el formulario a proposito: ademas de informar, impide el segundo
+   envio mientras el primero esta en curso.
+   -------------------------------------------------------------------------- */
+
+.dos-esperando {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1080;
+    background: rgba(244, 242, 239, .82);
+    text-align: center;
+}
+
+.dos-esperando.visible { display: block; }
+
+.dos-esperando-caja {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--crm-superficie);
+    border-radius: var(--crm-r-tarjeta);
+    box-shadow: var(--crm-sombra-2);
+    padding: 26px 34px;
+    min-width: 232px;
+}
+
+/* El anillo se abre por un lado, como el diafragma del logo. */
+.dos-esperando-aro {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    border: 3px solid var(--crm-linea);
+    border-top-color: var(--crm-acento);
+    border-radius: 50%;
+    animation: dos-girar .7s linear infinite;
+}
+
+@keyframes dos-girar { to { transform: rotate(360deg); } }
+
+.dos-esperando-texto {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--crm-tinta-media);
+}
+
+/* Sin animacion, el aro se queda quieto pero el aviso sigue estando. */
+@media (prefers-reduced-motion: reduce) {
+    .dos-esperando-aro {
+        animation: none;
+        border-top-color: var(--crm-acento);
+    }
+}

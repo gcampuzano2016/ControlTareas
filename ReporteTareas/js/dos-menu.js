@@ -32,7 +32,12 @@
     function normalizar(cadena) {
         cadena = cadena.toLowerCase();
         if (cadena.normalize) {
-            cadena = cadena.normalize("NFD").replace(/[̀-ͯ]/g, "");
+            /* El rango va escapado a proposito. Escrito con los caracteres
+               combinantes literales, este archivo dependia de que el navegador
+               acertara la codificacion: produccion lo sirve como
+               application/javascript SIN charset=utf-8 y sin BOM. Con \u escapes
+               el archivo es ASCII puro y da igual como se interprete. */
+            cadena = cadena.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         }
         return cadena;
     }
@@ -212,17 +217,40 @@
 
     /* ------------------------------------------------------------------ arranque */
 
-    function iniciar() {
+    /* El arranque va en DOS tiempos, y la diferencia importa.
+
+       La hamburguesa y el filtro solo necesitan que exista el DOM. Antes
+       esperaban a "load", que no dispara hasta que termino de bajar TODO:
+       el carrusel de la pagina de inicio y los scripts de code.jquery.com.
+       Mientras tanto el boton no respondia, que es como se reporto el fallo
+       desde produccion. Ahora arrancan apenas el documento esta listo.
+
+       Solo el nombre de la pantalla espera a "load": necesita leer el .active
+       que sb-admin-2.js pone dentro de su propio $(function), y ese depende de
+       jQuery. Si tarda, lo unico que llega tarde es el rotulo de arriba. */
+
+    function iniciarInmediato() {
         iniciarHamburguesa();
-        iniciarTitulo();
         iniciarFiltro();
     }
 
-    /* sb-admin-2.js marca la pagina actual dentro de su propio $(function).
-       Se espera a load para leer el resultado ya aplicado, no a medias. */
+    function iniciarTrasCarga() {
+        iniciarTitulo();
+    }
+
+    function cuandoElDomEsteListo(fn) {
+        if (document.readyState === "interactive" || document.readyState === "complete") {
+            fn();
+        } else {
+            document.addEventListener("DOMContentLoaded", fn);
+        }
+    }
+
+    cuandoElDomEsteListo(iniciarInmediato);
+
     if (document.readyState === "complete") {
-        iniciar();
+        iniciarTrasCarga();
     } else {
-        window.addEventListener("load", iniciar);
+        window.addEventListener("load", iniciarTrasCarga);
     }
 })();

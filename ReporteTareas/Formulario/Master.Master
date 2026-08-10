@@ -44,7 +44,7 @@
     </style>
     <!-- Tema DOS: va al final a proposito, para ganarle a sb-admin-2.css.
          Quitar esta linea revierte todo el cambio visual. -->
-    <link href="../css/dos-tema.css?v=7" rel="stylesheet" />
+    <link href="../css/dos-tema.css?v=8" rel="stylesheet" />
     <%-- Aplica la preferencia del menu ANTES del primer pintado. Si esto fuera
          al final del body, la barra lateral parpadearia en cada pantalla. --%>
     <script>
@@ -148,7 +148,7 @@
     <script src="../bower_components/assets/js/bootstrap-multiselect.min.js"></script>
     <script src="../bower_components/assets/js/bootstrap-multiselect.min.js"></script>
     <script src="../dist/js/sb-admin-2.js"></script>
-    <script src="../js/dos-menu.js?v=2"></script>
+    <script src="../js/dos-menu.js?v=3"></script>
     <!-- Latest jQuery minified -->
     <!-- Latest compiled and minified JavaScript -->
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->

@@ -167,15 +167,39 @@ textarea:focus-visible,
     min-height: 56px;
 }
 
+/* Master.Master deja un <p></p> vacio despues del logo. Bootstrap le da
+   margen inferior, asi que ese parrafo invisible estiraba la barra de 56px a
+   107px. Con la barra mas alta que los 51px en los que SB Admin 2 arranca la
+   barra lateral (sb-admin-2.css:175), el menu se montaba encima y tapaba el
+   logo. */
+.navbar-header > p:empty { display: none; }
+
+/* El logo no puede pasarse del alto de la barra. */
+.navbar-default .navbar-brand { padding: 13px 15px; height: auto; }
+.navbar-default .navbar-brand > img { max-height: 30px; width: auto; }
+
+/* La barra lateral arranca donde termina la barra superior: 56px de alto mas
+   1px de borde. Si alguna vez cambia el min-height de arriba, este numero
+   tiene que acompañarlo. */
+@media (min-width: 768px) {
+    .sidebar { margin-top: 57px; }
+}
+
 .navbar-default .navbar-brand,
 .navbar-top-links > li > a {
     color: var(--crm-tinta);
 }
 
+/* Todo lo de la barra se alinea a los 56px de alto. Sin esto cada pieza traia
+   su propia medida —SB Admin 2 le pone min-height:50px a estos enlaces, y
+   Bootstrap le suma 15px de margen arriba y abajo a .navbar-text— y la barra
+   terminaba midiendo 80px, mas que los 57px donde arranca la barra lateral. */
 .navbar-top-links > li > a {
     border-radius: var(--crm-r-control);
-    margin: 8px 2px;
-    padding: 10px 14px;
+    min-height: 0;
+    margin: 7px 2px;
+    padding: 9px 12px;
+    line-height: 1.4;
 }
 
 .navbar-top-links > li > a:hover,
@@ -184,11 +208,18 @@ textarea:focus-visible,
     color: var(--crm-acento);
 }
 
-/* El nombre de quien esta trabajando: dato, no adorno. */
+/* El nombre de quien esta trabajando: dato, no adorno. El line-height lo centra
+   sin margenes, que es lo que evita que estire la barra. */
 .navbar-top-links > li.navbar-text {
     color: var(--crm-tinta-media) !important;
     font-size: 13px;
+    margin: 0 !important;
+    padding: 0 14px 0 4px !important;
+    line-height: 56px;
 }
+
+/* Los botones de marcacion tambien se centran contra los 56px. */
+.navbar-top-links .navbar-btn { margin-top: 11px; margin-bottom: 11px; }
 
 .dropdown-menu {
     border: 1px solid var(--crm-linea);
@@ -348,8 +379,8 @@ textarea:focus-visible,
     color: var(--crm-tinta-media);
     font-size: 17px;
     line-height: 1;
-    padding: 10px 13px;
-    margin: 9px 4px 9px 10px;
+    padding: 9px 13px;
+    margin: 8px 4px 8px 10px;
 }
 
 .dos-menu-boton:hover,

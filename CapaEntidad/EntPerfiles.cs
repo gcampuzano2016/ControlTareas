@@ -18,5 +18,9 @@ namespace CapaEntidad
         public String StrEstado { get; set; }
         public String Combo { get; set; }
 
+        // Cantidad de usuarios que tienen este perfil. La usa la pantalla de
+        // administracion para saber si el perfil se puede eliminar.
+        public Int32 Usuarios { get; set; }
+
     }
 }

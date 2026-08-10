@@ -31,6 +31,16 @@ namespace CapaNegocio
             return DaoPerfiles.Sp_RTA_ConsultarUsuariosPerfil(tipo);
         }
 
+        public static List<EntPerfiles> ListarPerfilesAdmin(string filtro)
+        {
+            return DaoPerfiles.ListarPerfilesAdmin(filtro);
+        }
+
+        public static EntRespuesta EliminarPerfil(int idPerfil)
+        {
+            return DaoPerfiles.EliminarPerfil(idPerfil);
+        }
+
 
     }
 

@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionPerfiles.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionPerfiles" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionPerfiles.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionPerfiles" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="../js/parametrizacionPerfiles.js?v=1" type="text/javascript"></script>

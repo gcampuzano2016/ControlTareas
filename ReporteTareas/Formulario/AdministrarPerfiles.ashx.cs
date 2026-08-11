@@ -25,6 +25,10 @@ namespace JsonJQueryNetPerfiles
             {
                 responseAction.Append(responseMessage("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
+            else if (!TienePermisoDeAdministracion(context))
+            {
+                responseAction.Append(responseMessage("0", "No tiene permisos para administrar perfiles.", "danger"));
+            }
             else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
                 var inputStream = new System.IO.StreamReader(context.Request.InputStream);
@@ -66,7 +70,22 @@ namespace JsonJQueryNetPerfiles
             }
 
             context.Response.ContentType = "application/json";
+            context.Response.ContentEncoding = Encoding.UTF8;
+            context.Response.Charset = "utf-8";
             context.Response.Write(responseAction.ToString());
+        }
+
+        /// <summary>Perfiles con perfil de administración: 2, 18 y 19.</summary>
+        private static readonly int[] PerfilesAutorizados = { 2, 18, 19 };
+
+        private bool TienePermisoDeAdministracion(HttpContext context)
+        {
+            int idPerfil;
+            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil))
+            {
+                return false;
+            }
+            return Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
         }
 
         private string ListarPerfiles(dynamic campos)
@@ -90,23 +109,35 @@ namespace JsonJQueryNetPerfiles
                 {
                     return responseMessage("0", "Debe escribir el nombre del perfil.", "warning");
                 }
+                if (nombre.Length > 100)
+                {
+                    return responseMessage("0", "El nombre del perfil no puede superar los 100 caracteres.", "warning");
+                }
+
+                int idPerfil = Entero(campos, "idPerfil");
+
+                // La edición de perfiles está deshabilitada a propósito.
+                // NegPerfiles.Sp_RTActualizarPerfil NO actualiza el catálogo de
+                // perfiles: reasigna el perfil de un usuario (sus parámetros reales
+                // son @IdCambioPerfil, @IdUsuario, @CorreoCambio). Usarlo acá para
+                // editar un perfil o falla, o responde "éxito" sin cambiar nada.
+                // Cuando exista un SP correcto para actualizar el catálogo de
+                // perfiles, esta rama puede reactivarse.
+                if (idPerfil != 0)
+                {
+                    return responseMessage("0", "La edición de perfiles todavía no está disponible.", "warning");
+                }
 
                 EntPerfiles perfil = new EntPerfiles();
-                perfil.IdPerfil = Entero(campos, "idPerfil");
+                perfil.IdPerfil = idPerfil;
                 perfil.NombrePerfil = nombre;
                 perfil.Estado = Entero(campos, "estado");
                 perfil.Fecha = DateTime.Now;
 
-                // Id 0 significa alta; cualquier otro, modificación.
-                if (perfil.IdPerfil == 0)
-                {
-                    // @Codigo no se fija acá: sin poder consultar Sp_RTAInsertaNuevoPerfil
-                    // (no hay acceso a la base desde este entorno), no se sabe si el
-                    // procedimiento lo usa con algún significado. Ver task-4-report.md.
-                    return ToJson(NegPerfiles.RTAInsertarNuevoPerfil(perfil));
-                }
-
-                return ToJson(NegPerfiles.Sp_RTActualizarPerfil(perfil));
+                // @Codigo no se fija acá: sin poder consultar Sp_RTAInsertaNuevoPerfil
+                // (no hay acceso a la base desde este entorno), no se sabe si el
+                // procedimiento lo usa con algún significado. Ver task-4-report.md.
+                return ToJson(NegPerfiles.RTAInsertarNuevoPerfil(perfil));
             }
             catch (Exception ex)
             {

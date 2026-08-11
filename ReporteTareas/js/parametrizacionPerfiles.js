@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Administración de perfiles.
 
    El botón Eliminar se deshabilita cuando el perfil tiene usuarios, pero eso es
@@ -32,7 +32,7 @@ function PostPerfil(action, parameters, onSuccess) {
 function MostrarMensajePerfil(mensaje, tipo) {
     var clase = (tipo === "success") ? "alert-success"
               : (tipo === "warning") ? "alert-warning" : "alert-danger";
-    $("#divMensajes").html("<div class='alert " + clase + "'>" + mensaje + "</div>");
+    $("#divMensajes").empty().append($("<div>").addClass("alert " + clase).text(mensaje));
 }
 
 function BuscarPerfiles() {
@@ -52,11 +52,11 @@ function RenderTablaPerfiles(lista) {
     info += "<table width='100%' class='table table-hover'>";
     info += "<thead><tr>";
     info += "<th>Perfil</th><th>Estado</th><th style='text-align:center'>Usuarios</th>";
-    info += "<th style='text-align:center'>Editar</th><th style='text-align:center'>Eliminar</th>";
+    info += "<th style='text-align:center'>Eliminar</th>";
     info += "</tr></thead><tbody>";
 
     if (lista.length === 0) {
-        info += "<tr><td colspan='5'>No hay perfiles que coincidan con la búsqueda.</td></tr>";
+        info += "<tr><td colspan='4'>No hay perfiles que coincidan con la búsqueda.</td></tr>";
     }
 
     for (var i = 0; i < lista.length; i++) {
@@ -76,7 +76,6 @@ function RenderTablaPerfiles(lista) {
         info += "<td>" + Escapar(p.NombrePerfil) + "</td>";
         info += "<td>" + etiqueta + "</td>";
         info += "<td style='text-align:center'>" + p.Usuarios + "</td>";
-        info += "<td style='text-align:center'><button type='button' class='btn btn-info btn-xs' onclick='EditarPerfil(" + p.IdPerfil + ")'>Editar</button></td>";
         info += "<td style='text-align:center'>" + botonBorrar + "</td>";
         info += "</tr>";
     }
@@ -90,18 +89,6 @@ function NuevoPerfil() {
     $("#txtNombrePerfil").val("");
     $("#cmbEstado").val("1");
     $("#panelDetalle").show();
-}
-
-function EditarPerfil(idPerfil) {
-    for (var i = 0; i < _perfiles.length; i++) {
-        if (_perfiles[i].IdPerfil === idPerfil) {
-            $("#hdnIdPerfil").val(_perfiles[i].IdPerfil);
-            $("#txtNombrePerfil").val(_perfiles[i].NombrePerfil);
-            $("#cmbEstado").val(_perfiles[i].Estado);
-            $("#panelDetalle").show();
-            return;
-        }
-    }
 }
 
 function CancelarPerfil() {

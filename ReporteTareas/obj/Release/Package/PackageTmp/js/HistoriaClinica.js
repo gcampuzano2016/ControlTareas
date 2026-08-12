@@ -66,14 +66,28 @@ function seleccionarPestania(pestaniaId) {
 /* ============================================
  *          Seleccion de formulario
  * ===========================================*/
+/* Cada caja del cuadro de seleccion y la pantalla que abre.
+
+   Va como tabla y no como una constante por caja porque el marcado cambia: hoy
+   cuatro de estas cajas estan comentadas en HistoriaClinica.aspx (Preocupacional,
+   Periodica, Reintegro y Retiro), reemplazadas por Evaluacion Ocupacional 2026.
+   Antes el codigo hacia getElementById de cada una y enseguida addEventListener
+   sin comprobar: la primera comentada devolvia null, reventaba el bloque entero
+   y se quedaban sin enlazar todas las cajas que venian despues. Por eso no
+   abrian ni Inmunizaciones ni el Certificado. Al recorrer la tabla y saltar las
+   que no estan, comentar una caja ya no arrastra a las demas. */
+const PANTALLAS_POR_CAJA = {
+    btnAtencionMedica:            'HistorialClinico.aspx',
+    btnEvaluacionNueva:           'HistoriaEvaluacion.aspx',
+    btnEvaluacionPreocupacional:  'DepartamentoMedico.aspx',
+    btnEvaluacionPeriodica:       'HistoriaPeriodica.aspx',
+    btnEvaluacionReintegro:       'HistoriaReintegro.aspx',
+    btnEvaluacionRetiro:          'HistoriaRetiro.aspx',
+    btnRegInmunizaciones:         'HistoriaInmunizaciones.aspx',
+    btnCertificado:               'HistoriaCertificado.aspx'
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    const btnAtencionMedica = document.getElementById('btnAtencionMedica');
-    const btnEvaluacionPreocupacional = document.getElementById('btnEvaluacionPreocupacional');
-    const btnEvaluacionPeriodica = document.getElementById('btnEvaluacionPeriodica');
-    const btnEvaluacionReintegro = document.getElementById('btnEvaluacionReintegro');
-    const btnEvaluacionRetiro = document.getElementById('btnEvaluacionRetiro');
-    const btnRegInmunizaciones = document.getElementById('btnRegInmunizaciones');
-    const btnCertificado = document.getElementById('btnCertificado');
 
     const sendPostRequest = (actionUrl) => {
         let cedulaEmpleado = $('#txtCedula').val();
@@ -99,46 +113,15 @@ document.addEventListener('DOMContentLoaded', () => {
         form.submit();
     };
 
-    btnAtencionMedica.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistorialClinico.aspx');
-    });
+    Object.keys(PANTALLAS_POR_CAJA).forEach((idCaja) => {
+        const caja = document.getElementById(idCaja);
+        if (!caja) { return; }          /* la caja esta comentada en el aspx */
 
-    btnEvaluacionPreocupacional.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('DepartamentoMedico.aspx');
-    });
-
-    btnEvaluacionPeriodica.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistoriaPeriodica.aspx');
-    });
-
-    btnEvaluacionReintegro.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistoriaReintegro.aspx');
-    });
-
-    btnEvaluacionRetiro.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistoriaRetiro.aspx');
-    });
-
-    btnRegInmunizaciones.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistoriaInmunizaciones.aspx');
-    });
-
-    btnCertificado.addEventListener('click', () => {
-        // Mostrar el spinner
-        $("#divSpinner").show();
-        sendPostRequest('HistoriaCertificado.aspx');
+        caja.addEventListener('click', () => {
+            // Mostrar el spinner
+            $("#divSpinner").show();
+            sendPostRequest(PANTALLAS_POR_CAJA[idCaja]);
+        });
     });
 
     // Ocultar el spinner
@@ -574,65 +557,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/* ============================================
- *          Seleccion de formulario
- * ===========================================*/
-document.addEventListener('DOMContentLoaded', () => {
-    const btnEvaluacionPreocupacional = document.getElementById('btnEvaluacionPreocupacional');
-    const btnEvaluacionPeriodica = document.getElementById('btnEvaluacionPeriodica');
-    const btnEvaluacionReintegro = document.getElementById('btnEvaluacionReintegro');
-    const btnEvaluacionRetiro = document.getElementById('btnEvaluacionRetiro');
-    const btnRegInmunizaciones = document.getElementById('btnRegInmunizaciones');
-    const btnCertificado = document.getElementById('btnCertificado');
-
-    const sendPostRequest = (actionUrl) => {
-        let cedulaEmpleado = $('#txtCedula').val();
-
-        // Crear un formulario dinámico
-        let form = document.createElement('form');
-        form.method = 'POST';
-        form.action = actionUrl;
-
-        // Crear un campo de entrada oculto
-        let inputCedula = document.createElement('input');
-        inputCedula.type = 'hidden';
-        inputCedula.name = 'cedula';
-        inputCedula.value = cedulaEmpleado;
-
-        // Añadir el campo al formulario
-        form.appendChild(inputCedula);
-
-        // Añadir el formulario al cuerpo del documento
-        document.body.appendChild(form);
-
-        // Enviar el formulario
-        form.submit();
-    };
-
-    btnEvaluacionPreocupacional.addEventListener('click', () => {
-        sendPostRequest('DepartamentoMedico.aspx');
-    });
-
-    btnEvaluacionPeriodica.addEventListener('click', () => {
-        sendPostRequest('HistoriaPeriodica.aspx');
-    });
-
-    btnEvaluacionReintegro.addEventListener('click', () => {
-        sendPostRequest('HistoriaReintegro.aspx');
-    });
-
-    btnEvaluacionRetiro.addEventListener('click', () => {
-        sendPostRequest('HistoriaRetiro.aspx');
-    });
-
-    btnRegInmunizaciones.addEventListener('click', () => {
-        sendPostRequest('HistoriaInmunizaciones.aspx');
-    });
-
-    btnCertificado.addEventListener('click', () => {
-        sendPostRequest('HistoriaCertificado.aspx');
-    });
-});
+/* Aca habia un segundo bloque "Seleccion de formulario", copia del de arriba sin
+   Atencion Medica ni el spinner. Nunca llego a enlazar nada porque moria en el
+   mismo null, y eso escondia que enlazaba las mismas cajas dos veces: al dejar
+   de reventar, cada clic habria enviado el formulario dos veces. Se elimina; el
+   bloque de arriba, que recorre PANTALLAS_POR_CAJA, ya cubre todas las cajas. */
 
 
 /* =============================================================================== *

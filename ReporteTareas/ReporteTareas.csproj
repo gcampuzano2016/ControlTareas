@@ -1389,6 +1389,10 @@
     <Content Include="js\jquery-ui.min.js" />
     <Content Include="js\jquery.maskedinput.min.js" />
     <Content Include="js\jquery.min.js" />
+    <Content Include="js\HistorialEvaluacion.js" />
+    <Content Include="js\bootstrap-datetimepicker.js" />
+    <Content Include="js\moment.min.js" />
+    <Content Include="js\moment-with-locales.min.js" />
     <Content Include="js\morris-data.js" />
     <Content Include="js\cambiarEstadoTarea.js" />
     <Content Include="js\parametrizacionHorarioUsuario.js" />

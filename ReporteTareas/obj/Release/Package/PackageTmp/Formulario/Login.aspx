@@ -17,6 +17,7 @@
     <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="../css/dos-tema.css?v=9" rel="stylesheet">
     <script>
         window.onload = function () {
             const hostname = window.location.hostname;
@@ -83,6 +84,34 @@
                     </div>
                 </div>
             </div>
+            <%-- Espera del inicio de sesion. La validacion va contra Active
+                 Directory y tarda varios segundos; sin aviso la gente vuelve a
+                 apretar Ingresar creyendo que no tomo. --%>
+            <div id="dosEsperando" class="dos-esperando" role="status" aria-live="polite">
+                <div class="dos-esperando-caja">
+                    <div class="dos-esperando-aro"></div>
+                    <p class="dos-esperando-texto">Verificando sus credenciales...</p>
+                </div>
+            </div>
+            <script>
+                (function () {
+                    var formulario = document.getElementById("form1");
+                    var capa = document.getElementById("dosEsperando");
+                    if (!formulario || !capa) { return; }
+
+                    /* Se engancha al submit y no al clic del boton: asi tambien
+                       cubre a quien entra apretando Enter en el campo. */
+                    formulario.onsubmit = function () {
+                        capa.className = "dos-esperando visible";
+                    };
+
+                    /* Al volver atras en el navegador la pagina puede restaurarse
+                       desde cache con la capa puesta. Sin esto queda tapada. */
+                    window.addEventListener("pageshow", function () {
+                        capa.className = "dos-esperando";
+                    });
+                })();
+            </script>
             <script src="../bower_components/jquery/dist/jquery.min.js"></script>
             <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
             <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>

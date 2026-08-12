@@ -42,11 +42,23 @@
             padding-bottom: 15px;
         }
     </style>
+    <!-- Tema DOS: va al final a proposito, para ganarle a sb-admin-2.css.
+         Quitar esta linea revierte todo el cambio visual. -->
+    <link href="../css/dos-tema.css?v=9" rel="stylesheet" />
+    <%-- Aplica la preferencia del menu ANTES del primer pintado. Si esto fuera
+         al final del body, la barra lateral parpadearia en cada pantalla. --%>
+    <script>
+        try {
+            if (window.localStorage.getItem("dosMenuOculto") === "1") {
+                document.documentElement.className += " menu-oculto";
+            }
+        } catch (e) { }
+    </script>
     <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
     <asp:ContentPlaceHolder ID="head" runat="server">
     </asp:ContentPlaceHolder>
 </head>
-<body>
+<body class="app-dos">
     <form id="form1" runat="server">
         <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
         <div id="wrapper">
@@ -57,6 +69,11 @@
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
+                    </button>
+                    <button type="button" id="dosMenuBoton" class="dos-menu-boton"
+                        aria-controls="side-menu" aria-expanded="true" title="Ocultar el menú">
+                        <i class="fa fa-bars"></i>
+                        <span class="sr-only">Mostrar u ocultar el menú</span>
                     </button>
                     <a class="navbar-brand" href="http://www.dos.com.ec/">
                         <img src="../Img/IcoDos.png" /></a>
@@ -91,7 +108,12 @@
                     </li>
                 </ul>
                 <div class="navbar-default sidebar" role="navigation">
-                    <div class="sidebar-nav navbar-collapse">
+                    <%-- La clase "collapse" hace que el menu arranque CERRADO en celular.
+                         Sin ella se desplegaba siempre y empujaba el contenido hacia abajo.
+                         El boton .navbar-toggle de aca arriba ya lo abre y lo cierra.
+                         En escritorio no cambia nada: bootstrap.css:4104, dentro de
+                         @media (min-width: 768px), lo fuerza a display:block. --%>
+                    <div class="sidebar-nav collapse navbar-collapse">
                         <asp:Label ID="lblCargarMenu" runat="server" Text=""></asp:Label>
                     </div>
                 </div>
@@ -126,6 +148,47 @@
     <script src="../bower_components/assets/js/bootstrap-multiselect.min.js"></script>
     <script src="../bower_components/assets/js/bootstrap-multiselect.min.js"></script>
     <script src="../dist/js/sb-admin-2.js"></script>
+    <script src="../js/dos-menu.js?v=3"></script>
+    <%-- Espera de las consultas, para TODAS las pantallas.
+
+         75 pantallas usan esta master. Solo 51 cargaban blockUI, y 35 archivos
+         de js registraban el ajaxStart por su cuenta; las 24 restantes no
+         mostraban nada mientras esperaban. Registrarlo aca lo resuelve de una
+         vez, sin tocar ninguna pantalla.
+
+         Esto fija el mensaje por defecto. Las pantallas que definen el suyo lo
+         hacen dentro de $(function(){...}), que corre despues de este bloque,
+         asi que el de la pantalla gana. Aca solo se cubre a las que no tienen
+         ninguno. --%>
+    <script src="../js/jquery.blockUI.js"></script>
+    <script>
+        (function () {
+            if (typeof jQuery === "undefined" || !jQuery.blockUI) { return; }
+
+            jQuery.blockUI.defaults.message = "Espere un momento, por favor...";
+            jQuery.blockUI.defaults.css = {};          /* el aspecto lo da dos-tema.css */
+            jQuery.blockUI.defaults.overlayCSS = {};
+            jQuery.blockUI.defaults.fadeOut = 120;
+
+            /* De fabrica blockUI arranca en 1000, y con eso la capa quedaba
+               DEBAJO de los modales de bootstrap, que van en 1050. Son 46 las
+               pantallas con modal: si la consulta salia de adentro de uno, la
+               espera no se veia. 2000 la deja encima del modal y por debajo de
+               sweetalert (10000), que debe seguir mandando. */
+            jQuery.blockUI.defaults.baseZ = 2000;
+
+            /* El fadeIn se deja como viene la libreria (200 ms): las consultas
+               cortas alcanzan a terminar antes de que la capa sea opaca, y asi
+               no parpadea en cada llamada. */
+
+            /* En las 51 pantallas que ya lo registraban quedan DOS manejadores
+               y los dos corren en el mismo ajaxStart. No pasa nada: blockUI
+               borra el bloqueo anterior antes de montar el nuevo
+               (jquery.blockUI.js:268) y unblockUI dos veces no hace daño. El de
+               la pantalla corre despues, asi que su mensaje es el que queda. */
+            jQuery(document).ajaxStart(jQuery.blockUI).ajaxStop(jQuery.unblockUI);
+        })();
+    </script>
     <!-- Latest jQuery minified -->
     <!-- Latest compiled and minified JavaScript -->
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->

@@ -1161,6 +1161,7 @@
     <Content Include="js\InfoDepMedico.js" />
     <Content Include="js\InformacionContratos.js" />
     <Content Include="js\Inventario.js" />
+    <Content Include="js\jquery.blockUI.js" />
     <Content Include="js\Perfiles.js" />
     <Content Include="js\Producto.js" />
     <Content Include="js\PruebaMenu.js" />

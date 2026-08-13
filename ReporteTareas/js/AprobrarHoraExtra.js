@@ -78,7 +78,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                     }
 
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");

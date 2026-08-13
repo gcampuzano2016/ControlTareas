@@ -2919,7 +2919,7 @@ function ListadoArchivosPoliza(div, idTarea) {
                     $(div).html(htmlListaArchivosAdjuntos);
                 }
             } else {
-                $("#divMensajes").html("No existen datos para esta consulta.");
+                $(div).html(DosVacio("No hay archivos adjuntos.", ""));
             }
 
             $("#divMensajes").html("");

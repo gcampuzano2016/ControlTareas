@@ -17,7 +17,7 @@
     <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link href="../css/dos-tema.css?v=10" rel="stylesheet">
+    <link href="../css/dos-tema.css?v=11" rel="stylesheet">
     <script>
         window.onload = function () {
             const hostname = window.location.hostname;

@@ -54,13 +54,14 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
             success: function (respuesta) {
                 if (respuesta != null) {
                     var idTotalRegistro = respuesta.length;
-                    if (respuesta.length == 0) {
-                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
-                        alerta("No existen datos para esta consulta.");
-                    }
-                    else {
-                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
-                    }
+                    /* Antes esto era un if/else con la MISMA linea en las dos
+                       ramas; lo unico que cambiaba era que la rama vacia
+                       lanzaba alerta("No existen datos para esta consulta."),
+                       que es sweetAlert de tipo "error". Una busqueda sin
+                       coincidencias no es un fallo, y encima obligaba a cerrar
+                       un popup para seguir escribiendo. El aviso ahora va
+                       dentro del propio desplegable, en RecorreJSONTableSelect. */
+                    $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                 } else {
                     $(div).html(DosVacio());
                 }
@@ -156,6 +157,11 @@ function RecorreJSONTableSelect(json, boton, idSeleccionado) {
             //}
         });
 
+        /* Sin coincidencias el bucle no agrega nada y el desplegable quedaba
+           abierto y vacio. Una linea dentro de la lista dice lo que pasa sin
+           interrumpir a quien esta escribiendo. */
+        if (!x) { x = DosVacioLinea("No hay clientes que coincidan."); }
+
         document.getElementById("comboClientes").innerHTML = x;
         document.getElementById("comboClientes").style.display = "block";
     }
@@ -171,6 +177,8 @@ function RecorreJSONTableSelect(json, boton, idSeleccionado) {
             //    document.getElementById("comboClientes").style.display = "none";
             //}
         });
+
+        if (!x) { x = DosVacioLinea("No hay especialistas que coincidan."); }
 
         document.getElementById("comboEspecialista").innerHTML = x;
         document.getElementById("comboEspecialista").style.display = "block";

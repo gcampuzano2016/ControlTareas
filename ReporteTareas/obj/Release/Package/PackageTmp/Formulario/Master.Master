@@ -44,7 +44,7 @@
     </style>
     <!-- Tema DOS: va al final a proposito, para ganarle a sb-admin-2.css.
          Quitar esta linea revierte todo el cambio visual. -->
-    <link href="../css/dos-tema.css?v=10" rel="stylesheet" />
+    <link href="../css/dos-tema.css?v=11" rel="stylesheet" />
     <%-- Aplica la preferencia del menu ANTES del primer pintado. Si esto fuera
          al final del body, la barra lateral parpadearia en cada pantalla. --%>
     <script>
@@ -192,7 +192,7 @@
     <%-- Estado vacio: el bloque que se pinta cuando una consulta no trae filas.
          Va al pie porque solo se invoca desde callbacks de AJAX, nunca durante
          el parseo. El aspecto lo da dos-tema.css. --%>
-    <script src="../js/dos-vacio.js?v=1"></script>
+    <script src="../js/dos-vacio.js?v=2"></script>
     <!-- Latest jQuery minified -->
     <!-- Latest compiled and minified JavaScript -->
     <!-- <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>-->

@@ -1586,3 +1586,14 @@ body:has(.login-panel) { background-color: var(--crm-fondo); }
     font-size: 13px;
     color: var(--crm-tinta-suave);
 }
+
+/* La variante de una linea, dentro de un .dropdown-menu de busqueda. El padding
+   es el mismo que el de los items reales (.dropdown-menu > li > a, arriba) para
+   que la lista no cambie de forma al quedarse sin resultados. Tinta suave y
+   cursiva para que se lea como un aviso y no como una opcion elegible. */
+.dos-vacio-linea {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--crm-tinta-suave);
+}

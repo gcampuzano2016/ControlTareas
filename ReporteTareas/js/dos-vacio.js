@@ -50,6 +50,15 @@ function DosVacio(mensaje, pista) {
     return html + '</div>';
 }
 
+/* Version de una sola linea, para las listas desplegables de busqueda.
+
+   El bloque de arriba no sirve ahi: un desplegable de typeahead mide unos
+   pocos pixeles de alto y sus hijos tienen que ser <li>. Devuelve un <li> sin
+   enlace, asi que no es clicable ni entra en la navegacion por teclado. */
+function DosVacioLinea(mensaje) {
+    return '<li class="dos-vacio-linea">' + DosEscapar(mensaje) + '</li>';
+}
+
 /* El texto del dialogo de "descargar Excel" cuando no hay nada que exportar.
    Es un dialogo y no un estado vacio: responde a una accion explicita del
    usuario. Por eso conserva su forma; lo que cambia es que hable de la

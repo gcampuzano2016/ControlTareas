@@ -42,7 +42,7 @@
                                             <div class="col-lg-12">
                                                 <div class="col-lg-4">
 													<label>Num. OS</label>
-													<input type="text" class="form-control"  id="txt_Os" placeholder="Num. OS">
+													<input type="text" class="form-control"  id="txt_Os" placeholder="N° de orden de servicio">
 													<p class="help-block"></p>														
                                                 </div>
 

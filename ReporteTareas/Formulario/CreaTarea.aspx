@@ -51,7 +51,7 @@
                                                     </div>
 
                                                     <div class="col-lg-4">
-                                                        <h6><asp:Label ID="lbl_Cliente" Text="Nom. Cliente" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <h6><asp:Label ID="lbl_Cliente" Text="Cliente" runat="server" CssClass="text-center"></asp:Label></h6>
                                                         <asp:TextBox ID="txt_Cliente" runat="server" cssClass="form-control tam-text-box" Enabled="true"/>
                                                     </div>
 

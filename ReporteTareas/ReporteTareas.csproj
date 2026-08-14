@@ -1402,6 +1402,8 @@
     <Content Include="js\parametrizacionMenuUsuario.js" />
     <Content Include="js\dos-menu.js" />
     <Content Include="js\dos-vacio.js" />
+    <Content Include="js\EmpleadosLista.js" />
+    <Content Include="js\ReporteSalud.js" />
     <Content Include="js\parametrizacionUsuarios.js" />
     <Content Include="js\parametrizacionPerfiles.js" />
     <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />

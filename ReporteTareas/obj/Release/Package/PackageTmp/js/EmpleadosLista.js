@@ -43,7 +43,7 @@ function VerListaEmpleados() {
 
     if (IdPerfil == 14) {
         document.getElementById("editBoton").style.display = "block";
-    }    
+    }
     document.getElementById("editMenu").style.display = "block";
     document.getElementById("editEmpleados").style.display = "none";
     document.getElementById("editCargaFamiliar").style.display = "none";
@@ -77,7 +77,7 @@ function VerCargaFamiliarEmpleado(id) {
     document.getElementById("editCargaFamiliar").style.display = "block";
 
     ObtenerListaCargaFamiliar(IdEmpleado);
-    
+
     //document.getElementById("btnGProducto").innerHTML = "Guardar";
 }
 
@@ -104,126 +104,6 @@ function EditarCargaFamiliarEmpleado() {
 
     //document.getElementById("btnGProducto").innerHTML = "Guardar";
 }
-
-
-
-
-function cargaArchivos() {
-    //document.getElementById("editBoton").style.display = "none";
-}
-
-function MensajeCargaArchivo() {
-    $('#msgCargarArchivos').modal('show');
-}
-function MensajeListaArchivos() {
-    $('#msgVerArchivos').modal('show');
-}
-
-//===========================================
-//              Cargar Archivos
-//===========================================
-
-// Muestra el archivo seleccionado
-$(document).on('change', '.btn-file :file', function () {
-    // Se define una función que se ejecutará cuando se produzca un cambio en el elemento de entrada de archivo
-    var input = $(this); // Se obtiene el elemento de entrada de archivo que ha cambiado
-    var numFiles = input.get(0).files ? input.get(0).files.length : 1; // Se obtiene el número de archivos seleccionados
-    var label = input.val().replace(/\\/g, '/').replace(/.*\//, ''); // Se obtiene la etiqueta del archivo seleccionado
-    input.trigger('fileselect', [numFiles, label]); // Se dispara el evento personalizado 'fileselect' y se pasan los parámetros numFiles y label
-});
-
-$(document).ready(function () {
-    // Se define una función que se ejecutará cuando el documento esté listo
-    $('.btn-file :file').on('fileselect', function (event, numFiles, label) {
-        // Se define una función que se ejecutará cuando se produzca el evento personalizado 'fileselect'
-        var input = $(this).parents('.input-group').find(':text'); // Se encuentra el elemento de texto relacionado
-        var log = numFiles > 1 ? numFiles + ' files selected' : label; // Se crea un mensaje de registro basado en el número de archivos seleccionados y la etiqueta
-        if (input.length) {
-            input.val(log); // Si existe el elemento de texto, se establece su valor con el mensaje de registro
-        } else {
-            if (log) alert(log); // Si no existe el elemento de texto, se muestra una alerta con el mensaje de registro
-        }
-    });
-});
-
-
-function GuardarArchivo(id) {
-    IdEmpleado = id;
-    if (IdEmpleado == 0) {
-        alert("Para cargar un archivo debe seleccionar un contrato...");
-    } else {
-        var url = 'CargaArchivos.ashx';
-
-        // Checking whether FormData is available in browser  
-        if (window.FormData !== undefined) {
-            var fileUpload = $("#archivosAdjuntos").get(0);
-            var files = fileUpload.files;
-
-            // Create FormData object  
-            var fileData = new FormData();
-
-            // Looping over all files and add them to the FormData object  
-            for (var i = 0; i < files.length; i++) {
-                fileData.append(files[i].name, files[i]);
-            }
-
-            // Adding more keys to the FormData object  
-            fileData.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
-            fileData.append('action', 'CargarArchivos');
-            fileData.append('Id_RegTareas', IdEmpleado);
-            fileData.append('idServicio', "10");
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: fileData,
-                contentType: false, // Not to set any content header  
-                processData: false, // Not to process data  
-                dataType: "json",
-                beforeSend: function (respuesta) {
-                    $("#divMensajes").html("Cargando Archivos...");
-                },
-                success: function (respuesta) {
-                    if (respuesta.estado == "1") {
-                        MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", respuesta.mensaje, respuesta.tipoMensaje);
-                        ListadoArchivosContrato("#divArchivosAdjuntosAnteriores", IdEmpleado);
-                    }
-                    $("progress").hide();
-                },
-                xhr: function () {
-                    var fileXhr = $.ajaxSettings.xhr();
-                    if (fileXhr.upload) {
-                        $("progress").show();
-                        fileXhr.upload.addEventListener("progress", function (e) {
-                            if (e.lengthComputable) {
-                                $("#fileProgress").attr({
-                                    value: e.loaded,
-                                    max: e.total
-                                });
-                            }
-                        }, false);
-                    }
-                    return fileXhr;
-                },
-                error: function (objeto, msgError, objError) {
-                    var mensajeError = "La acción de cargar el archivo está tomando demasiado tiempo. Verifique su conexión de red y luego intente nuevamente cargar los archivos.";
-                    MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mensajeError, 'danger');
-                }
-            });
-        } else {
-            var mensajeError = "FormData no es soportado por su navegador.";
-            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mensajeError, 'danger');
-        }
-    }
-}
-
-$(document).on('click', '.btnCargarArchivo', function (e) {
-    e.preventDefault();
-    var data = table1.row($(this).parents('tr')).data();
-    GuardarArchivo(data.IdEmpleado);
-});
-
-
 
 
 
@@ -287,7 +167,7 @@ function MostrarMensajeDialogo(divModalTipo, divMensaje, divModal, mensaje, tipo
 
 
 function ObtenerListaEmpleados(tipo, descripcion, tipo2) {
-    var Datos = "[{ \"action\": \"BuscarListaEmpleados\", \"parameters\" : { tipo : \"" + IdPerfil + "\", descripcion: \"" + "" + "\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\"} }]";
+    var Datos = "[{ \"action\": \"BuscarListaEmpleados\", \"parameters\" : { tipo : \"" + IdPerfil + "\", descripcion: \"" + "Lista" + "\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\"} }]";
     CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
 }
 
@@ -324,7 +204,7 @@ function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
 
 function RecorreJSONTableSelectBusqueda(json, boton, idSeleccionado) {
 
-        dtEmpleados(json);
+    dtEmpleados(json);
 }
 
 function Create() {
@@ -336,12 +216,13 @@ function Create() {
 }
 
 function dtEmpleados(json) {
+    //<button type='button' value='Actualizar' title='Editar' class='btn btn btn-editMenu btn-xs'><i class='fa fa-edit' aria-hidden='true'></i></button>  
     Create();
     table1 = null;
 
     table1 = $('#tbl_Empleados').DataTable({
         data: json,
-        columns: [            
+        columns: [
             { data: 'IdEmpleado' },
             { data: 'Cedula' },
             { data: 'Nombre' },
@@ -353,8 +234,8 @@ function dtEmpleados(json) {
             { data: 'Sexo' },
             { data: 'Fecha_Nacimiento' },
             { data: 'Provincia' },
-            { defaultContent: "<button type='button' value='Actualizar' title='Ver carga familiar' class='btn btn btn-verCargaFamiliar btn-xs'><i class='fa fa-eye' aria-hidden='true'></i></button>" },
-            { defaultContent: "<button type='button' value='Actualizar' title='Editar' class='btn btn btn-editMenu btn-xs'><i class='fa fa-edit' aria-hidden='true'></i></button>  <button type='button' value='Eliminar' title='Eliminar' class='btn btn btn-deleteEmp btn-xs'><i class='fa fa-trash-o' aria-hidden='true'></i></button>" },
+            { defaultContent: "<button type='button' value='Actualizar' title='Ver carga familiar' class='btn btn-verCargaFamiliar btn-xs'><i class='fa fa-eye' aria-hidden='true'></i></button>" },
+            { defaultContent: "<button type='button' value='Eliminar' title='Eliminar' class='btn btn btn-deleteEmp btn-xs'><i class='fa fa-trash-o' aria-hidden='true'></i></button>" },
             { data: 'Estado' }
         ],
 
@@ -475,7 +356,7 @@ function GuardarEmpleado() {
             mensajeVerificacion += "- Debe ingresar la Cédula ";
             contadorVerificacion += 1;
         }
-        
+
         /*if ($('#txtIdEmpleado').val() == "") {
             mensajeVerificacion += "- Debe ingresar la Codigo del empleado ";
             contadorVerificacion += 1;
@@ -511,12 +392,12 @@ function GuardarEmpleado() {
             contadorVerificacion += 1;
         }
 
-        if($('#txtFechaNacimiento').val() == "") {
+        if ($('#txtFechaNacimiento').val() == "") {
             mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
             contadorVerificacion += 1;
         }
 
-        if($('#txtProvincia').val() == "") {
+        if ($('#txtProvincia').val() == "") {
             mensajeVerificacion += "- Debe ingresar la Provincia";
             contadorVerificacion += 1;
         }
@@ -627,12 +508,12 @@ function GuardarEmpleado() {
             contadorVerificacion += 1;
         }
 
-        if($('#txtFechaNacimiento').val() == "") {
+        if ($('#txtFechaNacimiento').val() == "") {
             mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
             contadorVerificacion += 1;
         }
 
-        if($('#txtProvincia').val() == "") {
+        if ($('#txtProvincia').val() == "") {
             mensajeVerificacion += "- Debe ingresar la Provincia";
             contadorVerificacion += 1;
         }
@@ -648,7 +529,7 @@ function GuardarEmpleado() {
         datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
         datosFormulario = datosFormulario + "'txtCedula': '" + $('#txtCedula').val() + "',";
         datosFormulario = datosFormulario + "'txtNombre': '" + $('#txtNombre').val() + "',";
-        datosFormulario = datosFormulario + "'txtIdEmpleado': '" +  "0"+ "',";
+        datosFormulario = datosFormulario + "'txtIdEmpleado': '" + "0" + "',";
         datosFormulario = datosFormulario + "'txtSociedad': '" + $('#txtSociedad').val() + "',";
         datosFormulario = datosFormulario + "'txtCiudad': '" + $('#txtCiudad').val() + "',";
         datosFormulario = datosFormulario + "'txtAreaTrabajo': '" + $('#txtAreaTrabajo').val() + "',";
@@ -692,6 +573,9 @@ function GuardarEmpleado() {
 
     }
 }
+
+
+
 
 
 function RecorreJSONTableSelectFamilia(json, boton, idSeleccionado) {
@@ -751,24 +635,24 @@ function dtCargaFam(json) {
         fixedHeader: true
     });
 }
-    
+
 
 function CargarItems2(data2) {
-     IdEmpleado = data2.IdEmpleado;
-     IdCargaFam = data2.IdCargaFam;
-     $('#txtParentescoCF').val(data2.Parentesco);
-     $('#txtNombreCF').val(data2.Nombre);
-     $('#txtFechaNacimientoCF').val(data2.fecha_nacimiento);
-     document.getElementById("btnGCargaFam").innerHTML = "Actualizar";
+    IdEmpleado = data2.IdEmpleado;
+    IdCargaFam = data2.IdCargaFam;
+    $('#txtParentescoCF').val(data2.Parentesco);
+    $('#txtNombreCF').val(data2.Nombre);
+    $('#txtFechaNacimientoCF').val(data2.fecha_nacimiento);
+    document.getElementById("btnGCargaFam").innerHTML = "Actualizar";
 }
 
 function BorrarCajas2() {
-     var combo1 = document.getElementById("tbl_CargaFam");
-     combo1.value = 0;
-     $('#txtParentescoCF').val("");
-     $('#txtNombreCF').val("");
-     $('#txtFechaNacimientoCF').val("");
-     document.getElementById("btnGCargaFam").innerHTML = "Guardar";
+    var combo1 = document.getElementById("tbl_CargaFam");
+    combo1.value = 0;
+    $('#txtParentescoCF').val("");
+    $('#txtNombreCF').val("");
+    $('#txtFechaNacimientoCF').val("");
+    document.getElementById("btnGCargaFam").innerHTML = "Guardar";
 }
 
 $(document).on('click', '.btn-editCarga', function (e) {
@@ -795,173 +679,173 @@ $(document).on('click', '.btn-deleteCarga', function (e) {
 
 function GuardarCargaFam() {
 
-        if (document.getElementById("btnGCargaFam").innerHTML == "Actualizar") {
-            Operacion = 2;
-            
-            var url = "ObtenerListaTareas.ashx";
-            var datos = "";
-            var mensajeVerificacion = "";
-            var tipoMensaje = "warning";
-            var contadorVerificacion = 0;
+    if (document.getElementById("btnGCargaFam").innerHTML == "Actualizar") {
+        Operacion = 2;
 
-            if ($('#txtParentescoCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el parentesco";
-                contadorVerificacion += 1;
-            }
+        var url = "ObtenerListaTareas.ashx";
+        var datos = "";
+        var mensajeVerificacion = "";
+        var tipoMensaje = "warning";
+        var contadorVerificacion = 0;
 
-            if ($('#txtNombreCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el nombre ";
-                contadorVerificacion += 1;
-            }
-
-            if ($('#txtFechaNacimientoCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
-                contadorVerificacion += 1;
-            }
-
-            if (contadorVerificacion > 0) {
-                alerta(mensajeVerificacion);
-                return;
-            }
-
-            var datosFormulario = "";
-
-            datosFormulario = datosFormulario + "{";
-            datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
-            datosFormulario = datosFormulario + "'IdCargaFam': '" + IdCargaFam + "',";
-            datosFormulario = datosFormulario + "'IdEmpleado': '" + IdEmpleado + "',";
-            datosFormulario = datosFormulario + "'Operacion': '" + Operacion + "',";
-            datosFormulario = datosFormulario + "'txtParentescoCF': '" + $('#txtParentescoCF').val() + "',";
-            datosFormulario = datosFormulario + "'txtNombreCF': '" + $('#txtNombreCF').val() + "',";
-            datosFormulario = datosFormulario + "'txtFechaNacimientoCF': '" + $('#txtFechaNacimientoCF').val() + "'";
-            datosFormulario = datosFormulario + "}";
-
-            datos = "[{'action': 'GuardarNuevaCargaFamiliar', 'parameters' : " + datosFormulario + " }]";
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: datos,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                beforeSend: function () {
-                    $("#divMensajes").html("Guardando Información...");
-                },
-                success: function (respuesta) {
-                    var mensaje = "";
-                    if (respuesta.estado == "1") {
-                        MensajeCorrecto(respuesta.mensaje);
-                        VerCargaFamiliarEmpleado(IdEmpleado);
-                        $("#divMensajes").html("");
-                    }
-                    else if (respuesta.estado == "0") {
-                        MensajeIncorrecto(respuesta.mensaje);
-                    }
-                },
-                error: function (objeto, msgError, objError) {
-                    var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
-                    MensajeIncorrecto(mesnajeError);
-                }
-            });
-
-            return;
-
+        if ($('#txtParentescoCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar el parentesco";
+            contadorVerificacion += 1;
         }
-        else if (document.getElementById("btnGCargaFam").innerHTML == "Guardar") {
 
-            var url = "ObtenerListaTareas.ashx";
-            var datos = "";
-            var mensajeVerificacion = "";
-            var tipoMensaje = "warning";
-            var contadorVerificacion = 0;
-            Operacion = 1;
-
-            if ($('#txtParentescoCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el parentesco";
-                contadorVerificacion += 1;
-            }
-
-            if ($('#txtNombreCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar el nombre ";
-                contadorVerificacion += 1;
-            }
-
-            if ($('#txtFechaNacimientoCF').val() == "") {
-                mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
-                contadorVerificacion += 1;
-            }
-
-            if (contadorVerificacion > 0) {
-                alerta(mensajeVerificacion);
-                return;
-            }
-
-            var datosFormulario = "";
-
-            datosFormulario = datosFormulario + "{";
-            datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
-            datosFormulario = datosFormulario + "'IdEmpleado': '" + IdEmpleado + "',";
-            datosFormulario = datosFormulario + "'Operacion': '" + Operacion + "',";
-            datosFormulario = datosFormulario + "'txtParentescoCF': '" + $('#txtParentescoCF').val() + "',";
-            datosFormulario = datosFormulario + "'txtNombreCF': '" + $('#txtNombreCF').val() + "',";
-            datosFormulario = datosFormulario + "'txtFechaNacimientoCF': '" + $('#txtFechaNacimientoCF').val() + "'";
-            datosFormulario = datosFormulario + "}";
-
-            datos = "[{'action': 'GuardarNuevaCargaFamiliar', 'parameters' : " + datosFormulario + " }]";
-
-            $.ajax({
-                type: "POST",
-                url: url,
-                data: datos,
-                contentType: "application/json; charset=utf-8",
-                dataType: "json",
-                beforeSend: function () {
-                    $("#divMensajes").html("Guardando Información...");
-                },
-                success: function (respuesta) {
-                    var mensaje = "";
-                    if (respuesta.estado == "1") {
-                        MensajeCorrecto(respuesta.mensaje);
-                        VerListaEmpleados();
-                        $("#divMensajes").html("");
-
-                    }
-                    else if (respuesta.estado == "0") {
-                        MensajeIncorrecto(respuesta.mensaje);
-                    }
-                },
-                error: function (objeto, msgError, objError) {
-                    var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
-                    MensajeIncorrecto(mesnajeError);
-                }
-            });
-
-            return;
-
+        if ($('#txtNombreCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar el nombre ";
+            contadorVerificacion += 1;
         }
+
+        if ($('#txtFechaNacimientoCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
+            contadorVerificacion += 1;
+        }
+
+        if (contadorVerificacion > 0) {
+            alerta(mensajeVerificacion);
+            return;
+        }
+
+        var datosFormulario = "";
+
+        datosFormulario = datosFormulario + "{";
+        datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+        datosFormulario = datosFormulario + "'IdCargaFam': '" + IdCargaFam + "',";
+        datosFormulario = datosFormulario + "'IdEmpleado': '" + IdEmpleado + "',";
+        datosFormulario = datosFormulario + "'Operacion': '" + Operacion + "',";
+        datosFormulario = datosFormulario + "'txtParentescoCF': '" + $('#txtParentescoCF').val() + "',";
+        datosFormulario = datosFormulario + "'txtNombreCF': '" + $('#txtNombreCF').val() + "',";
+        datosFormulario = datosFormulario + "'txtFechaNacimientoCF': '" + $('#txtFechaNacimientoCF').val() + "'";
+        datosFormulario = datosFormulario + "}";
+
+        datos = "[{'action': 'GuardarNuevaCargaFamiliar', 'parameters' : " + datosFormulario + " }]";
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: datos,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $("#divMensajes").html("Guardando Información...");
+            },
+            success: function (respuesta) {
+                var mensaje = "";
+                if (respuesta.estado == "1") {
+                    MensajeCorrecto(respuesta.mensaje);
+                    VerCargaFamiliarEmpleado(IdEmpleado);
+                    $("#divMensajes").html("");
+                }
+                else if (respuesta.estado == "0") {
+                    MensajeIncorrecto(respuesta.mensaje);
+                }
+            },
+            error: function (objeto, msgError, objError) {
+                var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+                MensajeIncorrecto(mesnajeError);
+            }
+        });
+
+        return;
+
+    }
+    else if (document.getElementById("btnGCargaFam").innerHTML == "Guardar") {
+
+        var url = "ObtenerListaTareas.ashx";
+        var datos = "";
+        var mensajeVerificacion = "";
+        var tipoMensaje = "warning";
+        var contadorVerificacion = 0;
+        Operacion = 1;
+
+        if ($('#txtParentescoCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar el parentesco";
+            contadorVerificacion += 1;
+        }
+
+        if ($('#txtNombreCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar el nombre ";
+            contadorVerificacion += 1;
+        }
+
+        if ($('#txtFechaNacimientoCF').val() == "") {
+            mensajeVerificacion += "- Debe ingresar la fecha de nacimiento ";
+            contadorVerificacion += 1;
+        }
+
+        if (contadorVerificacion > 0) {
+            alerta(mensajeVerificacion);
+            return;
+        }
+
+        var datosFormulario = "";
+
+        datosFormulario = datosFormulario + "{";
+        datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+        datosFormulario = datosFormulario + "'IdEmpleado': '" + IdEmpleado + "',";
+        datosFormulario = datosFormulario + "'Operacion': '" + Operacion + "',";
+        datosFormulario = datosFormulario + "'txtParentescoCF': '" + $('#txtParentescoCF').val() + "',";
+        datosFormulario = datosFormulario + "'txtNombreCF': '" + $('#txtNombreCF').val() + "',";
+        datosFormulario = datosFormulario + "'txtFechaNacimientoCF': '" + $('#txtFechaNacimientoCF').val() + "'";
+        datosFormulario = datosFormulario + "}";
+
+        datos = "[{'action': 'GuardarNuevaCargaFamiliar', 'parameters' : " + datosFormulario + " }]";
+
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: datos,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function () {
+                $("#divMensajes").html("Guardando Información...");
+            },
+            success: function (respuesta) {
+                var mensaje = "";
+                if (respuesta.estado == "1") {
+                    MensajeCorrecto(respuesta.mensaje);
+                    VerListaEmpleados();
+                    $("#divMensajes").html("");
+
+                }
+                else if (respuesta.estado == "0") {
+                    MensajeIncorrecto(respuesta.mensaje);
+                }
+            },
+            error: function (objeto, msgError, objError) {
+                var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+                MensajeIncorrecto(mesnajeError);
+            }
+        });
+
+        return;
+
+    }
 }
 
 
 
-        /*================================*/
-        /**     Accion de descarga xls    */
-        /*================================*/
+/*================================*/
+/**     Accion de descarga xls    */
+/*================================*/
 
-    function BtnDescarga() {
-        //$("#divMensajes").html("");
-        //ObtenerListaContratosDescarga(tipoGeneral, idregistroGeneral);
-       
-        ObtenerListaEmpleadosDescarga(0, 0,);
-    }
+function BtnDescarga() {
+    //$("#divMensajes").html("");
+    //ObtenerListaContratosDescarga(tipoGeneral, idregistroGeneral);
 
-    function ObtenerListaEmpleadosDescarga(tipo, idRegistro) {
+    ObtenerListaEmpleadosDescarga(0, 0,);
+}
+
+function ObtenerListaEmpleadosDescarga(tipo, idRegistro) {
 
 
-        //var Datos = "[{ \"action\": \"BuscarListaEmpleadosDescargar\", \"parameters\" : {busqueda: \"" + $("#txtNumeroOrden2").val() + "\", IdCliente: \"" + idCliente2 + "\", IdGerenteCuenta: \"" + $("#cboVendedor2").val() + "\", IdGestorProducto: \"" + $("#cboGerente2").val() + "\", sucursal: \"" + $("#cboSucursal2").val() + "\", estado: \"" + $("#cboEstado2").val() + "\", IdClasificacion: \"" + $("#cboClasificacion2").val() + "\", Anio: \"" + $("#cboAnio").val() + "\", meses: \"" + $("#cboMeses").val() + "\", idFecha: \"" + $("#cboFecha").val() + "\"} }]";
-        var Datos = "[{ \"action\": \"BuscarListaEmpleadosDescargar\", \"parameters\" : { tipo : \"" + "0" + "\", descripcion: \"" + "" + "\"} }]";
-        idCliente2 = 0;
-        DetalleTareasDescargaXLS('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "table");
-    }
+    //var Datos = "[{ \"action\": \"BuscarListaEmpleadosDescargar\", \"parameters\" : {busqueda: \"" + $("#txtNumeroOrden2").val() + "\", IdCliente: \"" + idCliente2 + "\", IdGerenteCuenta: \"" + $("#cboVendedor2").val() + "\", IdGestorProducto: \"" + $("#cboGerente2").val() + "\", sucursal: \"" + $("#cboSucursal2").val() + "\", estado: \"" + $("#cboEstado2").val() + "\", IdClasificacion: \"" + $("#cboClasificacion2").val() + "\", Anio: \"" + $("#cboAnio").val() + "\", meses: \"" + $("#cboMeses").val() + "\", idFecha: \"" + $("#cboFecha").val() + "\"} }]";
+    var Datos = "[{ \"action\": \"BuscarListaEmpleadosDescargar\", \"parameters\" : { tipo : \"" + "0" + "\", descripcion: \"" + "" + "\"} }]";
+    idCliente2 = 0;
+    DetalleTareasDescargaXLS('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "table");
+}
 
 
 function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
@@ -1027,9 +911,11 @@ $(function () {
 
         $("#txtFechaNacimiento, #txtFechaNacimientoCF").datepicker('setDate', 'today');
 
-        IdPerfil = $("#ContentPlaceHolder1_txtPerfil").val();
-  
-    ObtenerListaEmpleados("", "", "");    
-   
+    IdPerfil = $("#ContentPlaceHolder1_txtPerfil").val();
+
+    ObtenerListaEmpleados("", "", "");
+
+    VerListaEmpleados();
+
 });
 

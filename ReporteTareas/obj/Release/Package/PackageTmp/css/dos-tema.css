@@ -1548,3 +1548,41 @@ body:has(.login-panel) { background-color: var(--crm-fondo); }
 @media (prefers-reduced-motion: reduce) {
     .blockUI.blockMsg::before { animation: none; }
 }
+
+/* ----------------------------------------------------------------------------
+   Estado vacio
+   ----------------------------------------------------------------------------
+   El marcado lo genera js/dos-vacio.js. Los selectores de aca y las clases de
+   alla tienen que moverse juntos.
+
+   Sin borde ni fondo a proposito: esto vive dentro de una tarjeta blanca que ya
+   los tiene. Agregarlos dibujaria una caja dentro de otra.
+
+   Todos los colores salen de tokens existentes. No se introduce ninguno nuevo.
+   -------------------------------------------------------------------------- */
+
+.dos-vacio {
+    padding: 48px 24px;
+    text-align: center;
+    font-family: var(--crm-texto);
+}
+
+.dos-vacio__icono {
+    display: block;
+    margin-bottom: 16px;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--crm-linea);
+}
+
+.dos-vacio__mensaje {
+    margin: 0;
+    font-size: 15px;
+    color: var(--crm-tinta-media);
+}
+
+.dos-vacio__pista {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--crm-tinta-suave);
+}

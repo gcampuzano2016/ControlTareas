@@ -27,7 +27,7 @@ namespace CapaDato
             //cn.ConnectionString = "Data Source=GCAMPUZANO;Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
 
             //PRODUCCION
-            cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
+            //cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
 
             //DYNATRACE
             //cn.ConnectionString = "Data Source=VMmarietta2\\SQLEXPRESS; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
@@ -36,7 +36,7 @@ namespace CapaDato
             //cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ReporTareaPreProd; User Id=sa; Password=CAfKsUBnD0s";
             //cn.ConnectionString = "Data Source=SRV-CBS-ERP\\SQLEXPRESS; Initial Catalog=ReporTarea; User Id=sa; Password=CAfKsUBnD0s";
             // TEST
-            //cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ReporTareaTest; User Id=sa; Password=CAfKsUBnD0s";
+            cn.ConnectionString = "Data Source=192.168.11.14; Initial Catalog=ReporTareaTest; User Id=sa; Password=CAfKsUBnD0s";
             //cn.ConnectionString = "Data Source=GUILLERMO; Initial Catalog=ReporTarea; User Id=sa; Password=Sql$erver2014";
             //cn.ConnectionString = "Data Source=CARLOS-PC; Initial Catalog=FBillWeb; User Id=BillWeb; Password=BillWeb";
             return cn;

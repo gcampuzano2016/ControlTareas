@@ -29,9 +29,6 @@ ReporteTareas/obj/Release/*
 # Simbolos de depuracion: no hacen falta para ejecutar la aplicacion.
 *.pdb
 
-# Blindaje: adentro del paquete de despliegue no se ignora nada. PackageTmp
-# arrastra una carpeta obj/Debug heredada de otro proyecto (BillWeb) que las
-# reglas de arriba alcanzarian por accidente; se re-incluye primero la carpeta
-# y despues todo su contenido.
-!ReporteTareas/obj/Release/Package/PackageTmp/js/obj/Debug/
+# Blindaje: adentro del paquete de despliegue no se ignora nada, para que las
+# reglas de arriba no puedan recortarlo por accidente.
 !ReporteTareas/obj/Release/Package/PackageTmp/**

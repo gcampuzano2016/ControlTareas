@@ -10,5 +10,28 @@
 *.user
 .vs/**/applicationhost.config
 
-# OJO: bin/ y obj/ se trackean a proposito en este repo — el despliegue a
-# produccion se hace desde ahi. No agregarlos aqui.
+# OJO: bin/ se trackea a proposito en este repo — el despliegue a produccion
+# sale de ahi, igual que de ReporteTareas/obj/Release/Package/. Esos dos no
+# se agregan aqui. Lo que sigue es solo lo que MSBuild regenera en cada build.
+
+# Intermedios de compilacion. Son copias de lo que ya vive en bin/ mas
+# archivos de trabajo del compilador: cambian en cada build y ensucian el
+# diff sin aportar nada.
+**/obj/Debug/
+**/obj/Release/
+
+# EXCEPCION: el paquete de despliegue a produccion vive dentro de obj/Release.
+# Se re-incluye la carpeta y adentro solo se conserva Package/.
+!ReporteTareas/obj/Release/
+ReporteTareas/obj/Release/*
+!ReporteTareas/obj/Release/Package/
+
+# Simbolos de depuracion: no hacen falta para ejecutar la aplicacion.
+*.pdb
+
+# Blindaje: adentro del paquete de despliegue no se ignora nada. PackageTmp
+# arrastra una carpeta obj/Debug heredada de otro proyecto (BillWeb) que las
+# reglas de arriba alcanzarian por accidente; se re-incluye primero la carpeta
+# y despues todo su contenido.
+!ReporteTareas/obj/Release/Package/PackageTmp/js/obj/Debug/
+!ReporteTareas/obj/Release/Package/PackageTmp/**

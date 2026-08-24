@@ -59,10 +59,24 @@ perfil `FolderProfile`.
 
 ### Cómo llegan los archivos al servidor
 
-<!-- PENDIENTE: completar. No está documentado en el repositorio y no consta
-     en el historial. Quien haga el próximo despliegue debería escribir aquí
-     el paso real: copia manual, recurso compartido, FTP, Web Deploy, etc.,
-     junto con la ruta en el servidor y el nombre del sitio en IIS. -->
+A mano, por carpeta compartida: se copia el contenido de
+`C:\respaldodisco\Desarrollo\Publicar` sobre la carpeta del sitio en el
+servidor, reemplazando los archivos existentes.
+
+> **No uses una copia que borre sobrantes.** `robocopy /MIR`, un "sincronizar
+> carpetas" o cualquier opción de *eliminar archivos que no están en el
+> origen* **borrará `connections.config` del servidor**, porque ese archivo no
+> viene en la publicación. El sitio se cae en el siguiente query y la causa no
+> es obvia. Copia y reemplaza; nunca sincronices.
+
+Qué debe quedar en el servidor después de copiar:
+
+- todo lo publicado (`bin\`, `Formulario\`, `js\`, `Web.config`, …)
+- `connections.config`, **que ya estaba ahí y no se toca**
+
+No hace falta reiniciar IIS: al reemplazar `Web.config` o el contenido de
+`bin\`, ASP.NET recicla la aplicación solo. La primera visita después de
+copiar es más lenta de lo normal; eso es esperado.
 
 ---
 

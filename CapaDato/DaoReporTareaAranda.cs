@@ -51,8 +51,10 @@ namespace CapaDato
             // DESARROLLO
             //cn.ConnectionString = "Data Source=GUILLERMO; Initial Catalog=AD; User Id=sa; Password=Sql$erver2014";
 
-            // PRODUCCION
-            cn.ConnectionString = "Data Source=192.168.11.8//DCP; Initial Catalog=DCP; User Id=sap; Password=Sql$erver2014";
+            // Aquí se conectaba a SAP en producción (servidor 192.168.11.8, base DCP) para consultar
+            // saldos de vacaciones. Deshabilitado en el entorno de pruebas: es información sensible
+            // de nómina/SAP y no existe un destino de pruebas equivalente todavía.
+            //cn.ConnectionString = "Data Source=192.168.11.8//DCP; Initial Catalog=DCP; User Id=sap; Password=...";
 
             return cn;
         }

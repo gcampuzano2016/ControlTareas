@@ -108,14 +108,16 @@ namespace ReporteTareas.Formulario
             {
                 if (objUsuario.IdCliente == 0)
                 {
-                    Autentificacion2.AuthenticationSoapClient client = new Autentificacion2.AuthenticationSoapClient();
-                    Autentificacion2.UserInfo user = new Autentificacion2.UserInfo();
-                    user = client.AutenticateUserAD(txt_login.Text.Trim(), AuxClave, "COMPUEQUIP");
-                    if (user != null)
-                    {
+                    // Entorno de pruebas: no se autentica contra el Active Directory real de la empresa.
+                    // El login solo valida contra la base de datos de pruebas (ReporTareaTest / usuario de pruebas ya creado).
+                    //Autentificacion2.AuthenticationSoapClient client = new Autentificacion2.AuthenticationSoapClient();
+                    //Autentificacion2.UserInfo user = new Autentificacion2.UserInfo();
+                    //user = client.AutenticateUserAD(txt_login.Text.Trim(), AuxClave, "COMPUEQUIP");
+                    //if (user != null)
+                    //{
                         Session["Bandera"] = "1";
-                        if (user.ActiveUser.Equals(0))
-                        {
+                        //if (user.ActiveUser.Equals(0))
+                        //{
                             //ingres a la master
                             objUsuario = NegUsuario.RTA_ConsultaUsuarioRTA(txt_login.Text);
                             if (objUsuario != null)
@@ -249,27 +251,27 @@ namespace ReporteTareas.Formulario
                                 }
 
                             }
-                        }
-                        else
-                        {
-                            //mensaje de no auteticado
-                            Response.Write(negUser.mensajeInformativo("Sus credenciales de acceso son incorrectas", "danger", true, "divMensajesContenido_2"));
-                            txt_login.Text = Session["UserLogin"].ToString();
-                            txt_pass.Text = "";
-                            txt_pass.Focus();
-                        }
-                    }
-                    else
-                    {
-                        // Response.Write("<script>var divMensajesContenido_1 = 'Credencial de Acceso No Autorizadas';</script>");
-                        Response.Write(negUser.mensajeInformativo("Credenciales de acceso No Autorizadas", "danger", true, "divMensajesContenido_1"));
-                        txt_pass.Focus();
-                        //objUsuario.Log_Usuario = txt_login.Text;
-                        //objUsuario.CodigoReset = EnviarCodigo();
-                        //NegUsuario.RTA_InsertaCodigoSeguridad(objUsuario);
-                        //Session["UserLogin"] = txt_login.Text;
-                        //Response.Redirect("ResetPassword.aspx");
-                    }
+                        //}
+                        //else
+                        //{
+                        //    //mensaje de no auteticado
+                        //    Response.Write(negUser.mensajeInformativo("Sus credenciales de acceso son incorrectas", "danger", true, "divMensajesContenido_2"));
+                        //    txt_login.Text = Session["UserLogin"].ToString();
+                        //    txt_pass.Text = "";
+                        //    txt_pass.Focus();
+                        //}
+                    //}
+                    //else
+                    //{
+                    //    // Response.Write("<script>var divMensajesContenido_1 = 'Credencial de Acceso No Autorizadas';</script>");
+                    //    Response.Write(negUser.mensajeInformativo("Credenciales de acceso No Autorizadas", "danger", true, "divMensajesContenido_1"));
+                    //    txt_pass.Focus();
+                    //    //objUsuario.Log_Usuario = txt_login.Text;
+                    //    //objUsuario.CodigoReset = EnviarCodigo();
+                    //    //NegUsuario.RTA_InsertaCodigoSeguridad(objUsuario);
+                    //    //Session["UserLogin"] = txt_login.Text;
+                    //    //Response.Redirect("ResetPassword.aspx");
+                    //}
 
                 }
                 else

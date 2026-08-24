@@ -14,7 +14,6 @@ namespace CapaDato
         {
             SqlConnection cn = new SqlConnection();
             cn.ConnectionString = "Data Source=; Initial Catalog=; User Id=; Password=";
-            //cn.ConnectionString = "Data Source=CARLOS-PC; Initial Catalog=FBillWeb; User Id=BillWeb; Password=BillWeb";
             return cn;
         }
 

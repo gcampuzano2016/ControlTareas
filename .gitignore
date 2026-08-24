@@ -32,3 +32,8 @@ ReporteTareas/obj/Release/*
 # Blindaje: adentro del paquete de despliegue no se ignora nada, para que las
 # reglas de arriba no puedan recortarlo por accidente.
 !ReporteTareas/obj/Release/Package/PackageTmp/**
+
+# Credenciales de base de datos. connections.config se crea a mano en cada
+# maquina y en el servidor a partir de connections.config.ejemplo, que si
+# se versiona. Nunca commitear el archivo con las contrasenas reales.
+connections.config

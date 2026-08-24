@@ -1771,6 +1771,10 @@ function BorrarBotonesContrato() {
     $('#txtCliente').val("");
     $('#txtReferencia').val("");
     $('#txtMail').val("");
+    $('#txtFechaFirmaContrato').val("");
+    $('#txtFechaFirmaActa').val("");
+    $('#txtFechaAnticipo').val("");
+    $('#txtContactoTelefono').val("");
 
     var combo1 = document.getElementById("cboArea");
     combo1.selectedIndex = 0;
@@ -2034,6 +2038,10 @@ function EliminarContrato() {
     datosFormulario = datosFormulario + "'txtGerenteCuenta': '" + selectedoGerente + "',";
     datosFormulario = datosFormulario + "'txtSolucion': '" + $('#txtSolucion').val() + "',";
     datosFormulario = datosFormulario + "'cbotiempo': '" + $('#cbotiempo').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaContrato': '" + $('#txtFechaFirmaContrato').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaActa': '" + $('#txtFechaFirmaActa').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaAnticipo': '" + $('#txtFechaAnticipo').val() + "',";
+    datosFormulario = datosFormulario + "'txtContactoTelefono': '" + $('#txtContactoTelefono').val() + "',";
     datosFormulario = datosFormulario + "'txtSucursal': '" + $('#cboSucursal').val() + "'";
     datosFormulario = datosFormulario + "}";
 
@@ -2284,6 +2292,10 @@ function ActualizarContrato() {
     datosFormulario = datosFormulario + "'txtSolucion': '" + $('#txtSolucion').val() + "',";
     datosFormulario = datosFormulario + "'cbotiempo': '" + $('#cbotiempo').val() + "',";
     datosFormulario = datosFormulario + "'txtMail': '" + $('#txtMail').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaContrato': '" + $('#txtFechaFirmaContrato').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaActa': '" + $('#txtFechaFirmaActa').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaAnticipo': '" + $('#txtFechaAnticipo').val() + "',";
+    datosFormulario = datosFormulario + "'txtContactoTelefono': '" + $('#txtContactoTelefono').val() + "',";
     datosFormulario = datosFormulario + "'txtSucursal': '" + $('#cboSucursal').val() + "'";
     datosFormulario = datosFormulario + "}";
 
@@ -2533,6 +2545,10 @@ function GuardarNuevoContrato() {
     datosFormulario = datosFormulario + "'txtSolucion': '" + $('#txtSolucion').val() + "',";
     datosFormulario = datosFormulario + "'cbotiempo': '" + $('#cbotiempo').val() + "',";
     datosFormulario = datosFormulario + "'txtMail': '" + $('#txtMail').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaContrato': '" + $('#txtFechaFirmaContrato').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaFirmaActa': '" + $('#txtFechaFirmaActa').val() + "',";
+    datosFormulario = datosFormulario + "'txtFechaAnticipo': '" + $('#txtFechaAnticipo').val() + "',";
+    datosFormulario = datosFormulario + "'txtContactoTelefono': '" + $('#txtContactoTelefono').val() + "',";
     datosFormulario = datosFormulario + "'txtSucursal': '" + $('#cboSucursal').val() + "'";
     datosFormulario = datosFormulario + "}";
 
@@ -2755,6 +2771,32 @@ function EliminarProceso() {
     GuardarRequerimiento(2, IdCodigoIdRequerimiento);
 }
 
+
+/*==============================================================================
+ *                                 Mejoras 2026
+ *==============================================================================*/
+
+///* ===================================================================
+// *      Cambio de color en cuadros para seleccionar formulario
+// * ===================================================================*/
+function toggleContent(well) {
+    const contenido = well.querySelector('.contenido-oculto');
+    if (contenido.style.display === 'none' || !contenido.style.display) {
+        contenido.style.display = 'block';
+        well.classList.add('open'); // Marca como abierto
+        well.style.backgroundColor = 'rgba(30, 40, 50, 0.35)'; // Color cuando está abierto
+        well.style.color = '#ffffff'; // Letras blancas cuando está abierto
+        well.style.border = 'none';
+
+    } else {
+        contenido.style.display = 'none';
+        well.classList.remove('open'); // Marca como cerrado
+        //well.style.backgroundColor = '#d8a1a1f4'; // Color rosa cuando está cerrado
+        well.style.backgroundColor = '#d7a75e'; // Color rosa cuando está cerrado
+        well.style.color = 'black'; // Letras negras cuando está cerrado
+    }
+}
+
 $(function () {
 
     $.blockUI.defaults.message = "Espere un momento, por favor...";
@@ -2906,6 +2948,48 @@ $(function () {
         });
 
     tofrom10 = $("#txtFechaConsulta6").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom11 = $("#txtFechaFirmaContrato").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom12 = $("#txtFechaFirmaActa").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom13 = $("#txtFechaAnticipo").datepicker(
         {
             dateFormat: dateFormat,
             dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],

@@ -1091,6 +1091,7 @@
     <Content Include="Formulario\HistoriaReintegro.aspx" />
     <Content Include="Formulario\HistoriaRetiro.aspx" />
     <Content Include="Formulario\InformacionContratos.aspx" />
+    <Content Include="Formulario\InfoContratosPedidos.aspx" />
     <Content Include="Formulario\ListaEmpleados.aspx" />
     <Content Include="Formulario\PaginaError.aspx" />
     <Content Include="Formulario\Perfiles.aspx" />
@@ -1575,6 +1576,13 @@
     </Compile>
     <Compile Include="Formulario\InformacionContratos.aspx.designer.cs">
       <DependentUpon>InformacionContratos.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\InfoContratosPedidos.aspx.cs">
+      <DependentUpon>InfoContratosPedidos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\InfoContratosPedidos.aspx.designer.cs">
+      <DependentUpon>InfoContratosPedidos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ListaEmpleados.aspx.cs">
       <DependentUpon>ListaEmpleados.aspx</DependentUpon>

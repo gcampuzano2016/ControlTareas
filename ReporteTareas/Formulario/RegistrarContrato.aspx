@@ -240,6 +240,23 @@
                                     </div>-->
                                     </div>
                                     <div class="row">
+                                        <div class="form-group col-lg-3">
+                                            <label>Fecha Firma Contrato</label>
+                                            <input type="text" class="form-control" id="txtFechaFirmaContrato" placeholder="dd/mm/yyyy">
+                                            <p class="help-block"></p>
+                                        </div>
+                                        <div class="form-group col-lg-3">
+                                            <label>Fecha Acta Entrega</label>
+                                            <input type="text" class="form-control" id="txtFechaFirmaActa" placeholder="dd/mm/yyyy">
+                                            <p class="help-block"></p>
+                                        </div>
+                                        <div class="form-group col-lg-3">
+                                            <label>Fecha Anticipo</label>
+                                            <input type="text" class="form-control" id="txtFechaAnticipo" placeholder="dd/mm/yyyy">
+                                            <p class="help-block"></p>
+                                        </div>
+                                    </div>
+                                    <div class="row">
                                         <div class="form-group col-lg-12">
                                             <label>Observación</label>
                                             <textarea class="form-control" id="txtObservacion" name="txtObservacion" rows="4" cols="50"></textarea>
@@ -257,6 +274,11 @@
                                         <div class="form-group col-lg-6">
                                             <label>E-Mail</label>
                                             <input type="text" class="form-control" id="txtMail" placeholder="E-Mail">
+                                            <p class="help-block"></p>
+                                        </div>
+                                        <div class="form-group col-lg-4">
+                                            <label>Teléfono de Contacto</label>
+                                            <input type="text" class="form-control" id="txtContactoTelefono" placeholder="Teléfono de contacto">
                                             <p class="help-block"></p>
                                         </div>
                                     </div>

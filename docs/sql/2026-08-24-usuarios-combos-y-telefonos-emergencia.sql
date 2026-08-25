@@ -221,10 +221,36 @@ PRINT 'Sp_RTA_ActualizarUsuario actualizado.';
 GO
 
 /* ------------------------------------------------------------------ opcional
-   Normalizar los departamentos escritos distinto, para que el combo no muestre
-   duplicados. Descomentar solo si se quiere unificarlos; revisa antes que los
-   destinos sean los correctos.
+   Normalizar el departamento escrito distinto, para que el combo no ofrezca
+   dos veces el mismo. Descomentar y ejecutar cuando se quiera aplicar.
 
-UPDATE dbo.R_Usuarios SET Departamento = 'GTH'            WHERE LTRIM(RTRIM(Departamento)) = 'GTH-';
-UPDATE dbo.R_Usuarios SET Departamento = 'ADMINISTRACION' WHERE LTRIM(RTRIM(Departamento)) = 'ADMINISTRATIVO';
+   Los datos se revisaron el 2026-08-24 con
+   2026-08-24-departamentos-conteo.sql. De las variantes que parecian
+   duplicadas, solo una lo era.
+
+   GTH- -> GTH: es un typo, afecta a una fila. La evidencia es que el jefe
+   inmediato de esa persona (3296891) esta en GTH.
+*/
+
+-- UPDATE dbo.R_Usuarios SET Departamento = 'GTH' WHERE LTRIM(RTRIM(Departamento)) = 'GTH-';
+
+/* ADMINISTRACION y ADMINISTRATIVO NO se unifican, aunque el prefijo comun
+   invite a hacerlo. Son un usuario cada uno, de empresas distintas y con
+   jefes distintos:
+
+     ADMINISTRACION   MORA MOREJON DEVORA ESTELA   DOS       jefe 2184695
+     ADMINISTRATIVO   Karina Ruiz Palacios         AGILITY   jefe 1075
+
+   No hay nada que indique que sean la misma area, y elegir un destino seria
+   inventarlo: unificarlas le cambia el area a una persona real por una
+   coincidencia de las primeras seis letras. Si alguien confirma con GTH que
+   son la misma, ahi se decide el destino y se agrega el UPDATE.
+
+   AREA OPERACIONES tampoco se toca. Es el unico nombre con prefijo
+   redundante, pero no colisiona con ningun OPERACIONES: cambiarlo seria
+   cosmetico.
+
+   Aparte: 45 usuarios no tienen departamento (43 activos, pero solo 6
+   visibles en selectores). El combo les sale en blanco. No es un duplicado,
+   es un dato que nunca se lleno.
    ------------------------------------------------------------------------- */

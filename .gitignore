@@ -33,6 +33,15 @@ ReporteTareas/obj/Release/*
 # reglas de arriba no puedan recortarlo por accidente.
 !ReporteTareas/obj/Release/Package/PackageTmp/**
 
+# El target Package deja ademas, sueltos en Package/, un .zip de ~150 MB y los
+# scripts de MSDeploy. El despliegue de este proyecto no los usa: copia a mano
+# el contenido de PackageTmp/. Se ignoran para que un `git add -A` distraido no
+# meta el zip al repositorio. Solo aplican a Package/ en si, no a PackageTmp/.
+ReporteTareas/obj/Release/Package/*.zip
+ReporteTareas/obj/Release/Package/*.cmd
+ReporteTareas/obj/Release/Package/*.xml
+ReporteTareas/obj/Release/Package/*.txt
+
 # Credenciales de base de datos. connections.config se crea a mano en cada
 # maquina y en el servidor a partir de connections.config.ejemplo, que si
 # se versiona. Nunca commitear el archivo con las contrasenas reales.

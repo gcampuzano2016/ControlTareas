@@ -1406,9 +1406,6 @@
     <Content Include="js\ReporteSalud.js" />
     <Content Include="js\parametrizacionUsuarios.js" />
     <Content Include="js\parametrizacionPerfiles.js" />
-    <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />
-    <Content Include="js\obj\Debug\BillWeb.dll" />
-    <Content Include="js\obj\Debug\BillWeb.pdb" />
     <Content Include="js\ResetProceso.js" />
     <Content Include="js\ValidarTarea.js" />
     <Content Include="Web.config" />
@@ -2375,8 +2372,6 @@
     <Content Include="js\less\mixins.less" />
     <Content Include="js\less\sb-admin-2.less" />
     <Content Include="js\less\variables.less" />
-    <Content Include="js\obj\Debug\BillWeb.csprojResolveAssemblyReference.cache" />
-    <Content Include="js\obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <Content Include="libman.json" />
     <Content Include="Connected Services\ConsultarTicket2\ReporteTareas.ConsultarTicket2.AddResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -2484,7 +2479,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="bower_components\poper\" />
     <Folder Include="Controllers\" />
-    <Folder Include="js\obj\Debug\TempPE\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>

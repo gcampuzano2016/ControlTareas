@@ -11,29 +11,35 @@ namespace ReporteTareas
         void Application_Start(object sender, EventArgs e)
         {
             // Código que se ejecuta al iniciar la aplicación
-            VerificarCadenasDeConexion();
+            VerificarConfiguracion();
             GlobalConfiguration.Configure(WebApiConfig.Register);
         }
 
         /// <summary>
-        /// Los nombres que la capa de datos busca en la configuración. Si cambia
-        /// uno acá, cambia en connections.config y en DESPLIEGUE.md.
+        /// Cadenas de conexión que la capa de datos busca, en connections.config.
+        /// Si cambia un nombre acá, cambia también allá y en DESPLIEGUE.md.
         /// </summary>
         private static readonly string[] CadenasRequeridas = { "ReporTarea", "ArandaDb", "Sap" };
 
         /// <summary>
-        /// Falla al arrancar, con el nombre de lo que falta, si la configuración
-        /// no trae las cadenas de conexión.
-        ///
-        /// Existe porque el modo de fallar por defecto es pésimo: las cadenas
-        /// viven en connections.config, que no viaja en la publicación y se crea
-        /// a mano en cada servidor. Cuando falta, ConfigurationManager devuelve
-        /// null, el primer .ConnectionString revienta lejos de la causa, y el
-        /// catch de la capa de datos se lo traga y devuelve null. El login lo
-        /// interpreta como que el usuario no existe y manda a buscar el problema
-        /// a Active Directory. Ya paso: agosto de 2026.
+        /// Claves de appSettings que FileEncryptionService necesita, en
+        /// appsettings.config.
         /// </summary>
-        private static void VerificarCadenasDeConexion()
+        private static readonly string[] ClavesRequeridas = { "EncryptionPassword", "EncryptionSalt" };
+
+        /// <summary>
+        /// Falla al arrancar, nombrando lo que falta, si la configuración está
+        /// incompleta.
+        ///
+        /// Existe porque el modo de fallar por defecto es pésimo. Los secretos
+        /// viven en connections.config y appsettings.config, que no viajan en la
+        /// publicación y se crean a mano en cada servidor. Cuando falta uno,
+        /// ConfigurationManager devuelve null, el primer uso revienta lejos de la
+        /// causa, y el catch de la capa de datos se lo traga y devuelve null. El
+        /// login lo interpreta como que el usuario no existe y manda a buscar el
+        /// problema a Active Directory. Ya pasó: agosto de 2026.
+        /// </summary>
+        private static void VerificarConfiguracion()
         {
             List<string> faltantes = new List<string>();
 
@@ -42,17 +48,25 @@ namespace ReporteTareas
                 ConnectionStringSettings cadena = ConfigurationManager.ConnectionStrings[nombre];
                 if (cadena == null || string.IsNullOrWhiteSpace(cadena.ConnectionString))
                 {
-                    faltantes.Add(nombre);
+                    faltantes.Add("cadena de conexión '" + nombre + "' (connections.config)");
+                }
+            }
+
+            foreach (string nombre in ClavesRequeridas)
+            {
+                if (string.IsNullOrWhiteSpace(ConfigurationManager.AppSettings[nombre]))
+                {
+                    faltantes.Add("clave '" + nombre + "' (appsettings.config)");
                 }
             }
 
             if (faltantes.Count > 0)
             {
                 throw new ConfigurationErrorsException(
-                    "No se encontraron estas cadenas de conexión: " + string.Join(", ", faltantes) + ". " +
-                    "Deben estar en connections.config, en la misma carpeta que el Web.config del sitio. " +
-                    "Ese archivo no viaja en la publicación a propósito (tiene las contraseñas): " +
-                    "se crea una vez en cada servidor a partir de connections.config.ejemplo. " +
+                    "Falta configuración obligatoria: " + string.Join("; ", faltantes) + ". " +
+                    "Esos archivos van en la misma carpeta que el Web.config del sitio. " +
+                    "No viajan en la publicación a propósito, porque tienen los secretos: " +
+                    "se crean una vez en cada servidor a partir de su .ejemplo. " +
                     "Ver DESPLIEGUE.md, secciones 1 y 2.");
             }
         }

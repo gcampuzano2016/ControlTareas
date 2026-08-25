@@ -42,7 +42,9 @@ ReporteTareas/obj/Release/Package/*.cmd
 ReporteTareas/obj/Release/Package/*.xml
 ReporteTareas/obj/Release/Package/*.txt
 
-# Credenciales de base de datos. connections.config se crea a mano en cada
-# maquina y en el servidor a partir de connections.config.ejemplo, que si
-# se versiona. Nunca commitear el archivo con las contrasenas reales.
+# Secretos. Los dos se crean a mano en cada maquina y en el servidor, a partir
+# de su .ejemplo, que si se versiona. Nunca commitear los reales.
+#   connections.config  cadenas de conexion, con las contrasenas de base
+#   appsettings.config  claves de cifrado de FileEncryptionService
 connections.config
+appsettings.config

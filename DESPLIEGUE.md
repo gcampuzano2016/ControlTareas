@@ -6,23 +6,35 @@ despliegue a medias tumba el sitio.
 
 ---
 
-## 1. Lo que cambió: las credenciales ya no están en el código
+## 1. Lo que cambió: los secretos ya no están en el código
 
 Antes, las cadenas de conexión estaban escritas dentro de `CapaDato/*.cs`, con
-la contraseña de `sa` en claro. Como el repositorio es público, cualquiera
-podía leerlas.
+la contraseña de `sa` en claro, y las claves de cifrado en el `Web.config`. Como
+el repositorio es público, cualquiera podía leerlas.
 
-Ahora:
+Ahora hay **dos** archivos de secretos, con el mismo trato:
 
 | archivo | contenido | ¿va en git? |
 |---|---|---|
-| `ReporteTareas/Web.config` | `<connectionStrings configSource="connections.config" />` | sí, y no tiene secretos |
+| `ReporteTareas/Web.config` | solo los `configSource` que apuntan a los otros dos | sí, y no tiene secretos |
 | `ReporteTareas/connections.config` | las cadenas reales, con contraseñas | **no**, está en `.gitignore` |
 | `ReporteTareas/connections.config.ejemplo` | plantilla con placeholders | sí |
+| `ReporteTareas/appsettings.config` | las claves de cifrado reales | **no**, está en `.gitignore` |
+| `ReporteTareas/appsettings.config.ejemplo` | plantilla con placeholders | sí |
 
-La consecuencia práctica: **`connections.config` no viaja ni en git ni en la
-publicación**. Existe porque alguien lo creó a mano en esa máquina. En un
-servidor nuevo hay que crearlo, o el sitio levanta y falla al primer query.
+La consecuencia práctica: **ninguno de los dos viaja en git ni en la
+publicación**. Existen porque alguien los creó a mano en esa máquina. En un
+servidor nuevo hay que crear los dos.
+
+Si falta alguno, la aplicación **no arranca**: `Global.asax` lo verifica y corta
+con el nombre de lo que falta. Eso es a propósito. Antes fallaba mucho más
+tarde y mintiendo — un `NullReferenceException` en la capa de datos, o un
+"el usuario no existe" en el login.
+
+> **Ojo con `appsettings.config`.** De sus dos valores se deriva la llave AES con
+> la que `FileEncryptionService` cifra archivos. Si cambian, **los archivos ya
+> cifrados quedan ilegibles**. Al preparar un ambiente nuevo hay que copiar los
+> valores exactos del ambiente existente, no inventar unos nuevos.
 
 ---
 
@@ -30,13 +42,17 @@ servidor nuevo hay que crearlo, o el sitio levanta y falla al primer query.
 
 ```
 copy ReporteTareas\connections.config.ejemplo ReporteTareas\connections.config
+copy ReporteTareas\appsettings.config.ejemplo ReporteTareas\appsettings.config
 ```
 
-Luego edita `connections.config` y reemplaza `SERVIDOR`, `USUARIO` y
-`CONTRASENA` por los valores reales del ambiente. Se hace **una sola vez**: las
-publicaciones posteriores no lo tocan.
+Luego edita los dos y reemplaza los placeholders por los valores reales del
+ambiente: en `connections.config`, `SERVIDOR`, `USUARIO` y `CONTRASENA`; en
+`appsettings.config`, `CLAVE_DE_CIFRADO` y `SALT_DE_CIFRADO`. Se hace **una sola
+vez**: las publicaciones posteriores no los tocan.
 
-Nunca lo agregues a git. Si `git status` lo muestra, algo se rompió en el
+En el servidor van junto al `Web.config` desplegado, no en `bin\`.
+
+Nunca los agregues a git. Si `git status` los muestra, algo se rompió en el
 `.gitignore`.
 
 ---
@@ -53,9 +69,9 @@ Desde Visual Studio: clic derecho en el proyecto `ReporteTareas` → *Publicar* 
 perfil `FolderProfile`.
 
 > **Cuidado con el borrado.** La publicación vacía la carpeta destino. No
-> guardes ahí `connections.config` ni nada que quieras conservar: se pierde en
-> la siguiente publicación. El `connections.config` va en el servidor, junto al
-> `Web.config` desplegado, no en la carpeta de publicación.
+> guardes ahí los archivos de secretos ni nada que quieras conservar: se pierde
+> en la siguiente publicación. Los dos van en el servidor, junto al `Web.config`
+> desplegado, no en la carpeta de publicación.
 
 ### Cómo llegan los archivos al servidor
 
@@ -65,14 +81,15 @@ servidor, reemplazando los archivos existentes.
 
 > **No uses una copia que borre sobrantes.** `robocopy /MIR`, un "sincronizar
 > carpetas" o cualquier opción de *eliminar archivos que no están en el
-> origen* **borrará `connections.config` del servidor**, porque ese archivo no
-> viene en la publicación. El sitio se cae en el siguiente query y la causa no
-> es obvia. Copia y reemplaza; nunca sincronices.
+> origen* **borrará `connections.config` y `appsettings.config` del servidor**,
+> porque esos archivos no vienen en la publicación. Desde agosto de 2026 el
+> sitio no arranca y dice cuál falta, en vez de caerse al primer query sin
+> explicar por qué. Copia y reemplaza; nunca sincronices.
 
 Qué debe quedar en el servidor después de copiar:
 
 - todo lo publicado (`bin\`, `Formulario\`, `js\`, `Web.config`, …)
-- `connections.config`, **que ya estaba ahí y no se toca**
+- `connections.config` y `appsettings.config`, **que ya estaban ahí y no se tocan**
 
 No hace falta reiniciar IIS: al reemplazar `Web.config` o el contenido de
 `bin\`, ASP.NET recicla la aplicación solo. La primera visita después de
@@ -89,11 +106,12 @@ sin el otro, el sitio se cae.
 |---|---|
 | solo `bin\` sobre un `Web.config` viejo | **falla** — el código busca cadenas que ese `Web.config` no declara |
 | un paquete viejo completo | funciona, pero reintroduce las contraseñas en el código |
-| publicación nueva + `connections.config` en el servidor | correcto |
+| publicación nueva + los dos archivos de secretos en el servidor | correcto |
 
 Orden seguro:
 
-1. Verifica que `connections.config` ya exista en el servidor (sección 2).
+1. Verifica que `connections.config` y `appsettings.config` ya existan en el
+   servidor (sección 2).
 2. Ejecuta los scripts SQL pendientes de `docs/sql/` (ver abajo).
 3. Publica y copia los archivos.
 4. Recién entonces deja entrar tráfico.
@@ -130,7 +148,9 @@ Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Lo
 2. Abre una pantalla que liste tareas. Es la que usa la conexión `ReporTarea`,
    la de casi todo el sistema.
 3. Si aparece un error de referencia nula al conectar, casi siempre es que
-   falta `connections.config` o que un nombre no coincide. Los nombres que el
+   falta uno de los archivos de secretos o que un nombre no coincide. Desde
+   agosto de 2026 `Global.asax` corta al arrancar diciendo cuál falta. Los
+   nombres que el código espera son exactamente `ReporTarea`, `ArandaDb` y `Sap`.
    código espera son exactamente `ReporTarea`, `ArandaDb` y `Sap`.
 4. Si el cambio traía script SQL, comprueba la pantalla que lo usa. Para el de
    agosto de 2026 (teléfonos de emergencia): abre *Administración de usuarios*,
@@ -158,7 +178,7 @@ servidor y reinicias el sitio. Eso es todo.
 
 ## 7. Qué NO subir nunca
 
-- `connections.config` (contraseñas reales)
+- `connections.config` (contraseñas de base) y `appsettings.config` (claves de cifrado)
 - Cadenas de conexión escritas dentro de archivos `.cs`, ni siquiera comentadas
   — así fue como se filtraron las anteriores
 

@@ -2879,7 +2879,16 @@ namespace JsonJQueryNetTareas
                     f.RutaTrazo = ruta;
                 }
 
-                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+                /* El logo institucional, el mismo de los correos. Se usa este y no
+                   Img/logo_dos.png porque ese ultimo no esta declarado en el
+                   proyecto: existe en la maquina de desarrollo pero no viaja en la
+                   publicacion, asi que el PDF habria salido sin logo en el servidor
+                   y sin que nadie se enterara. Si algun dia se declara, se toma. */
+                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+                if (!File.Exists(rutaLogo))
+                {
+                    rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+                }
                 if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
 
                 string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo);
@@ -2925,6 +2934,57 @@ namespace JsonJQueryNetTareas
                     }
                 }
                 catch { }
+            }
+        }
+
+        /// <summary>
+        /// Registra la firma del colaborador sobre la solicitud recién creada.
+        ///
+        /// No corta el alta si algo sale mal. La solicitud ya está guardada y el
+        /// correo al jefe ya va en camino: reventar acá dejaría al colaborador
+        /// creyendo que no se envió cuando sí se envió. Si falta la firma, el
+        /// documento va a mostrar ese recuadro como pendiente, que es visible y
+        /// se corrige; una solicitud fantasma no.
+        /// </summary>
+        private void GuardarFirmaDelColaborador(HttpContext context, dynamic campos, object idNuevo, string codUsuario)
+        {
+            try
+            {
+                string dataUri = "";
+                try { dataUri = campos["firmaTrazo"].ToString(); }
+                catch { return; }   /* pantalla vieja en caché: no manda el campo */
+
+                byte[] trazo = TrazoDesdeDataUri(dataUri);
+                if (trazo == null || trazo.Length == 0) { return; }
+
+                long idVacaciones;
+                if (!long.TryParse(Convert.ToString(idNuevo), out idVacaciones) || idVacaciones <= 0) { return; }
+
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Rol = "COLABORADOR",
+                    Secuencia = 1,
+                    Decision = "APROBADO",
+                    Comentario = "",
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo registrar la firma del colaborador: " + ex.Message,
+                                "Log", "Detalle", false);
             }
         }
 
@@ -6005,6 +6065,20 @@ namespace JsonJQueryNetTareas
                 registro.Tipo = Convert.ToInt32(campos["tipo"]);
                 TipoProceso = registro.Tipo;
                 respuesta = NegSolicitud.RTA_InsertaNuevaSolicitud(registro);
+
+                /* La firma del colaborador se registra acá y no desde el navegador
+                   porque al enviar todavía no existe el IdVacaciones: lo genera
+                   este insert. Mandar el trazo junto con la solicitud evita un
+                   segundo viaje para pedir el id, y con él la ventana en la que la
+                   solicitud quedaría creada y sin firmar.
+
+                   Solo en el alta (Tipo 0): una actualización no vuelve a firmar.
+                   El mismo llamado va en el bloque de Permisos cuando esa pantalla
+                   tenga su pad, en la etapa 4. */
+                if (respuesta.estado == "1" && TipoProceso == 0)
+                {
+                    GuardarFirmaDelColaborador(HttpContext.Current, campos, respuesta.resultado, IdUsuarioSession);
+                }
 
                 #region Envio Mail
                 if (respuesta.estado == "1")

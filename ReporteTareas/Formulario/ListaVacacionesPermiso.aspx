@@ -5,8 +5,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
+    <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/ProcesoConvenio.js?v=25" type="text/javascript"></script>
+    <script src="../js/ProcesoConvenio.js?v=26" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -119,6 +120,14 @@
                                                                 <!-- Aviso de saldo insuficiente. No bloquea el envío: informa. -->
                                                                 <div class="col-lg-12">
                                                                     <div id="IdAvisoSaldo" class="alert alert-warning" style="display: none; margin-bottom: 10px;"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <!-- Firma del colaborador. Nombre, cargo y cedula los toma el
+                                                                     sistema de la sesion: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaborador"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -435,6 +444,12 @@
                             <label>Motivo:</label>
                             <textarea class="form-control" id="txtDescripcionReq2" name="txtDescripcionReq" rows="2" cols="50"></textarea>
                             <p class="help-block"></p>
+                        </div>
+                        <!-- Firma del paso. Su nombre, cargo y cédula los toma el
+                             sistema de la sesión: no se digitan. -->
+                        <div class="form-group col-lg-12">
+                            <label>Su firma: <span style="color:#a94442">*</span></label>
+                            <div id="divFirmaProceso"></div>
                         </div>
                     </div>
                     <div class="modal-footer">

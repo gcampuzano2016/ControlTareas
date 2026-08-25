@@ -5,8 +5,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
+    <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=29" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=30" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -139,6 +140,14 @@
                                                                         <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="text-align: center">
                                                                         </div>
                                                                     </div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <!-- Firma del colaborador. Nombre, cargo y cedula los toma el
+                                                                     sistema de la sesion: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaborador"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="row">

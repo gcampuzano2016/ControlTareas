@@ -101,7 +101,22 @@ function BtnPermiso() {
     document.getElementById("ListaSolicitud").style.display = "none";
 }
 
+/* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
+   se limpia entre solicitudes: crearlo de nuevo dejaria manejadores duplicados
+   sobre el mismo lienzo y el trazo saldria doble. */
+var _padColaborador = null;
+
+function PrepararFirmaColaborador() {
+    if (_padColaborador === null) {
+        _padColaborador = PadFirma("divFirmaColaborador", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaborador.limpiar();
+    }
+}
+
 function BtnVacaciones() {
+    PrepararFirmaColaborador();
     document.getElementById("RegistroVacaciones").style.display = "block";
     document.getElementById("RegistroPermisos").style.display = "none";
     document.getElementById("ListaSolicitud").style.display = "none";
@@ -1356,6 +1371,13 @@ function GuardarSolicitudVacaciones(tipo) {
         contadorVerificacion += 1;
     }
 
+    /* La firma es requisito del alta. En una actualizacion no se vuelve a
+       firmar: la firma vale por el momento en que se hizo. */
+    if (tipo == 0 && (_padColaborador === null || _padColaborador.estaVacio())) {
+        alerta("Debe firmar la solicitud antes de enviarla.");
+        return;
+    }
+
     if (contadorVerificacion > 0) {
         alerta(mensajeVerificacion);
         return;
@@ -1385,7 +1407,8 @@ function GuardarSolicitudVacaciones(tipo) {
     datosFormulario = datosFormulario + "'SaldoDias': '" + SaldoDias.toString().replace(".",",") + "',";
     datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
     datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
-    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "'";
+    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaborador !== null ? _padColaborador.obtenerTrazo() : "") + "'";
 
     datosFormulario = datosFormulario + "}";
 

@@ -44,7 +44,22 @@ function BtnPermiso() {
     document.getElementById("ListaSolicitud").style.display = "none";
 }
 
+/* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
+   se limpia entre solicitudes: crearlo de nuevo dejaria manejadores duplicados
+   sobre el mismo lienzo y el trazo saldria doble. */
+var _padColaborador = null;
+
+function PrepararFirmaColaborador() {
+    if (_padColaborador === null) {
+        _padColaborador = PadFirma("divFirmaColaborador", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaborador.limpiar();
+    }
+}
+
 function BtnVacaciones() {
+    PrepararFirmaColaborador();
     document.getElementById("RegistroVacaciones").style.display = "block";
     document.getElementById("RegistroPermisos").style.display = "none";
     document.getElementById("ListaSolicitud").style.display = "none";
@@ -194,10 +209,137 @@ function VerDocumento() {
     let proceso = "";
 }
 
+/* Genera el PDF firmado y lo abre.
+
+   Se genera en el momento en vez de guardar uno al aprobar, porque el archivo
+   queda registrado contra la solicitud y así una descarga posterior siempre
+   refleja las firmas que hay, no las que había. La conversión tarda un par de
+   segundos: por eso el aviso y el botón deshabilitado. */
+function DescargarPdfSolicitud(idvacaciones) {
+    var $btn = $(event ? event.currentTarget : null);
+    $btn.prop("disabled", true);
+    $("#divMensajes").html("Generando el PDF...");
+
+    var datos = JSON.stringify([{
+        "action": "GenerarPdfSolicitud",
+        "parameters": { "idVacaciones": idvacaciones }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $btn.prop("disabled", false);
+            $("#divMensajes").html("");
+
+            if (respuesta == null || respuesta.estado != "1") {
+                MensajeIncorrecto(respuesta == null ? "No se pudo generar el PDF." : respuesta.mensaje);
+                return;
+            }
+
+            /* En mensaje viene la ruta relativa del archivo generado. */
+            window.open(respuesta.mensaje, "_blank");
+        },
+        error: function () {
+            $btn.prop("disabled", false);
+            $("#divMensajes").html("");
+            MensajeIncorrecto("No se pudo generar el PDF. Intente nuevamente.");
+        }
+    });
+}
+
+/* El pad del modal de aprobación. Se crea una sola vez y se limpia en cada
+   apertura: instanciarlo de nuevo dejaría manejadores duplicados sobre el mismo
+   lienzo y el trazo saldría doble. */
+var _padProceso = null;
+
 function AprobarSolicitud(idvacaciones, Descripcion) {
     idVacaciones = idvacaciones;
     StrTipoSolicitud = Descripcion;
+
+    if (_padProceso === null) {
+        _padProceso = PadFirma("divFirmaProceso", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padProceso.limpiar();
+    }
+
     $("#modalCargarProceso").modal('show');
+}
+
+/* Quién firma se deduce del estado que se está poniendo: el jefe aprueba o
+   rechaza, Talento Humano procesa o rechaza como GTH. Así el rol no depende de
+   un dato nuevo que alguien tenga que mantener. */
+function RolQueFirma(estado) {
+    if (estado === "APROBADO" || estado === "RECHAZADO") { return "JEFE"; }
+    if (estado === "PROCESADO" || estado === "RECHAZADO GTH") { return "GTH"; }
+    return "";
+}
+
+function DecisionDelEstado(estado) {
+    return (estado === "RECHAZADO" || estado === "RECHAZADO GTH") ? "RECHAZADO" : "APROBADO";
+}
+
+/* Registra la firma y, solo si quedó guardada, sigue con el cambio de estado.
+
+   Ese orden importa. Si el estado cambiara primero y la firma fallara, quedaría
+   una solicitud aprobada sin firma, que es justo lo que este trabajo viene a
+   evitar. Al revés lo peor que pasa es una firma de un paso que no se completó,
+   y eso se arregla reintentando: el procedimiento responde "ese paso ya estaba
+   firmado" en vez de duplicar, así que volver a darle Guardar termina el
+   trámite. */
+function FirmarYActualizar(tipo) {
+    var estado = $('#cboEstado2').val();
+    var rol = RolQueFirma(estado);
+
+    if (rol === "") {
+        alerta("No se reconoce el estado seleccionado.");
+        return;
+    }
+
+    if (_padProceso === null || _padProceso.estaVacio()) {
+        alerta("Debe firmar para registrar su decisión.");
+        return;
+    }
+
+    var datos = JSON.stringify([{
+        "action": "GuardarFirmaSolicitud",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "idVacaciones": idVacaciones,
+            "rol": rol,
+            "decision": DecisionDelEstado(estado),
+            "comentario": $('#txtDescripcionReq2').val(),
+            "trazo": _padProceso.obtenerTrazo()
+        }
+    }]);
+
+    $("#btnBorrarArchivo2").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnBorrarArchivo2").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo registrar la firma." : respuesta.mensaje);
+                return;
+            }
+
+            ActualizarSolicitudProceso(tipo);
+        },
+        error: function () {
+            $("#btnBorrarArchivo2").prop("disabled", false);
+            alerta("No se pudo registrar la firma. No se cambió el estado de la solicitud.");
+        }
+    });
 }
 
 function EnvioCorreo(idvacaciones, Descripcion) {
@@ -217,17 +359,20 @@ function ActualizarProceso() {
         }
         else {
 
+            /* Ahora todo cambio de estado pasa por la firma. FirmarYActualizar
+               solo llama a ActualizarSolicitudProceso si la firma quedó
+               registrada. */
             if ($('#cboEstado2').val() == "APROBADO") {
-                ActualizarSolicitudProceso(2);
+                FirmarYActualizar(2);
             }
             else if ($('#cboEstado2').val() == "RECHAZADO") {
-                ActualizarSolicitudProceso(3);
+                FirmarYActualizar(3);
             }
             else if ($('#cboEstado2').val() == "RECHAZADO GTH") {
-                ActualizarSolicitudProceso(7);
+                FirmarYActualizar(7);
             }
             else if ($('#cboEstado2').val() == "PROCESADO") {
-                ActualizarSolicitudProceso(8);
+                FirmarYActualizar(8);
             }
         }
     }
@@ -285,6 +430,15 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
                 info = info + "<button type='button' value='Actualizar' title='Solicitar documento.' class='btn btn-btn-editClientes btn-xs' onclick='EnvioCorreo(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"); '><i class='fa fa-envelope' aria-hidden='true'></i></button>";
             }
         }
+
+        /* La descarga aparece solo con el trámite cerrado. PROCESADO es el estado
+           en que Talento Humano ya firmó, o sea el único en que el documento tiene
+           las tres firmas y sirve como respaldo. */
+        if (item.EstadoSolicitud == "PROCESADO") {
+            info = info + "&nbsp;|&nbsp;";
+            info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
+        }
+
         info = info + "</td>";
         info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";
         info = info + "<td class='sorting_1'>" + item.IdVacaciones + "</td>";
@@ -924,6 +1078,13 @@ function GuardarSolicitudVacaciones(tipo) {
         contadorVerificacion += 1;
     }
 
+    /* La firma es requisito del alta. En una actualización no se vuelve a firmar:
+       la firma vale por el momento en que se hizo. */
+    if (tipo == 0 && (_padColaborador === null || _padColaborador.estaVacio())) {
+        mensajeVerificacion += "- Debe firmar la solicitud antes de enviarla ";
+        contadorVerificacion += 1;
+    }
+
     if (contadorVerificacion > 0) {
         alerta(mensajeVerificacion);
         return;
@@ -949,7 +1110,8 @@ function GuardarSolicitudVacaciones(tipo) {
     datosFormulario = datosFormulario + "'SaldoDias': '" + SaldoDias.toString().replace(".",",") + "',";
     datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
     datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
-    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "'";
+    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaborador !== null ? _padColaborador.obtenerTrazo() : "") + "'";
 
     datosFormulario = datosFormulario + "}";
 

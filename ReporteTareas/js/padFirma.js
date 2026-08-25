@@ -18,6 +18,30 @@
        pad.limpiar();
    ============================================================================ */
 
+/* Clave donde se recuerda la firma del turno.
+
+   Se usa sessionStorage y no localStorage a proposito: en una maquina compartida
+   —y en esta empresa las hay— localStorage dejaria la firma de una persona
+   disponible para la siguiente que se siente ahi. sessionStorage muere al cerrar
+   la pestana.
+
+   Se agrega ademas el token de sesion a la clave, para que dos cuentas abiertas
+   en el mismo navegador nunca se ofrezcan la firma de la otra. */
+function FirmaRecordadaClave() {
+    var token = $("#ContentPlaceHolder1_txtUsuario").val() || "anon";
+    return "firmaTurno_" + token;
+}
+
+function FirmaRecordadaGuardar(dataUri) {
+    try { sessionStorage.setItem(FirmaRecordadaClave(), dataUri); }
+    catch (e) { /* modo privado o almacenamiento lleno: se sigue sin recordar */ }
+}
+
+function FirmaRecordadaLeer() {
+    try { return sessionStorage.getItem(FirmaRecordadaClave()) || ""; }
+    catch (e) { return ""; }
+}
+
 function PadFirma(idContenedor, opciones) {
     opciones = opciones || {};
 
@@ -48,6 +72,7 @@ function PadFirma(idContenedor, opciones) {
           '</div>' +
           '<div style="margin-top:8px">' +
             '<button type="button" class="btn btn-default btn-sm" id="' + idBase + '_limpiar">Limpiar</button>' +
+            '<button type="button" class="btn btn-info btn-sm" style="margin-left:6px; display:none" id="' + idBase + '_usar">Usar mi firma</button>' +
             '<span class="help-block" style="display:inline-block; margin:0 0 0 10px" id="' + idBase + '_estado">Sin firmar</span>' +
           '</div>' +
         '</div>'
@@ -148,14 +173,47 @@ function PadFirma(idContenedor, opciones) {
         lector.readAsDataURL(archivo);
     });
 
+    /* Pinta en el lienzo un data URI ya existente. */
+    function cargar(dataUri, etiqueta) {
+        var img = new Image();
+        img.onload = function () {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            var escala = Math.min(canvas.width / img.width, canvas.height / img.height);
+            var w = img.width * escala;
+            var h = img.height * escala;
+            ctx.drawImage(img, (canvas.width - w) / 2, (canvas.height - h) / 2, w, h);
+            hayTrazo = true;
+            estado(etiqueta);
+        };
+        img.src = dataUri;
+    }
+
+    /* La firma del turno: se dibuja una vez y se reusa en las demas aprobaciones.
+       Aprobar veinte solicitudes no puede significar dibujar veinte veces, o la
+       gente termina garabateando cualquier cosa y la firma deja de valer.
+
+       Lo que se reusa es el trazo, no la aprobacion: cada firma guarda igual su
+       propia fecha, IP, dispositivo y decision. */
+    if (FirmaRecordadaLeer() !== "") {
+        $("#" + idBase + "_usar").show().on("click", function () {
+            cargar(FirmaRecordadaLeer(), "Firmado (su firma guardada)");
+        });
+    }
+
     return {
         /* Data URI listo para viajar al servidor, o cadena vacia si no hay firma.
            Se devuelve vacio en vez del canvas en blanco a proposito: asi quien
            llama puede exigir firma sin tener que inspeccionar pixeles. */
         obtenerTrazo: function () {
-            return hayTrazo ? canvas.toDataURL("image/png") : "";
+            if (!hayTrazo) { return ""; }
+            var dataUri = canvas.toDataURL("image/png");
+            /* Se recuerda recien al usarla, no al dibujarla: un trazo que se
+               descarto sin enviar no deberia quedar como la firma del turno. */
+            FirmaRecordadaGuardar(dataUri);
+            return dataUri;
         },
         estaVacio: function () { return !hayTrazo; },
-        limpiar: limpiar
+        limpiar: limpiar,
+        cargar: cargar
     };
 }

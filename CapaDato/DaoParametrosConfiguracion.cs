@@ -38,7 +38,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objParametroConfiguracion;
         }
@@ -73,7 +76,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return valor;
         }
@@ -121,7 +127,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 

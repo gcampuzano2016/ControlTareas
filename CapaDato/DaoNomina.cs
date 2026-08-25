@@ -45,7 +45,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

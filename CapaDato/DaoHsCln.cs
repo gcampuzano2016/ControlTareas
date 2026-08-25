@@ -78,7 +78,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection?.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -119,7 +122,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return obj;
@@ -164,7 +170,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -269,7 +278,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;

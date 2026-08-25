@@ -35,7 +35,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
         }
@@ -81,7 +84,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objUsuario;
         }
@@ -118,7 +124,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objUsuario;
         }

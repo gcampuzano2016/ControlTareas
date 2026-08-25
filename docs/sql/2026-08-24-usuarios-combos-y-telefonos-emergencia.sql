@@ -222,7 +222,7 @@ GO
 
 /* ------------------------------------------------------------------ opcional
    Normalizar el departamento escrito distinto, para que el combo no ofrezca
-   dos veces el mismo. Descomentar y ejecutar cuando se quiera aplicar.
+   dos veces el mismo. Estado de cada caso, abajo.
 
    Los datos se revisaron el 2026-08-24 con
    2026-08-24-departamentos-conteo.sql. De las variantes que parecian
@@ -230,6 +230,14 @@ GO
 
    GTH- -> GTH: es un typo, afecta a una fila. La evidencia es que el jefe
    inmediato de esa persona (3296891) esta en GTH.
+
+   YA SE APLICO el 2026-08-25 sobre Id_Usuario 1252 (COMINA JIMENEZ GABRIELA
+   ESTEFANIA). Quedo anotado en R_UsuarioBitacora con Usuario_Registro =
+   'NORMALIZACION', porque un UPDATE directo no pasa por el SP y sin eso el
+   cambio de area no tendria rastro. El combo bajo de 12 opciones a 11.
+
+   El UPDATE se deja abajo por referencia. Volver a correrlo no hace nada: ya
+   no queda ninguna fila con 'GTH-'.
 */
 
 -- UPDATE dbo.R_Usuarios SET Departamento = 'GTH' WHERE LTRIM(RTRIM(Departamento)) = 'GTH-';

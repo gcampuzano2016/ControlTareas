@@ -14,7 +14,7 @@ namespace CapaNegocio
             return DaoFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
         }
 
-        public static List<EntFirmaSolicitud> Listar(int idVacaciones)
+        public static List<EntFirmaSolicitud> Listar(long idVacaciones)
         {
             return DaoFirmaSolicitud.Listar(idVacaciones);
         }
@@ -32,7 +32,7 @@ namespace CapaNegocio
         /// Se rellena a dos dígitos porque así lo muestran los ejemplos de la
         /// especificación; con solicitudes de cuatro cifras el número crece solo.
         /// </summary>
-        public static string Folio(int idVacaciones)
+        public static string Folio(long idVacaciones)
         {
             return PrefijoFolio + idVacaciones.ToString("00");
         }

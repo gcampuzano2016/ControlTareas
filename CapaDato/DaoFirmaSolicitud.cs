@@ -25,7 +25,7 @@ namespace CapaDato
             using (SqlCommand cmd = new SqlCommand("Sp_RTA_GuardarFirmaSolicitud", cnx))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@IdVacaciones", SqlDbType.Int).Value = firma.IdVacaciones;
+                cmd.Parameters.Add("@IdVacaciones", SqlDbType.BigInt).Value = firma.IdVacaciones;
                 cmd.Parameters.Add("@Rol", SqlDbType.VarChar, 20).Value = firma.Rol ?? string.Empty;
                 cmd.Parameters.Add("@Secuencia", SqlDbType.Int).Value = firma.Secuencia <= 0 ? 1 : firma.Secuencia;
                 cmd.Parameters.Add("@Decision", SqlDbType.VarChar, 10).Value = firma.Decision ?? string.Empty;
@@ -55,7 +55,7 @@ namespace CapaDato
         }
 
         /// <summary>Firmas de una solicitud, en el orden del flujo.</summary>
-        public static List<EntFirmaSolicitud> Listar(int idVacaciones)
+        public static List<EntFirmaSolicitud> Listar(long idVacaciones)
         {
             List<EntFirmaSolicitud> lista = new List<EntFirmaSolicitud>();
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
@@ -64,7 +64,7 @@ namespace CapaDato
             using (SqlCommand cmd = new SqlCommand("Sp_RTA_ListarFirmasSolicitud", cnx))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@IdVacaciones", SqlDbType.Int).Value = idVacaciones;
+                cmd.Parameters.Add("@IdVacaciones", SqlDbType.BigInt).Value = idVacaciones;
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
@@ -74,7 +74,7 @@ namespace CapaDato
                         lista.Add(new EntFirmaSolicitud()
                         {
                             IdFirma = Convert.ToInt32(dr["IdFirma"]),
-                            IdVacaciones = Convert.ToInt32(dr["IdVacaciones"]),
+                            IdVacaciones = Convert.ToInt64(dr["IdVacaciones"]),
                             Rol = dr["Rol"].ToString(),
                             Secuencia = Convert.ToInt32(dr["Secuencia"]),
                             Decision = dr["Decision"].ToString(),

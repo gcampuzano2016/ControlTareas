@@ -54,7 +54,7 @@ BEGIN
         /* La solicitud. Sin clave foranea, como el resto del esquema: este modelo
            no tiene ninguna y agregar una sola aqui daria una falsa sensacion de
            integridad referencial. */
-        IdVacaciones INT           NOT NULL,
+        IdVacaciones BIGINT        NOT NULL,
 
         /* COLABORADOR | JEFE | GTH. Secuencia es 1 salvo la reconfirmacion del
            jefe cuando hubo recuperacion, que es la segunda firma del mismo rol
@@ -105,7 +105,7 @@ IF OBJECT_ID('dbo.Sp_RTA_GuardarFirmaSolicitud') IS NOT NULL
 GO
 
 CREATE PROCEDURE dbo.Sp_RTA_GuardarFirmaSolicitud
-    @IdVacaciones INT,
+    @IdVacaciones BIGINT,
     @Rol          VARCHAR(20),
     @Secuencia    INT            = 1,
     @Decision     VARCHAR(10)    = 'APROBADO',
@@ -185,7 +185,7 @@ GO
 /* Las firmas de una solicitud, en el orden del flujo. El trazo va en base64
    porque de aqui sale directo al <img> del HTML que se convierte a PDF. */
 CREATE PROCEDURE dbo.Sp_RTA_ListarFirmasSolicitud
-    @IdVacaciones INT
+    @IdVacaciones BIGINT
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -393,17 +393,12 @@ GO
 PRINT 'Sp_RTA_ActualizarUsuario actualizado.';
 GO
 
-/* ------------------------------------------------------------------ a revisar
-   IdVacaciones se declaro INT en VacacionesFirma para calzar con el Int32 que
-   usa la capa de datos. Sp_RTAInsertaNuevaSolicitud lo declara BIGINT, asi que
-   el modelo ya venia inconsistente. Conviene confirmar el tipo real de
-   Vacaciones.IdVacaciones cuando la base este disponible:
-
-SELECT DATA_TYPE FROM INFORMATION_SCHEMA.COLUMNS
-WHERE TABLE_NAME = 'Vacaciones' AND COLUMN_NAME = 'IdVacaciones';
-
-   Si resultara BIGINT y llegara a superar el rango de INT, esta tabla habria que
-   ampliarla. Con 2801 solicitudes en cuatro anios, eso no pasa en esta decada.
+/* ---------------------------------------------------------------- verificado
+   Vacaciones.IdVacaciones es BIGINT, comprobado contra la base el 2026-08-25.
+   Por eso VacacionesFirma y los dos procedimientos usan BIGINT y no INT: el
+   maximo actual es 22837 y cabria en INT, pero una columna de union con tipo
+   distinto al origen provoca conversiones implicitas que arruinan los indices
+   cuando la tabla crece. Alinearlo antes de crear la tabla salia gratis.
    ------------------------------------------------------------------------- */
 
 /* ------------------------------------------------------------------ pruebas

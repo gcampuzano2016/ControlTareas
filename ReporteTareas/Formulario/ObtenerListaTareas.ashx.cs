@@ -334,6 +334,18 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(ContarFeriadosRango(parameters));
                 }
 
+                if (Action == "GuardarFirmaSolicitud")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarFirmaSolicitud(context, parameters));
+                }
+
+                if (Action == "GenerarPdfSolicitud")
+                {
+                    existAction = true;
+                    responseAction.Append(GenerarPdfSolicitud(parameters));
+                }
+
                 if (Action == "ReporteDatosEmpleado")
                 {
                     existAction = true;
@@ -2774,6 +2786,167 @@ namespace JsonJQueryNetTareas
             }
 
             return resultado.SerializaToJson();
+        }
+
+        /// <summary>
+        /// Registra la firma de un rol sobre una solicitud.
+        ///
+        /// El nombre, el cargo y la cédula NO llegan de la pantalla: los copia el
+        /// procedimiento desde R_Usuarios usando el código de la sesión. Así no se
+        /// pueden digitar, que es justamente lo que pide la especificación.
+        /// </summary>
+        public string GuardarFirmaSolicitud(HttpContext context, dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString()),
+                    Rol = parameters["rol"].ToString(),
+                    Secuencia = 1,
+                    Decision = parameters["decision"].ToString(),
+                    Comentario = parameters["comentario"].ToString(),
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                byte[] trazo = TrazoDesdeDataUri(parameters["trazo"].ToString());
+                if (trazo == null || trazo.Length == 0)
+                {
+                    return responseMessage("0", "Debe firmar antes de continuar.", "warning", "");
+                }
+
+                /* Trazabilidad: de dónde vino la firma. Con proxy, la IP real viene
+                   en la cabecera; Request.UserHostAddress daría la del balanceador. */
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntRespuesta respuesta = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al registrar la firma. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// Arma el PDF de una solicitud y devuelve la URL para descargarlo.
+        ///
+        /// El archivo queda en ~/descargas/ y su nombre se guarda contra la
+        /// solicitud, porque la especificación pide que la descarga siga
+        /// disponible después desde el historial y no solo al aprobar.
+        /// </summary>
+        public string GenerarPdfSolicitud(dynamic parameters)
+        {
+            string temporales = "";
+
+            try
+            {
+                long idVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString());
+
+                /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
+                   Convert lanza si no cabe, que es lo que se quiere: mejor un error
+                   visible que un id truncado en silencio. Hoy el máximo es 22837. */
+                EntSolicitud solicitud = NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+                if (solicitud == null || solicitud.IdVacaciones == 0)
+                {
+                    return responseMessage("0", "No se encontro la solicitud.", "warning", "");
+                }
+
+                List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
+                string folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+                /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
+                   no resuelve base64 embebido. Se borran al terminar: el original
+                   vive en la base. */
+                temporales = HttpContext.Current.Server.MapPath("~/descargas/tmp_" + idVacaciones + "_" +
+                                                                DateTime.Now.ToString("yyyyMMddHHmmssfff")) + "\\";
+                Directory.CreateDirectory(temporales);
+
+                foreach (EntFirmaSolicitud f in firmas)
+                {
+                    if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+                    string ruta = temporales + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(ruta, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = ruta;
+                }
+
+                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+                if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo);
+
+                PDFs generador = new PDFs();
+                string archivo = generador.GenerarPdfSolicitud(html, folio);
+
+                if (string.IsNullOrEmpty(archivo))
+                {
+                    return responseMessage("0", "No se pudo generar el PDF. Revise el log del servidor.", "danger", "");
+                }
+
+                /* Se deja registrado contra la solicitud para poder volver a
+                   descargarlo desde el historial. */
+                EntSolicitud registro = new EntSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Ruta_Archivo = "descargas/",
+                    Descripcion_Archivo = archivo
+                };
+                NegSolicitud.RTA_ActualizarRutaRide(registro);
+
+                EntRespuesta respuesta = new EntRespuesta()
+                {
+                    estado = "1",
+                    mensaje = "descargas/" + archivo,
+                    tipoMensaje = "success"
+                };
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al generar el PDF. " + ex.Message.ToString(), "danger", "");
+            }
+            finally
+            {
+                /* Si esto falla no importa: son archivos de render, no el registro. */
+                try
+                {
+                    if (!string.IsNullOrEmpty(temporales) && Directory.Exists(temporales))
+                    {
+                        Directory.Delete(temporales, true);
+                    }
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Convierte el "data:image/png;base64,...." que manda el pad en bytes.
+        /// Devuelve null si no viene una imagen: quien llama decide qué hacer.
+        /// </summary>
+        private static byte[] TrazoDesdeDataUri(string dataUri)
+        {
+            if (string.IsNullOrEmpty(dataUri)) { return null; }
+
+            int coma = dataUri.IndexOf(',');
+            string base64 = coma >= 0 ? dataUri.Substring(coma + 1) : dataUri;
+
+            try
+            {
+                return Convert.FromBase64String(base64);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
         }
 
         public string ObtenerListadeCorreos(dynamic parameters)

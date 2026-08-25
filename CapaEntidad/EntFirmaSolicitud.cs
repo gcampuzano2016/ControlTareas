@@ -12,7 +12,7 @@ namespace CapaEntidad
     public class EntFirmaSolicitud
     {
         public int IdFirma { get; set; }
-        public int IdVacaciones { get; set; }
+        public long IdVacaciones { get; set; }
 
         /// <summary>COLABORADOR, JEFE o GTH.</summary>
         public string Rol { get; set; }
@@ -39,6 +39,13 @@ namespace CapaEntidad
         public DateTime FechaFirma { get; set; }
         public string Ip { get; set; }
         public string Dispositivo { get; set; }
+
+        /// <summary>
+        /// Ruta en disco donde se dejó el trazo para que wkhtmltopdf lo lea. No
+        /// se persiste: la llena quien arma el PDF y se borra al terminar. Existe
+        /// porque esa versión no resuelve imágenes en base64 de forma confiable.
+        /// </summary>
+        public string RutaTrazo { get; set; }
 
         /// <summary>El trazo como data URI, para incrustarlo en el HTML del PDF.</summary>
         public string TrazoDataUri

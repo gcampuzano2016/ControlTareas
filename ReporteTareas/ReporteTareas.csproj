@@ -1420,6 +1420,7 @@
     <Compile Include="clases\JSONHelper.cs" />
     <Compile Include="clases\JSONHelperNuevo.cs" />
     <Compile Include="clases\logs.cs" />
+    <Compile Include="clases\HtmlSolicitud.cs" />
     <Compile Include="clases\PDF.cs" />
     <Compile Include="clases\PdfLista.cs" />
     <Compile Include="clases\SeguridadHelper.cs" />

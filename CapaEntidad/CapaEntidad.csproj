@@ -57,6 +57,7 @@
     <Compile Include="EntEgresoInventario.cs" />
     <Compile Include="EntEmpleado.cs" />
     <Compile Include="EntFeriadosRango.cs" />
+    <Compile Include="EntDetallePermiso.cs" />
     <Compile Include="EntFirmaSolicitud.cs" />
     <Compile Include="EntForeCast.cs" />
     <Compile Include="EntHsCln.cs" />

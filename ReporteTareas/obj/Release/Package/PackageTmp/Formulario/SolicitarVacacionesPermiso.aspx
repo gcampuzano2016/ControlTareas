@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=30" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=31" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -190,17 +190,75 @@
                                                                 </div>
                                                                 <div class="form-group col-lg-12">
                                                                     <div class="form-group col-lg-3">
-                                                                        <label>Actividad a realizar</label>
+                                                                        <label>Tipo de Permiso</label>
                                                                         <select id="txtActividadPC" class="form-control" onchange="AgregaActividad()">
-                                                                            <option value="CITA MEDICA">CITA MEDICA</option>
-                                                                            <option value="CITACION JUDICIAL">CITACION JUDICIAL</option>
-                                                                            <option value="OTROS">OTROS</option>
+                                                                            <option value="PERSONAL">Personal</option>
+                                                                            <option value="MEDICO">Médico</option>
+                                                                            <option value="FAMILIAR">Familiar</option>
+                                                                            <option value="CALAMIDAD">Calamidad</option>
+                                                                            <option value="TELETRABAJO">Teletrabajo</option>
+                                                                            <option value="OTRO">Otro</option>
                                                                         </select>
                                                                         <p class="help-block"></p>
                                                                     </div>
                                                                     <div class="form-group col-lg-9" style="display: none" id="IdOtrasActividad">
                                                                         <label>Actividad a realizar:</label>
                                                                         <input type="text" class="form-control" id="txtActividadP">
+                                                                    </div>
+                                                                    <!-- Rama de Teletrabajo. Aparece solo con ese tipo. -->
+                                                                    <div class="col-lg-12" style="display: none" id="IdTeletrabajo">
+                                                                        <div class="panel panel-default" style="margin-top:10px">
+                                                                            <div class="panel-heading">Teletrabajo</div>
+                                                                            <div class="panel-body">
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Modalidad</label>
+                                                                                    <select id="cboModalidadTT" class="form-control" onchange="CambiaModalidadTeletrabajo()">
+                                                                                        <option value="COMPLETA">Jornada completa</option>
+                                                                                        <option value="HORAS">Por horas</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                                <!-- Solo con modalidad por horas. Despues de esa hora la
+                                                                                     persona se presenta de forma presencial. -->
+                                                                                <div class="form-group col-lg-4" style="display: none" id="IdTTHoras">
+                                                                                    <label>Hora Desde / Hasta</label>
+                                                                                    <div class="row">
+                                                                                        <div class="col-lg-6">
+                                                                                            <input type="text" class="form-control" id="txtTTHoraDesde" placeholder="08:00" maxlength="5">
+                                                                                        </div>
+                                                                                        <div class="col-lg-6">
+                                                                                            <input type="text" class="form-control" id="txtTTHoraHasta" placeholder="12:00" maxlength="5">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <p class="help-block">Después de esa hora se presenta de forma presencial.</p>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Lugar desde donde trabajará</label>
+                                                                                    <input type="text" class="form-control" id="txtTTLugar" maxlength="200" placeholder="Domicilio — Quito">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Medios de contacto</label>
+                                                                                    <input type="text" class="form-control" id="txtTTMedios" maxlength="200" placeholder="Teléfono / Teams">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Motivo general</label>
+                                                                                    <input type="text" class="form-control" id="txtTTMotivo" maxlength="500">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Actividades a ejecutar</label>
+                                                                                    <textarea class="form-control" id="txtTTActividades" rows="2" maxlength="1000"></textarea>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Entregables esperados</label>
+                                                                                    <textarea class="form-control" id="txtTTEntregables" rows="2" maxlength="1000"></textarea>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-12">
+                                                                                    <label>
+                                                                                        <input type="checkbox" id="chkTTConectividad">
+                                                                                        Confirmo conectividad y confidencialidad de la información
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                     <div class="form-group col-lg-9" style="display: block" id="IdOtrasActividadCargar">
                                                                         <form role="form">
@@ -244,15 +302,22 @@
                                                                     <p class="help-block"></p>
                                                                 </div>
                                                                 <div class="form-group col-lg-3">
-                                                                    <label>Cargo a vacaciones</label>
+                                                                    <label>Tratamiento del excedente</label>
                                                                 </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <label>SI</label>
-                                                                    <input class="form-check-input" type="checkbox" value="" id="IdSI" onchange="DesactivarCheck1()">
-                                                                </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <label>NO</label>
-                                                                    <input class="form-check-input" type="checkbox" value="" id="IdNO" onchange="DesactivarCheck2()">
+                                                                <div class="form-group col-lg-6">
+                                                                    <select id="cboExcedente" class="form-control" onchange="CambiaTratamientoExcedente()">
+                                                                        <option value="">-- Seleccione --</option>
+                                                                        <option value="VACACIONES">Vacaciones</option>
+                                                                        <option value="RECUPERACION">Recuperación</option>
+                                                                        <option value="SIN_REMUNERACION">Permiso sin remuneración</option>
+                                                                    </select>
+                                                                    <p class="help-block" id="msgExcedente"></p>
+                                                                    <!-- Las casillas viejas siguen existiendo, ocultas: el guardado y
+                                                                         la columna CargoVacaciones se alimentan de ellas, y así el
+                                                                         histórico conserva el mismo significado. Las mantiene
+                                                                         sincronizadas CambiaTratamientoExcedente(). -->
+                                                                    <input type="checkbox" id="IdSI" style="display: none">
+                                                                    <input type="checkbox" id="IdNO" style="display: none">
                                                                 </div>
                                                                 <div class="col-lg-6" id="CargarHorarioRecuperacion" style="display: none">
                                                                     <div class="tab-pane active" id="pago">

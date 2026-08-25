@@ -2938,6 +2938,68 @@ namespace JsonJQueryNetTareas
         }
 
         /// <summary>
+        /// Guarda el tipo de permiso y, si es teletrabajo, su detalle.
+        ///
+        /// No corta el alta si falla, por lo mismo que la firma: la solicitud ya
+        /// está guardada y el correo al jefe ya salió. Un permiso sin tipo se ve y
+        /// se corrige; una solicitud fantasma no.
+        /// </summary>
+        private void GuardarDetalleDelPermiso(dynamic campos, object idNuevo)
+        {
+            try
+            {
+                long idVacaciones;
+                if (!long.TryParse(Convert.ToString(idNuevo), out idVacaciones) || idVacaciones <= 0) { return; }
+
+                string tipoPermiso = CampoOpcional(campos, "TipoPermiso");
+                if (tipoPermiso == "") { return; }   /* pantalla vieja en caché */
+
+                EntDetallePermiso detalle = new EntDetallePermiso()
+                {
+                    IdVacaciones = idVacaciones,
+                    TipoPermiso = tipoPermiso,
+                    TratamientoExcedente = CampoOpcional(campos, "TratamientoExcedente"),
+                    Modalidad = CampoOpcional(campos, "Modalidad"),
+                    HoraDesde = CampoOpcional(campos, "TeletrabajoHoraDesde"),
+                    HoraHasta = CampoOpcional(campos, "TeletrabajoHoraHasta"),
+                    Lugar = CampoOpcional(campos, "Lugar"),
+                    MediosContacto = CampoOpcional(campos, "MediosContacto"),
+                    MotivoGeneral = CampoOpcional(campos, "MotivoGeneral"),
+                    Actividades = CampoOpcional(campos, "Actividades"),
+                    Entregables = CampoOpcional(campos, "Entregables"),
+                    ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1"
+                };
+
+                NegDetallePermiso.Guardar(detalle);
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo guardar el detalle del permiso: " + ex.Message,
+                                "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// Lee una clave que puede no venir. Las pantallas se despliegan por
+        /// separado del código, así que un navegador con la versión anterior en
+        /// caché manda el payload viejo: pedir una clave nueva sin más reventaría
+        /// el alta entera.
+        /// </summary>
+        private static string CampoOpcional(dynamic campos, string clave)
+        {
+            try
+            {
+                object valor = campos[clave];
+                return valor == null ? "" : valor.ToString();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
         /// Registra la firma del colaborador sobre la solicitud recién creada.
         ///
         /// No corta el alta si algo sale mal. La solicitud ya está guardada y el
@@ -5921,6 +5983,17 @@ namespace JsonJQueryNetTareas
                 registro.Tipo = Convert.ToInt32(campos["tipo"]);
                 TipoProceso = registro.Tipo;
                 respuesta = NegSolicitud.RTA_InsertaNuevaSolicitud(registro);
+
+                /* Tipo de permiso y detalle de teletrabajo, después del alta y por
+                   su propio camino: el insert lo hace un procedimiento que también
+                   actualiza, aprueba y rechaza, y no conviene ampliarlo.
+
+                   Solo en el alta (Tipo 0). En una actualización el detalle se
+                   guarda desde la pantalla, no acá. */
+                if (respuesta.estado == "1" && TipoProceso == 0)
+                {
+                    GuardarDetalleDelPermiso(campos, respuesta.resultado);
+                }
 
                 #region Envio Mail
                 if (respuesta.estado == "1")

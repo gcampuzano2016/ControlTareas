@@ -982,10 +982,9 @@ function GuardarSolicitudPermiso(tipo) {
         contadorVerificacion += 1;
     }
 
-    if ($('#txtActividadP').val() == "" && $('#txtActividadPC').val() =="OTROS") {
-        mensajeVerificacion += "- Debe ingresar actividad a realizar ";
-        contadorVerificacion += 1;
-    }
+    /* La validación de "Otro" quedó junto a las demás del tipo de permiso, más
+       abajo. Antes vivía acá comparando contra "OTROS", el valor del catálogo
+       anterior, que ya no existe. */
 
     if ($('#frmTxtHoraDesdeP').val() == "") {
         mensajeVerificacion += "- Debe ingresar las horas de permiso ";
@@ -1007,11 +1006,43 @@ function GuardarSolicitudPermiso(tipo) {
         contadorVerificacion += 1;
     }
 
-    if ($('#txtActividadP').val() != "" && $('#txtActividadPC').val() == "OTROS") {
+    /* La columna Actividad se sigue llenando con una etiqueta legible del tipo,
+       o con el texto libre cuando es "Otro". Es de donde leen la lista y los
+       reportes desde 2022: llenarla mantiene lo nuevo visible ahí sin tocar nada
+       de eso, y de paso lo viejo y lo nuevo se ven parejos. */
+    var _tipoPermiso = TipoPermisoSeleccionado();
+
+    if ($('#txtActividadP').val() != "" && _tipoPermiso == "OTRO") {
         ActividadArealizar = $('#txtActividadP').val();
     }
     else {
-        ActividadArealizar = $('#txtActividadPC').val();
+        ActividadArealizar = _rotuloTipoPermiso[_tipoPermiso] || _tipoPermiso;
+    }
+
+    if (_tipoPermiso == "") {
+        mensajeVerificacion += "- Debe seleccionar el tipo de permiso ";
+        contadorVerificacion += 1;
+    }
+
+    if (_tipoPermiso == "OTRO" && $('#txtActividadP').val() == "") {
+        mensajeVerificacion += "- Debe describir la actividad a realizar ";
+        contadorVerificacion += 1;
+    }
+
+    if (_tipoPermiso == "TELETRABAJO") {
+        if ($('#cboModalidadTT').val() == "HORAS" &&
+            ($('#txtTTHoraDesde').val() == "" || $('#txtTTHoraHasta').val() == "")) {
+            mensajeVerificacion += "- Debe indicar la hora desde y hasta del teletrabajo ";
+            contadorVerificacion += 1;
+        }
+        if ($('#txtTTLugar').val() == "") {
+            mensajeVerificacion += "- Debe indicar el lugar desde donde trabajará ";
+            contadorVerificacion += 1;
+        }
+        if (!document.getElementById("chkTTConectividad").checked) {
+            mensajeVerificacion += "- Debe confirmar conectividad y confidencialidad ";
+            contadorVerificacion += 1;
+        }
     }
 
     if (contadorVerificacion > 0) {
@@ -1038,7 +1069,21 @@ function GuardarSolicitudPermiso(tipo) {
     datosFormulario = datosFormulario + "'IdNO': '" + $('#IdNO').val() + "',";
     datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
     datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
-    datosFormulario = datosFormulario + "'frmTxtObservacionesP': '" + $('#frmTxtObservacionesP').val() + "'";
+    datosFormulario = datosFormulario + "'frmTxtObservacionesP': '" + $('#frmTxtObservacionesP').val() + "',";
+
+    /* Campos de CB-GAP-POL-01. Van aparte del alta: el handler los guarda con su
+       propio procedimiento una vez que la solicitud tiene id. */
+    datosFormulario = datosFormulario + "'TipoPermiso': '" + _tipoPermiso + "',";
+    datosFormulario = datosFormulario + "'TratamientoExcedente': '" + ($('#cboExcedente').val() || "") + "',";
+    datosFormulario = datosFormulario + "'Modalidad': '" + ($('#cboModalidadTT').val() || "") + "',";
+    datosFormulario = datosFormulario + "'TeletrabajoHoraDesde': '" + $('#txtTTHoraDesde').val() + "',";
+    datosFormulario = datosFormulario + "'TeletrabajoHoraHasta': '" + $('#txtTTHoraHasta').val() + "',";
+    datosFormulario = datosFormulario + "'Lugar': '" + $('#txtTTLugar').val() + "',";
+    datosFormulario = datosFormulario + "'MediosContacto': '" + $('#txtTTMedios').val() + "',";
+    datosFormulario = datosFormulario + "'MotivoGeneral': '" + $('#txtTTMotivo').val() + "',";
+    datosFormulario = datosFormulario + "'Actividades': '" + $('#txtTTActividades').val() + "',";
+    datosFormulario = datosFormulario + "'Entregables': '" + $('#txtTTEntregables').val() + "',";
+    datosFormulario = datosFormulario + "'ConfirmaConectividad': '" + (document.getElementById("chkTTConectividad").checked ? "1" : "0") + "'";
 
     datosFormulario = datosFormulario + "}";
 
@@ -1515,17 +1560,70 @@ function VerListadoArchivosVacaciones(div, IdSolicitud) {
 
 }
 
-function AgregaActividad() {
-    var combooActividad = document.getElementById("txtActividadPC");
-    var selectedActividad = combooActividad.options[combooActividad.selectedIndex].text;
+/* Etiqueta legible de cada tipo. Se guarda además en la columna Actividad, que
+   es de donde leen la lista y los reportes desde 2022: así lo nuevo sigue
+   apareciendo ahí sin tener que tocar nada de eso. */
+var _rotuloTipoPermiso = {
+    "PERSONAL": "PERSONAL",
+    "MEDICO": "CITA MEDICA",
+    "FAMILIAR": "ASUNTO FAMILIAR",
+    "CALAMIDAD": "CALAMIDAD DOMESTICA",
+    "TELETRABAJO": "TELETRABAJO",
+    "OTRO": ""
+};
 
-    if (selectedActividad == "OTROS") {
-        document.getElementById("IdOtrasActividad").style.display = "block";
-        document.getElementById("IdOtrasActividadCargar").style.display = "none";
+function TipoPermisoSeleccionado() {
+    return $("#txtActividadPC").val() || "";
+}
+
+/* Muestra la rama que corresponde al tipo elegido. */
+function AgregaActividad() {
+    var tipo = TipoPermisoSeleccionado();
+
+    /* "Otro" es el único que pide describir a mano. Es también el que hereda el
+       comportamiento del antiguo OTROS. */
+    var esOtro = (tipo === "OTRO");
+    document.getElementById("IdOtrasActividad").style.display = esOtro ? "block" : "none";
+    document.getElementById("IdOtrasActividadCargar").style.display = esOtro ? "none" : "block";
+
+    var esTeletrabajo = (tipo === "TELETRABAJO");
+    document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
+    if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
+}
+
+/* Las horas solo aplican a la modalidad por horas. */
+function CambiaModalidadTeletrabajo() {
+    var porHoras = ($("#cboModalidadTT").val() === "HORAS");
+    document.getElementById("IdTTHoras").style.display = porHoras ? "block" : "none";
+}
+
+/* Mantiene sincronizadas las casillas viejas.
+
+   CargoVacaciones sigue siendo la columna que alimenta el alta y la que tiene
+   1437 permisos de historia. En vez de cambiarle el significado, se la deriva:
+   "Vacaciones" es el único tratamiento que carga días al saldo, igual que el
+   SI de antes. Los otros dos no lo hacen, igual que el NO. */
+function CambiaTratamientoExcedente() {
+    var valor = $("#cboExcedente").val() || "";
+    var cargaAVacaciones = (valor === "VACACIONES");
+
+    document.getElementById("IdSI").checked = cargaAVacaciones;
+    document.getElementById("IdNO").checked = (valor !== "" && !cargaAVacaciones);
+
+    var $msg = $("#msgExcedente");
+    if (valor === "RECUPERACION") {
+        /* El plan de recuperación llega en una etapa siguiente. Decirlo es mejor
+           que dejar al colaborador esperando un formulario que no aparece. */
+        $msg.text("El plan de recuperación se acuerda con su jefe inmediato.");
+    }
+    else if (valor === "SIN_REMUNERACION") {
+        $msg.text("Talento Humano lo registra para el descuento correspondiente.");
+    }
+    else if (valor === "VACACIONES") {
+        $msg.text("Se descuenta de su saldo de vacaciones.");
     }
     else {
-        document.getElementById("IdOtrasActividad").style.display = "none";
-        document.getElementById("IdOtrasActividadCargar").style.display = "block";
+        $msg.text("");
     }
 }
 

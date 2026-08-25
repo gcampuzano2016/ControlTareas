@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=31" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=32" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -170,7 +170,7 @@
                                                             <div class="col-lg-12">
                                                                 <div class="form-group col-lg-6">
                                                                     <label>Fecha:</label>
-                                                                    <input type="text" class="form-control" id="txtfechaP">
+                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual()">
                                                                 </div>
                                                                 <div class="form-group col-lg-6">
                                                                     <label>Cédula:</label>
@@ -302,6 +302,16 @@
                                                                     <p class="help-block"></p>
                                                                 </div>
                                                                 <div class="form-group col-lg-3">
+                                                                    <!-- Permiso mensual de 3 horas. El saldo se consulta al abrir el
+                                                                         formulario y cada vez que cambia la fecha: la bolsa es del mes
+                                                                         en que la persona se ausenta, no del mes en que lo pide. -->
+                                                                    <div class="col-lg-12" style="margin-bottom:10px">
+                                                                        <label>
+                                                                            <input type="checkbox" id="chkPermisoMensual" onchange="CambiaPermisoMensual()">
+                                                                            ¿Usa el permiso mensual de 3 horas?
+                                                                        </label>
+                                                                        <p class="help-block" id="msgPermisoMensual">Consultando su saldo del mes...</p>
+                                                                    </div>
                                                                     <label>Tratamiento del excedente</label>
                                                                 </div>
                                                                 <div class="form-group col-lg-6">

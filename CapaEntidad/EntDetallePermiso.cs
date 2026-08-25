@@ -37,5 +37,8 @@ namespace CapaEntidad
         public string Actividades { get; set; }
         public string Entregables { get; set; }
         public bool ConfirmaConectividad { get; set; }
+
+        /// <summary>La casilla del permiso mensual de 3 horas.</summary>
+        public bool UsaPermisoMensual { get; set; }
     }
 }

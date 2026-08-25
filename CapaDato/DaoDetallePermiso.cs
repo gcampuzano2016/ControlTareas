@@ -31,6 +31,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@Actividades", SqlDbType.VarChar, 1000).Value = detalle.Actividades ?? string.Empty;
                 cmd.Parameters.Add("@Entregables", SqlDbType.VarChar, 1000).Value = detalle.Entregables ?? string.Empty;
                 cmd.Parameters.Add("@ConfirmaConectividad", SqlDbType.Bit).Value = detalle.ConfirmaConectividad;
+                cmd.Parameters.Add("@UsaPermisoMensual", SqlDbType.Bit).Value = detalle.UsaPermisoMensual;
 
                 cnx.Open();
 
@@ -91,6 +92,47 @@ namespace CapaDato
             }
 
             return detalle;
+        }
+
+        /// <summary>
+        /// Cuánto le queda a alguien del permiso mensual de 3 horas en el mes de
+        /// la fecha indicada.
+        /// </summary>
+        /// <param name="idVacaciones">
+        /// La solicitud que se está editando, para que no se cuente a sí misma.
+        /// Cero cuando es una solicitud nueva.
+        /// </param>
+        public static EntSaldoPermisoMensual SaldoMensual(string codUsuario, DateTime fecha, long idVacaciones)
+        {
+            EntSaldoPermisoMensual saldo = null;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_SaldoPermisoMensual", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 64).Value = codUsuario ?? string.Empty;
+                cmd.Parameters.Add("@Fecha", SqlDbType.Date).Value = fecha.Date;
+                cmd.Parameters.Add("@IdVacaciones", SqlDbType.BigInt).Value = idVacaciones;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        saldo = new EntSaldoPermisoMensual()
+                        {
+                            MinutosAsignados = Convert.ToInt32(dr["MinutosAsignados"]),
+                            MinutosUsados = Convert.ToInt32(dr["MinutosUsados"]),
+                            MinutosDisponibles = Convert.ToInt32(dr["MinutosDisponibles"]),
+                            VigenteHasta = Convert.ToDateTime(dr["VigenteHasta"]),
+                            Mensaje = dr["Mensaje"].ToString()
+                        };
+                    }
+                }
+            }
+
+            return saldo;
         }
     }
 }

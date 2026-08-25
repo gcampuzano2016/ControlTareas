@@ -99,6 +99,10 @@ function BtnPermiso() {
     document.getElementById("RegistroVacaciones").style.display = "none";
     document.getElementById("RegistroPermisos").style.display = "block";
     document.getElementById("ListaSolicitud").style.display = "none";
+
+    /* El saldo del mes, para saber si la casilla se puede ofrecer. */
+    ConsultarSaldoMensual();
+    AgregaActividad();
 }
 
 /* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
@@ -1083,7 +1087,8 @@ function GuardarSolicitudPermiso(tipo) {
     datosFormulario = datosFormulario + "'MotivoGeneral': '" + $('#txtTTMotivo').val() + "',";
     datosFormulario = datosFormulario + "'Actividades': '" + $('#txtTTActividades').val() + "',";
     datosFormulario = datosFormulario + "'Entregables': '" + $('#txtTTEntregables').val() + "',";
-    datosFormulario = datosFormulario + "'ConfirmaConectividad': '" + (document.getElementById("chkTTConectividad").checked ? "1" : "0") + "'";
+    datosFormulario = datosFormulario + "'ConfirmaConectividad': '" + (document.getElementById("chkTTConectividad").checked ? "1" : "0") + "',";
+    datosFormulario = datosFormulario + "'UsaPermisoMensual': '" + (document.getElementById("chkPermisoMensual").checked ? "1" : "0") + "'";
 
     datosFormulario = datosFormulario + "}";
 
@@ -1589,6 +1594,110 @@ function AgregaActividad() {
     var esTeletrabajo = (tipo === "TELETRABAJO");
     document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
     if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
+}
+
+/* El saldo del permiso mensual del mes que corresponde al permiso. Se guarda
+   para no volver a preguntarle al servidor en cada validación. */
+var _saldoMensual = null;
+
+/* Consulta el saldo y ajusta la casilla.
+
+   Se llama al abrir el formulario y cada vez que cambia la fecha del permiso,
+   porque la bolsa es del mes en que la persona se ausenta: quien el 29 de agosto
+   pide un permiso para el 2 de septiembre está usando la bolsa de septiembre. */
+function ConsultarSaldoMensual() {
+    var datos = JSON.stringify([{
+        "action": "SaldoPermisoMensual",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "fecha": $("#txtfechaP").val(),
+            "idVacaciones": idVacaciones
+        }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            if (respuesta == null || typeof respuesta.MinutosDisponibles == "undefined") {
+                _saldoMensual = null;
+                $("#msgPermisoMensual").text("").removeClass("text-danger");
+                return;
+            }
+
+            _saldoMensual = respuesta;
+            $("#msgPermisoMensual").text(respuesta.Mensaje);
+
+            var agotado = (parseInt(respuesta.MinutosDisponibles, 10) <= 0);
+
+            /* Agotado: la opción se deshabilita hasta el mes siguiente, como pide
+               la especificación. Se destilda además, porque una casilla marcada y
+               deshabilitada seguiría enviando el valor. */
+            $("#chkPermisoMensual").prop("disabled", agotado);
+            if (agotado) {
+                document.getElementById("chkPermisoMensual").checked = false;
+                $("#msgPermisoMensual").addClass("text-danger");
+            }
+            else {
+                $("#msgPermisoMensual").removeClass("text-danger");
+            }
+
+            CambiaPermisoMensual();
+        },
+        error: function () {
+            /* Sin saldo confirmado no se ofrece la opción: es preferible que
+               tramiten el permiso por el camino normal a consumir una bolsa que
+               nadie pudo verificar. */
+            _saldoMensual = null;
+            $("#chkPermisoMensual").prop("disabled", true);
+            document.getElementById("chkPermisoMensual").checked = false;
+            $("#msgPermisoMensual")
+                .text("No se pudo consultar su saldo del mes. Puede continuar sin usar el permiso mensual.")
+                .addClass("text-danger");
+        }
+    });
+}
+
+/* Avisa cuánto del permiso se cubre con la bolsa y cuánto queda como excedente. */
+function CambiaPermisoMensual() {
+    if (!document.getElementById("chkPermisoMensual").checked || _saldoMensual === null) {
+        $("#msgExcedenteMensual").remove();
+        return;
+    }
+
+    var disponibles = parseInt(_saldoMensual.MinutosDisponibles, 10);
+    var pedidos = MinutosDelPermiso();
+
+    $("#msgExcedenteMensual").remove();
+
+    if (pedidos > disponibles) {
+        var excedente = pedidos - disponibles;
+        $("#msgPermisoMensual").after(
+            '<p class="help-block text-danger" id="msgExcedenteMensual">Su permiso es de ' +
+            MinutosATexto(pedidos) + ' y el saldo mensual cubre ' + MinutosATexto(disponibles) +
+            '. Las ' + MinutosATexto(excedente) + ' restantes necesitan un tratamiento del excedente.</p>');
+    }
+}
+
+/* El tiempo del permiso en minutos. El campo lo calcula la pantalla como HH:MM. */
+function MinutosDelPermiso() {
+    var texto = $("#frmTxtTiempoP").val() || "";
+    var partes = texto.split(":");
+    if (partes.length !== 2) { return 0; }
+
+    var h = parseInt(partes[0], 10);
+    var m = parseInt(partes[1], 10);
+    if (isNaN(h) || isNaN(m)) { return 0; }
+    return h * 60 + m;
+}
+
+function MinutosATexto(minutos) {
+    var h = Math.floor(minutos / 60);
+    var m = minutos % 60;
+    return h + "h" + (m < 10 ? "0" : "") + m;
 }
 
 /* Las horas solo aplican a la modalidad por horas. */

@@ -14,5 +14,10 @@ namespace CapaNegocio
         {
             return DaoDetallePermiso.Obtener(idVacaciones);
         }
+
+        public static EntSaldoPermisoMensual SaldoMensual(string codUsuario, System.DateTime fecha, long idVacaciones)
+        {
+            return DaoDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
+        }
     }
 }

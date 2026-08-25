@@ -340,6 +340,12 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(GuardarFirmaSolicitud(context, parameters));
                 }
 
+                if (Action == "SaldoPermisoMensual")
+                {
+                    existAction = true;
+                    responseAction.Append(SaldoPermisoMensual(parameters));
+                }
+
                 if (Action == "GenerarPdfSolicitud")
                 {
                     existAction = true;
@@ -2938,6 +2944,45 @@ namespace JsonJQueryNetTareas
         }
 
         /// <summary>
+        /// Cuánto le queda al colaborador del permiso mensual de 3 horas.
+        ///
+        /// La fecha que importa es la del permiso, no la de hoy: la bolsa es del
+        /// mes en que la persona se ausenta. Si no viene o no se entiende, se usa
+        /// el mes en curso, que es lo que la pantalla muestra al abrir el
+        /// formulario antes de que elijan fecha.
+        /// </summary>
+        public string SaldoPermisoMensual(dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                DateTime fecha;
+                if (!DateTime.TryParseExact(CampoOpcional(parameters, "fecha"), "dd/MM/yyyy",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
+                {
+                    fecha = DateTime.Now;
+                }
+
+                long idVacaciones;
+                if (!long.TryParse(CampoOpcional(parameters, "idVacaciones"), out idVacaciones)) { idVacaciones = 0; }
+
+                EntSaldoPermisoMensual saldo = NegDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
+                if (saldo == null)
+                {
+                    return responseMessage("0", "No se pudo consultar el saldo del permiso mensual.", "warning", "");
+                }
+
+                return saldo.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al consultar el saldo mensual. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
         /// Guarda el tipo de permiso y, si es teletrabajo, su detalle.
         ///
         /// No corta el alta si falla, por lo mismo que la firma: la solicitud ya
@@ -2967,7 +3012,8 @@ namespace JsonJQueryNetTareas
                     MotivoGeneral = CampoOpcional(campos, "MotivoGeneral"),
                     Actividades = CampoOpcional(campos, "Actividades"),
                     Entregables = CampoOpcional(campos, "Entregables"),
-                    ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1"
+                    ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1",
+                    UsaPermisoMensual = CampoOpcional(campos, "UsaPermisoMensual") == "1"
                 };
 
                 NegDetallePermiso.Guardar(detalle);

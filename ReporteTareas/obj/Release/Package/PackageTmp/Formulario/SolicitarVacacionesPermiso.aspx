@@ -5,7 +5,8 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/Convenio.js?v=28" type="text/javascript"></script>
+    <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=29" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -97,20 +98,28 @@
                                                                         <input type="text" class="form-control" id="frmTxtHoraHastaV" onchange="DiasVacaciones()">
                                                                         <p class="help-block" id="frmTxtHoraHastaMsg"></p>
                                                                     </div>
-                                                                    <div class="col-lg-3" id="IdFeriado" style="display: block">
-                                                                        <label>Feriados:</label>
-                                                                        <input type="text" class="form-control" id="frmTxtTiempoF" value="0" onchange="DiasVacaciones()">
-                                                                        <p class="help-block"></p>
-                                                                    </div>
                                                                     <div class="col-lg-3">
                                                                         <label>Dias:</label>
                                                                         <input type="text" class="form-control" id="frmTxtTiempoDiasV" value="1" disabled>
-                                                                        <p class="help-block"></p>
+                                                                        <!-- Los feriados ya no se digitan: salen de la tabla Feriado. Se
+                                                                             muestran acá cuando hay, para que el número de días se
+                                                                             entienda sin tener que preguntar. -->
+                                                                        <p class="help-block" id="frmTxtFeriadosMsg"></p>
+                                                                        <input type="hidden" id="frmTxtTiempoF" value="0">
+                                                                    </div>
+                                                                    <div class="col-lg-3">
+                                                                        <label>Regresa a trabajar:</label>
+                                                                        <input type="text" class="form-control" id="frmTxtRegresaTrabajar" disabled>
+                                                                        <p class="help-block">Día siguiente a Fecha Hasta</p>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-lg-12">
                                                                     <label style="color: red;" id="Idlista1">---</label>
                                                                     <label style="color: red;" id="Idlista2">---</label>
+                                                                </div>
+                                                                <!-- Aviso de saldo insuficiente. No bloquea el envío: informa. -->
+                                                                <div class="col-lg-12">
+                                                                    <div id="IdAvisoSaldo" class="alert alert-warning" style="display: none; margin-bottom: 10px;"></div>
                                                                 </div>
                                                                 <div class="form-group col-lg-3">
                                                                     <label>Días de vacaciones dispobibles</label>

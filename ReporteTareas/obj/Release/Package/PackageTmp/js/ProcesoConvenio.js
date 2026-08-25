@@ -5,6 +5,11 @@ let EstadoSolicitud = "";
 let TipoSolicitud = 0;
 let StrTipoSolicitud = "";
 
+/* Los feriados descuentan días en Vacaciones, pero no en Planificación. Antes
+   eso se expresaba con el campo "Feriados"; ahora que el número se calcula solo,
+   la regla vive en esta bandera. */
+let AplicaFeriados = true;
+
 function MensajeIncorrecto(resultado) {
     sweetAlert("Error", resultado, "error");
 }
@@ -338,11 +343,16 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         totalValor3 = totalValor3 + parseFloat(item.SALDO);
     });
 
+    /* "Días" llega con el valor definitivo desde DiasVacaciones(); acá solo se
+       resta del saldo. Antes se descontaban los feriados en cada corrida, y como
+       esta función también se llama al cambiar de tipo de solicitud, un mismo
+       rango podía quedar descontado dos veces. */
+    var diasSolicitados = parseFloat($('#frmTxtTiempoDiasV').val()) || 0;
+    var saldoGenerado = parseFloat(totalValor3);
+
     if (totalValor3 > 0) {
 
-        $('#frmTxtTiempoDiasV').val(parseFloat($('#frmTxtTiempoDiasV').val()) - parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) - (parseFloat($('#frmTxtTiempoDiasV').val()) + parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) + (parseFloat($('#frmTxtTiempoF').val()));
+        totalValor3 = saldoGenerado - diasSolicitados;
         info = info + "<tr>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
@@ -350,6 +360,13 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         info = info + "<td class='sorting_1' style='text-align: right;'><b>" + "" + format_two_digits((totalValor3).toFixed(2)) + "</b></td>";
         info = info + "</tr>";
         SaldoDias = totalValor3;
+    }
+
+    /* El aviso va fuera del if a propósito. Ese if solo dibuja la fila TOTAL
+       cuando hay saldo positivo, y el caso que más importa avisar es justamente
+       el de saldo en cero: adentro no se mostraría nunca. */
+    if (AplicaFeriados) {
+        FeriadosAvisarSaldo(diasSolicitados, saldoGenerado - diasSolicitados);
     }
 
     info = info + "</tbody>";
@@ -395,12 +412,14 @@ function BuscarSolicitud() {
     else if (selectedSolicitud == "VACACIONES") {
         BtnVacaciones();
         EstadoSolicitud = selectedSolicitud;
+        AplicaFeriados = true;
         ObtenerDatosEmpleado(1, 2);
         ObtenerListaComboReemplazo();
         ObtenerListaSaldoVacaciones(0);
     }
     else if (selectedSolicitud == "PLANIFICAR VACACIONES") {
         EstadoSolicitud = selectedSolicitud;
+        AplicaFeriados = false;
     }
 }
 
@@ -414,9 +433,25 @@ function SacarDias(f1, f2) {
     return parseFloat(dias)+1;
 }
 
+/* Recalcula días, feriados y fecha de regreso. Los helpers viven en
+   feriadosVacaciones.js, compartido con Convenio.js. */
 function DiasVacaciones() {
-    $('#frmTxtTiempoDiasV').val(SacarDias($('#frmTxtHoraDesdeV').val(), $('#frmTxtHoraHastaV').val()));
-    ObtenerListaSaldoVacaciones();
+    var desde = $('#frmTxtHoraDesdeV').val();
+    var hasta = $('#frmTxtHoraHastaV').val();
+
+    var naturales = SacarDias(desde, hasta);
+    $('#frmTxtTiempoDiasV').val(naturales);
+    $('#frmTxtRegresaTrabajar').val(FeriadosDiaSiguiente(hasta));
+
+    if (!AplicaFeriados) {
+        FeriadosLimpiarUI();
+        ObtenerListaSaldoVacaciones();
+        return;
+    }
+
+    FeriadosConsultar(desde, hasta, naturales, function () {
+        ObtenerListaSaldoVacaciones();
+    });
 }
 
 function BorrarBotones(idTipo) {
@@ -432,8 +467,9 @@ function BorrarBotones(idTipo) {
         //$('#frmTxtHoraHastaV').val("");
         $("#frmTxtHoraDesdeV").datepicker('setDate', 'today');
         $("#frmTxtHoraHastaV").datepicker('setDate', 'today');
-        $('#frmTxtTiempoF').val("0");
         $('#frmTxtTiempoDiasV').val("0");
+        $('#frmTxtRegresaTrabajar').val("");
+        FeriadosLimpiarUI();
         CancelarCambios1();
         idVacaciones = 0;
     }

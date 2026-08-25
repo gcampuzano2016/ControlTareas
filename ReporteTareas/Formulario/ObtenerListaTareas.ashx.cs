@@ -328,6 +328,12 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(ObtenerListaSaldoVacacionesIndividual(parameters));
                 }
 
+                if (Action == "ContarFeriadosRango")
+                {
+                    existAction = true;
+                    responseAction.Append(ContarFeriadosRango(parameters));
+                }
+
                 if (Action == "ReporteDatosEmpleado")
                 {
                     existAction = true;
@@ -2731,6 +2737,43 @@ namespace JsonJQueryNetTareas
             }
 
             return Lista.SerializaToJson();
+        }
+
+        /// <summary>
+        /// Feriados que caen dentro del rango de vacaciones que se está pidiendo.
+        /// Sustituye al campo que el colaborador llenaba a mano.
+        /// </summary>
+        public string ContarFeriadosRango(dynamic parameters)
+        {
+            EntFeriadosRango resultado;
+
+            try
+            {
+                DateTime desde;
+                DateTime hasta;
+
+                /* La pantalla maneja las fechas como dd/MM/yyyy. Se parsea con formato
+                   y cultura explícitos para no depender de la configuración regional
+                   del servidor, que ya nos ha mordido antes. */
+                string textoDesde = parameters["fechaDesde"].ToString();
+                string textoHasta = parameters["fechaHasta"].ToString();
+
+                if (!DateTime.TryParseExact(textoDesde, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out desde) ||
+                    !DateTime.TryParseExact(textoHasta, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out hasta))
+                {
+                    /* A medio llenar el formulario esto pasa seguido. No es un error:
+                       se responde 0 y la pantalla no muestra advertencia. */
+                    return new EntFeriadosRango { Feriados = 0, AniosSinCargar = "" }.SerializaToJson();
+                }
+
+                resultado = NegVacaciones.ContarFeriadosRango(desde, hasta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al calcular los feriados. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return resultado.SerializaToJson();
         }
 
         public string ObtenerListadeCorreos(dynamic parameters)

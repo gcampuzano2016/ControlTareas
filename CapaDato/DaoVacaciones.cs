@@ -8,6 +8,38 @@ namespace CapaDato
 {
     public class DaoVacaciones
     {
+        /// <summary>
+        /// Feriados que caen dentro del rango pedido. Reemplaza al campo que el
+        /// colaborador llenaba a mano: un feriado dentro de las vacaciones no
+        /// consume días, y ese cálculo no tiene por qué depender de que la
+        /// persona se acuerde de los feriados del año.
+        /// </summary>
+        public static EntFeriadosRango ContarFeriadosRango(DateTime fechaDesde, DateTime fechaHasta)
+        {
+            EntFeriadosRango resultado = new EntFeriadosRango { Feriados = 0, AniosSinCargar = string.Empty };
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_ContarFeriadosRango", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@FechaDesde", SqlDbType.Date).Value = fechaDesde.Date;
+                cmd.Parameters.Add("@FechaHasta", SqlDbType.Date).Value = fechaHasta.Date;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        resultado.Feriados = Convert.ToInt32(dr["Feriados"]);
+                        resultado.AniosSinCargar = dr["AniosSinCargar"].ToString();
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
         public static EntRespuesta ConsultarVacaciones(int codSap)
         {
             EntRespuesta Respuesta = new EntRespuesta();

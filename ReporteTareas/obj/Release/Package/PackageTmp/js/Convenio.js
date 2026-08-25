@@ -5,6 +5,12 @@ let EstadoSolicitud = "";
 let TipoSolicitud = 0;
 let StrTipoSolicitud = "";
 
+/* Los feriados descuentan días en Vacaciones, pero no en Planificación: antes
+   eso se expresaba mostrando u ocultando el campo "Feriados", que ya no existe
+   porque el número se calcula solo. La regla sigue siendo la misma, ahora en
+   una bandera. */
+let AplicaFeriados = true;
+
 function DesactivarCheck1() {
     var text = document.getElementById("IdNO");
     if (text.checked == true) {
@@ -413,11 +419,18 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         totalValor3 = totalValor3 + parseFloat(item.SALDO);
     });
 
+    /* Antes esta función descontaba los feriados del campo "Días" cada vez que
+       corría. Como también se la llama al cambiar de tipo de solicitud, un mismo
+       rango podía quedar descontado dos veces. Ahora "Días" llega con el valor
+       definitivo desde DiasVacaciones() y acá solo se resta del saldo: mismo
+       resultado, sin depender de cuántas veces se ejecute. */
+    var diasSolicitados = parseFloat($('#frmTxtTiempoDiasV').val()) || 0;
+    var saldoGenerado = parseFloat(totalValor3);
+
     if (totalValor3 > 0) {
 
-        $('#frmTxtTiempoDiasV').val(parseFloat($('#frmTxtTiempoDiasV').val()) - parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) - (parseFloat($('#frmTxtTiempoDiasV').val()) + parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) + (parseFloat($('#frmTxtTiempoF').val()));
+        totalValor3 = saldoGenerado - diasSolicitados;
+
         info = info + "<tr>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
@@ -425,6 +438,13 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         info = info + "<td class='sorting_1' style='text-align: right;'><b>" + "" + format_two_digits((totalValor3).toFixed(2)) + "</b></td>";
         info = info + "</tr>";
         SaldoDias = totalValor3;
+    }
+
+    /* El aviso va fuera del if a propósito. Ese if solo dibuja la fila TOTAL
+       cuando hay saldo positivo, y el caso que más importa avisar es justamente
+       el de saldo en cero: adentro no se mostraría nunca. */
+    if (AplicaFeriados) {
+        FeriadosAvisarSaldo(diasSolicitados, saldoGenerado - diasSolicitados);
     }
 
     info = info + "</tbody>";
@@ -467,7 +487,7 @@ function BuscarSolicitudEditar(seleccionarTipo) {
         ObtenerListaSaldoVacaciones(0);
         ObtenerListaDiasSolicitados(1);
         document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
-        document.getElementById("IdFeriado").style.display = "block";
+        AplicaFeriados = true;
 
         //document.getElementById("Vacaciones").style.display = "block";
         //document.getElementById("Planificacion").style.display = "none";
@@ -482,7 +502,7 @@ function BuscarSolicitudEditar(seleccionarTipo) {
         ObtenerListaSaldoVacaciones(0);
         ObtenerListaDiasSolicitados(1);
         document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
-        document.getElementById("IdFeriado").style.display = "block";
+        AplicaFeriados = true;
 
         //document.getElementById("Vacaciones").style.display = "block";
         //document.getElementById("Planificacion").style.display = "none";
@@ -497,7 +517,7 @@ function BuscarSolicitudEditar(seleccionarTipo) {
         ObtenerListaSaldoVacaciones(0);
         ObtenerListaDiasSolicitados(1);
         document.getElementById("fomTitleLabel").innerHTML = "Planificación de vacaciones";
-        document.getElementById("IdFeriado").style.display = "none";
+        AplicaFeriados = false;
 
         //document.getElementById("Vacaciones").style.display = "none";
         //document.getElementById("Planificacion").style.display = "block";
@@ -530,7 +550,7 @@ function BuscarSolicitud() {
         ObtenerListaSaldoVacaciones(0);
         ObtenerListaDiasSolicitados(1);
         document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
-        document.getElementById("IdFeriado").style.display = "block";
+        AplicaFeriados = true;
 
         //document.getElementById("Vacaciones").style.display = "block";
         //document.getElementById("Planificacion").style.display = "none";
@@ -545,7 +565,7 @@ function BuscarSolicitud() {
         ObtenerListaSaldoVacaciones(0);
         ObtenerListaDiasSolicitados(1);
         document.getElementById("fomTitleLabel").innerHTML = "Planificación de vacaciones";
-        document.getElementById("IdFeriado").style.display = "none";
+        AplicaFeriados = false;
 
         //document.getElementById("Vacaciones").style.display = "none";
         //document.getElementById("Planificacion").style.display = "block";
@@ -611,10 +631,26 @@ function SacarDias(f1, f2) {
     var dias = Math.floor(dif / (1000 * 60 * 60 * 24));
     return parseFloat(dias)+1;
 }
-
+/* Recalcula días, feriados y fecha de regreso cada vez que cambian las fechas.
+   Los helpers viven en feriadosVacaciones.js, compartido con ProcesoConvenio.js. */
 function DiasVacaciones() {
-    $('#frmTxtTiempoDiasV').val(SacarDias($('#frmTxtHoraDesdeV').val(), $('#frmTxtHoraHastaV').val()));
-    ObtenerListaSaldoVacaciones(0);
+    var desde = $('#frmTxtHoraDesdeV').val();
+    var hasta = $('#frmTxtHoraHastaV').val();
+
+    var naturales = SacarDias(desde, hasta);
+    $('#frmTxtTiempoDiasV').val(naturales);
+    $('#frmTxtRegresaTrabajar').val(FeriadosDiaSiguiente(hasta));
+
+    if (!AplicaFeriados) {
+        /* Planificación: los feriados no descuentan, igual que antes. */
+        FeriadosLimpiarUI();
+        ObtenerListaSaldoVacaciones(0);
+        return;
+    }
+
+    FeriadosConsultar(desde, hasta, naturales, function () {
+        ObtenerListaSaldoVacaciones(0);
+    });
 }
 
 function BorrarBotones(idTipo) {
@@ -630,8 +666,9 @@ function BorrarBotones(idTipo) {
         //$('#frmTxtHoraHastaV').val("");
         $("#frmTxtHoraDesdeV").datepicker('setDate', 'today');
         $("#frmTxtHoraHastaV").datepicker('setDate', 'today');
-        $('#frmTxtTiempoF').val("0");
         $('#frmTxtTiempoDiasV').val("0");
+        $('#frmTxtRegresaTrabajar').val("");
+        FeriadosLimpiarUI();
         CancelarCambios1();
     }
     else if (idTipo == 1) {

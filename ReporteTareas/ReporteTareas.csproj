@@ -1370,6 +1370,7 @@
     <Content Include="js\Convenio.js" />
     <Content Include="js\CreaTarea.js" />
     <Content Include="js\DetallesContrato.js" />
+    <Content Include="js\feriadosVacaciones.js" />
     <Content Include="js\ProcesoConvenio.js" />
     <Content Include="js\RegistroContrato.js" />
     <Content Include="js\RegistroForeCast.js" />

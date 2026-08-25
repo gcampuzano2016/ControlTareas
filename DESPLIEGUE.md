@@ -94,8 +94,32 @@ sin el otro, el sitio se cae.
 Orden seguro:
 
 1. Verifica que `connections.config` ya exista en el servidor (sección 2).
-2. Publica y copia los archivos.
-3. Recién entonces deja entrar tráfico.
+2. Ejecuta los scripts SQL pendientes de `docs/sql/` (ver abajo).
+3. Publica y copia los archivos.
+4. Recién entonces deja entrar tráfico.
+
+### Los scripts SQL van antes que los binarios
+
+Cuando un cambio trae script en `docs/sql/`, **el script corre primero**. Nunca
+después.
+
+La razón es que el `.dll` nuevo espera columnas y procedimientos que el script
+crea. Si los binarios llegan antes, el código pide algo que todavía no existe y
+**no falla solo el campo nuevo: falla la consulta entera**, así que la pantalla
+deja de listar.
+
+| qué haces primero | resultado |
+|---|---|
+| script SQL, después los binarios | correcto |
+| binarios, después el script SQL | **falla** — la pantalla no lista nada hasta que corras el script |
+
+El orden correcto es seguro incluso si tardas en copiar los binarios: los
+procedimientos declaran los parámetros nuevos con valor por defecto, así que el
+código viejo los sigue llamando sin enterarse. Por eso hay margen entre un paso
+y el otro, pero solo en ese sentido.
+
+Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Los
+`PRINT` te dicen si creó algo o si ya existía.
 
 ---
 
@@ -108,6 +132,16 @@ Orden seguro:
 3. Si aparece un error de referencia nula al conectar, casi siempre es que
    falta `connections.config` o que un nombre no coincide. Los nombres que el
    código espera son exactamente `ReporTarea`, `ArandaDb` y `Sap`.
+4. Si el cambio traía script SQL, comprueba la pantalla que lo usa. Para el de
+   agosto de 2026 (teléfonos de emergencia): abre *Administración de usuarios*,
+   confirma que el combo **Departamento** trae opciones, y guarda un usuario sin
+   tocarle nada. Debe responder *"No hubo cambios que guardar"*. Ese único paso
+   prueba tres cosas de golpe: que el JS nuevo llegó al navegador, que el
+   procedimiento nuevo está en la base, y que la comparación de cambios no le
+   altera el dato a nadie por el solo hecho de abrirle la ficha.
+5. Si una pantalla se comporta como la versión anterior, es caché del navegador:
+   haz Ctrl+F5. Si ahí funciona, al `.js` le faltó subirle el `?v=` y hay que
+   corregirlo antes de que lo sufra el resto de usuarios.
 
 ---
 

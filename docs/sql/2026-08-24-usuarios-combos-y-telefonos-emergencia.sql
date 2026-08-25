@@ -32,7 +32,12 @@ IF OBJECT_ID('dbo.Sp_RTA_ListarDepartamentos') IS NOT NULL
 GO
 
 /* Los departamentos que existen hoy en los usuarios. No hay tabla catalogo:
-   la lista sale de los propios datos, sin vacios y sin repetir. */
+   la lista sale de los propios datos, sin vacios y sin repetir.
+
+   Limitacion aceptada: esto NO es un catalogo. Un departamento que ningun
+   usuario tiene todavia no aparece en el combo, y no hay forma de crearlo
+   desde la pantalla. Para dar de alta un area nueva hay que asignarla por SQL
+   a un usuario primero; desde ahi ya sale en la lista para todos los demas. */
 CREATE PROCEDURE dbo.Sp_RTA_ListarDepartamentos
 AS
 BEGIN

@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionUsuarios.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionUsuarios" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionUsuarios.js?v=3" type="text/javascript"></script>
+    <script src="../js/parametrizacionUsuarios.js?v=4" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -90,11 +90,15 @@
                                     </div>
                                     <div class="form-group col-lg-4">
                                         <label>Departamento:</label>
-                                        <input type="text" class="form-control" id="txtDepartamento" maxlength="128" />
+                                        <select class="form-control" id="cboDepartamento"></select>
                                     </div>
                                     <div class="form-group col-lg-4">
                                         <label>Empresa:</label>
-                                        <input type="text" class="form-control" id="txtEmpresa" maxlength="50" />
+                                        <select class="form-control" id="cboEmpresa">
+                                            <option value=""></option>
+                                            <option value="DOS">DOS</option>
+                                            <option value="AGILITY">AGILITY</option>
+                                        </select>
                                     </div>
                                 </div>
                                 <div class="row">
@@ -109,6 +113,12 @@
                                     <div class="form-group col-lg-4">
                                         <label>Correo del jefe:</label>
                                         <input type="text" class="form-control" id="txtCorreoJefe" maxlength="100" />
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-lg-4">
+                                        <label>Teléfonos de emergencia:</label>
+                                        <input type="text" class="form-control" id="txtTelefonosEmergencia" maxlength="100" placeholder="Uno o varios, separados por / o ," />
                                     </div>
                                 </div>
                                 <div class="row">

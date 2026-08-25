@@ -10,6 +10,8 @@ namespace CapaEntidad
         public string Cedula { get; set; }
         public string Departamento { get; set; }
         public string Empresa { get; set; }
+        /// <summary>Cargo del colaborador. Se usa en la firma de las solicitudes.</summary>
+        public string Cargo { get; set; }
         public string Cod_Sap { get; set; }
         public string Cod_Jefe_Inm { get; set; }
         public string MailCodJefeInm { get; set; }

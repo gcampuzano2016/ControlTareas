@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionUsuarios.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionUsuarios" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionUsuarios.js?v=4" type="text/javascript"></script>
+    <script src="../js/parametrizacionUsuarios.js?v=5" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -119,6 +119,10 @@
                                     <div class="form-group col-lg-4">
                                         <label>Teléfonos de emergencia:</label>
                                         <input type="text" class="form-control" id="txtTelefonosEmergencia" maxlength="100" placeholder="Uno o varios, separados por / o ," />
+                                    </div>
+                                    <div class="form-group col-lg-8">
+                                        <label>Cargo:</label>
+                                        <input type="text" class="form-control" id="txtCargo" maxlength="128" placeholder="Como debe aparecer junto a su firma en los documentos" />
                                     </div>
                                 </div>
                                 <div class="row">

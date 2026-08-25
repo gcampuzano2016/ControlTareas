@@ -184,6 +184,7 @@
     <Compile Include="NegCuotaAnual.cs" />
     <Compile Include="NegEgresoInventario.cs" />
     <Compile Include="NegEmpleado.cs" />
+    <Compile Include="NegFirmaSolicitud.cs" />
     <Compile Include="NegForeCast.cs" />
     <Compile Include="NegHsCln.cs" />
     <Compile Include="NegInfoAdicionalHisClinica.cs" />

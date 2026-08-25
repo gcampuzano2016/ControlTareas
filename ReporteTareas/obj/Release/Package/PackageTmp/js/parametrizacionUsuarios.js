@@ -151,6 +151,7 @@ function SeleccionarUsuario(indice) {
     $("#txtJefe").val(u.Cod_Jefe_Inm);
     $("#txtCorreoJefe").val(u.MailCodJefeInm);
     $("#txtTelefonosEmergencia").val(u.TelefonosEmergencia);
+    $("#txtCargo").val(u.Cargo);
 
     /* El botón dice lo que va a hacer, no el estado en el que está. */
     var visible = EsActivoEnSelectores(u);
@@ -251,6 +252,7 @@ function GuardarUsuario() {
         "codSap": $.trim($("#txtCodSap").val()),
         "jefe": $.trim($("#txtJefe").val()),
         "correoJefe": correoJefe,
+        "cargo": $.trim($("#txtCargo").val()),
         "telefonosEmergencia": $.trim($("#txtTelefonosEmergencia").val())
     };
 

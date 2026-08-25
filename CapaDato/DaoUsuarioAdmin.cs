@@ -35,6 +35,7 @@ namespace CapaDato
                             Cedula = dr["Cedula"].ToString(),
                             Departamento = dr["Departamento"].ToString(),
                             Empresa = dr["Empresa"].ToString(),
+                            Cargo = dr["Cargo"].ToString(),
                             Cod_Sap = dr["Cod_Sap"].ToString(),
                             Cod_Jefe_Inm = dr["Cod_Jefe_Inm"].ToString(),
                             MailCodJefeInm = dr["MailCodJefeInm"].ToString(),
@@ -128,6 +129,7 @@ namespace CapaDato
                     cmd.Parameters.Add("@Cedula", SqlDbType.VarChar, 300).Value = u.Cedula ?? string.Empty;
                     cmd.Parameters.Add("@Departamento", SqlDbType.VarChar, 300).Value = u.Departamento ?? string.Empty;
                     cmd.Parameters.Add("@Empresa", SqlDbType.VarChar, 300).Value = u.Empresa ?? string.Empty;
+                    cmd.Parameters.Add("@Cargo", SqlDbType.VarChar, 300).Value = u.Cargo ?? string.Empty;
                     cmd.Parameters.Add("@Cod_Sap", SqlDbType.VarChar, 300).Value = u.Cod_Sap ?? string.Empty;
                     cmd.Parameters.Add("@Cod_Jefe_Inm", SqlDbType.VarChar, 300).Value = u.Cod_Jefe_Inm ?? string.Empty;
                     cmd.Parameters.Add("@MailCodJefeInm", SqlDbType.VarChar, 300).Value = u.MailCodJefeInm ?? string.Empty;

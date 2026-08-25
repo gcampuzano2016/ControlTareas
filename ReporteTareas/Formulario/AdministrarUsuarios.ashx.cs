@@ -123,8 +123,8 @@ namespace JsonJQueryNetUsuarios
             }
         }
 
-        /// <summary>Las nueve claves que debe traer todo GuardarUsuario, aunque su valor venga vacío.</summary>
-        private static readonly string[] ClavesUsuario = { "nombre", "correo", "cedula", "departamento", "empresa", "codSap", "jefe", "correoJefe", "telefonosEmergencia" };
+        /// <summary>Las diez claves que debe traer todo GuardarUsuario, aunque su valor venga vacío.</summary>
+        private static readonly string[] ClavesUsuario = { "nombre", "correo", "cedula", "departamento", "empresa", "cargo", "codSap", "jefe", "correoJefe", "telefonosEmergencia" };
 
         private string GuardarUsuario(HttpContext context, dynamic campos)
         {
@@ -152,6 +152,7 @@ namespace JsonJQueryNetUsuarios
                     Cedula = Texto(campos, "cedula"),
                     Departamento = Texto(campos, "departamento"),
                     Empresa = Texto(campos, "empresa"),
+                    Cargo = Texto(campos, "cargo"),
                     Cod_Sap = Texto(campos, "codSap"),
                     Cod_Jefe_Inm = Texto(campos, "jefe"),
                     MailCodJefeInm = Texto(campos, "correoJefe"),
@@ -217,6 +218,7 @@ namespace JsonJQueryNetUsuarios
             if (u.Cedula.Length > 32) { return "La cédula no puede superar los 32 caracteres."; }
             if (u.Departamento.Length > 128) { return "El departamento no puede superar los 128 caracteres."; }
             if (u.Empresa.Length > 50) { return "La empresa no puede superar los 50 caracteres."; }
+            if (u.Cargo.Length > 128) { return "El cargo no puede superar los 128 caracteres."; }
             if (u.Cod_Sap.Length > 50) { return "El código SAP no puede superar los 50 caracteres."; }
             if (u.Cod_Jefe_Inm.Length > 100) { return "El jefe inmediato no puede superar los 100 caracteres."; }
             if (u.MailCodJefeInm.Length > 100) { return "El correo del jefe no puede superar los 100 caracteres."; }

@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using System;
 using System.Text;
@@ -11,7 +11,7 @@ namespace JsonJQueryNetUsuarios
 {
     /// <summary>
     /// Handler de la pantalla "Administración de usuarios".
-    /// Acciones: BuscarUsuarios, GuardarUsuario, VerBitacora.
+    /// Acciones: BuscarUsuarios, ListarDepartamentos, GuardarUsuario, VerBitacora.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -42,6 +42,12 @@ namespace JsonJQueryNetUsuarios
                 {
                     existAction = true;
                     responseAction.Append(BuscarUsuarios(parameters));
+                }
+
+                if (Action == "ListarDepartamentos")
+                {
+                    existAction = true;
+                    responseAction.Append(ListarDepartamentos());
                 }
 
                 if (Action == "GuardarUsuario")
@@ -87,6 +93,18 @@ namespace JsonJQueryNetUsuarios
             }
         }
 
+        private string ListarDepartamentos()
+        {
+            try
+            {
+                return ToJson(NegUsuarioAdmin.ListarDepartamentos());
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al cargar los departamentos. " + ex.Message, "danger");
+            }
+        }
+
         private string VerBitacora(dynamic campos)
         {
             try
@@ -105,8 +123,8 @@ namespace JsonJQueryNetUsuarios
             }
         }
 
-        /// <summary>Las ocho claves que debe traer todo GuardarUsuario, aunque su valor venga vacío.</summary>
-        private static readonly string[] ClavesUsuario = { "nombre", "correo", "cedula", "departamento", "empresa", "codSap", "jefe", "correoJefe" };
+        /// <summary>Las nueve claves que debe traer todo GuardarUsuario, aunque su valor venga vacío.</summary>
+        private static readonly string[] ClavesUsuario = { "nombre", "correo", "cedula", "departamento", "empresa", "codSap", "jefe", "correoJefe", "telefonosEmergencia" };
 
         private string GuardarUsuario(HttpContext context, dynamic campos)
         {
@@ -136,7 +154,8 @@ namespace JsonJQueryNetUsuarios
                     Empresa = Texto(campos, "empresa"),
                     Cod_Sap = Texto(campos, "codSap"),
                     Cod_Jefe_Inm = Texto(campos, "jefe"),
-                    MailCodJefeInm = Texto(campos, "correoJefe")
+                    MailCodJefeInm = Texto(campos, "correoJefe"),
+                    TelefonosEmergencia = Texto(campos, "telefonosEmergencia")
                 };
 
                 string error = Validar(u);
@@ -201,6 +220,7 @@ namespace JsonJQueryNetUsuarios
             if (u.Cod_Sap.Length > 50) { return "El código SAP no puede superar los 50 caracteres."; }
             if (u.Cod_Jefe_Inm.Length > 100) { return "El jefe inmediato no puede superar los 100 caracteres."; }
             if (u.MailCodJefeInm.Length > 100) { return "El correo del jefe no puede superar los 100 caracteres."; }
+            if (u.TelefonosEmergencia.Length > 100) { return "Los teléfonos de emergencia no pueden superar los 100 caracteres."; }
             if (!CorreoValido(u.E_Mail)) { return "El correo no tiene un formato válido."; }
             if (!CorreoValido(u.MailCodJefeInm)) { return "El correo del jefe no tiene un formato válido."; }
             return null;

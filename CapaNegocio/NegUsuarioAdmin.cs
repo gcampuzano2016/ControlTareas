@@ -1,4 +1,4 @@
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
 using System.Collections.Generic;
 
@@ -9,6 +9,11 @@ namespace CapaNegocio
         public static List<EntUsuarioAdmin> ListarUsuarios(string filtro)
         {
             return DaoUsuarioAdmin.ListarUsuarios(filtro);
+        }
+
+        public static List<string> ListarDepartamentos()
+        {
+            return DaoUsuarioAdmin.ListarDepartamentos();
         }
 
         public static List<EntUsuarioBitacora> ListarBitacora(decimal idUsuario)

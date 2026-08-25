@@ -13,6 +13,7 @@ namespace CapaEntidad
         public string Cod_Sap { get; set; }
         public string Cod_Jefe_Inm { get; set; }
         public string MailCodJefeInm { get; set; }
+        public string TelefonosEmergencia { get; set; }
         public long Id_Perfil { get; set; }
         public string NombrePerfil { get; set; }
         public string Usuario_Estado { get; set; }

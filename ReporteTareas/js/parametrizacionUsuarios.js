@@ -6,10 +6,50 @@
    ============================================================================ */
 
 var _usuarios = [];
+var _departamentos = [];
 
 $(document).ready(function () {
+    CargarDepartamentos();
     BuscarUsuarios();
 });
+
+/* Los departamentos salen de los usuarios que ya existen: no hay catálogo.
+   Se cargan una vez al abrir, no con cada búsqueda, porque la lista no depende
+   del filtro. */
+function CargarDepartamentos() {
+    PostUsuario("ListarDepartamentos", {}, function (respuesta) {
+        _departamentos = $.isArray(respuesta) ? respuesta : [];
+
+        /* Si alcanzaron a abrir un usuario antes de que llegara la lista, su
+           combo tendría una sola opción. Se rellena conservando lo elegido. */
+        if ($("#panelDetalle").is(":visible")) {
+            LlenarCombo("cboDepartamento", _departamentos, $("#cboDepartamento").val());
+        }
+    });
+}
+
+/* Llena un combo y deja seleccionado el valor que tiene el usuario.
+   Si ese valor no está en la lista (dato viejo o escrito a mano), se agrega
+   como opción propia: de lo contrario el navegador elegiría la primera y
+   guardar sin tocar nada le cambiaría el dato a alguien. */
+function LlenarCombo(idCombo, opciones, valorActual) {
+    var $cbo = $("#" + idCombo);
+    var actual = $.trim(valorActual || "");
+
+    $cbo.empty().append($("<option></option>").attr("value", "").text(""));
+
+    var estaEnLaLista = false;
+    $.each(opciones, function (i, opcion) {
+        if (opcion === actual) { estaEnLaLista = true; }
+        $cbo.append($("<option></option>").attr("value", opcion).text(opcion));
+    });
+
+    if (actual !== "" && !estaEnLaLista) {
+        $cbo.append($("<option></option>").attr("value", actual).text(actual));
+    }
+
+    $cbo.val(actual);
+}
 
 function PostUsuario(action, parameters, onSuccess) {
     var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
@@ -105,11 +145,12 @@ function SeleccionarUsuario(indice) {
     $("#txtNombre").val(u.Nom_Usuario);
     $("#txtCorreo").val(u.E_Mail);
     $("#txtCedula").val(u.Cedula);
-    $("#txtDepartamento").val(u.Departamento);
-    $("#txtEmpresa").val(u.Empresa);
+    LlenarCombo("cboDepartamento", _departamentos, u.Departamento);
+    LlenarCombo("cboEmpresa", ["DOS", "AGILITY"], u.Empresa);
     $("#txtCodSap").val(u.Cod_Sap);
     $("#txtJefe").val(u.Cod_Jefe_Inm);
     $("#txtCorreoJefe").val(u.MailCodJefeInm);
+    $("#txtTelefonosEmergencia").val(u.TelefonosEmergencia);
 
     /* El botón dice lo que va a hacer, no el estado en el que está. */
     var visible = EsActivoEnSelectores(u);
@@ -205,11 +246,12 @@ function GuardarUsuario() {
         "nombre": nombre,
         "correo": correo,
         "cedula": $.trim($("#txtCedula").val()),
-        "departamento": $.trim($("#txtDepartamento").val()),
-        "empresa": $.trim($("#txtEmpresa").val()),
+        "departamento": $.trim($("#cboDepartamento").val() || ""),
+        "empresa": $.trim($("#cboEmpresa").val() || ""),
         "codSap": $.trim($("#txtCodSap").val()),
         "jefe": $.trim($("#txtJefe").val()),
-        "correoJefe": correoJefe
+        "correoJefe": correoJefe,
+        "telefonosEmergencia": $.trim($("#txtTelefonosEmergencia").val())
     };
 
     $("#btnGuardar").prop("disabled", true);

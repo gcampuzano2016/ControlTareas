@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -38,11 +38,39 @@ namespace CapaDato
                             Cod_Sap = dr["Cod_Sap"].ToString(),
                             Cod_Jefe_Inm = dr["Cod_Jefe_Inm"].ToString(),
                             MailCodJefeInm = dr["MailCodJefeInm"].ToString(),
+                            TelefonosEmergencia = dr["TelefonosEmergencia"].ToString(),
                             Id_Perfil = Convert.ToInt64(dr["Id_Perfil"]),
                             NombrePerfil = dr["NombrePerfil"].ToString(),
                             Usuario_Estado = dr["Usuario_Estado"].ToString(),
                             EstadoUsuario = dr["EstadoUsuario"].ToString()
                         });
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        /// <summary>
+        /// Departamentos que existen hoy en los usuarios, para el combo de la
+        /// pantalla. No hay tabla catalogo: la lista sale de los propios datos.
+        /// </summary>
+        public static List<string> ListarDepartamentos()
+        {
+            List<string> lista = new List<string>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_ListarDepartamentos", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(dr["Departamento"].ToString());
                     }
                 }
             }
@@ -103,6 +131,7 @@ namespace CapaDato
                     cmd.Parameters.Add("@Cod_Sap", SqlDbType.VarChar, 300).Value = u.Cod_Sap ?? string.Empty;
                     cmd.Parameters.Add("@Cod_Jefe_Inm", SqlDbType.VarChar, 300).Value = u.Cod_Jefe_Inm ?? string.Empty;
                     cmd.Parameters.Add("@MailCodJefeInm", SqlDbType.VarChar, 300).Value = u.MailCodJefeInm ?? string.Empty;
+                    cmd.Parameters.Add("@TelefonosEmergencia", SqlDbType.VarChar, 300).Value = u.TelefonosEmergencia ?? string.Empty;
                     cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 50).Value = usuarioRegistro ?? "SISTEMA";
 
                     cnx.Open();

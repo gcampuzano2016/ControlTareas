@@ -5,7 +5,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
+    <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
     <script src="../js/ProcesoConvenio.js?v=28" type="text/javascript"></script>
 

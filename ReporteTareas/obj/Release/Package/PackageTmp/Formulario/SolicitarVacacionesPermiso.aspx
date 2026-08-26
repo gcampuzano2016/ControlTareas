@@ -5,9 +5,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
+    <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=35" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=36" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -312,20 +312,22 @@
                                                                     <input type="text" class="form-control" id="frmTxtTiempoP" disabled>
                                                                     <p class="help-block"></p>
                                                                 </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <!-- Permiso mensual de 3 horas. El saldo se consulta al abrir el
-                                                                         formulario y cada vez que cambia la fecha: la bolsa es del mes
-                                                                         en que la persona se ausenta, no del mes en que lo pide. -->
-                                                                    <div class="col-lg-12" style="margin-bottom:10px">
-                                                                        <label>
-                                                                            <input type="checkbox" id="chkPermisoMensual" onchange="CambiaPermisoMensual()">
-                                                                            ¿Usa permiso mensual de 3 horas?
-                                                                        </label>
-                                                                        <p class="help-block" id="msgPermisoMensual">Consultando su saldo del mes...</p>
-                                                                    </div>
-                                                                    <label>Tratamiento del excedente</label>
+                                                                <!-- Permiso mensual de 3 horas. El saldo se consulta al abrir el
+                                                                     formulario y cada vez que cambia la fecha: la bolsa es del mes
+                                                                     en que la persona se ausenta, no del mes en que lo pide.
+
+                                                                     No aplica a Médico, Calamidad ni Teletrabajo. -->
+                                                                <div class="form-group col-lg-6" id="IdPermisoMensual" style="display: none">
+                                                                    <label>
+                                                                        <input type="checkbox" id="chkPermisoMensual" onchange="CambiaPermisoMensual()">
+                                                                        ¿Usa permiso mensual de 3 horas?
+                                                                    </label>
+                                                                    <p class="help-block" id="msgPermisoMensual">Consultando su saldo del mes...</p>
                                                                 </div>
-                                                                <div class="form-group col-lg-6">
+                                                                <!-- El tratamiento del excedente solo tiene sentido si hay excedente:
+                                                                     se oculta cuando el permiso entra completo en la bolsa mensual. -->
+                                                                <div class="form-group col-lg-6" id="IdExcedente" style="display: none">
+                                                                    <label>Tratamiento del excedente</label>
                                                                     <select id="cboExcedente" class="form-control" onchange="CambiaTratamientoExcedente()">
                                                                         <option value="">-- Seleccione --</option>
                                                                         <option value="VACACIONES">Vacaciones</option>
@@ -380,6 +382,14 @@
                                                                     <textarea class="form-control" rows="2" cols="50" id="frmTxtObservacionesP">
 																	</textarea>
                                                                     <p class="help-block"></p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <!-- Firma del colaborador, igual que en vacaciones. Nombre, cargo y
+                                                                     cédula los toma el sistema de la sesión: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaboradorP"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="row">

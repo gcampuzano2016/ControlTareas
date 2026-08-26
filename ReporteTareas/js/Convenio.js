@@ -100,6 +100,8 @@ function BtnPermiso() {
     document.getElementById("RegistroPermisos").style.display = "block";
     document.getElementById("ListaSolicitud").style.display = "none";
 
+    PrepararFirmaColaboradorPermiso();
+
     /* El saldo del mes, para saber si la casilla se puede ofrecer. */
     ConsultarSaldoMensual();
 
@@ -120,6 +122,19 @@ function PrepararFirmaColaborador() {
     }
     else {
         _padColaborador.limpiar();
+    }
+}
+
+/* Pad del formulario de permisos. Es otro lienzo, asi que necesita su propia
+   instancia: un mismo PadFirma no puede atender dos contenedores. */
+var _padColaboradorP = null;
+
+function PrepararFirmaColaboradorPermiso() {
+    if (_padColaboradorP === null) {
+        _padColaboradorP = PadFirma("divFirmaColaboradorP", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaboradorP.limpiar();
     }
 }
 
@@ -1049,7 +1064,7 @@ function GuardarSolicitudPermiso(tipo) {
     /* Si el permiso se pasa del saldo mensual, o la bolsa ya está en cero, el
        excedente tiene que tener tratamiento: son horas que salen de algún lado.
        Antes solo se avisaba, y se podía enviar sin elegir. */
-    if (ExcedeElSaldoMensual() && ($("#cboExcedente").val() || "") === "") {
+    if (CorrespondeTratamientoExcedente() && ($("#cboExcedente").val() || "") === "") {
         mensajeVerificacion += "- Debe indicar el tratamiento del excedente ";
         contadorVerificacion += 1;
     }
@@ -1073,6 +1088,14 @@ function GuardarSolicitudPermiso(tipo) {
             mensajeVerificacion += "- Debe confirmar conectividad y confidencialidad ";
             contadorVerificacion += 1;
         }
+    }
+
+    /* La firma es requisito del alta, igual que en vacaciones. En una
+       actualizacion no se vuelve a firmar: la firma vale por el momento en que
+       se hizo. */
+    if (tipo == 0 && (_padColaboradorP === null || _padColaboradorP.estaVacio())) {
+        alerta("Debe firmar la solicitud antes de enviarla.");
+        return;
     }
 
     if (contadorVerificacion > 0) {
@@ -1123,7 +1146,8 @@ function GuardarSolicitudPermiso(tipo) {
        PDF. Se manda el texto y no el numero para que documento y pantalla digan
        exactamente lo mismo. */
     datosFormulario = datosFormulario + "'SaldoMensualTexto': '" + ((document.getElementById("chkPermisoMensual").checked && _saldoMensual !== null) ? _saldoMensual.Mensaje : "") + "',";
-    datosFormulario = datosFormulario + "'RespaldoAdjunto': '" + ($("#cboRespaldo").val() || "") + "'";
+    datosFormulario = datosFormulario + "'RespaldoAdjunto': '" + ($("#cboRespaldo").val() || "") + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaboradorP !== null ? _padColaboradorP.obtenerTrazo() : "") + "'";
 
     datosFormulario = datosFormulario + "}";
 
@@ -1644,7 +1668,64 @@ function AgregaActividad() {
     document.getElementById("IdRespaldo").style.display =
         (esTeletrabajo || esMedico) ? "none" : "block";
 
+    MostrarPermisoMensual(tipo);
     MostrarAdjuntos();
+}
+
+/* Tipos a los que NO se les ofrece el permiso mensual de 3 horas.
+
+   Teletrabajo no es una ausencia sino una modalidad de trabajo: no hay tiempo
+   que descontar. Médico y Calamidad son ausencias justificadas, y no
+   corresponde que consuman una bolsa pensada para permisos discrecionales. */
+var _sinPermisoMensual = ["TELETRABAJO", "CALAMIDAD", "MEDICO"];
+
+function AplicaPermisoMensual(tipo) {
+    return _sinPermisoMensual.indexOf(tipo) === -1;
+}
+
+function MostrarPermisoMensual(tipo) {
+    var aplica = AplicaPermisoMensual(tipo);
+    document.getElementById("IdPermisoMensual").style.display = aplica ? "block" : "none";
+
+    if (!aplica) {
+        /* Se destilda además de ocultarse: una casilla marcada y escondida sigue
+           enviando su valor, y quedaría un permiso médico consumiendo la bolsa. */
+        document.getElementById("chkPermisoMensual").checked = false;
+    }
+
+    /* El tratamiento del excedente depende de si quedó algo sin cubrir. */
+    MostrarTratamientoExcedente();
+}
+
+/* El tratamiento del excedente solo aparece si hay excedente.
+
+   Si el permiso entra completo en la bolsa mensual no hay horas que tratar, y
+   ofrecer Vacaciones, Recuperación o Sin remuneración solo invita a elegir algo
+   que no corresponde. Si se pasa, la parte no cubierta sí necesita tratamiento y
+   el selector vuelve. */
+/* Si este permiso necesita que se decida qué hacer con el excedente.
+
+   Una sola función para las dos cosas que dependen de esto —que el selector se
+   vea y que la validación lo exija— porque separarlas deja el formulario
+   imposible de enviar: un campo escondido que igual se pide.
+
+   Teletrabajo no descuenta nada: es una modalidad de trabajo, no una ausencia.
+   No hay horas que cargar a ninguna bolsa. En Médico y Calamidad sí, porque son
+   ausencias y esas horas salen de algún lado. */
+function CorrespondeTratamientoExcedente() {
+    return (TipoPermisoSeleccionado() !== "TELETRABAJO") && ExcedeElSaldoMensual();
+}
+
+function MostrarTratamientoExcedente() {
+    var mostrar = CorrespondeTratamientoExcedente();
+    document.getElementById("IdExcedente").style.display = mostrar ? "block" : "none";
+
+    if (!mostrar) {
+        /* Se limpia al ocultarlo: si no, quedaría guardado un tratamiento para un
+           excedente que no existe. */
+        $("#cboExcedente").val("");
+        CambiaTratamientoExcedente();
+    }
 }
 
 /* Decide si se muestra el bloque de carga de archivos. */
@@ -1750,18 +1831,30 @@ function ConsultarSaldoMensual() {
             $("#msgPermisoMensual")
                 .text("No se pudo consultar su saldo del mes. Puede continuar sin usar el permiso mensual.")
                 .addClass("text-danger");
+
+            /* Sin bolsa que lo cubra, el permiso entero es excedente. */
+            MostrarTratamientoExcedente();
         }
     });
 }
 
-/* Si el permiso pedido no cabe en lo que queda del saldo mensual.
+/* Si queda tiempo del permiso sin cubrir por la bolsa mensual.
 
-   Vale también cuando no marcó la casilla: en ese caso el permiso entero es
-   excedente, y también necesita tratamiento. Por eso no se pregunta por la
-   casilla sino por si las horas alcanzan. */
+   Tres situaciones:
+
+     No usa la bolsa      todo el permiso es excedente.
+     La usa y le alcanza  no hay excedente. Es el caso que oculta el selector.
+     La usa y se pasa     el sobrante es excedente y necesita tratamiento.
+
+   Un permiso sin horas todavía cargadas no se cuenta como excedente: no se sabe.
+*/
 function ExcedeElSaldoMensual() {
     var pedidos = MinutosDelPermiso();
     if (pedidos === 0) { return false; }
+
+    /* En los tipos que no usan la bolsa —Médico, Calamidad, Teletrabajo— el
+       permiso completo es excedente, y ahí el tratamiento sí corresponde. */
+    if (!AplicaPermisoMensual(TipoPermisoSeleccionado())) { return true; }
 
     if (!document.getElementById("chkPermisoMensual").checked) { return true; }
     if (_saldoMensual === null) { return false; }
@@ -1771,6 +1864,11 @@ function ExcedeElSaldoMensual() {
 
 /* Avisa cuánto del permiso se cubre con la bolsa y cuánto queda como excedente. */
 function CambiaPermisoMensual() {
+    /* Marcar o desmarcar la casilla cambia si queda excedente, y con eso si el
+       selector de tratamiento tiene razon de estar. Va primero para que valga
+       tambien en los caminos que salen temprano. */
+    MostrarTratamientoExcedente();
+
     if (!document.getElementById("chkPermisoMensual").checked || _saldoMensual === null) {
         $("#msgExcedenteMensual").remove();
         return;
@@ -2010,6 +2108,9 @@ $(function () {
         }
 
         calculeTime(formFromTime.val(), formToTime.val(), '#frmTxtTiempoP');
+        /* El tiempo cambio: puede haber pasado a exceder la bolsa mensual, o a
+           caber en ella. CambiaPermisoMensual reevalua el selector de excedente. */
+        CambiaPermisoMensual();
 
     });
 
@@ -2025,6 +2126,9 @@ $(function () {
         }
 
         calculeTime(formFromTime.val(), formToTime.val(), '#frmTxtTiempoP');
+        /* El tiempo cambio: puede haber pasado a exceder la bolsa mensual, o a
+           caber en ella. CambiaPermisoMensual reevalua el selector de excedente. */
+        CambiaPermisoMensual();
 
     });
 

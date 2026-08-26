@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Pad de firma.
 
    La especificacion decia que este componente ya existia en la plataforma de
@@ -7,8 +7,8 @@
    un pad de firma. Asi que se construye aca.
 
    Lo usan las tres firmas de cada solicitud (colaborador, jefe, Talento Humano)
-   en Vacaciones y, cuando llegue la etapa 4, en Permisos. Por eso recibe el
-   contenedor y el rol: se instancia una vez por paso, no una por pantalla.
+   en Vacaciones y en Permisos. Por eso recibe el contenedor: se instancia una
+   vez por lienzo, no una por pantalla.
 
    Uso:
        var pad = PadFirma("divFirmaJefe");
@@ -140,6 +140,7 @@ function PadFirma(idContenedor, opciones) {
         hayTrazo = false;
         $("#" + idBase + "_file").val("");
         estado("Sin firmar");
+        AjustarBotonRecordada();
     }
 
     $("#" + idBase + "_limpiar").on("click", limpiar);
@@ -194,11 +195,20 @@ function PadFirma(idContenedor, opciones) {
 
        Lo que se reusa es el trazo, no la aprobacion: cada firma guarda igual su
        propia fecha, IP, dispositivo y decision. */
-    if (FirmaRecordadaLeer() !== "") {
-        $("#" + idBase + "_usar").show().on("click", function () {
-            cargar(FirmaRecordadaLeer(), "Firmado (su firma guardada)");
-        });
+    $("#" + idBase + "_usar").on("click", function () {
+        cargar(FirmaRecordadaLeer(), "Firmado (su firma guardada)");
+    });
+
+    /* Se revisa cada vez que el pad se reabre y no solo al construirlo: el pad
+       se arma una unica vez por pantalla, asi que si la firma se recordo despues
+       —firmo primero en Vacaciones y despues abrio Permisos, o al reves— el boton
+       nunca aparecia y la firma reusable no servia de nada. */
+    function AjustarBotonRecordada() {
+        var $b = $("#" + idBase + "_usar");
+        if (FirmaRecordadaLeer() !== "") { $b.show(); } else { $b.hide(); }
     }
+
+    AjustarBotonRecordada();
 
     return {
         /* Data URI listo para viajar al servidor, o cadena vacia si no hay firma.

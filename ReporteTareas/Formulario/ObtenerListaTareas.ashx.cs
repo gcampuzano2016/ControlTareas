@@ -6191,6 +6191,10 @@ namespace JsonJQueryNetTareas
                 if (respuesta.estado == "1" && TipoProceso == 0)
                 {
                     GuardarDetalleDelPermiso(campos, respuesta.resultado);
+
+                    /* Y la firma, por lo mismo que en Vacaciones: al enviar todavía
+                       no existe el IdVacaciones, lo genera este insert. */
+                    GuardarFirmaDelColaborador(HttpContext.Current, campos, respuesta.resultado, IdUsuarioSession);
                 }
 
                 #region Envio Mail
@@ -6344,8 +6348,7 @@ namespace JsonJQueryNetTareas
                    solicitud quedaría creada y sin firmar.
 
                    Solo en el alta (Tipo 0): una actualización no vuelve a firmar.
-                   El mismo llamado va en el bloque de Permisos cuando esa pantalla
-                   tenga su pad, en la etapa 4. */
+                   El bloque de Permisos hace el mismo llamado. */
                 if (respuesta.estado == "1" && TipoProceso == 0)
                 {
                     GuardarFirmaDelColaborador(HttpContext.Current, campos, respuesta.resultado, IdUsuarioSession);

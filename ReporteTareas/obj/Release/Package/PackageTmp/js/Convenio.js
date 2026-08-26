@@ -1662,6 +1662,10 @@ function AgregaActividad() {
     document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
     if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
 
+    /* La fecha se muestra en un lugar o en el otro, nunca en los dos: dos campos
+       con el mismo dato en pantalla se contradicen apenas alguien edita uno. */
+    MostrarFechaSegunTipo(esTeletrabajo);
+
     var esMedico = (tipo === "MEDICO");
 
     /* El selector de respaldo solo aparece donde de verdad decide algo. */
@@ -1670,6 +1674,42 @@ function AgregaActividad() {
 
     MostrarPermisoMensual(tipo);
     MostrarAdjuntos();
+}
+
+/* La fecha del permiso tiene dos lugares donde mostrarse: arriba junto a las
+   horas, y dentro del panel de teletrabajo. Es un solo dato.
+
+   txtfechaP manda: es lo que viaja al guardar y de lo que dependen el saldo
+   mensual, el plazo de recuperacion y el PDF. txtTTFecha es nada mas otra vista
+   del mismo valor, y por eso se copia en las dos direcciones. */
+function MostrarFechaSegunTipo(esTeletrabajo) {
+    document.getElementById("IdFechaPermiso").style.display =
+        esTeletrabajo ? "none" : "block";
+
+    if (esTeletrabajo) {
+        $("#txtTTFecha").val($("#txtfechaP").val());
+    }
+    else {
+        /* Al salir de teletrabajo se conserva lo que la persona ya habia elegido
+           adentro, en vez de hacerla escribirlo de nuevo. Si ademas cambio de mes,
+           hay que volver a preguntar el saldo: la bolsa es la del mes en que se
+           ausenta. */
+        var elegida = $("#txtTTFecha").val();
+        if (elegida !== "" && elegida !== $("#txtfechaP").val()) {
+            $("#txtfechaP").val(elegida);
+            ConsultarSaldoMensual();
+            MostrarPlazoRecuperacion();
+        }
+    }
+}
+
+function CambiaFechaTeletrabajo() {
+    $("#txtfechaP").val($("#txtTTFecha").val());
+
+    /* Lo mismo que hace el campo de arriba al cambiar: la bolsa mensual es la del
+       mes en que se ausenta, y el plazo de recuperacion cuelga de esta fecha. */
+    ConsultarSaldoMensual();
+    MostrarPlazoRecuperacion();
 }
 
 /* Tipos a los que NO se les ofrece el permiso mensual de 3 horas.
@@ -1959,6 +1999,12 @@ function TextoDesdeFecha(d) {
 }
 
 function MostrarPlazoRecuperacion() {
+    /* Espeja hacia la otra vista, para que las dos digan lo mismo sin importar
+       por cual se haya editado. */
+    if ($("#txtTTFecha").val() !== $("#txtfechaP").val()) {
+        $("#txtTTFecha").val($("#txtfechaP").val());
+    }
+
     var permiso = FechaDesdeTexto($("#txtfechaP").val());
 
     if (permiso === null) {
@@ -2100,6 +2146,18 @@ $(function () {
         .on("change", function () {
             from.datepicker("option", "maxDate", getDate(this));
             $("#btn_Descarga").hide();
+        });
+
+    /* La fecha del teletrabajo. Es otra vista de txtfechaP, asi que lleva el mismo
+       calendario; quien sincroniza los dos valores es CambiaFechaTeletrabajo. */
+    $("#txtTTFecha").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
         });
 
     /* La fecha propuesta del plan de recuperación. Se quedó sin calendario cuando

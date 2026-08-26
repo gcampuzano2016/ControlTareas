@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=38" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=39" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -217,6 +217,18 @@
                                                                         <div class="panel panel-default" style="margin-top:10px">
                                                                             <div class="panel-heading">Teletrabajo</div>
                                                                             <div class="panel-body">
+                                                                                <!-- La fecha vive acá cuando el permiso es teletrabajo, y no arriba con
+                                                                                     las horas: abierto este panel, aquel campo queda demasiado lejos para
+                                                                                     leerse como la fecha del teletrabajo.
+                                                                                
+                                                                                     Es la misma fecha, no una segunda. Lo que se escribe acá se copia a
+                                                                                     txtfechaP, que sigue siendo el valor que viaja al guardar y del que
+                                                                                     dependen el saldo mensual, el plazo de recuperación y el PDF. -->
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Fecha del teletrabajo <span style="color:#a94442">*</span></label>
+                                                                                    <input type="text" class="form-control" id="txtTTFecha" onchange="CambiaFechaTeletrabajo()">
+                                                                                    <p class="help-block">El día en que trabaja fuera de la oficina.</p>
+                                                                                </div>
                                                                                 <div class="form-group col-lg-4">
                                                                                     <label>Modalidad</label>
                                                                                     <select id="cboModalidadTT" class="form-control" onchange="CambiaModalidadTeletrabajo()">
@@ -297,7 +309,7 @@
                                                                      los datos autocompletados: ahí se leía como la fecha del documento.
                                                                      Es el día de la ausencia, y de él depende de qué mes sale el saldo
                                                                      del permiso mensual. Por eso al cambiarla se vuelve a consultar. -->
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3" id="IdFechaPermiso">
                                                                     <label>Fecha del permiso:</label>
                                                                     <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
                                                                     <p class="help-block">El día en que se ausenta.</p>

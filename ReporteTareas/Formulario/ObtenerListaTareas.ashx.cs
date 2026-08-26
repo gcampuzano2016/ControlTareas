@@ -6155,8 +6155,12 @@ namespace JsonJQueryNetTareas
                 registro.Remplazo = "";
                 if (registro.IdTipoSolicitud == 1)
                 {
-                    registro.FechaDesde = campos["txtfechaP"] + " " + campos["frmTxtHoraDesdeP"];
-                    registro.FechaHasta = campos["txtfechaP"] + " " + campos["frmTxtHoraHastaP"];
+                    /* Un teletrabajo de jornada completa no trae horas, y ahí la fecha
+                       viaja sola en vez de con un espacio colgando al final. */
+                    registro.FechaDesde =
+                        (campos["txtfechaP"] + " " + campos["frmTxtHoraDesdeP"]).Trim();
+                    registro.FechaHasta =
+                        (campos["txtfechaP"] + " " + campos["frmTxtHoraHastaP"]).Trim();
                 }
                 else
                 {

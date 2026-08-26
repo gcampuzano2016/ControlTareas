@@ -1009,19 +1009,24 @@ function GuardarSolicitudPermiso(tipo) {
        abajo. Antes vivía acá comparando contra "OTROS", el valor del catálogo
        anterior, que ya no existe. */
 
-    if ($('#frmTxtHoraDesdeP').val() == "") {
-        mensajeVerificacion += "- Debe ingresar las horas de permiso ";
-        contadorVerificacion += 1;
-    }
+    /* Un teletrabajo de jornada completa no tiene horas que registrar, y en el de
+       por horas las pide el panel. El mensaje tiene que nombrar el campo que la
+       persona esta viendo, no el que esta escondido. */
+    var esTeletrabajoAqui = (TipoPermisoSeleccionado() === "TELETRABAJO");
+    var jornadaCompleta = esTeletrabajoAqui && ($("#cboModalidadTT").val() !== "HORAS");
 
-    if ($('#frmTxtHoraHastaP').val() == "") {
-        mensajeVerificacion += "- Debe ingresar las horas de permiso ";
-        contadorVerificacion += 1;
-    }
+    if (!jornadaCompleta) {
+        var faltanHoras =
+            ($('#frmTxtHoraDesdeP').val() == "" ||
+             $('#frmTxtHoraHastaP').val() == "" ||
+             $('#frmTxtTiempoP').val() == "");
 
-    if ($('#frmTxtTiempoP').val() == "") {
-        mensajeVerificacion += "- Debe ingresar las horas de permiso ";
-        contadorVerificacion += 1;
+        if (faltanHoras) {
+            mensajeVerificacion += esTeletrabajoAqui
+                ? "- Debe ingresar el horario del teletrabajo "
+                : "- Debe ingresar las horas de permiso ";
+            contadorVerificacion += 1;
+        }
     }
 
     if ($('#frmTxtObservacionesP').val() == "") {
@@ -1662,9 +1667,11 @@ function AgregaActividad() {
     document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
     if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
 
-    /* La fecha se muestra en un lugar o en el otro, nunca en los dos: dos campos
-       con el mismo dato en pantalla se contradicen apenas alguien edita uno. */
+    /* La fecha y las horas se muestran en un lugar o en el otro, nunca en los
+       dos: dos campos con el mismo dato en pantalla se contradicen apenas
+       alguien edita uno. */
     MostrarFechaSegunTipo(esTeletrabajo);
+    MostrarHorasSegunTipo(esTeletrabajo);
 
     var esMedico = (tipo === "MEDICO");
 
@@ -1674,6 +1681,25 @@ function AgregaActividad() {
 
     MostrarPermisoMensual(tipo);
     MostrarAdjuntos();
+}
+
+/* La duracion del permiso a partir de las horas de abajo, que son las que mandan.
+   Es la misma cuenta que hace el datetimepicker al cambiar la hora, pero vive
+   aparte porque el panel de teletrabajo tambien necesita dispararla. */
+function CalcularTiempoPermiso() {
+    var desde = moment($("#frmTxtHoraDesdeP").val(), "HH:mm");
+    var hasta = moment($("#frmTxtHoraHastaP").val(), "HH:mm");
+
+    if (!desde.isValid() || !hasta.isValid() || hasta.isBefore(desde)) {
+        $("#frmTxtTiempoP").val("");
+    }
+    else {
+        var d = moment.duration(hasta.diff(desde));
+        $("#frmTxtTiempoP").val(
+            ("0" + d.hours()).slice(-2) + ":" + ("0" + d.minutes()).slice(-2));
+    }
+
+    CambiaPermisoMensual();
 }
 
 /* La fecha del permiso tiene dos lugares donde mostrarse: arriba junto a las
@@ -2046,6 +2072,37 @@ function AcotarFechaRecuperacion(desde, hasta) {
 function CambiaModalidadTeletrabajo() {
     var porHoras = ($("#cboModalidadTT").val() === "HORAS");
     document.getElementById("IdTTHoras").style.display = porHoras ? "block" : "none";
+
+    if (porHoras) {
+        CambiaHoraTeletrabajo();
+    }
+    else {
+        /* Jornada completa: no hay horas que registrar. Se limpian las de abajo
+           para que no viaje el horario de un intento anterior. */
+        $("#frmTxtHoraDesdeP").val("");
+        $("#frmTxtHoraHastaP").val("");
+        $("#frmTxtTiempoP").val("");
+    }
+}
+
+/* Las horas del permiso tienen dos lugares donde mostrarse, igual que la fecha:
+   abajo con el resto del permiso, y dentro del panel de teletrabajo. Con
+   teletrabajo elegido queda solo el panel.
+
+   frmTxtHoraDesdeP y frmTxtHoraHastaP siguen mandando: son las que arman
+   FechaDesde y FechaHasta al guardar. Las del panel las alimentan. */
+function MostrarHorasSegunTipo(esTeletrabajo) {
+    var mostrar = esTeletrabajo ? "none" : "block";
+    document.getElementById("IdHoraDesdeP").style.display = mostrar;
+    document.getElementById("IdHoraHastaP").style.display = mostrar;
+    document.getElementById("IdTiempoP").style.display = mostrar;
+}
+
+/* Copia las horas del panel a las del permiso y recalcula la duracion. */
+function CambiaHoraTeletrabajo() {
+    $("#frmTxtHoraDesdeP").val($("#txtTTHoraDesde").val());
+    $("#frmTxtHoraHastaP").val($("#txtTTHoraHasta").val());
+    CalcularTiempoPermiso();
 }
 
 /* Mantiene sincronizadas las casillas viejas.
@@ -2147,6 +2204,18 @@ $(function () {
             from.datepicker("option", "maxDate", getDate(this));
             $("#btn_Descarga").hide();
         });
+
+    /* Las horas del teletrabajo. Eran dos inputs de texto pelados con placeholder,
+       mientras que las de abajo tienen reloj: ahora que son las unicas visibles con
+       este tipo de permiso, tienen que comportarse igual.
+
+       Al cambiar copian su valor a las de abajo, que son las que arman FechaDesde
+       y FechaHasta al guardar. */
+    $("#txtTTHoraDesde").datetimepicker({ format: "HH:mm" })
+        .on("dp.change", function () { CambiaHoraTeletrabajo(); });
+
+    $("#txtTTHoraHasta").datetimepicker({ format: "HH:mm" })
+        .on("dp.change", function () { CambiaHoraTeletrabajo(); });
 
     /* La fecha del teletrabajo. Es otra vista de txtfechaP, asi que lleva el mismo
        calendario; quien sincroniza los dos valores es CambiaFechaTeletrabajo. */

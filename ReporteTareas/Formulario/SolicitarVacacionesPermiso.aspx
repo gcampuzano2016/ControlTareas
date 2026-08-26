@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=39" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=40" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -314,17 +314,17 @@
                                                                     <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
                                                                     <p class="help-block">El día en que se ausenta.</p>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3" id="IdHoraDesdeP">
                                                                     <label>Hora Desde:</label>
                                                                     <input type="text" class="form-control" id="frmTxtHoraDesdeP">
                                                                     <p class="help-block" id="frmTxtHoraDesdePMsg"></p>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3" id="IdHoraHastaP">
                                                                     <label>Hora Hasta:</label>
                                                                     <input type="text" class="form-control" id="frmTxtHoraHastaP">
                                                                     <p class="help-block" id="frmTxtHoraHastaPMsg"></p>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3" id="IdTiempoP">
                                                                     <label>Tiempo:</label>
                                                                     <input type="text" class="form-control" id="frmTxtTiempoP" disabled>
                                                                     <p class="help-block"></p>

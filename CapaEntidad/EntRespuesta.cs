@@ -25,5 +25,11 @@ namespace CapaEntidad
         public string rutapdf { get; set; }
         public string Archivo { get; set; }
 
+        // Identificadores separados por coma de las filas que quedaron pendientes de
+        // autorizacion. Lo llena Sp_RTAInsertaDetalleTarea_V2, que puede insertar
+        // varias filas de un solo guardado cuando el horario se parte en tramos.
+        // Queda vacio en los demas procedimientos.
+        public string IdsHorasExtras { get; set; }
+
     }
 }

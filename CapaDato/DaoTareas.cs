@@ -1443,8 +1443,7 @@ namespace CapaDato
                 DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
                 using (SqlConnection cnx = conexion.conectar())
-                //using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
-                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx))
+                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandTimeout = 60;
@@ -1523,6 +1522,16 @@ namespace CapaDato
 
                         respuesta.resultado = respuestaSP.ToString();
 
+                        /* Un guardado puede haber generado varias filas: el
+                           procedimiento parte el rango en tramos segun el horario del
+                           responsable. Aca vienen las que quedaron pendientes de
+                           autorizacion, para que el handler pida una por una.
+
+                           ObtenerValorColumna devuelve cadena vacia si la columna no
+                           esta, asi que esto tolera una base todavia sin actualizar. */
+                        respuesta.IdsHorasExtras =
+                            ObtenerValorColumna(dr, "IdsHorasExtras");
+
                         if (respuestaSP >= 1)
                         {
                             respuesta.estado = "1";
@@ -1599,11 +1608,15 @@ namespace CapaDato
                     return "Las fechas enviadas no tienen un formato válido.";
 
                 case -7:
-                    return "El horario contiene diferentes tipos de horas. Debe registrar los tramos por separado.";
+                    return "El horario cruza la medianoche. Registre cada fecha por separado.";
 
                 case -8:
                     return "No existe una configuración activa para el día seleccionado.";
 
+                /* -9 y -10 ya no los emite el procedimiento: el combo dejo de
+                   decidir y el horario manda. Se dejan porque la base se actualiza
+                   aparte de la DLL, y con una version anterior del procedimiento
+                   estos codigos volverian a aparecer. */
                 case -9:
                     return "El tipo de horas seleccionado no corresponde al horario enviado.";
 

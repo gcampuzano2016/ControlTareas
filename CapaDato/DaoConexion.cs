@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Data;
-using System.Data.Sql;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 
 namespace CapaDato
 {
@@ -21,7 +14,6 @@ namespace CapaDato
         {
             SqlConnection cn = new SqlConnection();
             cn.ConnectionString = "Data Source=; Initial Catalog=; User Id=; Password=";
-            //cn.ConnectionString = "Data Source=CARLOS-PC; Initial Catalog=FBillWeb; User Id=BillWeb; Password=BillWeb";
             return cn;
         }
 

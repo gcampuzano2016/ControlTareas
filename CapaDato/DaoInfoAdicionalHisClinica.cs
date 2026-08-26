@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -83,14 +80,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
 
         }
         public static EntRespuesta Consulta_Sp_InsUpdInfoAdicional2(EntInfoAdicionalHisClinica objInfo)
-        {     
+        {
             EntRespuesta Respuesta = new EntRespuesta();
             Int32 respuestaSP = 0;
             string respuestaSP1 = "";
@@ -157,7 +157,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -171,7 +174,7 @@ namespace CapaDato
             SqlDataReader dr = null;
 
             try
-            {                
+            {
                 EntInfoAdicionalHisClinica objInfo = new EntInfoAdicionalHisClinica();
 
                 DaoReporTareaAranda cn = new DaoReporTareaAranda();
@@ -207,11 +210,92 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
+
+        public static EntRespuesta Consulta_Sp_InsUpdInfoRelevante(List<EntDatosMed> objInfo)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            bool hasErrors = false;
+
+            try
+            {
+                // Crear conexión
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                using (SqlConnection cnx = cn.conectar())
+                {
+                    cnx.Open();
+
+                    foreach (var info in objInfo)
+                    {
+                        try
+                        {
+                            using (SqlCommand cmd = new SqlCommand("Sp_RTAInsMedInfoRelevante", cnx))
+                            {
+                                cmd.CommandType = CommandType.StoredProcedure;
+
+                                // Formar el nombre completo
+                                string nombreCompleto = $"{info.apellido1} {info.apellido2} {info.nombre1} {info.nombre2}";
+
+                                // Agregar parámetros al procedimiento almacenado
+                                cmd.Parameters.AddWithValue("@Nombre", nombreCompleto);
+                                cmd.Parameters.AddWithValue("@Empresa", info.empresa ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Sexo", info.sexo ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Fecha", info.fecha ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Diagnostico1", info.diagnostico1 ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Diagnostico2", info.diagnostico2 ?? (object)DBNull.Value);
+                                cmd.Parameters.AddWithValue("@Diagnostico3", info.diagnostico3 ?? (object)DBNull.Value);
+
+                                // Ejecutar el procedimiento almacenado
+                                int result = cmd.ExecuteNonQuery();
+
+                                // Validar el resultado de la ejecución
+                                if (result <= 0)
+                                {
+                                    hasErrors = true; // Marcar que hubo un error
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            hasErrors = true; // Marcar que hubo un error
+                                              // Log o registro del error específico (opcional)
+                            Console.WriteLine($"Error procesando elemento: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Configurar la respuesta basada en los errores
+                if (!hasErrors)
+                {
+                    Respuesta.estado = "1";
+                    Respuesta.mensaje = "Todos los datos se guardaron con éxito.";
+                    Respuesta.tipoMensaje = "success";
+                }
+                else
+                {
+                    Respuesta.estado = "0";
+                    Respuesta.mensaje = "Datos cargados sin embargo algunos datos no pudieron guardarse.";
+                    Respuesta.tipoMensaje = "warning";
+                }
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = $"Error: {ex.Message}";
+                Respuesta.tipoMensaje = "danger";
+            }
+
+            return Respuesta;
+        }
+
+
 
     }
 }

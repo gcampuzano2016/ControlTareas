@@ -14,7 +14,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ReporteTareas</RootNamespace>
     <AssemblyName>ReporteTareas</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <UseIISExpress>true</UseIISExpress>
     <Use64BitIISExpress />
     <IISExpressSSLPort />
@@ -78,6 +78,9 @@
       <HintPath>..\packages\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.1.0.8\lib\net45\Microsoft.CodeDom.Providers.DotNetCompilerPlatform.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=2.3.2.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.2.3.2\lib\net462\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
     <Reference Include="Microsoft.ReportViewer.Common, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\Microsoft.ReportViewer.Common.dll</HintPath>
@@ -94,6 +97,9 @@
       <HintPath>..\packages\Microsoft.SqlServer.Types.14.0.314.76\lib\net40\Microsoft.SqlServer.Types.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OnBarcode.Barcode.WinForms, Version=6.0.0.0, Culture=neutral, PublicKeyToken=4da8d7f865f70e30, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>bin\OnBarcode.Barcode.WinForms.dll</HintPath>
@@ -116,6 +122,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\librerias\SendGridMail.dll</HintPath>
     </Reference>
+    <Reference Include="System.Buffers, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Buffers.4.5.1\lib\net461\System.Buffers.dll</HintPath>
+    </Reference>
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.IO.FileSystem.Primitives, Version=4.0.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.FileSystem.Primitives.4.0.1\lib\net46\System.IO.FileSystem.Primitives.dll</HintPath>
@@ -123,7 +132,17 @@
     <Reference Include="System.IO.Packaging, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>..\packages\System.IO.Packaging.4.0.0\lib\net46\System.IO.Packaging.dll</HintPath>
     </Reference>
+    <Reference Include="System.Memory, Version=4.0.1.2, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Memory.4.5.5\lib\net461\System.Memory.dll</HintPath>
+    </Reference>
     <Reference Include="System.Net.Http" />
+    <Reference Include="System.Numerics" />
+    <Reference Include="System.Numerics.Vectors, Version=4.1.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Numerics.Vectors.4.5.0\lib\net46\System.Numerics.Vectors.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.5.0.0\lib\net45\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
     <Reference Include="System.Runtime.Serialization" />
     <Reference Include="System.ServiceModel" />
     <Reference Include="System.Web.DynamicData" />
@@ -132,9 +151,9 @@
     <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
-    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Web" />
+    <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Configuration" />
@@ -144,9 +163,6 @@
     <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>..\packages\Newtonsoft.Json.6.0.4\lib\net45\Newtonsoft.Json.dll</HintPath>
-    </Reference>
     <Reference Include="System.Net.Http.Formatting">
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
     </Reference>
@@ -1074,7 +1090,9 @@
     <Content Include="carrusel\imagenes\usuarios.png" />
     <Content Include="carrusel\imagenes\VideoDOS.mp4" />
     <Content Include="carrusel\js\carruseJava.js" />
+    <Content Include="css\dos-tema.css" />
     <Content Include="dist\css\depMedico.css" />
+    <Content Include="dist\css\InfoContratos.css" />
     <Content Include="dist\css\Montos.css" />
     <Content Include="dist\css\styleInventario.css" />
     <Content Include="Formulario\contenidoFormatoCorreoContrato.txt" />
@@ -1083,22 +1101,38 @@
     <Content Include="Formulario\EgresoInventario.aspx" />
     <Content Include="Formulario\ForeCastDetalle.aspx" />
     <Content Include="Formulario\FrmRptReporteGerencial.aspx" />
+    <Content Include="Formulario\HistoriaCertificado.aspx" />
     <Content Include="Formulario\HistoriaClinica.aspx" />
     <Content Include="Formulario\HistoriaClinicaArchivosRRHH.aspx" />
+    <Content Include="Formulario\HistoriaEvaluacion.aspx" />
     <Content Include="Formulario\HistoriaInmunizaciones.aspx" />
+    <Content Include="Formulario\HistorialClinico.aspx" />
     <Content Include="Formulario\HistoriaPeriodica.aspx" />
     <Content Include="Formulario\HistoriaReintegro.aspx" />
     <Content Include="Formulario\HistoriaRetiro.aspx" />
+    <Content Include="Formulario\InfoDepMedico.aspx" />
     <Content Include="Formulario\InformacionContratos.aspx" />
     <Content Include="Formulario\ListaEmpleados.aspx" />
+    <Content Include="Formulario\ObtenerNuevaListaTareas.ashx" />
     <Content Include="Formulario\PaginaError.aspx" />
     <Content Include="Formulario\Perfiles.aspx" />
     <Content Include="Formulario\PruebaMenu.aspx" />
+    <Content Include="Formulario\RegistroActividad.aspx" />
+    <Content Include="Formulario\RegistroAsistencia.aspx" />
     <Content Include="Formulario\RegistroCoste.aspx" />
     <Content Include="Formulario\RegistroForeCastGD.aspx" />
+    <Content Include="Formulario\RegistroIngresosEgresos.aspx" />
     <Content Include="Formulario\RegistroInventario.aspx" />
     <Content Include="Formulario\RegistroProyecto.aspx" />
     <Content Include="Formulario\ReporteHorarioLaboral.aspx" />
+    <Content Include="Formulario\ParametrizacionHorarioUsuario.aspx" />
+    <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
+    <Content Include="Formulario\ParametrizacionPerfilInicio.aspx" />
+    <Content Include="Formulario\ParametrizacionMenuPerfil.aspx" />
+    <Content Include="Formulario\ParametrizacionMenuUsuario.aspx" />
+    <Content Include="Formulario\ParametrizacionUsuarios.aspx" />
+    <Content Include="Formulario\ParametrizacionPerfiles.aspx" />
+    <Content Include="Formulario\ReporteSalud.aspx" />
     <Content Include="Formulario\ReportesSap.aspx" />
     <Content Include="Formulario\RRHHEmpleados.aspx" />
     <Content Include="Formulario\SolicitarVacacionesPermisoDesa.aspx" />
@@ -1116,18 +1150,27 @@
     <Content Include="js\DepartamentoMedico.js" />
     <Content Include="js\DetallePedido.js" />
     <Content Include="js\Empleados.js" />
+    <Content Include="js\HistoriaCertificado.js" />
     <Content Include="js\HistoriaClinica.js" />
     <Content Include="js\HistoriaClinicaArchivosRRHH.js" />
     <Content Include="js\HistoriaImunizaciones.js" />
+    <Content Include="js\HistorialClinico.js" />
     <Content Include="js\HistoriaPeriodica.js" />
     <Content Include="js\HistoriaReintegro.js" />
     <Content Include="js\HistoriaRetiro.js" />
+    <Content Include="js\InfoDepMedico.js" />
     <Content Include="js\InformacionContratos.js" />
     <Content Include="js\Inventario.js" />
+    <Content Include="js\jquery.blockUI.js" />
     <Content Include="js\Perfiles.js" />
     <Content Include="js\Producto.js" />
     <Content Include="js\PruebaMenu.js" />
+    <Content Include="js\RegistrIngDesc.js" />
+    <Content Include="js\registroActividad.js" />
+    <Content Include="js\registroAsistencia.js" />
     <Content Include="js\RegistroForeCastGD.js" />
+    <Content Include="js\RegistroLaboral.js" />
+    <Content Include="js\ReportesSap.js" />
     <Content Include="js\ReporteV.js" />
     <Content Include="js\VisualizarForeCast.js" />
     <Content Include="libeay32.dll">
@@ -1254,6 +1297,14 @@
     <Content Include="dist\js\sb-admin-2.js" />
     <Content Include="Formulario\ActualizarTareas.aspx" />
     <Content Include="Formulario\AdministrarTarea.ashx" />
+    <Content Include="Formulario\AdministrarHorarioUsuario.ashx" />
+    <Content Include="Formulario\AdministrarVentanaAprobacion.ashx" />
+    <Content Include="Formulario\AdministrarPerfilInicio.ashx" />
+    <Content Include="Formulario\AdministrarMenuPerfil.ashx" />
+    <Content Include="Formulario\AdministrarMenuUsuario.ashx" />
+    <Content Include="Formulario\AdministrarUsuarios.ashx" />
+    <Content Include="Formulario\AdministrarPerfiles.ashx" />
+    <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
     <Content Include="Formulario\AprobarHorasExtraPendientes.aspx" />
@@ -1319,6 +1370,7 @@
     <Content Include="js\Convenio.js" />
     <Content Include="js\CreaTarea.js" />
     <Content Include="js\DetallesContrato.js" />
+    <Content Include="js\feriadosVacaciones.js" />
     <Content Include="js\ProcesoConvenio.js" />
     <Content Include="js\RegistroContrato.js" />
     <Content Include="js\RegistroForeCast.js" />
@@ -1338,11 +1390,24 @@
     <Content Include="js\jquery-ui.min.js" />
     <Content Include="js\jquery.maskedinput.min.js" />
     <Content Include="js\jquery.min.js" />
+    <Content Include="js\HistorialEvaluacion.js" />
+    <Content Include="js\bootstrap-datetimepicker.js" />
+    <Content Include="js\moment.min.js" />
+    <Content Include="js\moment-with-locales.min.js" />
     <Content Include="js\morris-data.js" />
     <Content Include="js\cambiarEstadoTarea.js" />
-    <Content Include="js\obj\Debug\BillWeb.csproj.FileListAbsolute.txt" />
-    <Content Include="js\obj\Debug\BillWeb.dll" />
-    <Content Include="js\obj\Debug\BillWeb.pdb" />
+    <Content Include="js\parametrizacionHorarioUsuario.js" />
+    <Content Include="js\parametrizacionVentanaAprobacion.js" />
+    <Content Include="js\parametrizacionPerfilInicio.js" />
+    <Content Include="js\parametrizacionMenuPerfil.js" />
+    <Content Include="js\parametrizacionMenuUsuario.js" />
+    <Content Include="js\dos-menu.js" />
+    <Content Include="js\dos-vacio.js" />
+    <Content Include="js\EmpleadosLista.js" />
+    <Content Include="js\ReporteSalud.js" />
+    <Content Include="js\padFirma.js" />
+    <Content Include="js\parametrizacionUsuarios.js" />
+    <Content Include="js\parametrizacionPerfiles.js" />
     <Content Include="js\ResetProceso.js" />
     <Content Include="js\ValidarTarea.js" />
     <Content Include="Web.config" />
@@ -1353,6 +1418,9 @@
     <Compile Include="clases\FileHelper.cs" />
     <Compile Include="clases\GenerarXml.cs" />
     <Compile Include="clases\JSONHelper.cs" />
+    <Compile Include="clases\JSONHelperNuevo.cs" />
+    <Compile Include="clases\logs.cs" />
+    <Compile Include="clases\HtmlSolicitud.cs" />
     <Compile Include="clases\PDF.cs" />
     <Compile Include="clases\PdfLista.cs" />
     <Compile Include="clases\SeguridadHelper.cs" />
@@ -1382,6 +1450,33 @@
     </Compile>
     <Compile Include="Formulario\AdministrarTarea.ashx.cs">
       <DependentUpon>AdministrarTarea.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarHorarioUsuario.ashx.cs">
+      <DependentUpon>AdministrarHorarioUsuario.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarVentanaAprobacion.ashx.cs">
+      <DependentUpon>AdministrarVentanaAprobacion.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarPerfilInicio.ashx.cs">
+      <DependentUpon>AdministrarPerfilInicio.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarMenuPerfil.ashx.cs">
+      <DependentUpon>AdministrarMenuPerfil.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarMenuUsuario.ashx.cs">
+      <DependentUpon>AdministrarMenuUsuario.ashx</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Formulario\AdministrarUsuarios.ashx.cs">
+      <DependentUpon>AdministrarUsuarios.ashx</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Formulario\AdministrarPerfiles.ashx.cs">
+      <DependentUpon>AdministrarPerfiles.ashx</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Formulario\AdministrarMarcacion.ashx.cs">
+      <DependentUpon>AdministrarMarcacion.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AprobacionTareasJefatura.aspx.cs">
       <DependentUpon>AprobacionTareasJefatura.aspx</DependentUpon>
@@ -1519,6 +1614,13 @@
     <Compile Include="Formulario\FrmRptReporteGerencial.aspx.designer.cs">
       <DependentUpon>FrmRptReporteGerencial.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Formulario\HistoriaCertificado.aspx.cs">
+      <DependentUpon>HistoriaCertificado.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\HistoriaCertificado.aspx.designer.cs">
+      <DependentUpon>HistoriaCertificado.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Formulario\HistoriaClinica.aspx.cs">
       <DependentUpon>HistoriaClinica.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1533,12 +1635,26 @@
     <Compile Include="Formulario\HistoriaClinicaArchivosRRHH.aspx.designer.cs">
       <DependentUpon>HistoriaClinicaArchivosRRHH.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Formulario\HistoriaEvaluacion.aspx.cs">
+      <DependentUpon>HistoriaEvaluacion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\HistoriaEvaluacion.aspx.designer.cs">
+      <DependentUpon>HistoriaEvaluacion.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Formulario\HistoriaInmunizaciones.aspx.cs">
       <DependentUpon>HistoriaInmunizaciones.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Formulario\HistoriaInmunizaciones.aspx.designer.cs">
       <DependentUpon>HistoriaInmunizaciones.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\HistorialClinico.aspx.cs">
+      <DependentUpon>HistorialClinico.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\HistorialClinico.aspx.designer.cs">
+      <DependentUpon>HistorialClinico.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\HistoriaPeriodica.aspx.cs">
       <DependentUpon>HistoriaPeriodica.aspx</DependentUpon>
@@ -1560,6 +1676,13 @@
     </Compile>
     <Compile Include="Formulario\HistoriaRetiro.aspx.designer.cs">
       <DependentUpon>HistoriaRetiro.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\InfoDepMedico.aspx.cs">
+      <DependentUpon>InfoDepMedico.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\InfoDepMedico.aspx.designer.cs">
+      <DependentUpon>InfoDepMedico.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\InformacionContratos.aspx.cs">
       <DependentUpon>InformacionContratos.aspx</DependentUpon>
@@ -1598,6 +1721,9 @@
     </Compile>
     <Compile Include="Formulario\ObtenerListaTareas.ashx.cs">
       <DependentUpon>ObtenerListaTareas.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ObtenerNuevaListaTareas.ashx.cs">
+      <DependentUpon>ObtenerNuevaListaTareas.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\PaginaError.aspx.cs">
       <DependentUpon>PaginaError.aspx</DependentUpon>
@@ -1648,6 +1774,20 @@
     <Compile Include="Formulario\RegistrarPedido.aspx.designer.cs">
       <DependentUpon>RegistrarPedido.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Formulario\RegistroActividad.aspx.cs">
+      <DependentUpon>RegistroActividad.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\RegistroActividad.aspx.designer.cs">
+      <DependentUpon>RegistroActividad.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\RegistroAsistencia.aspx.cs">
+      <DependentUpon>RegistroAsistencia.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\RegistroAsistencia.aspx.designer.cs">
+      <DependentUpon>RegistroAsistencia.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Formulario\RegistroCoste.aspx.cs">
       <DependentUpon>RegistroCoste.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -1675,6 +1815,13 @@
     </Compile>
     <Compile Include="Formulario\RegistroForeCastGD.aspx.designer.cs">
       <DependentUpon>RegistroForeCastGD.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\RegistroIngresosEgresos.aspx.cs">
+      <DependentUpon>RegistroIngresosEgresos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\RegistroIngresosEgresos.aspx.designer.cs">
+      <DependentUpon>RegistroIngresosEgresos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\RegistroInventario.aspx.cs">
       <DependentUpon>RegistroInventario.aspx</DependentUpon>
@@ -1753,12 +1900,68 @@
     <Compile Include="Formulario\ReporteHorarioLaboral.aspx.designer.cs">
       <DependentUpon>ReporteHorarioLaboral.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Formulario\ParametrizacionHorarioUsuario.aspx.cs">
+      <DependentUpon>ParametrizacionHorarioUsuario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionHorarioUsuario.aspx.designer.cs">
+      <DependentUpon>ParametrizacionHorarioUsuario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionVentanaAprobacion.aspx.cs">
+      <DependentUpon>ParametrizacionVentanaAprobacion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionVentanaAprobacion.aspx.designer.cs">
+      <DependentUpon>ParametrizacionVentanaAprobacion.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPerfilInicio.aspx.cs">
+      <DependentUpon>ParametrizacionPerfilInicio.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPerfilInicio.aspx.designer.cs">
+      <DependentUpon>ParametrizacionPerfilInicio.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuPerfil.aspx.cs">
+      <DependentUpon>ParametrizacionMenuPerfil.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuPerfil.aspx.designer.cs">
+      <DependentUpon>ParametrizacionMenuPerfil.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuUsuario.aspx.cs">
+      <DependentUpon>ParametrizacionMenuUsuario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionMenuUsuario.aspx.designer.cs">
+      <DependentUpon>ParametrizacionMenuUsuario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionUsuarios.aspx.cs">
+      <DependentUpon>ParametrizacionUsuarios.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionUsuarios.aspx.designer.cs">
+      <DependentUpon>ParametrizacionUsuarios.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPerfiles.aspx.cs">
+      <DependentUpon>ParametrizacionPerfiles.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPerfiles.aspx.designer.cs">
+      <DependentUpon>ParametrizacionPerfiles.aspx</DependentUpon>
+    </Compile>
     <Compile Include="Formulario\ReporteHorasExtras.aspx.cs">
       <DependentUpon>ReporteHorasExtras.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Formulario\ReporteHorasExtras.aspx.designer.cs">
       <DependentUpon>ReporteHorasExtras.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ReporteSalud.aspx.cs">
+      <DependentUpon>ReporteSalud.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ReporteSalud.aspx.designer.cs">
+      <DependentUpon>ReporteSalud.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ReporteServicio.aspx.cs">
       <DependentUpon>ReporteServicio.aspx</DependentUpon>
@@ -2172,8 +2375,6 @@
     <Content Include="js\less\mixins.less" />
     <Content Include="js\less\sb-admin-2.less" />
     <Content Include="js\less\variables.less" />
-    <Content Include="js\obj\Debug\BillWeb.csprojResolveAssemblyReference.cache" />
-    <Content Include="js\obj\Debug\DesignTimeResolveAssemblyReferencesInput.cache" />
     <Content Include="libman.json" />
     <Content Include="Connected Services\ConsultarTicket2\ReporteTareas.ConsultarTicket2.AddResponse.datasource">
       <DependentUpon>Reference.svcmap</DependentUpon>
@@ -2259,6 +2460,7 @@
     <None Include="Connected Services\ConsultarTicket2\ServiceCall.wsdl" />
     <None Include="packages.config" />
     <Content Include="Properties\DataSources\System.Data.DataSet.datasource" />
+    <Content Include="Properties\DataSources\System.Data.DataSet1.datasource" />
     <None Include="Properties\PublishProfiles\FolderProfile.pubxml" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -2280,7 +2482,6 @@
     <Folder Include="App_Data\" />
     <Folder Include="bower_components\poper\" />
     <Folder Include="Controllers\" />
-    <Folder Include="js\obj\Debug\TempPE\" />
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>

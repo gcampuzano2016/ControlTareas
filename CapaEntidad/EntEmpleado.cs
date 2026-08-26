@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -29,5 +25,7 @@ namespace CapaEntidad
         public String Correo { get; set; }
 
         public Int32 Notificacion { get; set; }
+
+        public bool PerVulnerable { get; set; }
     }
 }

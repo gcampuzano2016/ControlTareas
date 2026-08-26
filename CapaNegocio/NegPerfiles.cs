@@ -2,13 +2,10 @@ using CapaDato;
 using CapaEntidad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaNegocio
 {
-    public class  NegPerfiles
+    public class NegPerfiles
     {
         public static EntRespuesta RTAInsertarNuevoPerfil(EntPerfiles objPerfil)
         {
@@ -34,8 +31,18 @@ namespace CapaNegocio
             return DaoPerfiles.Sp_RTA_ConsultarUsuariosPerfil(tipo);
         }
 
+        public static List<EntPerfiles> ListarPerfilesAdmin(string filtro)
+        {
+            return DaoPerfiles.ListarPerfilesAdmin(filtro);
+        }
+
+        public static EntRespuesta EliminarPerfil(int idPerfil)
+        {
+            return DaoPerfiles.EliminarPerfil(idPerfil);
+        }
+
 
     }
 
-   
+
 }

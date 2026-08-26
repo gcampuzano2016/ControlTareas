@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
 using CorreoHelper;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
 
 
 namespace ReporteTareas.Formulario
@@ -29,7 +25,7 @@ namespace ReporteTareas.Formulario
                     Label1.Text = "";
                 }
 
-                txt_login.Focus();              
+                txt_login.Focus();
                 Session["Id_Usuario"] = "";
                 Session["Cod_Usuario"] = "";
                 Session["Nom_Usuario"] = "";
@@ -58,7 +54,7 @@ namespace ReporteTareas.Formulario
 
         public string EnviarCodigo()
         {
-            string strcodigo="";
+            string strcodigo = "";
             strcodigo = Guid.NewGuid().ToString("N").Substring(1, 5);
 
             #region EnvioMail
@@ -102,7 +98,7 @@ namespace ReporteTareas.Formulario
             EntUsuario objUsuario = new EntUsuario();
             string AuxClave = txt_pass.Text.Trim();
             SeguridadHelper seguridad = new SeguridadHelper();
-            txt_pass.Text=seguridad.GetMd5Hash(AuxClave);
+            txt_pass.Text = seguridad.GetMd5Hash(AuxClave);
             objUsuario = NegUsuario.RTA_ConsultaUsuarioRTA(txt_login.Text.Trim());
             if (objUsuario != null)
             {
@@ -130,49 +126,9 @@ namespace ReporteTareas.Formulario
                                 Session["IdCliente"] = objUsuario.IdCliente;
                                 Session["Id_Perfil"] = objUsuario.Id_Perfil;
 
-                                if (objUsuario.Id_Perfil == 2 || objUsuario.Id_Perfil == 3)
-                                    Session["Id_Usuario"] = 1;
-                                else if (objUsuario.Id_Perfil == 4)
-                                    Session["Id_Usuario"] = 4;
-                                else if (objUsuario.Id_Perfil == 5)
-                                    Session["Id_Usuario"] = 5;
-                                else if (objUsuario.Id_Perfil == 6) // Reporte Gerencial
-                                    Session["Id_Usuario"] = 6;
-                                else if (objUsuario.Id_Perfil == 7) // Externos
-                                    Session["Id_Usuario"] = 7;
-                                else if (objUsuario.Id_Perfil == 8) //Vendedores Gerente de Producto
-                                    Session["Id_Usuario"] = 8;
-                                else if (objUsuario.Id_Perfil == 9) //Vendedores Gerente de Producto
-                                    Session["Id_Usuario"] = 9;
-                                else if (objUsuario.Id_Perfil == 10) //gerencia
-                                    Session["Id_Usuario"] = 10;
-                                else if (objUsuario.Id_Perfil == 11) //subgerencia
-                                    Session["Id_Usuario"] = 11;
-                                else if (objUsuario.Id_Perfil == 12) //Gerente Ventas
-                                    Session["Id_Usuario"] = 12;
-                                else if (objUsuario.Id_Perfil == 13) //Gerente Servicio
-                                    Session["Id_Usuario"] = 13;
-                                else if (objUsuario.Id_Perfil == 14) //Talento Humano
-                                    Session["Id_Usuario"] = 14;
-                                else if (objUsuario.Id_Perfil == 15) //Tesoreria
-                                    Session["Id_Usuario"] = 15;
-                                else if (objUsuario.Id_Perfil == 16) //Big&Prices
-                                    Session["Id_Usuario"] = 16;
-                                else if (objUsuario.Id_Perfil == 17) // Inventario
-                                    Session["Id_Usuario"] = 17;
-                                else if (objUsuario.Id_Perfil == 18) // ForeCast GD
-                                    Session["Id_Usuario"] = 18;
-                                else if (objUsuario.Id_Perfil == 19) //Vendedores Gerente de Producto 8
-                                    Session["Id_Usuario"] = 19;
-                                else if (objUsuario.Id_Perfil == 20) //Vendedores Gerente de Producto 9
-                                    Session["Id_Usuario"] = 20;
-                                else if (objUsuario.Id_Perfil == 21) //Logistica
-                                    Session["Id_Usuario"] = 21;
-                                else
-                                    Session["Id_Usuario"] = 0;
-
-
-                                Response.Redirect("Principal.aspx");
+                                var inicio = NegPerfilInicio.ObtenerPerfilInicio(objUsuario.Id_Perfil);
+                                Session["Id_Usuario"] = inicio.IdTipo;
+                                Response.Redirect(inicio.Href);
                             }
                             else
                             {
@@ -287,26 +243,9 @@ namespace ReporteTareas.Formulario
                         Session["IdCliente"] = objUsuario.IdCliente;
                         Session["Id_Perfil"] = objUsuario.Id_Perfil;
 
-                        if (objUsuario.Id_Perfil == 2 || objUsuario.Id_Perfil == 3)
-                            Session["Id_Usuario"] = 1;
-                        else if (objUsuario.Id_Perfil == 4)
-                            Session["Id_Usuario"] = 4;
-                        else if (objUsuario.Id_Perfil == 5)
-                            Session["Id_Usuario"] = 5;
-                        else if (objUsuario.Id_Perfil == 7)
-                            Session["Id_Usuario"] = 7;
-                        else if (objUsuario.Id_Perfil == 19) //Vendedores Gerente de Producto 8
-                            Session["Id_Usuario"] = 19;
-                        else if (objUsuario.Id_Perfil == 20) //Vendedores Gerente de Producto 9
-                            Session["Id_Usuario"] = 20;
-                        else if (objUsuario.Id_Perfil == 21) //Logistica
-                            Session["Id_Usuario"] = 21;
-                        else if (objUsuario.Id_Perfil == 12) //Gerente Ventas
-                            Session["Id_Usuario"] = 12;
-                        else
-                            Session["Id_Usuario"] = 0;
-
-                        Response.Redirect("Principal.aspx");
+                        var inicioSec = NegPerfilInicio.ObtenerPerfilInicio(objUsuario.Id_Perfil);
+                        Session["Id_Usuario"] = inicioSec.IdTipo;
+                        Response.Redirect(inicioSec.Href);
                     }
                 }
             }

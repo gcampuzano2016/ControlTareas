@@ -1,19 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Web;
-using System.Web.Services;
-using JSONHelper;
-using System.Text;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
-using System.Web.Script.Serialization;
-using System.Globalization;
 using CorreoHelper;
-using ReporteTareas.ConsultarTicket2;
+using JSONHelper;
 using ReporteTareas.ConsultarIncidente2;
-using System.IO;
-using System.Data;
+using ReporteTareas.ConsultarTicket2;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.Text;
+using System.Web;
+using System.Web.Script.Serialization;
+using System.Web.Services;
 
 namespace JsonJQueryNetAdministrarTarea
 {
@@ -24,7 +22,7 @@ namespace JsonJQueryNetAdministrarTarea
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class AdministrarTarea : IHttpHandler
     {
-        
+
         public void ProcessRequest(HttpContext context)
         {
             dynamic parametros;
@@ -57,7 +55,7 @@ namespace JsonJQueryNetAdministrarTarea
                     responseAction.Append(GuardarDetalleTarea(parameters));
                 }
 
-                if(Action == "EnviarEmailPoliza")
+                if (Action == "EnviarEmailPoliza")
                 {
                     existAction = true;
                     responseAction.Append(EnviarEmailPolizas(parameters));
@@ -86,7 +84,7 @@ namespace JsonJQueryNetAdministrarTarea
                     existAction = true;
                     responseAction.Append(GuardarDetalleTareaCambioEstado(parameters));
                 }
-                
+
                 if (Action == "AprobarTarea")
                 {
                     existAction = true;
@@ -123,7 +121,7 @@ namespace JsonJQueryNetAdministrarTarea
                     existAction = true;
                     responseAction.Append(AprobarTareaRevisor(parameters));
                 }
-                
+
                 if (Action == "AnularAprobacionTareasRevisor")
                 {
                     existAction = true;
@@ -139,7 +137,7 @@ namespace JsonJQueryNetAdministrarTarea
 
             }
 
- 
+
 
             context.Response.ContentType = "application/json";
             context.Response.Charset = "utf-8";
@@ -151,7 +149,7 @@ namespace JsonJQueryNetAdministrarTarea
 
             SeguridadHelper seguridad = new SeguridadHelper();
             EntRespuesta respuesta = new EntRespuesta();
-            EntRespuesta respuestaActualizaHorasExtras = new EntRespuesta(); 
+            EntRespuesta respuestaActualizaHorasExtras = new EntRespuesta();
             EntDetalleTarea registro = new EntDetalleTarea();
             EntDetalleTarea registroOriginal = new EntDetalleTarea();
             EntTareas objTarea = new EntTareas();
@@ -161,7 +159,7 @@ namespace JsonJQueryNetAdministrarTarea
             EntItemValor campoCorreo = new EntItemValor();
             EntUsuario usuario = new EntUsuario();
             string IdUsuarioSession = "";
-            string IpCliente = ""; 
+            string IpCliente = "";
 
 
             try
@@ -197,7 +195,7 @@ namespace JsonJQueryNetAdministrarTarea
                 registro.Det_Nom_Empresa = objTarea.Nom_Empresa;
                 registro.Id_RegTareas = objTarea.Id_RegTareas;
 
-                registro.Cod_CatalogoTareaSap = Convert.ToInt32(campos["frmCmbTipoActividad"]); 
+                registro.Cod_CatalogoTareaSap = Convert.ToInt32(campos["frmCmbTipoActividad"]);
                 registro.Id_RegDetTareas = Convert.ToInt32(campos["frmTxtCodigo"]);
                 registro.Det_Det_Tarea = campos["frmTxtTareaDetalle"];
                 string fechaInicio = campos["frmTxtFecha"] + " " + campos["frmTxtHoraDesde"];
@@ -287,13 +285,13 @@ namespace JsonJQueryNetAdministrarTarea
                     {
                         // Se envia el codigo de la solicitud y el valor 1-Solicitud Horas Extras Enviada
                         respuestaActualizaHorasExtras = NegTareas.RTAActualizarEstadoHorasExtras(registro.Id_RegDetTareas, 1);
-                        if(respuestaActualizaHorasExtras.estado == "0")
+                        if (respuestaActualizaHorasExtras.estado == "0")
                         {
                             return responseMessage("0", "Se guardo correctamente los datos y se envía correo con solicitud, pero no se pudo cambiar el estado de la solicitud.", "warning");
                         }
 
                     }
-                    
+
                 }
 
             }
@@ -378,89 +376,52 @@ namespace JsonJQueryNetAdministrarTarea
 
                 respuesta = NegTareas.RTA_InsertaDetalleTarea(registro);
 
-                bool respuestaEnvioCorreo = false;
+                /* El procedimiento pudo haber insertado varias filas: parte el rango en
+                   tramos según el horario del responsable, así que 07:30 a 18:30 con
+                   jornada 08:30-17:30 deja dos tramos suplementarios y uno normal.
 
-                if (respuesta.estado == "1" && ((registro.Det_Horas_Extras_Tipo == 1 || registro.Det_Horas_Extras_Tipo == 2) && registro.Det_Horas_Extras_Estado == 0))
+                   La guarda ya no mira el combo de la pantalla, que dejó de decidir.
+                   Manda lo que devolvió el procedimiento: los identificadores de las
+                   filas que salieron como horas extras. Si el rango entró completo en la
+                   jornada, la lista viene vacía y no se pide nada. */
+                if (respuesta.estado == "1" && !string.IsNullOrWhiteSpace(respuesta.IdsHorasExtras))
                 {
                     EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
-                    registroOriginal = NegTareas.RTA_ConsultaDetalleTareaRTA(Convert.ToInt32(respuesta.resultado));
+                    List<string> sinSolicitar = new List<string>();
 
-                    // Se encripta los parametros de aprobación y rechazo para enviar en la url de aprobación.
-                    string valorEncritar1 = registroOriginal.Id_RegDetTareas.ToString() + ";" + registroOriginal.Id_RegTareas.ToString() + ";" + "D" + ";" + registroOriginal.Det_Horas_Extras_Tipo.ToString();
-                    string valorEncritar2 = registroOriginal.Id_RegDetTareas.ToString() + ";" + registroOriginal.Id_RegTareas.ToString() + ";" + "R" + ";" + registroOriginal.Det_Horas_Extras_Tipo.ToString();
-                    string valorIncritado1 = envioCorreo.Encrypt(valorEncritar1, "3m1l10100", "3m1l10100");
-                    string valorIncritado2 = envioCorreo.Encrypt(valorEncritar2, "3m1l10100", "3m1l10100");
-                    // Se trae el parametro de la URL del sitio de aprobaciones.
-                    string urlSiteAprobacion = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
-                    // Se estrcutura las URL de aprobación y rechazo de las horas extras
-                    string urlAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado1;
-                    string urlRechazarAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado2;
-                    // Llenado de listado de parámetros a ser reemplazados en el contenido del correo electrónico.
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE HORAS EXTRAS" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta1", Valor = "Orden de Servicio:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto1", Valor = registroOriginal.Det_Num_OrdenServicio });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Empresa:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto2", Valor = registroOriginal.Det_Nom_Empresa });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta21", Valor = "Cliente:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto21", Valor = objTarea.NombreCliente });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta22", Valor = "Fecha:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto22", Valor = campos["frmTxtFecha"] });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta23", Valor = "Hora Inicio:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto23", Valor = campos["frmTxtHoraDesde"] });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta24", Valor = "Hora Fin:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto24", Valor = campos["frmTxtHoraHasta"] });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta25", Valor = "Tiempo:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto25", Valor = campos["frmTxtTiempo"] });
-
-                    if (registro.Det_Horas_Extras_Tipo == 1)
+                    foreach (string idTexto in respuesta.IdsHorasExtras.Split(','))
                     {
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Tipo de Horas Extra:" });
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "texto3", Valor = "50%" });
-                    }
-                    if (registro.Det_Horas_Extras_Tipo == 2)
-                    {
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Tipo de Horas Extra:" });
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "texto3", Valor = "100%" });
-                    }
+                        long idTramo;
 
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta4", Valor = "Solicitante:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto4", Valor = usuario.Nom_Usuario });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaDescripcion", Valor = "Descripción de la Tarea:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "textoDescripcion", Valor = registroOriginal.Det_Det_Tarea.ToString() });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton1", Valor = "Aprobar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton1", Valor = urlAprobacion });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton2", Valor = "Rechazar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton2", Valor = urlRechazarAprobacion });
-
-
-                    correoJefeInmediato = NegUsuario.RTA_CorreoJefeInmediato(IdUsuarioSession);
-                    //correoJefeInmediato = "arosero@dos.com.ec";
-
-                    respuestaEnvioCorreo = envioCorreo.EnvioCorreo(correoJefeInmediato, "Autorización de Horas Extras", envioCorreo.EstructuraContenidoCorreo(), listaCamposCorreo);
-
-                    if (!respuestaEnvioCorreo)
-                    {
-                        return responseMessage("0", "Se guardo correctamente los datos, pero no se pudo enviar el correo con la solicitud de horas extras.", "warning");
-
-                        // Se envia el codigo de la solicitud y el valor 1-Solicitud Horas Extras Enviada
-                        respuestaActualizaHorasExtras = NegTareas.RTAActualizarEstadoHorasExtras(registroOriginal.Id_RegDetTareas, 1);
-                        if (respuestaActualizaHorasExtras.estado == "0")
+                        if (!long.TryParse(idTexto.Trim(), out idTramo))
                         {
-                            return responseMessage("0", "Se guardo correctamente los datos y se envía correo con solicitud, pero no se pudo cambiar el estado de la solicitud.", "warning");
+                            continue;
                         }
 
-                    }
-                    else
-                    {
-                        // Se envia el codigo de la solicitud y el valor 1-Solicitud Horas Extras Enviada
-                        respuestaActualizaHorasExtras = NegTareas.RTAActualizarEstadoHorasExtras(registroOriginal.Id_RegDetTareas, 1);
-                        if (respuestaActualizaHorasExtras.estado == "0")
+                        EntRespuesta solicitud =
+                            envioCorreo.SolicitarAutorizacionHorasExtras(
+                                idTramo,
+                                IdUsuarioSession,
+                                usuario.Nom_Usuario,
+                                objTarea.NombreCliente);
+
+                        if (solicitud.estado != "1")
                         {
-                            return responseMessage("0", "Se guardo correctamente los datos y se envía correo con solicitud, pero no se pudo cambiar el estado de la solicitud.", "warning");
+                            sinSolicitar.Add(solicitud.mensaje);
                         }
-
                     }
 
+                    /* Las filas ya están guardadas y la transacción del procedimiento
+                       cerró: un correo que no salió no puede deshacer el registro. Se le
+                       dice al usuario cuáles quedaron sin pedir, y no se pierde nada. */
+                    if (sinSolicitar.Count > 0)
+                    {
+                        return responseMessage(
+                            "0",
+                            "Se registró la actividad, pero quedaron horas extras sin solicitar. "
+                            + string.Join(" ", sinSolicitar.ToArray()),
+                            "warning");
+                    }
                 }
                 else if (respuesta.estado == "-1")
                 {
@@ -541,7 +502,7 @@ namespace JsonJQueryNetAdministrarTarea
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
                 correo = campos["correo"];
-                detalle = campos["detalle"]+"↨" + usuario.Nom_Usuario;
+                detalle = campos["detalle"] + "↨" + usuario.Nom_Usuario;
                 detalleBody = detalle;
                 bool respuestaEnvioCorreo = false;
                 EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
@@ -620,7 +581,7 @@ namespace JsonJQueryNetAdministrarTarea
                 objTarea.Det_Ip_Modificacion = ipCliente;
 
                 //actualizar observacion
-                objTarea.EstadoTarea = detalleTarea +":  " + observacionTarea;
+                objTarea.EstadoTarea = detalleTarea + ":  " + observacionTarea;
                 objTarea.Tipo = 1;
                 objTarea.Id_RegTareas = idTareaPrincipal;
                 NegTareas.RTA_ActualizarRequerimiento(objTarea);
@@ -904,15 +865,22 @@ namespace JsonJQueryNetAdministrarTarea
             string idUsuarioResponsable = campos["txtCodigo"].ToString();
             string fechaDesde = campos["txtFechaDesde"].ToString();
             string fechaHasta = campos["txtFechaHasta"].ToString();
-            
+
             try
             {
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
 
+                // Ventana de aprobación del jefe (opt-in): si tiene ventana y hoy está fuera, no aprueba.
+                EntRespuesta valVentana = NegVentanaAprobacion.ValidarVentana(usuario.E_Mail, DateTime.Now);
+                if (valVentana.estado == "0")
+                {
+                    return valVentana.SerializaToJson();
+                }
+
                 Int32 estadoAprobacion = 2;
 
-                // Actualización de tareas con estado de aprobación. 
+                // Actualización de tareas con estado de aprobación.
                 respuestaAprobacion = NegTareas.RTA_CambioEstadoAprobacionTarea(IdUsuarioSession, fechaDesde, fechaHasta, idUsuarioResponsable, IdUsuarioSession, ipCliente, estadoAprobacion);
 
                 //
@@ -926,7 +894,7 @@ namespace JsonJQueryNetAdministrarTarea
                 }
                 else
                 {
-                    if(respuesta.mensaje == null)
+                    if (respuesta.mensaje == null)
                     {
                         respuesta.mensaje = "No se realizó la Aprobación de Tareas. Si las tareas seleccionadas ya estan aprobadas puede recibir este mensaje.";
                     }
@@ -965,9 +933,16 @@ namespace JsonJQueryNetAdministrarTarea
                 IdUsuarioSession = seguridad.Desencripta(campos["session"]);
                 usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
 
+                // Ventana de aprobación del jefe (opt-in): si tiene ventana y hoy está fuera, no aprueba.
+                EntRespuesta valVentana = NegVentanaAprobacion.ValidarVentana(usuario.E_Mail, DateTime.Now);
+                if (valVentana.estado == "0")
+                {
+                    return valVentana.SerializaToJson();
+                }
+
                 Int32 estadoAprobacion = 2;
 
-                // Actualización de tareas con estado de aprobación. 
+                // Actualización de tareas con estado de aprobación.
                 respuestaAprobacion = NegTareas.RTA_CambioEstadoAprobacionTareaIndividual(IdUsuarioSession, fechaDesde, fechaHasta, idUsuarioResponsable, IdUsuarioSession, ipCliente, estadoAprobacion, idDetalleTarea);
 
                 //

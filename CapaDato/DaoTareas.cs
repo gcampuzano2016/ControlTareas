@@ -1,19 +1,14 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
     public class DaoTareas
     {
-    
+
         public static List<EntTareas> ListaTareas(string Idusuario)
         {
             List<EntTareas> listaTareas = null;
@@ -33,7 +28,7 @@ namespace CapaDato
                 while (dr.Read())
                 {
                     EntTareas Tarea = new EntTareas();
-                    
+
 
                     Tarea.Id_RegTareas = Convert.ToInt32(dr["Id_RegTareas"].ToString());
                     Tarea.Num_OrdenServicio = dr["Num_OrdenServicio"].ToString();
@@ -53,7 +48,7 @@ namespace CapaDato
                     Tarea.FechaAprobacion = dr["FechaAprobacion"].ToString();
                     Tarea.IdEstadoTarea = Convert.ToInt32(dr["IdEstadoTarea"].ToString());
                     Tarea.EstadoTarea = dr["EstadoTarea"].ToString();
-                    Tarea.CatalogoTareaSap = dr["CatalogoTareaSap"].ToString(); 
+                    Tarea.CatalogoTareaSap = dr["CatalogoTareaSap"].ToString();
                     Tarea.TareaEnEjecucion = Convert.ToInt32(dr["TareaEnEjecucion"].ToString());
                     Tarea.conteoArchivosAdjuntos = Convert.ToInt32(dr["conteoArchivosAdjuntos"].ToString());
 
@@ -70,7 +65,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaTareas;
         }
@@ -121,14 +119,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaArchivosTarea;
         }
 
         public static List<EntArchivoTarea> ListaArchivosTareas(Int32 IdTarea, Int32 idServicio)
         {
-            
+
             List<EntArchivoTarea> listaArchivosTarea = null;
             SqlCommand cmd = null;
             SqlDataReader dr = null;
@@ -148,7 +149,7 @@ namespace CapaDato
                 {
                     EntArchivoTarea archivoTarea = new EntArchivoTarea();
 
-                    archivoTarea.Id_ArchivosTarea = Convert.ToInt32(dr["Id_ArchivosTarea"].ToString()); 
+                    archivoTarea.Id_ArchivosTarea = Convert.ToInt32(dr["Id_ArchivosTarea"].ToString());
                     archivoTarea.Nombre_Archivo = dr["Nombre_Archivo"].ToString();
                     archivoTarea.Extension_Archivo = dr["Extension_Archivo"].ToString();
                     archivoTarea.Codigo_Archivo = dr["Codigo_Archivo"].ToString();
@@ -173,7 +174,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaArchivosTarea;
         }
@@ -235,14 +239,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
 
 
-        public static List<EntTareas> ConsultaHorasExtrasPorAutorizar(string FchIni, string FchFin, string IdResponsable,int Det_Horas_Extras_Estado,string IdUsuarioJefe)
+        public static List<EntTareas> ConsultaHorasExtrasPorAutorizar(string FchIni, string FchFin, string IdResponsable, int Det_Horas_Extras_Estado, string IdUsuarioJefe)
         {
             List<EntTareas> listaTareas = null;
 
@@ -290,7 +297,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -333,14 +343,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
         }
 
 
-        public static List<EntTareas> ConsultaTareasGeneradas(string FchIni, string FchFin, int Tipo, int Id_RegTareas,string registro,string busqueda)
+        public static List<EntTareas> ConsultaTareasGeneradas(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string busqueda)
         {
             List<EntTareas> listaTareas = null;
 
@@ -390,7 +403,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -434,14 +450,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
         }
 
 
-        public static List<EntTareas> ConsultaTareasGeneradasContrato(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS,int idCliente,int idProceso)
+        public static List<EntTareas> ConsultaTareasGeneradasContrato(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS, int idCliente, int idProceso)
         {
             List<EntTareas> listaTareas = null;
 
@@ -495,7 +514,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -543,14 +565,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
 
 
-        public static EntRespuesta ConsultaTareasGeneradasContratoDescargar(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS,int idCliente, int idProceso)
+        public static EntRespuesta ConsultaTareasGeneradasContratoDescargar(string FchIni, string FchFin, int Tipo, int Id_RegTareas, string registro, string numeroOS, int idCliente, int idProceso)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -590,13 +615,16 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
         }
 
-        public static EntRespuesta ObtenerReporteGPFGeneradasDescargar(string FchIni, string FchFin,int idtipo)
+        public static EntRespuesta ObtenerReporteGPFGeneradasDescargar(string FchIni, string FchFin, int idtipo)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -631,7 +659,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -683,7 +714,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objTarea;
         }
@@ -714,7 +748,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objTarea;
         }
@@ -750,7 +787,7 @@ namespace CapaDato
                     objDetalleTarea.Det_Tiempo = dr["Det_Tiempo"].ToString();
                     objDetalleTarea.Det_Nom_Empresa = dr["Det_Nom_Empresa"].ToString();
                     objDetalleTarea.Det_Det_Tarea = dr["Det_Det_Tarea"].ToString();
-                    objDetalleTarea.Det_Tarea = dr["Det_Tarea"].ToString(); 
+                    objDetalleTarea.Det_Tarea = dr["Det_Tarea"].ToString();
                     objDetalleTarea.Det_Estado = dr["Det_Estado"].ToString();
                     objDetalleTarea.Id_Responsable = dr["Id_Responsable"].ToString();
                     objDetalleTarea.Det_Det_TareaFin = dr["Det_Det_TareaFin"].ToString();
@@ -765,7 +802,7 @@ namespace CapaDato
                     objDetalleTarea.Cod_CatalogoTareaSap = Convert.ToInt32(dr["Cod_CatalogoTareaSap"].ToString());
                     objDetalleTarea.Det_Aprobacion_Tarea_Estado = Convert.ToInt32(dr["Det_Aprobacion_Tarea_Estado"].ToString());
                     objDetalleTarea.Det_Fecha_Aprobacion_Tarea = dr["Det_Fecha_Aprobacion_Tarea"].ToString();
-                    objDetalleTarea.Det_Aprobacion_Tarea_Estado_Descripcion = dr["Det_Aprobacion_Tarea_Estado_Descripcion"].ToString(); 
+                    objDetalleTarea.Det_Aprobacion_Tarea_Estado_Descripcion = dr["Det_Aprobacion_Tarea_Estado_Descripcion"].ToString();
                     objDetalleTarea.Det_Horas_Extras_Fecha_Solicitud = dr["Det_Horas_Extras_Fecha_Solicitud"].ToString();
                     objDetalleTarea.Det_Horas_Extras_Fecha_Aprobacion = dr["Det_Horas_Extras_Fecha_Aprobacion"].ToString();
                     objDetalleTarea.Det_Aprobacion_Tarea_Estado_QA = Convert.ToInt32(dr["Det_Aprobacion_Tarea_Estado_QA"].ToString());
@@ -781,12 +818,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objDetalleTarea;
         }
 
-        
+
 
         public static int RTA_IngresaHisTarea(EntHisTarea objHisTarea)
         {
@@ -810,7 +850,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@Det_Nom_Empresa", objHisTarea.Det_Nom_Empresa);
                 cmd.Parameters.AddWithValue("@Det_Det_Tarea", objHisTarea.Det_Det_Tarea);
                 cmd.Parameters.AddWithValue("@Det_Estado", objHisTarea.Det_Estado);
-                cmd.Parameters.AddWithValue("@Det_Motivo_Cambio_Estado", objHisTarea.Det_Motivo_Cambio_Estado );
+                cmd.Parameters.AddWithValue("@Det_Motivo_Cambio_Estado", objHisTarea.Det_Motivo_Cambio_Estado);
                 cmd.CommandType = CommandType.StoredProcedure;
                 cnx.Open();
                 dr = cmd.ExecuteReader();
@@ -823,7 +863,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -876,7 +919,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -935,7 +981,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -979,7 +1028,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -1016,7 +1068,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -1042,8 +1097,8 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@Id_RegDetTareas", objDetalleTarea.Id_RegDetTareas);
                 cmd.Parameters.AddWithValue("@Id_RegTareas", objDetalleTarea.Id_RegTareas);
                 cmd.Parameters.AddWithValue("@Det_Num_OrdenServicio", objDetalleTarea.Det_Num_OrdenServicio);
-				cmd.Parameters.AddWithValue("@Det_Id_CompAranda", objDetalleTarea.Det_Id_CompAranda);
-                cmd.Parameters.AddWithValue("@Det_Det_Tarea", objDetalleTarea.Det_Det_Tarea); 
+                cmd.Parameters.AddWithValue("@Det_Id_CompAranda", objDetalleTarea.Det_Id_CompAranda);
+                cmd.Parameters.AddWithValue("@Det_Det_Tarea", objDetalleTarea.Det_Det_Tarea);
                 cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleIni", objDetalleTarea.Det_Fch_RegDetalleIni);
                 cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleFin", objDetalleTarea.Det_Fch_RegDetalleFin);
                 cmd.Parameters.AddWithValue("@Det_Tiempo", objDetalleTarea.Det_Tiempo);
@@ -1080,10 +1135,13 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
-            
+
             return Respuesta;
 
         }
@@ -1133,7 +1191,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1186,7 +1247,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1239,7 +1303,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1292,7 +1359,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1301,7 +1371,7 @@ namespace CapaDato
         }
 
 
-        public static EntRespuesta RTAActualizarEstadoHorasExtras(int Id_RegDetTareas,  int Det_HorasExtrasEstado)
+        public static EntRespuesta RTAActualizarEstadoHorasExtras(int Id_RegDetTareas, int Det_HorasExtrasEstado)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             int respuestaSP = 0;
@@ -1346,7 +1416,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1354,101 +1427,315 @@ namespace CapaDato
 
         }
 
+        #region RTA_InsertaDetalleTarea Nueva Version
         public static EntRespuesta RTA_InsertaDetalleTarea(EntDetalleTarea objDetalleTarea)
         {
-            EntRespuesta Respuesta = new EntRespuesta();
-            int respuestaSP = 0;
-            SqlCommand cmd = null;
-            SqlDataReader dr = null;
+            EntRespuesta respuesta = new EntRespuesta
+            {
+                estado = "0",
+                mensaje = "No se pudo procesar la solicitud.",
+                tipoMensaje = "danger",
+                resultado = "0"
+            };
 
             try
             {
-                DaoReporTareaAranda cn = new DaoReporTareaAranda();
-                SqlConnection cnx = cn.conectar();
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
-                cnx.Open();
-                                       
-                cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx);
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.CommandTimeout = 60;
 
-                cmd.Parameters.AddWithValue("@Id_RegTareas", objDetalleTarea.Id_RegTareas);
-                cmd.Parameters.AddWithValue("@Det_Num_OrdenServicio", objDetalleTarea.Det_Num_OrdenServicio);
-                cmd.Parameters.AddWithValue("@Det_Id_CompAranda", objDetalleTarea.Det_Id_CompAranda);
-                cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleIni", objDetalleTarea.Det_Fch_RegDetalleIni);
-                cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleFin", objDetalleTarea.Det_Fch_RegDetalleFin);
-                cmd.Parameters.AddWithValue("@Det_EstadoIni", objDetalleTarea.Det_EstadoIni);
-                cmd.Parameters.AddWithValue("@Det_EstadoFin", objDetalleTarea.Det_EstadoFin);
-                cmd.Parameters.AddWithValue("@Det_Nom_Empresa", objDetalleTarea.Det_Nom_Empresa);
-                cmd.Parameters.AddWithValue("@Det_Det_Tarea", objDetalleTarea.Det_Det_Tarea);
-                cmd.Parameters.AddWithValue("@Det_Estado", objDetalleTarea.Det_Estado);
-                cmd.Parameters.AddWithValue("@IdDet_EstadoIni", objDetalleTarea.IdDet_EstadoIni); 
-                cmd.Parameters.AddWithValue("@Det_Motivo_Cambio_Estado", objDetalleTarea.Det_Motivo_Cambio_Estado);
-                cmd.Parameters.AddWithValue("@Det_Observaciones", objDetalleTarea.Det_Observaciones);
-                cmd.Parameters.AddWithValue("@Det_Horas_Extras_Tipo", objDetalleTarea.Det_Horas_Extras_Tipo);
-                cmd.Parameters.AddWithValue("@Id_Responsable", objDetalleTarea.Id_Responsable);
-                cmd.Parameters.AddWithValue("@Det_Tiempo", objDetalleTarea.Det_Tiempo);
-                cmd.Parameters.AddWithValue("@Cod_CatalogoTareaSap", objDetalleTarea.Cod_CatalogoTareaSap);
-                cmd.Parameters.AddWithValue("@IdTipoGasto", objDetalleTarea.IdTipoGasto);
-                cmd.CommandType = CommandType.StoredProcedure;
-                dr = cmd.ExecuteReader();
-                dr.Read();
+                    cmd.Parameters.Add("@Id_RegTareas", SqlDbType.BigInt)
+                        .Value = objDetalleTarea.Id_RegTareas;
 
-                respuestaSP = Convert.ToInt32(dr["Respuestas"].ToString());
+                    cmd.Parameters.Add("@Det_Num_OrdenServicio", SqlDbType.VarChar, 50)
+                        .Value = objDetalleTarea.Det_Num_OrdenServicio ?? string.Empty;
 
-                if (respuestaSP >= 1)
-                {
-                    //Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.estado = "1";
-                    Respuesta.mensaje = "Datos Guardados con Exito.";
-                    Respuesta.tipoMensaje = "success";
-                    Respuesta.resultado = respuestaSP.ToString();
-                }
-                else if(respuestaSP==-1)
-                {
-                    //Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.estado = "-1";
-                    Respuesta.mensaje = "No existe el número de orden por favor validar";
-                    Respuesta.tipoMensaje = "danger";
-                    Respuesta.resultado = respuestaSP.ToString();
-                }
-                else if (respuestaSP == -3)
-                {
-                    //Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.estado = "-3";
-                    Respuesta.mensaje = "Estas horas ya fuerón registradas en otra actividad. Validar que no se duplique ";
-                    Respuesta.tipoMensaje = "danger";
-                    Respuesta.resultado = respuestaSP.ToString();
-                }
-                else if (respuestaSP == -4)
-                {
-                    //Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.estado = "-4";
-                    Respuesta.mensaje = "La OS se encuentra CERRADA no puede registrar mas tiempo comuniquese con Planificador. ";
-                    Respuesta.tipoMensaje = "danger";
-                    Respuesta.resultado = respuestaSP.ToString();
-                }
-                else
-                {
-                    Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.mensaje = "Ocurrio un error al guardar los datos.";
-                    Respuesta.tipoMensaje = "danger";
-                }
+                    cmd.Parameters.Add("@Det_Id_CompAranda", SqlDbType.VarChar, 80)
+                        .Value = objDetalleTarea.Det_Id_CompAranda ?? string.Empty;
 
+                    cmd.Parameters.Add("@Det_Fch_RegDetalleIni", SqlDbType.VarChar, 40)
+                        .Value = objDetalleTarea.Det_Fch_RegDetalleIni ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Fch_RegDetalleFin", SqlDbType.VarChar, 40)
+                        .Value = objDetalleTarea.Det_Fch_RegDetalleFin ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_EstadoIni", SqlDbType.VarChar, 3)
+                        .Value = objDetalleTarea.Det_EstadoIni ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_EstadoFin", SqlDbType.VarChar, 3)
+                        .Value = objDetalleTarea.Det_EstadoFin ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Nom_Empresa", SqlDbType.VarChar, 100)
+                        .Value = objDetalleTarea.Det_Nom_Empresa ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Det_Tarea", SqlDbType.VarChar, 500)
+                        .Value = objDetalleTarea.Det_Det_Tarea ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Estado", SqlDbType.VarChar, 500)
+                        .Value = objDetalleTarea.Det_Estado ?? string.Empty;
+
+                    cmd.Parameters.Add("@IdDet_EstadoIni", SqlDbType.Int)
+                        .Value = objDetalleTarea.IdDet_EstadoIni;
+
+                    cmd.Parameters.Add("@Det_Motivo_Cambio_Estado", SqlDbType.VarChar, 256)
+                        .Value = objDetalleTarea.Det_Motivo_Cambio_Estado ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Observaciones", SqlDbType.VarChar, 512)
+                        .Value = objDetalleTarea.Det_Observaciones ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Horas_Extras_Tipo", SqlDbType.BigInt)
+                        .Value = objDetalleTarea.Det_Horas_Extras_Tipo;
+
+                    cmd.Parameters.Add("@Id_Responsable", SqlDbType.VarChar, 20)
+                        .Value = objDetalleTarea.Id_Responsable ?? string.Empty;
+
+                    cmd.Parameters.Add("@Det_Tiempo", SqlDbType.VarChar, 10)
+                        .Value = objDetalleTarea.Det_Tiempo ?? string.Empty;
+
+                    cmd.Parameters.Add("@Cod_CatalogoTareaSap", SqlDbType.BigInt)
+                        .Value = objDetalleTarea.Cod_CatalogoTareaSap;
+
+                    cmd.Parameters.Add("@IdTipoGasto", SqlDbType.BigInt)
+                        .Value = objDetalleTarea.IdTipoGasto;
+
+                    cnx.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (!dr.Read())
+                        {
+                            respuesta.mensaje =
+                                "El procedimiento almacenado no devolvió información.";
+
+                            return respuesta;
+                        }
+
+                        int respuestaSP =
+                            Convert.ToInt32(dr["Respuestas"]);
+
+                        string mensajeSP =
+                            ObtenerValorColumna(dr, "Mensaje");
+
+                        respuesta.resultado = respuestaSP.ToString();
+
+                        /* Un guardado puede haber generado varias filas: el
+                           procedimiento parte el rango en tramos segun el horario del
+                           responsable. Aca vienen las que quedaron pendientes de
+                           autorizacion, para que el handler pida una por una.
+
+                           ObtenerValorColumna devuelve cadena vacia si la columna no
+                           esta, asi que esto tolera una base todavia sin actualizar. */
+                        respuesta.IdsHorasExtras =
+                            ObtenerValorColumna(dr, "IdsHorasExtras");
+
+                        if (respuestaSP >= 1)
+                        {
+                            respuesta.estado = "1";
+                            respuesta.tipoMensaje = "success";
+
+                            respuesta.mensaje =
+                                !string.IsNullOrWhiteSpace(mensajeSP)
+                                    ? mensajeSP
+                                    : "Datos guardados con éxito.";
+                        }
+                        else
+                        {
+                            respuesta.estado = respuestaSP.ToString();
+                            respuesta.tipoMensaje = "danger";
+
+                            respuesta.mensaje =
+                                !string.IsNullOrWhiteSpace(mensajeSP)
+                                    ? mensajeSP
+                                    : ObtenerMensajePredeterminado(respuestaSP);
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Respuesta.estado = "0";
-                Respuesta.mensaje = ex.Message.ToString();
-                Respuesta.tipoMensaje = "danger";
+                respuesta.estado = "0";
+                respuesta.resultado = "0";
+                respuesta.mensaje =
+                    "Ocurrió un error al guardar los datos. Detalle: " + ex.Message;
+
+                respuesta.tipoMensaje = "danger";
             }
-            finally
-            {
-                cmd.Connection.Close();
-            }
 
-
-            return Respuesta;
-
+            return respuesta;
         }
+
+        private static string ObtenerValorColumna(
+    SqlDataReader dr,
+    string nombreColumna)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (string.Equals(
+                    dr.GetName(i),
+                    nombreColumna,
+                    StringComparison.OrdinalIgnoreCase))
+                {
+                    return dr.IsDBNull(i)
+                        ? string.Empty
+                        : dr.GetValue(i).ToString();
+                }
+            }
+
+            return string.Empty;
+        }
+
+        private static string ObtenerMensajePredeterminado(int respuestaSP)
+        {
+            switch (respuestaSP)
+            {
+                case -1:
+                    return "No existe el número de orden. Por favor, valide la información.";
+
+                case -3:
+                    return "Estas horas ya fueron registradas en otra actividad. Valide que no existan horarios duplicados.";
+
+                case -4:
+                    return "La orden de servicio se encuentra cerrada. No puede registrar más tiempo. Comuníquese con el planificador.";
+
+                case -5:
+                    return "El período de reporte de horas se encuentra cerrado. No es posible registrar actividades fuera de este plazo.";
+
+                case -6:
+                    return "Las fechas enviadas no tienen un formato válido.";
+
+                case -7:
+                    return "El horario cruza la medianoche. Registre cada fecha por separado.";
+
+                case -8:
+                    return "No existe una configuración activa para el día seleccionado.";
+
+                /* -9 y -10 ya no los emite el procedimiento: el combo dejo de
+                   decidir y el horario manda. Se dejan porque la base se actualiza
+                   aparte de la DLL, y con una version anterior del procedimiento
+                   estos codigos volverian a aparecer. */
+                case -9:
+                    return "El tipo de horas seleccionado no corresponde al horario enviado.";
+
+                case -10:
+                    return "El tipo de horas únicamente puede ser 0, 1 o 2.";
+
+                case -99:
+                    return "Ocurrió un error técnico durante el registro de la actividad.";
+
+                default:
+                    return "Ocurrió un error al guardar los datos.";
+            }
+        }
+        #endregion
+
+        //public static EntRespuesta RTA_InsertaDetalleTarea(EntDetalleTarea objDetalleTarea)
+        //{
+        //    EntRespuesta Respuesta = new EntRespuesta();
+        //    int respuestaSP = 0;
+        //    SqlCommand cmd = null;
+        //    SqlDataReader dr = null;
+
+        //    try
+        //    {
+        //        DaoReporTareaAranda cn = new DaoReporTareaAranda();
+        //        SqlConnection cnx = cn.conectar();
+
+        //        cnx.Open();
+
+        //        //cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx);
+        //        cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx);
+
+        //        cmd.Parameters.AddWithValue("@Id_RegTareas", objDetalleTarea.Id_RegTareas);
+        //        cmd.Parameters.AddWithValue("@Det_Num_OrdenServicio", objDetalleTarea.Det_Num_OrdenServicio);
+        //        cmd.Parameters.AddWithValue("@Det_Id_CompAranda", objDetalleTarea.Det_Id_CompAranda);
+        //        cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleIni", objDetalleTarea.Det_Fch_RegDetalleIni);
+        //        cmd.Parameters.AddWithValue("@Det_Fch_RegDetalleFin", objDetalleTarea.Det_Fch_RegDetalleFin);
+        //        cmd.Parameters.AddWithValue("@Det_EstadoIni", objDetalleTarea.Det_EstadoIni);
+        //        cmd.Parameters.AddWithValue("@Det_EstadoFin", objDetalleTarea.Det_EstadoFin);
+        //        cmd.Parameters.AddWithValue("@Det_Nom_Empresa", objDetalleTarea.Det_Nom_Empresa);
+        //        cmd.Parameters.AddWithValue("@Det_Det_Tarea", objDetalleTarea.Det_Det_Tarea);
+        //        cmd.Parameters.AddWithValue("@Det_Estado", objDetalleTarea.Det_Estado);
+        //        cmd.Parameters.AddWithValue("@IdDet_EstadoIni", objDetalleTarea.IdDet_EstadoIni);
+        //        cmd.Parameters.AddWithValue("@Det_Motivo_Cambio_Estado", objDetalleTarea.Det_Motivo_Cambio_Estado);
+        //        cmd.Parameters.AddWithValue("@Det_Observaciones", objDetalleTarea.Det_Observaciones);
+        //        cmd.Parameters.AddWithValue("@Det_Horas_Extras_Tipo", objDetalleTarea.Det_Horas_Extras_Tipo);
+        //        cmd.Parameters.AddWithValue("@Id_Responsable", objDetalleTarea.Id_Responsable);
+        //        cmd.Parameters.AddWithValue("@Det_Tiempo", objDetalleTarea.Det_Tiempo);
+        //        cmd.Parameters.AddWithValue("@Cod_CatalogoTareaSap", objDetalleTarea.Cod_CatalogoTareaSap);
+        //        cmd.Parameters.AddWithValue("@IdTipoGasto", objDetalleTarea.IdTipoGasto);
+        //        cmd.CommandType = CommandType.StoredProcedure;
+        //        dr = cmd.ExecuteReader();
+        //        dr.Read();
+
+        //        respuestaSP = Convert.ToInt32(dr["Respuestas"].ToString());
+
+        //        if (respuestaSP >= 1)
+        //        {
+        //            //Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.estado = "1";
+        //            Respuesta.mensaje = "Datos Guardados con Exito.";
+        //            Respuesta.tipoMensaje = "success";
+        //            Respuesta.resultado = respuestaSP.ToString();
+        //        }
+        //        else if (respuestaSP == -1)
+        //        {
+        //            //Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.estado = "-1";
+        //            Respuesta.mensaje = "No existe el número de orden por favor validar";
+        //            Respuesta.tipoMensaje = "danger";
+        //            Respuesta.resultado = respuestaSP.ToString();
+        //        }
+        //        else if (respuestaSP == -3)
+        //        {
+        //            //Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.estado = "-3";
+        //            Respuesta.mensaje = "Estas horas ya fuerón registradas en otra actividad. Validar que no se duplique ";
+        //            Respuesta.tipoMensaje = "danger";
+        //            Respuesta.resultado = respuestaSP.ToString();
+        //        }
+        //        else if (respuestaSP == -4)
+        //        {
+        //            //Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.estado = "-4";
+        //            Respuesta.mensaje = "La OS se encuentra CERRADA no puede registrar mas tiempo comuniquese con Planificador. ";
+        //            Respuesta.tipoMensaje = "danger";
+        //            Respuesta.resultado = respuestaSP.ToString();
+        //        }
+        //        else if (respuestaSP == -5)
+        //        {
+        //            //Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.estado = "-5";
+        //            Respuesta.mensaje = "El período de reporte para horas se encuentra cerrado. No es posible realizar registros fuera de este plazo. ";
+        //            Respuesta.tipoMensaje = "danger";
+        //            Respuesta.resultado = respuestaSP.ToString();
+        //        }
+        //        else
+        //        {
+        //            Respuesta.estado = respuestaSP.ToString();
+        //            Respuesta.mensaje = "Ocurrio un error al guardar los datos.";
+        //            Respuesta.tipoMensaje = "danger";
+        //        }
+
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Respuesta.estado = "0";
+        //        Respuesta.mensaje = ex.Message.ToString();
+        //        Respuesta.tipoMensaje = "danger";
+        //    }
+        //    finally
+        //    {
+        //        cmd.Connection.Close();
+        //    }
+
+
+        //    return Respuesta;
+
+        //}
 
         public static EntRespuesta RTA_InsertaDetalleTareaActualizar(EntDetalleTarea objDetalleTarea)
         {
@@ -1522,7 +1809,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1556,7 +1846,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@Id_RegDetTareas", registro.Id_RegDetTareas);
                 cmd.Parameters.AddWithValue("@Id_RegTareas", registro.Id_RegTareas);
                 cmd.Parameters.AddWithValue("@Orden_Archivo", registro.Orden_Archivo);
-                cmd.Parameters.AddWithValue("@Icon_Nombre", registro.Icon_Nombre); 
+                cmd.Parameters.AddWithValue("@Icon_Nombre", registro.Icon_Nombre);
                 cmd.Parameters.AddWithValue("@Usu_Modificacion", registro.Usu_Modificacion);
                 cmd.Parameters.AddWithValue("@Ip_Modificacion", registro.Ip_Modificacion);
                 cmd.Parameters.AddWithValue("@idServicio", registro.idServicio);
@@ -1591,7 +1881,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1625,7 +1918,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -1667,7 +1963,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -1735,7 +2034,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -1782,7 +2084,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1840,7 +2145,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -1848,7 +2156,7 @@ namespace CapaDato
         }
 
 
-        public static List<EntDetTarea> ListaDetTareas(string Idusuario, string FchIni, string FchFin,string Det_Nom_Empresa,string Det_Num_OrdenServicio,int IdTipoGasto, int idTareaAprobada, int idTareaAprobadaQA,int idFecha, int Tipo)
+        public static List<EntDetTarea> ListaDetTareas(string Idusuario, string FchIni, string FchFin, string Det_Nom_Empresa, string Det_Num_OrdenServicio, int IdTipoGasto, int idTareaAprobada, int idTareaAprobadaQA, int idFecha, int Tipo)
         {
             List<EntDetTarea> listaDetTareas = null;
             SqlCommand cmd = null;
@@ -1860,7 +2168,7 @@ namespace CapaDato
                 cnx.Open();
 
                 cmd = new SqlCommand("Sp_RTAListaDetTareas", cnx);
-                cmd.Parameters.AddWithValue("@Idusuario", Idusuario); 
+                cmd.Parameters.AddWithValue("@Idusuario", Idusuario);
                 cmd.Parameters.AddWithValue("@FchIni", FchIni);
                 cmd.Parameters.AddWithValue("@FchFin", FchFin);
                 cmd.Parameters.AddWithValue("@Det_Nom_Empresa", Det_Nom_Empresa);
@@ -1877,13 +2185,13 @@ namespace CapaDato
                 {
                     EntDetTarea DetTarea = new EntDetTarea();
 
-                    
+
                     DetTarea.Nom_Cliente = dr["Nom_Cliente"].ToString();
                     DetTarea.Num_OrdenServicio = dr["Num_OrdenServicio"].ToString();
                     DetTarea.Id_Responsable = dr["Id_Responsable"].ToString();
                     DetTarea.Actividad = dr["Actividad"].ToString();
                     DetTarea.Det_Tarea = dr["Det_Tarea"].ToString();
-                    DetTarea.Det_Fecha = dr["Det_Fecha"].ToString().Substring(0,10);
+                    DetTarea.Det_Fecha = dr["Det_Fecha"].ToString().Substring(0, 10);
                     DetTarea.Det_Fch_RegDetalleIni = dr["Det_Fch_RegDetalleIni"].ToString();
                     DetTarea.Det_Fch_RegDetalleFin = dr["Det_Fch_RegDetalleFin"].ToString();
                     DetTarea.Det_Tiempo = dr["Det_Tiempo"].ToString();
@@ -1901,7 +2209,7 @@ namespace CapaDato
                     DetTarea.Det_Horas_Extras_Descripcion = dr["Det_Horas_Extras_Descripcion"].ToString();
                     DetTarea.Det_Horas_Extras_Envio_Correo = Convert.ToInt32(dr["Det_Horas_Extras_Envio_Correo"].ToString());
                     DetTarea.UsuarioResponsable = dr["UsuarioResponsable"].ToString();
-                    if(dr["Det_Horas_Extras_Fecha_Solicitud"].ToString() == "01/01/1900 0:00:00")
+                    if (dr["Det_Horas_Extras_Fecha_Solicitud"].ToString() == "01/01/1900 0:00:00")
                     {
                         DetTarea.Det_Horas_Extras_Fecha_Solicitud = "";
                     }
@@ -1945,7 +2253,7 @@ namespace CapaDato
                         DetTarea.Det_Fecha_Aprobacion_Tarea_QA = dr["Det_Fecha_Aprobacion_Tarea_QA"].ToString();
                     }
                     DetTarea.Det_Aprobacion_Tarea_Estado_QA_Class_Mensaje = dr["Det_Aprobacion_Tarea_Estado_QA_Class_Mensaje"].ToString();
-                    DetTarea.DetCategoria= dr["DetCategoria"].ToString();
+                    DetTarea.DetCategoria = dr["DetCategoria"].ToString();
                     DetTarea.NumAranda = dr["NumAranda"].ToString();
                     listaDetTareas.Add(DetTarea);
                 }
@@ -1957,7 +2265,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
@@ -2074,12 +2385,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
 
-        public static EntRespuesta ListaHorasRecursosPorJefatura(string Idusuario, string FchIni, string FchFin, int Tipo,int estado)
+        public static EntRespuesta ListaHorasRecursosPorJefatura(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -2098,7 +2412,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@idEstado", estado);
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
-				
+
                 dtResultados.Load(dr);
 
                 //if (dr.HasRows)
@@ -2123,7 +2437,144 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
+            }
+
+            return Respuesta;
+        }
+
+
+        public static EntRespuesta ListaHorasRecursosPorAsistencia(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            DataTable dtResultados = new DataTable();
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+
+                cmd = new SqlCommand("Sp_RTAListaHorasRecursosPorAsistencia", cnx);
+                cmd.Parameters.AddWithValue("@IdUsuarioJefe", Idusuario);
+                cmd.Parameters.AddWithValue("@FechaInicio", FchIni);
+                cmd.Parameters.AddWithValue("@FechaFin", FchFin);
+                cmd.Parameters.AddWithValue("@idEstado", estado);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+
+                dtResultados.Load(dr);
+
+                Respuesta.estado = "1";
+                Respuesta.tipoMensaje = "success";
+                Respuesta.resultadoTabla = dtResultados;
+
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = ex.Message.ToString();
+                Respuesta.tipoMensaje = "danger";
+            }
+            finally
+            {
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
+            }
+
+            return Respuesta;
+        }
+
+
+        public static EntRespuesta ListaHorasRecursosPorActividad(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            DataTable dtResultados = new DataTable();
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+
+                cmd = new SqlCommand("Sp_RTAListaHorasRecursosPorActividad", cnx);
+                cmd.Parameters.AddWithValue("@IdUsuarioJefe", Idusuario);
+                cmd.Parameters.AddWithValue("@FechaInicio", FchIni);
+                cmd.Parameters.AddWithValue("@FechaFin", FchFin);
+                cmd.Parameters.AddWithValue("@idEstado", estado);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+
+                dtResultados.Load(dr);
+
+                Respuesta.estado = "1";
+                Respuesta.tipoMensaje = "success";
+                Respuesta.resultadoTabla = dtResultados;
+
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = ex.Message.ToString();
+                Respuesta.tipoMensaje = "danger";
+            }
+            finally
+            {
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
+            }
+
+            return Respuesta;
+        }
+
+        public static EntRespuesta ListaHorasRecursosPorAsistenciaDescarga(string Idusuario, string FchIni, string FchFin, int Tipo, int estado)
+        {
+            EntRespuesta Respuesta = new EntRespuesta();
+            DataTable dtResultados = new DataTable();
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cnx.Open();
+
+                cmd = new SqlCommand("Sp_RTAListaHorasRecursosPorAsistencia", cnx);
+                cmd.Parameters.AddWithValue("@IdUsuarioJefe", Idusuario);
+                cmd.Parameters.AddWithValue("@FechaInicio", FchIni);
+                cmd.Parameters.AddWithValue("@FechaFin", FchFin);
+                cmd.Parameters.AddWithValue("@idEstado", estado);
+                cmd.CommandType = CommandType.StoredProcedure;
+                dr = cmd.ExecuteReader();
+
+                dtResultados.Load(dr);
+
+                Respuesta.estado = "1";
+                Respuesta.tipoMensaje = "success";
+                Respuesta.resultadoTabla = dtResultados;
+
+            }
+            catch (Exception ex)
+            {
+                Respuesta.estado = "0";
+                Respuesta.mensaje = ex.Message.ToString();
+                Respuesta.tipoMensaje = "danger";
+            }
+            finally
+            {
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2171,7 +2622,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2209,12 +2663,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
 
-        public static int RTA_CreaTareasHorasExtras( Int32 Id_RegTareas)
+        public static int RTA_CreaTareasHorasExtras(Int32 Id_RegTareas)
         {
             int Respuesta = 0;
             SqlCommand cmd = null;
@@ -2238,7 +2695,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2293,7 +2753,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2348,7 +2811,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2402,7 +2868,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2453,7 +2922,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaTareas;
         }
@@ -2486,7 +2958,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2510,7 +2985,7 @@ namespace CapaDato
                 while (dr.Read())
                 {
                     EntTareas DetTarea = new EntTareas();
-                    DetTarea.Id_RegTareasHorasExtras =Convert.ToInt32(dr["Id_RegTareasHorasExtras"].ToString());
+                    DetTarea.Id_RegTareasHorasExtras = Convert.ToInt32(dr["Id_RegTareasHorasExtras"].ToString());
                     DetTarea.Id_RegTareas = Convert.ToInt32(dr["Id_RegTareas"].ToString());
                     DetTarea.Num_OrdenServicio = dr["Num_OrdenServicio"].ToString();
                     DetTarea.Nom_Responsable = dr["Nom_Responsable"].ToString();
@@ -2529,7 +3004,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
@@ -2574,7 +3052,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objTarea;
         }
@@ -2608,7 +3089,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -2658,7 +3142,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
@@ -2693,7 +3180,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaDetTareas;
         }
@@ -2713,18 +3203,21 @@ namespace CapaDato
                 SqlDataAdapter da = new SqlDataAdapter(cmd);
                 da.Fill(Temp);
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Temp = null;
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return Temp;
         }
 
-        
+
         public static DataSet RTAListaCatalogoSecuencia(Int32 IdEstado)
         {
             SqlCommand cmd = null;
@@ -2746,12 +3239,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return Temp;
         }
 
-        
+
 
         public static List<EntCombo> RTAListaEstadosCombo(Int32 idEstado, Int32 IdProyecto)
         {
@@ -2787,12 +3283,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
 
-        
+
         public static List<EntCombo> RTAListaCatalogoCombo(Int32 idTipoCatalogo)
         {
             List<EntCombo> cmbEstados = null;
@@ -2826,7 +3325,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -2864,7 +3366,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -2902,7 +3407,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -2940,7 +3448,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -2967,7 +3478,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return Temp;
         }

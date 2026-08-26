@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
-   public class EntPoliza
+    public class EntPoliza
     {
         public Int32 conteoArchivosAdjuntos { get; set; }
         public Int32 IdPoliza { get; set; }

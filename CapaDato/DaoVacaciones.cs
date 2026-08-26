@@ -1,18 +1,80 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
     public class DaoVacaciones
     {
+        /// <summary>
+        /// Feriados que caen dentro del rango pedido. Reemplaza al campo que el
+        /// colaborador llenaba a mano: un feriado dentro de las vacaciones no
+        /// consume días, y ese cálculo no tiene por qué depender de que la
+        /// persona se acuerde de los feriados del año.
+        /// </summary>
+        public static EntFeriadosRango ContarFeriadosRango(DateTime fechaDesde, DateTime fechaHasta)
+        {
+            EntFeriadosRango resultado = new EntFeriadosRango { Feriados = 0, AniosSinCargar = string.Empty };
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_ContarFeriadosRango", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@FechaDesde", SqlDbType.Date).Value = fechaDesde.Date;
+                cmd.Parameters.Add("@FechaHasta", SqlDbType.Date).Value = fechaHasta.Date;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        resultado.Feriados = Convert.ToInt32(dr["Feriados"]);
+                        resultado.AniosSinCargar = dr["AniosSinCargar"].ToString();
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
+        /// <summary>
+        /// Los períodos de vacaciones con saldo de una persona, para el PDF.
+        ///
+        /// Devuelve todos los que tengan días, separados por coma, y no solo uno:
+        /// alguien puede estar tomando días de dos períodos a la vez, y el
+        /// documento no debe decir que salieron de uno solo. Cadena vacía si no
+        /// hay saldo cargado.
+        /// </summary>
+        public static string PeriodosConSaldo(int codSap)
+        {
+            System.Text.StringBuilder periodos = new System.Text.StringBuilder();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            /* Consulta con parámetro y no concatenada, a diferencia de
+               ConsultarVacaciones acá arriba. */
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand(
+                "SELECT PERIODO FROM dbo.SaldoVacaciones WHERE PERNR = @Pernr AND SALDO > 0 ORDER BY PERIODO", cnx))
+            {
+                cmd.Parameters.Add("@Pernr", SqlDbType.VarChar, 50).Value = codSap.ToString();
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        if (periodos.Length > 0) { periodos.Append(", "); }
+                        periodos.Append(dr["PERIODO"].ToString());
+                    }
+                }
+            }
+
+            return periodos.ToString();
+        }
+
         public static EntRespuesta ConsultarVacaciones(int codSap)
         {
             EntRespuesta Respuesta = new EntRespuesta();
@@ -41,13 +103,16 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
         }
 
-        public static List<EntVacaciones> ConsultarSaldoVacaciones(string CodSap,int tipo)
+        public static List<EntVacaciones> ConsultarSaldoVacaciones(string CodSap, int tipo)
         {
             List<EntVacaciones> listaTareas = null;
 
@@ -93,7 +158,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;

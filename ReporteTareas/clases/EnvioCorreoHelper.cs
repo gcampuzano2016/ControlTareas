@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SendGridMail;
-using SendGridMail.Transport;
-using System.Net.Mail;
-using System.Net;
-using System.Security.Cryptography;
-using System.IO;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using PDF;
 using ReporteTareas.clases;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CorreoHelper
 {
@@ -201,7 +197,7 @@ namespace CorreoHelper
                 parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
                 parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
 
-               contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
+                contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
 
                 respuestaEnvioCorreo = EnviarCorreoForeCast(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, Notificacion, "Notificación - Sistema de Gestión Interno");
 
@@ -331,6 +327,51 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnvioCorreoMarcacion
+        /// <summary>Correo de confirmación de una marcación (accion: 1=entrada, 2=salida).</summary>
+        public bool EnvioCorreoMarcacion(string correoDestino, string nombreUsuario, int accion, DateTime fechaHora)
+        {
+            EntParametrosCorreo parametrosServidorCorreo = new EntParametrosCorreo();
+            bool respuestaEnvioCorreo = false;
+
+            try
+            {
+                parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametrosServidorCorreo.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                string tipo = (accion == 1) ? "entrada" : "salida";
+                string fecha = fechaHora.ToString("dd/MM/yyyy");
+                string hora = fechaHora.ToString("HH:mm");
+
+                string titulo = "Registro de " + tipo + " - " + fecha + " " + hora;
+
+                string contenido =
+                    "<p>Estimado(a) " + nombreUsuario + ",</p>" +
+                    "<p>Se registró su <b>" + tipo + "</b> con los siguientes datos:</p>" +
+                    "<table cellpadding='6' style='border-collapse:collapse'>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Tipo</b></td><td style='border:1px solid #ddd'>" + tipo + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Fecha</b></td><td style='border:1px solid #ddd'>" + fecha + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Hora</b></td><td style='border:1px solid #ddd'>" + hora + "</td></tr>" +
+                    "</table>" +
+                    "<p>Si usted no reconoce este registro, comuníquese con Talento Humano.</p>" +
+                    "<p style='color:#888;font-size:11px'>Mensaje automático del Sistema de Gestión Interno. No responda a este correo.</p>";
+
+                respuestaEnvioCorreo = EnviarCorreo(correoDestino, titulo, contenido, parametrosServidorCorreo);
+            }
+            catch (Exception ex)
+            {
+                ErrorProceso = ex.Message.ToString().Trim();
+                respuestaEnvioCorreo = false;
+            }
+
+            return respuestaEnvioCorreo;
+        }
+        #endregion
+
         #region EnvioCorreoSolicitudEmpleado
         public bool EnvioCorreoSolicitudEmpleado(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, List<EntItemValor> listaCampos, string nombreArchivo, int codigoSolicitud)
         {
@@ -358,7 +399,7 @@ namespace CorreoHelper
                     if (parametrosContenido.Item == "texto2")
                     {
                         Colaborador = parametrosContenido.Valor;
-                       //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
+                        //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
                     }
                     //cedula
                     else if (parametrosContenido.Item == "texto11")
@@ -377,7 +418,7 @@ namespace CorreoHelper
                     string rutaQR = generarRide.GenerarCodigoQR(Cedula + " " + Colaborador);
 
                     //VerErrores("rutaQR: " + rutaQR, "Log", "Detalle");
-                    
+
                     listaCampos.Add(new EntItemValor() { Item = "textoQR", Valor = "'" + rutaQR + "'" });
 
                     contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
@@ -392,8 +433,9 @@ namespace CorreoHelper
                     generarRide.EnvioCorreoEncuesta(contenidoCorreo, codigoSolicitud);
                     //pdfLista.CrearPDF(contenidoCorreo, codigoSolicitud);
                 }
-                else {
-                    
+                else
+                {
+
                     contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
 
                     foreach (EntItemValor parametrosContenido in listaCampos)
@@ -421,7 +463,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacion.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -438,7 +480,7 @@ namespace CorreoHelper
         {
 
             string mensaje = "";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -456,7 +498,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacionUsuario.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -474,7 +516,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacionEncuesta.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -483,6 +525,222 @@ namespace CorreoHelper
             }
 
             return mensaje;
+        }
+        #endregion
+
+        #region SolicitarAutorizacionHorasExtras
+        /// <summary>
+        /// Le pide al jefe inmediato que autorice UNA fila de horas extras.
+        ///
+        /// Vive acá y no en los handlers porque un solo guardado puede generar varias:
+        /// Sp_RTAInsertaDetalleTarea_V2 parte el rango en tramos según el horario del
+        /// responsable, así que 07:30 a 18:30 con jornada 08:30-17:30 deja dos tramos
+        /// suplementarios y uno normal. Cada tramo se autoriza por separado, porque
+        /// RespuestaAprobacion trabaja por Id_RegDetTareas y el jefe tiene que poder
+        /// aprobar la mañana y rechazar la tarde.
+        ///
+        /// Las horas y el tiempo salen de la fila guardada, NO del formulario: el
+        /// formulario tiene el rango completo, y mandarlo en los dos correos le pediría
+        /// al jefe autorizar once horas dos veces.
+        /// </summary>
+        public EntRespuesta SolicitarAutorizacionHorasExtras(
+            long idRegDetTarea,
+            string codUsuarioSesion,
+            string nombreSolicitante,
+            string nombreCliente)
+        {
+            EntRespuesta respuesta = new EntRespuesta
+            {
+                estado = "0",
+                mensaje = "No se pudo solicitar la autorización de las horas extras.",
+                tipoMensaje = "warning",
+                resultado = idRegDetTarea.ToString()
+            };
+
+            try
+            {
+                EntDetalleTarea fila =
+                    NegTareas.RTA_ConsultaDetalleTareaRTA(Convert.ToInt32(idRegDetTarea));
+
+                if (fila == null || fila.Id_RegDetTareas == 0)
+                {
+                    respuesta.mensaje =
+                        "No se encontró la actividad " + idRegDetTarea
+                        + " para solicitar la autorización.";
+
+                    return respuesta;
+                }
+
+                string horaDesde = ParteDeLaFecha(fila.Det_Fch_RegDetalleIni, "HH:mm");
+                string horaHasta = ParteDeLaFecha(fila.Det_Fch_RegDetalleFin, "HH:mm");
+
+                string valorEncritar1 = fila.Id_RegDetTareas.ToString() + ";"
+                    + fila.Id_RegTareas.ToString() + ";" + "D" + ";"
+                    + fila.Det_Horas_Extras_Tipo.ToString();
+
+                string valorEncritar2 = fila.Id_RegDetTareas.ToString() + ";"
+                    + fila.Id_RegTareas.ToString() + ";" + "R" + ";"
+                    + fila.Det_Horas_Extras_Tipo.ToString();
+
+                string valorIncritado1 = Encrypt(valorEncritar1, "3m1l10100", "3m1l10100");
+                string valorIncritado2 = Encrypt(valorEncritar2, "3m1l10100", "3m1l10100");
+
+                string urlSiteAprobacion =
+                    NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
+
+                string urlAprobacion = urlSiteAprobacion
+                    + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado1;
+
+                string urlRechazarAprobacion = urlSiteAprobacion
+                    + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado2;
+
+                List<EntItemValor> campos = new List<EntItemValor>();
+
+                campos.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE HORAS EXTRAS" });
+                campos.Add(new EntItemValor() { Item = "etiqueta1", Valor = "Orden de Servicio:" });
+                campos.Add(new EntItemValor() { Item = "texto1", Valor = fila.Det_Num_OrdenServicio });
+                campos.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Empresa:" });
+                campos.Add(new EntItemValor() { Item = "texto2", Valor = fila.Det_Nom_Empresa });
+                campos.Add(new EntItemValor() { Item = "etiqueta21", Valor = "Cliente:" });
+                campos.Add(new EntItemValor() { Item = "texto21", Valor = nombreCliente ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiqueta22", Valor = "Fecha:" });
+                campos.Add(new EntItemValor() { Item = "texto22", Valor = ParteDeLaFecha(fila.Det_Fch_RegDetalleIni, "dd/MM/yyyy") });
+                campos.Add(new EntItemValor() { Item = "etiqueta23", Valor = "Hora Inicio:" });
+                campos.Add(new EntItemValor() { Item = "texto23", Valor = horaDesde });
+                campos.Add(new EntItemValor() { Item = "etiqueta24", Valor = "Hora Fin:" });
+                campos.Add(new EntItemValor() { Item = "texto24", Valor = horaHasta });
+                campos.Add(new EntItemValor() { Item = "etiqueta25", Valor = "Tiempo:" });
+                campos.Add(new EntItemValor() { Item = "texto25", Valor = fila.Det_Tiempo });
+
+                /* La descripción la puso el procedimiento al insertar la fila: 50% o
+                   100% según el tramo. No se recalcula acá. */
+                if (fila.Det_Horas_Extras_Tipo == 1 || fila.Det_Horas_Extras_Tipo == 2)
+                {
+                    campos.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Tipo de Horas Extra:" });
+                    campos.Add(new EntItemValor() { Item = "texto3", Valor = fila.Det_Horas_Extras_Descripcion });
+                }
+
+                campos.Add(new EntItemValor() { Item = "etiqueta4", Valor = "Solicitante:" });
+                campos.Add(new EntItemValor() { Item = "texto4", Valor = nombreSolicitante ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiquetaDescripcion", Valor = "Descripción de la Tarea:" });
+                campos.Add(new EntItemValor() { Item = "textoDescripcion", Valor = fila.Det_Det_Tarea ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiquetaBoton1", Valor = "Aprobar" });
+                campos.Add(new EntItemValor() { Item = "urlBoton1", Valor = urlAprobacion });
+                campos.Add(new EntItemValor() { Item = "etiquetaBoton2", Valor = "Rechazar" });
+                campos.Add(new EntItemValor() { Item = "urlBoton2", Valor = urlRechazarAprobacion });
+
+                string correoJefeInmediato =
+                    NegUsuario.RTA_CorreoJefeInmediato(codUsuarioSesion);
+
+                bool seEnvio = EnvioCorreo(
+                    correoJefeInmediato,
+                    "Autorización de Horas Extras",
+                    EstructuraContenidoCorreo(),
+                    campos);
+
+                /* El estado pasa a 1 (solicitud enviada) aunque el correo haya fallado.
+                   La fila ya está pedida: dejarla en 0 la deja fuera del listado de
+                   pendientes y nadie la vuelve a mirar. Que el correo no salió se le
+                   avisa al usuario, que puede insistir.
+
+                   Antes esta llamada estaba detrás de un return, así que con el correo
+                   caído el estado no se movía nunca. */
+                EntRespuesta cambioEstado =
+                    NegTareas.RTAActualizarEstadoHorasExtras(Convert.ToInt32(idRegDetTarea), 1);
+
+                if (!seEnvio)
+                {
+                    respuesta.mensaje =
+                        "No se pudo enviar el correo de autorización de las horas de "
+                        + horaDesde + " a " + horaHasta + ".";
+
+                    return respuesta;
+                }
+
+                if (cambioEstado == null || cambioEstado.estado == "0")
+                {
+                    respuesta.mensaje =
+                        "Se envió el correo de las horas de " + horaDesde + " a " + horaHasta
+                        + ", pero no se pudo cambiar el estado de la solicitud.";
+
+                    return respuesta;
+                }
+
+                respuesta.estado = "1";
+                respuesta.tipoMensaje = "success";
+                respuesta.mensaje = "Autorización solicitada.";
+
+                return respuesta;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("SolicitarAutorizacionHorasExtras: " + ex.Message, "Log", "Detalle");
+
+                respuesta.mensaje =
+                    "Ocurrió un error al solicitar la autorización de las horas extras.";
+
+                return respuesta;
+            }
+        }
+
+        /// <summary>
+        /// Formatea como texto la fecha que viene de la base. Si no se puede leer se
+        /// devuelve tal cual: esto va a un correo, y una fecha cruda es mejor que nada.
+        /// </summary>
+        private string ParteDeLaFecha(string valor, string formato)
+        {
+            DateTime fecha;
+
+            if (DateTime.TryParse(valor, out fecha))
+            {
+                return fecha.ToString(formato);
+            }
+
+            return valor ?? string.Empty;
+        }
+        #endregion
+
+        #region RutaPlantillaCorreo
+        /// <summary>
+        /// Dónde está la plantilla de un correo.
+        ///
+        /// Los cuatro métodos de arriba la buscaban en una ruta absoluta de la
+        /// máquina de desarrollo del autor original. Cuando esa carpeta no existe
+        /// —o sea, en el servidor— File.Exists da falso, el método devuelve cadena
+        /// vacía, y el correo sale sin cuerpo sin ningún error que lo delate.
+        ///
+        /// Se conserva la ruta vieja como primera opción a propósito: si en algún
+        /// servidor alguien la creó a mano, lo que hoy funciona sigue funcionando
+        /// igual. Recién cuando no está se busca dentro del sitio, que es donde el
+        /// csproj despliega las plantillas.
+        /// </summary>
+        private string RutaPlantillaCorreo(string nombreArchivo)
+        {
+            string rutaHistorica =
+                "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\"
+                + nombreArchivo;
+
+            if (File.Exists(rutaHistorica))
+            {
+                return rutaHistorica;
+            }
+
+            /* Sin petición web no hay sitio desde el cual resolver la ruta relativa.
+               Ahí se devuelve la histórica y todo queda como estaba. */
+            if (System.Web.HttpContext.Current == null)
+            {
+                return rutaHistorica;
+            }
+
+            try
+            {
+                return System.Web.HttpContext.Current.Server.MapPath(
+                    "~/Formulario/" + nombreArchivo);
+            }
+            catch
+            {
+                return rutaHistorica;
+            }
         }
         #endregion
 
@@ -548,32 +806,43 @@ namespace CorreoHelper
 
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
                 using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
                 {
+                    // El armado de destinatarios va DENTRO del try: una direccion mal
+                    // formada hace que mail.To.Add lance FormatException, y si eso ocurre
+                    // fuera del try la excepcion sube sin dejar rastro de por que no salio
+                    // el correo. Aqui se convierte en un false con ErrorProceso y bitacora.
                     try
                     {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in (correosDestinatarios ?? string.Empty).Split(new Char[] { ';' }))
+                        {
+                            if (correoIndividual.Trim() != "")
+                            {
+                                mail.To.Add(correoIndividual.Trim());
+                            }
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
                         smtp.Credentials = new NetworkCredential(emailFrom, password);
                         smtp.EnableSsl = enableSSL;
                         smtp.Send(mail);
                         Temp = true;
                     }
-                     catch (Exception ex)
+                    catch (Exception ex)
                     {
                         Temp = false;
                         ErrorProceso = ex.Message.ToString().Trim();
-                        VerErrores("ErrorProceso: " + ErrorProceso, "Log", "Detalle");
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
                     }
                 }
             }
@@ -582,7 +851,7 @@ namespace CorreoHelper
             return Temp;
         }
 
-        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo,string RutaDocumento)
+        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
         {
             bool Temp = false;
 

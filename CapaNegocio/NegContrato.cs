@@ -1,8 +1,7 @@
-using System;
-using System.Collections.Generic;
 using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -11,11 +10,11 @@ namespace CapaNegocio
 
         public static EntRespuesta ConsultaSp_RTAListaContratosDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado, string area)
         {
-            return DaoContrato.ConsultaSp_RTAListaContratosDescargar(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorResponsable, sucursal, estado,area);
+            return DaoContrato.ConsultaSp_RTAListaContratosDescargar(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorResponsable, sucursal, estado, area);
         }
-        public static List<EntContrato> ConsultaSp_RTAListaContratos(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado, string area,int IdClasificacion)
+        public static List<EntContrato> ConsultaSp_RTAListaContratos(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorResponsable, string sucursal, string estado, string area, int IdClasificacion)
         {
-            return DaoContrato.ConsultaSp_RTAListaContratos(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorResponsable, sucursal, estado,area, IdClasificacion);
+            return DaoContrato.ConsultaSp_RTAListaContratos(FchIni, FchFin, busqueda, IdCliente, IdGerenteCuenta, IdGestorResponsable, sucursal, estado, area, IdClasificacion);
         }
         public static List<EntContrato> ConsultaSp_RTAConsultarContratos(int IdServicio, string orden, int tipo)
         {
@@ -47,9 +46,9 @@ namespace CapaNegocio
 
             return respuesta;
         }
-        public static List<EntCombo> RTAListaComboContrato(Int32 Tipo, string Cod_Usuario, Int32 IdSucursal,Int32 IdCliente, string IdSucursalGerente)
+        public static List<EntCombo> RTAListaComboContrato(Int32 Tipo, string Cod_Usuario, Int32 IdSucursal, Int32 IdCliente, string IdSucursalGerente, string Mes)
         {
-            return DaoContrato.RTAListaComboContrato(Tipo, Cod_Usuario, IdSucursal, IdCliente, IdSucursalGerente);
+            return DaoContrato.RTAListaComboContrato(Tipo, Cod_Usuario, IdSucursal, IdCliente, IdSucursalGerente, Mes);
         }
     }
 }

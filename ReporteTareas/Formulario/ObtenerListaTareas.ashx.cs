@@ -1,22 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.Services;
-using JSONHelper;
-using System.Text;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-using SeguridadAppHelper;
-using System.Web.Script.Serialization;
-using System.Globalization;
-using CorreoHelper;
 using ClosedXML.Excel;
-using System.Data;
+using CorreoHelper;
+using JSONHelper;
+using JSONHelperNuevo;
 using Newtonsoft.Json;
-using System.IO;
-using System.Diagnostics;
 using PDF;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Web;
+using System.Web.Script.Serialization;
+using System.Web.Services;
 
 namespace JsonJQueryNetTareas
 {
@@ -30,13 +30,15 @@ namespace JsonJQueryNetTareas
 
         public void ProcessRequest(HttpContext context)
         {
+            //context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+            //context.Response.ContentType = "application/json; charset=utf-8";
             dynamic parametros;
             StringBuilder responseAction = new StringBuilder();
             if (context.Request.ContentType.Contains("json"))
             {
                 var inputStream = new System.IO.StreamReader(context.Request.InputStream);
                 var inputJson = inputStream.ReadToEnd();
-                List<RespuestaJson> collectionJson = inputJson.DeserializarJsonTo<List<RespuestaJson>>();
+                //List<RespuestaJson> collectionJson = inputJson.DeserializarJsonTo<List<RespuestaJson>>();
 
                 JavaScriptSerializer i = new JavaScriptSerializer();
                 parametros = i.Deserialize(inputJson.ToString(), typeof(object));
@@ -77,7 +79,7 @@ namespace JsonJQueryNetTareas
                     existAction = true;
                     responseAction.Append(ObtenerTareasPorFechaUsuario(parameters));
                 }
-                
+
 
                 if (Action == "ListaDetalleTareasPorUsuario")
                 {
@@ -96,7 +98,13 @@ namespace JsonJQueryNetTareas
                     existAction = true;
                     responseAction.Append(ObtenerListaUsuarios(parameters));
                 }
-                
+
+                if (Action == "ListaUsuariosSap")
+                {
+                    existAction = true;
+                    responseAction.Append(ObtenerListaUsuariosSap(parameters));
+                }
+
                 if (Action == "DetalleTarea")
                 {
                     existAction = true;
@@ -120,7 +128,7 @@ namespace JsonJQueryNetTareas
                     existAction = true;
                     responseAction.Append(ObtenerDetalleTareaPrincipal(parameters));
                 }
-                
+
                 if (Action == "ListaComboContrato")
                 {
                     existAction = true;
@@ -137,6 +145,24 @@ namespace JsonJQueryNetTareas
                 {
                     existAction = true;
                     responseAction.Append(ObtenerRecursosHorasDiarias(parameters));
+                }
+
+                if (Action == "ListaRecursosHorasDiariasAsistencia")
+                {
+                    existAction = true;
+                    responseAction.Append(ObtenerRecursosHorasDiariasAsistencia(parameters));
+                }
+
+                if (Action == "ListaRecursosHorasDiariasActividad")
+                {
+                    existAction = true;
+                    responseAction.Append(ObtenerRecursosHorasDiariasActividad(parameters));
+                }
+
+                if (Action == "ObtenerRecursosHorasDiariasAsistenciaDescargar")
+                {
+                    existAction = true;
+                    responseAction.Append(ObtenerRecursosHorasDiariasAsistenciaDescargar(parameters));
                 }
 
                 if (Action == "ListaGastosCuentasContable")
@@ -156,7 +182,7 @@ namespace JsonJQueryNetTareas
                     existAction = true;
                     responseAction.Append(ObtenerCatalogoCombo(parameters));
                 }
-             
+
                 if (Action == "ListaComboGasto")
                 {
                     existAction = true;
@@ -300,6 +326,42 @@ namespace JsonJQueryNetTareas
                 {
                     existAction = true;
                     responseAction.Append(ObtenerListaSaldoVacacionesIndividual(parameters));
+                }
+
+                if (Action == "ContarFeriadosRango")
+                {
+                    existAction = true;
+                    responseAction.Append(ContarFeriadosRango(parameters));
+                }
+
+                if (Action == "GuardarFirmaSolicitud")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarFirmaSolicitud(context, parameters));
+                }
+
+                if (Action == "ConfirmarRecuperacion")
+                {
+                    existAction = true;
+                    responseAction.Append(ConfirmarRecuperacion(context, parameters));
+                }
+
+                if (Action == "ListarRecuperacionesPendientes")
+                {
+                    existAction = true;
+                    responseAction.Append(ListarRecuperacionesPendientes());
+                }
+
+                if (Action == "SaldoPermisoMensual")
+                {
+                    existAction = true;
+                    responseAction.Append(SaldoPermisoMensual(parameters));
+                }
+
+                if (Action == "GenerarPdfSolicitud")
+                {
+                    existAction = true;
+                    responseAction.Append(GenerarPdfSolicitud(parameters));
                 }
 
                 if (Action == "ReporteDatosEmpleado")
@@ -717,6 +779,29 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(ActualizarSolicitudBase(parameters));
                 }
 
+                if (Action == "RegistrarEvento")
+                {
+                    existAction = true;
+                    responseAction.Append(RegistrarEvento(parameters));
+                }
+                if (Action == "RegistrarEvento2")
+                {
+                    existAction = true;
+                    responseAction.Append(RegistrarEvento2(parameters));
+                }
+
+                if (Action == "RegistrarEvento3")
+                {
+                    existAction = true;
+                    responseAction.Append(RegistrarEvento3(parameters));
+                }
+
+                if (Action == "ConsultarEvento")
+                {
+                    existAction = true;
+                    responseAction.Append(ConsultaBiometria(parameters));
+                }
+
                 if (Action == "ResetearPassword")
                 {
                     existAction = true;
@@ -776,6 +861,8 @@ namespace JsonJQueryNetTareas
 
                 if (Action == "GuardarNuevoInfoContrato")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(GuardarNuevoInfoContrato(parameters));
                 }
@@ -788,6 +875,8 @@ namespace JsonJQueryNetTareas
 
                 if (Action == "BuscarContrato")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(BuscarContrato(parameters));
                 }
@@ -800,6 +889,8 @@ namespace JsonJQueryNetTareas
 
                 if (Action == "GuardarNuevaHistoria")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(GuardarNuevaHistoria(parameters));
                 }
@@ -807,6 +898,8 @@ namespace JsonJQueryNetTareas
 
                 if (Action == "GuardarHisInmunizaciones")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(GuardarHisInmunizaciones(parameters));
                 }
@@ -824,11 +917,15 @@ namespace JsonJQueryNetTareas
                 }
                 if (Action == "BuscarContactoEmpleadoPorCedula")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(BuscarContactoEmpleadoPorCedula(parameters));
                 }
                 if (Action == "BuscarCodigoCIE")
                 {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
                     existAction = true;
                     responseAction.Append(BuscarCodigoCIE(parameters));
                 }
@@ -863,6 +960,20 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(EliminarCargaFam(parameters));
                 }
 
+                if (Action == "BuscarListaFormularios")
+                {
+                    existAction = true;
+                    responseAction.Append(BuscarListaFormularios(parameters));
+                }
+
+                if (Action == "AbrirDocHistoria")
+                {
+                    context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+                    context.Response.ContentType = "application/json; charset=utf-8";
+                    existAction = true;
+                    responseAction.Append(AbrirDocHistoria(parameters));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger", ""));
@@ -877,120 +988,181 @@ namespace JsonJQueryNetTareas
 
         public string BuscarContrato(dynamic parameters)
         {
-            EntInfoContrato contrato = new EntInfoContrato();
-
             SeguridadHelper seguridad = new SeguridadHelper();
-            string session = parameters["session"].ToString();
-            string idUsuario = seguridad.Desencripta(session.ToString());
-            string numContrato = parameters["descripcion"].ToString();
-
-            /*try
-            {
-                // Obtener la información del contrato con los permisos
-                contrato = NegInfoContrato.Sp_RTAConsultarPermisoContratoNum(numContrato, idUsuario);
- 
-                // Verificar si el idUsuario tiene permisos
-                if (contrato == null)
-                {
-                    return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
-                }
- 
-                List<string> permisos = contrato.PERMISOS.Split(',').ToList();
- 
-                if (permisos.Contains("1"))
-                {
-                    contrato.opcion = 1;
-                }
-                else if (permisos.Contains("2"))
-                {
-                    // Si tiene permiso, cargar la información del contrato
-                    contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
-                    if (contrato == null)
-                    {
-                        return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
-                    }
-                    contrato.opcion = 2;
-                }
-                else if (permisos.Contains("3"))
-                {
-                    contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
-                    if (contrato == null)
-                    {
-                        return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
-                    }
-                    contrato.opcion = 3;
-                }
-                else
-                {
-                    // Si no tiene permiso, devolver un mensaje de error
-                    return responseMessage("0", "No tienes permisos para ver este contrato.", "danger", "");
-                }*/
-
+            int op = Convert.ToInt32(parameters["op"]);
+            string numContrato = parameters["nContrato"].ToString();
+            int opcBD = Convert.ToInt32(parameters["tipo"]); // Se corrigió la conversión
 
             try
             {
-                // Obtener la información del contrato
-                contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
-
-                // Verificar si el contrato fue encontrado
-                if (contrato == null)
+                if (op == 1) //Opcion para obtener la informacino de un solo contrato por NumContrato o NumPedido
                 {
-                    return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
-                }
+                    EntInfoContrato contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato, opcBD);
 
-                contrato.opcion = 2; // O cualquier valor que sea necesario para 'opcion'
+                    // Verificar si el contrato fue encontrado
+                    if (contrato == null)
+                    {
+                        return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
+                    }
+
+                    contrato.opcion = 2; // Asignar el valor correcto
+                    return contrato.SerializaToJson2(); // Retornar el contrato en formato JSON
+                }
+                else if (op == 2)
+                {
+                    // Obtener la lista de contratos
+                    List<EntInfoContrato> ListaContratos = NegInfoContrato.Sp_RTA_ConsultarContratos(numContrato);
+
+                    // Verificar si la lista está vacía
+                    if (ListaContratos == null || ListaContratos.Count == 0)
+                    {
+                        return responseMessage("0", "No se encontraron contratos.", "warning", "");
+                    }
+
+                    return JsonConvert.SerializeObject(ListaContratos); // Retornar la lista en JSON
+                }
+                else
+                {
+                    return responseMessage("0", "Operación no válida.", "danger", "");
+                }
             }
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrió un error al obtener los datos. " + ex.Message, "danger", "");
             }
-
-            return contrato.SerializaToJson();
         }
+
+        //public string BuscarContrato(dynamic parameters)
+        //{
+        //    EntInfoContrato contrato = new EntInfoContrato();
+
+        //    SeguridadHelper seguridad = new SeguridadHelper();
+        //    string session = parameters["session"].ToString();
+        //    string idUsuario = seguridad.Desencripta(session.ToString());
+        //    string numContrato = parameters["descripcion"].ToString();
+
+        //    /*try
+        //    {
+        //        // Obtener la información del contrato con los permisos
+        //        contrato = NegInfoContrato.Sp_RTAConsultarPermisoContratoNum(numContrato, idUsuario);
+
+        //        // Verificar si el idUsuario tiene permisos
+        //        if (contrato == null)
+        //        {
+        //            return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
+        //        }
+
+        //        List<string> permisos = contrato.PERMISOS.Split(',').ToList();
+
+        //        if (permisos.Contains("1"))
+        //        {
+        //            contrato.opcion = 1;
+        //        }
+        //        else if (permisos.Contains("2"))
+        //        {
+        //            // Si tiene permiso, cargar la información del contrato
+        //            contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
+        //            if (contrato == null)
+        //            {
+        //                return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
+        //            }
+        //            contrato.opcion = 2;
+        //        }
+        //        else if (permisos.Contains("3"))
+        //        {
+        //            contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
+        //            if (contrato == null)
+        //            {
+        //                return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
+        //            }
+        //            contrato.opcion = 3;
+        //        }
+        //        else
+        //        {
+        //            // Si no tiene permiso, devolver un mensaje de error
+        //            return responseMessage("0", "No tienes permisos para ver este contrato.", "danger", "");
+        //        }*/
+
+
+        //    try
+        //    {
+        //        // Obtener la información del contrato
+        //        contrato = NegInfoContrato.Sp_RTAConsultarContratoNum(numContrato);
+
+        //        // Verificar si el contrato fue encontrado
+        //        if (contrato == null)
+        //        {
+        //            return responseMessage("0", "No se encontró el contrato especificado.", "warning", "");
+        //        }
+
+        //        contrato.opcion = 2; // O cualquier valor que sea necesario para 'opcion'
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return responseMessage("0", "Ocurrió un error al obtener los datos. " + ex.Message, "danger", "");
+        //    }
+
+        //    return contrato.SerializaToJson2();
+        //}
 
         public string GuardarNuevoInfoContrato(dynamic campos)
         {
             SeguridadHelper seguridad = new SeguridadHelper();
             EntRespuesta respuesta = new EntRespuesta();
-            //EntInfoContrato contrato = new EntInfoContrato();
+
             string IdUsuarioSession = "";
             IdUsuarioSession = seguridad.Desencripta(campos["session"]);
-            //contrato = NegInfoContrato.Sp_InsertarActualizarContrato(IdUsuarioSession);
+
 
             try
             {
                 EntInfoContrato registro = new EntInfoContrato();
-                //registro.IdContrato = campos["txtIdEmpleado"]);
+
                 int usuario = 0;
                 usuario = campos["formulario"];
 
-                //if(usuario == 1)
-                //{
                 registro.opcion = usuario;
+                //registro.CLIENTE = seguridad.Encripta(campos["txtCliente"]);
+                //registro.CLI_NOMBRE = seguridad.Encripta(campos["txtNomContacto"]);
+                //registro.CLI_TELEFONO = seguridad.Encripta(campos["txtTelefono"]);
+                //registro.CLI_DIRECCION = seguridad.Encripta(campos["txtDireccion"]);
+                //registro.CLI_CORREO = seguridad.Encripta(campos["txtCorreo"]);
+                //registro.NUM_CONTRATO = seguridad.Encripta(campos["txtNumContrato"]);
+
                 registro.CLIENTE = campos["txtCliente"];
                 registro.CLI_NOMBRE = campos["txtNomContacto"];
                 registro.CLI_TELEFONO = campos["txtTelefono"];
                 registro.CLI_DIRECCION = campos["txtDireccion"];
                 registro.CLI_CORREO = campos["txtCorreo"];
                 registro.NUM_CONTRATO = campos["txtNumContrato"];
+
+                registro.NUM_PEDIDO = campos["txtNumPedido"];
                 registro.OBJETO = campos["txtObjeto"];
                 registro.VALOR_TOTAL_CONTRATO = Convert.ToDecimal(campos["txtValorContrato"], CultureInfo.InvariantCulture);
                 registro.ALCANCE = campos["txtAlcance"];
+                decimal? margen = null; // Permitir valores nulos
+
+                if (!string.IsNullOrWhiteSpace(campos["txtConMargen"]))
+                {
+                    if (decimal.TryParse(campos["txtConMargen"], NumberStyles.Any, CultureInfo.InvariantCulture, out decimal tempMargen))
+                    {
+                        margen = tempMargen;
+                        registro.MARGEN = tempMargen;
+                    }
+                }
+
                 registro.HARDWARE = campos["txtHardware"];
                 registro.LICENCIAS = campos["txtLicencias"];
                 registro.SERVICIOS_FABRICANTE = campos["txtServiciosFab"];
-                registro.SERVICIO_DOS = campos["txtServiciosDOS"];
                 registro.SERVICIO_EXTERNOS = campos["txtServiciosExt"];
                 registro.POLIZAS = campos["txtPolizas"];
-                registro.TERMINOS_TDR = campos["txtTDR"];
                 registro.FORMA_PAGO = campos["selectFormaPago"];
                 registro.FECHA_SUSCRIPCION_CONTRATO = campos["fechaSuscripContrato"];
                 registro.FECHA_NOTIF_ANTICIPO = campos["fechaNotifAnticipo"];
                 registro.FECHA_INICIO_GARANTIA = campos["fechaIniActivacion"];
                 registro.FECHA_FIN_GARANTIA = campos["fechaFinActivacion"];
-                registro.PLAZO_ACTIVACION = campos["txtPlazoActGarantia"];
-                registro.PLAZO_ACTIVACION_LIC = campos["txtPlazoActLicencia"];
-                registro.DURACION_VIGENCIA_TEC = campos["txtDuracionVigTec"];
+
+                registro.ITEMS = campos["txtItems"];
 
                 registro.OBS_NUM_CONTRATO = campos["txtNumContratoObs"];
                 registro.OBS_VALOR_TOTAL = campos["txtValorContratoObs"];
@@ -1002,39 +1174,8 @@ namespace JsonJQueryNetTareas
                 registro.OBS_SERVICIO_DOS = campos["txtServiciosDOSObs"];
                 registro.OBS_SERVICIO_EXTERNOS = campos["txtServiciosExternosObs"];
                 registro.OBS_POLIZAS = campos["txtPolizasObs"];
-                registro.OBS_TERMINOS_TDR = campos["txtTerminosObs"];
                 registro.OBS_FORMA_PAGO = campos["txtFormaPagoObs"];
 
-                registro.ACTA_PREGUNTAS = campos["txtPreguntas"];
-                registro.ACTA_ADJUDICACION = campos["txtActAdj"];
-                registro.ACTA_NEGOCIACION = campos["txtActNeg"];
-                registro.BOM_SOLUCION = campos["txtBomSolucion"];
-                registro.ACUERDOS_MAY = campos["txtAcuMayoristas"];
-                registro.ACUERDOS_FAB = campos["txtAcuFabricantes"];
-                registro.OBS_ACTA_PREGUNTAS = campos["txtActaPreguntasObs"];
-                registro.OBS_ACTA_ADJUDICACION = campos["txtActaAdjObs"];
-                registro.OBS_ACTA_NEGOCIACION = campos["txtActaNegObs"];
-                registro.OBS_BOM_SOLUCION = campos["txtBomSolucionsObs"];
-                registro.OBS_ACUERDOS_MAY = campos["txtAcuMayoristasObs"];
-                registro.OBS_ACUERDOS_FAB = campos["txtAcuFabricantesObs"];
-
-                //registro.opcion = 3;
-                registro.GARANTIAS_FIN = campos["txtGarantiasFIN"];
-                registro.GARANTIAS_TEC = campos["txtGarantiasTEC"];
-                registro.GENERACION_PEDIDOS = campos["txtGenPedidos"];
-                registro.OBS_GARANTIAS_FIN = campos["txtGarFinObs"];
-                registro.OBS_GARANTIAS_TEC = campos["txtGarTECObs"];
-                registro.OBS_GENERACION_PEDIDOS = campos["txtGenPedidosObs"];
-
-
-
-
-                //registro.PLAZO_ACTIVACION = campos["txtFechaNacimiento"];
-                //registro.DURACION_VIGENCIA_TEC = campos["txtFechaNacimiento"];
-
-                registro.ENTREGA_LIC_TEMPORALES = campos["txtLicenciaTemporales"];
-
-                //registro.OBS_CLIENTE = campos["txtClienteObs"];
 
                 respuesta = NegInfoContrato.Sp_InsertarActualizarContrato(registro);
 
@@ -1051,17 +1192,17 @@ namespace JsonJQueryNetTareas
                     listaCamposCorreo.Add(new EntItemValor() { Item = "titValorContrato", Valor = "Valor Total de Contrato:" });
                     listaCamposCorreo.Add(new EntItemValor() { Item = "txtValorContrato", Valor = campos["txtValorContrato"] });
 
-                    parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                    /*parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
                     parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
                     parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
                     parametrosServidorCorreo.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
                     parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
                     parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
-
+                    */
                     bool respuestaEnvioCorreo = false;
 
-                    /*
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "txtcliente", Valor = "PLANIFICACION DE VACACIONES" });
+
+                    /*listaCamposCorreo.Add(new EntItemValor() { Item = "txtcliente", Valor = "PLANIFICACION DE VACACIONES" });
                     listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Estimados2. " });
                     listaCamposCorreo.Add(new EntItemValor() { Item = "titValorContrato", Valor = "Estimados1. " });
                     listaCamposCorreo.Add(new EntItemValor() { Item = "txtValorContrato", Valor = "12543767 " });
@@ -1074,7 +1215,9 @@ namespace JsonJQueryNetTareas
                     }
 
                     //respuestaEnvioCorreo=envioCorreo.EnviarCorreo("leoct1871@gmail.com", "Correo de prueba", "HOLA MUNDO...!!", parametrosServidorCorreo);
-                    respuestaEnvioCorreo = envioCorreo.EnvioCorreo("lsalazar@dos.com.ec;prueda@dos.com.ec", "Ingreso de nuevo contrato", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoFormatoCorreoContrato.txt"), listaCamposCorreo);
+                    //respuestaEnvioCorreo=envioCorreo.EnviarCorreo("lsalazar@dos.com.ec", "Ingreso de nuevo contrato", "HOLA MUNDO...!!", parametrosServidorCorreo);
+
+                    //respuestaEnvioCorreo = envioCorreo.EnvioCorreo("lsalazar@dos.com.ec", "Ingreso de nuevo contrato", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoFormatoCorreoContrato.txt"), listaCamposCorreo);
 
                 }
             }
@@ -1082,8 +1225,145 @@ namespace JsonJQueryNetTareas
             {
                 return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
             }
-            return respuesta.SerializaToJson();
+            return respuesta.SerializaToJson2();
         }
+
+        //public string GuardarNuevoInfoContrato(dynamic campos)
+        //{
+        //    SeguridadHelper seguridad = new SeguridadHelper();
+        //    EntRespuesta respuesta = new EntRespuesta();
+        //    //EntInfoContrato contrato = new EntInfoContrato();
+        //    string IdUsuarioSession = "";
+        //    IdUsuarioSession = seguridad.Desencripta(campos["session"]);
+        //    //contrato = NegInfoContrato.Sp_InsertarActualizarContrato(IdUsuarioSession);
+
+        //    try
+        //    {
+        //        EntInfoContrato registro = new EntInfoContrato();
+        //        //registro.IdContrato = campos["txtIdEmpleado"]);
+        //        int usuario = 0;
+        //        usuario = campos["formulario"];
+
+        //        //if(usuario == 1)
+        //        //{
+        //        registro.opcion = usuario;
+        //        registro.CLIENTE = campos["txtCliente"];
+        //        registro.CLI_NOMBRE = campos["txtNomContacto"];
+        //        registro.CLI_TELEFONO = campos["txtTelefono"];
+        //        registro.CLI_DIRECCION = campos["txtDireccion"];
+        //        registro.CLI_CORREO = campos["txtCorreo"];
+        //        registro.NUM_CONTRATO = campos["txtNumContrato"];
+        //        registro.OBJETO = campos["txtObjeto"];
+        //        registro.VALOR_TOTAL_CONTRATO = Convert.ToDecimal(campos["txtValorContrato"], CultureInfo.InvariantCulture);
+        //        registro.ALCANCE = campos["txtAlcance"];
+        //        registro.HARDWARE = campos["txtHardware"];
+        //        registro.LICENCIAS = campos["txtLicencias"];
+        //        registro.SERVICIOS_FABRICANTE = campos["txtServiciosFab"];
+        //        registro.SERVICIO_DOS = campos["txtServiciosDOS"];
+        //        registro.SERVICIO_EXTERNOS = campos["txtServiciosExt"];
+        //        registro.POLIZAS = campos["txtPolizas"];
+        //        registro.TERMINOS_TDR = campos["txtTDR"];
+        //        registro.FORMA_PAGO = campos["selectFormaPago"];
+        //        registro.FECHA_SUSCRIPCION_CONTRATO = campos["fechaSuscripContrato"];
+        //        registro.FECHA_NOTIF_ANTICIPO = campos["fechaNotifAnticipo"];
+        //        registro.FECHA_INICIO_GARANTIA = campos["fechaIniActivacion"];
+        //        registro.FECHA_FIN_GARANTIA = campos["fechaFinActivacion"];
+        //        registro.PLAZO_ACTIVACION = campos["txtPlazoActGarantia"];
+        //        registro.PLAZO_ACTIVACION_LIC = campos["txtPlazoActLicencia"];
+        //        registro.DURACION_VIGENCIA_TEC = campos["txtDuracionVigTec"];
+
+        //        registro.OBS_NUM_CONTRATO = campos["txtNumContratoObs"];
+        //        registro.OBS_VALOR_TOTAL = campos["txtValorContratoObs"];
+        //        registro.OBS_OBJETO = campos["txtObjetoObs"];
+        //        registro.OBS_ALCANCE = campos["txtAlcanceObjetoObs"];
+        //        registro.OBS_HARDWARE = campos["txtHardwareObs"];
+        //        registro.OBS_LICENCIAS = campos["txtLicenciasObs"];
+        //        registro.OBS_SERVICIOS_FABRICANTE = campos["txtServiciosFabObs"];
+        //        registro.OBS_SERVICIO_DOS = campos["txtServiciosDOSObs"];
+        //        registro.OBS_SERVICIO_EXTERNOS = campos["txtServiciosExternosObs"];
+        //        registro.OBS_POLIZAS = campos["txtPolizasObs"];
+        //        registro.OBS_TERMINOS_TDR = campos["txtTerminosObs"];
+        //        registro.OBS_FORMA_PAGO = campos["txtFormaPagoObs"];
+
+        //        registro.ACTA_PREGUNTAS = campos["txtPreguntas"];
+        //        registro.ACTA_ADJUDICACION = campos["txtActAdj"];
+        //        registro.ACTA_NEGOCIACION = campos["txtActNeg"];
+        //        registro.BOM_SOLUCION = campos["txtBomSolucion"];
+        //        registro.ACUERDOS_MAY = campos["txtAcuMayoristas"];
+        //        registro.ACUERDOS_FAB = campos["txtAcuFabricantes"];
+        //        registro.OBS_ACTA_PREGUNTAS = campos["txtActaPreguntasObs"];
+        //        registro.OBS_ACTA_ADJUDICACION = campos["txtActaAdjObs"];
+        //        registro.OBS_ACTA_NEGOCIACION = campos["txtActaNegObs"];
+        //        registro.OBS_BOM_SOLUCION = campos["txtBomSolucionsObs"];
+        //        registro.OBS_ACUERDOS_MAY = campos["txtAcuMayoristasObs"];
+        //        registro.OBS_ACUERDOS_FAB = campos["txtAcuFabricantesObs"];
+
+        //        //registro.opcion = 3;
+        //        registro.GARANTIAS_FIN = campos["txtGarantiasFIN"];
+        //        registro.GARANTIAS_TEC = campos["txtGarantiasTEC"];
+        //        registro.GENERACION_PEDIDOS = campos["txtGenPedidos"];
+        //        registro.OBS_GARANTIAS_FIN = campos["txtGarFinObs"];
+        //        registro.OBS_GARANTIAS_TEC = campos["txtGarTECObs"];
+        //        registro.OBS_GENERACION_PEDIDOS = campos["txtGenPedidosObs"];
+
+
+
+
+        //        //registro.PLAZO_ACTIVACION = campos["txtFechaNacimiento"];
+        //        //registro.DURACION_VIGENCIA_TEC = campos["txtFechaNacimiento"];
+
+        //        registro.ENTREGA_LIC_TEMPORALES = campos["txtLicenciaTemporales"];
+
+        //        //registro.OBS_CLIENTE = campos["txtClienteObs"];
+
+        //        respuesta = NegInfoContrato.Sp_InsertarActualizarContrato(registro);
+
+        //        if (respuesta.estado == "1")
+        //        {
+        //            List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
+        //            EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
+        //            EntParametrosCorreo parametrosServidorCorreo = new EntParametrosCorreo();
+        //            string contenidoCorreo = "";
+
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "txtcliente", Valor = campos["txtCliente"] });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Contrato:" });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "txtnumContrato", Valor = campos["txtNumContrato"] });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "titValorContrato", Valor = "Valor Total de Contrato:" });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "txtValorContrato", Valor = campos["txtValorContrato"] });
+
+        //            parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+        //            parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+        //            parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+        //            parametrosServidorCorreo.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+        //            parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+        //            parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+        //            bool respuestaEnvioCorreo = false;
+
+        //            /*
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "txtcliente", Valor = "PLANIFICACION DE VACACIONES" });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Estimados2. " });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "titValorContrato", Valor = "Estimados1. " });
+        //            listaCamposCorreo.Add(new EntItemValor() { Item = "txtValorContrato", Valor = "12543767 " });
+        //            */
+        //            //contenidoCorreo = estructuraContenidoCorreo;
+
+        //            foreach (EntItemValor parametrosContenido in listaCamposCorreo)
+        //            {
+        //                contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
+        //            }
+
+        //            //respuestaEnvioCorreo=envioCorreo.EnviarCorreo("leoct1871@gmail.com", "Correo de prueba", "HOLA MUNDO...!!", parametrosServidorCorreo);
+        //            respuestaEnvioCorreo = envioCorreo.EnvioCorreo("lsalazar@dos.com.ec;prueda@dos.com.ec", "Ingreso de nuevo contrato", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoFormatoCorreoContrato.txt"), listaCamposCorreo);
+
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+        //    }
+        //    return respuesta.SerializaToJson2();
+        //}
 
         public string ConsultarOrdenServicioPedido(dynamic campos)
         {
@@ -1116,7 +1396,7 @@ namespace JsonJQueryNetTareas
             List<EntDetalleInventario> Ent2 = new List<EntDetalleInventario>();
             string IdUsuarioSession = "";
             IdUsuarioSession = seguridad.Desencripta(campos["session"]);
-            int idEncabezado  =Convert.ToInt32(campos["tipo"]);
+            int idEncabezado = Convert.ToInt32(campos["tipo"]);
             int op = Convert.ToInt32(campos["opcion"]);
             try
             {
@@ -1136,11 +1416,11 @@ namespace JsonJQueryNetTareas
             //GuardarHistoria();
             if (op == 1)
             {
-                return Ent1.SerializaToJson();
+                return Ent1.SerializaToJson2();
             }
             else if (op == 2)
             {
-                return Ent2.SerializaToJson();
+                return Ent2.SerializaToJson2();
             }
             else
             {
@@ -1395,18 +1675,208 @@ namespace JsonJQueryNetTareas
 
                 respuesta = NegTareas.ListaHorasRecursosPorJefatura(IdUsuarioConsulta, fechaDesde, fechaHasta, tipo, estado);
 
-                
+
             }
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
             }
 
-            //return respuesta.resultadoTabla.SerializaToJson();
             return JsonConvert.SerializeObject(respuesta.resultadoTabla);
 
 
         }
+
+        public string ObtenerRecursosHorasDiariasActividad(dynamic parameters)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+
+            string idUsuario = parameters["usuario"].ToString();
+            string fechaDesde = parameters["fechaDesde"].ToString();
+            string fechaHasta = parameters["fechaHasta"].ToString();
+            int estado = Convert.ToInt32(parameters["estado"].ToString());
+
+            string session = parameters["session"].ToString();
+            int tipo = 0;
+            string IdUsuarioSession = "";
+            bool usuarioEsJefe = false;
+            string IdUsuarioConsulta = "";
+
+            try
+            {
+                IdUsuarioSession = seguridad.Desencripta(session.ToString());
+                usuarioEsJefe = NegUsuario.RTA_ConsultaUsuarioEsJefe(IdUsuarioSession);
+
+
+                IdUsuarioConsulta = IdUsuarioSession;
+                tipo = 0;
+                respuesta = NegTareas.ListaHorasRecursosPorActividad(IdUsuarioConsulta, fechaDesde, fechaHasta, tipo, estado);
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return JsonConvert.SerializeObject(respuesta.resultadoTabla);
+
+
+        }
+
+        public string ObtenerRecursosHorasDiariasAsistencia(dynamic parameters)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+
+            string idUsuario = parameters["usuario"].ToString();
+            string fechaDesde = parameters["fechaDesde"].ToString();
+            string fechaHasta = parameters["fechaHasta"].ToString();
+            int estado = Convert.ToInt32(parameters["estado"].ToString());
+
+            string session = parameters["session"].ToString();
+            int tipo = 0;
+            string IdUsuarioSession = "";
+            bool usuarioEsJefe = false;
+            string IdUsuarioConsulta = "";
+
+            try
+            {
+                IdUsuarioSession = seguridad.Desencripta(session.ToString());
+                usuarioEsJefe = NegUsuario.RTA_ConsultaUsuarioEsJefe(IdUsuarioSession);
+
+                if (usuarioEsJefe)
+                {
+                    tipo = 1;
+
+                    if (Convert.ToInt32(idUsuario) > 0)
+                    {
+                        IdUsuarioConsulta = idUsuario;
+                    }
+                    else
+                    {
+                        IdUsuarioConsulta = IdUsuarioSession;
+                    }
+                }
+                else
+                {
+                    tipo = 0;
+                    IdUsuarioConsulta = idUsuario;
+                }
+
+                respuesta = NegTareas.ListaHorasRecursosPorAsistencia(IdUsuarioConsulta, fechaDesde, fechaHasta, tipo, estado);
+
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return JsonConvert.SerializeObject(respuesta.resultadoTabla);
+
+
+        }
+
+        public string ObtenerRecursosHorasDiariasAsistenciaDescargar(dynamic parameters)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+
+            string idUsuario = parameters["usuario"].ToString();
+            string fechaDesde = parameters["fechaDesde"].ToString();
+            string fechaHasta = parameters["fechaHasta"].ToString();
+            int estado = Convert.ToInt32(parameters["estado"].ToString());
+
+            string rutaCarpetaDescargas = "";
+            string nombreArchivo = "";
+            string urlDescargas = "";
+            DataTable dtResultados = null;
+
+            string session = parameters["session"].ToString();
+
+            string IdUsuarioSession = "";
+            bool usuarioEsJefe = false;
+            string IdUsuarioConsulta = "";
+
+            try
+            {
+                IdUsuarioSession = seguridad.Desencripta(session.ToString());
+                usuarioEsJefe = NegUsuario.RTA_ConsultaUsuarioEsJefe(IdUsuarioSession);
+                if (usuarioEsJefe)
+                {
+                    if (Convert.ToInt32(idUsuario) > 0)
+                    {
+                        IdUsuarioConsulta = idUsuario;
+                    }
+                    else
+                    {
+                        IdUsuarioConsulta = IdUsuarioSession;
+                    }
+                }
+                else
+                {
+                    IdUsuarioConsulta = IdUsuarioSession;
+                }
+
+                respuesta = NegTareas.ListaHorasRecursosPorAsistenciaDescarga(IdUsuarioConsulta, fechaDesde, fechaHasta, 0, estado);
+
+                try
+                {
+
+                    if (respuesta.estado == "1")
+                    {
+                        dtResultados = respuesta.resultadoTabla;
+
+                        // Creación de archivo XLS
+                        var workbook = new XLWorkbook();
+                        var worksheet = workbook.Worksheets.Add("Reporte de Asistencia");
+
+                        int numeroColumna = 1;
+                        foreach (DataColumn column in dtResultados.Columns)
+                        {
+                            worksheet.Cell(1, numeroColumna).Value = column.ColumnName;
+                            worksheet.Columns(1, numeroColumna).Width = 20;
+                            worksheet.Rows(1, numeroColumna).AdjustToContents();
+                            numeroColumna += 1;
+                        }
+
+                        rutaCarpetaDescargas = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CARPETA_DESCARGAS");
+
+                        worksheet.Cell(2, 1).Value = dtResultados;
+                        //worksheet.RangeUsed().SetAutoFilter();
+
+                        // Guardo archivo en carpeta publica
+                        DateTime fechaActual = DateTime.Now;
+                        nombreArchivo = "F-CS-001 Reporte de Asistencia" + fechaActual.Year.ToString() + fechaActual.Month.ToString() + fechaActual.Day.ToString() + "_" + fechaActual.Hour.ToString() + fechaActual.Minute.ToString() + fechaActual.Second.ToString() + ".xlsx";
+                        workbook.SaveAs(rutaCarpetaDescargas + nombreArchivo);
+                    }
+                    else
+                    {
+                        return respuesta.SerializaToJson().ToString();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            dtResultados = null;
+
+
+            urlDescargas = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_DESCARGAS");
+
+            return responseMessage("1", urlDescargas + nombreArchivo, "success", "");
+
+
+        }
+
         public string ObtenerListaUsuarios(dynamic parameters)
         {
             SeguridadHelper seguridad = new SeguridadHelper();
@@ -1417,6 +1887,27 @@ namespace JsonJQueryNetTareas
             {
                 string IdUsuario = seguridad.Desencripta(parameters.ToString());
                 cmbUsuario = NegUsuario.ListaUsuariosCombo(IdUsuario);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return cmbUsuario.SerializaToJson();
+
+
+        }
+
+        public string ObtenerListaUsuariosSap(dynamic parameters)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+            List<EntCombo> cmbUsuario = new List<EntCombo>();
+
+            try
+            {
+                string IdUsuario = seguridad.Desencripta(parameters.ToString());
+                cmbUsuario = NegUsuario.ListaUsuariosComboSap(IdUsuario);
             }
             catch (Exception ex)
             {
@@ -1527,7 +2018,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                listaTareas = NegTareas.ConsultaTareasGeneradas(fechaDesde, fechaHasta,  estado, Id_RegTareas,"", busqueda);
+                listaTareas = NegTareas.ConsultaTareasGeneradas(fechaDesde, fechaHasta, estado, Id_RegTareas, "", busqueda);
             }
             catch (Exception ex)
             {
@@ -1863,7 +2354,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                respuesta = NegTareas.ConsultaTareasGeneradasDescargar(fechaDesde, fechaHasta, estado, Id_RegTareas,"", busqueda);
+                respuesta = NegTareas.ConsultaTareasGeneradasDescargar(fechaDesde, fechaHasta, estado, Id_RegTareas, "", busqueda);
 
                 try
                 {
@@ -1940,7 +2431,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                listaTareas = NegTareas.ConsultaHorasContratadas(fechaDesde, fechaHasta, estado, Id_RegTareas, busqueda,os, idCliente, idProceso);
+                listaTareas = NegTareas.ConsultaHorasContratadas(fechaDesde, fechaHasta, estado, Id_RegTareas, busqueda, os, idCliente, idProceso);
             }
             catch (Exception ex)
             {
@@ -2003,7 +2494,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                respuesta = NegTareas.ConsultaTareasGeneradasContratoDescargar(fechaDesde, fechaHasta, estado, Id_RegTareas, busqueda,os, idCliente, idProceso);
+                respuesta = NegTareas.ConsultaTareasGeneradasContratoDescargar(fechaDesde, fechaHasta, estado, Id_RegTareas, busqueda, os, idCliente, idProceso);
 
                 try
                 {
@@ -2082,13 +2573,13 @@ namespace JsonJQueryNetTareas
             {
                 area = parameters["area"].ToString();
             }
-            if (parameters["sucursal"].ToString()== "SELECCIONAR SUCURSAL")
+            if (parameters["sucursal"].ToString() == "SELECCIONAR SUCURSAL")
             {
                 sucursal = "";
             }
             else
             {
-                 sucursal = parameters["sucursal"].ToString();
+                sucursal = parameters["sucursal"].ToString();
             }
 
             if (parameters["estado"].ToString() == "SELECCIONAR ESTADO")
@@ -2097,12 +2588,12 @@ namespace JsonJQueryNetTareas
             }
             else
             {
-                 estado = parameters["estado"].ToString();
+                estado = parameters["estado"].ToString();
             }
 
             try
             {
-                Lista = NegContrato.ConsultaSp_RTAListaContratos(fechaDesde, fechaHasta, busqueda, IdCliente, IdGerenteCuenta,IdGestorResponsable, sucursal, estado, area, IdClasificacion);
+                Lista = NegContrato.ConsultaSp_RTAListaContratos(fechaDesde, fechaHasta, busqueda, IdCliente, IdGerenteCuenta, IdGestorResponsable, sucursal, estado, area, IdClasificacion);
             }
             catch (Exception ex)
             {
@@ -2187,11 +2678,14 @@ namespace JsonJQueryNetTareas
             string busqueda = parameters["busqueda"].ToString();
             int tipo = Convert.ToInt32(parameters["tipo"].ToString());
             int pagina = Convert.ToInt32(parameters["pagina"].ToString());
+
+            int tipofecha = Convert.ToInt32(parameters["tipofecha"].ToString());
+
             string estadosolicitud = parameters["estadosolicitud"].ToString();
             string usuario = parameters["usuario"].ToString();
             try
             {
-                Lista = NegSolicitud.ConsultaSp_RTAListaSolicitud(tipo, IdUsuarioSession, pagina, estadosolicitud, fechaDesde, fechaHasta, Convert.ToInt32(busqueda), usuario);
+                Lista = NegSolicitud.ConsultaSp_RTAListaSolicitud(tipo, IdUsuarioSession, pagina, estadosolicitud, fechaDesde, fechaHasta, Convert.ToInt32(busqueda), usuario, tipofecha);
             }
             catch (Exception ex)
             {
@@ -2275,6 +2769,506 @@ namespace JsonJQueryNetTareas
             return Lista.SerializaToJson();
         }
 
+        /// <summary>
+        /// Feriados que caen dentro del rango de vacaciones que se está pidiendo.
+        /// Sustituye al campo que el colaborador llenaba a mano.
+        /// </summary>
+        public string ContarFeriadosRango(dynamic parameters)
+        {
+            EntFeriadosRango resultado;
+
+            try
+            {
+                DateTime desde;
+                DateTime hasta;
+
+                /* La pantalla maneja las fechas como dd/MM/yyyy. Se parsea con formato
+                   y cultura explícitos para no depender de la configuración regional
+                   del servidor, que ya nos ha mordido antes. */
+                string textoDesde = parameters["fechaDesde"].ToString();
+                string textoHasta = parameters["fechaHasta"].ToString();
+
+                if (!DateTime.TryParseExact(textoDesde, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out desde) ||
+                    !DateTime.TryParseExact(textoHasta, "dd/MM/yyyy", CultureInfo.InvariantCulture, DateTimeStyles.None, out hasta))
+                {
+                    /* A medio llenar el formulario esto pasa seguido. No es un error:
+                       se responde 0 y la pantalla no muestra advertencia. */
+                    return new EntFeriadosRango { Feriados = 0, AniosSinCargar = "" }.SerializaToJson();
+                }
+
+                resultado = NegVacaciones.ContarFeriadosRango(desde, hasta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al calcular los feriados. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return resultado.SerializaToJson();
+        }
+
+        /// <summary>
+        /// Registra la firma de un rol sobre una solicitud.
+        ///
+        /// El nombre, el cargo y la cédula NO llegan de la pantalla: los copia el
+        /// procedimiento desde R_Usuarios usando el código de la sesión. Así no se
+        /// pueden digitar, que es justamente lo que pide la especificación.
+        /// </summary>
+        public string GuardarFirmaSolicitud(HttpContext context, dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString()),
+                    Rol = parameters["rol"].ToString(),
+                    Secuencia = 1,
+                    Decision = parameters["decision"].ToString(),
+                    Comentario = parameters["comentario"].ToString(),
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                byte[] trazo = TrazoDesdeDataUri(parameters["trazo"].ToString());
+                if (trazo == null || trazo.Length == 0)
+                {
+                    return responseMessage("0", "Debe firmar antes de continuar.", "warning", "");
+                }
+
+                /* Trazabilidad: de dónde vino la firma. Con proxy, la IP real viene
+                   en la cabecera; Request.UserHostAddress daría la del balanceador. */
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntRespuesta respuesta = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al registrar la firma. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// Arma el PDF de una solicitud y devuelve la URL para descargarlo.
+        ///
+        /// El archivo queda en ~/descargas/ y su nombre se guarda contra la
+        /// solicitud, porque la especificación pide que la descarga siga
+        /// disponible después desde el historial y no solo al aprobar.
+        /// </summary>
+        public string GenerarPdfSolicitud(dynamic parameters)
+        {
+            string temporales = "";
+
+            try
+            {
+                long idVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString());
+
+                /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
+                   Convert lanza si no cabe, que es lo que se quiere: mejor un error
+                   visible que un id truncado en silencio. Hoy el máximo es 22837. */
+                EntSolicitud solicitud = NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+                if (solicitud == null || solicitud.IdVacaciones == 0)
+                {
+                    return responseMessage("0", "No se encontro la solicitud.", "warning", "");
+                }
+
+                List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
+                string folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+                /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
+                   no resuelve base64 embebido. Se borran al terminar: el original
+                   vive en la base. */
+                temporales = HttpContext.Current.Server.MapPath("~/descargas/tmp_" + idVacaciones + "_" +
+                                                                DateTime.Now.ToString("yyyyMMddHHmmssfff")) + "\\";
+                Directory.CreateDirectory(temporales);
+
+                foreach (EntFirmaSolicitud f in firmas)
+                {
+                    if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+                    string ruta = temporales + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(ruta, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = ruta;
+                }
+
+                /* El logo institucional, el mismo de los correos. Se usa este y no
+                   Img/logo_dos.png porque ese ultimo no esta declarado en el
+                   proyecto: existe en la maquina de desarrollo pero no viaja en la
+                   publicacion, asi que el PDF habria salido sin logo en el servidor
+                   y sin que nadie se enterara. Si algun dia se declara, se toma. */
+                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+                if (!File.Exists(rutaLogo))
+                {
+                    rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+                }
+                if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
+
+                /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
+                   recuperacion. En vacaciones no aplica y viene null, que es lo que
+                   la plantilla espera. */
+                EntDetallePermiso detalle = null;
+                if (solicitud.IdTipoSolicitud == 1)
+                {
+                    detalle = NegDetallePermiso.Obtener(idVacaciones);
+                }
+
+                /* Los periodos de los que salen los dias. Solo en vacaciones. */
+                string periodos = "";
+                if (solicitud.IdTipoSolicitud != 1)
+                {
+                    periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
+                }
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
+
+                PDFs generador = new PDFs();
+                string archivo = generador.GenerarPdfSolicitud(html, folio);
+
+                if (string.IsNullOrEmpty(archivo))
+                {
+                    return responseMessage("0", "No se pudo generar el PDF. Revise el log del servidor.", "danger", "");
+                }
+
+                /* Se deja registrado contra la solicitud para poder volver a
+                   descargarlo desde el historial. */
+                EntSolicitud registro = new EntSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Ruta_Archivo = "descargas/",
+                    Descripcion_Archivo = archivo
+                };
+                NegSolicitud.RTA_ActualizarRutaRide(registro);
+
+                EntRespuesta respuesta = new EntRespuesta()
+                {
+                    estado = "1",
+                    mensaje = "descargas/" + archivo,
+                    tipoMensaje = "success"
+                };
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al generar el PDF. " + ex.Message.ToString(), "danger", "");
+            }
+            finally
+            {
+                /* Si esto falla no importa: son archivos de render, no el registro. */
+                try
+                {
+                    if (!string.IsNullOrEmpty(temporales) && Directory.Exists(temporales))
+                    {
+                        Directory.Delete(temporales, true);
+                    }
+                }
+                catch { }
+            }
+        }
+
+        /// <summary>
+        /// Las recuperaciones cuyo plazo venció y nadie cerró todavía.
+        /// </summary>
+        public string ListarRecuperacionesPendientes()
+        {
+            try
+            {
+                return NegPlanRecuperacion.ListarPendientes().SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al listar las recuperaciones. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// El cierre de una recuperación: el jefe dice si se recuperó o no, y firma.
+        ///
+        /// Es la segunda firma del jefe sobre la misma solicitud, por eso va con
+        /// Secuencia = 2. La restricción única de VacacionesFirma es sobre
+        /// (solicitud, rol, secuencia), así que convive con la firma de la
+        /// aprobación sin pisarla.
+        ///
+        /// Igual que al aprobar: primero la firma, después el cierre. Si el cierre
+        /// fallara queda una firma de un paso incompleto, y reintentar lo termina;
+        /// al revés quedaría un cierre sin firmar, que es lo que no se quiere.
+        /// </summary>
+        public string ConfirmarRecuperacion(HttpContext context, dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                long idVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString());
+                bool seRecupero = parameters["seRecupero"].ToString() == "1";
+                string observacion = CampoOpcional(parameters, "observacion");
+
+                byte[] trazo = TrazoDesdeDataUri(CampoOpcional(parameters, "trazo"));
+                if (trazo == null || trazo.Length == 0)
+                {
+                    return responseMessage("0", "Debe firmar para registrar el cierre.", "warning", "");
+                }
+
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Rol = "JEFE",
+                    Secuencia = 2,
+                    Decision = seRecupero ? "APROBADO" : "RECHAZADO",
+                    Comentario = observacion,
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                EntRespuesta firmaResp = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+                if (firmaResp.estado != "1")
+                {
+                    return firmaResp.SerializaToJson();
+                }
+
+                EntRespuesta respuesta = NegPlanRecuperacion.Confirmar(idVacaciones, seRecupero, observacion, codUsuario);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al confirmar la recuperacion. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// Cuánto le queda al colaborador del permiso mensual de 3 horas.
+        ///
+        /// La fecha que importa es la del permiso, no la de hoy: la bolsa es del
+        /// mes en que la persona se ausenta. Si no viene o no se entiende, se usa
+        /// el mes en curso, que es lo que la pantalla muestra al abrir el
+        /// formulario antes de que elijan fecha.
+        /// </summary>
+        public string SaldoPermisoMensual(dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                DateTime fecha;
+                if (!DateTime.TryParseExact(CampoOpcional(parameters, "fecha"), "dd/MM/yyyy",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
+                {
+                    fecha = DateTime.Now;
+                }
+
+                long idVacaciones;
+                if (!long.TryParse(CampoOpcional(parameters, "idVacaciones"), out idVacaciones)) { idVacaciones = 0; }
+
+                EntSaldoPermisoMensual saldo = NegDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
+                if (saldo == null)
+                {
+                    return responseMessage("0", "No se pudo consultar el saldo del permiso mensual.", "warning", "");
+                }
+
+                return saldo.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al consultar el saldo mensual. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// Guarda el tipo de permiso y, si es teletrabajo, su detalle.
+        ///
+        /// No corta el alta si falla, por lo mismo que la firma: la solicitud ya
+        /// está guardada y el correo al jefe ya salió. Un permiso sin tipo se ve y
+        /// se corrige; una solicitud fantasma no.
+        /// </summary>
+        private void GuardarDetalleDelPermiso(dynamic campos, object idNuevo)
+        {
+            try
+            {
+                long idVacaciones;
+                if (!long.TryParse(Convert.ToString(idNuevo), out idVacaciones) || idVacaciones <= 0) { return; }
+
+                string tipoPermiso = CampoOpcional(campos, "TipoPermiso");
+                if (tipoPermiso == "") { return; }   /* pantalla vieja en caché */
+
+                EntDetallePermiso detalle = new EntDetallePermiso()
+                {
+                    IdVacaciones = idVacaciones,
+                    TipoPermiso = tipoPermiso,
+                    TratamientoExcedente = CampoOpcional(campos, "TratamientoExcedente"),
+                    Modalidad = CampoOpcional(campos, "Modalidad"),
+                    HoraDesde = CampoOpcional(campos, "TeletrabajoHoraDesde"),
+                    HoraHasta = CampoOpcional(campos, "TeletrabajoHoraHasta"),
+                    Lugar = CampoOpcional(campos, "Lugar"),
+                    MediosContacto = CampoOpcional(campos, "MediosContacto"),
+                    MotivoGeneral = CampoOpcional(campos, "MotivoGeneral"),
+                    Actividades = CampoOpcional(campos, "Actividades"),
+                    Entregables = CampoOpcional(campos, "Entregables"),
+                    ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1",
+                    UsaPermisoMensual = CampoOpcional(campos, "UsaPermisoMensual") == "1",
+                    SaldoMensualTexto = CampoOpcional(campos, "SaldoMensualTexto"),
+                    RespaldoAdjunto = CampoOpcional(campos, "RespaldoAdjunto")
+                };
+
+                NegDetallePermiso.Guardar(detalle);
+
+                /* El plan de recuperación solo existe cuando el excedente se trata
+                   así. Va después del detalle porque el procedimiento del plan
+                   valida contra la fecha del permiso, que ya está guardada. */
+                if (detalle.TratamientoExcedente == "RECUPERACION")
+                {
+                    GuardarPlanDeRecuperacion(campos, idVacaciones);
+                }
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo guardar el detalle del permiso: " + ex.Message,
+                                "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// El plan con el que el colaborador propone recuperar las horas.
+        ///
+        /// Como el resto del detalle, no corta el alta si falla: la solicitud ya
+        /// existe. Un permiso con recuperación y sin plan se ve —el jefe no tiene
+        /// qué confirmar— y se corrige volviendo a guardar.
+        /// </summary>
+        private void GuardarPlanDeRecuperacion(dynamic campos, long idVacaciones)
+        {
+            try
+            {
+                DateTime propuesta;
+                if (!DateTime.TryParseExact(CampoOpcional(campos, "RecuperacionFecha"), "dd/MM/yyyy",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out propuesta))
+                {
+                    return;
+                }
+
+                EntPlanRecuperacion plan = new EntPlanRecuperacion()
+                {
+                    IdVacaciones = idVacaciones,
+                    FechaPropuesta = propuesta,
+                    HorarioPropuesto = CampoOpcional(campos, "RecuperacionHorario"),
+                    Actividades = CampoOpcional(campos, "RecuperacionActividades"),
+                    Entregables = CampoOpcional(campos, "RecuperacionEntregables")
+                };
+
+                NegPlanRecuperacion.Guardar(plan);
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo guardar el plan de recuperacion: " + ex.Message,
+                                "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// Lee una clave que puede no venir. Las pantallas se despliegan por
+        /// separado del código, así que un navegador con la versión anterior en
+        /// caché manda el payload viejo: pedir una clave nueva sin más reventaría
+        /// el alta entera.
+        /// </summary>
+        private static string CampoOpcional(dynamic campos, string clave)
+        {
+            try
+            {
+                object valor = campos[clave];
+                return valor == null ? "" : valor.ToString();
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        /// <summary>
+        /// Registra la firma del colaborador sobre la solicitud recién creada.
+        ///
+        /// No corta el alta si algo sale mal. La solicitud ya está guardada y el
+        /// correo al jefe ya va en camino: reventar acá dejaría al colaborador
+        /// creyendo que no se envió cuando sí se envió. Si falta la firma, el
+        /// documento va a mostrar ese recuadro como pendiente, que es visible y
+        /// se corrige; una solicitud fantasma no.
+        /// </summary>
+        private void GuardarFirmaDelColaborador(HttpContext context, dynamic campos, object idNuevo, string codUsuario)
+        {
+            try
+            {
+                string dataUri = "";
+                try { dataUri = campos["firmaTrazo"].ToString(); }
+                catch { return; }   /* pantalla vieja en caché: no manda el campo */
+
+                byte[] trazo = TrazoDesdeDataUri(dataUri);
+                if (trazo == null || trazo.Length == 0) { return; }
+
+                long idVacaciones;
+                if (!long.TryParse(Convert.ToString(idNuevo), out idVacaciones) || idVacaciones <= 0) { return; }
+
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Rol = "COLABORADOR",
+                    Secuencia = 1,
+                    Decision = "APROBADO",
+                    Comentario = "",
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo registrar la firma del colaborador: " + ex.Message,
+                                "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// Convierte el "data:image/png;base64,...." que manda el pad en bytes.
+        /// Devuelve null si no viene una imagen: quien llama decide qué hacer.
+        /// </summary>
+        private static byte[] TrazoDesdeDataUri(string dataUri)
+        {
+            if (string.IsNullOrEmpty(dataUri)) { return null; }
+
+            int coma = dataUri.IndexOf(',');
+            string base64 = coma >= 0 ? dataUri.Substring(coma + 1) : dataUri;
+
+            try
+            {
+                return Convert.FromBase64String(base64);
+            }
+            catch (FormatException)
+            {
+                return null;
+            }
+        }
+
         public string ObtenerListadeCorreos(dynamic parameters)
         {
             List<EntUsuario> Lista = null;
@@ -2324,7 +3318,7 @@ namespace JsonJQueryNetTareas
                         respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(Correos, "Planificación de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoPlanificacionVacaciones.txt"), listaCamposCorreo, "contenidoCorreoPlanificacionVacaciones.txt");
                     }
 
-                    if (respuestaEnvioCorreo==true)
+                    if (respuestaEnvioCorreo == true)
                     {
                         respuesta.estado = "1";
                         respuesta.mensaje = "E-Mail enviado correctamente.";
@@ -2554,14 +3548,14 @@ namespace JsonJQueryNetTareas
 
             int idFecha = Convert.ToInt32(parameters["idFecha"].ToString());
 
-            string  Anio ="";
-            if(parameters["Anio"].ToString() == "null" || parameters["Anio"].ToString() == "")
+            string Anio = "";
+            if (parameters["Anio"].ToString() == "null" || parameters["Anio"].ToString() == "")
             {
                 Anio = "";
             }
             else
             {
-                Anio= parameters["Anio"].ToString();
+                Anio = parameters["Anio"].ToString();
             }
             string meses = parameters["meses"].ToString();
 
@@ -2700,10 +3694,10 @@ namespace JsonJQueryNetTareas
             //int idFecha = Convert.ToInt32(parameters["tipofecha"].ToString());
             int Anio = Convert.ToInt32(parameters["anio"].ToString());
 
-            
+
             try
             {
-                respuesta = NegReporteGe.ConsultaSp_RTAListaForeCastDescargar(Anio,1);
+                respuesta = NegReporteGe.ConsultaSp_RTAListaForeCastDescargar(Anio, 1);
 
                 try
                 {
@@ -2837,7 +3831,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                respuesta = NegForeCast.ConsultaSp_RTAListaForeCastDescargar(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico,TipoProyecto);
+                respuesta = NegForeCast.ConsultaSp_RTAListaForeCastDescargar(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto);
 
                 try
                 {
@@ -3101,7 +4095,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                respuesta = NegForeCast.ConsultaSp_RTAListaForeCastDescargarPersonalizado(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio, IdPrioProyecto,ProyecEstrategico);
+                respuesta = NegForeCast.ConsultaSp_RTAListaForeCastDescargarPersonalizado(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico);
 
                 try
                 {
@@ -3474,7 +4468,7 @@ namespace JsonJQueryNetTareas
             int Anio = Convert.ToInt32(parameters["anio"].ToString());
             try
             {
-                Lista = NegReporteGe.ConsultaSp_RTAConsultarForeCast(Anio,0);
+                Lista = NegReporteGe.ConsultaSp_RTAConsultarForeCast(Anio, 0);
             }
             catch (Exception ex)
             {
@@ -3498,6 +4492,9 @@ namespace JsonJQueryNetTareas
             int idForeCast = Convert.ToInt32(parameters["idForeCast"].ToString());
             string FechaFacturacion = parameters["FechaFacturacion"].ToString();
             string MesEstimadoCierre = parameters["MesEstimadoCierre"].ToString();
+
+            string semana = parameters["Semana"].ToString();
+
             int IdCliente = Convert.ToInt32(parameters["IdCliente"].ToString());
             int IdGerenteCuenta = Convert.ToInt32(parameters["IdGerenteCuenta"].ToString());
 
@@ -3534,11 +4531,11 @@ namespace JsonJQueryNetTareas
             string sucursal = "";
             if (parameters["sucursal"].ToString() == "SELECCIONAR SUCURSAL" || parameters["sucursal"].ToString() == "null")
             {
-                 sucursal = "";
+                sucursal = "";
             }
             else
             {
-                 sucursal = parameters["sucursal"].ToString();
+                sucursal = parameters["sucursal"].ToString();
             }
 
             string cierrenegocio = "";
@@ -3558,7 +4555,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                Lista = NegForeCast.ConsultaSp_RTAListaForeCast(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio,IdPrioProyecto,ProyecEstrategico, TipoProyecto);
+                Lista = NegForeCast.ConsultaSp_RTAListaForeCast(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, Marca, sucursal, SegmentodeMercado, StrIdPrioridad, IdUsuarioSession, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto, semana);
             }
             catch (Exception ex)
             {
@@ -3860,7 +4857,7 @@ namespace JsonJQueryNetTareas
 
             try
             {
-                Lista = NegInventario .RTA_ConsultaInventarioLike(tipo, descripcion);
+                Lista = NegInventario.RTA_ConsultaInventarioLike(tipo, descripcion);
             }
             catch (Exception ex)
             {
@@ -4543,7 +5540,7 @@ namespace JsonJQueryNetTareas
 
             string fechaDesde = parameters["fechaDesde"].ToString();
             string fechaHasta = parameters["fechaHasta"].ToString();
-            int idtipo =Convert.ToInt32 ( parameters["idtipo"].ToString());
+            int idtipo = Convert.ToInt32(parameters["idtipo"].ToString());
 
             string rutaCarpetaDescargas = "";
             string nombreArchivo = "";
@@ -4624,7 +5621,7 @@ namespace JsonJQueryNetTareas
                 IdUsuarioSession = seguridad.Desencripta(session.ToString());
                 idTipoCatalogo = Convert.ToInt32(parameters["catalogo"].ToString());
 
-                cmbElementosCatalogo = NegTareas.ListaCatalogoCombo(idTipoCatalogo); 
+                cmbElementosCatalogo = NegTareas.ListaCatalogoCombo(idTipoCatalogo);
             }
             catch (Exception ex)
             {
@@ -4719,9 +5716,9 @@ namespace JsonJQueryNetTareas
             try
             {
                 idEstado = Convert.ToInt32(parameters["idTarea"].ToString());
-                IdProyecto= Convert.ToInt32(parameters["idProyeto"].ToString());
+                IdProyecto = Convert.ToInt32(parameters["idProyeto"].ToString());
 
-                cmbEstados = NegTareas.ListaEstadosCombo(idEstado, IdProyecto); 
+                cmbEstados = NegTareas.ListaEstadosCombo(idEstado, IdProyecto);
             }
             catch (Exception ex)
             {
@@ -4738,6 +5735,9 @@ namespace JsonJQueryNetTareas
             List<EntCombo> cmbEstados = new List<EntCombo>();
             SeguridadHelper seguridad = new SeguridadHelper();
             string session = parameters["session"].ToString();
+            string mes = "";
+            try { mes = parameters["Mes"].ToString(); } catch { }
+
             string IdUsuarioSession = "";
             try
             {
@@ -4751,7 +5751,7 @@ namespace JsonJQueryNetTareas
                 }
                 else
                 {
-                    if(parameters["IdSucursal"].ToString()=="null")
+                    if (parameters["IdSucursal"].ToString() == "null")
                     {
                         IdSucursal = 0;
                     }
@@ -4762,7 +5762,7 @@ namespace JsonJQueryNetTareas
                 }
                 int IdCliente = Convert.ToInt32(parameters["IdCliente"].ToString());
 
-                cmbEstados = NegContrato.RTAListaComboContrato(Tipo, IdUsuarioSession, IdSucursal, IdCliente, IdSucursalGerente);
+                cmbEstados = NegContrato.RTAListaComboContrato(Tipo, IdUsuarioSession, IdSucursal, IdCliente, IdSucursalGerente, mes);
             }
             catch (Exception ex)
             {
@@ -4805,7 +5805,7 @@ namespace JsonJQueryNetTareas
             //int diaSemana = (int) dtFechaMinima.DayOfWeek;
             //diaSemanaMasMenosFecha = (diaSemana + 7) * - 1;
 
-            diasBloqueoEditarTarea = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("DIAS_BLOQUEO_EDITAR_TAREA"); 
+            diasBloqueoEditarTarea = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("DIAS_BLOQUEO_EDITAR_TAREA");
 
             diaSemanaMasMenosFecha = Convert.ToInt32(diasBloqueoEditarTarea);
             dtFechaMinima = dtFechaMinima.AddDays(diaSemanaMasMenosFecha);
@@ -4857,7 +5857,7 @@ namespace JsonJQueryNetTareas
             string idUsuario = parameters["usuario"].ToString();
             string fechaDesde = parameters["fechaDesde"].ToString();
             string fechaHasta = parameters["fechaHasta"].ToString();
-            string session = parameters["session"].ToString(); 
+            string session = parameters["session"].ToString();
 
             string rutaCarpetaDescargas = "";
             string nombreArchivo = "";
@@ -4919,7 +5919,7 @@ namespace JsonJQueryNetTareas
                     foreach (DataColumn column in dtResultados.Columns)
                     {
                         worksheet.Cell(1, numeroColumna).Value = column.ColumnName;
-                        worksheet.Columns(1, numeroColumna).Width=20;
+                        worksheet.Columns(1, numeroColumna).Width = 20;
                         worksheet.Rows(1, numeroColumna).AdjustToContents();
                         numeroColumna += 1;
                     }
@@ -4946,7 +5946,7 @@ namespace JsonJQueryNetTareas
 
             urlDescargas = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_DESCARGAS");
 
-            return responseMessage("1", urlDescargas + nombreArchivo, "success", ""); 
+            return responseMessage("1", urlDescargas + nombreArchivo, "success", "");
 
         }
 
@@ -5102,7 +6102,7 @@ namespace JsonJQueryNetTareas
             }
             catch (Exception ex)
             {
-                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger","");
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
 
             }
 
@@ -5119,7 +6119,7 @@ namespace JsonJQueryNetTareas
             string session = campos["session"].ToString();
             string IdUsuarioSession = "";
             IdUsuarioSession = seguridad.Desencripta(session.ToString());
-            int tipo =0;
+            int tipo = 0;
             int idVacaciones = Convert.ToInt32(campos["IdVacaciones"].ToString());
             try
             {
@@ -5168,7 +6168,7 @@ namespace JsonJQueryNetTareas
                 registro.TotalDias = Convert.ToDouble(0);
                 registro.Feriado = Convert.ToDouble(0);
                 registro.SaldoDias = Convert.ToDouble(0);
-                registro.CargoVacaciones = Convert.ToInt32(campos["IdSI"]); 
+                registro.CargoVacaciones = Convert.ToInt32(campos["IdSI"]);
                 registro.Horas = campos["frmTxtTiempoP"];
                 registro.Actividad = campos["txtActividadP"];
                 registro.Observacion = campos["frmTxtObservacionesP"];
@@ -5182,6 +6182,21 @@ namespace JsonJQueryNetTareas
                 TipoProceso = registro.Tipo;
                 respuesta = NegSolicitud.RTA_InsertaNuevaSolicitud(registro);
 
+                /* Tipo de permiso y detalle de teletrabajo, después del alta y por
+                   su propio camino: el insert lo hace un procedimiento que también
+                   actualiza, aprueba y rechaza, y no conviene ampliarlo.
+
+                   Solo en el alta (Tipo 0). En una actualización el detalle se
+                   guarda desde la pantalla, no acá. */
+                if (respuesta.estado == "1" && TipoProceso == 0)
+                {
+                    GuardarDetalleDelPermiso(campos, respuesta.resultado);
+
+                    /* Y la firma, por lo mismo que en Vacaciones: al enviar todavía
+                       no existe el IdVacaciones, lo genera este insert. */
+                    GuardarFirmaDelColaborador(HttpContext.Current, campos, respuesta.resultado, IdUsuarioSession);
+                }
+
                 #region Envio Mail
                 if (respuesta.estado == "1")
                 {
@@ -5192,12 +6207,12 @@ namespace JsonJQueryNetTareas
                     string IdSolicitud = "";
                     if (TipoProceso == 0)
                     {
-                       IdSolicitud = respuesta.resultado.ToString();
+                        IdSolicitud = respuesta.resultado.ToString();
                     }
                     else if (TipoProceso == 1)
                     {
                         IdSolicitud = campos["IdVacaciones"];
-                    }                     
+                    }
                     EntSolicitud Lista = new EntSolicitud();
                     List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
                     int tipo = 0;
@@ -5320,11 +6335,24 @@ namespace JsonJQueryNetTareas
                 registro.FechaAprobacion = "";
                 registro.FechaRechazo = "";
                 registro.UsuarioAprobo = "";
-                registro.UsuarioRechazo ="";
+                registro.UsuarioRechazo = "";
                 registro.Cod_Usuario = IdUsuarioSession;
                 registro.Tipo = Convert.ToInt32(campos["tipo"]);
                 TipoProceso = registro.Tipo;
                 respuesta = NegSolicitud.RTA_InsertaNuevaSolicitud(registro);
+
+                /* La firma del colaborador se registra acá y no desde el navegador
+                   porque al enviar todavía no existe el IdVacaciones: lo genera
+                   este insert. Mandar el trazo junto con la solicitud evita un
+                   segundo viaje para pedir el id, y con él la ventana en la que la
+                   solicitud quedaría creada y sin firmar.
+
+                   Solo en el alta (Tipo 0): una actualización no vuelve a firmar.
+                   El bloque de Permisos hace el mismo llamado. */
+                if (respuesta.estado == "1" && TipoProceso == 0)
+                {
+                    GuardarFirmaDelColaborador(HttpContext.Current, campos, respuesta.resultado, IdUsuarioSession);
+                }
 
                 #region Envio Mail
                 if (respuesta.estado == "1")
@@ -5338,7 +6366,7 @@ namespace JsonJQueryNetTareas
                     {
                         IdSolicitud = respuesta.resultado.ToString();
                     }
-                    else if (TipoProceso == 1)
+                    else if (TipoProceso == 1 || TipoProceso == 5)
                     {
                         IdSolicitud = campos["IdVacaciones"];
                     }
@@ -5346,7 +6374,7 @@ namespace JsonJQueryNetTareas
                     List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
                     int tipo = 0;
                     EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
-                    Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(tipo,Convert.ToInt32(IdSolicitud));
+                    Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(tipo, Convert.ToInt32(IdSolicitud));
 
 
                     // Se encripta los parametros de aprobación y rechazo para enviar en la url de aprobación.
@@ -5409,7 +6437,7 @@ namespace JsonJQueryNetTareas
                     bool respuestaEnvioCorreoUsuario = false;
                     if (tipoSolicitud == 2)
                     {
-                        if (TipoProceso == 0)
+                        if (TipoProceso == 0 || TipoProceso == 5)
                         {
                             respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
                         }
@@ -5446,7 +6474,7 @@ namespace JsonJQueryNetTareas
 
         }
 
-        public string EnviarCorreo(int IdVacaciones,string IdUsuarioSession, string Cod_Usuario,string  tipoSolicitud,string EstadoSolicitud)
+        public string EnviarCorreo(int IdVacaciones, string IdUsuarioSession, string Cod_Usuario, string tipoSolicitud, string EstadoSolicitud)
         {
             string respuestaProceso = "";
 
@@ -5545,6 +6573,119 @@ namespace JsonJQueryNetTareas
             }
 
             return respuestaProceso;
+        }
+
+        public string ConsultaBiometria(dynamic campos)
+        {
+            List<EntRegistroBiometrico> Lista = null;
+            EntRespuesta respuesta = new EntRespuesta();
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntUsuario usuario = new EntUsuario();
+            string IdUsuarioSession = "";
+            IdUsuarioSession = seguridad.Desencripta(campos["session"]);
+            usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
+
+            int Id_Usuario = Convert.ToInt32(usuario.Id_Usuario);
+            DateTime ahora = DateTime.Now;
+            DateTime FechaRegistro = Convert.ToDateTime(ahora);
+
+            try
+            {
+                Lista = NegForeCast.Sp_RTAConsultaBiometria(Id_Usuario, FechaRegistro);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
+            }
+
+            return Lista.SerializaToJson();
+        }
+
+        /// <summary>
+        /// CAMINO VIEJO DE MARCACIÓN — CERRADO.
+        ///
+        /// Registraba la entrada/salida sin enviar el correo de confirmación y sin
+        /// distinguir qué botón se presionó. Fue reemplazado por
+        /// AdministrarMarcacion.ashx (acción RegistrarMarcacion).
+        ///
+        /// Sigue existiendo porque un navegador con RegistroLaboral.js cacheado de
+        /// antes del despliegue todavía puede llamarlo. En ese caso NO se registra la
+        /// marcación: se devuelve un mensaje que obliga a recargar la página, porque
+        /// grabar por aquí significaba que el usuario nunca recibiera su correo.
+        /// </summary>
+        public string RegistrarEvento(dynamic campos)
+        {
+            return responseMessage("0",
+                "Su navegador está usando una versión anterior del sistema y su marcación no fue registrada. " +
+                "Presione Ctrl+F5 para recargar la página y vuelva a marcar.",
+                "warning", "");
+        }
+
+        public string RegistrarEvento3(dynamic campos)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+            EntUsuario usuario = new EntUsuario();
+            string IdUsuarioSession = "";
+            IdUsuarioSession = campos["Usuario"];
+            usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
+            try
+            {
+                DateTime ahora = DateTime.Now;
+                EntActividad actividad = new EntActividad();
+                actividad.IdProceso = Convert.ToInt32(campos["IdProceso"]);
+                actividad.FechaInicio = Convert.ToDateTime(campos["FechaEntrada"]);
+                actividad.FechaFinal = Convert.ToDateTime(campos["FechaSalida"]);
+                actividad.FechaLimite = Convert.ToDateTime(campos["FechaSalidaAct"]);
+                actividad.Observacion = Convert.ToString(campos["Observacion"]);
+                actividad.Estado = Convert.ToInt32(campos["Estado"]);
+                actividad.Tipo = Convert.ToInt32(campos["Tipo"]);
+                respuesta = NegForeCast.InsertarModificarEliminarRegistroActividad(actividad);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+
+            }
+
+            return respuesta.SerializaToJson();
+
+        }
+
+        public string RegistrarEvento2(dynamic campos)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+            EntRespuesta respuesta = new EntRespuesta();
+            EntUsuario usuario = new EntUsuario();
+            string IdUsuarioSession = "";
+            IdUsuarioSession = campos["Usuario"];
+            usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
+            try
+            {
+                DateTime ahora = DateTime.Now;
+                EntRegistroBiometrico biometrico = new EntRegistroBiometrico();
+                biometrico.IdProceso = Convert.ToInt32(campos["IdProceso"]);
+                biometrico.Id_Usuario = Convert.ToDecimal(usuario.Id_Usuario);
+                biometrico.FechaEntrada = Convert.ToDateTime(campos["FechaEntrada"]);
+                biometrico.FechaAlmorzar = Convert.ToDateTime("1900-01-01");
+                biometrico.FechaRegAlmorzar = Convert.ToDateTime("1900-01-01");
+                biometrico.FechaSalida = Convert.ToDateTime(campos["FechaSalida"]);
+                biometrico.FechaRegistro = Convert.ToDateTime(ahora);
+                biometrico.Observacion = Convert.ToString(campos["Observacion"]);
+                biometrico.Estado = 1;
+                biometrico.Tipo = 2;
+                respuesta = NegForeCast.InsertarModificarEliminarRegistroBiometrico(biometrico);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
+
+            }
+
+            return respuesta.SerializaToJson();
+
         }
 
         public string ActualizarSolicitudBase(dynamic campos)
@@ -5679,32 +6820,32 @@ namespace JsonJQueryNetTareas
 
                 //if (CodigoSeguridad == usuario.CodigoReset)
                 //{
-                    if (Password == ConfirmarPassword)
+                if (Password == ConfirmarPassword)
+                {
+                    ServerAD = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("SERVERAD");
+                    DominioAD = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("DOMINIOAD");
+                    if (ServerAD != "" && DominioAD != "")
                     {
-                        ServerAD = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("SERVERAD");
-                        DominioAD = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("DOMINIOAD");
-                        if (ServerAD != "" && DominioAD != "")
+                        ReporteTareas.AD.ActualizarCuentaAD actualizarCuenta = new ReporteTareas.AD.ActualizarCuentaAD();
+                        string respuestaAD = "";
+                        respuestaAD = actualizarCuenta.CambiarContrasenia(ServerAD, DominioAD, Usuario, Password, ConfirmarPassword, ConfirmarPassword, 2);
+                        if (respuestaAD == "Contraseña actualizada.")
                         {
-                            ReporteTareas.AD.ActualizarCuentaAD actualizarCuenta = new ReporteTareas.AD.ActualizarCuentaAD();
-                            string respuestaAD = "";
-                            respuestaAD = actualizarCuenta.CambiarContrasenia(ServerAD, DominioAD, Usuario, Password, ConfirmarPassword, ConfirmarPassword, 2);
-                            if (respuestaAD == "Contraseña actualizada.")
-                            {
-                                respuesta.estado = "1";
-                                respuesta.mensaje = respuestaAD;
-                            }
-                            else
-                            {
-                                respuesta.estado = "0";
-                                respuesta.mensaje = "La Contraseña debe incluir caracteres de complejidad, es decir letras mayúsculas, minúsculas, número y caracteres especiales";
-                            }
+                            respuesta.estado = "1";
+                            respuesta.mensaje = respuestaAD;
+                        }
+                        else
+                        {
+                            respuesta.estado = "0";
+                            respuesta.mensaje = "La Contraseña debe incluir caracteres de complejidad, es decir letras mayúsculas, minúsculas, número y caracteres especiales";
                         }
                     }
-                    else
-                    {
-                        respuesta.estado = "0";
-                        respuesta.mensaje = "No coiciden las claves por favor corregir";
-                    }
+                }
+                else
+                {
+                    respuesta.estado = "0";
+                    respuesta.mensaje = "No coiciden las claves por favor corregir";
+                }
                 //}
                 //else
                 //{
@@ -5896,13 +7037,13 @@ namespace JsonJQueryNetTareas
                 EntMensajeForeCast registro = new EntMensajeForeCast();
 
                 registro.IdMensaje = 0;
-                registro.IdForeCast = Convert.ToInt32(campos["IdForeCast"]);         
-                registro.Mensaje = campos["Mensaje"];        
-                registro.Usuario = usuario.Nom_Usuario;              
+                registro.IdForeCast = Convert.ToInt32(campos["IdForeCast"]);
+                registro.Mensaje = campos["Mensaje"];
+                registro.Usuario = usuario.Nom_Usuario;
                 registro.Tipo = Convert.ToInt32(campos["Tipo"]);
 
                 respuesta = NegMensajeForeCast.RTAInsertaNuevaMensajeForeCast(registro);
-                if(respuesta.estado == "1")
+                if (respuesta.estado == "1")
                 {
                     if (campos["IdEmpleado"] != "0")
                     {
@@ -6002,12 +7143,12 @@ namespace JsonJQueryNetTareas
             ReporteTareas.clases.GenerarXml generar = new ReporteTareas.clases.GenerarXml();
             try
             {
-                EntEgresoInventario  registro = new EntEgresoInventario();
+                EntEgresoInventario registro = new EntEgresoInventario();
 
                 registro.IdEncabezado = 0;
                 registro.IdCliente = Convert.ToInt32(campos["idCliente"]);
                 registro.Cod_Usuario = usuario.Log_Usuario;
-                registro.FechaRegistro = Convert.ToDateTime ( campos["txtFechaActual"]);
+                registro.FechaRegistro = Convert.ToDateTime(campos["txtFechaActual"]);
                 registro.CantidadComprada = 0;
                 registro.SubTotal = Convert.ToDouble(campos["totalEgreso"]);
                 registro.Iva = 0;
@@ -6018,9 +7159,9 @@ namespace JsonJQueryNetTareas
                 registro.Estado = 1;
                 respuesta = NegEgresoInventario.RTAInsertaNuevoEgresoInventario(registro);
 
-                if(respuesta.resultado != "0")
+                if (respuesta.resultado != "0")
                 {
-                    IdEncabezado= Convert.ToInt32(respuesta.resultado);
+                    IdEncabezado = Convert.ToInt32(respuesta.resultado);
                     registro.IdEncabezado = Convert.ToInt32(respuesta.resultado);
                     registro.IdDetalle = 0;
                     string[] listas = campos["detalle"].Split('↨');
@@ -6030,8 +7171,8 @@ namespace JsonJQueryNetTareas
                         {
                             string[] lista = r.Split(';');
                             string[] lista2 = lista[0].Split('à');
-                            registro .IdInventario = Convert.ToInt32(lista2[0].ToString());
-                            registro.Cantidad =Convert.ToDouble (lista[1].ToString().Replace(".", ","));
+                            registro.IdInventario = Convert.ToInt32(lista2[0].ToString());
+                            registro.Cantidad = Convert.ToDouble(lista[1].ToString().Replace(".", ","));
                             registro.PrecioUnitario = Convert.ToDouble(lista[3].ToString().Replace(".", ","));
                             registro.PrecioTotal = 0;
                             registro.Tipo = 1;
@@ -6086,19 +7227,19 @@ namespace JsonJQueryNetTareas
             usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
             try
             {
-                EntInventario  registro = new EntInventario();
+                EntInventario registro = new EntInventario();
 
                 registro.IdInventario = Convert.ToInt32(campos["IdInventario"]);
                 registro.IdMarca = Convert.ToInt32(campos["IdMarca"]);
                 registro.CodigoSAP = campos["txtCodigoSap"];
                 registro.NumParte = campos["txtNumParte"];
-                registro.Descripcion  = campos["txtDescripcion"];
+                registro.Descripcion = campos["txtDescripcion"];
                 registro.Cantidad = Convert.ToDouble(campos["txtCantidad"].ToString());
                 registro.Ubicacion = campos["txtUbicacion"];
                 registro.Almacen = campos["txtAlmacen"];
                 registro.NumSerie = campos["txtNumSerie"];
                 registro.PrecioUnitario = Convert.ToDouble(campos["txtPrecioUnitario"].ToString());
-                registro.Usuario  = usuario.Log_Usuario;
+                registro.Usuario = usuario.Log_Usuario;
                 registro.Estado = 1;
                 registro.Tipo = Convert.ToInt32(campos["Tipo"]);
                 respuesta = NegInventario.RTAInsertaNuevoInventario(registro);
@@ -6124,9 +7265,9 @@ namespace JsonJQueryNetTareas
             usuario = NegUsuario.RTAConsultaUsuarioPorCodigo(IdUsuarioSession);
             try
             {
-                EntCosteoServicio  registro = new EntCosteoServicio();
+                EntCosteoServicio registro = new EntCosteoServicio();
 
-                registro.IdCosteo  = Convert.ToInt32(campos["IdCosteo"]);
+                registro.IdCosteo = Convert.ToInt32(campos["IdCosteo"]);
                 registro.Ticket = campos["txtTicket"];
                 registro.FechaSolicitud = campos["txtFechaSolicitud"];
                 registro.FechaActual = campos["txtFechaActual"];
@@ -6223,7 +7364,7 @@ namespace JsonJQueryNetTareas
 
                 EntRebates registro = new EntRebates();
                 registro.DescripcionB = campos["txtRegistroBanco"];
-                registro.ValorB =campos["txtPorcentaje"];
+                registro.ValorB = campos["txtPorcentaje"];
                 registro.FechaIngreso = fecha.ToString();
                 registro.Tipo = Convert.ToInt32(campos["Tipo"]);
                 registro.IdBanco = Convert.ToInt32(campos["IdBanco"]);
@@ -6373,7 +7514,7 @@ namespace JsonJQueryNetTareas
             {
                 EntCuotaAnual registro = new EntCuotaAnual();
                 string DatosGuardar = campos["resultadoDatos"];
-                DatosGuardar = DatosGuardar.Replace("$ ", "").Replace("-",";");
+                DatosGuardar = DatosGuardar.Replace("$ ", "").Replace("-", ";");
                 string[] listasCuotas = DatosGuardar.Split('↨');
                 string fecha;
                 fecha = DateTime.Now.ToString("dd/MM/yyyy");
@@ -6432,7 +7573,7 @@ namespace JsonJQueryNetTareas
 
                 //registro.Tipo = Convert.ToInt32(campos["Tipo"]);
 
-                    //respuesta = NegPedido.RTA_InsertaNuevoClientes(registro);
+                //respuesta = NegPedido.RTA_InsertaNuevoClientes(registro);
             }
             catch (Exception ex)
             {
@@ -6468,7 +7609,7 @@ namespace JsonJQueryNetTareas
                         string[] lista = r.Split(';');
                         if (lista.Count() == 5)
                         {
-                            if(lista[0].ToString()=="")
+                            if (lista[0].ToString() == "")
                             {
                                 registro.IdMetas = 0;
                             }
@@ -6561,7 +7702,7 @@ namespace JsonJQueryNetTareas
                 registro.IdRequerimiento = Convert.ToInt32(campos["IdRequerimiento"]);
                 registro.Tipo = Convert.ToInt32(campos["Tipo"]);
                 registro.FechIngreso = fecha;
-              
+
 
                 respuesta = NegMantenimiento.RTA_InsertaNuevoMantenimiento(registro);
             }
@@ -6599,7 +7740,7 @@ namespace JsonJQueryNetTareas
                 objTarea.Categoria = campos["cboCategoria"];
                 objTarea.SubCategoria = "";
                 objTarea.EstadoApro = "";
-                respuesta = NegTareas.RTA_CreaTareas2(objTarea); 
+                respuesta = NegTareas.RTA_CreaTareas2(objTarea);
             }
             catch (Exception ex)
             {
@@ -7287,7 +8428,6 @@ namespace JsonJQueryNetTareas
         }
 
 
-
         public string GuardarNuevaHistoria(dynamic campos)
         {
             SeguridadHelper seguridad = new SeguridadHelper();
@@ -7308,6 +8448,9 @@ namespace JsonJQueryNetTareas
                 respuesta = NegEmpleado.Sp_InsertarActualizarEmpleado(registro);*/
 
                 // Creamos variables con los mismos nombres de las etiquetas en el formulario de Excel
+                string sociedad = "";
+                string numhistoria = "";
+                string numarchivo = "";
                 string primerNombre = "";
                 string segundoNombre = "";
                 string primerApellido = "";
@@ -7338,10 +8481,19 @@ namespace JsonJQueryNetTareas
                 string discapacidadno = "";
                 string discapacidadtipo = "";
                 string discapacidadporcentaje = "";
-                string fechaingresotrabajo = "";
+                string txtfechaIng = "";
                 string puestotrabajo = "";
                 string areatrabajo = "";
                 string actividadesrelevantes = "";
+
+                string fechaUltimoDia = "";
+                string txtTotalDias = "";
+                string fechaReintegro = "";
+                string txtCausaSalida = "";
+
+                string fechaInicioLab = "";
+                string fechaSalida = "";
+                string txtTotalMeses = "";
 
                 string motivoconsulta = "";
                 string antpersonales = "";
@@ -7475,13 +8627,30 @@ namespace JsonJQueryNetTareas
                 string antriesgopsicosocial4 = "";
                 string antobservaciones4 = "";
 
+                string antFam1 = "";
+                string antFam2 = "";
+                string antFam3 = "";
+                string antFam4 = "";
+                string antFam5 = "";
+                string antFam6 = "";
+                string antFam7 = "";
+                string antFam8 = "";
+
+                string HbtsIncidentes = "";
+
                 string accidentestrabajoSi = "";
                 string accidentestrabajoNo = "";
                 string especificaracctrabajo = "";
+                string accTrabAnio = "";
+                string accTrabMes = "";
+                string accTrabDia = "";
                 string acctrabajoobservaciones = "";
                 string enfermedadesprofSi = "";
                 string enfermedadesprofNo = "";
                 string especificarenfermedadesprof = "";
+                string enfProfAnio = "";
+                string enfProfMes = "";
+                string enfProfDia = "";
                 string enfermedadesprofobservaciones = "";
 
                 string factoresriesgopuestotrabajo1 = "";
@@ -7770,6 +8939,7 @@ namespace JsonJQueryNetTareas
                 string aptitudNoapto = "";
                 string aptitudObservacionDesc = "";
                 string aptitudLimitacionDesc = "";
+                string aptitudReubicacionDesc = "";
                 string descRecomendaciones = "";
 
                 string primerNombreDoc = "";
@@ -7800,6 +8970,8 @@ namespace JsonJQueryNetTareas
                 string relacionNo = "";
                 string relacionNoAplica = "";
 
+                string fechaFormulario = "";
+                string horaFormulario = "";
                 string aptitudAptoDesc = "";
 
                 string descAptitud = "";
@@ -7807,6 +8979,8 @@ namespace JsonJQueryNetTareas
 
                 var info = new DataTable();
 
+                numhistoria = campos["txtNumHistoria"];
+                numarchivo = campos["txtNumArchivo"];
 
                 // Guardamos los datos obtenidos del JSON generado en Departamento.js y los guardamos en las variables previamente creadas.
                 var nombreCompleto = campos["txtNombre"];
@@ -7828,7 +9002,10 @@ namespace JsonJQueryNetTareas
                 {
                     sexo = "M";
                 }
-
+                if (campos["formulario"] == "4")
+                {
+                    puestotrabajo = campos["txtPuestoTrabajo"];
+                }
                 if (campos["formulario"] == "5")
                 {
                     puestotrabajo = campos["txtPuestoTrabajo"];
@@ -7939,6 +9116,35 @@ namespace JsonJQueryNetTareas
                 }
                 discapacidadtipo = campos["txtTipoDiscapacidad"];
                 discapacidadporcentaje = campos["txtPorcentajeDiscapacidad"];
+                if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+                {
+                    puestotrabajo = campos["txtPuestoTrabajo"];
+                    if (campos["formulario"] == "1")
+                    {
+                        actividadesrelevantes = campos["txtActRelevantes"];
+                        txtfechaIng = campos["txtfechaIng"];
+                        if (DateTime.TryParse(txtfechaIng, out DateTime fecha))
+                        {
+                            // Formatear la fecha en aaaa/mm/dd
+                            txtfechaIng = fecha.ToString("yyyy/MM/dd");
+                        }
+                    }
+                    if (campos["formulario"] == "3")
+                    {
+                        fechaUltimoDia = campos["fechaUltimoDia"];
+                        txtTotalDias = campos["txtTotalDias"];
+                        fechaReintegro = campos["fechaReintegro"];
+                        txtCausaSalida = campos["txtCausaSalida"];
+                    }
+                }
+
+                if (campos["formulario"] == "4")
+                {
+                    fechaInicioLab = campos["fechaInicioLab"];
+                    fechaSalida = campos["fechaSalida"];
+                    txtTotalMeses = campos["txtTotalMeses"];
+
+                }
                 motivoconsulta = campos["txtMotivoConsulta"];
                 antpersonales = campos["txtAntecedentesPersonales"];
                 menarquia = campos["txtMenarquia"];
@@ -8076,6 +9282,7 @@ namespace JsonJQueryNetTareas
                 otrasdrogasCantidad = campos["txtCantidadOtra"];
                 otrasdrogasExconsumidor = campos["exConsumidorSelectOtra"];
                 otrasdrogasTiempoabst = campos["txtTiempoAbstinenciaOtra"];
+                HbtsIncidentes = campos["txtHbtsIncidentes"];
                 if (campos["txtActividadFisiscaSelect"] == "si")
                 {
                     actividadfisicaSi = "X";
@@ -8231,6 +9438,12 @@ namespace JsonJQueryNetTareas
                     accidentestrabajoNo = "X";
                 }
                 especificaracctrabajo = campos["txtEspecificarAccidentesTrabajoSelect"];
+
+                accTrabAnio = campos["txtfechaAccTrabAnio"];
+                accTrabMes = campos["txtfechaAccTrabMes"];
+                accTrabDia = campos["txtfechaAccTrabDia"];
+
+
                 acctrabajoobservaciones = campos["txtObservacionesAccTrabajo"];
                 if (campos["EnfermedadesProfSelect"] == "si")
                 {
@@ -8241,7 +9454,46 @@ namespace JsonJQueryNetTareas
                     enfermedadesprofNo = "X";
                 }
                 especificarenfermedadesprof = campos["txtEspecificarEnfermedadesProfSelect"];
+                enfProfAnio = campos["txtfechaEnfProfAnio"];
+                enfProfMes = campos["txtfechaEnfProfMes"];
+                enfProfDia = campos["txtfechaEnfProfDia"];
                 enfermedadesprofobservaciones = campos["txtObservacionesEnfermedadesProf"];
+
+                if (campos["formulario"] == "1" || campos["formulario"] == "2")
+                {
+                    if (campos["AntFamA"] == true)
+                    {
+                        antFam1 = "X";
+                    }
+                    if (campos["AntFamB"] == true)
+                    {
+                        antFam2 = "X";
+                    }
+                    if (campos["AntFamC"] == true)
+                    {
+                        antFam3 = "X";
+                    }
+                    if (campos["AntFamD"] == true)
+                    {
+                        antFam4 = "X";
+                    }
+                    if (campos["AntFamE"] == true)
+                    {
+                        antFam5 = "X";
+                    }
+                    if (campos["AntFamF"] == true)
+                    {
+                        antFam6 = "X";
+                    }
+                    if (campos["AntFamG"] == true)
+                    {
+                        antFam7 = "X";
+                    }
+                    if (campos["AntFamH"] == true)
+                    {
+                        antFam8 = "X";
+                    }
+                }
 
                 antfamiliares = campos["txtAntecedentesFamiliares"];
                 actextralaborales = campos["txtActividadesExtraLaborales"];
@@ -8416,7 +9668,7 @@ namespace JsonJQueryNetTareas
 
                 switch (campos["txtPSicosocialSelect1"])
                 {
-                    case "MonotoniaTrabajo ":
+                    case "MonotoniaTrabajo":
                         psicosocialmonotonia1 = "X";
                         break;
                     case "SobrecargaLaboral":
@@ -8883,40 +10135,48 @@ namespace JsonJQueryNetTareas
                 }
                 medidaspreventivas3 = campos["txtMedidadPreventiva3"];
 
-                switch (campos["txtPatologia"])
+                if (campos["formulario"] == "1" || campos["formulario"] == "2")
                 {
-                    case "1":
+                    if (campos["RevicionA"] == true)
+                    {
                         revisionpiel = "X";
-                        break;
-                    case "2":
+                    }
+                    if (campos["RevicionB"] == true)
+                    {
                         revisionsentidos = "X";
-                        break;
-                    case "3":
+                    }
+                    if (campos["RevicionC"] == true)
+                    {
                         revisionrespiratorio = "X";
-                        break;
-                    case "4":
+                    }
+                    if (campos["RevicionD"] == true)
+                    {
                         revisioncardio = "X";
-                        break;
-                    case "5":
+                    }
+                    if (campos["RevicionE"] == true)
+                    {
                         revisiondigestivo = "X";
-                        break;
-                    case "6":
+                    }
+                    if (campos["RevicionF"] == true)
+                    {
                         revisiongenito = "X";
-                        break;
-                    case "7":
+                    }
+                    if (campos["RevicionG"] == true)
+                    {
                         revisionmusculo = "X";
-                        break;
-                    case "8":
+                    }
+                    if (campos["RevicionH"] == true)
+                    {
                         revisionendocrino = "X";
-                        break;
-                    case "9":
+                    }
+                    if (campos["RevicionI"] == true)
+                    {
                         revisionhemo = "X";
-                        break;
-                    case "10":
+                    }
+                    if (campos["RevicionJ"] == true)
+                    {
                         revisionnervioso = "X";
-                        break;
-                    default:
-                        break;
+                    }
                 }
 
                 revisionorganosdescripcion = campos["txtRevisionOrganos"];
@@ -9175,7 +10435,10 @@ namespace JsonJQueryNetTareas
                 aptitudObservacionDesc = campos["txtDescObservacion"];
                 aptitudLimitacionDesc = campos["txtDescLimitacion"];
 
-
+                if (campos["formulario"] == "3")
+                {
+                    aptitudReubicacionDesc = campos["txtDescReubicacion"];
+                }
                 if (campos["formulario"] == "4")
                 {
                     actividades1 = campos["actividades1"];
@@ -9198,24 +10461,24 @@ namespace JsonJQueryNetTareas
 
                 if (campos["formulario"] == "5")
                 {
-                    aptitudAptoDesc = campos["txtDescAptitud"];
+                    descAptitud = campos["txtDescAptitud"];
                     switch (campos["txtAptitudSelect"])
                     {
                         case "apto":
                             aptitudApto = "X";
-                            descAptitud = aptitudAptoDesc;
+                            //descAptitud = aptitudAptoDesc;
                             break;
                         case "aptoObservacion":
                             aptitudObservacion = "X";
-                            descAptitud = aptitudObservacionDesc;
+                            //descAptitud = aptitudObservacionDesc;
                             break;
                         case "aptoLimitacion":
                             aptitudLimitaciones = "X";
-                            descAptitud = aptitudLimitacionDesc;
+                            //descAptitud = aptitudLimitacionDesc;
                             break;
                         case "noApto":
                             aptitudNoapto = "X";
-                            descAptitud = aptitudAptoDesc;
+                            //descAptitud = aptitudAptoDesc;
                             break;
                         default:
                             break;
@@ -9261,6 +10524,15 @@ namespace JsonJQueryNetTareas
                             break;
                     }
                 }
+                if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
+                {
+                    fechaFormulario = campos["txtfechaFormulario"];
+                    if (DateTime.TryParse(fechaFormulario, out DateTime fecha))
+                    {
+                        fechaFormulario = fecha.ToString("yyyy/MM/dd");
+                    }
+                    horaFormulario = campos["txthoraFormulario"];
+                }
                 descRecomendaciones = campos["txtRecomendacion"];
 
 
@@ -9287,6 +10559,10 @@ namespace JsonJQueryNetTareas
                     info.Columns.Add("segundonombre");
                     info.Columns.Add("sexo");
 
+                    if (campos["formulario"] == "5")
+                    {
+                        info.Columns.Add("puestotrabajo");
+                    }
                     if (campos["formulario"] == "1" || campos["formulario"] == "3")
                     {
                         info.Columns.Add("edad");
@@ -9316,7 +10592,11 @@ namespace JsonJQueryNetTareas
                             info.Columns.Add("discapacidadporcentaje");
                         }
                     }
-                    info.Columns.Add("puestotrabajo");
+                    if (campos["formulario"] == "1")
+                    {
+                        info.Columns.Add("fechaingresotrabajo");
+                    }
+
 
                     if (campos["formulario"] == "5")
                     {
@@ -9348,9 +10628,31 @@ namespace JsonJQueryNetTareas
                     {
                         info.Columns.Add("areatrabajo");
                     }
-                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+
+                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
                     {
-                        info.Columns.Add("motivoconsulta");
+                        if (campos["formulario"] == "4")
+                        {
+                            info.Columns.Add("fechaInicioLab");
+                            info.Columns.Add("fechaSalida");
+                            info.Columns.Add("txtTotalMeses");
+                        }
+                        info.Columns.Add("puestotrabajo");
+                        if (campos["formulario"] == "1")
+                        {
+                            info.Columns.Add("actividadesrelevantes");
+                        }
+                        if (campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("fechaUltimoDia"); //aaaa / mm / dd
+                            info.Columns.Add("fechaReintegro");
+                            info.Columns.Add("totalDias");
+                            info.Columns.Add("causaSalida");
+                        }
+                        if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("motivoconsulta");
+                        }
                     }
 
                     if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "4")
@@ -9446,6 +10748,10 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("cantidadMedicamento1");
                         info.Columns.Add("cantidadMedicamento2");
                         info.Columns.Add("cantidadMedicamento3");
+                        if (campos["formulario"] == "2")
+                        {
+                            info.Columns.Add("HbtsIncidentes");
+                        }
                     }
 
                     if (campos["formulario"] == "1")
@@ -9504,14 +10810,29 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("accidentestrabajoSi");
                         info.Columns.Add("accidentestrabajoNo");
                         info.Columns.Add("especificaracctrabajo");
+                        info.Columns.Add("accTrabAnio");
+                        info.Columns.Add("accTrabMes");
+                        info.Columns.Add("accTrabDia");
                         info.Columns.Add("acctrabajoobservaciones");
                         info.Columns.Add("enfermedadesprofSi");
                         info.Columns.Add("enfermedadesprofNo");
                         info.Columns.Add("especificarenfermedadesprof");
+                        info.Columns.Add("enfProfAnio");
+                        info.Columns.Add("enfProfMes");
+                        info.Columns.Add("enfProfDia");
                         info.Columns.Add("enfermedadesprofobservaciones");
                     }
                     if (campos["formulario"] == "1" || campos["formulario"] == "2")
                     {
+                        info.Columns.Add("antFam1");
+                        info.Columns.Add("antFam2");
+                        info.Columns.Add("antFam3");
+                        info.Columns.Add("antFam4");
+                        info.Columns.Add("antFam5");
+                        info.Columns.Add("antFam6");
+                        info.Columns.Add("antFam7");
+                        info.Columns.Add("antFam8");
+
                         info.Columns.Add("antfamiliares");
                         info.Columns.Add("factoresriesgopuestotrabajo1");
                         info.Columns.Add("factoresriesgoactividades1");
@@ -9834,8 +11155,20 @@ namespace JsonJQueryNetTareas
                         info.Columns.Add("aptitudNoapto");
                         info.Columns.Add("aptitudObservacionDesc");
                         info.Columns.Add("aptitudLimitacionDesc");
+                        if (campos["formulario"] == "3")
+                        {
+                            info.Columns.Add("aptitudReubicacionDesc");
+                        }
 
                     }
+                    //if (campos["formulario"] == "5")
+                    //{
+                    //    info.Columns.Add("aptitudApto");
+                    //    info.Columns.Add("aptitudObservacion");
+                    //    info.Columns.Add("aptitudLimitaciones");
+                    //    info.Columns.Add("aptitudNoapto");
+                    //    info.Columns.Add("aptitudObservacionDesc");
+                    //}
                     if (campos["formulario"] == "4")
                     {
                         info.Columns.Add("EvalRetiroSi");
@@ -9845,15 +11178,18 @@ namespace JsonJQueryNetTareas
 
                     info.Columns.Add("descRecomendaciones");
 
-
-
+                    if (campos["formulario"] == "1" || campos["formulario"] == "2" || campos["formulario"] == "3" || campos["formulario"] == "4")
+                    {
+                        info.Columns.Add("fechaFormulario");
+                        info.Columns.Add("horaFormulario");
+                    }
                     // FORMULARIO TIPO 1
                     if (campos["formulario"] == "1")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, catolica, evangelica, testigo, mormona, otrareligion, gruposanguineo, lateralidad,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, catolica, evangelica, testigo, mormona, otrareligion, gruposanguineo, lateralidad,
                                  orientlesbiana, orientgay, orientbisexual, orientheterosexual, orientnosabe, identfemenino, identmasculino, identransfem, identransmasc, identnosabe, discapacidadsi,
-                                 discapacidadno, discapacidadtipo, discapacidadporcentaje, puestotrabajo, areatrabajo, motivoconsulta, antpersonales, menarquia, ciclos, ultmenstruacion, gestas, partos, cesareas, abortos, hijosvivosF, hijosmuertosF, vidaSxActivaSi, vidaSxActivaNo,
+                                 discapacidadno, discapacidadtipo, discapacidadporcentaje, txtfechaIng, puestotrabajo, areatrabajo, actividadesrelevantes, motivoconsulta, antpersonales, menarquia, ciclos, ultmenstruacion, gestas, partos, cesareas, abortos, hijosvivosF, hijosmuertosF, vidaSxActivaSi, vidaSxActivaNo,
                                  metodoplanfamSi1, metodoplanfamNo1, metodoplanfamTipo1, papnicolaouSi, papnicolaouNo, papnicolaouTiempo, papnicolaouResultado, ecomamaSi, ecomamaNo, ecomamaTiempo, ecomamaResultado,
                                  colposcopiaSi, colposcopiaNo, colposcopiaTiempo, colposcopiaResultado, mamografiaSi, mamografiaNo, mamografiaTiempo, mamografiaResultado, antigenoprostSi, antigenoprostNo, antigenoprostTiempo,
                                  antigenoprostResultado, ecoprostaticoSi, ecoprostaticoNo, ecoprostaticoTiempo, ecoprostaticoResultado, metodoplanfamSi2, metodoplanfamNo2, metodoplanfamTipo2, hijosvivosM, hijosmuertosM,
@@ -9864,8 +11200,8 @@ namespace JsonJQueryNetTareas
                                  antobservaciones1, antempresa2, antpuestotrabajo2, antactividad2, anttiempotrabajo2, antriesgofisico2, antriesgomecanico2, antriesgoquimico2, antriesgobiologico2, antriesgoergonomico2, antriesgopsicosocial2,
                                  antobservaciones2, antempresa3, antpuestotrabajo3, antactividad3, anttiempotrabajo3, antriesgofisico3, antriesgomecanico3, antriesgoquimico3, antriesgobiologico3, antriesgoergonomico3, antriesgopsicosocial3,
                                  antobservaciones3, antempresa4, antpuestotrabajo4, antactividad4, anttiempotrabajo4, antriesgofisico4, antriesgomecanico4, antriesgoquimico4, antriesgobiologico4, antriesgoergonomico4, antriesgopsicosocial4,
-                                 antobservaciones4, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones,
-                                 antfamiliares, factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1,
+                                 antobservaciones4, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabAnio, accTrabMes, accTrabDia, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfAnio, enfProfMes, enfProfDia, enfermedadesprofobservaciones,
+                                 antFam1, antFam2, antFam3, antFam4, antFam5, antFam6, antFam7, antFam8, antfamiliares, factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1,
                                  fisicoelectrico1, fisicootros1, mecatrapmaquinas1, mecatrapsuperficies1, mecatrapobjetos1, meccaidasdeobjetos1, meccaidasmismonivel1, meccaidasdiferentenivel1, meccontactoelectrico1,
                                  meccontacosuperficies1, mecproyeccionparticulas1, mecproyeccionfluidos1, mecpinchazos1, meccortes1, mecatropellamientovehiculo1, mecchoquescolision1, mecanicootros1, quimicosolidos1, quimicopolvos1, quimicohumos1,
                                  quimicoliquidos1, quimicovapores1, quimicoaerosoles1, quimiconeblinas1, quimicogaseosos1, quimicootros1, biologicovirus1, biologicohongos1, biologicobacterias1, biologicoparasitos1, biologicoexpovectores1,
@@ -9890,7 +11226,7 @@ namespace JsonJQueryNetTareas
                                  examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB,
                                  examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examNom3, examFecha3, examResultado3, examNom4,
                                  examFecha4, examResultado4, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones,
-                                 aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                                 aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -9900,11 +11236,11 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "2")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, motivoconsulta, antpersonales,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, motivoconsulta, antpersonales,
                             tabacoSi, tabacoNo, tabacoTiempo, tabacoCantidad, tabacoExconsumidor, tabacoTiempoabst, actividadfisicaSi, actividadfisicaNo, actividadfisicaCual, tiempoActividadFisica, alcoholSi, alcoholNo, alcoholTiempo, alcoholCantidad, alcoholExconsumidor, alcoholTiempoabst,
                             nombreOtrasDrogas, otrasdrogasSi, otrasdrogasNo, otrasdrogasTiempo, otrasdrogasCantidad, otrasdrogasExconsumidor, otrasdrogasTiempoabst,
-                            medicacionhabSi, medicacionhabNo, medicacionhabCual1, medicacionhabCual2, medicacionhabCual3, cantidadMedicamento1, cantidadMedicamento2, cantidadMedicamento3,
-                            accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones, antfamiliares,
+                            medicacionhabSi, medicacionhabNo, medicacionhabCual1, medicacionhabCual2, medicacionhabCual3, cantidadMedicamento1, cantidadMedicamento2, cantidadMedicamento3, HbtsIncidentes,
+                            accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabAnio, accTrabMes, accTrabDia, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfAnio, enfProfMes, enfProfDia, enfermedadesprofobservaciones, antFam1, antFam2, antFam3, antFam4, antFam5, antFam6, antFam7, antFam8, antfamiliares,
 
                             factoresriesgopuestotrabajo1, factoresriesgoactividades1, fisicotempaltas1, fisicotempbajas1, fisicoionizante1, fisicoNoionizante1, fisicoruido1, fisicovibracion1, fisicoiluminacion1, fisicoventilacion1, fisicoelectrico1, fisicootros1,
                             mecatrapmaquinas1, mecatrapsuperficies1, mecatrapobjetos1, meccaidasdeobjetos1, meccaidasmismonivel1, meccaidasdiferentenivel1, meccontactoelectrico1, meccontacosuperficies1, mecproyeccionparticulas1, mecproyeccionfluidos1, mecpinchazos1, meccortes1, mecatropellamientovehiculo1, mecchoquescolision1, mecanicootros1,
@@ -9941,7 +11277,7 @@ namespace JsonJQueryNetTareas
 
                             DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3,
 
-                            aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                            aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 2
                         info.TableName = "info";
@@ -9951,26 +11287,26 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "3")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, puestotrabajo, motivoconsulta, enfermedadactual, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria,
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, edad, puestotrabajo, fechaUltimoDia, fechaReintegro, txtTotalDias, txtCausaSalida, motivoconsulta, enfermedadactual, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria,
                                  constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE, examfisicooidoA, examfisicooidoB,
                                  examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB, examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A,
                                  examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB,
                                  examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examNom3, examFecha3, examResultado3, examObservaciones,
-                                 DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, descRecomendaciones);
+                                 DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, aptitudObservacionDesc, aptitudLimitacionDesc, aptitudReubicacionDesc, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
                     }
 
-
                     // FORMULARIO TIPO 4
                     if (campos["formulario"] == "4")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, actividades1, factoresriesgoactividades1, actividades2, factoresriesgoactividades2, actividades3, factoresriesgoactividades3, antpersonales, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, acctrabajoobservaciones, enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfermedadesprofobservaciones,
-                            constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria, constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE, examfisicooidoA, examfisicooidoB, examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB,
-                            examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A, examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC, examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB, examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1,
-                            examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3, DiagDef3, EvalRetiroSi, EvalRetiroNo, EvalRetiroObservacion, descRecomendaciones);
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, fechaInicioLab, fechaSalida, txtTotalMeses, puestotrabajo, actividades1, factoresriesgoactividades1, actividades2, factoresriesgoactividades2, actividades3, factoresriesgoactividades3, antpersonales, accidentestrabajoSi, accidentestrabajoNo, especificaracctrabajo, accTrabDia, accTrabMes, accTrabAnio, acctrabajoobservaciones,
+                            enfermedadesprofSi, enfermedadesprofNo, especificarenfermedadesprof, enfProfDia, enfProfMes, enfProfAnio, enfermedadesprofobservaciones, constpresion, consttemperatura, constfreccardiaca, constsaturacion, constfrecrespiratoria, constpeso, consttalla, constindice, constperimetro, examfisicopielA, examfisicopielB, examfisicopielC, examfisicoojosA, examfisicoojosB, examfisicoojosC, examfisicoojosD, examfisicoojosE,
+                            examfisicooidoA, examfisicooidoB, examfisicooidoC, examfisicooroA, examfisicooroB, examfisicooroC, examfisicooroD, examfisicooroE, examfisiconarizA, examfisiconarizB, examfisiconarizC, examfisiconarizD, examfisicocuelloA, examfisicocuelloB, examfisicotorax1A, examfisicotorax1B, examfisicotorax2A, examfisicotorax2B, examfisicoabdomenA, examfisicoabdomenB, examfisicocolumnaA, examfisicocolumnaB, examfisicocolumnaC,
+                            examfisicopelvisA, examfisicopelvisB, examfisicoextremA, examfisicoextremB, examfisicoextremC, examfisiconeuroA, examfisiconeuroB, examfisiconeuroC, examfisiconeuroD, examfisicoobservacion, examNom1, examFecha1, examResultado1, examNom2, examFecha2, examResultado2, examObservaciones, DiagDescripcion1, DiagCIE1, DiagPre1, DiagDef1, DiagDescripcion2, DiagCIE2, DiagPre2, DiagDef2, DiagDescripcion3, DiagCIE3, DiagPre3,
+                            DiagDef3, EvalRetiroSi, EvalRetiroNo, EvalRetiroObservacion, descRecomendaciones, fechaFormulario, horaFormulario);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -9980,7 +11316,7 @@ namespace JsonJQueryNetTareas
                     if (campos["formulario"] == "5")
                     {
                         // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                        info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fecEmision, evaIngreso, evaPeriodico, evaReintegro, evaRetiro, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, descAptitud, retiroSi, retiroNo, diagPresuntiva, diagDefinitiva, diagNoAplica, relacionSi, relacionNo, relacionNoAplica, descRecomendaciones);
+                        info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fecEmision, evaIngreso, evaPeriodico, evaReintegro, evaRetiro, aptitudApto, aptitudObservacion, aptitudLimitaciones, aptitudNoapto, descAptitud, retiroSi, retiroNo, diagPresuntiva, diagDefinitiva, diagNoAplica, relacionSi, relacionNo, relacionNoAplica, descRecomendaciones);
 
                         // Registramos los ingresos si el formulario es tipo 1
                         info.TableName = "info";
@@ -10013,34 +11349,91 @@ namespace JsonJQueryNetTareas
                 string nomHoja2 = "";
                 string tipoFormulario = "";
                 string archivo = "";
+                sociedad = campos["txtSociedad"];
+
                 switch (campos["formulario"])
                 {
                     case "1":
                         nomHoja = "077-PREOCUPA. INICIO 1-3";
                         tipoFormulario = "PREOCUPACIONAL";
-                        archivo = "TemplatePreocupacional.xlsx";
+                        if (sociedad == "DOS S.A")
+                        {
+                            archivo = "TemplatePreocupacional.xlsx";
+                        }
+                        if (sociedad == "AGILITY S.A")
+                        {
+                            archivo = "TemplatePreocupacionalAgility.xlsx";
+                        }
+                        if (sociedad == "GREENDC" || sociedad == "GREEN DC")
+                        {
+                            archivo = "TemplatePreocupacionalGreen.xlsx";
+                        }
                         break;
                     case "2":
                         nomHoja = "078-PERIODICA ";
                         tipoFormulario = "PERIODICA";
-                        archivo = "TemplatePeriodica.xlsx";
+                        if (sociedad == "DOS S.A")
+                        {
+                            archivo = "TemplatePeriodica.xlsx";
+                        }
+                        if (sociedad == "AGILITY S.A")
+                        {
+                            archivo = "TemplatePeriodicaAgility.xlsx";
+                        }
+                        if (sociedad == "GREENDC" || sociedad == "GREEN DC")
+                        {
+                            archivo = "TemplatePeriodicaGreen.xlsx";
+                        }
                         break;
                     case "3":
                         nomHoja = "079-REINTEGRO";
                         tipoFormulario = "REINTEGRO";
-                        archivo = "TemplateReintegro.xlsx";
+                        if (sociedad == "DOS S.A")
+                        {
+                            archivo = "TemplateReintegro.xlsx";
+                        }
+                        if (sociedad == "AGILITY S.A")
+                        {
+                            archivo = "TemplateReintegroAgility.xlsx";
+                        }
+                        if (sociedad == "GREENDC" || sociedad == "GREEN DC")
+                        {
+                            archivo = "TemplateReintegroGreen.xlsx";
+                        }
                         break;
                     case "4":
                         nomHoja = "080-RETIRO 1-2";
                         //nomHoja2 = "080-RETIRO 2-2";
                         tipoFormulario = "RETIRO";
-                        archivo = "TemplateRetiro.xlsx";
+                        if (sociedad == "DOS S.A")
+                        {
+                            archivo = "TemplateRetiro.xlsx";
+                        }
+                        if (sociedad == "AGILITY S.A")
+                        {
+                            archivo = "TemplateRetiroAgility.xlsx";
+                        }
+                        if (sociedad == "GREENDC" || sociedad == "GREEN DC")
+                        {
+                            archivo = "TemplateRetiroGreen.xlsx";
+                        }
                         break;
                     case "5":
                         nomHoja = "CERTIFICADO DE AL";
                         //nomHoja2 = "080-RETIRO 2-2";
                         tipoFormulario = "CERTIFICADO";
-                        archivo = "TemplateCertificado.xlsx";
+                        if (sociedad == "DOS S.A")
+                        {
+                            archivo = "TemplateCertificado.xlsx";
+                        }
+                        if (sociedad == "AGILITY S.A")
+                        {
+                            archivo = "TemplateCertificadoAgility.xlsx";
+                        }
+                        if (sociedad == "GREENDC" || sociedad == "GREEN DC")
+                        {
+                            archivo = "TemplateCertificadoGreen.xlsx";
+                        }
                         break;
                     default:
                         break;
@@ -10057,7 +11450,7 @@ namespace JsonJQueryNetTareas
                 // Llama a un método "FillReport" para llenar un archivo Excel utilizando una plantilla ("templateDOS.xlsx") y datos proporcionados en el DataSet ("ds").
                 // El archivo resultante se guardará en la ruta especificada por "outputPath".
                 TemplateExcel.FillReport(outputPath, archivo, nomHoja, ds, new string[] { "{", "}" }, rutaQR, rutaQR2, nombrePaciente);
-
+                //logs.logs.VerErrores(outputPath, "LogHistoriaClinica");
                 /*switch (campos["formulario"])
                 {
                     case "4":
@@ -10069,8 +11462,16 @@ namespace JsonJQueryNetTareas
 
 
                 // Abre el archivo recién creado utilizando la aplicación asociada en el sistema.
-                Process.Start(outputPath);
+                //Process.Start(outputPath);
 
+                // Transformar ruta física en URL
+                string baseUrl = "https://portaldeservicios.dos.com.ec/RTareas";
+                string relativePath = outputPath.Replace(AppDomain.CurrentDomain.BaseDirectory, "").Replace("\\", "/");
+                string fileUrl = $"{baseUrl}/{relativePath.TrimStart('/')}";
+
+                // Registrar log para verificar la URL generada (opcional)
+                logs.logs.VerErrores(fileUrl, "LogHistoriaClinica");
+                respuesta.mensaje = fileUrl;
             }
             catch (Exception ex)
             {
@@ -10078,8 +11479,10 @@ namespace JsonJQueryNetTareas
 
             }
 
-            return respuesta.SerializaToJson();
+            //return respuesta.SerializaToJson();
+            return respuesta.SerializaToJson2();
         }
+
 
         public string AbrirDocHistoria(dynamic campos)
         {
@@ -10109,17 +11512,27 @@ namespace JsonJQueryNetTareas
 
             // Ruta completa del archivo de salida, que incluye la carpeta del paciente
             string outputPath = Path.Combine(pacienteFolder, nombreArchivo);
-
+            //logs.logs.VerErrores(outputPath, "LogHistoriaClinica");
 
             // Abre el archivo recién creado utilizando la aplicación asociada en el sistema.
-            Process.Start(outputPath);
+            //Process.Start(outputPath);
 
-            return "";
+            string baseUrl = "https://portaldeservicios.dos.com.ec/RTareas";
+            string relativePath = outputPath.Replace(AppDomain.CurrentDomain.BaseDirectory, "").Replace("\\", "/");
+            string fileUrl = $"{baseUrl}/{relativePath.TrimStart('/')}";
+
+            // Registrar log para verificar la URL generada (opcional)
+            logs.logs.VerErrores(fileUrl, "LogHistoriaClinica");
+
+            // Retornar la URL generada
+            //Process.Start(fileUrl);
+            logs.logs.VerErrores(fileUrl, "LogHistoriaClinica");
+            EntRespuesta respuesta = new EntRespuesta();
+            respuesta.mensaje = fileUrl;
+
+            return respuesta.SerializaToJson2();
 
         }
-
-
-
 
         public string GuardarHisInmunizaciones(dynamic campos)
         {
@@ -10134,7 +11547,8 @@ namespace JsonJQueryNetTareas
                 string primerApellido = "";
                 string segundoApellido = "";
 
-
+                string numhistoria = campos["txtNumHistoria"];
+                string numarchivo = campos["txtNumArchivo"];
                 // Guardamos los datos obtenidos del JSON generado en Departamento.js y los guardamos en las variables previamente creadas.
                 var nombreCompleto = campos["txtNombre"];
 
@@ -10147,7 +11561,17 @@ namespace JsonJQueryNetTareas
                 primerNombre = palabras.Length > 2 ? palabras[2] : "";
                 segundoNombre = palabras.Length > 3 ? palabras[3] : "";
 
-                string sexo = campos["txtSexo"];
+                string sexo = "";
+
+                if (campos["txtSexo"] == "Femenino" || campos["txtSexo"] == "FEMENINO")
+                {
+                    sexo = "F";
+                }
+                else if (campos["txtSexo"] == "Masculino" || campos["txtSexo"] == "MASCULINO")
+                {
+                    sexo = "M";
+                }
+
                 string puestotrabajo = campos["txtPuestoTrabajo1"];
                 //string areatrabajo = "";
 
@@ -10331,6 +11755,266 @@ namespace JsonJQueryNetTareas
                 string obsSarampion2 = campos["txtobsSarampion2"];
 
 
+
+                // INM EXTRAS 1
+
+                string txtNuevaDosis1 = campos["txtNuevaDosis1"];
+
+                string fechaNuevo1 = campos["fechaNuevo1"];
+                string txtNuevoLote1 = campos["txtNuevoLote1"];
+                string txtNuevoNombre1 = campos["txtNuevoNombre1"];
+                string txtNuevoEstablecimiento1 = campos["txtNuevoEstablecimiento1"];
+                string txtNuevoObs1 = campos["txtNuevoObs1"];
+
+                string fechaNuevo2 = campos["fechaNuevo2"];
+                string txtNuevoLote2 = campos["txtNuevoLote2"];
+                string txtNuevoNombre2 = campos["txtNuevoNombre2"];
+                string txtNuevoEstablecimiento2 = campos["txtNuevoEstablecimiento2"];
+                string txtNuevoObs2 = campos["txtNuevoObs2"];
+
+                string fechaNuevo3 = campos["fechaNuevo3"];
+                string txtNuevoLote3 = campos["txtNuevoLote3"];
+                string txtNuevoNombre3 = campos["txtNuevoNombre3"];
+                string txtNuevoEstablecimiento3 = campos["txtNuevoEstablecimiento3"];
+                string txtNuevoObs3 = campos["txtNuevoObs3"];
+
+                string fechaNuevo4 = campos["fechaNuevo4"];
+                string txtNuevoLote4 = campos["txtNuevoLote4"];
+                string txtNuevoNombre4 = campos["txtNuevoNombre4"];
+                string txtNuevoEstablecimiento4 = campos["txtNuevoEstablecimiento4"];
+                string txtNuevoObs4 = campos["txtNuevoObs4"];
+
+                string fechaNuevo5 = campos["fechaNuevo5"];
+                string txtNuevoLote5 = campos["txtNuevoLote5"];
+                string txtNuevoNombre5 = campos["txtNuevoNombre5"];
+                string txtNuevoEstablecimiento5 = campos["txtNuevoEstablecimiento5"];
+                string txtNuevoObs5 = campos["txtNuevoObs5"];
+
+                // INM EXTRAS 2
+                string txtNuevaDosis12 = campos["txtNuevaDosis12"];
+
+                string fechaNuevo1Inm2 = campos["fechaNuevo1Inm2"];
+                string txtNuevoLote1Inm2 = campos["txtNuevoLote1Inm2"];
+                string txtNuevoNombre1Inm2 = campos["txtNuevoNombre1Inm2"];
+                string txtNuevoEstablecimiento1Inm2 = campos["txtNuevoEstablecimiento1Inm2"];
+                string txtNuevoObs1Inm2 = campos["txtNuevoObs1Inm2"];
+
+                string fechaNuevo2Inm2 = campos["fechaNuevo2Inm2"];
+                string txtNuevoLote2Inm2 = campos["txtNuevoLote2Inm2"];
+                string txtNuevoNombre2Inm2 = campos["txtNuevoNombre2Inm2"];
+                string txtNuevoEstablecimiento2Inm2 = campos["txtNuevoEstablecimiento2Inm2"];
+                string txtNuevoObs2Inm2 = campos["txtNuevoObs2Inm2"];
+
+                string fechaNuevo3Inm2 = campos["fechaNuevo3Inm2"];
+                string txtNuevoLote3Inm2 = campos["txtNuevoLote3Inm2"];
+                string txtNuevoNombre3Inm2 = campos["txtNuevoNombre3Inm2"];
+                string txtNuevoEstablecimiento3Inm2 = campos["txtNuevoEstablecimiento3Inm2"];
+                string txtNuevoObs3Inm2 = campos["txtNuevoObs3Inm2"];
+
+                string fechaNuevo4Inm2 = campos["fechaNuevo4Inm2"];
+                string txtNuevoLote4Inm2 = campos["txtNuevoLote4Inm2"];
+                string txtNuevoNombre4Inm2 = campos["txtNuevoNombre4Inm2"];
+                string txtNuevoEstablecimiento4Inm2 = campos["txtNuevoEstablecimiento4Inm2"];
+                string txtNuevoObs4Inm2 = campos["txtNuevoObs4Inm2"];
+
+                string fechaNuevo5Inm2 = campos["fechaNuevo5Inm2"];
+                string txtNuevoLote5Inm2 = campos["txtNuevoLote5Inm2"];
+                string txtNuevoNombre5Inm2 = campos["txtNuevoNombre5Inm2"];
+                string txtNuevoEstablecimiento5Inm2 = campos["txtNuevoEstablecimiento5Inm2"];
+                string txtNuevoObs5Inm2 = campos["txtNuevoObs5Inm2"];
+
+                // INM EXTRAS 3
+                string txtNuevaDosis13 = campos["txtNuevaDosis13"];
+
+                string fechaNuevo1Inm3 = campos["fechaNuevo1Inm3"];
+                string txtNuevoLote1Inm3 = campos["txtNuevoLote1Inm3"];
+                string txtNuevoNombre1Inm3 = campos["txtNuevoNombre1Inm3"];
+                string txtNuevoEstablecimiento1Inm3 = campos["txtNuevoEstablecimiento1Inm3"];
+                string txtNuevoObs1Inm3 = campos["txtNuevoObs1Inm3"];
+
+                string fechaNuevo2Inm3 = campos["fechaNuevo2Inm3"];
+                string txtNuevoLote2Inm3 = campos["txtNuevoLote2Inm3"];
+                string txtNuevoNombre2Inm3 = campos["txtNuevoNombre2Inm3"];
+                string txtNuevoEstablecimiento2Inm3 = campos["txtNuevoEstablecimiento2Inm3"];
+                string txtNuevoObs2Inm3 = campos["txtNuevoObs2Inm3"];
+
+                string fechaNuevo3Inm3 = campos["fechaNuevo3Inm3"];
+                string txtNuevoLote3Inm3 = campos["txtNuevoLote3Inm3"];
+                string txtNuevoNombre3Inm3 = campos["txtNuevoNombre3Inm3"];
+                string txtNuevoEstablecimiento3Inm3 = campos["txtNuevoEstablecimiento3Inm3"];
+                string txtNuevoObs3Inm3 = campos["txtNuevoObs3Inm3"];
+
+                string fechaNuevo4Inm3 = campos["fechaNuevo4Inm3"];
+                string txtNuevoLote4Inm3 = campos["txtNuevoLote4Inm3"];
+                string txtNuevoNombre4Inm3 = campos["txtNuevoNombre4Inm3"];
+                string txtNuevoEstablecimiento4Inm3 = campos["txtNuevoEstablecimiento4Inm3"];
+                string txtNuevoObs4Inm3 = campos["txtNuevoObs4Inm3"];
+
+                string fechaNuevo5Inm3 = campos["fechaNuevo5Inm3"];
+                string txtNuevoLote5Inm3 = campos["txtNuevoLote5Inm3"];
+                string txtNuevoNombre5Inm3 = campos["txtNuevoNombre5Inm3"];
+                string txtNuevoEstablecimiento5Inm3 = campos["txtNuevoEstablecimiento5Inm3"];
+                string txtNuevoObs5Inm3 = campos["txtNuevoObs5Inm3"];
+
+                // INM EXTRAS 4
+                string txtNuevaDosis123 = campos["txtNuevaDosis123"];
+
+                string fechaNuevo1Inm2Inm3 = campos["fechaNuevo1Inm2Inm3"];
+                string txtNuevoLote1Inm2Inm3 = campos["txtNuevoLote1Inm2Inm3"];
+                string txtNuevoNombre1Inm2Inm3 = campos["txtNuevoNombre1Inm2Inm3"];
+                string txtNuevoEstablecimiento1Inm2Inm3 = campos["txtNuevoEstablecimiento1Inm2Inm3"];
+                string txtNuevoObs1Inm2Inm3 = campos["txtNuevoObs1Inm2Inm3"];
+
+                string fechaNuevo2Inm2Inm3 = campos["fechaNuevo2Inm2Inm3"];
+                string txtNuevoLote2Inm2Inm3 = campos["txtNuevoLote2Inm2Inm3"];
+                string txtNuevoNombre2Inm2Inm3 = campos["txtNuevoNombre2Inm2Inm3"];
+                string txtNuevoEstablecimiento2Inm2Inm3 = campos["txtNuevoEstablecimiento2Inm2Inm3"];
+                string txtNuevoObs2Inm2Inm3 = campos["txtNuevoObs2Inm2Inm3"];
+
+                string fechaNuevo3Inm2Inm3 = campos["fechaNuevo3Inm2Inm3"];
+                string txtNuevoLote3Inm2Inm3 = campos["txtNuevoLote3Inm2Inm3"];
+                string txtNuevoNombre3Inm2Inm3 = campos["txtNuevoNombre3Inm2Inm3"];
+                string txtNuevoEstablecimiento3Inm2Inm3 = campos["txtNuevoEstablecimiento3Inm2Inm3"];
+                string txtNuevoObs3Inm2Inm3 = campos["txtNuevoObs3Inm2Inm3"];
+
+                string fechaNuevo4Inm2Inm3 = campos["fechaNuevo4Inm2Inm3"];
+                string txtNuevoLote4Inm2Inm3 = campos["txtNuevoLote4Inm2Inm3"];
+                string txtNuevoNombre4Inm2Inm3 = campos["txtNuevoNombre4Inm2Inm3"];
+                string txtNuevoEstablecimiento4Inm2Inm3 = campos["txtNuevoEstablecimiento4Inm2Inm3"];
+                string txtNuevoObs4Inm2Inm3 = campos["txtNuevoObs4Inm2Inm3"];
+
+                string fechaNuevo5Inm2Inm3 = campos["fechaNuevo5Inm2Inm3"];
+                string txtNuevoLote5Inm2Inm3 = campos["txtNuevoLote5Inm2Inm3"];
+                string txtNuevoNombre5Inm2Inm3 = campos["txtNuevoNombre5Inm2Inm3"];
+                string txtNuevoEstablecimiento5Inm2Inm3 = campos["txtNuevoEstablecimiento5Inm2Inm3"];
+                string txtNuevoObs5Inm2Inm3 = campos["txtNuevoObs5Inm2Inm3"];
+
+                string SelectNuevoEsquema1 = "";
+
+                if (campos["txtSelectNuevoEsquema1"] == "SI")
+                {
+                    SelectNuevoEsquema1 = "X";
+                }
+
+                string SelectNuevoEsquema2 = "";
+                if (campos["txtSelectNuevoEsquema2"] == "SI")
+                {
+                    SelectNuevoEsquema2 = "X";
+                }
+
+                string SelectNuevoEsquema3 = "";
+                if (campos["txtSelectNuevoEsquema3"] == "SI")
+                {
+                    SelectNuevoEsquema3 = "X";
+                }
+
+                string SelectNuevoEsquema4 = "";
+                if (campos["txtSelectNuevoEsquema4"] == "SI")
+                {
+                    SelectNuevoEsquema4 = "X";
+                }
+
+                string SelectNuevoEsquema5 = "";
+                if (campos["txtSelectNuevoEsquema5"] == "SI")
+                {
+                    SelectNuevoEsquema5 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm2 = "";
+                if (campos["txtSelectNuevoEsquema1Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm2 = "";
+                if (campos["txtSelectNuevoEsquema2Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm2 = "";
+                if (campos["txtSelectNuevoEsquema3Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm2 = "";
+                if (campos["txtSelectNuevoEsquema4Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm2 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm2 = "";
+                if (campos["txtSelectNuevoEsquema5Inm2"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm2 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm3 = "";
+                if (campos["txtSelectNuevoEsquema1Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm3 = "";
+                if (campos["txtSelectNuevoEsquema3Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm3 = "";
+                if (campos["txtSelectNuevoEsquema4Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm3 = "";
+                if (campos["txtSelectNuevoEsquema5Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm3 = "X";
+                }
+
+
+                string SelectNuevoEsquema1Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema1Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema1Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema2Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema2Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema2Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema3Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema3Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema3Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema4Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema4Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema4Inm2Inm3 = "X";
+                }
+
+                string SelectNuevoEsquema5Inm2Inm3 = "";
+                if (campos["txtSelectNuevoEsquema5Inm2Inm3"] == "SI")
+                {
+                    SelectNuevoEsquema5Inm2Inm3 = "X";
+                }
+
+
+
                 string primerApellidoDoc = "";
                 string segundoApellidoDoc = "";
                 string primerNombreDoc = "";
@@ -10445,7 +12129,6 @@ namespace JsonJQueryNetTareas
                 info.Columns.Add("obsHepB2");
                 info.Columns.Add("obsHepB3");
 
-
                 info.Columns.Add("fechaInfluenza");
                 info.Columns.Add("fechaFiebre");
                 info.Columns.Add("fechaSarampion1");
@@ -10476,15 +12159,195 @@ namespace JsonJQueryNetTareas
                 info.Columns.Add("obsSarampion1");
                 info.Columns.Add("obsSarampion2");
 
+                //Nuevas Inmunizaciones
+
+                info.Columns.Add("Inmnombre1");
+
+                info.Columns.Add("Inm1fecha1");
+                info.Columns.Add("Inm1lote1");
+                info.Columns.Add("Inm1esquema1");
+                info.Columns.Add("Inm1nombre1");
+                info.Columns.Add("Inm1establecimiento1");
+                info.Columns.Add("Inm1obs1");
+
+                info.Columns.Add("Inm1fecha2");
+                info.Columns.Add("Inm1lote2");
+                info.Columns.Add("Inm1esquema2");
+                info.Columns.Add("Inm1nombre2");
+                info.Columns.Add("Inm1establecimiento2");
+                info.Columns.Add("Inm1obs2");
+
+                info.Columns.Add("Inm1fecha3");
+                info.Columns.Add("Inm1lote3");
+                info.Columns.Add("Inm1esquema3");
+                info.Columns.Add("Inm1nombre3");
+                info.Columns.Add("Inm1establecimiento3");
+                info.Columns.Add("Inm1obs3");
+
+                info.Columns.Add("Inm1fecha4");
+                info.Columns.Add("Inm1lote4");
+                info.Columns.Add("Inm1esquema4");
+                info.Columns.Add("Inm1nombre4");
+                info.Columns.Add("Inm1establecimiento4");
+                info.Columns.Add("Inm1obs4");
+
+                info.Columns.Add("Inm1fecha5");
+                info.Columns.Add("Inm1lote5");
+                info.Columns.Add("Inm1esquema5");
+                info.Columns.Add("Inm1nombre5");
+                info.Columns.Add("Inm1establecimiento5");
+                info.Columns.Add("Inm1obs5");
+
+                info.Columns.Add("Inmnombre2");
+
+                info.Columns.Add("Inm2fecha1");
+                info.Columns.Add("Inm2lote1");
+                info.Columns.Add("Inm2esquema1");
+                info.Columns.Add("Inm2nombre1");
+                info.Columns.Add("Inm2establecimiento1");
+                info.Columns.Add("Inm2obs1");
+
+                info.Columns.Add("Inm2fecha2");
+                info.Columns.Add("Inm2lote2");
+                info.Columns.Add("Inm2esquema2");
+                info.Columns.Add("Inm2nombre2");
+                info.Columns.Add("Inm2establecimiento2");
+                info.Columns.Add("Inm2obs2");
+
+                info.Columns.Add("Inm2fecha3");
+                info.Columns.Add("Inm2lote3");
+                info.Columns.Add("Inm2esquema3");
+                info.Columns.Add("Inm2nombre3");
+                info.Columns.Add("Inm2establecimiento3");
+                info.Columns.Add("Inm2obs3");
+
+                info.Columns.Add("Inm2fecha4");
+                info.Columns.Add("Inm2lote4");
+                info.Columns.Add("Inm2esquema4");
+                info.Columns.Add("Inm2nombre4");
+                info.Columns.Add("Inm2establecimiento4");
+                info.Columns.Add("Inm2obs4");
+
+                info.Columns.Add("Inm2fecha5");
+                info.Columns.Add("Inm2lote5");
+                info.Columns.Add("Inm2esquema5");
+                info.Columns.Add("Inm2nombre5");
+                info.Columns.Add("Inm2establecimiento5");
+                info.Columns.Add("Inm2obs5");
+
+                info.Columns.Add("Inmnombre3");
+
+                info.Columns.Add("Inm3fecha1");
+                info.Columns.Add("Inm3lote1");
+                info.Columns.Add("Inm3esquema1");
+                info.Columns.Add("Inm3nombre1");
+                info.Columns.Add("Inm3establecimiento1");
+                info.Columns.Add("Inm3obs1");
+
+                info.Columns.Add("Inm3fecha2");
+                info.Columns.Add("Inm3lote2");
+                info.Columns.Add("Inm3esquema2");
+                info.Columns.Add("Inm3nombre2");
+                info.Columns.Add("Inm3establecimiento2");
+                info.Columns.Add("Inm3obs2");
+
+                info.Columns.Add("Inm3fecha3");
+                info.Columns.Add("Inm3lote3");
+                info.Columns.Add("Inm3esquema3");
+                info.Columns.Add("Inm3nombre3");
+                info.Columns.Add("Inm3establecimiento3");
+                info.Columns.Add("Inm3obs3");
+
+                info.Columns.Add("Inm3fecha4");
+                info.Columns.Add("Inm3lote4");
+                info.Columns.Add("Inm3esquema4");
+                info.Columns.Add("Inm3nombre4");
+                info.Columns.Add("Inm3establecimiento4");
+                info.Columns.Add("Inm3obs4");
+
+                info.Columns.Add("Inm3fecha5");
+                info.Columns.Add("Inm3lote5");
+                info.Columns.Add("Inm3esquema5");
+                info.Columns.Add("Inm3nombre5");
+                info.Columns.Add("Inm3establecimiento5");
+                info.Columns.Add("Inm3obs5");
+
+                info.Columns.Add("Inmnombre4");
+
+                info.Columns.Add("Inm4fecha1");
+                info.Columns.Add("Inm4lote1");
+                info.Columns.Add("Inm4esquema1");
+                info.Columns.Add("Inm4nombre1");
+                info.Columns.Add("Inm4establecimiento1");
+                info.Columns.Add("Inm4obs1");
+
+                info.Columns.Add("Inm4fecha2");
+                info.Columns.Add("Inm4lote2");
+                info.Columns.Add("Inm4esquema2");
+                info.Columns.Add("Inm4nombre2");
+                info.Columns.Add("Inm4establecimiento2");
+                info.Columns.Add("Inm4obs2");
+
+                info.Columns.Add("Inm4fecha3");
+                info.Columns.Add("Inm4lote3");
+                info.Columns.Add("Inm4esquema3");
+                info.Columns.Add("Inm4nombre3");
+                info.Columns.Add("Inm4establecimiento3");
+                info.Columns.Add("Inm4obs3");
+
+                info.Columns.Add("Inm4fecha4");
+                info.Columns.Add("Inm4lote4");
+                info.Columns.Add("Inm4esquema4");
+                info.Columns.Add("Inm4nombre4");
+                info.Columns.Add("Inm4establecimiento4");
+                info.Columns.Add("Inm4obs4");
+
+                info.Columns.Add("Inm4fecha5");
+                info.Columns.Add("Inm4lote5");
+                info.Columns.Add("Inm4esquema5");
+                info.Columns.Add("Inm4nombre5");
+                info.Columns.Add("Inm4establecimiento5");
+                info.Columns.Add("Inm4obs5");
+
 
                 // Agregamos las variables cargadas con la informacion a las etiquetas registradas previamente en orden
-                info.Rows.Add("QWE32", "ASLS22", primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fechaTetanos1, fechaTetanos2, fechaTetanos3, fechaTetanos4, fechaTetanos5,
+                info.Rows.Add(numhistoria, numarchivo, primerApellido, segundoApellido, primerNombre, segundoNombre, sexo, puestotrabajo, fechaTetanos1, fechaTetanos2, fechaTetanos3, fechaTetanos4, fechaTetanos5,
                     loteTetanos1, loteTetanos2, loteTetanos3, loteTetanos4, loteTetanos5, esquemaTetanos1, esquemaTetanos2, esquemaTetanos3, esquemaTetanos4, esquemaTetanos5, nombreTetanos1, nombreTetanos2, nombreTetanos3, nombreTetanos4,
                     nombreTetanos5, establecimientoTetanos1, establecimientoTetanos2, establecimientoTetanos3, establecimientoTetanos4, establecimientoTetanos5, obsTetanos1, obsTetanos2, obsTetanos3, obsTetanos4, obsTetanos5, fechaHepA1,
                     fechaHepA2, fechaHepA3, fechaHepB1, fechaHepB2, fechaHepB3, loteHepA1, loteHepA2, loteHepA3, loteHepB1, loteHepB2, loteHepB3, esquemaHepA1, esquemaHepA2, esquemaHepA3, esquemaHepB1, esquemaHepB2, esquemaHepB3, nombreHepA1,
                     nombreHepA2, nombreHepA3, nombreHepB1, nombreHepB2, nombreHepB3, establecimientoHepA1, establecimientoHepA2, establecimientoHepA3, establecimientoHepB1, establecimientoHepB2, establecimientoHepB3, obsHepA1, obsHepA2,
                     obsHepA3, obsHepB1, obsHepB2, obsHepB3, fechaInfluenza, fechaFiebre, fechaSarampion1, fechaSarampion2, loteInfluenza, loteFiebre, loteSarampion1, loteSarampion2, esquemaInfluenza, esquemaFiebre, esquemaSarampion1,
-                    esquemaSarampion2, nombreInfluenza, nombreFiebre, nombreSarampion1, nombreSarampion2, establecimientoInfluenza, establecimientoFiebre, establecimientoSarampion1, establecimientoSarampion2, obsInfluenza, obsFiebre, obsSarampion1, obsSarampion2);
+                    esquemaSarampion2, nombreInfluenza, nombreFiebre, nombreSarampion1, nombreSarampion2, establecimientoInfluenza, establecimientoFiebre, establecimientoSarampion1, establecimientoSarampion2, obsInfluenza, obsFiebre, obsSarampion1, obsSarampion2,
+                    // INM EXTRAS 1
+                    txtNuevaDosis1,
+                    fechaNuevo1, txtNuevoLote1, SelectNuevoEsquema1, txtNuevoNombre1, txtNuevoEstablecimiento1, txtNuevoObs1,
+                    fechaNuevo2, txtNuevoLote2, SelectNuevoEsquema2, txtNuevoNombre2, txtNuevoEstablecimiento2, txtNuevoObs2,
+                    fechaNuevo3, txtNuevoLote3, SelectNuevoEsquema3, txtNuevoNombre3, txtNuevoEstablecimiento3, txtNuevoObs3,
+                    fechaNuevo4, txtNuevoLote4, SelectNuevoEsquema4, txtNuevoNombre4, txtNuevoEstablecimiento4, txtNuevoObs4,
+                    fechaNuevo5, txtNuevoLote5, SelectNuevoEsquema5, txtNuevoNombre5, txtNuevoEstablecimiento5, txtNuevoObs5,
+                    // INM EXTRAS 2
+                    txtNuevaDosis12,
+                    fechaNuevo1Inm2, txtNuevoLote1Inm2, SelectNuevoEsquema1Inm2, txtNuevoNombre1Inm2, txtNuevoEstablecimiento1Inm2, txtNuevoObs1Inm2,
+                    fechaNuevo2Inm2, txtNuevoLote2Inm2, SelectNuevoEsquema2Inm2, txtNuevoNombre2Inm2, txtNuevoEstablecimiento2Inm2, txtNuevoObs2Inm2,
+                    fechaNuevo3Inm2, txtNuevoLote3Inm2, SelectNuevoEsquema3Inm2, txtNuevoNombre3Inm2, txtNuevoEstablecimiento3Inm2, txtNuevoObs3Inm2,
+                    fechaNuevo4Inm2, txtNuevoLote4Inm2, SelectNuevoEsquema4Inm2, txtNuevoNombre4Inm2, txtNuevoEstablecimiento4Inm2, txtNuevoObs4Inm2,
+                    fechaNuevo5Inm2, txtNuevoLote5Inm2, SelectNuevoEsquema5Inm2, txtNuevoNombre5Inm2, txtNuevoEstablecimiento5Inm2, txtNuevoObs5Inm2,
+                    // INM EXTRAS 3
+                    txtNuevaDosis13,
+                    fechaNuevo1Inm3, txtNuevoLote1Inm3, SelectNuevoEsquema1Inm3, txtNuevoNombre1Inm3, txtNuevoEstablecimiento1Inm3, txtNuevoObs1Inm3,
+                    fechaNuevo2Inm3, txtNuevoLote2Inm3, SelectNuevoEsquema2Inm3, txtNuevoNombre2Inm3, txtNuevoEstablecimiento2Inm3, txtNuevoObs2Inm3,
+                    fechaNuevo3Inm3, txtNuevoLote3Inm3, SelectNuevoEsquema3Inm3, txtNuevoNombre3Inm3, txtNuevoEstablecimiento3Inm3, txtNuevoObs3Inm3,
+                    fechaNuevo4Inm3, txtNuevoLote4Inm3, SelectNuevoEsquema4Inm3, txtNuevoNombre4Inm3, txtNuevoEstablecimiento4Inm3, txtNuevoObs4Inm3,
+                    fechaNuevo5Inm3, txtNuevoLote5Inm3, SelectNuevoEsquema5Inm3, txtNuevoNombre5Inm3, txtNuevoEstablecimiento5Inm3, txtNuevoObs5Inm3,
+                    // INM EXTRAS 4
+                    txtNuevaDosis123,
+                    fechaNuevo1Inm2Inm3, txtNuevoLote1Inm2Inm3, SelectNuevoEsquema1Inm2Inm3, txtNuevoNombre1Inm2Inm3, txtNuevoEstablecimiento1Inm2Inm3, txtNuevoObs1Inm2Inm3,
+                    fechaNuevo2Inm2Inm3, txtNuevoLote2Inm2Inm3, SelectNuevoEsquema2Inm2Inm3, txtNuevoNombre2Inm2Inm3, txtNuevoEstablecimiento2Inm2Inm3, txtNuevoObs2Inm2Inm3,
+                    fechaNuevo3Inm2Inm3, txtNuevoLote3Inm2Inm3, SelectNuevoEsquema3Inm2Inm3, txtNuevoNombre3Inm2Inm3, txtNuevoEstablecimiento3Inm2Inm3, txtNuevoObs3Inm2Inm3,
+                    fechaNuevo4Inm2Inm3, txtNuevoLote4Inm2Inm3, SelectNuevoEsquema4Inm2Inm3, txtNuevoNombre4Inm2Inm3, txtNuevoEstablecimiento4Inm2Inm3, txtNuevoObs4Inm2Inm3,
+                    fechaNuevo5Inm2Inm3, txtNuevoLote5Inm2Inm3, SelectNuevoEsquema5Inm2Inm3, txtNuevoNombre5Inm2Inm3, txtNuevoEstablecimiento5Inm2Inm3, txtNuevoObs5Inm2Inm3
+
+                    );
 
                 // Registramos los ingresos si el formulario es tipo 1
                 info.TableName = "info";
@@ -10516,13 +12379,26 @@ namespace JsonJQueryNetTareas
                 string tipoFormulario = "";
                 string archivo = "";
 
+                string nombreArchPaciente = campos["archivo"];
+                string op = campos["operacion"];
+
                 nomHoja = "Form 083 Registro Inmunizacione";
                 tipoFormulario = "INMUNIZACIONES";
                 archivo = "TemplateInmunizaciones.xlsx";
 
+                string nombreArchivo = "";
 
-                // Nombre del archivo de la historia clínica
-                string nombreArchivo = $"{tipoFormulario}_{nombrePaciente}_{DateTime.Now.ToString("yyyyMMdd_HHmm")}.xlsx";
+                if (op == "0")
+                {
+                    // Nombre del archivo de la historia clínica
+                    nombreArchivo = $"{tipoFormulario}_{nombrePaciente}_{DateTime.Now.ToString("yyyyMMdd_HHmm")}.xlsx";
+                }
+                else if (op == "1")
+                {
+                    // Nombre del archivo de la historia clínica
+                    nombreArchivo = nombreArchPaciente;
+                }
+
 
                 // Ruta completa del archivo de salida, que incluye la carpeta del paciente
                 string outputPath = Path.Combine(pacienteFolder, nombreArchivo);
@@ -10534,17 +12410,24 @@ namespace JsonJQueryNetTareas
                 TemplateExcel.FillReport(outputPath, archivo, nomHoja, ds, new string[] { "{", "}" }, rutaQR, rutaQR2, nombrePaciente);
 
                 // Abre el archivo recién creado utilizando la aplicación asociada en el sistema.
-                Process.Start(outputPath);
+                //Process.Start(outputPath);
 
+                string baseUrl = "https://portaldeservicios.dos.com.ec/RTareas";
+                string relativePath = outputPath.Replace(AppDomain.CurrentDomain.BaseDirectory, "").Replace("\\", "/");
+                string fileUrl = $"{baseUrl}/{relativePath.TrimStart('/')}";
+
+                // Registrar log para verificar la URL generada (opcional)
+                logs.logs.VerErrores(fileUrl, "LogHistoriaClinica");
+                respuesta.mensaje = fileUrl;
+                //// Ruta completa del archivo de salida, que incluye la carpeta del paciente
             }
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrio un error al guardar los datos. " + ex.Message.ToString(), "danger", "");
 
             }
-            return respuesta.SerializaToJson();
+            return respuesta.SerializaToJson2();
         }
-
 
         private string ConsultarProvinciasCiudades(dynamic campos)
         {
@@ -10586,7 +12469,7 @@ namespace JsonJQueryNetTareas
             {
                 return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
             }
-            return Lista.SerializaToJson();
+            return Lista.SerializaToJson2();
         }
         public string BuscarContactoEmpleadoPorCedula(dynamic parameters)
         {
@@ -10619,7 +12502,7 @@ namespace JsonJQueryNetTareas
             {
                 return responseMessage("0", "Ocurrio un error al obtener los datos. " + ex.Message.ToString(), "danger", "");
             }
-            return Lista.SerializaToJson();
+            return Lista.SerializaToJson2();
         }
         public string BuscarListaEmpleados(dynamic parameters)
         {
@@ -10805,6 +12688,185 @@ namespace JsonJQueryNetTareas
         }
 
 
+
+        public string BuscarListaFormularios(dynamic parameters)
+        {
+            // Obtiene los parámetros necesarios del objeto 'parameters'
+            string tipo = parameters["tipo"].ToString();
+            var nombreCompleto = parameters["nombre"].ToString();
+            string sociedad = parameters["sociedad"].ToString();
+            string areaTrabajo = parameters["areaTrabajo"].ToString();
+            string fecha1 = parameters["fecha1"].ToString();
+            string fecha2 = parameters["fecha2"].ToString();
+
+            // Separar el nombre completo en palabras utilizando el espacio como delimitador
+            var palabras = nombreCompleto.Split(' ');
+            // Asegurarse de que haya al menos cuatro palabras antes de acceder a los índices
+            string primerApellido = palabras.Length > 0 ? palabras[0] : "";
+            string segundoApellido = palabras.Length > 1 ? palabras[1] : "";
+            string primerNombre = palabras.Length > 2 ? palabras[2] : "";
+            string segundoNombre = palabras.Length > 3 ? palabras[3] : "";
+
+            //try
+            //{
+            // Directorio base donde se almacenan las historias clínicas
+            string historiasClinicasFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HistoriasClinicas");
+
+            // Obtenemos el nombre del paciente o identificador único
+            string nombrePaciente = $"{primerApellido} {segundoApellido} {primerNombre} {segundoNombre}";
+
+            // Combinar el directorio base con el nombre del paciente para obtener la carpeta del paciente
+            string outputPath = Path.Combine(historiasClinicasFolder, nombrePaciente);
+            logs.logs.VerErrores(outputPath, "LogHistoriaClinica");
+
+            // Transformar ruta física en URL
+            //string baseUrl = "https://portaldeservicios.dos.com.ec/RTareas";
+            //string relativePath = outputPath.Replace(AppDomain.CurrentDomain.BaseDirectory, "").Replace("\\", "/");
+            //string pacienteFolder = $"{baseUrl}/{relativePath.TrimStart('/')}";
+
+            // Verifica si la carpeta del paciente existe
+            if (Directory.Exists(outputPath))
+            {
+                // Filtra los archivos de la carpeta del paciente
+                var archivosFiltrados = Directory.GetFiles(outputPath)
+                 .Where(archivo =>
+                 {
+                     string nombreDocumento = Path.GetFileName(archivo);
+                     string[] partesNombre = nombreDocumento.Split('_');
+
+                     // Verifica que el nombre del archivo tenga al menos 4 secciones
+                     if (partesNombre.Length >= 4)
+                     {
+                         string tipoDocumento = partesNombre[0];
+                         string fechaDocumentoStr = partesNombre[2];
+
+                         // Variable para almacenar la fecha formateada
+                         string fechaFormateada = "";
+
+                         // Verifica que sea el tipo que se busca
+                         if (tipoDocumento == tipo)
+                         {
+                             // Convierte la fecha del documento en un objeto DateTime
+                             if (DateTime.TryParseExact(fechaDocumentoStr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fecha))
+                             {
+                                 Console.WriteLine($"Nombre del documento: {nombreDocumento}");
+                                 Console.WriteLine($"Tipo del documento: {tipoDocumento}");
+                                 Console.WriteLine($"Fecha del documento: {fechaDocumentoStr}");
+                                 Console.WriteLine($"Fecha de inicio: {fecha1}");
+                                 Console.WriteLine($"Fecha de fin: {fecha2}");
+                                 Console.WriteLine("Fecha convertida: " + fecha);
+
+                                 DateTime fechaA = DateTime.ParseExact(fecha1, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                                 DateTime fechaB = DateTime.ParseExact(fecha2, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                                 // Comprueba si la fecha del documento está en el rango especificado
+                                 if (fecha >= fechaA && fecha <= fechaB)
+                                 {
+                                     // Formatea la fecha como "yyyy/MM/dd"
+                                     fechaFormateada = fecha.ToString("yyyy/MM/dd");
+                                     return true;
+                                 }
+                                 else
+                                 {
+                                     Console.WriteLine("La fecha del documento no está en el rango especificado.");
+                                 }
+                             }
+                             else
+                             {
+                                 // La conversión de fecha falló, puedes manejarlo aquí
+                                 Console.WriteLine("No se pudo convertir la fecha.");
+                             }
+                         }
+                         if (tipo == "Todas")
+                         {
+                             // Convierte la fecha del documento en un objeto DateTime
+                             if (DateTime.TryParseExact(fechaDocumentoStr, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime fecha))
+                             {
+                                 Console.WriteLine($"Nombre del documento: {nombreDocumento}");
+                                 Console.WriteLine($"Tipo del documento: {tipoDocumento}");
+                                 Console.WriteLine($"Fecha del documento: {fechaDocumentoStr}");
+                                 Console.WriteLine($"Fecha de inicio: {fecha1}");
+                                 Console.WriteLine($"Fecha de fin: {fecha2}");
+                                 Console.WriteLine("Fecha convertida: " + fecha);
+
+                                 DateTime fechaA = DateTime.ParseExact(fecha1, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+                                 DateTime fechaB = DateTime.ParseExact(fecha2, "yyyy-MM-dd", CultureInfo.InvariantCulture);
+
+                                 // Comprueba si la fecha del documento está en el rango especificado
+                                 if (fecha >= fechaA && fecha <= fechaB)
+                                 {
+                                     // Formatea la fecha como "yyyy/MM/dd"
+                                     fechaFormateada = fecha.ToString("yyyy/MM/dd");
+                                     return true;
+                                 }
+                                 else
+                                 {
+                                     Console.WriteLine("La fecha del documento no está en el rango especificado.");
+                                 }
+                             }
+                         }
+
+                         // Formatea la fecha como "yyyy/MM/dd"
+                         fechaFormateada = fechaDocumentoStr.Insert(4, "/").Insert(7, "/");
+                     }
+
+                     return false;
+                 })
+                 .Select(archivo =>
+                 {
+                     string nombreDocumento = Path.GetFileName(archivo);
+                     string[] partesNombre = nombreDocumento.Split('_');
+
+
+                     string tipoDocumento = partesNombre[0];
+                     string fechaDocumentoStr = partesNombre[2];
+
+                     // Formatea la fecha como "yyyy/MM/dd" en el objeto anónimo
+                     string fechaFormateada = fechaDocumentoStr.Insert(4, "/").Insert(7, "/");
+
+                     // Proyecta los datos del archivo en un objeto anónimo
+                     return new
+                     {
+                         Tipo = tipoDocumento,
+                         Nombre = nombreDocumento,
+                         Sociedad = sociedad,
+                         AreaTrabajo = areaTrabajo,
+                         Fecha = fechaFormateada
+                     };
+                 })
+                 .ToList();
+
+
+                if (archivosFiltrados.Any())
+                {
+                    Console.WriteLine("Documentos encontrados:");
+                    foreach (var archivoFiltrado in archivosFiltrados)
+                    {
+                        Console.WriteLine(archivoFiltrado);
+                    }
+
+                    // Convierte la lista de objetos anónimos en una cadena JSON
+                    string json = JsonConvert.SerializeObject(archivosFiltrados);
+                    return json;
+                }
+                else
+                {
+                    // No se encontraron documentos que cumplan con los criterios de búsqueda.
+                    return "{}";
+                }
+            }
+            else
+            {
+                // Carpeta de paciente no encontrada.
+                return "{}";
+            }
+            //}
+            //catch (Exception ex)
+            //{
+            //    // En caso de error, retorna un JSON con el mensaje de error
+            //    return JsonConvert.SerializeObject(new { error = ex.Message });
+            //}
+        }
 
     }
 }

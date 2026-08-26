@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
 
 namespace CapaEntidad
 {
@@ -31,7 +26,7 @@ namespace CapaEntidad
         public string Categoria { get; set; }
         public string SubCategoria { get; set; }
         public string EstadoApro { get; set; }
-		public string FechaAprobacion { get; set; }
+        public string FechaAprobacion { get; set; }
         public string Estado2 { get; set; }
         public string ResponsableAprobacion { get; set; }
         public string MailResponsableAprobacion { get; set; }

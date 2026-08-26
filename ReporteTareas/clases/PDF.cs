@@ -1,26 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using Pechkin;
-
-using System.Web;
-using System.Web.Services;
-using System.Web.Script.Serialization;
-
 using CapaEntidad;
 using CapaNegocio;
-
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
-
+using Pechkin;
+using Pechkin.Synchronized;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using Pechkin.Synchronized;
+using System.IO;
+using System.Text;
+using System.Web;
 
 namespace PDF
 {
@@ -59,10 +48,10 @@ namespace PDF
                     pdfBuffer = pechkin.Convert(contenidohtml);
                     VerErrores("Paso 5: " + "Paso 5", "Log", "Detalle");
                     // PDF simple de cadena
-                   
+
                     //pdfBuffer = new SimplePechkin(new GlobalConfig()).Convert(contenidohtml);
 
-                    // Carpeta donde se crear� el archivo
+                    // Carpeta donde se crear� el archivo
                     folderPath = HttpContext.Current.Server.MapPath("~/descargas/");
                     VerErrores("folderPath: " + folderPath.ToString(), "Log", "Detalle");
                     string directory = folderPath;
@@ -81,7 +70,7 @@ namespace PDF
                         registro.Ruta_Archivo = directory;
                         registro.Descripcion_Archivo = filename;
                         int result = NegSolicitud.RTA_ActualizarRutaRide(registro);
-                      
+
                     }
                     else
                     {
@@ -122,11 +111,85 @@ namespace PDF
             }
             catch (Exception _Exception)
             {
-                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
-                VerErrores("Exception: "+ _Exception.ToString(), "Log", "Detalle");
+                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
+                VerErrores("Exception: " + _Exception.ToString(), "Log", "Detalle");
             }
 
             return false;
+        }
+        #endregion
+
+        #region GenerarPdfSolicitud
+        /// <summary>
+        /// Convierte HTML a PDF y lo deja en ~/descargas/, devolviendo el nombre
+        /// del archivo generado, o cadena vacía si falló.
+        ///
+        /// Existe en vez de reusar EnvioCorreoEncuesta, que hace casi lo mismo pero
+        /// tiene tres problemas para este uso:
+        ///
+        ///   - Nunca devuelve true. Su variable de resultado se declara en false y
+        ///     no se toca, así que quien la llama no puede distinguir un PDF creado
+        ///     de uno que no se creó.
+        ///   - Arma el nombre del archivo con "hh:mm:ss", que es hora de 12 sin
+        ///     AM/PM. Dos documentos generados a la 01:00 y a las 13:00 del mismo
+        ///     día se sobrescriben, y dos en el mismo segundo también.
+        ///   - Se llama "EnvioCorreoEncuesta" y no envía correos ni tiene que ver
+        ///     con encuestas.
+        ///
+        /// No se toca esa función porque hay tres pantallas colgando de ella.
+        /// </summary>
+        /// <param name="contenidoHtml">El documento ya armado.</param>
+        /// <param name="prefijo">Prefijo del nombre del archivo, normalmente el folio.</param>
+        public string GenerarPdfSolicitud(string contenidoHtml, string prefijo)
+        {
+            if (string.IsNullOrEmpty(contenidoHtml)) { return ""; }
+
+            try
+            {
+                byte[] pdf = new SynchronizedPechkin(new GlobalConfig()).Convert(contenidoHtml);
+
+                if (pdf == null || pdf.Length == 0)
+                {
+                    VerErrores("GenerarPdfSolicitud: Pechkin devolvio vacio", "Log", "Detalle");
+                    return "";
+                }
+
+                string carpeta = HttpContext.Current.Server.MapPath("~/descargas/");
+                if (!Directory.Exists(carpeta)) { Directory.CreateDirectory(carpeta); }
+
+                /* Nombre único: folio más marca de tiempo hasta el milisegundo en
+                   24 horas. Regenerar el mismo documento crea un archivo nuevo en
+                   vez de pisar el anterior, que es lo que se quiere para algo que
+                   lleva firmas. */
+                string nombre = LimpiarNombre(prefijo) + "_" +
+                                DateTime.Now.ToString("yyyyMMdd_HHmmss_fff") + ".pdf";
+
+                if (!ByteArrayToFile(carpeta + nombre, pdf))
+                {
+                    VerErrores("GenerarPdfSolicitud: no se pudo escribir " + nombre, "Log", "Detalle");
+                    return "";
+                }
+
+                return nombre;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("GenerarPdfSolicitud: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+
+        /// <summary>Deja el prefijo apto para nombre de archivo.</summary>
+        private string LimpiarNombre(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) { return "solicitud"; }
+
+            StringBuilder limpio = new StringBuilder();
+            foreach (char c in texto)
+            {
+                limpio.Append(char.IsLetterOrDigit(c) || c == '-' || c == '_' ? c : '_');
+            }
+            return limpio.ToString();
         }
         #endregion
 
@@ -160,7 +223,7 @@ namespace PDF
             catch (Exception ex)
             {
                 VerErrores("ex-QR: " + ex.Message.ToString(), "Log", "Detalle");
-                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
+                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
                 //VerErrores("Exception.ToString(): " + ex.ToString(), "Log", "Detalle");
             }
             return rutaQr;

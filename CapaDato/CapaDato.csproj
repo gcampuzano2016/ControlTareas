@@ -8,7 +8,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CapaDato</RootNamespace>
     <AssemblyName>CapaDato</AssemblyName>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <TargetFrameworkProfile />
@@ -38,6 +38,7 @@
       <HintPath>..\..\..\WinCorreo\WinCorreo\bin\Debug\CapaDato.exe</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -58,8 +59,11 @@
     <Compile Include="DaoCuotaAnual.cs" />
     <Compile Include="DaoEgresoInventario.cs" />
     <Compile Include="DaoEmpleado.cs" />
+    <Compile Include="DaoDetallePermiso.cs" />
+    <Compile Include="DaoFirmaSolicitud.cs" />
     <Compile Include="DaoForeCast.cs" />
     <Compile Include="DaoHistoriaClinica.cs" />
+    <Compile Include="DaoHsCln.cs" />
     <Compile Include="DaoInfoAdicionalHisClinica.cs" />
     <Compile Include="DaoInfoContrato.cs" />
     <Compile Include="DaoInfoFactProv.cs" />
@@ -71,6 +75,12 @@
     <Compile Include="DaoMenu.cs" />
     <Compile Include="DaoOrdenServicio.cs" />
     <Compile Include="DaoPedido.cs" />
+    <Compile Include="DaoMarcacion.cs" />
+    <Compile Include="DaoMenuPerfil.cs" />
+    <Compile Include="DaoMenuUsuario.cs" />
+    <Compile Include="DaoUsuarioAdmin.cs" />
+    <Compile Include="DaoPerfilInicio.cs" />
+    <Compile Include="DaoPlanRecuperacion.cs" />
     <Compile Include="DaoPerfiles.cs" />
     <Compile Include="DaoPoliza.cs" />
     <Compile Include="DaoProvinciasCiudades.cs" />
@@ -82,10 +92,14 @@
     <Compile Include="DaoParametrosConfiguracion.cs" />
     <Compile Include="DaoSolicitud.cs" />
     <Compile Include="DaoTareas.cs" />
+    <Compile Include="DaoUsuarioHorario.cs" />
+    <Compile Include="DaoVentanaAprobacion.cs" />
     <Compile Include="DaoTransaccion.cs" />
     <Compile Include="DaoVacaciones.cs" />
+    <Compile Include="FileEncryptionService.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SeguridadHelper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

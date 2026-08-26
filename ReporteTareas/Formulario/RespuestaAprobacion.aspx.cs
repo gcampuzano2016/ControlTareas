@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Security.Cryptography;
-using System.IO;
-using System.Text;
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.CompilerServices;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CorreoHelper;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ReporteTareas.Formulario
 {
@@ -89,14 +84,14 @@ namespace ReporteTareas.Formulario
                             registro.IdVacaciones = Convert.ToInt32(parametrosSolicitud[0]);
                             registro.EstadoSolicitud = "APROBADO";
                             registro.Cod_Usuario = parametrosSolicitud[3];
-                            registro.Tipo =5;
+                            registro.Tipo = 5;
                             registro.UsuarioAprobo = "";
                             registro.UsuarioRechazo = "";
                             respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
                             if (respuesta.estado == "1")
                             {
                                 lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
-                                
+
                                 #region Enviar mail Recurso Humano
                                 if (parametrosSolicitud[4] == "EM")
                                 {
@@ -142,7 +137,7 @@ namespace ReporteTareas.Formulario
                                 else if (parametrosSolicitud[4] == "EM")
                                 {
                                     Rechazado.Visible = true;
-                                }                              
+                                }
                             }
                             else
                             {
@@ -217,7 +212,7 @@ namespace ReporteTareas.Formulario
         #endregion
 
         #region EnviarCorreoRH
-        public void EnviarCorreoRH(EntSolicitud Lista,string IdSolicitud,string correoUsuario,string IdUsuarioSession)
+        public void EnviarCorreoRH(EntSolicitud Lista, string IdSolicitud, string correoUsuario, string IdUsuarioSession)
         {
             EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
             List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();

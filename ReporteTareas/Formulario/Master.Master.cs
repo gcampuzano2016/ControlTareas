@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using Newtonsoft.Json;
+using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
 using System.Data;
 
 
@@ -18,8 +15,14 @@ namespace ReporteTareas.Formulario
         {
             int Idperfil = 0;
             Idperfil = Convert.ToInt32(Session["Id_Perfil"]);
+
+            string CodUnico = "";
+            CodUnico = Session["Cod_Usuario"].ToString();
+            SeguridadHelper seguridad = new SeguridadHelper();
+            txtUsuario.Text = seguridad.Encripta(CodUnico.ToString());
+
             List<EntMenuDos> menuDos = new List<EntMenuDos>();
-            menuDos = NegMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(Idperfil);
+            menuDos = NegMenuDos.Sp_RTA_ConsultarMenuPerfilUsuario(Idperfil, CodUnico);
             var json = JsonConvert.SerializeObject(menuDos);
             DataTable dtPadres = new DataTable();
             DataTable dtPrincipal = (DataTable)JsonConvert.DeserializeObject(json, (typeof(DataTable)));

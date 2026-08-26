@@ -48,6 +48,9 @@ namespace CapaEntidad
         /// </summary>
         public string SaldoMensualTexto { get; set; }
 
+        /// <summary>SI, NO o NO_APLICA. Vacio en Medico y Teletrabajo, que no lo usan.</summary>
+        public string RespaldoAdjunto { get; set; }
+
         /* El plan de recuperación, para que el PDF no necesite otra consulta. */
         public bool TieneRecuperacion { get; set; }
         public string RecFechaPropuesta { get; set; }

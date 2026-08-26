@@ -1037,6 +1037,23 @@ function GuardarSolicitudPermiso(tipo) {
         contadorVerificacion += 1;
     }
 
+    /* El adjunto de la cita médica bloquea el envío. La especificación lo pide
+       explícito —"validar antes de habilitar el botón Enviar, no solo al
+       guardar"— y es el caso más frecuente: 607 de 1437 permisos son médicos.
+       Un permiso médico sin respaldo es justo lo que esto viene a impedir. */
+    if (_tipoPermiso == "MEDICO" && ArchivosElegidos() === 0) {
+        mensajeVerificacion += "- Debe adjuntar la cita médica ";
+        contadorVerificacion += 1;
+    }
+
+    /* Si el permiso se pasa del saldo mensual, o la bolsa ya está en cero, el
+       excedente tiene que tener tratamiento: son horas que salen de algún lado.
+       Antes solo se avisaba, y se podía enviar sin elegir. */
+    if (ExcedeElSaldoMensual() && ($("#cboExcedente").val() || "") === "") {
+        mensajeVerificacion += "- Debe indicar el tratamiento del excedente ";
+        contadorVerificacion += 1;
+    }
+
     if ($("#cboExcedente").val() == "RECUPERACION" && $("#txtRecFecha").val() == "") {
         mensajeVerificacion += "- Debe proponer una fecha de recuperación ";
         contadorVerificacion += 1;
@@ -1105,7 +1122,8 @@ function GuardarSolicitudPermiso(tipo) {
     /* El saldo tal como se le mostro al colaborador: queda como constancia en el
        PDF. Se manda el texto y no el numero para que documento y pantalla digan
        exactamente lo mismo. */
-    datosFormulario = datosFormulario + "'SaldoMensualTexto': '" + ((document.getElementById("chkPermisoMensual").checked && _saldoMensual !== null) ? _saldoMensual.Mensaje : "") + "'";
+    datosFormulario = datosFormulario + "'SaldoMensualTexto': '" + ((document.getElementById("chkPermisoMensual").checked && _saldoMensual !== null) ? _saldoMensual.Mensaje : "") + "',";
+    datosFormulario = datosFormulario + "'RespaldoAdjunto': '" + ($("#cboRespaldo").val() || "") + "'";
 
     datosFormulario = datosFormulario + "}";
 
@@ -1598,7 +1616,16 @@ function TipoPermisoSeleccionado() {
     return $("#txtActividadPC").val() || "";
 }
 
-/* Muestra la rama que corresponde al tipo elegido. */
+/* Muestra la rama que corresponde al tipo elegido, y decide si se pide archivo.
+
+   Tres reglas de la especificación se cruzan sobre el mismo bloque de adjuntos,
+   por eso se resuelven juntas y no cada una por su lado:
+
+     Teletrabajo  no usa el campo genérico "Adjuntar Archivos". Textual.
+     Médico       el adjunto es obligatorio, así que no tiene sentido preguntar
+                  si hay respaldo: se pide siempre.
+     Los demás    lo decide "Respaldo adjunto": solo con "Sí" se pide archivo.
+*/
 function AgregaActividad() {
     var tipo = TipoPermisoSeleccionado();
 
@@ -1606,11 +1633,60 @@ function AgregaActividad() {
        comportamiento del antiguo OTROS. */
     var esOtro = (tipo === "OTRO");
     document.getElementById("IdOtrasActividad").style.display = esOtro ? "block" : "none";
-    document.getElementById("IdOtrasActividadCargar").style.display = esOtro ? "none" : "block";
 
     var esTeletrabajo = (tipo === "TELETRABAJO");
     document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
     if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
+
+    var esMedico = (tipo === "MEDICO");
+
+    /* El selector de respaldo solo aparece donde de verdad decide algo. */
+    document.getElementById("IdRespaldo").style.display =
+        (esTeletrabajo || esMedico) ? "none" : "block";
+
+    MostrarAdjuntos();
+}
+
+/* Decide si se muestra el bloque de carga de archivos. */
+function MostrarAdjuntos() {
+    var tipo = TipoPermisoSeleccionado();
+    var mostrar;
+
+    if (tipo === "TELETRABAJO") {
+        mostrar = false;
+    }
+    else if (tipo === "MEDICO") {
+        mostrar = true;
+    }
+    else {
+        mostrar = ($("#cboRespaldo").val() === "SI");
+    }
+
+    document.getElementById("IdOtrasActividadCargar").style.display = mostrar ? "block" : "none";
+
+    /* Que el colaborador sepa por qué se le pide el archivo antes de buscarlo. */
+    var $msg = $("#msgAdjuntoObligatorio");
+    if (tipo === "MEDICO") {
+        if ($msg.length === 0) {
+            $("#IdOtrasActividadCargar").prepend(
+                '<p class="help-block text-danger" id="msgAdjuntoObligatorio">' +
+                'Adjunte la cita médica. Sin ella no se puede enviar la solicitud.</p>');
+        }
+    }
+    else {
+        $msg.remove();
+    }
+}
+
+function CambiaRespaldoAdjunto() {
+    MostrarAdjuntos();
+}
+
+/* Cuántos archivos hay elegidos en el campo de carga. */
+function ArchivosElegidos() {
+    var campo = document.getElementById("archivosAdjuntos");
+    if (campo === null || campo.files === undefined) { return 0; }
+    return campo.files.length;
 }
 
 /* El saldo del permiso mensual del mes que corresponde al permiso. Se guarda
@@ -1676,6 +1752,21 @@ function ConsultarSaldoMensual() {
                 .addClass("text-danger");
         }
     });
+}
+
+/* Si el permiso pedido no cabe en lo que queda del saldo mensual.
+
+   Vale también cuando no marcó la casilla: en ese caso el permiso entero es
+   excedente, y también necesita tratamiento. Por eso no se pregunta por la
+   casilla sino por si las horas alcanzan. */
+function ExcedeElSaldoMensual() {
+    var pedidos = MinutosDelPermiso();
+    if (pedidos === 0) { return false; }
+
+    if (!document.getElementById("chkPermisoMensual").checked) { return true; }
+    if (_saldoMensual === null) { return false; }
+
+    return pedidos > parseInt(_saldoMensual.MinutosDisponibles, 10);
 }
 
 /* Avisa cuánto del permiso se cubre con la bolsa y cuánto queda como excedente. */

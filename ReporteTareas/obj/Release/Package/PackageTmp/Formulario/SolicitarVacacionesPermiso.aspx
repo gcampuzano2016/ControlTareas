@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=34" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=35" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -204,6 +204,17 @@
                                                                     <div class="form-group col-lg-9" style="display: none" id="IdOtrasActividad">
                                                                         <label>Actividad a realizar:</label>
                                                                         <input type="text" class="form-control" id="txtActividadP">
+                                                                    </div>
+                                                                    <!-- Respaldo adjunto. Decide si se pide archivo. No aparece en
+                                                                         Médico, donde el adjunto es obligatorio, ni en Teletrabajo,
+                                                                         que no usa el campo genérico. -->
+                                                                    <div class="form-group col-lg-3" style="display: none" id="IdRespaldo">
+                                                                        <label>Respaldo adjunto</label>
+                                                                        <select id="cboRespaldo" class="form-control" onchange="CambiaRespaldoAdjunto()">
+                                                                            <option value="NO_APLICA">No aplica</option>
+                                                                            <option value="SI">Sí</option>
+                                                                            <option value="NO">No</option>
+                                                                        </select>
                                                                     </div>
                                                                     <!-- Rama de Teletrabajo. Aparece solo con ese tipo. -->
                                                                     <div class="col-lg-12" style="display: none" id="IdTeletrabajo">

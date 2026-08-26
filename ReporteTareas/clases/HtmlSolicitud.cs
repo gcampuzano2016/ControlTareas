@@ -32,8 +32,10 @@ namespace PDF
         /// <param name="folio">Folio y codigo de verificacion.</param>
         /// <param name="rutaLogo">Ruta en disco del logo. Si esta vacia, se omite.</param>
         /// <param name="detalle">Detalle del permiso. Puede venir null en vacaciones.</param>
+        /// <param name="periodos">Periodos con saldo. Solo aplica a vacaciones.</param>
         public static string Construir(EntSolicitud solicitud, List<EntFirmaSolicitud> firmas,
-                                       string folio, string rutaLogo, EntDetallePermiso detalle)
+                                       string folio, string rutaLogo, EntDetallePermiso detalle,
+                                       string periodos)
         {
             bool esVacaciones = solicitud.IdTipoSolicitud != 1;
             string titulo = esVacaciones ? "Solicitud de vacaciones" : "Convenio de permisos en horas laborales";
@@ -69,6 +71,7 @@ namespace PDF
             if (esVacaciones)
             {
                 Fila(h, "Reemplazo", string.IsNullOrEmpty(solicitud.Remplazo) ? "—" : solicitud.Remplazo);
+                FilaSiHay(h, "Período", periodos);
                 Fila(h, "Fechas", solicitud.FechaDesde + " – " + solicitud.FechaHasta);
                 Fila(h, "Días tomados", Dias(solicitud.TotalDias));
                 if (solicitud.Feriado > 0)
@@ -159,6 +162,7 @@ namespace PDF
                 FilaSiHay(h, "Saldo del permiso mensual", detalle.SaldoMensualTexto);
             }
 
+            FilaSiHay(h, "Respaldo adjunto", RotuloRespaldo(detalle.RespaldoAdjunto));
             FilaSiHay(h, "Tratamiento del excedente", RotuloExcedente(detalle.TratamientoExcedente));
 
             if (detalle.TieneRecuperacion)
@@ -182,6 +186,17 @@ namespace PDF
                 case "TELETRABAJO": return "Teletrabajo";
                 case "OTRO": return "Otro";
                 default: return tipo;
+            }
+        }
+
+        private static string RotuloRespaldo(string valor)
+        {
+            switch (valor)
+            {
+                case "SI": return "Sí";
+                case "NO": return "No";
+                case "NO_APLICA": return "No aplica";
+                default: return "";
             }
         }
 

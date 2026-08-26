@@ -40,6 +40,41 @@ namespace CapaDato
             return resultado;
         }
 
+        /// <summary>
+        /// Los períodos de vacaciones con saldo de una persona, para el PDF.
+        ///
+        /// Devuelve todos los que tengan días, separados por coma, y no solo uno:
+        /// alguien puede estar tomando días de dos períodos a la vez, y el
+        /// documento no debe decir que salieron de uno solo. Cadena vacía si no
+        /// hay saldo cargado.
+        /// </summary>
+        public static string PeriodosConSaldo(int codSap)
+        {
+            System.Text.StringBuilder periodos = new System.Text.StringBuilder();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            /* Consulta con parámetro y no concatenada, a diferencia de
+               ConsultarVacaciones acá arriba. */
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand(
+                "SELECT PERIODO FROM dbo.SaldoVacaciones WHERE PERNR = @Pernr AND SALDO > 0 ORDER BY PERIODO", cnx))
+            {
+                cmd.Parameters.Add("@Pernr", SqlDbType.VarChar, 50).Value = codSap.ToString();
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        if (periodos.Length > 0) { periodos.Append(", "); }
+                        periodos.Append(dr["PERIODO"].ToString());
+                    }
+                }
+            }
+
+            return periodos.ToString();
+        }
+
         public static EntRespuesta ConsultarVacaciones(int codSap)
         {
             EntRespuesta Respuesta = new EntRespuesta();

@@ -2918,7 +2918,14 @@ namespace JsonJQueryNetTareas
                     detalle = NegDetallePermiso.Obtener(idVacaciones);
                 }
 
-                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle);
+                /* Los periodos de los que salen los dias. Solo en vacaciones. */
+                string periodos = "";
+                if (solicitud.IdTipoSolicitud != 1)
+                {
+                    periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
+                }
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
 
                 PDFs generador = new PDFs();
                 string archivo = generador.GenerarPdfSolicitud(html, folio);
@@ -3112,7 +3119,8 @@ namespace JsonJQueryNetTareas
                     Entregables = CampoOpcional(campos, "Entregables"),
                     ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1",
                     UsaPermisoMensual = CampoOpcional(campos, "UsaPermisoMensual") == "1",
-                    SaldoMensualTexto = CampoOpcional(campos, "SaldoMensualTexto")
+                    SaldoMensualTexto = CampoOpcional(campos, "SaldoMensualTexto"),
+                    RespaldoAdjunto = CampoOpcional(campos, "RespaldoAdjunto")
                 };
 
                 NegDetallePermiso.Guardar(detalle);

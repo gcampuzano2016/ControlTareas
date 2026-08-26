@@ -209,6 +209,97 @@ function VerDocumento() {
     let proceso = "";
 }
 
+/* ------------------------------------------- comprobante de asistencia --- */
+
+var _idComprobante = 0;
+
+/* Si a esta solicitud le corresponde subir el comprobante de asistencia.
+
+   Tres condiciones de la especificación: que sea cita médica, que ya esté
+   aprobada, y que la fecha del permiso haya pasado. Antes de la cita no hay nada
+   que justificar.
+
+   Se reconoce por Actividad y no por TipoPermiso porque así funciona también
+   para los 607 permisos médicos anteriores a agosto de 2026, que no tienen tipo
+   pero sí dicen "CITA MEDICA". */
+function CorrespondeComprobante(item) {
+    if (item.Actividad !== "CITA MEDICA") { return false; }
+    if (item.EstadoSolicitud !== "APROBADO" && item.EstadoSolicitud !== "PROCESADO") { return false; }
+
+    var partes = (item.FechaDesde || "").split('/');
+    if (partes.length !== 3) { return false; }
+
+    var fecha = new Date(partes[2], partes[1] - 1, partes[0]);
+    if (isNaN(fecha.getTime())) { return false; }
+
+    var hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return fecha < hoy;
+}
+
+function AbrirComprobante(idvacaciones, fecha) {
+    _idComprobante = idvacaciones;
+    $("#archivoComprobante").val("");
+    $("#txtDetalleComprobante").text(
+        "Permiso de cita médica del " + fecha + ". Suba el justificativo de que asistió.");
+
+    /* Lo que ya está cargado, para que no suban dos veces lo mismo. */
+    VerListadoArchivosSolicitud("#divComprobanteAnteriores", idvacaciones);
+
+    $("#modalComprobante").modal('show');
+}
+
+function SubirComprobante() {
+    var campo = document.getElementById("archivoComprobante");
+    if (campo === null || campo.files.length === 0) {
+        alerta("Debe elegir el archivo del comprobante.");
+        return;
+    }
+
+    if (window.FormData === undefined) {
+        alerta("Su navegador no permite subir archivos desde aquí.");
+        return;
+    }
+
+    var datos = new FormData();
+    for (var i = 0; i < campo.files.length; i++) {
+        datos.append(campo.files[i].name, campo.files[i]);
+    }
+    /* Mismo endpoint y mismo idServicio que el resto de adjuntos de solicitudes:
+       el comprobante es un documento más de esta solicitud. */
+    datos.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
+    datos.append('action', 'CargarArchivos');
+    datos.append('Id_RegTareas', _idComprobante);
+    datos.append('idServicio', "6");
+
+    $("#btnSubirComprobante").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "CargaArchivos.ashx",
+        data: datos,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnSubirComprobante").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo subir el comprobante." : respuesta.mensaje);
+                return;
+            }
+
+            $("#archivoComprobante").val("");
+            VerListadoArchivosSolicitud("#divComprobanteAnteriores", _idComprobante);
+            MensajeCorrecto("Comprobante cargado.");
+        },
+        error: function () {
+            $("#btnSubirComprobante").prop("disabled", false);
+            alerta("No se pudo subir el comprobante. Intente nuevamente.");
+        }
+    });
+}
+
 /* ---------------------------------------------- cierre de recuperaciones --- */
 
 var _padRecuperacion = null;
@@ -340,7 +431,10 @@ function DescargarPdfSolicitud(idvacaciones) {
    lienzo y el trazo saldría doble. */
 var _padProceso = null;
 
-function AprobarSolicitud(idvacaciones, Descripcion) {
+/* Datos del faltante, para armar el motivo automático si el jefe rechaza. */
+var _faltante = null;
+
+function AprobarSolicitud(idvacaciones, Descripcion, totalDias, saldoDias, fechaDesde, fechaHasta) {
     idVacaciones = idvacaciones;
     StrTipoSolicitud = Descripcion;
 
@@ -351,7 +445,63 @@ function AprobarSolicitud(idvacaciones, Descripcion) {
         _padProceso.limpiar();
     }
 
+    /* SaldoDias se guardó al pedir la solicitud como saldo disponible menos días
+       pedidos, así que en negativo significa exactamente "no alcanza". Hasta
+       ahora el jefe aprobaba sin ver esta cuenta. */
+    MostrarFaltanteDeSaldo(totalDias, saldoDias, fechaDesde, fechaHasta);
+
+    $("#txtDescripcionReq2").val("");
     $("#modalCargarProceso").modal('show');
+}
+
+function MostrarFaltanteDeSaldo(totalDias, saldoDias, fechaDesde, fechaHasta) {
+    _faltante = null;
+    $("#IdFaltanteSaldo").hide().empty();
+
+    var saldo = parseFloat(saldoDias);
+    var pedidos = parseFloat(totalDias);
+    if (isNaN(saldo) || isNaN(pedidos) || saldo >= 0) { return; }
+
+    var faltan = Math.abs(saldo);
+    var disponibles = pedidos - faltan;
+
+    _faltante = {
+        pedidos: pedidos,
+        faltan: faltan,
+        disponibles: disponibles,
+        desde: fechaDesde,
+        hasta: fechaHasta
+    };
+
+    $("#IdFaltanteSaldo").html(
+        '<div class="alert alert-warning" style="margin-bottom:10px">' +
+        '<b>Al colaborador no le alcanza el saldo.</b><br>' +
+        'Solicita ' + pedidos.toFixed(2) + ' días y tiene ' + disponibles.toFixed(2) +
+        ' disponibles: le faltan <b>' + faltan.toFixed(2) + '</b>.' +
+        '<br><br>Puede rechazarla —el motivo se llena solo con estos números— o aprobarla ' +
+        'de todos modos si acordó el adelanto por fuera. ' +
+        '<i>El adelanto automático del siguiente período todavía no está disponible: ' +
+        'depende de definir con Talento Humano cómo se concilia con SAP.</i>' +
+        '</div>').show();
+}
+
+/* Redacta el motivo del rechazo con los números, para que el colaborador reciba
+   la explicación y no un "rechazado" a secas.
+
+   Solo rellena si el campo está vacío: si el jefe ya escribió algo, lo suyo
+   manda. */
+function MotivoAutomaticoSiCorresponde() {
+    if (_faltante === null) { return; }
+    if ($.trim($("#txtDescripcionReq2").val()) !== "") { return; }
+    if ($("#cboEstado2").val() !== "RECHAZADO") { return; }
+
+    $("#txtDescripcionReq2").val(
+        "Su solicitud de vacaciones (" + _faltante.desde + " – " + _faltante.hasta + ", " +
+        _faltante.pedidos.toFixed(2) + " días) fue rechazada. Tiene " +
+        _faltante.disponibles.toFixed(2) + " días disponibles y solicitó " +
+        _faltante.pedidos.toFixed(2) + ": le faltan " + _faltante.faltan.toFixed(2) +
+        ". Puede ajustar las fechas o pedirle a su jefe que apruebe el adelanto " +
+        "del siguiente período.");
 }
 
 /* Quién firma se deduce del estado que se está poniendo: el jefe aprueba o
@@ -503,7 +653,7 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
         info = info + "<td class='sorting_1' style='text-align:center'>";
         info = info + "<button type='button' value='Actualizar' title='Imprimir Solicitud' class='btn btn-btn-editClientes btn-xs'  onclick='VerListadoArchivosVacaciones(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");' ><i class='fa fa-print' aria-hidden='true'></i></button>";
         info = info + "&nbsp;|&nbsp;";
-        info = info + "<button type='button' value='Actualizar' title='Aprobar o rechazar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"); '><i class='fa fa-tasks' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' value='Actualizar' title='Aprobar o rechazar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"," + item.TotalDias + "," + item.SaldoDias + ",\"" + item.FechaDesde + "\",\"" + item.FechaHasta + "\"); '><i class='fa fa-tasks' aria-hidden='true'></i></button>";
         info = info + "&nbsp;|&nbsp;";
         if (item.conteoArchivosAdjuntos != '0') {
             info = info + "<button type=\"button\" title='Documento cargado.' class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
@@ -513,6 +663,13 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
             if (item.Actividad == "CITA MEDICA" || item.Actividad == "CITACION JUDICIAL") {
                 info = info + "<button type='button' value='Actualizar' title='Solicitar documento.' class='btn btn-btn-editClientes btn-xs' onclick='EnvioCorreo(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"); '><i class='fa fa-envelope' aria-hidden='true'></i></button>";
             }
+        }
+
+        /* El segundo momento del permiso médico: subir el comprobante de que
+           asistió, una vez pasada la cita. */
+        if (CorrespondeComprobante(item)) {
+            info = info + "&nbsp;|&nbsp;";
+            info = info + "<button type='button' title='Subir comprobante de asistencia' class='btn btn-warning btn-xs' onclick='AbrirComprobante(\"" + item.IdVacaciones + "\",\"" + item.FechaDesde + "\");'><i class='fa fa-stethoscope' aria-hidden='true'></i></button>";
         }
 
         /* La descarga aparece solo con el trámite cerrado. PROCESADO es el estado

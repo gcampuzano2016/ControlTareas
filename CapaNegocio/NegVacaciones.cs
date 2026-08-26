@@ -23,6 +23,11 @@ namespace CapaNegocio
             return DaoVacaciones.ContarFeriadosRango(fechaDesde, fechaHasta);
         }
 
+        public static string PeriodosConSaldo(int codSap)
+        {
+            return DaoVacaciones.PeriodosConSaldo(codSap);
+        }
+
         #region EscribirLog
         public void EscribirLog(string valor, string Carpeta, string rucEmpresa, bool EstadoProceso)
         {

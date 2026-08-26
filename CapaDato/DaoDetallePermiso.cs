@@ -33,6 +33,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@ConfirmaConectividad", SqlDbType.Bit).Value = detalle.ConfirmaConectividad;
                 cmd.Parameters.Add("@UsaPermisoMensual", SqlDbType.Bit).Value = detalle.UsaPermisoMensual;
                 cmd.Parameters.Add("@SaldoMensualTexto", SqlDbType.VarChar, 200).Value = detalle.SaldoMensualTexto ?? string.Empty;
+                cmd.Parameters.Add("@RespaldoAdjunto", SqlDbType.VarChar, 20).Value = detalle.RespaldoAdjunto ?? string.Empty;
 
                 cnx.Open();
 
@@ -89,6 +90,7 @@ namespace CapaDato
                             ConfirmaConectividad = Convert.ToBoolean(dr["ConfirmaConectividad"]),
                             UsaPermisoMensual = Convert.ToBoolean(dr["UsaPermisoMensual"]),
                             SaldoMensualTexto = dr["SaldoMensualTexto"].ToString(),
+                            RespaldoAdjunto = dr["RespaldoAdjunto"].ToString(),
                             TieneRecuperacion = Convert.ToInt32(dr["TieneRecuperacion"]) == 1,
                             /* Las fechas del plan vienen como texto ya formateado
                                para el documento; si no hay plan quedan vacías. */

@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/ProcesoConvenio.js?v=27" type="text/javascript"></script>
+    <script src="../js/ProcesoConvenio.js?v=28" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -426,6 +426,34 @@
         <!-- /.modal -->
 
         <!-- Modal -->
+        <!-- Comprobante de asistencia. Segundo momento del permiso médico: el
+             colaborador vuelve una vez pasada la cita y sube el justificativo. -->
+        <div class="modal fade" id="modalComprobante" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #fcf8e3">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Comprobante de asistencia</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-lg-12">
+                            <p class="help-block" id="txtDetalleComprobante"></p>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>Justificativo de que asistió a la cita</label>
+                            <input type="file" id="archivoComprobante" multiple />
+                            <p class="help-block">Se agrega a los documentos de esta solicitud.</p>
+                        </div>
+                        <div class="col-lg-12" id="divComprobanteAnteriores"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button type="button" onclick="SubirComprobante()" class="btn btn-primary" id="btnSubirComprobante">Subir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Cierre de una recuperación. Solo aparece para las que ya vencieron:
              confirmar antes sería opinar sobre algo que todavía puede pasar. -->
         <div class="modal fade" id="modalCerrarRecuperacion" tabindex="-1" role="dialog" aria-hidden="true">
@@ -474,7 +502,8 @@
                         <div class="form-group col-lg-12">
                             </br>
 							<label>Estado</label>
-                            <select id="cboEstado2" class="form-control">
+                            <div id="IdFaltanteSaldo" style="display: none"></div>
+                            <select id="cboEstado2" class="form-control" onchange="MotivoAutomaticoSiCorresponde()">
                             </select>
                         </div>
                         <div class="form-group col-lg-12">

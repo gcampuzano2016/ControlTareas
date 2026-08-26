@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=33" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=34" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -308,7 +308,7 @@
                                                                     <div class="col-lg-12" style="margin-bottom:10px">
                                                                         <label>
                                                                             <input type="checkbox" id="chkPermisoMensual" onchange="CambiaPermisoMensual()">
-                                                                            ¿Usa el permiso mensual de 3 horas?
+                                                                            ¿Usa permiso mensual de 3 horas?
                                                                         </label>
                                                                         <p class="help-block" id="msgPermisoMensual">Consultando su saldo del mes...</p>
                                                                     </div>

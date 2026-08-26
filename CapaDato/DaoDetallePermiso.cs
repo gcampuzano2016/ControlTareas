@@ -32,6 +32,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@Entregables", SqlDbType.VarChar, 1000).Value = detalle.Entregables ?? string.Empty;
                 cmd.Parameters.Add("@ConfirmaConectividad", SqlDbType.Bit).Value = detalle.ConfirmaConectividad;
                 cmd.Parameters.Add("@UsaPermisoMensual", SqlDbType.Bit).Value = detalle.UsaPermisoMensual;
+                cmd.Parameters.Add("@SaldoMensualTexto", SqlDbType.VarChar, 200).Value = detalle.SaldoMensualTexto ?? string.Empty;
 
                 cnx.Open();
 
@@ -85,13 +86,30 @@ namespace CapaDato
                             MotivoGeneral = dr["MotivoGeneral"].ToString(),
                             Actividades = dr["Actividades"].ToString(),
                             Entregables = dr["Entregables"].ToString(),
-                            ConfirmaConectividad = Convert.ToBoolean(dr["ConfirmaConectividad"])
+                            ConfirmaConectividad = Convert.ToBoolean(dr["ConfirmaConectividad"]),
+                            UsaPermisoMensual = Convert.ToBoolean(dr["UsaPermisoMensual"]),
+                            SaldoMensualTexto = dr["SaldoMensualTexto"].ToString(),
+                            TieneRecuperacion = Convert.ToInt32(dr["TieneRecuperacion"]) == 1,
+                            /* Las fechas del plan vienen como texto ya formateado
+                               para el documento; si no hay plan quedan vacías. */
+                            RecFechaPropuesta = FechaCorta(dr["RecFechaPropuesta"]),
+                            RecHorario = dr["RecHorario"].ToString(),
+                            RecActividades = dr["RecActividades"].ToString(),
+                            RecEntregables = dr["RecEntregables"].ToString(),
+                            RecFechaMaxima = FechaCorta(dr["RecFechaMaxima"])
                         };
                     }
                 }
             }
 
             return detalle;
+        }
+
+        /// <summary>Una fecha del lector como dd/MM/yyyy, o vacio si viene NULL.</summary>
+        private static string FechaCorta(object valor)
+        {
+            if (valor == null || valor == DBNull.Value) { return string.Empty; }
+            return Convert.ToDateTime(valor).ToString("dd/MM/yyyy");
         }
 
         /// <summary>

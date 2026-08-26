@@ -2909,7 +2909,16 @@ namespace JsonJQueryNetTareas
                 }
                 if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
 
-                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo);
+                /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
+                   recuperacion. En vacaciones no aplica y viene null, que es lo que
+                   la plantilla espera. */
+                EntDetallePermiso detalle = null;
+                if (solicitud.IdTipoSolicitud == 1)
+                {
+                    detalle = NegDetallePermiso.Obtener(idVacaciones);
+                }
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle);
 
                 PDFs generador = new PDFs();
                 string archivo = generador.GenerarPdfSolicitud(html, folio);
@@ -3102,7 +3111,8 @@ namespace JsonJQueryNetTareas
                     Actividades = CampoOpcional(campos, "Actividades"),
                     Entregables = CampoOpcional(campos, "Entregables"),
                     ConfirmaConectividad = CampoOpcional(campos, "ConfirmaConectividad") == "1",
-                    UsaPermisoMensual = CampoOpcional(campos, "UsaPermisoMensual") == "1"
+                    UsaPermisoMensual = CampoOpcional(campos, "UsaPermisoMensual") == "1",
+                    SaldoMensualTexto = CampoOpcional(campos, "SaldoMensualTexto")
                 };
 
                 NegDetallePermiso.Guardar(detalle);

@@ -31,8 +31,9 @@ namespace PDF
         /// <param name="firmas">Firmas ya registradas, con RutaTrazo resuelta.</param>
         /// <param name="folio">Folio y codigo de verificacion.</param>
         /// <param name="rutaLogo">Ruta en disco del logo. Si esta vacia, se omite.</param>
+        /// <param name="detalle">Detalle del permiso. Puede venir null en vacaciones.</param>
         public static string Construir(EntSolicitud solicitud, List<EntFirmaSolicitud> firmas,
-                                       string folio, string rutaLogo)
+                                       string folio, string rutaLogo, EntDetallePermiso detalle)
         {
             bool esVacaciones = solicitud.IdTipoSolicitud != 1;
             string titulo = esVacaciones ? "Solicitud de vacaciones" : "Convenio de permisos en horas laborales";
@@ -81,9 +82,7 @@ namespace PDF
             }
             else
             {
-                Fila(h, "Actividad", solicitud.Actividad);
-                Fila(h, "Fecha", solicitud.FechaDesde);
-                Fila(h, "Horas", solicitud.Horas);
+                FilasDelPermiso(h, solicitud, detalle);
             }
 
             if (!string.IsNullOrEmpty(solicitud.Observacion))
@@ -100,6 +99,107 @@ namespace PDF
 
             h.Append("</body></html>");
             return h.ToString();
+        }
+
+        /// <summary>
+        /// Las filas propias de un permiso.
+        ///
+        /// Cada una aparece solo si tiene valor: un permiso personal de dos horas
+        /// no tiene por qué salir con ocho campos vacíos de teletrabajo. Por eso
+        /// hay tantos condicionales en vez de una lista fija.
+        ///
+        /// El detalle puede venir null para lo registrado antes de agosto de 2026:
+        /// esas solicitudes no tienen tipo de permiso y solo llevan la actividad
+        /// en texto libre, que es todo lo que se guardó en su momento.
+        /// </summary>
+        private static void FilasDelPermiso(StringBuilder h, EntSolicitud solicitud, EntDetallePermiso detalle)
+        {
+            bool hayDetalle = detalle != null && !string.IsNullOrEmpty(detalle.TipoPermiso);
+
+            if (hayDetalle)
+            {
+                Fila(h, "Tipo de Permiso", RotuloTipo(detalle.TipoPermiso));
+
+                /* La actividad en texto libre solo aporta cuando es "Otro": para
+                   los demás tipos repetiría la etiqueta de arriba. */
+                if (detalle.TipoPermiso == "OTRO" && !string.IsNullOrEmpty(solicitud.Actividad))
+                {
+                    Fila(h, "Actividad", solicitud.Actividad);
+                }
+            }
+            else
+            {
+                Fila(h, "Actividad", solicitud.Actividad);
+            }
+
+            Fila(h, "Fecha", solicitud.FechaDesde);
+            Fila(h, "Horas", solicitud.Horas);
+
+            if (detalle == null) { return; }
+
+            if (detalle.EsTeletrabajo)
+            {
+                string modalidad = detalle.Modalidad == "HORAS"
+                    ? "Por horas · " + detalle.HoraDesde + " – " + detalle.HoraHasta + " (luego presencial)"
+                    : "Jornada completa";
+
+                Fila(h, "Modalidad", modalidad);
+                FilaSiHay(h, "Lugar", detalle.Lugar);
+                FilaSiHay(h, "Medios de contacto", detalle.MediosContacto);
+                FilaSiHay(h, "Motivo general", detalle.MotivoGeneral);
+                FilaSiHay(h, "Actividades a ejecutar", detalle.Actividades);
+                FilaSiHay(h, "Entregables esperados", detalle.Entregables);
+            }
+
+            if (detalle.UsaPermisoMensual)
+            {
+                Fila(h, "¿Usa permiso mensual de 3h?", "Sí");
+                /* El texto congelado al pedir el permiso, no el saldo de hoy: la
+                   especificación pide constancia de cuánto quedaba en ese momento. */
+                FilaSiHay(h, "Saldo del permiso mensual", detalle.SaldoMensualTexto);
+            }
+
+            FilaSiHay(h, "Tratamiento del excedente", RotuloExcedente(detalle.TratamientoExcedente));
+
+            if (detalle.TieneRecuperacion)
+            {
+                FilaSiHay(h, "Recuperación propuesta", detalle.RecFechaPropuesta);
+                FilaSiHay(h, "Horario de recuperación", detalle.RecHorario);
+                FilaSiHay(h, "Actividades de recuperación", detalle.RecActividades);
+                FilaSiHay(h, "Entregables de recuperación", detalle.RecEntregables);
+                FilaSiHay(h, "Fecha máxima de cierre", detalle.RecFechaMaxima);
+            }
+        }
+
+        private static string RotuloTipo(string tipo)
+        {
+            switch (tipo)
+            {
+                case "PERSONAL": return "Personal";
+                case "MEDICO": return "Médico";
+                case "FAMILIAR": return "Familiar";
+                case "CALAMIDAD": return "Calamidad";
+                case "TELETRABAJO": return "Teletrabajo";
+                case "OTRO": return "Otro";
+                default: return tipo;
+            }
+        }
+
+        private static string RotuloExcedente(string valor)
+        {
+            switch (valor)
+            {
+                case "VACACIONES": return "Vacaciones";
+                case "RECUPERACION": return "Recuperación";
+                case "SIN_REMUNERACION": return "Permiso sin remuneración";
+                default: return "";
+            }
+        }
+
+        private static void FilaSiHay(StringBuilder h, string etiqueta, string valor)
+        {
+            if (string.IsNullOrEmpty(valor)) { return; }
+            Fila(h, etiqueta, valor);
         }
 
         /// <summary>Los tres recuadros de firma, en el orden del flujo.</summary>

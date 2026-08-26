@@ -1101,7 +1101,11 @@ function GuardarSolicitudPermiso(tipo) {
     datosFormulario = datosFormulario + "'RecuperacionFecha': '" + $("#txtRecFecha").val() + "',";
     datosFormulario = datosFormulario + "'RecuperacionHorario': '" + $("#txtRecHorario").val() + "',";
     datosFormulario = datosFormulario + "'RecuperacionActividades': '" + $("#txtRecActividades").val() + "',";
-    datosFormulario = datosFormulario + "'RecuperacionEntregables': '" + $("#txtRecEntregables").val() + "'";
+    datosFormulario = datosFormulario + "'RecuperacionEntregables': '" + $("#txtRecEntregables").val() + "',";
+    /* El saldo tal como se le mostro al colaborador: queda como constancia en el
+       PDF. Se manda el texto y no el numero para que documento y pantalla digan
+       exactamente lo mismo. */
+    datosFormulario = datosFormulario + "'SaldoMensualTexto': '" + ((document.getElementById("chkPermisoMensual").checked && _saldoMensual !== null) ? _saldoMensual.Mensaje : "") + "'";
 
     datosFormulario = datosFormulario + "}";
 

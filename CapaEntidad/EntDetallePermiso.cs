@@ -40,5 +40,20 @@ namespace CapaEntidad
 
         /// <summary>La casilla del permiso mensual de 3 horas.</summary>
         public bool UsaPermisoMensual { get; set; }
+
+        /// <summary>
+        /// El saldo tal como se le mostró al colaborador al pedir el permiso.
+        /// Congelado a propósito: la especificación pide constancia de cuánto
+        /// quedaba en ese momento, no de cuánto queda hoy.
+        /// </summary>
+        public string SaldoMensualTexto { get; set; }
+
+        /* El plan de recuperación, para que el PDF no necesite otra consulta. */
+        public bool TieneRecuperacion { get; set; }
+        public string RecFechaPropuesta { get; set; }
+        public string RecHorario { get; set; }
+        public string RecActividades { get; set; }
+        public string RecEntregables { get; set; }
+        public string RecFechaMaxima { get; set; }
     }
 }

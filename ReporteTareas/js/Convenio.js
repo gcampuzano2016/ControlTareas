@@ -1943,18 +1943,57 @@ function MinutosATexto(minutos) {
    colaborador necesita ver el límite mientras llena el formulario, no después
    de que se lo rechacen. Si la regla cambia, se cambia en los dos lugares; por
    eso está marcada en el procedimiento. */
-function MostrarPlazoRecuperacion() {
-    var partes = ($("#txtfechaP").val() || "").split('/');
-    if (partes.length !== 3) { $("#txtRecMaxima").val(""); return; }
+/* Lee una fecha en dd/mm/aaaa. Devuelve null si el texto no es una fecha. */
+function FechaDesdeTexto(texto) {
+    var partes = (texto || "").split('/');
+    if (partes.length !== 3) { return null; }
 
     var d = new Date(partes[2], partes[1] - 1, partes[0]);
-    if (isNaN(d.getTime())) { $("#txtRecMaxima").val(""); return; }
+    return isNaN(d.getTime()) ? null : d;
+}
 
-    d.setDate(d.getDate() + 30);
-
+function TextoDesdeFecha(d) {
     var dd = ("0" + d.getDate()).slice(-2);
     var mm = ("0" + (d.getMonth() + 1)).slice(-2);
-    $("#txtRecMaxima").val(dd + "/" + mm + "/" + d.getFullYear());
+    return dd + "/" + mm + "/" + d.getFullYear();
+}
+
+function MostrarPlazoRecuperacion() {
+    var permiso = FechaDesdeTexto($("#txtfechaP").val());
+
+    if (permiso === null) {
+        $("#txtRecMaxima").val("");
+        AcotarFechaRecuperacion(null, null);
+        return;
+    }
+
+    var maxima = new Date(permiso.getTime());
+    maxima.setDate(maxima.getDate() + 30);
+
+    $("#txtRecMaxima").val(TextoDesdeFecha(maxima));
+
+    /* El calendario se acota al mismo plazo que muestra el campo de al lado. Es
+       mejor que no deje elegir una fecha imposible a dejarla elegir y rechazarla
+       despues. */
+    AcotarFechaRecuperacion(permiso, maxima);
+}
+
+/* Limita el calendario del plan al rango util, y descarta lo ya elegido si quedo
+   fuera: al mover la fecha del permiso, la propuesta anterior puede haber dejado
+   de tener sentido, y sin esto viajaba igual al guardar. */
+function AcotarFechaRecuperacion(desde, hasta) {
+    var $campo = $("#txtRecFecha");
+    if (!$campo.length || !$campo.hasClass("hasDatepicker")) { return; }
+
+    $campo.datepicker("option", "minDate", desde);
+    $campo.datepicker("option", "maxDate", hasta);
+
+    if (desde === null) { return; }
+
+    var elegida = FechaDesdeTexto($campo.val());
+    if (elegida !== null && (elegida < desde || elegida > hasta)) {
+        $campo.val("");
+    }
 }
 
 /* Las horas solo aplican a la modalidad por horas. */
@@ -2061,6 +2100,22 @@ $(function () {
         .on("change", function () {
             from.datepicker("option", "maxDate", getDate(this));
             $("#btn_Descarga").hide();
+        });
+
+    /* La fecha propuesta del plan de recuperación. Se quedó sin calendario cuando
+       se armó el bloque: era un input de texto pelado y había que escribir la
+       fecha a mano.
+
+       No lleva el .on("change") que copian los de arriba: ese handler mueve el
+       maxDate del filtro de consulta, que no tiene nada que ver con esto. */
+    $("#txtRecFecha").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
         });
 
     tofrom13 = $("#frmTxtHoraDesdeV").datepicker(

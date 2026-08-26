@@ -340,6 +340,18 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(GuardarFirmaSolicitud(context, parameters));
                 }
 
+                if (Action == "ConfirmarRecuperacion")
+                {
+                    existAction = true;
+                    responseAction.Append(ConfirmarRecuperacion(context, parameters));
+                }
+
+                if (Action == "ListarRecuperacionesPendientes")
+                {
+                    existAction = true;
+                    responseAction.Append(ListarRecuperacionesPendientes());
+                }
+
                 if (Action == "SaldoPermisoMensual")
                 {
                     existAction = true;
@@ -2944,6 +2956,83 @@ namespace JsonJQueryNetTareas
         }
 
         /// <summary>
+        /// Las recuperaciones cuyo plazo venció y nadie cerró todavía.
+        /// </summary>
+        public string ListarRecuperacionesPendientes()
+        {
+            try
+            {
+                return NegPlanRecuperacion.ListarPendientes().SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al listar las recuperaciones. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// El cierre de una recuperación: el jefe dice si se recuperó o no, y firma.
+        ///
+        /// Es la segunda firma del jefe sobre la misma solicitud, por eso va con
+        /// Secuencia = 2. La restricción única de VacacionesFirma es sobre
+        /// (solicitud, rol, secuencia), así que convive con la firma de la
+        /// aprobación sin pisarla.
+        ///
+        /// Igual que al aprobar: primero la firma, después el cierre. Si el cierre
+        /// fallara queda una firma de un paso incompleto, y reintentar lo termina;
+        /// al revés quedaría un cierre sin firmar, que es lo que no se quiere.
+        /// </summary>
+        public string ConfirmarRecuperacion(HttpContext context, dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                long idVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString());
+                bool seRecupero = parameters["seRecupero"].ToString() == "1";
+                string observacion = CampoOpcional(parameters, "observacion");
+
+                byte[] trazo = TrazoDesdeDataUri(CampoOpcional(parameters, "trazo"));
+                if (trazo == null || trazo.Length == 0)
+                {
+                    return responseMessage("0", "Debe firmar para registrar el cierre.", "warning", "");
+                }
+
+                string ip = context.Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = context.Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = context.Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Rol = "JEFE",
+                    Secuencia = 2,
+                    Decision = seRecupero ? "APROBADO" : "RECHAZADO",
+                    Comentario = observacion,
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codUsuario
+                };
+
+                EntRespuesta firmaResp = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+                if (firmaResp.estado != "1")
+                {
+                    return firmaResp.SerializaToJson();
+                }
+
+                EntRespuesta respuesta = NegPlanRecuperacion.Confirmar(idVacaciones, seRecupero, observacion, codUsuario);
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al confirmar la recuperacion. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
         /// Cuánto le queda al colaborador del permiso mensual de 3 horas.
         ///
         /// La fecha que importa es la del permiso, no la de hoy: la bolsa es del
@@ -3017,11 +3106,56 @@ namespace JsonJQueryNetTareas
                 };
 
                 NegDetallePermiso.Guardar(detalle);
+
+                /* El plan de recuperación solo existe cuando el excedente se trata
+                   así. Va después del detalle porque el procedimiento del plan
+                   valida contra la fecha del permiso, que ya está guardada. */
+                if (detalle.TratamientoExcedente == "RECUPERACION")
+                {
+                    GuardarPlanDeRecuperacion(campos, idVacaciones);
+                }
             }
             catch (Exception ex)
             {
                 NegVacaciones neg = new NegVacaciones();
                 neg.EscribirLog("No se pudo guardar el detalle del permiso: " + ex.Message,
+                                "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// El plan con el que el colaborador propone recuperar las horas.
+        ///
+        /// Como el resto del detalle, no corta el alta si falla: la solicitud ya
+        /// existe. Un permiso con recuperación y sin plan se ve —el jefe no tiene
+        /// qué confirmar— y se corrige volviendo a guardar.
+        /// </summary>
+        private void GuardarPlanDeRecuperacion(dynamic campos, long idVacaciones)
+        {
+            try
+            {
+                DateTime propuesta;
+                if (!DateTime.TryParseExact(CampoOpcional(campos, "RecuperacionFecha"), "dd/MM/yyyy",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out propuesta))
+                {
+                    return;
+                }
+
+                EntPlanRecuperacion plan = new EntPlanRecuperacion()
+                {
+                    IdVacaciones = idVacaciones,
+                    FechaPropuesta = propuesta,
+                    HorarioPropuesto = CampoOpcional(campos, "RecuperacionHorario"),
+                    Actividades = CampoOpcional(campos, "RecuperacionActividades"),
+                    Entregables = CampoOpcional(campos, "RecuperacionEntregables")
+                };
+
+                NegPlanRecuperacion.Guardar(plan);
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo guardar el plan de recuperacion: " + ex.Message,
                                 "Log", "Detalle", false);
             }
         }

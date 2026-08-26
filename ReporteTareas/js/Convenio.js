@@ -102,7 +102,11 @@ function BtnPermiso() {
 
     /* El saldo del mes, para saber si la casilla se puede ofrecer. */
     ConsultarSaldoMensual();
+
+    /* Las dos ramas condicionales arrancan en el estado que corresponda al
+       formulario recién abierto, en vez de esperar a que el usuario toque algo. */
     AgregaActividad();
+    CambiaTratamientoExcedente();
 }
 
 /* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
@@ -1033,6 +1037,11 @@ function GuardarSolicitudPermiso(tipo) {
         contadorVerificacion += 1;
     }
 
+    if ($("#cboExcedente").val() == "RECUPERACION" && $("#txtRecFecha").val() == "") {
+        mensajeVerificacion += "- Debe proponer una fecha de recuperación ";
+        contadorVerificacion += 1;
+    }
+
     if (_tipoPermiso == "TELETRABAJO") {
         if ($('#cboModalidadTT').val() == "HORAS" &&
             ($('#txtTTHoraDesde').val() == "" || $('#txtTTHoraHasta').val() == "")) {
@@ -1088,7 +1097,11 @@ function GuardarSolicitudPermiso(tipo) {
     datosFormulario = datosFormulario + "'Actividades': '" + $('#txtTTActividades').val() + "',";
     datosFormulario = datosFormulario + "'Entregables': '" + $('#txtTTEntregables').val() + "',";
     datosFormulario = datosFormulario + "'ConfirmaConectividad': '" + (document.getElementById("chkTTConectividad").checked ? "1" : "0") + "',";
-    datosFormulario = datosFormulario + "'UsaPermisoMensual': '" + (document.getElementById("chkPermisoMensual").checked ? "1" : "0") + "'";
+    datosFormulario = datosFormulario + "'UsaPermisoMensual': '" + (document.getElementById("chkPermisoMensual").checked ? "1" : "0") + "',";
+    datosFormulario = datosFormulario + "'RecuperacionFecha': '" + $("#txtRecFecha").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionHorario': '" + $("#txtRecHorario").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionActividades': '" + $("#txtRecActividades").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionEntregables': '" + $("#txtRecEntregables").val() + "'";
 
     datosFormulario = datosFormulario + "}";
 
@@ -1700,6 +1713,27 @@ function MinutosATexto(minutos) {
     return h + "h" + (m < 10 ? "0" : "") + m;
 }
 
+/* Muestra hasta cuándo hay plazo para recuperar.
+
+   El cálculo se repite acá y en el procedimiento, y eso es a propósito: el
+   servidor es el que manda —rechaza una fecha fuera de plazo— pero el
+   colaborador necesita ver el límite mientras llena el formulario, no después
+   de que se lo rechacen. Si la regla cambia, se cambia en los dos lugares; por
+   eso está marcada en el procedimiento. */
+function MostrarPlazoRecuperacion() {
+    var partes = ($("#txtfechaP").val() || "").split('/');
+    if (partes.length !== 3) { $("#txtRecMaxima").val(""); return; }
+
+    var d = new Date(partes[2], partes[1] - 1, partes[0]);
+    if (isNaN(d.getTime())) { $("#txtRecMaxima").val(""); return; }
+
+    d.setDate(d.getDate() + 30);
+
+    var dd = ("0" + d.getDate()).slice(-2);
+    var mm = ("0" + (d.getMonth() + 1)).slice(-2);
+    $("#txtRecMaxima").val(dd + "/" + mm + "/" + d.getFullYear());
+}
+
 /* Las horas solo aplican a la modalidad por horas. */
 function CambiaModalidadTeletrabajo() {
     var porHoras = ($("#cboModalidadTT").val() === "HORAS");
@@ -1719,11 +1753,14 @@ function CambiaTratamientoExcedente() {
     document.getElementById("IdSI").checked = cargaAVacaciones;
     document.getElementById("IdNO").checked = (valor !== "" && !cargaAVacaciones);
 
+    /* El plan solo se pide cuando el excedente se recupera. */
+    document.getElementById("IdRecuperacion").style.display =
+        (valor === "RECUPERACION") ? "block" : "none";
+    if (valor === "RECUPERACION") { MostrarPlazoRecuperacion(); }
+
     var $msg = $("#msgExcedente");
     if (valor === "RECUPERACION") {
-        /* El plan de recuperación llega en una etapa siguiente. Decirlo es mejor
-           que dejar al colaborador esperando un formulario que no aparece. */
-        $msg.text("El plan de recuperación se acuerda con su jefe inmediato.");
+        $msg.text("Proponga cómo va a recuperar el tiempo.");
     }
     else if (valor === "SIN_REMUNERACION") {
         $msg.text("Talento Humano lo registra para el descuento correspondiente.");

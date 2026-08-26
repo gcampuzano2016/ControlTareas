@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=32" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=33" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -170,7 +170,7 @@
                                                             <div class="col-lg-12">
                                                                 <div class="form-group col-lg-6">
                                                                     <label>Fecha:</label>
-                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual()">
+                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
                                                                 </div>
                                                                 <div class="form-group col-lg-6">
                                                                     <label>Cédula:</label>
@@ -329,37 +329,38 @@
                                                                     <input type="checkbox" id="IdSI" style="display: none">
                                                                     <input type="checkbox" id="IdNO" style="display: none">
                                                                 </div>
-                                                                <div class="col-lg-6" id="CargarHorarioRecuperacion" style="display: none">
-                                                                    <div class="tab-pane active" id="pago">
-                                                                        <table id="TbFormaPago" class="table table-forma-pago ">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Fecha Recuperación</th>
-                                                                                    <th>Hora Inicio</th>
-                                                                                    <th>Hora Final</th>
-                                                                                    <th>Tiempo</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                <form class="form-horizontal form-forma-pagos"></form>
-                                                                                <tr class="tr_clone_field_forma_pago">
-                                                                                    <td>
-                                                                                        <input name="Fecha_forma_pago[]" type="text" class="form-control" id="txtfechaR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="fecha1_forma_pago[]" type="text" class="form-control" id="frmTxtHoraDesdeR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="fecha2_forma_pago[]" type="text" class="form-control" id="frmTxtHoraHastaR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="tiempo_forma_pago[]" type="text" class="form-control" id="frmTxtTiempoR">
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                        <div class="text-right">
-                                                                            <a class="btn btn-primary btn-outline btn-sm add-forma-pago" onclick="AgregarFormaDePago()">Añadir Campo</a>
+                                                                <!-- Plan de recuperacion. Aparece solo cuando el excedente se trata
+                                                                     asi. Reemplaza a un bloque anterior que estaba muerto: era una
+                                                                     tabla de N filas copiada de un widget de formas de pago, sin los
+                                                                     campos que pide la especificacion, y nunca se mostraba. -->
+                                                                <div class="col-lg-12" style="display: none" id="IdRecuperacion">
+                                                                    <div class="panel panel-default" style="margin-top:10px">
+                                                                        <div class="panel-heading">Plan de recuperación</div>
+                                                                        <div class="panel-body">
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Fecha propuesta <span style="color:#a94442">*</span></label>
+                                                                                <input type="text" class="form-control" id="txtRecFecha" placeholder="dd/mm/aaaa">
+                                                                            </div>
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Horario propuesto</label>
+                                                                                <input type="text" class="form-control" id="txtRecHorario" maxlength="100" placeholder="08:00 a 10:00">
+                                                                            </div>
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Fecha máxima de cierre</label>
+                                                                                <input type="text" class="form-control" id="txtRecMaxima" disabled>
+                                                                                <p class="help-block">30 días desde el permiso.</p>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-6">
+                                                                                <label>Actividades a ejecutar</label>
+                                                                                <textarea class="form-control" id="txtRecActividades" rows="2" maxlength="1000"></textarea>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-6">
+                                                                                <label>Entregables esperados</label>
+                                                                                <textarea class="form-control" id="txtRecEntregables" rows="2" maxlength="1000"></textarea>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-12">
+                                                                                <p class="help-block">Pasada la fecha máxima, su jefe inmediato confirma si el tiempo se recuperó.</p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>

@@ -209,6 +209,90 @@ function VerDocumento() {
     let proceso = "";
 }
 
+/* ---------------------------------------------- cierre de recuperaciones --- */
+
+var _padRecuperacion = null;
+var _idRecuperacion = 0;
+
+/* Abre el cierre de una recuperación vencida. */
+function CerrarRecuperacion(idvacaciones, detalle) {
+    _idRecuperacion = idvacaciones;
+    $("#txtDetalleRecuperacion").text(detalle || "");
+    $("#txtObsRecuperacion").val("");
+    $("#cboSeRecupero").val("1");
+
+    if (_padRecuperacion === null) {
+        _padRecuperacion = PadFirma("divFirmaRecuperacion", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padRecuperacion.limpiar();
+    }
+
+    CambiaSeRecupero();
+    $("#modalCerrarRecuperacion").modal('show');
+}
+
+/* Decir que no se recuperó tiene consecuencias para el colaborador, así que el
+   motivo pasa a ser obligatorio y el rótulo lo dice. El servidor lo valida
+   igual: esto es para que se vea antes de intentar guardar. */
+function CambiaSeRecupero() {
+    var seRecupero = ($("#cboSeRecupero").val() === "1");
+    $("#lblObsRecuperacion").html(seRecupero
+        ? "Observaciones"
+        : "Motivo <span style='color:#a94442'>*</span>");
+}
+
+function ConfirmarRecuperacion() {
+    var seRecupero = $("#cboSeRecupero").val();
+    var observacion = $("#txtObsRecuperacion").val();
+
+    if (seRecupero === "0" && $.trim(observacion) === "") {
+        alerta("Debe indicar por qué no se recuperó el tiempo.");
+        return;
+    }
+
+    if (_padRecuperacion === null || _padRecuperacion.estaVacio()) {
+        alerta("Debe firmar para registrar el cierre.");
+        return;
+    }
+
+    var datos = JSON.stringify([{
+        "action": "ConfirmarRecuperacion",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "idVacaciones": _idRecuperacion,
+            "seRecupero": seRecupero,
+            "observacion": observacion,
+            "trazo": _padRecuperacion.obtenerTrazo()
+        }
+    }]);
+
+    $("#btnCerrarRecuperacion").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnCerrarRecuperacion").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo confirmar." : respuesta.mensaje);
+                return;
+            }
+
+            $("#modalCerrarRecuperacion").modal('hide');
+            MensajeCorrecto(respuesta.mensaje);
+        },
+        error: function () {
+            $("#btnCerrarRecuperacion").prop("disabled", false);
+            alerta("No se pudo confirmar la recuperación. No se registró el cierre.");
+        }
+    });
+}
+
 /* Genera el PDF firmado y lo abre.
 
    Se genera en el momento en vez de guardar uno al aprobar, porque el archivo

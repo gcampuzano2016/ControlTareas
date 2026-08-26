@@ -80,6 +80,7 @@
     <Compile Include="EntUsuarioAdmin.cs" />
     <Compile Include="EntUsuarioBitacora.cs" />
     <Compile Include="EntUsuarioMenuBusqueda.cs" />
+    <Compile Include="EntPlanRecuperacion.cs" />
     <Compile Include="EntPerfil.cs" />
     <Compile Include="EntPerfilInicio.cs" />
     <Compile Include="EntPerfiles.cs" />

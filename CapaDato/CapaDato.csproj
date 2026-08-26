@@ -80,6 +80,7 @@
     <Compile Include="DaoMenuUsuario.cs" />
     <Compile Include="DaoUsuarioAdmin.cs" />
     <Compile Include="DaoPerfilInicio.cs" />
+    <Compile Include="DaoPlanRecuperacion.cs" />
     <Compile Include="DaoPerfiles.cs" />
     <Compile Include="DaoPoliza.cs" />
     <Compile Include="DaoProvinciasCiudades.cs" />

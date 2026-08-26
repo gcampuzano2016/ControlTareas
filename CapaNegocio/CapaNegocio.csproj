@@ -205,6 +205,7 @@
     <Compile Include="NegUsuarioAdmin.cs" />
     <Compile Include="NegPerfilInicio.cs" />
     <Compile Include="NegPerfiles.cs" />
+    <Compile Include="NegPlanRecuperacion.cs" />
     <Compile Include="NegPoliza.cs" />
     <Compile Include="NegProvinciasCiudades.cs" />
     <Compile Include="NegRebetes.cs" />

@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=1" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/ProcesoConvenio.js?v=26" type="text/javascript"></script>
+    <script src="../js/ProcesoConvenio.js?v=27" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -426,6 +426,43 @@
         <!-- /.modal -->
 
         <!-- Modal -->
+        <!-- Cierre de una recuperación. Solo aparece para las que ya vencieron:
+             confirmar antes sería opinar sobre algo que todavía puede pasar. -->
+        <div class="modal fade" id="modalCerrarRecuperacion" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #fcf8e3">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Confirmar recuperación</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-lg-12">
+                            <p id="txtDetalleRecuperacion" class="help-block"></p>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>¿Se recuperó el tiempo?</label>
+                            <select id="cboSeRecupero" class="form-control" onchange="CambiaSeRecupero()">
+                                <option value="1">Sí, se recuperó</option>
+                                <option value="0">No se recuperó</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label id="lblObsRecuperacion">Observaciones</label>
+                            <textarea class="form-control" id="txtObsRecuperacion" rows="2" maxlength="500"></textarea>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>Su firma: <span style="color:#a94442">*</span></label>
+                            <div id="divFirmaRecuperacion"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" onclick="ConfirmarRecuperacion()" class="btn btn-primary" id="btnCerrarRecuperacion">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="modalCargarProceso" tabindex="-1" role="dialog" aria-labelledby="modalCargarProcesoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">

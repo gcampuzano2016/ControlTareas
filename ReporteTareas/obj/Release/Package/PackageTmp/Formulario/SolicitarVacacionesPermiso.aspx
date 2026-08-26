@@ -169,10 +169,6 @@
                                                         <div class="panel-body">
                                                             <div class="col-lg-12">
                                                                 <div class="form-group col-lg-6">
-                                                                    <label>Fecha:</label>
-                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
-                                                                </div>
-                                                                <div class="form-group col-lg-6">
                                                                     <label>Cédula:</label>
                                                                     <input type="text" class="form-control" id="txtCedulaP" disabled>
                                                                 </div>
@@ -184,7 +180,7 @@
                                                                     <label>Departamento:</label>
                                                                     <input type="text" class="form-control" id="txtDepartamentoP" disabled>
                                                                 </div>
-                                                                <div class="form-group col-lg-12">
+                                                                <div class="form-group col-lg-6">
                                                                     <label>Jefe de Area:</label>
                                                                     <input type="text" class="form-control" id="txtJefaAreaP" disabled>
                                                                 </div>
@@ -297,6 +293,15 @@
                                                                         </form>
                                                                     </div>
                                                                 </div>
+                                                                <!-- La fecha del permiso vive acá, junto a las horas, y no arriba entre
+                                                                     los datos autocompletados: ahí se leía como la fecha del documento.
+                                                                     Es el día de la ausencia, y de él depende de qué mes sale el saldo
+                                                                     del permiso mensual. Por eso al cambiarla se vuelve a consultar. -->
+                                                                <div class="col-lg-3">
+                                                                    <label>Fecha del permiso:</label>
+                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
+                                                                    <p class="help-block">El día en que se ausenta.</p>
+                                                                </div>
                                                                 <div class="col-lg-3">
                                                                     <label>Hora Desde:</label>
                                                                     <input type="text" class="form-control" id="frmTxtHoraDesdeP">
@@ -307,7 +312,7 @@
                                                                     <input type="text" class="form-control" id="frmTxtHoraHastaP">
                                                                     <p class="help-block" id="frmTxtHoraHastaPMsg"></p>
                                                                 </div>
-                                                                <div class="col-lg-6">
+                                                                <div class="col-lg-3">
                                                                     <label>Tiempo:</label>
                                                                     <input type="text" class="form-control" id="frmTxtTiempoP" disabled>
                                                                     <p class="help-block"></p>

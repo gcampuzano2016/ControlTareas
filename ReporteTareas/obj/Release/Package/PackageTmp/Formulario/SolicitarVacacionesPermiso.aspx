@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=36" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=37" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>

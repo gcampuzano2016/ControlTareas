@@ -1774,6 +1774,10 @@ function ArchivosElegidos() {
    para no volver a preguntarle al servidor en cada validación. */
 var _saldoMensual = null;
 
+/* Si la consulta del saldo ya volvio, con dato o con error. Distingue "todavia
+   no se" de "se que no hay saldo", que llevan a pantallas distintas. */
+var _saldoConsultado = false;
+
 /* Consulta el saldo y ajusta la casilla.
 
    Se llama al abrir el formulario y cada vez que cambia la fecha del permiso,
@@ -1796,9 +1800,17 @@ function ConsultarSaldoMensual() {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (respuesta) {
+            _saldoConsultado = true;
+
             if (respuesta == null || typeof respuesta.MinutosDisponibles == "undefined") {
+                /* Respondio, pero sin saldo utilizable. Cuenta como bolsa que no
+                   cubre nada, igual que el error: el selector de excedente tiene
+                   que salir. Antes se salia por acá sin reevaluarlo. */
                 _saldoMensual = null;
                 $("#msgPermisoMensual").text("").removeClass("text-danger");
+                $("#chkPermisoMensual").prop("disabled", true);
+                document.getElementById("chkPermisoMensual").checked = false;
+                MostrarTratamientoExcedente();
                 return;
             }
 
@@ -1822,6 +1834,8 @@ function ConsultarSaldoMensual() {
             CambiaPermisoMensual();
         },
         error: function () {
+            _saldoConsultado = true;
+
             /* Sin saldo confirmado no se ofrece la opción: es preferible que
                tramiten el permiso por el camino normal a consumir una bolsa que
                nadie pudo verificar. */
@@ -1849,15 +1863,31 @@ function ConsultarSaldoMensual() {
    Un permiso sin horas todavía cargadas no se cuenta como excedente: no se sabe.
 */
 function ExcedeElSaldoMensual() {
+    var tipo = TipoPermisoSeleccionado();
+
+    /* Médico y Calamidad no consumen la bolsa mensual: el permiso entero es
+       excedente, se sepan o no las horas todavía. */
+    if (!AplicaPermisoMensual(tipo)) { return true; }
+
+    /* Mientras la consulta del saldo no vuelve no se afirma nada, para no mostrar
+       y esconder el selector en el mismo segundo. */
+    if (!_saldoConsultado) { return false; }
+
+    /* Sin saldo no hay nada que pueda cubrir el permiso, así que el excedente es
+       seguro antes de saber cuántas horas son. Por eso el selector sale junto con
+       el aviso de agotado y no recién cuando se cargan las horas.
+
+       Vale para las dos formas de quedarse sin bolsa: la del mes ya consumida, y
+       la consulta que no se pudo hacer. */
+    if (_saldoMensual === null) { return true; }
+    if (parseInt(_saldoMensual.MinutosDisponibles, 10) <= 0) { return true; }
+
+    /* Con saldo disponible ya depende de cuánto pida, y eso no se sabe hasta que
+       cargue las horas. */
     var pedidos = MinutosDelPermiso();
     if (pedidos === 0) { return false; }
 
-    /* En los tipos que no usan la bolsa —Médico, Calamidad, Teletrabajo— el
-       permiso completo es excedente, y ahí el tratamiento sí corresponde. */
-    if (!AplicaPermisoMensual(TipoPermisoSeleccionado())) { return true; }
-
     if (!document.getElementById("chkPermisoMensual").checked) { return true; }
-    if (_saldoMensual === null) { return false; }
 
     return pedidos > parseInt(_saldoMensual.MinutosDisponibles, 10);
 }

@@ -528,6 +528,62 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region TramosPorAutorizar
+        /// <summary>
+        /// Las filas de un guardado a las que hay que pedirles autorización.
+        ///
+        /// Normalmente la lista la arma el procedimiento, que puede haber insertado
+        /// varias: parte el rango en tramos según el horario del responsable.
+        ///
+        /// El caso raro, y la razón de que esto exista, es un despliegue a medias.
+        /// Esta DLL puede quedar arriba con la CapaDato anterior todavía en el
+        /// servidor —se hace así a propósito, para publicar el PDF nuevo sin activar
+        /// el partido en tramos—. Esa versión no llena IdsHorasExtras, y sin este
+        /// respaldo la guarda nueva daría siempre falso: dejarían de salir los
+        /// correos de autorización de horas extras sin ningún error que lo delate.
+        ///
+        /// Por eso se mira si la propiedad es null y no si está vacía. Son dos cosas
+        /// distintas: null es "la capa de datos no me dijo nada", vacío es "me dijo
+        /// que no hay ninguna". Tratarlas igual volvería a mandar correos por
+        /// permisos que no son horas extras.
+        ///
+        /// Cuando CapaDato.exe suba con el resto, esta segunda rama deja de usarse y
+        /// se puede borrar.
+        /// </summary>
+        /// <param name="respuesta">Lo que devolvió el alta.</param>
+        /// <param name="tipoElegido">El tipo que mandó la pantalla. Solo se usa en el respaldo.</param>
+        public static List<long> TramosPorAutorizar(EntRespuesta respuesta, long tipoElegido)
+        {
+            List<long> ids = new List<long>();
+
+            if (respuesta == null || respuesta.estado != "1") { return ids; }
+
+            if (respuesta.IdsHorasExtras != null)
+            {
+                foreach (string texto in respuesta.IdsHorasExtras.Split(','))
+                {
+                    long id;
+                    if (long.TryParse(texto.Trim(), out id) && id > 0) { ids.Add(id); }
+                }
+
+                return ids;
+            }
+
+            /* Respaldo: el criterio anterior, sobre la única fila que insertaba esa
+               versión. Lo decidía el combo de la pantalla. */
+            if (tipoElegido == 1 || tipoElegido == 2)
+            {
+                long unica;
+                if (long.TryParse(Convert.ToString(respuesta.resultado), out unica) && unica > 0)
+                {
+                    ids.Add(unica);
+                }
+            }
+
+            return ids;
+        }
+        #endregion
+
         #region SolicitarAutorizacionHorasExtras
         /// <summary>
         /// Le pide al jefe inmediato que autorice UNA fila de horas extras.

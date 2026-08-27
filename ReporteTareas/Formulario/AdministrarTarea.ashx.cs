@@ -380,24 +380,23 @@ namespace JsonJQueryNetAdministrarTarea
                    tramos según el horario del responsable, así que 07:30 a 18:30 con
                    jornada 08:30-17:30 deja dos tramos suplementarios y uno normal.
 
-                   La guarda ya no mira el combo de la pantalla, que dejó de decidir.
-                   Manda lo que devolvió el procedimiento: los identificadores de las
-                   filas que salieron como horas extras. Si el rango entró completo en la
-                   jornada, la lista viene vacía y no se pide nada. */
-                if (respuesta.estado == "1" && !string.IsNullOrWhiteSpace(respuesta.IdsHorasExtras))
+                   Ya no decide el combo de la pantalla sino lo que devolvió el
+                   procedimiento: los identificadores de las filas que salieron como
+                   horas extras. Si el rango entró completo en la jornada, la lista
+                   viene vacía y no se pide nada.
+
+                   TramosPorAutorizar tiene además el respaldo para cuando esta DLL
+                   está arriba y la CapaDato anterior todavía no. */
+                List<long> tramosPorAutorizar =
+                    EnvioCorreoHelper.TramosPorAutorizar(respuesta, registro.Det_Horas_Extras_Tipo);
+
+                if (tramosPorAutorizar.Count > 0)
                 {
                     EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
                     List<string> sinSolicitar = new List<string>();
 
-                    foreach (string idTexto in respuesta.IdsHorasExtras.Split(','))
+                    foreach (long idTramo in tramosPorAutorizar)
                     {
-                        long idTramo;
-
-                        if (!long.TryParse(idTexto.Trim(), out idTramo))
-                        {
-                            continue;
-                        }
-
                         EntRespuesta solicitud =
                             envioCorreo.SolicitarAutorizacionHorasExtras(
                                 idTramo,

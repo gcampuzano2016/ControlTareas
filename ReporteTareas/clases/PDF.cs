@@ -313,7 +313,26 @@ namespace PDF
 
             try
             {
-                byte[] pdf = new SynchronizedPechkin(new GlobalConfig()).Convert(contenidoHtml);
+                /* Estas tres marcas separan las dos cosas que pueden fallar y que
+                   desde afuera se ven igual: que no cargue la libreria nativa, y que
+                   cargue pero la conversion no vuelva.
+
+                   wkhtmltox0.dll es una compilacion de 32 bits -viene con mingwm10 y
+                   libgcc_s_dw2-1-, asi que en un grupo de aplicaciones de 64 bits no
+                   se puede cargar. Si el hilo despachador de Pechkin muere al
+                   inicializarla, Convert espera una respuesta que no llega nunca. */
+                VerErrores("GenerarPdfSolicitud: proceso de " + (IntPtr.Size * 8)
+                           + " bits, creando el convertidor", "Log", "Detalle");
+
+                SynchronizedPechkin convertidor = new SynchronizedPechkin(new GlobalConfig());
+
+                VerErrores("GenerarPdfSolicitud: convertidor creado, convirtiendo "
+                           + contenidoHtml.Length + " caracteres", "Log", "Detalle");
+
+                byte[] pdf = convertidor.Convert(contenidoHtml);
+
+                VerErrores("GenerarPdfSolicitud: convertido, "
+                           + (pdf == null ? "null" : pdf.Length.ToString() + " bytes"), "Log", "Detalle");
 
                 if (pdf == null || pdf.Length == 0)
                 {

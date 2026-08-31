@@ -1,10 +1,11 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
 using Pechkin;
 using Pechkin.Synchronized;
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -116,6 +117,123 @@ namespace PDF
             }
 
             return false;
+        }
+        #endregion
+
+        #region DocumentoDeSolicitud
+        /// <summary>
+        /// Arma el documento de una solicitud con el formato de los modelos de
+        /// Talento Humano y lo deja en ~/descargas/, registrado contra la solicitud.
+        /// Devuelve el nombre del archivo, o cadena vacía si falló.
+        ///
+        /// Vive acá y no en el handler porque hay dos momentos que lo necesitan:
+        /// cuando se crea la solicitud —la copia que acompaña al correo— y cuando
+        /// alguien descarga el documento firmado desde la lista. Antes cada uno
+        /// generaba su propio PDF por caminos distintos, y el de la creación salía
+        /// convertido de la plantilla del correo: dos documentos que no se parecían
+        /// en nada para la misma solicitud.
+        ///
+        /// Se puede llamar en cualquier estado. Las firmas que todavía no existen
+        /// salen como "Pendiente", que es lo correcto para una copia recién creada.
+        /// </summary>
+        public string DocumentoDeSolicitud(long idVacaciones)
+        {
+            string temporales = "";
+
+            try
+            {
+                /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
+                   Convert lanza si no cabe, que es lo que se quiere: mejor un error
+                   visible que un id truncado en silencio. */
+                EntSolicitud solicitud =
+                    NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+
+                if (solicitud == null || solicitud.IdVacaciones == 0)
+                {
+                    VerErrores("DocumentoDeSolicitud: no existe la solicitud " + idVacaciones, "Log", "Detalle");
+                    return "";
+                }
+
+                List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
+                string folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+                /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
+                   no resuelve base64 embebido. Se borran al terminar: el original
+                   vive en la base. */
+                temporales = HttpContext.Current.Server.MapPath("~/descargas/tmp_" + idVacaciones + "_" +
+                                                                DateTime.Now.ToString("yyyyMMddHHmmssfff")) + "\\";
+                Directory.CreateDirectory(temporales);
+
+                foreach (EntFirmaSolicitud f in firmas)
+                {
+                    if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+                    string ruta = temporales + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(ruta, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = ruta;
+                }
+
+                /* El logo institucional, el mismo de los correos. Se usa este y no
+                   Img/logo_dos.png porque ese último no está declarado en el
+                   proyecto: existe en la máquina de desarrollo pero no viaja en la
+                   publicación, así que el PDF habría salido sin logo en el servidor
+                   y sin que nadie se enterara. Si algún día se declara, se toma. */
+                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+                if (!File.Exists(rutaLogo))
+                {
+                    rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+                }
+                if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
+
+                /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
+                   recuperación. En vacaciones no aplica y viene null, que es lo que
+                   la plantilla espera. */
+                EntDetallePermiso detalle = null;
+                if (solicitud.IdTipoSolicitud == 1)
+                {
+                    detalle = NegDetallePermiso.Obtener(idVacaciones);
+                }
+
+                /* Los períodos de los que salen los días. Solo en vacaciones. */
+                string periodos = "";
+                if (solicitud.IdTipoSolicitud != 1)
+                {
+                    periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
+                }
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
+
+                string archivo = GenerarPdfSolicitud(html, folio);
+                if (string.IsNullOrEmpty(archivo)) { return ""; }
+
+                /* Se deja registrado contra la solicitud para poder volver a
+                   descargarlo desde el historial. */
+                EntSolicitud registro = new EntSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Ruta_Archivo = "descargas/",
+                    Descripcion_Archivo = archivo
+                };
+                NegSolicitud.RTA_ActualizarRutaRide(registro);
+
+                return archivo;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("DocumentoDeSolicitud: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+            finally
+            {
+                /* Si esto falla no importa: son archivos de render, no el registro. */
+                try
+                {
+                    if (!string.IsNullOrEmpty(temporales) && Directory.Exists(temporales))
+                    {
+                        Directory.Delete(temporales, true);
+                    }
+                }
+                catch { }
+            }
         }
         #endregion
 

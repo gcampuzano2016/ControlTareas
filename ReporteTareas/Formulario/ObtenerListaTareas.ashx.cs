@@ -2862,88 +2862,26 @@ namespace JsonJQueryNetTareas
         /// solicitud, porque la especificación pide que la descarga siga
         /// disponible después desde el historial y no solo al aprobar.
         /// </summary>
+        /// <summary>
+        /// Genera el documento de una solicitud y devuelve su ruta relativa.
+        ///
+        /// La receta vive en PDFs.DocumentoDeSolicitud, porque el mismo documento
+        /// se arma tambien al crear la solicitud, desde el envio del correo de
+        /// copia. Antes cada camino generaba el suyo y no se parecian.
+        /// </summary>
         public string GenerarPdfSolicitud(dynamic parameters)
         {
-            string temporales = "";
-
             try
             {
                 long idVacaciones = Convert.ToInt64(parameters["idVacaciones"].ToString());
 
-                /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
-                   Convert lanza si no cabe, que es lo que se quiere: mejor un error
-                   visible que un id truncado en silencio. Hoy el máximo es 22837. */
-                EntSolicitud solicitud = NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
-                if (solicitud == null || solicitud.IdVacaciones == 0)
-                {
-                    return responseMessage("0", "No se encontro la solicitud.", "warning", "");
-                }
-
-                List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
-                string folio = NegFirmaSolicitud.Folio(idVacaciones);
-
-                /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
-                   no resuelve base64 embebido. Se borran al terminar: el original
-                   vive en la base. */
-                temporales = HttpContext.Current.Server.MapPath("~/descargas/tmp_" + idVacaciones + "_" +
-                                                                DateTime.Now.ToString("yyyyMMddHHmmssfff")) + "\\";
-                Directory.CreateDirectory(temporales);
-
-                foreach (EntFirmaSolicitud f in firmas)
-                {
-                    if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
-                    string ruta = temporales + f.Rol + "_" + f.Secuencia + ".png";
-                    File.WriteAllBytes(ruta, Convert.FromBase64String(f.TrazoBase64));
-                    f.RutaTrazo = ruta;
-                }
-
-                /* El logo institucional, el mismo de los correos. Se usa este y no
-                   Img/logo_dos.png porque ese ultimo no esta declarado en el
-                   proyecto: existe en la maquina de desarrollo pero no viaja en la
-                   publicacion, asi que el PDF habria salido sin logo en el servidor
-                   y sin que nadie se enterara. Si algun dia se declara, se toma. */
-                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
-                if (!File.Exists(rutaLogo))
-                {
-                    rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
-                }
-                if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
-
-                /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
-                   recuperacion. En vacaciones no aplica y viene null, que es lo que
-                   la plantilla espera. */
-                EntDetallePermiso detalle = null;
-                if (solicitud.IdTipoSolicitud == 1)
-                {
-                    detalle = NegDetallePermiso.Obtener(idVacaciones);
-                }
-
-                /* Los periodos de los que salen los dias. Solo en vacaciones. */
-                string periodos = "";
-                if (solicitud.IdTipoSolicitud != 1)
-                {
-                    periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
-                }
-
-                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
-
                 PDFs generador = new PDFs();
-                string archivo = generador.GenerarPdfSolicitud(html, folio);
+                string archivo = generador.DocumentoDeSolicitud(idVacaciones);
 
                 if (string.IsNullOrEmpty(archivo))
                 {
                     return responseMessage("0", "No se pudo generar el PDF. Revise el log del servidor.", "danger", "");
                 }
-
-                /* Se deja registrado contra la solicitud para poder volver a
-                   descargarlo desde el historial. */
-                EntSolicitud registro = new EntSolicitud()
-                {
-                    IdVacaciones = idVacaciones,
-                    Ruta_Archivo = "descargas/",
-                    Descripcion_Archivo = archivo
-                };
-                NegSolicitud.RTA_ActualizarRutaRide(registro);
 
                 EntRespuesta respuesta = new EntRespuesta()
                 {
@@ -2956,18 +2894,6 @@ namespace JsonJQueryNetTareas
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrio un error al generar el PDF. " + ex.Message.ToString(), "danger", "");
-            }
-            finally
-            {
-                /* Si esto falla no importa: son archivos de render, no el registro. */
-                try
-                {
-                    if (!string.IsNullOrEmpty(temporales) && Directory.Exists(temporales))
-                    {
-                        Directory.Delete(temporales, true);
-                    }
-                }
-                catch { }
             }
         }
 

@@ -430,7 +430,11 @@ namespace CorreoHelper
 
                     //VerErrores("contenidoCorreo: " + contenidoCorreo, "Log", "Detalle");
                     respuestaEnvioCorreo = EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo);
-                    generarRide.EnvioCorreoEncuesta(contenidoCorreo, codigoSolicitud);
+                    /* La copia en PDF de la solicitud. Se arma con el mismo formato
+                       que el documento firmado -los modelos de Talento Humano- y no
+                       convirtiendo el cuerpo del correo, que es lo que se hacia antes
+                       y daba dos documentos distintos para la misma solicitud. */
+                    generarRide.DocumentoDeSolicitud(codigoSolicitud);
                     //pdfLista.CrearPDF(contenidoCorreo, codigoSolicitud);
                 }
                 else

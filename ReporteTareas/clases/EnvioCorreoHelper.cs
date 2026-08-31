@@ -695,7 +695,12 @@ namespace CorreoHelper
             StringBuilder h = new StringBuilder();
 
             h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
-            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">SU DECISION</div>");
+            /* Con dos botones es una decision -aprobar o rechazar-; con uno solo es
+               una accion, que es el caso de Talento Humano. */
+            bool esDecision = urlAprobar != "" && urlRechazar != "";
+
+            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">");
+            h.Append(esDecision ? "SU DECISIÓN" : "ACCIÓN").Append("</div>");
             h.Append("<table cellpadding=" + Q + "0" + Q + " cellspacing=" + Q + "0" + Q + "><tr>");
 
             if (urlAprobar != "")
@@ -714,7 +719,12 @@ namespace CorreoHelper
             }
 
             h.Append("</tr></table>");
-            h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Se le pedira su firma antes de registrar la decision.</p>");
+            /* El aviso de la firma solo aplica a aprobar y rechazar: son los dos
+               caminos que piden firmar antes de aplicar la decision. */
+            if (esDecision)
+            {
+                h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Se le pedirá su firma antes de registrar la decisión.</p>");
+            }
             h.Append("</div>");
 
             return h.ToString();

@@ -101,6 +101,9 @@ namespace CapaDato
                 {
                     Tarea.IdVacaciones = Convert.ToInt32(dr["IdVacaciones"].ToString());
                     Tarea.FechaRegistro = dr["FechaRegistro"].ToString();
+                    /* El procedimiento ya lo devolvia y nadie lo leia. Hace falta para
+                       distinguir permiso de vacaciones en los avisos. */
+                    Tarea.IdTipoSolicitud = Convert.ToInt64(dr["IdTipoSolicitud"]);
                     Tarea.Cedula = dr["Cedula"].ToString();
                     Tarea.Colaborador = dr["Colaborador"].ToString();
                     Tarea.Departamento = dr["Departamento"].ToString();

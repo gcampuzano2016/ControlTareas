@@ -182,18 +182,23 @@ namespace ReporteTareas.Formulario
                     lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
 
                     #region Enviar mail Recurso Humano
+                    /* Talento Humano es el ultimo filtro, tanto en vacaciones como en
+                       permisos: es quien pone la tercera firma del documento. Antes
+                       solo se le avisaba con el marcador "EM", que traen las
+                       vacaciones; los permisos vienen con "NO" y se quedaban sin
+                       aviso, asi que el tramite moria en la aprobacion del jefe. */
+                    EntSolicitud Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(
+                        0, Convert.ToInt32(parametrosSolicitud[0]));
+
+                    string CorreoRH = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CORREORH");
+                    EnviarCorreoRH(Lista, parametrosSolicitud[0], CorreoRH, parametrosSolicitud[3]);
+                    #endregion
+
+                    /* El marcador sigue decidiendo que imagen se le muestra al jefe. */
                     if (parametrosSolicitud[4] == "EM")
                     {
-                        EntSolicitud Lista = new EntSolicitud();
-                        List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
-                        string CorreoRH = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CORREORH");
-                        int tipo = 0;
-                        EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
-                        Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(tipo, Convert.ToInt32(parametrosSolicitud[0]));
-                        EnviarCorreoRH(Lista, parametrosSolicitud[0], CorreoRH, parametrosSolicitud[3]);
                         Aprobados.Visible = true;
                     }
-                    #endregion
                     else if (parametrosSolicitud[4] == "NO")
                     {
                         PermisoAprobado.Visible = true;
@@ -435,7 +440,18 @@ namespace ReporteTareas.Formulario
             bool respuestaEnvioCorreo = false;
             bool respuestaEnvioCorreoUsuario = false;
             //respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
-            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, "Registrar Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt");
+            /* Talento Humano recibe el mismo documento que el colaborador y el jefe,
+               con las firmas que ya tenga, y sus propios botones. Antes le llegaba la
+               plantilla contenidoCorreoNotificacionSolicitudRH.txt, que no esta
+               desplegada en el servidor: el correo salia con el cuerpo vacio. */
+            string asuntoRH = Lista.IdTipoSolicitud == 1
+                ? "Permiso aprobado por el jefe - pendiente de su validación"
+                : "Vacaciones aprobadas por el jefe - pendientes de su registro";
+
+            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, asuntoRH,
+                envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"),
+                listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt",
+                Convert.ToInt32(IdSolicitud));
         }
         #endregion
 

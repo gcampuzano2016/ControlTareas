@@ -6737,7 +6737,18 @@ namespace JsonJQueryNetTareas
             bool respuestaEnvioCorreo = false;
             bool respuestaEnvioCorreoUsuario = false;
             //respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
-            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, "Registrar Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt");
+            /* Talento Humano recibe el mismo documento que el colaborador y el jefe,
+               con las firmas que ya tenga, y sus propios botones. Antes le llegaba la
+               plantilla contenidoCorreoNotificacionSolicitudRH.txt, que no esta
+               desplegada en el servidor: el correo salia con el cuerpo vacio. */
+            string asuntoRH = Lista.IdTipoSolicitud == 1
+                ? "Permiso aprobado por el jefe - pendiente de su validación"
+                : "Vacaciones aprobadas por el jefe - pendientes de su registro";
+
+            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, asuntoRH,
+                envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"),
+                listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt",
+                Convert.ToInt32(IdSolicitud));
         }
         #endregion
 

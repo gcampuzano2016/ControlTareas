@@ -138,10 +138,34 @@ namespace PDF
         /// </summary>
         public string DocumentoDeSolicitud(long idVacaciones)
         {
+            /* Las rutas se resuelven aca, con HttpContext a mano. La sobrecarga de
+               abajo no lo usa: puede correr en otro hilo, donde HttpContext.Current
+               es null. */
+            string carpetaDescargas = HttpContext.Current.Server.MapPath("~/descargas/");
+            string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+
+            if (!File.Exists(rutaLogo))
+            {
+                rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+            }
+            if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
+
+            return DocumentoDeSolicitud(idVacaciones, carpetaDescargas, rutaLogo);
+        }
+
+        /// <summary>
+        /// Igual que la anterior, pero con las rutas ya resueltas. Existe para poder
+        /// llamarla desde un hilo que no es el de la peticion.
+        /// </summary>
+        public string DocumentoDeSolicitud(long idVacaciones, string carpetaDescargas, string rutaLogo)
+        {
             string temporales = "";
+            System.Diagnostics.Stopwatch reloj = System.Diagnostics.Stopwatch.StartNew();
 
             try
             {
+                Etapa(reloj, idVacaciones, "inicio");
+
                 /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
                    Convert lanza si no cabe, que es lo que se quiere: mejor un error
                    visible que un id truncado en silencio. */
@@ -154,14 +178,18 @@ namespace PDF
                     return "";
                 }
 
+                Etapa(reloj, idVacaciones, "solicitud leida");
+
                 List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
                 string folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+                Etapa(reloj, idVacaciones, "firmas y folio");
 
                 /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
                    no resuelve base64 embebido. Se borran al terminar: el original
                    vive en la base. */
-                temporales = HttpContext.Current.Server.MapPath("~/descargas/tmp_" + idVacaciones + "_" +
-                                                                DateTime.Now.ToString("yyyyMMddHHmmssfff")) + "\\";
+                temporales = carpetaDescargas + "tmp_" + idVacaciones + "_" +
+                             DateTime.Now.ToString("yyyyMMddHHmmssfff") + "\\";
                 Directory.CreateDirectory(temporales);
 
                 foreach (EntFirmaSolicitud f in firmas)
@@ -172,17 +200,6 @@ namespace PDF
                     f.RutaTrazo = ruta;
                 }
 
-                /* El logo institucional, el mismo de los correos. Se usa este y no
-                   Img/logo_dos.png porque ese último no está declarado en el
-                   proyecto: existe en la máquina de desarrollo pero no viaja en la
-                   publicación, así que el PDF habría salido sin logo en el servidor
-                   y sin que nadie se enterara. Si algún día se declara, se toma. */
-                string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
-                if (!File.Exists(rutaLogo))
-                {
-                    rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
-                }
-                if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
 
                 /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
                    recuperación. En vacaciones no aplica y viene null, que es lo que
@@ -200,9 +217,16 @@ namespace PDF
                     periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
                 }
 
+                Etapa(reloj, idVacaciones, "detalle y periodos");
+
                 string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
 
-                string archivo = GenerarPdfSolicitud(html, folio);
+                Etapa(reloj, idVacaciones, "html armado");
+
+                string archivo = GenerarPdfSolicitud(html, folio, carpetaDescargas);
+
+                Etapa(reloj, idVacaciones, "pdf convertido");
+
                 if (string.IsNullOrEmpty(archivo)) { return ""; }
 
                 /* Se deja registrado contra la solicitud para poder volver a
@@ -214,6 +238,8 @@ namespace PDF
                     Descripcion_Archivo = archivo
                 };
                 NegSolicitud.RTA_ActualizarRutaRide(registro);
+
+                Etapa(reloj, idVacaciones, "registrado, listo");
 
                 return archivo;
             }
@@ -236,6 +262,19 @@ namespace PDF
             }
         }
         #endregion
+
+        /// <summary>
+        /// Deja en el log cuanto llevaba el documento al llegar a cada etapa.
+        ///
+        /// Existe porque cuando esto se colgo en produccion no habia forma de saber
+        /// donde. Son cinco lineas por solicitud y solo se escriben al generar un
+        /// documento, no en cada peticion.
+        /// </summary>
+        private void Etapa(System.Diagnostics.Stopwatch reloj, long idVacaciones, string etapa)
+        {
+            VerErrores("DocumentoDeSolicitud " + idVacaciones + " | " + etapa + " | "
+                       + reloj.ElapsedMilliseconds + " ms", "Log", "Detalle");
+        }
 
         #region GenerarPdfSolicitud
         /// <summary>
@@ -260,6 +299,16 @@ namespace PDF
         /// <param name="prefijo">Prefijo del nombre del archivo, normalmente el folio.</param>
         public string GenerarPdfSolicitud(string contenidoHtml, string prefijo)
         {
+            return GenerarPdfSolicitud(contenidoHtml, prefijo,
+                                       HttpContext.Current.Server.MapPath("~/descargas/"));
+        }
+
+        /// <summary>
+        /// Igual que la anterior, con la carpeta de salida ya resuelta, para poder
+        /// correr fuera del hilo de la peticion.
+        /// </summary>
+        public string GenerarPdfSolicitud(string contenidoHtml, string prefijo, string carpetaDescargas)
+        {
             if (string.IsNullOrEmpty(contenidoHtml)) { return ""; }
 
             try
@@ -272,7 +321,7 @@ namespace PDF
                     return "";
                 }
 
-                string carpeta = HttpContext.Current.Server.MapPath("~/descargas/");
+                string carpeta = carpetaDescargas;
                 if (!Directory.Exists(carpeta)) { Directory.CreateDirectory(carpeta); }
 
                 /* Nombre único: folio más marca de tiempo hasta el milisegundo en

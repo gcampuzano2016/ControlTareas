@@ -428,24 +428,19 @@ namespace CorreoHelper
                         contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
                     }
 
-                    /* La copia en PDF de la solicitud. Se arma con el mismo formato
-                       que el documento firmado -los modelos de Talento Humano- y no
-                       convirtiendo el cuerpo del correo, que es lo que se hacia antes
-                       y daba dos documentos distintos para la misma solicitud.
+                    /* La copia en PDF, con el mismo formato que el documento firmado.
 
-                       Se genera ANTES de enviar, porque ahora viaja adjunto: el cuerpo
-                       del mensaje sigue siendo la plantilla de siempre, pero lo que el
-                       colaborador se guarda es el documento de verdad. */
-                    string archivoPdf = generarRide.DocumentoDeSolicitud(codigoSolicitud);
+                       Va acotada en el tiempo y a proposito. La conversion a PDF corre
+                       dentro de la peticion que guarda la solicitud, y si se traba deja
+                       al usuario esperando para siempre: paso en produccion. Guardar la
+                       solicitud es lo importante; el adjunto es un extra que no puede
+                       costarle el tramite a nadie.
 
-                    string rutaAdjunto = "";
-                    if (!string.IsNullOrEmpty(archivoPdf))
-                    {
-                        rutaAdjunto = System.Web.HttpContext.Current.Server.MapPath("~/descargas/") + archivoPdf;
-                    }
+                       Si no termina a tiempo se manda el correo sin adjunto y queda
+                       anotado. El documento se puede volver a generar despues desde el
+                       boton de descarga, que arma exactamente el mismo archivo. */
+                    string rutaAdjunto = DocumentoParaAdjuntar(generarRide, codigoSolicitud);
 
-                    /* Sin PDF se manda igual, solo que sin adjunto. Un documento que no
-                       se pudo generar no puede dejar al colaborador sin su aviso. */
                     respuestaEnvioCorreo = string.IsNullOrEmpty(rutaAdjunto)
                         ? EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo)
                         : EnviarCorreoPermiso(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, rutaAdjunto);
@@ -542,6 +537,71 @@ namespace CorreoHelper
             }
 
             return mensaje;
+        }
+        #endregion
+
+        #region DocumentoParaAdjuntar
+        /// <summary>
+        /// Cuanto se espera por el documento antes de mandar el correo sin el.
+        ///
+        /// Un PDF de una pagina se arma en un par de segundos. Treinta es holgado
+        /// para un servidor cargado y sigue siendo tolerable para quien esta
+        /// esperando que se guarde su solicitud.
+        /// </summary>
+        private const int SegundosParaElDocumento = 30;
+
+        /// <summary>
+        /// La ruta del documento recien generado, o cadena vacia si no se pudo o si
+        /// tardo demasiado.
+        ///
+        /// Corre en otro hilo para poder abandonarlo. Si la conversion se cuelga, el
+        /// hilo queda ahi hasta que termine o muera, pero la peticion del usuario
+        /// sigue: la solicitud se guarda y el correo sale igual.
+        ///
+        /// Por eso las rutas se resuelven aca y se le pasan hechas: en ese otro hilo
+        /// no hay HttpContext.
+        /// </summary>
+        private string DocumentoParaAdjuntar(PDFs generador, int codigoSolicitud)
+        {
+            try
+            {
+                System.Web.HttpContext contexto = System.Web.HttpContext.Current;
+                if (contexto == null) { return ""; }
+
+                string carpeta = contexto.Server.MapPath("~/descargas/");
+                string logo = contexto.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+
+                if (!System.IO.File.Exists(logo))
+                {
+                    logo = contexto.Server.MapPath("~/Img/logo_dos.png");
+                }
+                if (!System.IO.File.Exists(logo)) { logo = ""; }
+
+                string archivo = "";
+
+                System.Threading.Tasks.Task tarea = System.Threading.Tasks.Task.Factory.StartNew(
+                    delegate
+                    {
+                        archivo = generador.DocumentoDeSolicitud(codigoSolicitud, carpeta, logo);
+                    });
+
+                if (!tarea.Wait(SegundosParaElDocumento * 1000))
+                {
+                    VerErrores("DocumentoParaAdjuntar: la generacion del PDF de la solicitud "
+                               + codigoSolicitud + " paso de " + SegundosParaElDocumento
+                               + " segundos. El correo sale sin adjunto.", "Log", "Detalle");
+                    return "";
+                }
+
+                if (string.IsNullOrEmpty(archivo)) { return ""; }
+
+                return carpeta + archivo;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("DocumentoParaAdjuntar: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
         }
         #endregion
 

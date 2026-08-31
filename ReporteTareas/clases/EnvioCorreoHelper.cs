@@ -556,6 +556,125 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnviarDocumentoATalentoHumano
+        /// <summary>
+        /// Le manda a Talento Humano el documento con las firmas que ya tiene, le dice
+        /// quien firmo, y le deja el acceso para poner la suya.
+        ///
+        /// Talento Humano es el ultimo paso: hasta que no valida y firma, el documento
+        /// no esta completo. Por eso el correo no le informa nada mas, le dice que
+        /// falta lo suyo.
+        /// </summary>
+        public bool EnviarDocumentoATalentoHumano(int codigoSolicitud, string correoRH, string asunto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(correoRH)) { return false; }
+
+                string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+                if (string.IsNullOrEmpty(urlSitio)) { urlSitio = ""; }
+
+                PDFs generador = new PDFs();
+
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
+                                                   AccionesParaTalentoHumano(codigoSolicitud, urlSitio));
+                if (string.IsNullOrEmpty(cuerpo)) { return false; }
+
+                string adjunto = DocumentoParaAdjuntar(generador, codigoSolicitud);
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return string.IsNullOrEmpty(adjunto)
+                    ? EnviarCorreo(correoRH, asunto, cuerpo, parametros)
+                    : EnviarCorreoPermiso(correoRH, asunto, cuerpo, parametros, adjunto);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnviarDocumentoATalentoHumano: " + ex.Message, "Log", "Detalle");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// El bloque final del correo a Talento Humano: quien firmo ya, y el acceso
+        /// para firmar.
+        ///
+        /// El boton lleva a la aplicacion y no a un enlace que firme de una. La firma
+        /// que cierra el documento tiene que quedar respaldada por quien inicio
+        /// sesion, no por quien tenga reenviado un correo.
+        /// </summary>
+        private string AccionesParaTalentoHumano(int codigoSolicitud, string urlSitio)
+        {
+            const string Q = "'";
+
+            EntFirmaSolicitud colaborador = FirmaDe(codigoSolicitud, "COLABORADOR");
+            EntFirmaSolicitud jefe = FirmaDe(codigoSolicitud, "JEFE");
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
+            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">FALTA SU VALIDACIÓN</div>");
+
+            h.Append("<p style=" + Q + "margin:0 0 6px" + Q + ">");
+            h.Append(Renglon("Colaborador", colaborador));
+            h.Append("</p>");
+
+            h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">");
+            h.Append(Renglon("Jefe inmediato", jefe));
+            h.Append("</p>");
+
+            if (colaborador != null && jefe != null)
+            {
+                h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">Con las dos firmas puestas, el documento queda a la espera de la suya.</p>");
+            }
+
+            if (!string.IsNullOrEmpty(urlSitio))
+            {
+                string url = urlSitio.TrimEnd(new char[] { (char)47 }) + "/Formulario/ListaVacacionesPermiso.aspx";
+
+                h.Append("<a href=" + Q).Append(url).Append(Q);
+                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
+                h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Validar y firmar</a>");
+            }
+
+            h.Append("</div>");
+            return h.ToString();
+        }
+
+        /// <summary>Un renglon con el estado de una firma.</summary>
+        private string Renglon(string rotulo, EntFirmaSolicitud firma)
+        {
+            if (firma == null)
+            {
+                return "<b>" + rotulo + ":</b> <span style='color:#8A8A8A'>todavía no firma</span>";
+            }
+
+            string decision = firma.Decision == "RECHAZADO" ? " (rechazó)" : "";
+
+            return "<b>" + rotulo + ":</b> firmado por " + firma.Nombre + decision
+                   + " el " + firma.FechaFirma.ToString("dd/MM/yyyy HH:mm");
+        }
+
+        private EntFirmaSolicitud FirmaDe(int codigoSolicitud, string rol)
+        {
+            List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(codigoSolicitud);
+            if (firmas == null) { return null; }
+
+            foreach (EntFirmaSolicitud f in firmas)
+            {
+                if (f.Rol == rol && f.Secuencia == 1) { return f; }
+            }
+
+            return null;
+        }
+        #endregion
+
         #region EnviarDocumentoAlColaborador
         /// <summary>
         /// Le manda al colaborador el documento tal como quedo, con las firmas que

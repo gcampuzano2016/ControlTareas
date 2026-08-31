@@ -445,13 +445,11 @@ namespace ReporteTareas.Formulario
                plantilla contenidoCorreoNotificacionSolicitudRH.txt, que no esta
                desplegada en el servidor: el correo salia con el cuerpo vacio. */
             string asuntoRH = Lista.IdTipoSolicitud == 1
-                ? "Permiso aprobado por el jefe - pendiente de su validación"
-                : "Vacaciones aprobadas por el jefe - pendientes de su registro";
+                ? "Permiso firmado por el colaborador y su jefe - falta su validación"
+                : "Vacaciones firmadas por el colaborador y su jefe - falta su validación";
 
-            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, asuntoRH,
-                envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"),
-                listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt",
-                Convert.ToInt32(IdSolicitud));
+            respuestaEnvioCorreo = envioCorreo.EnviarDocumentoATalentoHumano(
+                Convert.ToInt32(IdSolicitud), correoUsuario, asuntoRH);
         }
         #endregion
 

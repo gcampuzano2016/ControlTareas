@@ -164,6 +164,11 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
 
                 $("#divMensajes").html("");
 
+                /* Si se llego con ?solicitud= en la direccion, se abre esa. Solo
+                   despues de la tabla: esta misma funcion carga tambien los combos,
+                   y ahi no hay ninguna fila donde buscarla. */
+                if (div === "#datosTablaPrincipal") { AbrirSolicitudPedida(); }
+
             },
             error: function (objeto, msgError, objError) {
                 var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
@@ -915,6 +920,54 @@ function RecorreDatosPantalla(json) {
 function ObtenerUsuario() {
     var comboUsuario = document.getElementById("cmbUsuarios2");
     var selectedUsuario = comboUsuario.options[comboUsuario.selectedIndex].text;
+}
+
+/* La solicitud que venia en la direccion, o cadena vacia.
+
+   El correo a Talento Humano trae ?solicitud=1234 para que no tenga que buscarla
+   en el listado. Se lee una vez al cargar la pagina. */
+var _solicitudPedida = (function () {
+    var partes = window.location.search.substring(1).split("&");
+
+    for (var i = 0; i < partes.length; i++) {
+        var par = partes[i].split("=");
+        if (par[0] === "solicitud" && /^[0-9]+$/.test(par[1] || "")) { return par[1]; }
+    }
+
+    return "";
+})();
+
+/* Abre el recuadro de aprobacion de esa solicitud, si esta en el listado.
+
+   Se busca el boton por su onclick en vez de rearmar la llamada: AprobarSolicitud
+   necesita seis datos de la fila -dias, saldo, fechas- y duplicarlos aca seria
+   copiar la fila entera. Pulsar el boton que ya los tiene es mas simple y no se
+   desincroniza si esa firma cambia.
+
+   Se intenta una sola vez: si la solicitud no esta en el rango de fechas del
+   filtro, se le dice, en vez de dejarla esperando algo que no va a pasar. */
+function AbrirSolicitudPedida() {
+    if (_solicitudPedida === "") { return; }
+
+    var buscado = _solicitudPedida;
+    _solicitudPedida = "";
+
+    var boton = null;
+
+    $("#datosTablaPrincipal button").each(function () {
+        var accion = $(this).attr("onclick") || "";
+        if (accion.indexOf('AprobarSolicitud("' + buscado + '"') !== -1) { boton = this; }
+    });
+
+    if (boton === null) {
+        MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo",
+            "#modalMensajeInformativo",
+            "La solicitud " + buscado + " no aparece con los filtros actuales. " +
+            "Amplie el rango de fechas o el estado y vuelva a buscarla.", "warning");
+        return;
+    }
+
+    boton.click();
 }
 
 function ObtenerListaSolicitud(tipo, idRegistro, fechaInicio, fechaFinal, pagina, estadosolicitud) {

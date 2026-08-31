@@ -636,7 +636,11 @@ namespace CorreoHelper
 
             if (!string.IsNullOrEmpty(urlSitio))
             {
-                string url = urlSitio.TrimEnd(new char[] { (char)47 }) + "/Formulario/ListaVacacionesPermiso.aspx";
+                /* Con el numero de solicitud, para que la pantalla la abra sola en vez
+                   de dejarla buscandola en el listado. */
+                string url = urlSitio.TrimEnd(new char[] { (char)47 })
+                             + "/Formulario/ListaVacacionesPermiso.aspx?solicitud="
+                             + codigoSolicitud;
 
                 h.Append("<a href=" + Q).Append(url).Append(Q);
                 h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");

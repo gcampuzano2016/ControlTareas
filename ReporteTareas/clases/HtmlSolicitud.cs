@@ -533,9 +533,15 @@ namespace PDF
         /// Ruta de disco como URI de archivo. wkhtmltopdf lee las imágenes del
         /// sistema de archivos; una ruta de Windows sin este prefijo la ignora en
         /// silencio y el recuadro sale vacío.
+        ///
+        /// Una dirección web se devuelve tal cual. El mismo documento se usa como
+        /// cuerpo del correo, y ahí file:/// no sirve: apunta al disco del servidor,
+        /// que quien recibe el mensaje no tiene.
         /// </summary>
         private static string RutaComoUri(string ruta)
         {
+            if (ruta.StartsWith("http://") || ruta.StartsWith("https://")) { return ruta; }
+
             return "file:///" + ruta.Replace("\\", "/");
         }
 

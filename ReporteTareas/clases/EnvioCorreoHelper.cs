@@ -421,11 +421,27 @@ namespace CorreoHelper
 
                     listaCampos.Add(new EntItemValor() { Item = "textoQR", Valor = "'" + rutaQR + "'" });
 
-                    contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
+                    /* El cuerpo del correo es el mismo documento que va adjunto, no una
+                       plantilla aparte. Antes eran dos cosas distintas para la misma
+                       solicitud: el adjunto con el formato nuevo, y el mensaje con una
+                       plantilla de 2021 que se veia como el documento anterior.
 
-                    foreach (EntItemValor parametrosContenido in listaCampos)
+                       Si por algo no se puede armar, se cae a la plantilla de siempre y
+                       el correo sale igual. */
+                    string cuerpoDocumento = CuerpoDelDocumento(generarRide, codigoSolicitud);
+
+                    if (!string.IsNullOrEmpty(cuerpoDocumento))
                     {
-                        contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
+                        contenidoCorreo = cuerpoDocumento;
+                    }
+                    else
+                    {
+                        contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
+
+                        foreach (EntItemValor parametrosContenido in listaCampos)
+                        {
+                            contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
+                        }
                     }
 
                     /* La copia en PDF, con el mismo formato que el documento firmado.
@@ -537,6 +553,33 @@ namespace CorreoHelper
             }
 
             return mensaje;
+        }
+        #endregion
+
+        #region CuerpoDelDocumento
+        /// <summary>
+        /// El documento de la solicitud como cuerpo de correo, o cadena vacia.
+        ///
+        /// El logo se pasa por direccion web: en un correo file:/// apunta al disco
+        /// del servidor, que quien recibe el mensaje no tiene.
+        /// </summary>
+        private string CuerpoDelDocumento(PDFs generador, int codigoSolicitud)
+        {
+            try
+            {
+                string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+                if (string.IsNullOrEmpty(urlSitio)) { return ""; }
+
+                string urlLogo = urlSitio.TrimEnd(new char[] { (char)47 })
+                                 + "/Img/imagesCorreo/logo_dos_textoGris.png";
+
+                return generador.HtmlDeSolicitudParaCorreo(codigoSolicitud, urlLogo);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("CuerpoDelDocumento: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
         }
         #endregion
 

@@ -166,24 +166,14 @@ namespace PDF
             {
                 Etapa(reloj, idVacaciones, "inicio");
 
-                /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
-                   Convert lanza si no cabe, que es lo que se quiere: mejor un error
-                   visible que un id truncado en silencio. */
-                EntSolicitud solicitud =
-                    NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+                DatosDelDocumento datos = CargarDatos(idVacaciones);
+                if (datos == null) { return ""; }
 
-                if (solicitud == null || solicitud.IdVacaciones == 0)
-                {
-                    VerErrores("DocumentoDeSolicitud: no existe la solicitud " + idVacaciones, "Log", "Detalle");
-                    return "";
-                }
+                EntSolicitud solicitud = datos.Solicitud;
+                List<EntFirmaSolicitud> firmas = datos.Firmas;
+                string folio = datos.Folio;
 
-                Etapa(reloj, idVacaciones, "solicitud leida");
-
-                List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
-                string folio = NegFirmaSolicitud.Folio(idVacaciones);
-
-                Etapa(reloj, idVacaciones, "firmas y folio");
+                Etapa(reloj, idVacaciones, "solicitud, firmas y folio");
 
                 /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
                    no resuelve base64 embebido. Se borran al terminar: el original
@@ -201,25 +191,8 @@ namespace PDF
                 }
 
 
-                /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
-                   recuperación. En vacaciones no aplica y viene null, que es lo que
-                   la plantilla espera. */
-                EntDetallePermiso detalle = null;
-                if (solicitud.IdTipoSolicitud == 1)
-                {
-                    detalle = NegDetallePermiso.Obtener(idVacaciones);
-                }
-
-                /* Los períodos de los que salen los días. Solo en vacaciones. */
-                string periodos = "";
-                if (solicitud.IdTipoSolicitud != 1)
-                {
-                    periodos = NegVacaciones.PeriodosConSaldo(solicitud.CodSap);
-                }
-
-                Etapa(reloj, idVacaciones, "detalle y periodos");
-
-                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos);
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo,
+                                                      datos.Detalle, datos.Periodos);
 
                 Etapa(reloj, idVacaciones, "html armado");
 
@@ -275,6 +248,91 @@ namespace PDF
             VerErrores("DocumentoDeSolicitud " + idVacaciones + " | " + etapa + " | "
                        + reloj.ElapsedMilliseconds + " ms", "Log", "Detalle");
         }
+
+        /// <summary>Lo que hace falta para armar el documento de una solicitud.</summary>
+        private class DatosDelDocumento
+        {
+            public EntSolicitud Solicitud;
+            public List<EntFirmaSolicitud> Firmas;
+            public string Folio;
+            public EntDetallePermiso Detalle;
+            public string Periodos;
+        }
+
+        /// <summary>
+        /// Lee de la base todo lo que lleva el documento. Vive aparte porque lo
+        /// necesitan los dos: el PDF que se adjunta y el cuerpo del correo.
+        /// </summary>
+        private DatosDelDocumento CargarDatos(long idVacaciones)
+        {
+            /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
+               Convert lanza si no cabe, que es lo que se quiere: mejor un error
+               visible que un id truncado en silencio. */
+            EntSolicitud solicitud =
+                NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+
+            if (solicitud == null || solicitud.IdVacaciones == 0)
+            {
+                VerErrores("CargarDatos: no existe la solicitud " + idVacaciones, "Log", "Detalle");
+                return null;
+            }
+
+            DatosDelDocumento datos = new DatosDelDocumento();
+            datos.Solicitud = solicitud;
+            datos.Firmas = NegFirmaSolicitud.Listar(idVacaciones);
+            datos.Folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+            /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
+               recuperación. En vacaciones no aplica y queda null, que es lo que la
+               plantilla espera. */
+            datos.Detalle = solicitud.IdTipoSolicitud == 1
+                ? NegDetallePermiso.Obtener(idVacaciones)
+                : null;
+
+            /* Los períodos de los que salen los días. Solo en vacaciones. */
+            datos.Periodos = solicitud.IdTipoSolicitud != 1
+                ? NegVacaciones.PeriodosConSaldo(solicitud.CodSap)
+                : "";
+
+            return datos;
+        }
+
+        #region HtmlDeSolicitudParaCorreo
+        /// <summary>
+        /// El mismo documento, pero como cuerpo de correo. Devuelve cadena vacia si
+        /// no se pudo armar.
+        ///
+        /// Dos diferencias con el que va al PDF, y las dos por lo mismo: el correo se
+        /// abre en la maquina de otra persona.
+        ///
+        /// El logo va por direccion web y no por file:///, que apunta al disco del
+        /// servidor. Y las firmas dibujadas no van: son archivos temporales del
+        /// servidor que se borran, y ademas Outlook bloquea las imagenes embebidas.
+        /// Los recuadros igual muestran quien firmo, con que cargo y cuando; el trazo
+        /// esta en el PDF adjunto, que es el documento que vale.
+        /// </summary>
+        public string HtmlDeSolicitudParaCorreo(long idVacaciones, string urlLogo)
+        {
+            try
+            {
+                DatosDelDocumento datos = CargarDatos(idVacaciones);
+                if (datos == null) { return ""; }
+
+                if (datos.Firmas != null)
+                {
+                    foreach (EntFirmaSolicitud f in datos.Firmas) { f.RutaTrazo = ""; }
+                }
+
+                return HtmlSolicitud.Construir(datos.Solicitud, datos.Firmas, datos.Folio,
+                                               urlLogo, datos.Detalle, datos.Periodos);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("HtmlDeSolicitudParaCorreo: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+        #endregion
 
         #region GenerarPdfSolicitud
         /// <summary>

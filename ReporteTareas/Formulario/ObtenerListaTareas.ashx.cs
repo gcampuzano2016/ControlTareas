@@ -6207,11 +6207,11 @@ namespace JsonJQueryNetTareas
                     bool respuestaEnvioCorreoUsuario = false;
                     if (TipoProceso == 0)
                     {
-                        respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Permiso", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermiso.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermiso.txt");
+                        respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Permiso", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermiso.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermiso.txt", Convert.ToInt32(IdSolicitud));
                     }
                     else if (TipoProceso == 1)
                     {
-                        respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Permiso (Actualizar)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermiso.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermiso.txt");
+                        respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Permiso (Actualizar)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermiso.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermiso.txt", Convert.ToInt32(IdSolicitud));
                     }
                     respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Permiso", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermisoUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermisoUsuario.txt", Convert.ToInt32(IdSolicitud));
 
@@ -6369,11 +6369,11 @@ namespace JsonJQueryNetTareas
                     {
                         if (TipoProceso == 0 || TipoProceso == 5)
                         {
-                            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
+                            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt", Convert.ToInt32(IdSolicitud));
                         }
                         else if (TipoProceso == 1)
                         {
-                            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Vacaciones (Actualizar)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
+                            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Vacaciones (Actualizar)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt", Convert.ToInt32(IdSolicitud));
                         }
                         respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
                     }

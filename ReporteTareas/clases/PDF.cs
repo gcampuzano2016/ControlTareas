@@ -297,6 +297,46 @@ namespace PDF
             return datos;
         }
 
+        /// <summary>
+        /// Escribe los trazos en descargas/firmas y deja en RutaTrazo su direccion
+        /// web, para que se vean en el correo.
+        ///
+        /// En el PDF los trazos van por file:/// desde una carpeta temporal que se
+        /// borra. En un correo eso no sirve: el archivo tiene que seguir estando y
+        /// tiene que alcanzarse por http desde la maquina de quien lee. Por eso estos
+        /// quedan, con un nombre fijo por solicitud y rol, y se sobreescriben si se
+        /// vuelve a generar.
+        ///
+        /// Quedan accesibles a quien conozca la direccion, igual que los PDF firmados
+        /// que ya viven en esa misma carpeta.
+        /// </summary>
+        private void PublicarFirmas(DatosDelDocumento datos, string carpetaDescargas, string baseUrl)
+        {
+            if (datos.Firmas == null) { return; }
+
+            string carpeta = carpetaDescargas + "firmas\\";
+            if (!Directory.Exists(carpeta)) { Directory.CreateDirectory(carpeta); }
+
+            foreach (EntFirmaSolicitud f in datos.Firmas)
+            {
+                f.RutaTrazo = "";
+                if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+
+                try
+                {
+                    string nombre = datos.Solicitud.IdVacaciones + "_" + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(carpeta + nombre, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = baseUrl + "/descargas/firmas/" + nombre;
+                }
+                catch (Exception ex)
+                {
+                    /* Una firma que no se pudo escribir sale como recuadro sin trazo;
+                       el resto del documento no se pierde por eso. */
+                    VerErrores("PublicarFirmas: " + ex.Message, "Log", "Detalle");
+                }
+            }
+        }
+
         #region HtmlDeSolicitudParaCorreo
         /// <summary>
         /// El mismo documento, pero como cuerpo de correo. Devuelve cadena vacia si
@@ -311,20 +351,21 @@ namespace PDF
         /// Los recuadros igual muestran quien firmo, con que cargo y cuando; el trazo
         /// esta en el PDF adjunto, que es el documento que vale.
         /// </summary>
-        public string HtmlDeSolicitudParaCorreo(long idVacaciones, string urlLogo)
+        public string HtmlDeSolicitudParaCorreo(long idVacaciones, string urlSitio,
+                                                string carpetaDescargas, string htmlAcciones)
         {
             try
             {
                 DatosDelDocumento datos = CargarDatos(idVacaciones);
                 if (datos == null) { return ""; }
 
-                if (datos.Firmas != null)
-                {
-                    foreach (EntFirmaSolicitud f in datos.Firmas) { f.RutaTrazo = ""; }
-                }
+                string baseUrl = urlSitio.TrimEnd(new char[] { (char)47 });
+
+                PublicarFirmas(datos, carpetaDescargas, baseUrl);
 
                 return HtmlSolicitud.Construir(datos.Solicitud, datos.Firmas, datos.Folio,
-                                               urlLogo, datos.Detalle, datos.Periodos);
+                                               baseUrl + "/Img/imagesCorreo/logo_dos_textoGris.png",
+                                               datos.Detalle, datos.Periodos, htmlAcciones);
             }
             catch (Exception ex)
             {

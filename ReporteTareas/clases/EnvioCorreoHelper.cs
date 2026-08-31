@@ -428,7 +428,7 @@ namespace CorreoHelper
 
                        Si por algo no se puede armar, se cae a la plantilla de siempre y
                        el correo sale igual. */
-                    string cuerpoDocumento = CuerpoDelDocumento(generarRide, codigoSolicitud);
+                    string cuerpoDocumento = CuerpoDelDocumento(generarRide, codigoSolicitud, "");
 
                     if (!string.IsNullOrEmpty(cuerpoDocumento))
                     {
@@ -556,6 +556,117 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnvioCorreoSolicitudJefe con documento
+        /// <summary>
+        /// El correo al jefe con el mismo documento que recibe el colaborador, mas
+        /// los botones de aprobar y rechazar.
+        ///
+        /// Antes el jefe recibia una plantilla aparte con unos pocos campos, asi que
+        /// aprobaba sin ver que iba a hacer la persona: ni el detalle del teletrabajo,
+        /// ni el plan de recuperacion, ni el saldo del permiso mensual.
+        ///
+        /// Es una sobrecarga y no un cambio del metodo de siempre porque ese lo usan
+        /// tambien el codigo de verificacion del login, la planificacion de vacaciones
+        /// y las cancelaciones, que no tienen documento que mostrar.
+        /// </summary>
+        public bool EnvioCorreoSolicitudJefe(string correosDestinatarios, string correoTitulo,
+                                             string estructuraContenidoCorreo, List<EntItemValor> listaCampos,
+                                             string nombreArchivo, int codigoSolicitud)
+        {
+            try
+            {
+                PDFs generador = new PDFs();
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
+                                                   BotonesDeAprobacion(listaCampos));
+
+                if (string.IsNullOrEmpty(cuerpo))
+                {
+                    /* Sin documento se manda como siempre: el jefe tiene que poder
+                       aprobar aunque el documento no se haya podido armar. */
+                    return EnvioCorreoSolicitudJefe(correosDestinatarios, correoTitulo,
+                                                    estructuraContenidoCorreo, listaCampos, nombreArchivo);
+                }
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return EnviarCorreo(correosDestinatarios, correoTitulo, cuerpo, parametros);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnvioCorreoSolicitudJefe con documento: " + ex.Message, "Log", "Detalle");
+                return EnvioCorreoSolicitudJefe(correosDestinatarios, correoTitulo,
+                                                estructuraContenidoCorreo, listaCampos, nombreArchivo);
+            }
+        }
+
+        /// <summary>
+        /// Los dos botones, con las direcciones que ya venian en la lista de campos.
+        /// Se arman con tabla y estilos en linea porque Outlook no entiende mucho mas.
+        /// </summary>
+        private string BotonesDeAprobacion(List<EntItemValor> listaCampos)
+        {
+            /* Comilla simple para los atributos: el HTML va dentro de cadenas de C#,
+               y escaparla en cada uno haria esto ilegible. */
+            const string Q = "'";
+
+            string urlAprobar = ValorDe(listaCampos, "urlBoton1");
+            string urlRechazar = ValorDe(listaCampos, "urlBoton2");
+
+            if (string.IsNullOrEmpty(urlAprobar) && string.IsNullOrEmpty(urlRechazar)) { return ""; }
+
+            string etiquetaAprobar = ValorDe(listaCampos, "etiquetaBoton1");
+            string etiquetaRechazar = ValorDe(listaCampos, "etiquetaBoton2");
+
+            if (etiquetaAprobar == "") { etiquetaAprobar = "Aprobar"; }
+            if (etiquetaRechazar == "") { etiquetaRechazar = "Rechazar"; }
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
+            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">SU DECISION</div>");
+            h.Append("<table cellpadding=" + Q + "0" + Q + " cellspacing=" + Q + "0" + Q + "><tr>");
+
+            if (urlAprobar != "")
+            {
+                h.Append("<td style=" + Q + "padding-right:10px" + Q + "><a href=" + Q).Append(urlAprobar).Append(Q);
+                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
+                h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">").Append(etiquetaAprobar).Append("</a></td>");
+            }
+
+            if (urlRechazar != "")
+            {
+                h.Append("<td><a href=" + Q).Append(urlRechazar).Append(Q);
+                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#ffffff; color:#C00000; ");
+                h.Append("border:1px solid #C00000; text-decoration:none; font-size:13px; font-weight:bold" + Q + ">");
+                h.Append(etiquetaRechazar).Append("</a></td>");
+            }
+
+            h.Append("</tr></table>");
+            h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Se le pedira su firma antes de registrar la decision.</p>");
+            h.Append("</div>");
+
+            return h.ToString();
+        }
+
+        private string ValorDe(List<EntItemValor> listaCampos, string item)
+        {
+            if (listaCampos == null) { return ""; }
+
+            foreach (EntItemValor campo in listaCampos)
+            {
+                if (campo.Item == item) { return campo.Valor ?? ""; }
+            }
+
+            return "";
+        }
+        #endregion
+
         #region CuerpoDelDocumento
         /// <summary>
         /// El documento de la solicitud como cuerpo de correo, o cadena vacia.
@@ -563,17 +674,19 @@ namespace CorreoHelper
         /// El logo se pasa por direccion web: en un correo file:/// apunta al disco
         /// del servidor, que quien recibe el mensaje no tiene.
         /// </summary>
-        private string CuerpoDelDocumento(PDFs generador, int codigoSolicitud)
+        private string CuerpoDelDocumento(PDFs generador, int codigoSolicitud, string htmlAcciones)
         {
             try
             {
+                System.Web.HttpContext contexto = System.Web.HttpContext.Current;
+                if (contexto == null) { return ""; }
+
                 string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
                 if (string.IsNullOrEmpty(urlSitio)) { return ""; }
 
-                string urlLogo = urlSitio.TrimEnd(new char[] { (char)47 })
-                                 + "/Img/imagesCorreo/logo_dos_textoGris.png";
-
-                return generador.HtmlDeSolicitudParaCorreo(codigoSolicitud, urlLogo);
+                return generador.HtmlDeSolicitudParaCorreo(
+                    codigoSolicitud, urlSitio,
+                    contexto.Server.MapPath("~/descargas/"), htmlAcciones);
             }
             catch (Exception ex)
             {

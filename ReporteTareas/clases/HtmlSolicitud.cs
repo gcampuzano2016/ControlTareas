@@ -54,6 +54,20 @@ namespace PDF
                                        string folio, string rutaLogo, EntDetallePermiso detalle,
                                        string periodos)
         {
+            return Construir(solicitud, firmas, folio, rutaLogo, detalle, periodos, "");
+        }
+
+        /// <summary>
+        /// Igual, con un bloque propio antes del pie.
+        ///
+        /// Lo usa el correo al jefe, que lleva el mismo documento que el colaborador
+        /// mas los botones de aprobar y rechazar. El documento en si no cambia: los
+        /// botones se agregan al final, despues de las firmas.
+        /// </summary>
+        public static string Construir(EntSolicitud solicitud, List<EntFirmaSolicitud> firmas,
+                                       string folio, string rutaLogo, EntDetallePermiso detalle,
+                                       string periodos, string htmlAcciones)
+        {
             bool esVacaciones = solicitud.IdTipoSolicitud != 1;
             bool hayRecuperacion = detalle != null && detalle.TieneRecuperacion;
 
@@ -139,6 +153,8 @@ namespace PDF
             h.Append("</tr></table>");
 
             h.Append(BloqueFirmas(firmas, hayRecuperacion));
+
+            if (!string.IsNullOrEmpty(htmlAcciones)) { h.Append(htmlAcciones); }
 
             h.Append("<div style='margin-top:34px; text-align:center; font-family:\"Courier New\",monospace; font-size:9px; color:#9A9A9A'>");
             h.Append("Documento generado automáticamente &middot; código de verificación: ").Append(Escapar(folio));

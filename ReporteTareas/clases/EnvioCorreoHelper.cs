@@ -428,14 +428,27 @@ namespace CorreoHelper
                         contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
                     }
 
-                    //VerErrores("contenidoCorreo: " + contenidoCorreo, "Log", "Detalle");
-                    respuestaEnvioCorreo = EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo);
                     /* La copia en PDF de la solicitud. Se arma con el mismo formato
                        que el documento firmado -los modelos de Talento Humano- y no
                        convirtiendo el cuerpo del correo, que es lo que se hacia antes
-                       y daba dos documentos distintos para la misma solicitud. */
-                    generarRide.DocumentoDeSolicitud(codigoSolicitud);
-                    //pdfLista.CrearPDF(contenidoCorreo, codigoSolicitud);
+                       y daba dos documentos distintos para la misma solicitud.
+
+                       Se genera ANTES de enviar, porque ahora viaja adjunto: el cuerpo
+                       del mensaje sigue siendo la plantilla de siempre, pero lo que el
+                       colaborador se guarda es el documento de verdad. */
+                    string archivoPdf = generarRide.DocumentoDeSolicitud(codigoSolicitud);
+
+                    string rutaAdjunto = "";
+                    if (!string.IsNullOrEmpty(archivoPdf))
+                    {
+                        rutaAdjunto = System.Web.HttpContext.Current.Server.MapPath("~/descargas/") + archivoPdf;
+                    }
+
+                    /* Sin PDF se manda igual, solo que sin adjunto. Un documento que no
+                       se pudo generar no puede dejar al colaborador sin su aviso. */
+                    respuestaEnvioCorreo = string.IsNullOrEmpty(rutaAdjunto)
+                        ? EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo)
+                        : EnviarCorreoPermiso(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, rutaAdjunto);
                 }
                 else
                 {

@@ -1741,9 +1741,13 @@ function CambiaFechaTeletrabajo() {
 /* Tipos a los que NO se les ofrece el permiso mensual de 3 horas.
 
    Teletrabajo no es una ausencia sino una modalidad de trabajo: no hay tiempo
-   que descontar. Médico y Calamidad son ausencias justificadas, y no
-   corresponde que consuman una bolsa pensada para permisos discrecionales. */
-var _sinPermisoMensual = ["TELETRABAJO", "CALAMIDAD", "MEDICO"];
+   que descontar. Médico se justifica con la cita adjunta, que es obligatoria, y
+   por eso tampoco pasa por la bolsa ni pide tratamiento del excedente.
+
+   Calamidad sí la usa: es una ausencia de horas como cualquier otra, y si se
+   pasa del saldo mensual el excedente se trata igual que en un permiso personal.
+   Estuvo fuera de esta lista un tiempo, hasta que se probó y se corrigió. */
+var _sinPermisoMensual = ["TELETRABAJO", "MEDICO"];
 
 function AplicaPermisoMensual(tipo) {
     return _sinPermisoMensual.indexOf(tipo) === -1;

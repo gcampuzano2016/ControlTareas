@@ -6656,6 +6656,19 @@ namespace JsonJQueryNetTareas
                     EnviarCorreo(Convert.ToInt32(campos["IdVacaciones"]), IdUsuarioSession, IdUsuarioSession, campos["StrTipoSolicitud"], campos["EstadoSolicitud"]);
                 }
 
+                /* Cuando el jefe decide, el colaborador recibe el documento otra vez,
+                   ahora con la firma de su jefe. La copia que le llego al pedir el
+                   permiso salio sin ella, porque en ese momento no existia. */
+                if (registro.EstadoSolicitud == "APROBADO" || registro.EstadoSolicitud == "RECHAZADO")
+                {
+                    EnvioCorreoHelper avisoColaborador = new EnvioCorreoHelper();
+                    avisoColaborador.EnviarDocumentoAlColaborador(
+                        Convert.ToInt32(campos["IdVacaciones"]),
+                        registro.EstadoSolicitud == "APROBADO"
+                            ? "Su solicitud fue aprobada por su jefe inmediato"
+                            : "Su solicitud fue rechazada por su jefe inmediato");
+                }
+
             }
             catch (Exception ex)
             {

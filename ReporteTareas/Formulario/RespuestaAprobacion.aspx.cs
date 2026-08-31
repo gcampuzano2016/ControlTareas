@@ -68,6 +68,15 @@ namespace ReporteTareas.Formulario
 
                 if (esAprobacion) { AplicarAprobacion(parametrosSolicitud); }
                 else { AplicarRechazo(parametrosSolicitud); }
+
+                /* Y el colaborador recibe el documento con la firma recien puesta. La
+                   copia que le llego al pedir el permiso salio sin ella. */
+                EnvioCorreoHelper avisoColaborador = new EnvioCorreoHelper();
+                avisoColaborador.EnviarDocumentoAlColaborador(
+                    Convert.ToInt32(idVacaciones),
+                    esAprobacion
+                        ? "Su solicitud fue aprobada por su jefe inmediato"
+                        : "Su solicitud fue rechazada por su jefe inmediato");
             }
             catch (Exception ex)
             {

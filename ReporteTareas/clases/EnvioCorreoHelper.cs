@@ -556,6 +556,72 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnviarDocumentoAlColaborador
+        /// <summary>
+        /// Le manda al colaborador el documento tal como quedo, con las firmas que
+        /// haya hasta ese momento. Devuelve false si no se pudo.
+        ///
+        /// Existe porque la copia que recibe al pedir el permiso sale sin la firma del
+        /// jefe: en ese momento todavia no firmo. Cuando el jefe aprueba o rechaza,
+        /// esta funcion le manda el documento de nuevo, ahora si con esa firma.
+        ///
+        /// A quien se le manda sale de la propia firma del colaborador, que guarda su
+        /// Cod_Usuario. Es el dato mas confiable que hay: lo dejo el que firmo, no se
+        /// deduce de la sesion de quien esta aprobando.
+        /// </summary>
+        public bool EnviarDocumentoAlColaborador(int codigoSolicitud, string correoTitulo)
+        {
+            try
+            {
+                string correo = CorreoDelColaborador(codigoSolicitud);
+                if (string.IsNullOrEmpty(correo)) { return false; }
+
+                PDFs generador = new PDFs();
+
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud, "");
+                if (string.IsNullOrEmpty(cuerpo)) { return false; }
+
+                string adjunto = DocumentoParaAdjuntar(generador, codigoSolicitud);
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return string.IsNullOrEmpty(adjunto)
+                    ? EnviarCorreo(correo, correoTitulo, cuerpo, parametros)
+                    : EnviarCorreoPermiso(correo, correoTitulo, cuerpo, parametros, adjunto);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnviarDocumentoAlColaborador: " + ex.Message, "Log", "Detalle");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// El correo de quien pidio la solicitud, sacado de su propia firma.
+        /// </summary>
+        private string CorreoDelColaborador(int codigoSolicitud)
+        {
+            List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(codigoSolicitud);
+            if (firmas == null) { return ""; }
+
+            foreach (EntFirmaSolicitud f in firmas)
+            {
+                if (f.Rol == "COLABORADOR" && !string.IsNullOrEmpty(f.Cod_Usuario))
+                {
+                    return NegUsuario.RTA_CorreoUsuario(f.Cod_Usuario);
+                }
+            }
+
+            return "";
+        }
+        #endregion
+
         #region EnvioCorreoSolicitudJefe con documento
         /// <summary>
         /// El correo al jefe con el mismo documento que recibe el colaborador, mas

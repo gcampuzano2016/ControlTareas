@@ -1769,17 +1769,29 @@ function MostrarPermisoMensual(tipo) {
    ofrecer Vacaciones, Recuperación o Sin remuneración solo invita a elegir algo
    que no corresponde. Si se pasa, la parte no cubierta sí necesita tratamiento y
    el selector vuelve. */
+/* Tipos que no piden decidir qué hacer con el excedente.
+
+   Teletrabajo no descuenta nada: es una modalidad de trabajo, no una ausencia,
+   así que no hay horas que cargar a ninguna bolsa.
+
+   Médico se justifica con la cita adjunta —que además es obligatoria— y no se
+   descuenta de vacaciones, ni se recupera, ni va sin remuneración.
+
+   Calamidad no está en la lista: hoy sigue pidiendo tratamiento. Si Talento
+   Humano decide que tampoco corresponde, se agrega acá y listo. */
+var _sinTratamientoExcedente = ["TELETRABAJO", "MEDICO"];
+
 /* Si este permiso necesita que se decida qué hacer con el excedente.
 
    Una sola función para las dos cosas que dependen de esto —que el selector se
    vea y que la validación lo exija— porque separarlas deja el formulario
-   imposible de enviar: un campo escondido que igual se pide.
-
-   Teletrabajo no descuenta nada: es una modalidad de trabajo, no una ausencia.
-   No hay horas que cargar a ninguna bolsa. En Médico y Calamidad sí, porque son
-   ausencias y esas horas salen de algún lado. */
+   imposible de enviar: un campo escondido que igual se pide. */
 function CorrespondeTratamientoExcedente() {
-    return (TipoPermisoSeleccionado() !== "TELETRABAJO") && ExcedeElSaldoMensual();
+    if (_sinTratamientoExcedente.indexOf(TipoPermisoSeleccionado()) !== -1) {
+        return false;
+    }
+
+    return ExcedeElSaldoMensual();
 }
 
 function MostrarTratamientoExcedente() {
@@ -1931,8 +1943,9 @@ function ConsultarSaldoMensual() {
 function ExcedeElSaldoMensual() {
     var tipo = TipoPermisoSeleccionado();
 
-    /* Médico y Calamidad no consumen la bolsa mensual: el permiso entero es
-       excedente, se sepan o no las horas todavía. */
+    /* Los tipos que no consumen la bolsa mensual: el permiso entero queda fuera
+       de ella, se sepan o no las horas todavía. A los que además no piden
+       tratamiento —Teletrabajo y Médico— los filtró ya quien llama. */
     if (!AplicaPermisoMensual(tipo)) { return true; }
 
     /* Mientras la consulta del saldo no vuelve no se afirma nada, para no mostrar

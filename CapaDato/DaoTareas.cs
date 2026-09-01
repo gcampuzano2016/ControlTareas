@@ -1443,7 +1443,15 @@ namespace CapaDato
                 DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
                 using (SqlConnection cnx = conexion.conectar())
-                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
+                /* Apunta al procedimiento anterior a proposito, no por descuido.
+
+                   El partido en tramos de horario esta terminado y su script ya
+                   aplicado en la base, pero todavia no tiene el visto bueno para
+                   activarse. Como esta DLL hace falta para otras cosas, se deja
+                   llamando al de siempre y se cambia esta linea a
+                   Sp_RTAInsertaDetalleTarea_V2 el dia que se apruebe. Lo demas ya esta
+                   preparado y no hay que tocar nada mas. */
+                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandTimeout = 60;
@@ -1527,10 +1535,16 @@ namespace CapaDato
                            responsable. Aca vienen las que quedaron pendientes de
                            autorizacion, para que el handler pida una por una.
 
-                           ObtenerValorColumna devuelve cadena vacia si la columna no
-                           esta, asi que esto tolera una base todavia sin actualizar. */
-                        respuesta.IdsHorasExtras =
-                            ObtenerValorColumna(dr, "IdsHorasExtras");
+                           Si la columna no viene -que es lo que pasa con el
+                           procedimiento anterior- se deja en null y no en vacio. Son
+                           cosas distintas para quien decide a quien pedirle
+                           autorizacion: null es "no me dijo" y cae al criterio de
+                           siempre; vacio es "me dijo que no hay ninguna". Confundirlas
+                           deja de mandar los correos de horas extras sin que nadie se
+                           entere. */
+                        respuesta.IdsHorasExtras = TieneColumna(dr, "IdsHorasExtras")
+                            ? ObtenerValorColumna(dr, "IdsHorasExtras")
+                            : null;
 
                         if (respuestaSP >= 1)
                         {
@@ -1566,6 +1580,20 @@ namespace CapaDato
             }
 
             return respuesta;
+        }
+
+        /// <summary>Si el resultado trae esa columna.</summary>
+        private static bool TieneColumna(SqlDataReader dr, string nombreColumna)
+        {
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                if (string.Equals(dr.GetName(i), nombreColumna, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         private static string ObtenerValorColumna(

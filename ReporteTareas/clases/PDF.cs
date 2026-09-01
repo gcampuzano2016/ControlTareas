@@ -423,19 +423,38 @@ namespace PDF
                 VerErrores("GenerarPdfSolicitud: proceso de " + (IntPtr.Size * 8)
                            + " bits, creando el convertidor", "Log", "Detalle");
 
-                SynchronizedPechkin convertidor = new SynchronizedPechkin(new GlobalConfig());
+                /* Dos intentos. En el servidor la conversion viene fallando una de cada
+                   dos veces -las solicitudes con archivo y sin archivo se alternan una
+                   por una-, mientras que en una consola seis seguidas salen bien. Sea
+                   cual sea la causa de fondo, un segundo intento con un convertidor
+                   nuevo recupera el caso.
 
-                VerErrores("GenerarPdfSolicitud: convertidor creado, convirtiendo "
-                           + contenidoHtml.Length + " caracteres", "Log", "Detalle");
+                   El reintento solo ocurre cuando la conversion vuelve rapido y vacia.
+                   Si se cuelga, el limite de tiempo esta afuera y aca no se vuelve a
+                   entrar: no se le suman treinta segundos mas a nadie. */
+                byte[] pdf = null;
 
-                byte[] pdf = convertidor.Convert(contenidoHtml);
+                for (int intento = 1; intento <= 2 && (pdf == null || pdf.Length == 0); intento++)
+                {
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + ", creando el convertidor",
+                               "Log", "Detalle");
 
-                VerErrores("GenerarPdfSolicitud: convertido, "
-                           + (pdf == null ? "null" : pdf.Length.ToString() + " bytes"), "Log", "Detalle");
+                    SynchronizedPechkin convertidor = new SynchronizedPechkin(new GlobalConfig());
+
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + ", convirtiendo "
+                               + contenidoHtml.Length + " caracteres", "Log", "Detalle");
+
+                    pdf = convertidor.Convert(contenidoHtml);
+
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + " -> "
+                               + (pdf == null ? "null" : pdf.Length.ToString() + " bytes"),
+                               "Log", "Detalle");
+                }
 
                 if (pdf == null || pdf.Length == 0)
                 {
-                    VerErrores("GenerarPdfSolicitud: Pechkin devolvio vacio", "Log", "Detalle");
+                    VerErrores("GenerarPdfSolicitud: Pechkin devolvio vacio en los dos intentos",
+                               "Log", "Detalle");
                     return "";
                 }
 

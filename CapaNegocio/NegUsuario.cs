@@ -108,6 +108,12 @@ namespace CapaNegocio
             return respuesta;
 
         }
+        /// <summary>El Cod_Usuario de quien tiene ese correo, o cadena vacia.</summary>
+        public static string RTA_CodigoUsuarioPorCorreo(string correo)
+        {
+            return DaoRTAUsuario.RTA_CodigoUsuarioPorCorreo(correo);
+        }
+
         public static string RTA_CorreoUsuario(string IdUsuario)
         {
             string respuesta = "";

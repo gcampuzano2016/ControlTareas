@@ -592,5 +592,47 @@ namespace CapaDato
             return resultado;
         }
 
+
+        /// <summary>
+        /// El Cod_Usuario de quien tiene ese correo, o cadena vacia.
+        ///
+        /// Hace falta para atribuirle la firma a Talento Humano cuando valida desde el
+        /// correo: el destinatario se configura como direccion en
+        /// R_ParametrosConfiguracion.CORREORH, no como codigo de usuario.
+        ///
+        /// Va con consulta parametrizada y no con procedimiento porque es una lectura
+        /// de un solo campo y no vale una migracion de base.
+        ///
+        /// Si dos usuarios comparten correo se toma el de Id_Usuario mas alto, que es
+        /// el criterio que ya usan los procedimientos de firma ante los codigos
+        /// duplicados de R_Usuarios.
+        /// </summary>
+        public static string RTA_CodigoUsuarioPorCorreo(string correo)
+        {
+            if (string.IsNullOrEmpty(correo)) { return string.Empty; }
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT TOP 1 Cod_Usuario FROM dbo.R_Usuarios " +
+                    "WHERE E_Mail = @Correo AND ISNULL(Cod_Usuario, '') <> '' " +
+                    "ORDER BY Id_Usuario DESC", cnx))
+                {
+                    cmd.Parameters.Add("@Correo", SqlDbType.VarChar, 128).Value = correo.Trim();
+                    cnx.Open();
+
+                    object valor = cmd.ExecuteScalar();
+                    return valor == null ? string.Empty : valor.ToString();
+                }
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
+        }
+
     }
 }

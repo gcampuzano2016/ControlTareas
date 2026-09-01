@@ -17,17 +17,35 @@ namespace ReporteTareas.Formulario
         /// <summary>
         /// Muestra el pad y espera. La decision se aplica recien al confirmar.
         /// </summary>
-        private void PedirFirmaDelJefe(bool esAprobacion)
+        private void PedirFirma(string codigo)
         {
-            litTituloFirma.Text = esAprobacion
-                ? "Firme para aprobar la solicitud"
-                : "Firme para registrar el rechazo";
+            bool aFavor = codigo == "SA" || codigo == "VG";
+            bool esTalentoHumano = codigo == "VG" || codigo == "RG";
 
-            litAyudaFirma.Text = esAprobacion
-                ? "Su firma queda en el documento que descarga el colaborador. Dibujela con el mouse o el dedo, o suba una imagen."
-                : "Su firma queda registrada junto al rechazo. Dibujela con el mouse o el dedo, o suba una imagen.";
+            if (esTalentoHumano)
+            {
+                litTituloFirma.Text = aFavor
+                    ? "Firme para validar la solicitud"
+                    : "Firme para rechazar la solicitud";
 
-            btnConfirmar.Text = esAprobacion ? "Firmar y aprobar" : "Firmar y rechazar";
+                litAyudaFirma.Text = aFavor
+                    ? "Es la ultima firma: con la suya el documento queda cerrado. Dibujela con el mouse o el dedo, o suba una imagen."
+                    : "Su firma queda registrada junto al rechazo. Dibujela con el mouse o el dedo, o suba una imagen.";
+
+                btnConfirmar.Text = aFavor ? "Firmar y validar" : "Firmar y rechazar";
+            }
+            else
+            {
+                litTituloFirma.Text = aFavor
+                    ? "Firme para aprobar la solicitud"
+                    : "Firme para registrar el rechazo";
+
+                litAyudaFirma.Text = aFavor
+                    ? "Su firma queda en el documento que descarga el colaborador. Dibujela con el mouse o el dedo, o suba una imagen."
+                    : "Su firma queda registrada junto al rechazo. Dibujela con el mouse o el dedo, o suba una imagen.";
+
+                btnConfirmar.Text = aFavor ? "Firmar y aprobar" : "Firmar y rechazar";
+            }
 
             lblmensaje.Text = "";
             pnlFirma.Visible = true;
@@ -45,38 +63,40 @@ namespace ReporteTareas.Formulario
             try
             {
                 string[] parametrosSolicitud = hfParametros.Value.Split(new char[] { ';' });
-                bool esAprobacion = parametrosSolicitud[2] == "SA";
+                string codigo = parametrosSolicitud[2];
+
+                bool aFavor = codigo == "SA" || codigo == "VG";
+                bool esTalentoHumano = codigo == "VG" || codigo == "RG";
+                string rol = esTalentoHumano ? "GTH" : "JEFE";
 
                 long idVacaciones = Convert.ToInt64(parametrosSolicitud[0]);
 
-                /* Si ya hay firma del jefe no se vuelve a aplicar nada. Pasa cuando se
-                   abre dos veces el mismo enlace del correo, que es comun. */
-                if (YaFirmoElJefe(idVacaciones))
+                /* Si ese paso ya esta firmado no se vuelve a aplicar nada. Pasa cuando
+                   se abre dos veces el mismo enlace del correo, que es comun. */
+                if (YaFirmo(idVacaciones, rol))
                 {
                     pnlFirma.Visible = false;
-                    lblmensaje.Text = "Esta solicitud <b>ya fue firmada</b>. No se registro dos veces.";
+                    lblmensaje.Text = "Esta solicitud <b>ya fue firmada</b> en este paso. No se registro dos veces.";
                     return;
                 }
 
-                if (!RegistrarFirmaDelJefe(idVacaciones, parametrosSolicitud[3], esAprobacion))
+                if (!RegistrarFirma(idVacaciones, parametrosSolicitud[3], aFavor, esTalentoHumano))
                 {
-                    lblmensaje.Text = "<b>No se pudo registrar su firma.</b> Vuelva a intentarlo, o ingrese a la aplicacion para aprobar desde ahi.";
+                    lblmensaje.Text = "<b>No se pudo registrar su firma.</b> Vuelva a intentarlo, o ingrese a la aplicacion para firmar desde ahi.";
                     return;
                 }
 
                 pnlFirma.Visible = false;
 
-                if (esAprobacion) { AplicarAprobacion(parametrosSolicitud); }
+                if (esTalentoHumano) { AplicarValidacion(idVacaciones, parametrosSolicitud[3], aFavor); }
+                else if (aFavor) { AplicarAprobacion(parametrosSolicitud); }
                 else { AplicarRechazo(parametrosSolicitud); }
 
                 /* Y el colaborador recibe el documento con la firma recien puesta. La
                    copia que le llego al pedir el permiso salio sin ella. */
                 EnvioCorreoHelper avisoColaborador = new EnvioCorreoHelper();
                 avisoColaborador.EnviarDocumentoAlColaborador(
-                    Convert.ToInt32(idVacaciones),
-                    esAprobacion
-                        ? "Su solicitud fue aprobada por su jefe inmediato"
-                        : "Su solicitud fue rechazada por su jefe inmediato");
+                    Convert.ToInt32(idVacaciones), AvisoParaElColaborador(esTalentoHumano, aFavor));
             }
             catch (Exception ex)
             {
@@ -84,17 +104,70 @@ namespace ReporteTareas.Formulario
             }
         }
 
-        private bool YaFirmoElJefe(long idVacaciones)
+        private bool YaFirmo(long idVacaciones, string rol)
         {
             List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
             if (firmas == null) { return false; }
 
             foreach (EntFirmaSolicitud f in firmas)
             {
-                if (f.Rol == "JEFE" && f.Secuencia == 1) { return true; }
+                if (f.Rol == rol && f.Secuencia == 1) { return true; }
             }
 
             return false;
+        }
+
+        /// <summary>El asunto del aviso que recibe el colaborador.</summary>
+        private string AvisoParaElColaborador(bool esTalentoHumano, bool aFavor)
+        {
+            if (esTalentoHumano)
+            {
+                return aFavor
+                    ? "Su solicitud fue validada por Talento Humano"
+                    : "Su solicitud fue rechazada por Talento Humano";
+            }
+
+            return aFavor
+                ? "Su solicitud fue aprobada por su jefe inmediato"
+                : "Su solicitud fue rechazada por su jefe inmediato";
+        }
+
+        /// <summary>
+        /// La decision de Talento Humano: deja la solicitud en PROCESADO o en
+        /// RECHAZADO GTH.
+        ///
+        /// Son los mismos dos estados, y los mismos tipos 8 y 7, que manda la pantalla
+        /// cuando Talento Humano firma dentro de la aplicacion. Se replican para que el
+        /// resultado no dependa de por donde se firmo.
+        /// </summary>
+        private void AplicarValidacion(long idVacaciones, string codUsuario, bool aFavor)
+        {
+            EntSolicitud registro = new EntSolicitud();
+            registro.IdVacaciones = Convert.ToInt32(idVacaciones);
+            registro.EstadoSolicitud = aFavor ? "PROCESADO" : "RECHAZADO GTH";
+            registro.MotivoAnulacion = aFavor
+                ? "Validado por Talento Humano desde el correo."
+                : "Rechazado por Talento Humano desde el correo.";
+            registro.Cod_Usuario = codUsuario;
+            registro.Tipo = aFavor ? 8 : 7;
+            registro.UsuarioAprobo = "";
+            registro.UsuarioRechazo = "";
+
+            EntRespuesta respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
+
+            if (respuesta != null && respuesta.estado == "1")
+            {
+                lblmensaje.Text = aFavor
+                    ? "Se registro la <b>VALIDACION</b> de la solicitud. El documento queda cerrado."
+                    : "Se registro el <b>RECHAZO</b> de la solicitud.";
+
+                if (aFavor) { PermisoAprobado.Visible = true; }
+                else { PermisoRechazado.Visible = true; }
+            }
+            else
+            {
+                lblmensaje.Text = "Su firma quedo registrada, pero <b>no se pudo cambiar el estado</b> de la solicitud. Ingrese a la aplicacion para terminarlo.";
+            }
         }
 
         /// <summary>
@@ -107,15 +180,18 @@ namespace ReporteTareas.Formulario
         /// enlace reenviado puede firmar por el. El camino con identidad real es que
         /// el jefe entre a la aplicacion y firme ahi.
         /// </summary>
-        private bool RegistrarFirmaDelJefe(long idVacaciones, string codSolicitante, bool esAprobacion)
+        private bool RegistrarFirma(long idVacaciones, string codDelEnlace, bool aFavor, bool esTalentoHumano)
         {
             try
             {
                 byte[] trazo = TrazoDesdeDataUri(hfTrazo.Value);
                 if (trazo == null || trazo.Length == 0) { return false; }
 
-                string codJefe = CodigoDelJefe(codSolicitante);
-                if (string.IsNullOrEmpty(codJefe)) { return false; }
+                /* En el enlace del jefe viaja el codigo del SOLICITANTE, asi que el jefe
+                   se resuelve por su Cod_Jefe_Inm. En el de Talento Humano viaja ya su
+                   propio codigo, resuelto desde CORREORH al armar el correo. */
+                string codFirmante = esTalentoHumano ? codDelEnlace : CodigoDelJefe(codDelEnlace);
+                if (string.IsNullOrEmpty(codFirmante)) { return false; }
 
                 string ip = Request.Headers["X-Forwarded-For"];
                 if (string.IsNullOrEmpty(ip)) { ip = Request.UserHostAddress; }
@@ -127,12 +203,12 @@ namespace ReporteTareas.Formulario
                 EntFirmaSolicitud firma = new EntFirmaSolicitud()
                 {
                     IdVacaciones = idVacaciones,
-                    Rol = "JEFE",
+                    Rol = esTalentoHumano ? "GTH" : "JEFE",
                     Secuencia = 1,
-                    Decision = esAprobacion ? "APROBADO" : "RECHAZADO",
+                    Decision = aFavor ? "APROBADO" : "RECHAZADO",
                     Comentario = "Firmado desde el correo de aprobacion.",
                     TrazoTipo = "image/png",
-                    Cod_Usuario = codJefe
+                    Cod_Usuario = codFirmante
                 };
 
                 EntRespuesta guardada = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
@@ -140,7 +216,7 @@ namespace ReporteTareas.Formulario
             }
             catch (Exception ex)
             {
-                VerErrores("RegistrarFirmaDelJefe: " + ex.Message, "Log", "Detalle");
+                VerErrores("RegistrarFirma: " + ex.Message, "Log", "Detalle");
                 return false;
             }
         }
@@ -313,7 +389,8 @@ namespace ReporteTareas.Formulario
                             lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
                             Aprobados.Visible = true;
                         }
-                        else if (parametrosSolicitud[2] == "SA" || parametrosSolicitud[2] == "SR")
+                        else if (parametrosSolicitud[2] == "SA" || parametrosSolicitud[2] == "SR"
+                                 || parametrosSolicitud[2] == "VG" || parametrosSolicitud[2] == "RG")
                         {
                             /* Ya no se aplica de una. La solicitud no cambia de estado
                                hasta que el jefe firme: sin eso el PDF salia con el
@@ -322,7 +399,7 @@ namespace ReporteTareas.Formulario
                                Los parametros viajan en el formulario para no volver a
                                descifrar la URL en el postback. */
                             hfParametros.Value = parametrosRecibidos;
-                            PedirFirmaDelJefe(parametrosSolicitud[2] == "SA");
+                            PedirFirma(parametrosSolicitud[2]);
                         }
                     }
                 }

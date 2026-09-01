@@ -577,7 +577,7 @@ namespace CorreoHelper
                 PDFs generador = new PDFs();
 
                 string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
-                                                   AccionesParaTalentoHumano(codigoSolicitud, urlSitio));
+                                                   AccionesParaTalentoHumano(codigoSolicitud, correoRH));
                 if (string.IsNullOrEmpty(cuerpo)) { return false; }
 
                 string adjunto = DocumentoParaAdjuntar(generador, codigoSolicitud);
@@ -609,7 +609,7 @@ namespace CorreoHelper
         /// que cierra el documento tiene que quedar respaldada por quien inicio
         /// sesion, no por quien tenga reenviado un correo.
         /// </summary>
-        private string AccionesParaTalentoHumano(int codigoSolicitud, string urlSitio)
+        private string AccionesParaTalentoHumano(int codigoSolicitud, string correoRH)
         {
             const string Q = "'";
 
@@ -621,34 +621,81 @@ namespace CorreoHelper
             h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
             h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">FALTA SU VALIDACIÓN</div>");
 
-            h.Append("<p style=" + Q + "margin:0 0 6px" + Q + ">");
-            h.Append(Renglon("Colaborador", colaborador));
-            h.Append("</p>");
-
-            h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">");
-            h.Append(Renglon("Jefe inmediato", jefe));
-            h.Append("</p>");
+            h.Append("<p style=" + Q + "margin:0 0 6px" + Q + ">").Append(Renglon("Colaborador", colaborador)).Append("</p>");
+            h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">").Append(Renglon("Jefe inmediato", jefe)).Append("</p>");
 
             if (colaborador != null && jefe != null)
             {
                 h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">Con las dos firmas puestas, el documento queda a la espera de la suya.</p>");
             }
 
-            if (!string.IsNullOrEmpty(urlSitio))
-            {
-                /* Con el numero de solicitud, para que la pantalla la abra sola en vez
-                   de dejarla buscandola en el listado. */
-                string url = urlSitio.TrimEnd(new char[] { (char)47 })
-                             + "/Formulario/ListaVacacionesPermiso.aspx?solicitud="
-                             + codigoSolicitud;
+            h.Append(BotonesDeValidacion(codigoSolicitud, correoRH, Q));
+            h.Append("</div>");
 
-                h.Append("<a href=" + Q).Append(url).Append(Q);
-                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
-                h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Validar y firmar</a>");
+            return h.ToString();
+        }
+
+        /// <summary>
+        /// Los dos botones de Talento Humano. Llevan a la misma pagina donde firma el
+        /// jefe: se dibuja o se sube la firma y recien ahi se aplica la decision.
+        ///
+        /// VG deja la solicitud en PROCESADO y RG en RECHAZADO GTH, que son los dos
+        /// estados que la aplicacion asocia a la firma de Talento Humano.
+        ///
+        /// Quien firma va cifrado en el propio enlace, resuelto desde CORREORH. Vale
+        /// la misma advertencia que para el jefe: el enlace es un portador, y la firma
+        /// se atribuye a quien lo tenga.
+        /// </summary>
+        private string BotonesDeValidacion(int codigoSolicitud, string correoRH, string Q)
+        {
+            string codRH = NegUsuario.RTA_CodigoUsuarioPorCorreo(correoRH);
+            string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
+
+            if (string.IsNullOrEmpty(codRH) || string.IsNullOrEmpty(urlSitio))
+            {
+                /* Sin poder identificarla no se le ofrece firmar desde el correo: la
+                   firma quedaria sin nombre. Se la manda a la aplicacion. */
+                return EnlaceALaAplicacion(codigoSolicitud, Q);
             }
 
-            h.Append("</div>");
+            string baseUrl = urlSitio.TrimEnd(new char[] { (char)47 }) + "/Formulario/RespuestaAprobacion.aspx?idValor=";
+
+            string validar = baseUrl + Encrypt(
+                codigoSolicitud + ";" + codigoSolicitud + ";VG;" + codRH, "3m1l10100", "3m1l10100");
+
+            string rechazar = baseUrl + Encrypt(
+                codigoSolicitud + ";" + codigoSolicitud + ";RG;" + codRH, "3m1l10100", "3m1l10100");
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<table cellpadding=" + Q + "0" + Q + " cellspacing=" + Q + "0" + Q + "><tr>");
+
+            h.Append("<td style=" + Q + "padding-right:10px" + Q + "><a href=" + Q).Append(validar).Append(Q);
+            h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
+            h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Firmar y validar</a></td>");
+
+            h.Append("<td><a href=" + Q).Append(rechazar).Append(Q);
+            h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#ffffff; color:#C00000; ");
+            h.Append("border:1px solid #C00000; text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Rechazar</a></td>");
+
+            h.Append("</tr></table>");
+            h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Puede dibujar su firma o subir una imagen; el documento se cierra al confirmar.</p>");
+
             return h.ToString();
+        }
+
+        /// <summary>El respaldo: entrar a la aplicacion a firmar.</summary>
+        private string EnlaceALaAplicacion(int codigoSolicitud, string Q)
+        {
+            string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+            if (string.IsNullOrEmpty(urlSitio)) { return ""; }
+
+            string url = urlSitio.TrimEnd(new char[] { (char)47 })
+                         + "/Formulario/ListaVacacionesPermiso.aspx?solicitud=" + codigoSolicitud;
+
+            return "<a href=" + Q + url + Q
+                   + " style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; "
+                   + "text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Validar y firmar</a>";
         }
 
         /// <summary>Un renglon con el estado de una firma.</summary>

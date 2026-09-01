@@ -395,6 +395,29 @@ function ConfirmarRecuperacion() {
    queda registrado contra la solicitud y así una descarga posterior siempre
    refleja las firmas que hay, no las que había. La conversión tarda un par de
    segundos: por eso el aviso y el botón deshabilitado. */
+/* Baja un archivo del servidor sin que el navegador lo bloquee.
+
+   Antes esto era window.open dentro de la respuesta de un ajax. Como para el
+   navegador eso no es un clic de la persona sino algo que pasa despues, Chrome lo
+   trata como ventana emergente y lo bloquea: la descarga no ocurria y no salia
+   ningun error, solo el aviso chico de la barra de direcciones.
+
+   Un enlace con download y un clic programatico si baja: no abre ventana, no se
+   sale de la pagina, y no depende de que la persona tenga habilitadas las
+   emergentes. */
+function DescargarArchivo(ruta) {
+    var enlace = document.createElement("a");
+    enlace.href = ruta;
+    enlace.download = "";
+    enlace.style.display = "none";
+
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    /* Se quita despues del clic; el navegador ya tomo la descarga. */
+    setTimeout(function () { document.body.removeChild(enlace); }, 0);
+}
+
 function DescargarPdfSolicitud(idvacaciones) {
     var $btn = $(event ? event.currentTarget : null);
     $btn.prop("disabled", true);
@@ -421,7 +444,7 @@ function DescargarPdfSolicitud(idvacaciones) {
             }
 
             /* En mensaje viene la ruta relativa del archivo generado. */
-            window.open(respuesta.mensaje, "_blank");
+            DescargarArchivo(respuesta.mensaje);
         },
         error: function () {
             $btn.prop("disabled", false);
@@ -1040,8 +1063,8 @@ function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
         success: function (respuesta) {
             if (respuesta != null) {
                 if (respuesta.estado == "1") {
-                    // Se abre el enlace al documento
-                    window.open(respuesta.mensaje);
+                    // Se baja el documento
+                    DescargarArchivo(respuesta.mensaje);
                 } else {
                     $("#MensajeInformativo").html(respuesta.mensaje);
                     $('#modalMensajeInformativo').modal('show');

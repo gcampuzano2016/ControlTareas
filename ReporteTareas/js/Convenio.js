@@ -399,6 +399,15 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
         if (item.conteoArchivosAdjuntos != '0') {
             info = info + "<button type=\"button\" class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
         }
+
+        /* El documento firmado, para el propio colaborador. Aparece con el tramite
+           cerrado, que es cuando tiene las tres firmas y sirve de respaldo. Hasta
+           ahora solo podia bajarlo Talento Humano desde la otra pantalla. */
+        if (item.EstadoSolicitud == "PROCESADO") {
+            info = info + "&nbsp;|&nbsp;";
+            info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
+        }
+
         info = info + "</td>";
         info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";
         info = info + "<td class='sorting_1'>" + item.IdVacaciones + "</td>";
@@ -1655,6 +1664,58 @@ function TipoPermisoSeleccionado() {
                   si hay respaldo: se pide siempre.
      Los demás    lo decide "Respaldo adjunto": solo con "Sí" se pide archivo.
 */
+/* Baja un archivo del servidor sin que el navegador lo bloquee.
+
+   Con window.open dentro de la respuesta de un ajax, Chrome lo toma por ventana
+   emergente y lo bloquea en silencio. Un enlace con download y un clic
+   programatico si baja. */
+function DescargarArchivo(ruta) {
+    var enlace = document.createElement("a");
+    enlace.href = ruta;
+    enlace.download = "";
+    enlace.style.display = "none";
+
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    setTimeout(function () { document.body.removeChild(enlace); }, 0);
+}
+
+/* El documento firmado de la propia solicitud.
+
+   Es el mismo que descarga Talento Humano desde la otra pantalla: el servidor lo
+   arma en el momento, asi que siempre sale con las firmas que existan. */
+function DescargarPdfSolicitud(idvacaciones) {
+    $("#divMensajes").html("Generando el PDF...");
+
+    var datos = JSON.stringify([{
+        "action": "GenerarPdfSolicitud",
+        "parameters": { "idVacaciones": idvacaciones }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#divMensajes").html("");
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo generar el PDF." : respuesta.mensaje);
+                return;
+            }
+
+            DescargarArchivo(respuesta.mensaje);
+        },
+        error: function () {
+            $("#divMensajes").html("");
+            alerta("No se pudo generar el PDF. Intente nuevamente.");
+        }
+    });
+}
+
 function AgregaActividad() {
     var tipo = TipoPermisoSeleccionado();
 

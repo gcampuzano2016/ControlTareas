@@ -1,5 +1,6 @@
 using CapaEntidad;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -55,6 +56,19 @@ namespace CapaDato
         /// El detalle de una solicitud. Devuelve null solo si la solicitud no
         /// existe: una sin detalle cargado responde con los campos vacíos, para
         /// que la pantalla no tenga que distinguir esos dos casos.
+        ///
+        /// Las columnas se leen por presencia y no a ciegas. Sp_RTA_ObtenerDetallePermiso
+        /// crecio en varias entregas -el saldo mensual, el respaldo adjunto y el
+        /// plan de recuperacion se agregaron despues-, asi que una base que quedo
+        /// con la version anterior no devuelve todas. Pedir una columna que no vino
+        /// lanza IndexOutOfRangeException, y esa excepcion no se queda aca: sube
+        /// hasta PDFs.CargarDatos y deja al permiso sin documento y sin el correo a
+        /// Talento Humano, que es quien pone la tercera firma. Vacaciones nunca se
+        /// entera, porque no pasa por este procedimiento.
+        ///
+        /// Asi una base a medio actualizar degrada a "detalle vacio" -el documento
+        /// pierde las secciones del permiso- en vez de tumbar el tramite entero. Lo
+        /// que falte se arregla corriendo los scripts que quedaron pendientes.
         /// </summary>
         public static EntDetallePermiso Obtener(long idVacaciones)
         {
@@ -72,33 +86,37 @@ namespace CapaDato
                 {
                     if (dr.Read())
                     {
+                        HashSet<string> columnas = ColumnasDe(dr);
+
                         detalle = new EntDetallePermiso()
                         {
-                            IdVacaciones = Convert.ToInt64(dr["IdVacaciones"]),
-                            TipoPermiso = dr["TipoPermiso"].ToString(),
-                            TratamientoExcedente = dr["TratamientoExcedente"].ToString(),
-                            Actividad = dr["Actividad"].ToString(),
-                            EsTeletrabajo = Convert.ToInt32(dr["EsTeletrabajo"]) == 1,
-                            Modalidad = dr["Modalidad"].ToString(),
-                            HoraDesde = dr["HoraDesde"].ToString(),
-                            HoraHasta = dr["HoraHasta"].ToString(),
-                            Lugar = dr["Lugar"].ToString(),
-                            MediosContacto = dr["MediosContacto"].ToString(),
-                            MotivoGeneral = dr["MotivoGeneral"].ToString(),
-                            Actividades = dr["Actividades"].ToString(),
-                            Entregables = dr["Entregables"].ToString(),
-                            ConfirmaConectividad = Convert.ToBoolean(dr["ConfirmaConectividad"]),
-                            UsaPermisoMensual = Convert.ToBoolean(dr["UsaPermisoMensual"]),
-                            SaldoMensualTexto = dr["SaldoMensualTexto"].ToString(),
-                            RespaldoAdjunto = dr["RespaldoAdjunto"].ToString(),
-                            TieneRecuperacion = Convert.ToInt32(dr["TieneRecuperacion"]) == 1,
+                            /* El del parametro: el procedimiento filtra por el, asi
+                               que la fila no puede ser de otra solicitud. */
+                            IdVacaciones = idVacaciones,
+                            TipoPermiso = Texto(dr, columnas, "TipoPermiso"),
+                            TratamientoExcedente = Texto(dr, columnas, "TratamientoExcedente"),
+                            Actividad = Texto(dr, columnas, "Actividad"),
+                            EsTeletrabajo = Bandera(dr, columnas, "EsTeletrabajo"),
+                            Modalidad = Texto(dr, columnas, "Modalidad"),
+                            HoraDesde = Texto(dr, columnas, "HoraDesde"),
+                            HoraHasta = Texto(dr, columnas, "HoraHasta"),
+                            Lugar = Texto(dr, columnas, "Lugar"),
+                            MediosContacto = Texto(dr, columnas, "MediosContacto"),
+                            MotivoGeneral = Texto(dr, columnas, "MotivoGeneral"),
+                            Actividades = Texto(dr, columnas, "Actividades"),
+                            Entregables = Texto(dr, columnas, "Entregables"),
+                            ConfirmaConectividad = Bandera(dr, columnas, "ConfirmaConectividad"),
+                            UsaPermisoMensual = Bandera(dr, columnas, "UsaPermisoMensual"),
+                            SaldoMensualTexto = Texto(dr, columnas, "SaldoMensualTexto"),
+                            RespaldoAdjunto = Texto(dr, columnas, "RespaldoAdjunto"),
+                            TieneRecuperacion = Bandera(dr, columnas, "TieneRecuperacion"),
                             /* Las fechas del plan vienen como texto ya formateado
                                para el documento; si no hay plan quedan vacías. */
-                            RecFechaPropuesta = FechaCorta(dr["RecFechaPropuesta"]),
-                            RecHorario = dr["RecHorario"].ToString(),
-                            RecActividades = dr["RecActividades"].ToString(),
-                            RecEntregables = dr["RecEntregables"].ToString(),
-                            RecFechaMaxima = FechaCorta(dr["RecFechaMaxima"])
+                            RecFechaPropuesta = FechaCorta(dr, columnas, "RecFechaPropuesta"),
+                            RecHorario = Texto(dr, columnas, "RecHorario"),
+                            RecActividades = Texto(dr, columnas, "RecActividades"),
+                            RecEntregables = Texto(dr, columnas, "RecEntregables"),
+                            RecFechaMaxima = FechaCorta(dr, columnas, "RecFechaMaxima")
                         };
                     }
                 }
@@ -107,10 +125,55 @@ namespace CapaDato
             return detalle;
         }
 
-        /// <summary>Una fecha del lector como dd/MM/yyyy, o vacio si viene NULL.</summary>
-        private static string FechaCorta(object valor)
+        /// <summary>
+        /// Los nombres de columna que trae el lector, sin distinguir mayusculas:
+        /// es como los compara SQL Server y como los pide el indexador del lector.
+        /// </summary>
+        private static HashSet<string> ColumnasDe(SqlDataReader dr)
         {
+            HashSet<string> nombres = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            for (int i = 0; i < dr.FieldCount; i++)
+            {
+                nombres.Add(dr.GetName(i));
+            }
+
+            return nombres;
+        }
+
+        /// <summary>Una columna de texto, o vacio si no vino o es NULL.</summary>
+        private static string Texto(SqlDataReader dr, HashSet<string> columnas, string nombre)
+        {
+            if (!columnas.Contains(nombre)) { return string.Empty; }
+
+            object valor = dr[nombre];
+            return valor == null || valor == DBNull.Value ? string.Empty : valor.ToString();
+        }
+
+        /// <summary>
+        /// Una columna de si/no, o false si no vino o es NULL. Vale para las BIT y
+        /// para el 0/1 que devuelven los CASE de EsTeletrabajo y TieneRecuperacion.
+        /// </summary>
+        private static bool Bandera(SqlDataReader dr, HashSet<string> columnas, string nombre)
+        {
+            if (!columnas.Contains(nombre)) { return false; }
+
+            object valor = dr[nombre];
+            if (valor == null || valor == DBNull.Value) { return false; }
+
+            return Convert.ToBoolean(valor);
+        }
+
+        /// <summary>
+        /// Una columna de fecha como dd/MM/yyyy, o vacio si no vino o es NULL.
+        /// </summary>
+        private static string FechaCorta(SqlDataReader dr, HashSet<string> columnas, string nombre)
+        {
+            if (!columnas.Contains(nombre)) { return string.Empty; }
+
+            object valor = dr[nombre];
             if (valor == null || valor == DBNull.Value) { return string.Empty; }
+
             return Convert.ToDateTime(valor).ToString("dd/MM/yyyy");
         }
 

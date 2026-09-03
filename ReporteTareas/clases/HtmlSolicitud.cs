@@ -234,10 +234,13 @@ namespace PDF
 
             if (hayMensual)
             {
-                Fila(h, "¿Usa permiso mensual de 3h?", "Sí");
+                /* Solo el saldo, no la bolsa entera. Antes iba además un renglón
+                   "¿Usa permiso mensual de 3h?: Sí", y en el documento leído de
+                   corrido las tres horas se confundían con lo que a la persona le
+                   quedaba. Que use la bolsa ya se deduce de que este renglón esté.
 
-                /* El texto congelado al pedir el permiso, no el saldo de hoy: la
-                   especificación pide constancia de cuánto quedaba en ese momento. */
+                   El texto es el congelado al pedir el permiso, no el saldo de hoy:
+                   la especificación pide constancia de cuánto quedaba entonces. */
                 FilaSiHay(h, "Saldo del permiso mensual", detalle.SaldoMensualTexto);
             }
 

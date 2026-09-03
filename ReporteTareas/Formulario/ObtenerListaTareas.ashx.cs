@@ -3020,7 +3020,7 @@ namespace JsonJQueryNetTareas
         /// está guardada y el correo al jefe ya salió. Un permiso sin tipo se ve y
         /// se corrige; una solicitud fantasma no.
         /// </summary>
-        private void GuardarDetalleDelPermiso(dynamic campos, object idNuevo)
+        private void GuardarDetalleDelPermiso(dynamic campos, object idNuevo, string codUsuario)
         {
             try
             {
@@ -3049,6 +3049,27 @@ namespace JsonJQueryNetTareas
                     RespaldoAdjunto = CampoOpcional(campos, "RespaldoAdjunto")
                 };
 
+                /* El saldo del permiso mensual lo calcula el servidor, no el
+                   navegador.
+
+                   La pantalla consulta el saldo al abrirse y al cambiar la fecha, y
+                   lo deja en memoria. Quien pide dos permisos seguidos sin recargar
+                   manda en el segundo el saldo de antes del primero: asi quedaron
+                   las solicitudes 22858 y 22859, dos permisos de 2h22 del mismo dia
+                   y de la misma persona, que dicen los dos "Le queda 3h00" cuando el
+                   segundo tenia 0h38.
+
+                   Se le pasa idVacaciones para que la solicitud recien creada no se
+                   cuente a si misma: en este punto ya esta insertada.
+
+                   Si la consulta falla se conserva lo que mando la pantalla, que es
+                   mejor que dejar el renglon vacio en el documento. */
+                if (detalle.UsaPermisoMensual)
+                {
+                    string saldoReal = SaldoMensualAlGuardar(codUsuario, campos, idVacaciones);
+                    if (saldoReal != "") { detalle.SaldoMensualTexto = saldoReal; }
+                }
+
                 NegDetallePermiso.Guardar(detalle);
 
                 /* El plan de recuperación solo existe cuando el excedente se trata
@@ -3064,6 +3085,41 @@ namespace JsonJQueryNetTareas
                 NegVacaciones neg = new NegVacaciones();
                 neg.EscribirLog("No se pudo guardar el detalle del permiso: " + ex.Message,
                                 "Log", "Detalle", false);
+            }
+        }
+
+        /// <summary>
+        /// Cuanto le queda de la bolsa mensual en el momento de guardar, ya
+        /// redactado. Cadena vacia si no se pudo consultar.
+        ///
+        /// Es el mismo texto que arma Sp_RTA_SaldoPermisoMensual para la pantalla,
+        /// asi que el documento y el aviso del formulario dicen lo mismo sin
+        /// repetir la redaccion en dos lenguajes.
+        /// </summary>
+        private static string SaldoMensualAlGuardar(string codUsuario, dynamic campos, long idVacaciones)
+        {
+            try
+            {
+                DateTime fecha;
+                if (!DateTime.TryParseExact(CampoOpcional(campos, "txtfechaP"), "dd/MM/yyyy",
+                        CultureInfo.InvariantCulture, DateTimeStyles.None, out fecha))
+                {
+                    /* La bolsa es del mes en que la persona se ausenta. Sin fecha
+                       legible se usa hoy, que es lo que hace la pantalla. */
+                    fecha = DateTime.Now;
+                }
+
+                EntSaldoPermisoMensual saldo =
+                    NegDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
+
+                return saldo == null ? "" : (saldo.Mensaje ?? "");
+            }
+            catch (Exception ex)
+            {
+                NegVacaciones neg = new NegVacaciones();
+                neg.EscribirLog("No se pudo calcular el saldo mensual al guardar: " + ex.Message,
+                                "Log", "Detalle", false);
+                return "";
             }
         }
 
@@ -6120,7 +6176,7 @@ namespace JsonJQueryNetTareas
                    guarda desde la pantalla, no acá. */
                 if (respuesta.estado == "1" && TipoProceso == 0)
                 {
-                    GuardarDetalleDelPermiso(campos, respuesta.resultado);
+                    GuardarDetalleDelPermiso(campos, respuesta.resultado, IdUsuarioSession);
 
                     /* Y la firma, por lo mismo que en Vacaciones: al enviar todavía
                        no existe el IdVacaciones, lo genera este insert. */

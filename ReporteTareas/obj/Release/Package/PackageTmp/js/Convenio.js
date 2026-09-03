@@ -400,13 +400,16 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
             info = info + "<button type=\"button\" class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
         }
 
-        /* El documento firmado, para el propio colaborador. Aparece con el tramite
-           cerrado, que es cuando tiene las tres firmas y sirve de respaldo. Hasta
-           ahora solo podia bajarlo Talento Humano desde la otra pantalla. */
+        /* El boton de descarga del PDF firmado queda oculto por pedido del
+           usuario. No se borra la logica: DescargarPdfSolicitud sigue estando y
+           el servidor sigue armando el documento, asi que volver a mostrarlo es
+           devolver este bloque y nada mas.
+
         if (item.EstadoSolicitud == "PROCESADO") {
             info = info + "&nbsp;|&nbsp;";
             info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
         }
+        */
 
         info = info + "</td>";
         info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";

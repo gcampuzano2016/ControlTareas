@@ -972,7 +972,33 @@ function GuardarSolicitud2() {
     }
 }
 
+/* Antes de validar se vuelve a consultar el saldo mensual, y recien despues se
+   envia.
+
+   La pantalla consulta el saldo al abrirse y al cambiar la fecha, y lo deja en
+   memoria. Quien pedia dos permisos seguidos sin recargar validaba el segundo
+   con el saldo de antes del primero: el selector de tratamiento del excedente no
+   aparecia, y el permiso se enviaba sin decir de donde salen esas horas.
+
+   El texto que queda guardado ya lo calcula el servidor. Esto arregla la otra
+   mitad: lo que decide si el formulario se puede enviar.
+
+   ConsultarSaldoMensual ya reevalua el selector al volver, asi que la validacion
+   de mas abajo ve el estado nuevo sin tener que repetir esa cuenta aca. */
+var _consultandoSaldo = false;
+
 function GuardarSolicitudPermiso(tipo) {
+    /* Un segundo clic mientras la consulta viaja no arranca otro envio. */
+    if (_consultandoSaldo) { return; }
+    _consultandoSaldo = true;
+
+    ConsultarSaldoMensual(function () {
+        _consultandoSaldo = false;
+        EnviarSolicitudPermiso(tipo);
+    });
+}
+
+function EnviarSolicitudPermiso(tipo) {
 
     var url = "ObtenerListaTareas.ashx";
     var datos = "";
@@ -1929,7 +1955,7 @@ var _saldoConsultado = false;
    Se llama al abrir el formulario y cada vez que cambia la fecha del permiso,
    porque la bolsa es del mes en que la persona se ausenta: quien el 29 de agosto
    pide un permiso para el 2 de septiembre está usando la bolsa de septiembre. */
-function ConsultarSaldoMensual() {
+function ConsultarSaldoMensual(alTerminar) {
     var datos = JSON.stringify([{
         "action": "SaldoPermisoMensual",
         "parameters": {
@@ -1957,6 +1983,7 @@ function ConsultarSaldoMensual() {
                 $("#chkPermisoMensual").prop("disabled", true);
                 document.getElementById("chkPermisoMensual").checked = false;
                 MostrarTratamientoExcedente();
+                AvisarSaldoConsultado(alTerminar);
                 return;
             }
 
@@ -1978,6 +2005,7 @@ function ConsultarSaldoMensual() {
             }
 
             CambiaPermisoMensual();
+            AvisarSaldoConsultado(alTerminar);
         },
         error: function () {
             _saldoConsultado = true;
@@ -1994,8 +2022,16 @@ function ConsultarSaldoMensual() {
 
             /* Sin bolsa que lo cubra, el permiso entero es excedente. */
             MostrarTratamientoExcedente();
+            AvisarSaldoConsultado(alTerminar);
         }
     });
+}
+
+/* Corre el aviso si vino. Los tres caminos de ConsultarSaldoMensual terminan
+   aca, tambien el del error: quien espera para validar tiene que seguir en los
+   tres, o el boton de guardar se queda muerto. */
+function AvisarSaldoConsultado(alTerminar) {
+    if (typeof alTerminar === "function") { alTerminar(); }
 }
 
 /* Si queda tiempo del permiso sin cubrir por la bolsa mensual.

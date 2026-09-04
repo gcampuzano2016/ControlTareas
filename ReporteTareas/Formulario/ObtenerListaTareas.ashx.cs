@@ -3064,6 +3064,20 @@ namespace JsonJQueryNetTareas
 
                    Si la consulta falla se conserva lo que mando la pantalla, que es
                    mejor que dejar el renglon vacio en el documento. */
+                /* En Medico el respaldo no se elige: la cita es obligatoria y el
+                   formulario no deja enviar sin ella. El selector esta escondido
+                   justamente por eso -no hay nada que decidir- y mandaba su valor
+                   por defecto, NO_APLICA, que en el documento se lee como "no hay
+                   respaldo": lo contrario de lo que paso.
+
+                   Se corrige aca y no en la pantalla porque es el servidor el que
+                   persiste, y asi vale tambien para un navegador con la version
+                   anterior en cache.
+
+                   Teletrabajo se queda en NO_APLICA, que ahi si es verdad: no hay
+                   respaldo que adjuntar. */
+                if (detalle.TipoPermiso == "MEDICO") { detalle.RespaldoAdjunto = "SI"; }
+
                 if (detalle.UsaPermisoMensual)
                 {
                     EntSaldoPermisoMensual saldoReal =

@@ -136,6 +136,10 @@
         <div id="morris-bar-chart"></div>
         <div id="morris-donut-chart"></div>
         <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
+        <!-- Que version esta corriendo. Lo llena Master.Master.cs; ver ahi por que. -->
+        <div style="text-align: center; padding: 12px 0 16px; color: #9A9A9A; font-size: 11px">
+            <asp:Literal ID="litVersion" runat="server" />
+        </div>
     </form>
     <!--////////////////////////////////////////////////////////////////////////////////////////////////////////////-->
     <%--    <script src="../../bower_components/jquery/dist/jquery.min.js"></script>--%>

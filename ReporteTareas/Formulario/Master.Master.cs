@@ -13,6 +13,8 @@ namespace ReporteTareas.Formulario
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            litVersion.Text = VersionDesplegada();
+
             int Idperfil = 0;
             Idperfil = Convert.ToInt32(Session["Id_Perfil"]);
 
@@ -55,6 +57,44 @@ namespace ReporteTareas.Formulario
                 }
                 plan1 = plan1 + "</ul>";
                 lblCargarMenu.Text = plan1;
+            }
+        }
+
+        /// <summary>
+        /// Que version esta corriendo, para el pie de pagina.
+        ///
+        /// Existe por una confusion concreta de septiembre de 2026: se diagnostico
+        /// un problema contra el codigo del repositorio dando por hecho que el
+        /// servidor tenia lo mismo, y no lo tenia. Se perdieron dos dias. Con esto,
+        /// saber que hay desplegado es mirar el pie de cualquier pantalla.
+        ///
+        /// La fecha sale del archivo del ensamblado y no de una constante que haya
+        /// que acordarse de subir: una constante desactualizada miente, y aqui una
+        /// mentira es peor que no tener el dato. Copiar con robocopy conserva la
+        /// fecha original, asi que lo que se lee es el momento en que se compilo, no
+        /// el de la copia.
+        ///
+        /// Se lee bin\ReporteTareas.dll y no Assembly.Location a proposito: ASP.NET
+        /// hace copia sombra de los ensamblados a Temporary ASP.NET Files, y esa
+        /// copia tiene la fecha en que se reciclo la aplicacion, no la de la
+        /// compilacion.
+        ///
+        /// AssemblyVersion no aporta: esta fija en 1.0.0.0 desde siempre.
+        /// </summary>
+        private string VersionDesplegada()
+        {
+            try
+            {
+                string ruta = Server.MapPath("~/bin/ReporteTareas.dll");
+                if (!System.IO.File.Exists(ruta)) { return ""; }
+
+                DateTime compilado = System.IO.File.GetLastWriteTime(ruta);
+                return "Version del " + compilado.ToString("dd/MM/yyyy HH:mm");
+            }
+            catch
+            {
+                /* Un pie de pagina no puede tumbar una pantalla. */
+                return "";
             }
         }
     }

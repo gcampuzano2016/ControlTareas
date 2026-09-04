@@ -42,6 +42,74 @@ function FirmaRecordadaLeer() {
     catch (e) { return ""; }
 }
 
+/* ----------------------------------------------------------------------------
+   La firma guardada en la base.
+
+   sessionStorage resuelve el mismo rato: firmar Vacaciones y despues Permisos sin
+   volver a dibujar. Pero muere al cerrar la pestana, asi que al dia siguiente
+   habia que subirla de nuevo.
+
+   La de la base viaja con la persona en vez de quedarse en la maquina. Se pide
+   una sola vez por pantalla y se deja en sessionStorage, que sigue siendo el
+   camino rapido: de ahi en adelante todo funciona igual que antes.
+
+   Si ya hay firma del turno, esa manda: es mas nueva que la guardada, o es la
+   misma.
+   ---------------------------------------------------------------------------- */
+
+/* Los pads avisan por aca cuando hay que reevaluar su boton. El pad se arma antes
+   de que vuelva la respuesta, asi que sin esto el boton no aparecia hasta la
+   siguiente vez que se abriera el modal. */
+var _padsQueEsperanLaFirma = [];
+var _firmaDelServidorPedida = false;
+
+function FirmaGuardadaTraerDelServidor() {
+    if (_firmaDelServidorPedida) { return; }
+    _firmaDelServidorPedida = true;
+
+    /* Ya hay firma del turno: no hace falta molestar al servidor. */
+    if (FirmaRecordadaLeer() !== "") { return; }
+
+    /* Sin token no se pide, y eso NO es una limitacion: es la salvaguarda.
+
+       La unica pantalla con pad que no lo tiene es RespuestaAprobacion.aspx, la
+       que se abre desde el enlace del correo. Ese enlace es un portador: quien lo
+       tenga reenviado puede abrirlo. Ofrecer ahi la firma guardada del jefe seria
+       regalarsela a cualquiera que reciba ese correo.
+
+       Si alguna vez alguien le agrega el token a esa pantalla "para que tambien
+       funcione", esto deja de proteger. En el correo se dibuja la firma, y punto. */
+    var token = $("#ContentPlaceHolder1_txtUsuario").val() || "";
+    if (token === "") { return; }
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: JSON.stringify([{
+            "action": "FirmaGuardadaUsuario",
+            "parameters": { "session": token }
+        }]),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            if (respuesta == null || respuesta.estado != "1") { return; }
+
+            var trazo = respuesta.mensaje || "";
+            if (trazo.indexOf("data:") !== 0) { return; }   /* todavia no tiene una */
+
+            FirmaRecordadaGuardar(trazo);
+
+            for (var i = 0; i < _padsQueEsperanLaFirma.length; i++) {
+                _padsQueEsperanLaFirma[i]();
+            }
+        },
+        error: function () {
+            /* Sin firma guardada se dibuja, como siempre. No se avisa nada: no es
+               un problema del que la persona pueda hacer algo. */
+        }
+    });
+}
+
 function PadFirma(idContenedor, opciones) {
     opciones = opciones || {};
 
@@ -209,6 +277,11 @@ function PadFirma(idContenedor, opciones) {
     }
 
     AjustarBotonRecordada();
+
+    /* Se registra para que la respuesta del servidor, si llega despues, encienda
+       el boton sin tener que cerrar y reabrir el modal. */
+    _padsQueEsperanLaFirma.push(AjustarBotonRecordada);
+    FirmaGuardadaTraerDelServidor();
 
     return {
         /* Data URI listo para viajar al servidor, o cadena vacia si no hay firma.

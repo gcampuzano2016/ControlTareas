@@ -340,6 +340,12 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(GuardarFirmaSolicitud(context, parameters));
                 }
 
+                if (Action == "FirmaGuardadaUsuario")
+                {
+                    existAction = true;
+                    responseAction.Append(FirmaGuardadaUsuario(parameters));
+                }
+
                 if (Action == "ConfirmarRecuperacion")
                 {
                     existAction = true;
@@ -2852,6 +2858,40 @@ namespace JsonJQueryNetTareas
             catch (Exception ex)
             {
                 return responseMessage("0", "Ocurrio un error al registrar la firma. " + ex.Message.ToString(), "danger", "");
+            }
+        }
+
+        /// <summary>
+        /// La firma que la persona dejo guardada, para precargar el pad.
+        ///
+        /// Va por el codigo de la sesion y no por uno que mande la pantalla: pedir
+        /// la firma de otro tiene que ser imposible desde aca, no solo dificil.
+        ///
+        /// Sin firma guardada responde estado 1 y el trazo vacio. No es un error
+        /// -la primera vez nadie tiene una- y tratarlo como tal llenaria la pantalla
+        /// de avisos que no dicen nada.
+        /// </summary>
+        public string FirmaGuardadaUsuario(dynamic parameters)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string codUsuario = seguridad.Desencripta(parameters["session"].ToString());
+
+                EntRespuesta respuesta = new EntRespuesta()
+                {
+                    estado = "1",
+                    mensaje = NegFirmaUsuario.Obtener(codUsuario),
+                    tipoMensaje = "success"
+                };
+
+                return respuesta.SerializaToJson();
+            }
+            catch (Exception ex)
+            {
+                /* Que no se pueda recuperar la firma guardada no puede impedir
+                   firmar: el pad sigue sirviendo para dibujarla o subirla. */
+                return responseMessage("0", "No se pudo recuperar su firma guardada. " + ex.Message.ToString(), "warning", "");
             }
         }
 

@@ -12,7 +12,7 @@
          veces desde el teléfono, y si el CDN no responde el pad no se dibuja y el
          jefe no puede firmar. --%>
     <script src="../js/jquery.min.js" type="text/javascript"></script>
-    <script src="../js/padFirma.js?v=2" type="text/javascript"></script>
+    <script src="../js/padFirma.js?v=3" type="text/javascript"></script>
 
     <style type="text/css">
         body { font-family: 'Segoe UI', Arial, sans-serif; color: #333; }

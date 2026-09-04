@@ -186,6 +186,7 @@
     <Compile Include="NegEmpleado.cs" />
     <Compile Include="NegDetallePermiso.cs" />
     <Compile Include="NegFirmaSolicitud.cs" />
+    <Compile Include="NegFirmaUsuario.cs" />
     <Compile Include="NegForeCast.cs" />
     <Compile Include="NegHsCln.cs" />
     <Compile Include="NegInfoAdicionalHisClinica.cs" />

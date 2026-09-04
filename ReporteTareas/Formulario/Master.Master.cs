@@ -13,7 +13,15 @@ namespace ReporteTareas.Formulario
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            litVersion.Text = VersionDesplegada();
+            /* Con guarda a proposito. El control vive en Master.Master, que es
+               contenido y viaja aparte del ensamblado: si alguien sube el bin sin
+               el .master, litVersion llega nulo y esta linea tumbaba TODAS las
+               pantallas con un "Object reference not set to an instance of an
+               object" apenas se iniciaba sesion. Paso el 4 de septiembre de 2026.
+
+               Un pie de pagina informativo no puede ser un punto de falla. Sin el
+               control, no se muestra la version y la aplicacion sigue. */
+            if (litVersion != null) { litVersion.Text = VersionDesplegada(); }
 
             int Idperfil = 0;
             Idperfil = Convert.ToInt32(Session["Id_Perfil"]);

@@ -48,7 +48,57 @@ namespace ReporteTareas.Formulario
             }
 
             lblmensaje.Text = "";
+            CargarFirmaGuardada(codigo);
             pnlFirma.Visible = true;
+        }
+
+        /// <summary>
+        /// Deja servida en la pantalla la firma que esta persona guardo antes, para
+        /// que no tenga que volver a dibujarla.
+        ///
+        /// Aca no hay sesion: el pad no puede pedirsela al servidor como en el resto
+        /// de las pantallas, porque no hay un usuario autenticado a quien pedirsela.
+        /// Se resuelve desde el propio enlace, que es lo unico que dice quien va a
+        /// firmar: en Talento Humano viaja su codigo, y en el del jefe viaja el del
+        /// solicitante, del que se deduce su Cod_Jefe_Inm. Es la misma resolucion
+        /// que hace RegistrarFirma al momento de guardar, para que lo que se ofrece
+        /// y lo que se registra sean de la misma persona.
+        ///
+        /// Vale la advertencia de siempre sobre este enlace: es un portador. Quien
+        /// lo tenga reenviado ve esta pantalla, y ahora ademas la firma guardada de
+        /// quien deberia firmar. Se hace igual porque asi se pidio y porque el paso
+        /// que de verdad respalda la identidad -entrar a la aplicacion- sigue
+        /// existiendo; pero conviene saber que el enlace vale mas que antes.
+        ///
+        /// Si algo falla, se sigue sin firma guardada y la persona la dibuja. Nunca
+        /// corta la pantalla: es una comodidad, no un requisito.
+        /// </summary>
+        private void CargarFirmaGuardada(string codigo)
+        {
+            try
+            {
+                /* Con guarda: el control vive en el marcado, que se despliega aparte
+                   del ensamblado. Si llegan desparejos, esto no puede tumbar la
+                   pantalla de aprobacion. */
+                if (hfFirmaGuardada == null) { return; }
+
+                string[] parametrosSolicitud = hfParametros.Value.Split(new char[] { ';' });
+                if (parametrosSolicitud.Length < 4) { return; }
+
+                bool esTalentoHumano = codigo == "VG" || codigo == "RG";
+
+                string codFirmante = esTalentoHumano
+                    ? parametrosSolicitud[3]
+                    : CodigoDelJefe(parametrosSolicitud[3]);
+
+                if (string.IsNullOrEmpty(codFirmante)) { return; }
+
+                hfFirmaGuardada.Value = NegFirmaUsuario.Obtener(codFirmante);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("CargarFirmaGuardada: " + ex.Message, "Log", "Detalle");
+            }
         }
 
         /// <summary>

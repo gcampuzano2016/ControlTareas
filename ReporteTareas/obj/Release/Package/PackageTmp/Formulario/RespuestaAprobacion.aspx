@@ -56,6 +56,10 @@
 
                         <asp:HiddenField ID="hfTrazo" runat="server" />
                         <asp:HiddenField ID="hfParametros" runat="server" />
+                        <%-- La firma que esta persona dejo guardada, si tiene una. La
+                             resuelve el servidor desde el propio enlace; ver
+                             RespuestaAprobacion.aspx.cs. --%>
+                        <asp:HiddenField ID="hfFirmaGuardada" runat="server" />
 
                         <p class="aviso" id="msgFalta" style="display: none">
                             Debe dibujar su firma para continuar.</p>
@@ -100,6 +104,19 @@
 
         $(function () {
             if ($("#divFirmaJefe").length === 0) { return; }
+
+            /* Se siembra ANTES de armar el pad: PadFirma decide ahi si muestra el
+               boton "Usar mi firma", y si se hace despues el boton no aparece hasta
+               que la pantalla se recargue.
+
+               En esta pantalla no hay sesion, asi que el pad no puede pedirle la
+               firma al servidor por su cuenta: se la deja servida el servidor al
+               renderizar, resuelta desde el propio enlace. */
+            var guardada = document.getElementById("<%= hfFirmaGuardada.ClientID %>");
+            if (guardada !== null && guardada.value.indexOf("data:") === 0) {
+                FirmaRecordadaGuardar(guardada.value);
+            }
+
             _padJefe = PadFirma("divFirmaJefe", { ancho: 420, alto: 150 });
 
             /* El pad usa las pestañas de Bootstrap para alternar entre dibujar y

@@ -36,6 +36,13 @@ namespace CapaDato
                 cmd.Parameters.Add("@SaldoMensualTexto", SqlDbType.VarChar, 200).Value = detalle.SaldoMensualTexto ?? string.Empty;
                 cmd.Parameters.Add("@RespaldoAdjunto", SqlDbType.VarChar, 20).Value = detalle.RespaldoAdjunto ?? string.Empty;
 
+                /* Nulo cuando no se sabe, para que la columna quede NULL y no en
+                   cero: el documento distingue los dos casos. */
+                cmd.Parameters.Add("@SaldoMensualMinutos", SqlDbType.Int).Value =
+                    detalle.SaldoMensualMinutos.HasValue
+                        ? (object)detalle.SaldoMensualMinutos.Value
+                        : DBNull.Value;
+
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
@@ -108,6 +115,7 @@ namespace CapaDato
                             ConfirmaConectividad = Bandera(dr, columnas, "ConfirmaConectividad"),
                             UsaPermisoMensual = Bandera(dr, columnas, "UsaPermisoMensual"),
                             SaldoMensualTexto = Texto(dr, columnas, "SaldoMensualTexto"),
+                            SaldoMensualMinutos = Entero(dr, columnas, "SaldoMensualMinutos"),
                             RespaldoAdjunto = Texto(dr, columnas, "RespaldoAdjunto"),
                             TieneRecuperacion = Bandera(dr, columnas, "TieneRecuperacion"),
                             /* Las fechas del plan vienen como texto ya formateado
@@ -162,6 +170,23 @@ namespace CapaDato
             if (valor == null || valor == DBNull.Value) { return false; }
 
             return Convert.ToBoolean(valor);
+        }
+
+        /// <summary>
+        /// <summary>
+        /// Una columna de numero entero, o nulo si no vino o es NULL.
+        ///
+        /// Nulo y cero no son lo mismo aqui: quien lee distingue "no se registro"
+        /// de "era cero", asi que el nulo se conserva en vez de aplanarlo.
+        /// </summary>
+        private static int? Entero(SqlDataReader dr, HashSet<string> columnas, string nombre)
+        {
+            if (!columnas.Contains(nombre)) { return null; }
+
+            object valor = dr[nombre];
+            if (valor == null || valor == DBNull.Value) { return null; }
+
+            return Convert.ToInt32(valor);
         }
 
         /// <summary>

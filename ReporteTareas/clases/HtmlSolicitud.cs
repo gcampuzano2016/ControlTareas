@@ -293,15 +293,7 @@ namespace PDF
             }
             FilaSiHay(h, "Fecha y tiempo de ausencia", ausencia);
 
-            /* Las horas a recuperar solo se afirman cuando no hay ambigüedad: si no
-               se usó la bolsa mensual, el excedente es el permiso entero. Cuando sí
-               se usó, lo que sobra depende del saldo que quedaba, y ese número no se
-               guarda: solo el texto que se le mostró a la persona. Antes de inventar
-               una cifra en un documento firmado, se omite el renglón. */
-            if (!detalle.UsaPermisoMensual)
-            {
-                FilaSiHay(h, "Horas a recuperar", solicitud.Horas);
-            }
+            FilaSiHay(h, "Horas a recuperar", HorasARecuperar(solicitud, detalle));
 
             FilaSiHay(h, "Fecha propuesta de recuperación", detalle.RecFechaPropuesta);
             FilaSiHay(h, "Horario propuesto", detalle.RecHorario);
@@ -503,6 +495,70 @@ namespace PDF
         {
             if (string.IsNullOrEmpty(valor)) { return; }
             Fila(h, etiqueta, valor);
+        }
+
+        /// <summary>
+        /// Cuánto queda por recuperar: el permiso menos lo que cubrió la bolsa
+        /// mensual. Cadena vacía cuando no se puede afirmar.
+        ///
+        /// Quien pide 4 horas y usa las 3 de la bolsa recupera 1. Sin la bolsa de
+        /// por medio, el excedente es el permiso entero.
+        ///
+        /// Lo registrado antes del 4 de septiembre de 2026 no guardó los minutos de
+        /// la bolsa, solo el texto que se le mostró a la persona. Ahí el renglón se
+        /// omite, como se venía haciendo: en un documento firmado es preferible que
+        /// falte un dato a que aparezca uno inventado.
+        /// </summary>
+        private static string HorasARecuperar(EntSolicitud solicitud, EntDetallePermiso detalle)
+        {
+            if (!detalle.UsaPermisoMensual) { return solicitud.Horas ?? ""; }
+
+            if (!detalle.SaldoMensualMinutos.HasValue) { return ""; }
+
+            int permiso = Minutos(solicitud.Horas);
+            if (permiso <= 0) { return ""; }
+
+            /* Si la bolsa lo cubrió entero no hay nada que recuperar, y el renglón
+               no tiene por qué salir diciendo cero. */
+            int excedente = permiso - detalle.SaldoMensualMinutos.Value;
+            if (excedente <= 0) { return ""; }
+
+            return Duracion(excedente);
+        }
+
+        /// <summary>Los minutos de un "HH:mm". Cero si no se entiende.</summary>
+        private static int Minutos(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) { return 0; }
+
+            string[] partes = texto.Split(new char[] { (char)58 });
+            if (partes.Length != 2) { return 0; }
+
+            int horas, minutos;
+            if (!int.TryParse(partes[0], out horas)) { return 0; }
+            if (!int.TryParse(partes[1], out minutos)) { return 0; }
+
+            return horas * 60 + minutos;
+        }
+
+        /// <summary>
+        /// Unos minutos en palabras. Las horas justas se dicen como horas —"1 hora",
+        /// "2 horas"— porque es como lo dice la gente; el resto va en el formato
+        /// corto que ya usa el saldo mensual, "1h30".
+        /// </summary>
+        private static string Duracion(int minutos)
+        {
+            if (minutos <= 0) { return ""; }
+
+            if (minutos % 60 == 0)
+            {
+                int horas = minutos / 60;
+                return horas == 1 ? "1 hora" : horas.ToString() + " horas";
+            }
+
+            if (minutos < 60) { return minutos.ToString() + " minutos"; }
+
+            return (minutos / 60).ToString() + "h" + (minutos % 60).ToString("00");
         }
 
         private static string Dias(double valor)

@@ -3066,8 +3066,17 @@ namespace JsonJQueryNetTareas
                    mejor que dejar el renglon vacio en el documento. */
                 if (detalle.UsaPermisoMensual)
                 {
-                    string saldoReal = SaldoMensualAlGuardar(codUsuario, campos, idVacaciones);
-                    if (saldoReal != "") { detalle.SaldoMensualTexto = saldoReal; }
+                    EntSaldoPermisoMensual saldoReal =
+                        SaldoMensualAlGuardar(codUsuario, campos, idVacaciones);
+
+                    if (saldoReal != null)
+                    {
+                        detalle.SaldoMensualTexto = saldoReal.Mensaje ?? "";
+
+                        /* El numero, ademas del texto: de el sale cuanto hay que
+                           recuperar cuando el permiso se pasa de la bolsa. */
+                        detalle.SaldoMensualMinutos = saldoReal.MinutosDisponibles;
+                    }
                 }
 
                 NegDetallePermiso.Guardar(detalle);
@@ -3089,14 +3098,16 @@ namespace JsonJQueryNetTareas
         }
 
         /// <summary>
-        /// Cuanto le queda de la bolsa mensual en el momento de guardar, ya
-        /// redactado. Cadena vacia si no se pudo consultar.
+        /// Lo que le queda de la bolsa mensual en el momento de guardar. Nulo si no
+        /// se pudo consultar.
         ///
-        /// Es el mismo texto que arma Sp_RTA_SaldoPermisoMensual para la pantalla,
-        /// asi que el documento y el aviso del formulario dicen lo mismo sin
-        /// repetir la redaccion en dos lenguajes.
+        /// Devuelve la entidad entera y no solo el texto porque hacen falta las dos
+        /// cosas: la frase que va al documento como constancia, y los minutos, de
+        /// los que sale cuanto hay que recuperar. El texto lo arma
+        /// Sp_RTA_SaldoPermisoMensual, asi que el documento y el aviso del
+        /// formulario dicen lo mismo sin repetir la redaccion en dos lenguajes.
         /// </summary>
-        private static string SaldoMensualAlGuardar(string codUsuario, dynamic campos, long idVacaciones)
+        private static EntSaldoPermisoMensual SaldoMensualAlGuardar(string codUsuario, dynamic campos, long idVacaciones)
         {
             try
             {
@@ -3109,17 +3120,14 @@ namespace JsonJQueryNetTareas
                     fecha = DateTime.Now;
                 }
 
-                EntSaldoPermisoMensual saldo =
-                    NegDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
-
-                return saldo == null ? "" : (saldo.Mensaje ?? "");
+                return NegDetallePermiso.SaldoMensual(codUsuario, fecha, idVacaciones);
             }
             catch (Exception ex)
             {
                 NegVacaciones neg = new NegVacaciones();
                 neg.EscribirLog("No se pudo calcular el saldo mensual al guardar: " + ex.Message,
                                 "Log", "Detalle", false);
-                return "";
+                return null;
             }
         }
 

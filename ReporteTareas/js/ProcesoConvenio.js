@@ -700,19 +700,25 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
             info = info + "<button type='button' title='Subir comprobante de asistencia' class='btn btn-warning btn-xs' onclick='AbrirComprobante(\"" + item.IdVacaciones + "\",\"" + item.FechaDesde + "\");'><i class='fa fa-stethoscope' aria-hidden='true'></i></button>";
         }
 
-        /* La descarga aparece solo con el tramite cerrado. PROCESADO es el estado
-           en que Talento Humano ya firmo, o sea el unico en que el documento tiene
-           las tres firmas y sirve como respaldo.
+        /* La descarga esta disponible en cualquier estado, solo en esta pantalla.
 
-           Se mantiene en esta pantalla, y no en la del colaborador, porque es el
-           unico camino para recuperar el documento de las solicitudes del 26-ago
-           al 1-sep: a 14 de ellas les fallo la conversion al crearse y quedaron
-           sin archivo. El servidor lo rearma en el momento, asi que pedirlo hoy
-           lo regenera con las firmas que tenga. */
-        if (item.EstadoSolicitud == "PROCESADO") {
-            info = info + "&nbsp;|&nbsp;";
-            info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
-        }
+           Antes salia unicamente en PROCESADO, que es cuando el documento tiene
+           las tres firmas. El problema aparecio con las solicitudes del 26-ago al
+           1-sep: a 14 de ellas les fallo la conversion al crearse y quedaron sin
+           archivo, y las que no llegaron a cerrarse -22883 entre ellas- no tenian
+           por donde recuperarse. El servidor rearma el documento cada vez que se
+           pide, asi que basta con poder pedirlo.
+
+           El estado no se esconde, se muestra: verde con las tres firmas, gris y
+           con otro rotulo mientras falten. Quien baja un documento a medio firmar
+           tiene que saberlo, y esa era la razon de la restriccion anterior. */
+        var documentoCerrado = (item.EstadoSolicitud == "PROCESADO");
+
+        info = info + "&nbsp;|&nbsp;";
+        info = info + "<button type='button' title='" +
+            (documentoCerrado ? "Descargar PDF firmado" : "Descargar PDF (todavia sin las tres firmas)") +
+            "' class='btn " + (documentoCerrado ? "btn-success" : "btn-default") +
+            " btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
 
         info = info + "</td>";
         info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";

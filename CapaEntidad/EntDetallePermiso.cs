@@ -48,6 +48,17 @@ namespace CapaEntidad
         /// </summary>
         public string SaldoMensualTexto { get; set; }
 
+        /// <summary>
+        /// Los minutos que tenia la bolsa al pedir el permiso, congelados por lo
+        /// mismo que el texto. De aqui sale cuanto hay que recuperar: el permiso
+        /// menos esto.
+        ///
+        /// Nulo en lo registrado antes del 4 de septiembre de 2026, que no lo
+        /// guardaba. Nulo no es cero: cero seria "la bolsa estaba vacia", y con
+        /// eso habria que recuperar el permiso entero.
+        /// </summary>
+        public int? SaldoMensualMinutos { get; set; }
+
         /// <summary>SI, NO o NO_APLICA. Vacio en Medico y Teletrabajo, que no lo usan.</summary>
         public string RespaldoAdjunto { get; set; }
 

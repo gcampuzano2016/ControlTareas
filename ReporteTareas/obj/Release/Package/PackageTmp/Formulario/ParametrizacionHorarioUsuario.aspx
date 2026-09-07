@@ -1,7 +1,8 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionHorarioUsuario.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionHorarioUsuario" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionHorarioUsuario.js?v=2" type="text/javascript"></script>
+    <script src="../js/editorDiasHorario.js?v=1" type="text/javascript"></script>
+    <script src="../js/parametrizacionHorarioUsuario.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -71,7 +72,18 @@
                             <label>Horario actual:</label>
                             <input type="text" class="form-control" id="txtHorarioActualSel" disabled />
                         </div>
-                        <div class="form-group col-lg-7">
+                        <div class="form-group col-lg-12">
+                            <label style="font-weight: normal">
+                                <input type="radio" name="tipoHorario" id="rdPerfil" onchange="AlternarTipoHorario()" checked="checked" />
+                                Usar un horario del catálogo
+                            </label>
+                            &nbsp;&nbsp;&nbsp;
+                            <label style="font-weight: normal">
+                                <input type="radio" name="tipoHorario" id="rdPropio" onchange="AlternarTipoHorario()" />
+                                Horario propio de esta persona
+                            </label>
+                        </div>
+                        <div class="form-group col-lg-7" id="bloquePerfil">
                             <label>Nuevo perfil de horario:</label>
                             <select id="cmbPerfilHorario" class="form-control">
                             </select>
@@ -79,6 +91,25 @@
                         <div class="form-group col-lg-5">
                             <label>Vigente desde:</label>
                             <input type="date" class="form-control" id="txtFechaDesde" />
+                        </div>
+
+                        <div class="form-group col-lg-12" id="bloquePropio" style="display: none">
+                            <label>Días y horas de esta persona:</label>
+                            <button type="button" class="btn btn-xs btn-default pull-right" onclick="CopiarLunesAViernesUsuario()">
+                                Copiar el lunes a toda la semana laboral
+                            </button>
+                            <table class="table table-bordered table-condensed" style="margin-top: 5px">
+                                <thead>
+                                    <tr>
+                                        <th>Día</th>
+                                        <th style="text-align: center; width: 90px">Laborable</th>
+                                        <th style="width: 120px">Entrada</th>
+                                        <th style="width: 120px">Salida</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoDiasUsuario">
+                                </tbody>
+                            </table>
                         </div>
                     </div>
                     <div class="modal-footer">

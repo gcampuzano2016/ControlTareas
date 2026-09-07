@@ -93,6 +93,7 @@
     <Compile Include="DaoParametrosConfiguracion.cs" />
     <Compile Include="DaoSolicitud.cs" />
     <Compile Include="DaoTareas.cs" />
+    <Compile Include="DaoHorarioLaboral.cs" />
     <Compile Include="DaoUsuarioHorario.cs" />
     <Compile Include="DaoVentanaAprobacion.cs" />
     <Compile Include="DaoTransaccion.cs" />

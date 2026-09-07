@@ -213,6 +213,7 @@
     <Compile Include="NegReporteGe.cs" />
     <Compile Include="NegSolicitud.cs" />
     <Compile Include="NegTareas.cs" />
+    <Compile Include="NegHorarioLaboral.cs" />
     <Compile Include="NegUsuarioHorario.cs" />
     <Compile Include="NegVentanaAprobacion.cs" />
     <Compile Include="NegTransaccion.cs" />

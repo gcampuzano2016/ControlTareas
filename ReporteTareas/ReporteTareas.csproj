@@ -1125,6 +1125,7 @@
     <Content Include="Formulario\RegistroInventario.aspx" />
     <Content Include="Formulario\RegistroProyecto.aspx" />
     <Content Include="Formulario\ReporteHorarioLaboral.aspx" />
+    <Content Include="Formulario\ParametrizacionHorario.aspx" />
     <Content Include="Formulario\ParametrizacionHorarioUsuario.aspx" />
     <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
     <Content Include="Formulario\ParametrizacionPerfilInicio.aspx" />
@@ -1297,6 +1298,7 @@
     <Content Include="dist\js\sb-admin-2.js" />
     <Content Include="Formulario\ActualizarTareas.aspx" />
     <Content Include="Formulario\AdministrarTarea.ashx" />
+    <Content Include="Formulario\AdministrarHorarioLaboral.ashx" />
     <Content Include="Formulario\AdministrarHorarioUsuario.ashx" />
     <Content Include="Formulario\AdministrarVentanaAprobacion.ashx" />
     <Content Include="Formulario\AdministrarPerfilInicio.ashx" />
@@ -1396,6 +1398,8 @@
     <Content Include="js\moment-with-locales.min.js" />
     <Content Include="js\morris-data.js" />
     <Content Include="js\cambiarEstadoTarea.js" />
+    <Content Include="js\editorDiasHorario.js" />
+    <Content Include="js\parametrizacionHorario.js" />
     <Content Include="js\parametrizacionHorarioUsuario.js" />
     <Content Include="js\parametrizacionVentanaAprobacion.js" />
     <Content Include="js\parametrizacionPerfilInicio.js" />
@@ -1450,6 +1454,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarTarea.ashx.cs">
       <DependentUpon>AdministrarTarea.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarHorarioLaboral.ashx.cs">
+      <DependentUpon>AdministrarHorarioLaboral.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarHorarioUsuario.ashx.cs">
       <DependentUpon>AdministrarHorarioUsuario.ashx</DependentUpon>
@@ -1899,6 +1906,13 @@
     </Compile>
     <Compile Include="Formulario\ReporteHorarioLaboral.aspx.designer.cs">
       <DependentUpon>ReporteHorarioLaboral.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionHorario.aspx.cs">
+      <DependentUpon>ParametrizacionHorario.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionHorario.aspx.designer.cs">
+      <DependentUpon>ParametrizacionHorario.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ParametrizacionHorarioUsuario.aspx.cs">
       <DependentUpon>ParametrizacionHorarioUsuario.aspx</DependentUpon>

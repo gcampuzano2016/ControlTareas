@@ -1,11 +1,19 @@
 ﻿/* ============================================================================
    Pantalla: Parametrizacion de horario por usuario
-   Handler : AdministrarHorarioUsuario.ashx
+   Handler : AdministrarHorarioUsuario.ashx  (asignar un perfil)
+             AdministrarHorarioLaboral.ashx  (el horario propio de una persona)
+   Requiere: editorDiasHorario.js (la grilla de los siete dias)
+
+   Dos formas de darle horario a alguien:
+     - un perfil del catalogo, que comparte con los demas; o
+     - su horario propio, que no le sirve a nadie mas y por eso no sale en el
+       catalogo. Por dentro tambien es un perfil, solo que con dueño.
    ============================================================================ */
 
 var _usuariosHorario = [];
 
 $(document).ready(function () {
+    DibujarEditorDias("cuerpoDiasUsuario", "usr");
     CargarPerfilesHorario();
     BuscarUsuarios();
 });
@@ -17,6 +25,25 @@ function PostHorario(action, parameters, onSuccess) {
     $.ajax({
         type: "POST",
         url: "AdministrarHorarioUsuario.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            onSuccess(respuesta);
+        },
+        error: function () {
+            MostrarMensaje("La operación está tomando demasiado tiempo o la red está saturada. Intente nuevamente.", "danger");
+        }
+    });
+}
+
+/* Lo mismo, contra el handler del catalogo de horarios */
+function PostCatalogo(action, parameters, onSuccess) {
+    var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
+
+    $.ajax({
+        type: "POST",
+        url: "AdministrarHorarioLaboral.ashx",
         data: datos,
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -83,9 +110,12 @@ function RenderTablaUsuarios(lista) {
     }
 
     $.each(lista, function (i, item) {
-        var badge = (item.EsPredeterminado == 1)
-            ? " <span class='label label-default'>Predeterminado</span>"
-            : "";
+        var badge = "";
+        if (item.EsPredeterminado == 1) {
+            badge = " <span class='label label-default'>Predeterminado</span>";
+        } else if (item.EsPropio == 1) {
+            badge = " <span class='label label-info'>Propio</span>";
+        }
 
         info += "<tr role='row'>";
         info += "<td style='text-align:center'>";
@@ -112,29 +142,75 @@ function AbrirAsignar(indice) {
     $("#txtCodUsuarioSel").val(item.Cod_Usuario);
     $("#txtNombreUsuarioSel").val(item.Nom_Usuario + " (" + item.Cod_Usuario + ")");
     $("#txtHorarioActualSel").val(item.NombreHorario + (item.EsPredeterminado == 1 ? " [Predeterminado]" : ""));
+    $("#txtFechaDesde").val(FechaHoyISO());
+
+    LimpiarEditorDias("usr");
+
+    /* Si ya tiene su propio horario, se abre en ese modo y con sus horas cargadas */
+    if (item.EsPropio == 1 && item.IdHorarioLaboral > 0) {
+        $("#rdPropio").prop("checked", true);
+        AlternarTipoHorario();
+
+        PostCatalogo("ObtenerHorario", { "idHorario": item.IdHorarioLaboral }, function (respuesta) {
+            if (respuesta != null && typeof respuesta.estado != "undefined") {
+                MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+                return;
+            }
+
+            LlenarEditorDias("usr", respuesta);
+            $("#modalAsignar").modal("show");
+        });
+
+        return;
+    }
+
+    $("#rdPerfil").prop("checked", true);
+    AlternarTipoHorario();
 
     /* Si el usuario ya tiene un perfil real asignado, lo preselecciona */
     if (item.IdHorarioLaboral && item.IdHorarioLaboral > 0) {
         $("#cmbPerfilHorario").val(item.IdHorarioLaboral.toString());
     }
 
-    $("#txtFechaDesde").val(FechaHoyISO());
     $("#modalAsignar").modal("show");
+}
+
+/* Perfil del catalogo o horario propio: se muestra uno u otro, nunca los dos */
+function AlternarTipoHorario() {
+    var propio = $("#rdPropio").is(":checked");
+
+    $("#bloquePerfil").toggle(!propio);
+    $("#bloquePropio").toggle(propio);
+}
+
+function CopiarLunesAViernesUsuario() {
+    var error = AplicarLunesAViernes("usr");
+
+    if (error !== "") {
+        MostrarMensaje(error, "warning");
+    }
 }
 
 /* Envia la asignacion al handler */
 function GuardarAsignacion() {
     var codUsuario = $("#txtCodUsuarioSel").val();
-    var idHorario = $("#cmbPerfilHorario").val();
     var fechaDesde = $("#txtFechaDesde").val(); // yyyy-MM-dd (input type=date)
     var usuarioRegistro = $("#ContentPlaceHolder1_txtLoginUsuario").val();
 
-    if (idHorario == null || idHorario === "") {
-        MostrarMensaje("Debe seleccionar un perfil de horario.", "warning");
-        return;
-    }
     if (fechaDesde == null || fechaDesde === "") {
         MostrarMensaje("Debe indicar la fecha desde la cual rige el horario.", "warning");
+        return;
+    }
+
+    if ($("#rdPropio").is(":checked")) {
+        GuardarHorarioPropio(codUsuario, fechaDesde, usuarioRegistro);
+        return;
+    }
+
+    var idHorario = $("#cmbPerfilHorario").val();
+
+    if (idHorario == null || idHorario === "") {
+        MostrarMensaje("Debe seleccionar un perfil de horario.", "warning");
         return;
     }
 
@@ -149,19 +225,46 @@ function GuardarAsignacion() {
 
     PostHorario("AsignarHorarioUsuario", parameters, function (respuesta) {
         $("#btnGuardarAsignacion").prop("disabled", false);
-
-        if (respuesta == null) {
-            MostrarMensaje("No se recibió respuesta del servidor.", "danger");
-            return;
-        }
-
-        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
-
-        if (respuesta.estado == "1") {
-            $("#modalAsignar").modal("hide");
-            BuscarUsuarios();
-        }
+        TerminarGuardado(respuesta);
     });
+}
+
+/* El horario propio se crea (o se reescribe) y se asigna en una sola llamada */
+function GuardarHorarioPropio(codUsuario, fechaDesde, usuarioRegistro) {
+    var errorDias = ValidarEditorDias("usr");
+
+    if (errorDias !== "") {
+        MostrarMensaje(errorDias, "warning");
+        return;
+    }
+
+    var parameters = {
+        "codUsuario": codUsuario,
+        "fechaDesde": fechaDesde,
+        "usuarioRegistro": usuarioRegistro,
+        "dias": LeerEditorDias("usr")
+    };
+
+    $("#btnGuardarAsignacion").prop("disabled", true);
+
+    PostCatalogo("GuardarHorarioPropio", parameters, function (respuesta) {
+        $("#btnGuardarAsignacion").prop("disabled", false);
+        TerminarGuardado(respuesta);
+    });
+}
+
+function TerminarGuardado(respuesta) {
+    if (respuesta == null) {
+        MostrarMensaje("No se recibió respuesta del servidor.", "danger");
+        return;
+    }
+
+    MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+
+    if (respuesta.estado == "1") {
+        $("#modalAsignar").modal("hide");
+        BuscarUsuarios();
+    }
 }
 
 /* ----------------------------- utilitarios ------------------------------- */

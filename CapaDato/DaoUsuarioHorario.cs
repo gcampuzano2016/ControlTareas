@@ -68,7 +68,8 @@ namespace CapaDato
                             CodigoHorario = dr["CodigoHorario"].ToString(),
                             NombreHorario = dr["NombreHorario"].ToString(),
                             EsPredeterminado = Convert.ToInt32(dr["EsPredeterminado"].ToString()),
-                            FechaDesde = dr["FechaDesde"].ToString()
+                            FechaDesde = dr["FechaDesde"].ToString(),
+                            EsPropio = Convert.ToInt32(dr["EsPropio"].ToString())
                         });
                     }
                 }

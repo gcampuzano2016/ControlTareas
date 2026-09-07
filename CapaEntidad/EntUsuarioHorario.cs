@@ -14,5 +14,7 @@ namespace CapaEntidad
         public string NombreHorario { get; set; }
         public Int32 EsPredeterminado { get; set; }
         public string FechaDesde { get; set; }
+        /// <summary>1 cuando el horario vigente es el horario propio de esa persona.</summary>
+        public Int32 EsPropio { get; set; }
     }
 }

@@ -1443,15 +1443,14 @@ namespace CapaDato
                 DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
                 using (SqlConnection cnx = conexion.conectar())
-                /* Apunta al procedimiento anterior a proposito, no por descuido.
+                /* El partido en tramos de horario, ya aprobado y activo.
 
-                   El partido en tramos de horario esta terminado y su script ya
-                   aplicado en la base, pero todavia no tiene el visto bueno para
-                   activarse. Como esta DLL hace falta para otras cosas, se deja
-                   llamando al de siempre y se cambia esta linea a
-                   Sp_RTAInsertaDetalleTarea_V2 el dia que se apruebe. Lo demas ya esta
-                   preparado y no hay que tocar nada mas. */
-                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea", cnx))
+                   El procedimiento reparte el rango segun el horario del
+                   responsable e inserta una fila por tramo: 07:00 a 18:00 con
+                   jornada 08:30-17:30 deja tres filas (50%, normales, 50%). El
+                   anterior, Sp_RTAInsertaDetalleTarea, metia el rango completo en
+                   una sola fila. */
+                using (SqlCommand cmd = new SqlCommand("Sp_RTAInsertaDetalleTarea_V2", cnx))
                 {
                     cmd.CommandType = CommandType.StoredProcedure;
                     cmd.CommandTimeout = 60;

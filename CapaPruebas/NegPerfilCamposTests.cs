@@ -1,3 +1,4 @@
+using CapaEntidad;
 using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -119,6 +120,82 @@ namespace CapaPruebas
             int anios = hoy.Year - nacimiento.Year;
             if (nacimiento.Date > hoy.AddYears(-anios)) { anios--; }
             return anios;
+        }
+
+        /* -------------------------------------------------- lista blanca ---- */
+
+        /// <summary>
+        /// El corazon del control de acceso del modulo. En la maqueta los campos
+        /// bloqueados eran un disabled de CSS, que no detiene a nadie que sepa
+        /// abrir la consola del navegador. Aca el payload puede traer lo que
+        /// quiera: si no esta en la lista, no hay propiedad donde aterrice.
+        /// </summary>
+        [TestMethod]
+        public void LeerContacto_PayloadConCamposBloqueados_LosIgnora()
+        {
+            var payload = new System.Collections.Generic.Dictionary<string, object>
+            {
+                { "correoPersonal",   "alguien@gmail.com" },
+                { "telefonoPersonal", "0991234567" },
+                { "direccion",        "Av. Amazonas y Naciones Unidas" },
+                { "estadoCivil",      "Casado/a" },
+                // Los que RRHH administra. Vienen en el payload a proposito.
+                { "cargo",            "Gerente General" },
+                { "areaTrabajo",      "Directorio" },
+                { "cedula",           "9999999999" },
+                { "fechaNacimiento",  "01/01/1900" },
+                { "puestoTrabajo",    "Gerente General" }
+            };
+
+            EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(payload);
+
+            Assert.AreEqual("alguien@gmail.com", contacto.CorreoPersonal);
+            Assert.AreEqual("0991234567", contacto.TelefonoPersonal);
+            Assert.AreEqual("Av. Amazonas y Naciones Unidas", contacto.Direccion);
+            Assert.AreEqual("Casado/a", contacto.EstadoCivil);
+
+            // La comprobacion de verdad: la entidad no tiene forma de cargar un
+            // cargo. Si alguien le agrega la propiedad, esta prueba deja de
+            // compilar y obliga a mirar por que.
+            Assert.AreEqual(4, typeof(EntPerfilContacto).GetProperties().Length,
+                            "EntPerfilContacto es la lista blanca: cuatro campos, ni uno mas");
+        }
+
+        [TestMethod]
+        public void LeerContacto_ClavesAusentes_QuedanEnCadenaVacia()
+        {
+            var payload = new System.Collections.Generic.Dictionary<string, object>
+            {
+                { "correoPersonal", "alguien@gmail.com" }
+            };
+
+            EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(payload);
+
+            Assert.AreEqual("alguien@gmail.com", contacto.CorreoPersonal);
+            Assert.AreEqual("", contacto.TelefonoPersonal);
+            Assert.AreEqual("", contacto.Direccion);
+            Assert.AreEqual("", contacto.EstadoCivil);
+        }
+
+        [TestMethod]
+        public void LeerContacto_RecortaEspacios()
+        {
+            var payload = new System.Collections.Generic.Dictionary<string, object>
+            {
+                { "correoPersonal", "  alguien@gmail.com  " }
+            };
+
+            Assert.AreEqual("alguien@gmail.com",
+                            NegPerfilCampos.LeerContacto(payload).CorreoPersonal);
+        }
+
+        [TestMethod]
+        public void LeerContacto_PayloadNulo_DevuelveEntidadVacia()
+        {
+            EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(null);
+
+            Assert.IsNotNull(contacto);
+            Assert.AreEqual("", contacto.CorreoPersonal);
         }
     }
 }

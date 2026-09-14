@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using CapaEntidad;
 
 namespace CapaNegocio
 {
@@ -49,6 +51,45 @@ namespace CapaNegocio
             if (nacimiento.Date > hoy.AddYears(-anios)) { anios--; }
 
             return anios;
+        }
+
+        /* Las unicas cuatro claves que se leen del payload. Todo lo demas que
+           venga se descarta sin avisar: no es un error del cliente, es que no
+           le corresponde. Cargo, area, cedula, fecha de nacimiento y puesto los
+           administra RRHH y no tienen entrada por aca. */
+        private static readonly string[] CamposPermitidos =
+        {
+            "correoPersonal", "telefonoPersonal", "direccion", "estadoCivil"
+        };
+
+        /// <summary>
+        /// Arma el contacto editable a partir del payload, leyendo solo las
+        /// claves permitidas.
+        /// </summary>
+        public static EntPerfilContacto LeerContacto(IDictionary<string, object> campos)
+        {
+            return new EntPerfilContacto
+            {
+                CorreoPersonal   = Texto(campos, "correoPersonal"),
+                TelefonoPersonal = Texto(campos, "telefonoPersonal"),
+                Direccion        = Texto(campos, "direccion"),
+                EstadoCivil      = Texto(campos, "estadoCivil")
+            };
+        }
+
+        /// <summary>
+        /// El valor de una clave permitida, recortado. Cadena vacia si la clave
+        /// no vino, si vino nula, o si no esta en la lista blanca.
+        /// </summary>
+        private static string Texto(IDictionary<string, object> campos, string clave)
+        {
+            if (campos == null) { return ""; }
+            if (Array.IndexOf(CamposPermitidos, clave) < 0) { return ""; }
+
+            object valor;
+            if (!campos.TryGetValue(clave, out valor) || valor == null) { return ""; }
+
+            return valor.ToString().Trim();
         }
     }
 }

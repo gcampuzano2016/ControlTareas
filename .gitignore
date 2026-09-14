@@ -48,3 +48,9 @@ ReporteTareas/obj/Release/Package/*.txt
 #   appsettings.config  claves de cifrado de FileEncryptionService
 connections.config
 appsettings.config
+
+# EXCEPCION a la regla de arriba: CapaPruebas no se despliega nunca -no lo
+# referencia ningun proyecto- asi que su bin/ no tiene por que viajar. Son
+# ~38 MB de dependencias que ya viven en el bin/ de las otras capas.
+CapaPruebas/bin/
+CapaPruebas/obj/

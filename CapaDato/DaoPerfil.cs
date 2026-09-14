@@ -39,6 +39,7 @@ namespace CapaDato
                     /* 1. cabecera */
                     if (dr.Read())
                     {
+                        perfil.PerfilEncontrado            = true;
                         perfil.Cabecera.CodUsuario         = Texto(dr, "Cod_Usuario");
                         perfil.Cabecera.NombreCompleto     = Texto(dr, "NombreCompleto");
                         perfil.Cabecera.Cedula             = Texto(dr, "Cedula");

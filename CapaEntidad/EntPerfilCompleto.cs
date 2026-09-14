@@ -13,6 +13,16 @@ namespace CapaEntidad
         public EntPerfilContacto Contacto { get; set; }
         public List<EntPerfilEmergencia> Emergencia { get; set; }
 
+        /// <summary>
+        /// false por defecto: el usuario no se pudo identificar de forma unica
+        /// (Cod_Usuario repetido en R_Usuarios) y el procedimiento no devolvio
+        /// fila de cabecera. La pantalla debe explicarlo en vez de mostrar
+        /// campos vacios sin motivo, igual que ya hace TieneFicha para los
+        /// usuarios sin ficha de empleado. Se pone en true solo cuando si hubo
+        /// fila de cabecera.
+        /// </summary>
+        public bool PerfilEncontrado { get; set; }
+
         public EntPerfilCompleto()
         {
             Cabecera = new EntPerfilCabecera();

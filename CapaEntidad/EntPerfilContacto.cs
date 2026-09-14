@@ -9,9 +9,12 @@ namespace CapaEntidad
     /// </summary>
     public class EntPerfilContacto
     {
-        public string CorreoPersonal { get; set; }
-        public string TelefonoPersonal { get; set; }
-        public string Direccion { get; set; }
-        public string EstadoCivil { get; set; }
+        /* En "" por defecto y no en null, por la misma razon que
+           EntPerfilCabecera: el objeto por defecto debe verse igual que el
+           camino normal cuando no hay fila que leer. */
+        public string CorreoPersonal { get; set; } = "";
+        public string TelefonoPersonal { get; set; } = "";
+        public string Direccion { get; set; } = "";
+        public string EstadoCivil { get; set; } = "";
     }
 }

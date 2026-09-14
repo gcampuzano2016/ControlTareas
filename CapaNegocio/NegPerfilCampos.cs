@@ -37,6 +37,12 @@ namespace CapaNegocio
             if (!valida) { return null; }
 
             DateTime hoy = DateTime.Today;
+
+            // Una fecha de nacimiento futura no es una edad negativa: es un
+            // dato mal tipeado. No se acota el extremo inferior a proposito:
+            // una persona de 90 anios es perfectamente plausible.
+            if (nacimiento.Date > hoy) { return null; }
+
             int anios = hoy.Year - nacimiento.Year;
 
             // Todavia no cumple anios este anio.

@@ -1,6 +1,8 @@
 using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Globalization;
+using System.Threading;
 
 namespace CapaPruebas
 {
@@ -12,6 +14,28 @@ namespace CapaPruebas
     [TestClass]
     public class NegPerfilCamposTests
     {
+        private CultureInfo _culturaOriginal;
+
+        /// <summary>
+        /// Cultura hostil a proposito: en-US interpreta "03/07/1985" como
+        /// 7 de marzo, no 3 de julio. Si alguien le quita el formato explicito
+        /// a EdadDesdeTexto y lo reemplaza por un TryParse implicito, las
+        /// pruebas de esta clase tienen que fallar aqui mismo, no solo en un
+        /// servidor con otra configuracion regional.
+        /// </summary>
+        [TestInitialize]
+        public void FijarCulturaHostil()
+        {
+            _culturaOriginal = Thread.CurrentThread.CurrentCulture;
+            Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+        }
+
+        [TestCleanup]
+        public void RestaurarCultura()
+        {
+            Thread.CurrentThread.CurrentCulture = _culturaOriginal;
+        }
+
         /* ---------------------------------------------------------- edad ---- */
 
         /// <summary>
@@ -67,6 +91,20 @@ namespace CapaPruebas
             Assert.IsNull(NegPerfilCampos.EdadDesdeTexto("   "));
             Assert.IsNull(NegPerfilCampos.EdadDesdeTexto("no es fecha"));
             Assert.IsNull(NegPerfilCampos.EdadDesdeTexto("31/02/1990"));
+        }
+
+        /// <summary>
+        /// La base tiene 8 fechas de nacimiento fuera de rango razonable: un
+        /// anio mal tipeado no es hipotetico. Una fecha de nacimiento futura
+        /// no es una edad negativa, es un dato invalido.
+        /// </summary>
+        [TestMethod]
+        public void EdadDesdeTexto_FechaFutura_DevuelveNull()
+        {
+            string texto = DateTime.Today.AddYears(65).ToString("dd/MM/yyyy");
+
+            Assert.IsNull(NegPerfilCampos.EdadDesdeTexto(texto),
+                          "una fecha de nacimiento en el futuro no es una edad negativa");
         }
 
         [TestMethod]

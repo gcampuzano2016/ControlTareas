@@ -197,5 +197,87 @@ namespace CapaPruebas
             Assert.IsNotNull(contacto);
             Assert.AreEqual("", contacto.CorreoPersonal);
         }
+
+        /* ------------------------------------------- emergencia valida ------ */
+
+        [TestMethod]
+        public void ValidarEmergencia_CompletoYCorrecto_SinError()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "0987654321"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_SinNombre_Rechaza()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "   ", Parentesco = "Madre", Telefono = "0987654321"
+            };
+
+            Assert.AreEqual("Escriba el nombre del contacto de emergencia.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_SinTelefono_Rechaza()
+        {
+            // El caso que importa: un contacto sin telefono ocupa el lugar del
+            // bueno y hace creer que el dato esta.
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = ""
+            };
+
+            Assert.AreEqual("Escriba el teléfono del contacto de emergencia.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_TelefonoSinDigitosSuficientes_Rechaza()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "no tengo"
+            };
+
+            Assert.AreEqual("El teléfono debe tener al menos 7 dígitos.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_TelefonoConGuionesYEspacios_LoAcepta()
+        {
+            // La gente escribe "099 123-4567". Contar digitos, no caracteres.
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "099 123-4567"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_SinParentesco_Rechaza()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "", Telefono = "0987654321"
+            };
+
+            Assert.AreEqual("Indique el parentesco del contacto de emergencia.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_ContactoNulo_Rechaza()
+        {
+            Assert.AreEqual("No se recibió el contacto de emergencia.",
+                            NegPerfilCampos.ValidarEmergencia(null));
+        }
     }
 }

@@ -91,5 +91,53 @@ namespace CapaNegocio
 
             return valor.ToString().Trim();
         }
+
+        /// <summary>Minimo de digitos de un telefono utilizable en Ecuador.</summary>
+        private const int DigitosMinimosTelefono = 7;
+
+        /// <summary>
+        /// Cadena vacia si el contacto sirve; si no, el mensaje para el usuario.
+        ///
+        /// Se valida aca y no solo en el navegador porque el handler es
+        /// alcanzable por HTTP directo: una validacion que solo vive en el
+        /// cliente no es una validacion.
+        /// </summary>
+        public static string ValidarEmergencia(EntPerfilEmergencia contacto)
+        {
+            if (contacto == null)
+            {
+                return "No se recibió el contacto de emergencia.";
+            }
+
+            if (string.IsNullOrWhiteSpace(contacto.Nombre))
+            {
+                return "Escriba el nombre del contacto de emergencia.";
+            }
+
+            if (string.IsNullOrWhiteSpace(contacto.Parentesco))
+            {
+                return "Indique el parentesco del contacto de emergencia.";
+            }
+
+            if (string.IsNullOrWhiteSpace(contacto.Telefono))
+            {
+                return "Escriba el teléfono del contacto de emergencia.";
+            }
+
+            /* Se cuentan digitos, no caracteres: "099 123-4567" es un telefono
+               perfectamente valido y la gente lo escribe asi. */
+            int digitos = 0;
+            foreach (char c in contacto.Telefono)
+            {
+                if (char.IsDigit(c)) { digitos++; }
+            }
+
+            if (digitos < DigitosMinimosTelefono)
+            {
+                return "El teléfono debe tener al menos 7 dígitos.";
+            }
+
+            return "";
+        }
     }
 }

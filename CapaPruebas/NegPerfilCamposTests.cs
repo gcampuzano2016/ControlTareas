@@ -238,14 +238,14 @@ namespace CapaPruebas
         }
 
         [TestMethod]
-        public void ValidarEmergencia_TelefonoSinDigitosSuficientes_Rechaza()
+        public void ValidarEmergencia_TelefonoConLetras_Rechaza()
         {
             var contacto = new EntPerfilEmergencia
             {
                 Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "no tengo"
             };
 
-            Assert.AreEqual("El teléfono debe tener al menos 7 dígitos.",
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
                             NegPerfilCampos.ValidarEmergencia(contacto));
         }
 
@@ -278,6 +278,82 @@ namespace CapaPruebas
         {
             Assert.AreEqual("No se recibió el contacto de emergencia.",
                             NegPerfilCampos.ValidarEmergencia(null));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_TextoLibreConDigitos_Rechaza()
+        {
+            // Caso real que motivo el cambio: el usuario escribio literalmente
+            // "no tengo celular" en el campo, y como tiene 10 digitos dentro, se
+            // guardaba como un contacto de emergencia valido.
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "mi cedula es 1710034678, no tengo celular"
+            };
+
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_DigitosConLetras_Rechaza()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "aaa1234567bbb"
+            };
+
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_ConSignoMasYEspacios_Acepta()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "+593 99 123 4567"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_ConParentesisYGuiones_Acepta()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "(02) 246-8000"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_MasDe15Digitos_Rechaza()
+        {
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "9999999999999999"
+            };
+
+            Assert.AreEqual("El teléfono no puede tener más de 15 dígitos.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarEmergencia_PocosDígitosCaracteresValidos_Rechaza()
+        {
+            // Cobertura del mensaje "al menos 7 digitos": con caracteres validos
+            // pero insuficientes. Asegura que ese mensaje siga siendo alcanzable
+            // con las nuevas reglas.
+            var contacto = new EntPerfilEmergencia
+            {
+                Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "12345"
+            };
+
+            Assert.AreEqual("El teléfono debe tener al menos 7 dígitos.",
+                            NegPerfilCampos.ValidarEmergencia(contacto));
         }
     }
 }

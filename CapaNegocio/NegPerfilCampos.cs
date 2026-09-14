@@ -95,6 +95,9 @@ namespace CapaNegocio
         /// <summary>Minimo de digitos de un telefono utilizable en Ecuador.</summary>
         private const int DigitosMinimosTelefono = 7;
 
+        /// <summary>Maximo de digitos segun la norma E.164 para numeros telefonicos internacionales.</summary>
+        private const int DigitosMaximosTelefono = 15;
+
         /// <summary>
         /// Cadena vacia si el contacto sirve; si no, el mensaje para el usuario.
         ///
@@ -124,17 +127,38 @@ namespace CapaNegocio
                 return "Escriba el teléfono del contacto de emergencia.";
             }
 
-            /* Se cuentan digitos, no caracteres: "099 123-4567" es un telefono
-               perfectamente valido y la gente lo escribe asi. */
+            /* Se cuentan digitos ASCII, no caracteres: "099 123-4567" es un
+               telefono perfectamente valido. Solo se aceptan separadores que la
+               gente usa de verdad: espacio, guion, parentesis, signo +, punto. */
             int digitos = 0;
             foreach (char c in contacto.Telefono)
             {
-                if (char.IsDigit(c)) { digitos++; }
+                /* char.IsDigit aceptaria digitos Unicode (arabigo-indicos,
+                   devanagari). Aqui se exige ASCII explicito. */
+                if (c >= '0' && c <= '9')
+                {
+                    digitos++;
+                }
+                /* Los separadores permitidos. */
+                else if (c == ' ' || c == '-' || c == '(' || c == ')' || c == '+' || c == '.')
+                {
+                    /* Nada: son caracteres permitidos. */
+                }
+                else
+                {
+                    /* Cualquier otro caracter rechaza el telefono. */
+                    return "El teléfono solo puede tener números, espacios, guiones y paréntesis.";
+                }
             }
 
             if (digitos < DigitosMinimosTelefono)
             {
                 return "El teléfono debe tener al menos 7 dígitos.";
+            }
+
+            if (digitos > DigitosMaximosTelefono)
+            {
+                return "El teléfono no puede tener más de 15 dígitos.";
             }
 
             return "";

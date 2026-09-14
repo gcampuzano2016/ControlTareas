@@ -82,6 +82,8 @@
     <Compile Include="EntUsuarioMenuBusqueda.cs" />
     <Compile Include="EntPlanRecuperacion.cs" />
     <Compile Include="EntPerfil.cs" />
+    <Compile Include="EntPerfilCabecera.cs" />
+    <Compile Include="EntPerfilCompleto.cs" />
     <Compile Include="EntPerfilContacto.cs" />
     <Compile Include="EntPerfilEmergencia.cs" />
     <Compile Include="EntPerfilInicio.cs" />

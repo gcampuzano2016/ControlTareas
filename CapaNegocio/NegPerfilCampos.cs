@@ -53,18 +53,19 @@ namespace CapaNegocio
             return anios;
         }
 
-        /* Las unicas cuatro claves que se leen del payload. Todo lo demas que
-           venga se descarta sin avisar: no es un error del cliente, es que no
-           le corresponde. Cargo, area, cedula, fecha de nacimiento y puesto los
-           administra RRHH y no tienen entrada por aca. */
-        private static readonly string[] CamposPermitidos =
-        {
-            "correoPersonal", "telefonoPersonal", "direccion", "estadoCivil"
-        };
+        /* La lista blanca no es un arreglo que se recorra: es la forma de este
+           codigo. LeerContacto pide exactamente cuatro claves, y
+           EntPerfilContacto tiene exactamente cuatro propiedades. Un cargo o
+           una cedula en el payload no se cuelan porque no hay linea que los
+           pida ni propiedad que los reciba.
+
+           Agregar un campo editable son dos cambios deliberados -la propiedad
+           y la llamada- y la prueba que fija el conteo de propiedades obliga a
+           justificarlo. */
 
         /// <summary>
         /// Arma el contacto editable a partir del payload, leyendo solo las
-        /// claves permitidas.
+        /// cuatro claves que el codigo esta escrito para leer.
         /// </summary>
         public static EntPerfilContacto LeerContacto(IDictionary<string, object> campos)
         {
@@ -78,13 +79,12 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// El valor de una clave permitida, recortado. Cadena vacia si la clave
-        /// no vino, si vino nula, o si no esta en la lista blanca.
+        /// El valor de una clave, recortado. Cadena vacia si la clave no vino
+        /// o si vino nula.
         /// </summary>
         private static string Texto(IDictionary<string, object> campos, string clave)
         {
             if (campos == null) { return ""; }
-            if (Array.IndexOf(CamposPermitidos, clave) < 0) { return ""; }
 
             object valor;
             if (!campos.TryGetValue(clave, out valor) || valor == null) { return ""; }

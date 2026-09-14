@@ -155,8 +155,8 @@ namespace CapaPruebas
             Assert.AreEqual("Casado/a", contacto.EstadoCivil);
 
             // La comprobacion de verdad: la entidad no tiene forma de cargar un
-            // cargo. Si alguien le agrega la propiedad, esta prueba deja de
-            // compilar y obliga a mirar por que.
+            // cargo. Si alguien le agrega la propiedad, esta prueba falla al
+            // correr y obliga a mirar por que.
             Assert.AreEqual(4, typeof(EntPerfilContacto).GetProperties().Length,
                             "EntPerfilContacto es la lista blanca: cuatro campos, ni uno mas");
         }

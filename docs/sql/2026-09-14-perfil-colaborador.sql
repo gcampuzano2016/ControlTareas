@@ -287,6 +287,19 @@ GO
    que RRHH los resuelva. Es el mismo criterio de DaoFirmaUsuario cuando el
    codigo de usuario esta repetido: antes que adivinar, no responder.
 
+   Tambien se excluyen los usuarios activos cuyo Cod_Usuario este repetido
+   (el mismo caso de la seccion 4 y del reporte de la seccion 8). Esto no es
+   defensa contra un dato imposible: hoy no se dispara porque el grupo '0000'
+   comparte cedula entre si (ya cae en el filtro de arriba) y el grupo
+   '369748' tiene la cedula vacia en ambos. Pero el reporte de excepciones de
+   este mismo script le pide a RRHH que le asigne una cedula valida y
+   distinta a cada persona de esos grupos, y ese es exactamente el arreglo
+   que, hecho antes de corregir el Cod_Usuario duplicado, haria que dos
+   cedulas ya validas y distintas apunten al mismo Cod_Usuario: el UPDATE
+   escribiria ese codigo en dos fichas de Empleados y violaria
+   UQ_Empleados_Cod_Usuario, abortando el script. La condicion cubre ese
+   estado intermedio, no un caso de hoy.
+
    Solo se escribe donde esta vacio, asi que correrlo de nuevo no pisa un
    enlace corregido a mano. */
 UPDATE e
@@ -297,6 +310,11 @@ UPDATE e
           FROM dbo.R_Usuarios
          WHERE ISNULL(EstadoUsuario, 0) = 0
            AND ISNULL(LTRIM(RTRIM(Cedula)), '') <> ''
+           AND Cod_Usuario NOT IN (
+                SELECT Cod_Usuario FROM dbo.R_Usuarios
+                 WHERE ISNULL(EstadoUsuario, 0) = 0
+                 GROUP BY Cod_Usuario
+                HAVING COUNT(*) > 1)   -- Cod_Usuario repetido: no se enlaza
          GROUP BY LTRIM(RTRIM(Cedula))
         HAVING COUNT(*) = 1          -- cedula repetida: no se enlaza
        ) u

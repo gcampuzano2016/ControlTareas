@@ -18,6 +18,15 @@
 SET NOCOUNT ON;
 GO
 
+/* Los indices filtrados -el UQ_Empleados_Cod_Usuario de la seccion 2- exigen
+   estas dos opciones encendidas en la sesion que los crea, o CREATE INDEX
+   falla con el error 1934. sqlcmd trae QUOTED_IDENTIFIER apagado por defecto,
+   al reves que SSMS: por eso el script tiene que encenderlo el mismo en vez de
+   confiar en como lo invoquen. */
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
 /* ------------------------------------------------------------ 1. tablas --- */
 
 /* Una fila por persona: aca no hay borrado logico porque no significa nada.
@@ -220,10 +229,39 @@ END
 ELSE PRINT 'Empleados.Cod_Usuario ya existia.';
 GO
 
-IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Empleados_Cod_Usuario')
+/* Se reemplaza el indice no unico de la version anterior por uno unico
+   filtrado: el flujo le pide a RRHH enlazar a mano las fichas que quedaron
+   fuera del poblado automatico, y sin esto nada impide que por error apunten
+   dos al mismo Cod_Usuario. No es clave foranea -no referencia otra tabla-
+   asi que no contradice la regla de no usarlas. Tiene que ser FILTRADO
+   (WHERE Cod_Usuario IS NOT NULL) porque hay 21 fichas sin enlazar todavia:
+   SQL Server trata todos los NULL como iguales en un indice unico, y sin el
+   filtro el CREATE fallaria contra esas 21 filas. Dos indices sobre la misma
+   columna serian desperdicio, por eso se elimina el anterior en vez de
+   dejarlo junto al nuevo.
+
+   Primero se crea el nuevo, y solo si existe con exito se retira el viejo.
+   No al reves: si el DROP fuera primero y el CREATE fallara a mitad de
+   camino (por ejemplo, por el error 1934 de un indice filtrado sin
+   QUOTED_IDENTIFIER/ANSI_NULLS encendidos), la base quedaria sin ningun
+   indice sobre la columna, peor que como estaba. Creando primero, un CREATE
+   fallido deja el viejo intacto y el script se detiene ahi sin haber
+   empeorado nada. */
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UQ_Empleados_Cod_Usuario')
 BEGIN
-    CREATE INDEX IX_Empleados_Cod_Usuario ON dbo.Empleados (Cod_Usuario);
-    PRINT 'IX_Empleados_Cod_Usuario creado.';
+    CREATE UNIQUE INDEX UQ_Empleados_Cod_Usuario
+        ON dbo.Empleados (Cod_Usuario)
+        WHERE Cod_Usuario IS NOT NULL;
+    PRINT 'UQ_Empleados_Cod_Usuario creado.';
+END
+ELSE PRINT 'UQ_Empleados_Cod_Usuario ya existia.';
+GO
+
+IF EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'UQ_Empleados_Cod_Usuario')
+   AND EXISTS (SELECT 1 FROM sys.indexes WHERE name = 'IX_Empleados_Cod_Usuario')
+BEGIN
+    DROP INDEX IX_Empleados_Cod_Usuario ON dbo.Empleados;
+    PRINT 'IX_Empleados_Cod_Usuario (no unico) eliminado, reemplazado por UQ_Empleados_Cod_Usuario.';
 END
 GO
 
@@ -296,6 +334,36 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    /* R_Usuarios no tiene indice unico sobre Cod_Usuario -su llave real es
+       Id_Usuario- y hay codigos repetidos entre usuarios activos (el caso
+       '0000' son dos personas distintas). Si se entregara CUALQUIERA de los
+       siete result sets en ese caso, el contacto personal, los contactos de
+       emergencia y todo lo demas que cuelga de Cod_Usuario vendria mezclado
+       o seria de la otra persona -domicilio, telefono personal, a
+       quien llamar en una emergencia-, sin forma de saber de quien es cada
+       dato. Y aunque la pantalla oculte las pestanas cuando no hay perfil, el
+       JSON ya viajo al navegador: cerrar la puerta de la cabecera y dejar
+       las demas abiertas serviria de poco.
+
+       Por eso @CodigoRepetido se aplica en el WHERE de los siete SELECT, no
+       solo en la cabecera: el criterio es "no se entrega nada", no "no se
+       entrega la cabecera". No hay un RETURN anticipado a proposito -el Dao
+       recorre los result sets por posicion y espera que los siete siempre
+       vengan, aunque vacios; un RETURN rompe ese contrato.
+
+       Mismo criterio que CapaDato/DaoFirmaUsuario.cs (comentario del metodo
+       Obtener): ante un codigo repetido, se devuelve vacio en vez de
+       adivinar cual de las dos personas es -"la fila seria de dos personas
+       distintas"-. No se usa TOP 1 con ORDER BY: eso elegiria una fila fija,
+       y para '0000' esa fila fija seria siempre la de la persona equivocada
+       para la otra. Determinista y equivocado es peor que vacio, porque
+       nadie lo descubre. */
+    DECLARE @CodigoRepetido BIT = 0;
+
+    IF (SELECT COUNT(*) FROM dbo.R_Usuarios
+         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+        SET @CodigoRepetido = 1;
+
     /* 1. cabecera */
     SELECT  u.Cod_Usuario,
             NombreCompleto  = ISNULL(NULLIF(LTRIM(RTRIM(e.Nombre)), ''), u.Nom_Usuario),
@@ -332,7 +400,8 @@ BEGIN
       FROM  dbo.R_Usuarios u
       LEFT JOIN dbo.Empleados  e ON e.Cod_Usuario = u.Cod_Usuario
       LEFT JOIN dbo.R_Usuarios j ON LTRIM(RTRIM(j.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Jefe_Inm))
-     WHERE  u.Cod_Usuario = @Cod_Usuario;
+     WHERE  u.Cod_Usuario = @Cod_Usuario
+       AND  @CodigoRepetido = 0;
 
     /* 2. contacto personal (editable) */
     SELECT  CorreoPersonal   = ISNULL(p.CorreoPersonal, ''),
@@ -342,36 +411,42 @@ BEGIN
       FROM  dbo.R_Usuarios u
       LEFT JOIN dbo.Perfil_ContactoPersonal p ON p.Cod_Usuario = u.Cod_Usuario
       LEFT JOIN dbo.Empleados e ON e.Cod_Usuario = u.Cod_Usuario
-     WHERE  u.Cod_Usuario = @Cod_Usuario;
+     WHERE  u.Cod_Usuario = @Cod_Usuario
+       AND  @CodigoRepetido = 0;
 
     /* 3. contactos de emergencia */
     SELECT IdContacto, Nombre, Parentesco, Telefono
       FROM dbo.Perfil_ContactoEmergencia
      WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
      ORDER BY IdContacto;
 
     /* 4. estudios (fase 2) */
     SELECT IdEstudio, Nivel, Institucion, Titulo, AnioGraduacion
       FROM dbo.Perfil_Estudio
      WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
      ORDER BY AnioGraduacion DESC, IdEstudio;
 
     /* 5. certificaciones (fase 2) */
     SELECT IdCertificacion, Nombre, Entidad, FechaObtencion
       FROM dbo.Perfil_Certificacion
      WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
      ORDER BY FechaObtencion DESC, IdCertificacion;
 
     /* 6. experiencia (fase 2) */
     SELECT IdExperiencia, Empresa, Cargo, AnioDesde, AnioHasta, Funciones
       FROM dbo.Perfil_Experiencia
      WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
      ORDER BY ISNULL(AnioHasta, 9999) DESC, AnioDesde DESC;
 
     /* 7. documentos de respaldo (fase 3) */
     SELECT IdDocumento, Origen, IdOrigen, NombreArchivo, NombreArchivoCodigo, Ruta
       FROM dbo.Perfil_Documento
      WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
      ORDER BY IdDocumento;
 END
 GO
@@ -396,6 +471,27 @@ IF EXISTS (SELECT 1 FROM dbo.Empleados
             WHERE ISNULL(Cod_Usuario,'') <> ''
             GROUP BY Cod_Usuario HAVING COUNT(*) > 1)
     RAISERROR('FALLO: hay un Cod_Usuario enlazado a mas de una ficha.', 16, 1);
+
+/* Cod_Usuario repetido entre usuarios activos: esto NO hace fallar el
+   script -es un problema de datos en R_Usuarios, que no tiene indice unico
+   sobre esa columna, no algo que el script haya causado- pero hay que
+   avisarlo bien visible, porque Sp_RTA_PerfilColaborador le niega el perfil
+   a esas personas (ver el comentario de la seccion 4) hasta que RRHH les
+   asigne un codigo unico. Tambien salen en el reporte de excepciones. */
+DECLARE @GruposRepetidos INT, @UsuariosAfectados INT;
+
+SELECT @GruposRepetidos = COUNT(*), @UsuariosAfectados = SUM(Cnt)
+  FROM (SELECT Cod_Usuario, COUNT(*) AS Cnt
+          FROM dbo.R_Usuarios
+         WHERE ISNULL(EstadoUsuario,0) = 0
+         GROUP BY Cod_Usuario
+        HAVING COUNT(*) > 1) x;
+
+IF ISNULL(@GruposRepetidos,0) > 0
+    PRINT 'ADVERTENCIA: ' + CAST(@GruposRepetidos AS VARCHAR(10))
+        + ' Cod_Usuario repetidos entre usuarios activos, afectando a '
+        + CAST(@UsuariosAfectados AS VARCHAR(10))
+        + ' personas que no pueden ver su perfil hasta que RRHH corrija el dato.';
 
 PRINT 'Aserciones OK.';
 GO
@@ -434,6 +530,15 @@ SELECT 'Jefe inmediato que no corresponde a ningun usuario',
    AND ISNULL(LTRIM(RTRIM(u.Cod_Jefe_Inm)),'') <> ''
    AND NOT EXISTS (SELECT 1 FROM dbo.R_Usuarios j
                     WHERE LTRIM(RTRIM(j.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Jefe_Inm)))
+UNION ALL
+SELECT 'Cod_Usuario repetido entre usuarios activos (no pueden ver su perfil)',
+       u.Cod_Usuario, u.Nom_Usuario, u.E_Mail, u.Departamento
+  FROM dbo.R_Usuarios u
+ WHERE ISNULL(u.EstadoUsuario,0) = 0
+   AND u.Cod_Usuario IN (
+        SELECT Cod_Usuario FROM dbo.R_Usuarios
+         WHERE ISNULL(EstadoUsuario,0) = 0
+         GROUP BY Cod_Usuario HAVING COUNT(*) > 1)
  ORDER BY 1, 3;
 GO
 

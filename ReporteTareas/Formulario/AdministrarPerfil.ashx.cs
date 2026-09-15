@@ -603,6 +603,39 @@ namespace JsonJQueryNetPerfil
                     System.IO.Directory.CreateDirectory(carpeta);
                 }
 
+                /* El web.config de esta carpeta -<handlers><clear /></handlers>- es
+                   lo unico que impide que IIS sirva estos documentos como archivos
+                   estaticos a quien acierte el nombre. Si la carpeta no viajo en el
+                   despliegue o alguien la borro en una limpieza, CreateDirectory de
+                   arriba la recrea SIN esa proteccion y nada lo avisa; se repone
+                   aca, en la primera subida, para que la carpeta nunca quede
+                   desprotegida en produccion. */
+                string rutaWebConfig = System.IO.Path.Combine(carpeta, "web.config");
+                if (!System.IO.File.Exists(rutaWebConfig))
+                {
+                    System.IO.File.WriteAllText(rutaWebConfig,
+@"<?xml version=""1.0"" encoding=""utf-8""?>
+<!--
+  Esta carpeta guarda respaldos personales: partidas de nacimiento, titulos,
+  cedulas. Sin este archivo, IIS los serviria como archivos estaticos a
+  cualquiera que acertara el nombre, sin preguntarle nada a nadie.
+
+  <clear /> deja la carpeta sin ningun handler, de modo que IIS no tiene con
+  que responder a una peticion directa. Los archivos se siguen leyendo del
+  disco desde DescargarPerfil.ashx, que primero le pregunta a la base de quien
+  es el documento; ese camino no pasa por los handlers de esta carpeta y no se
+  ve afectado.
+-->
+<configuration>
+  <system.webServer>
+    <handlers>
+      <clear />
+    </handlers>
+  </system.webServer>
+</configuration>
+");
+                }
+
                 EntPerfilDocumento doc = new EntPerfilDocumento
                 {
                     Origen              = origen,

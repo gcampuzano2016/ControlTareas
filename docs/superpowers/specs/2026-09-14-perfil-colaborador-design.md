@@ -409,11 +409,20 @@ respaldo y CV en PDF. La foto entra como noveno result set, por el final, por la
 misma razón que las cargas familiares entraron como octavo: el contrato es
 posicional y se amplía por el final.
 
-**Fase 3b — lo compartido.** La vista de jefatura. Se separó de la 3a a
-propósito: es la única parte del módulo donde una persona ve datos de otra, y
+**Fase 3b — lo compartido.** [COMPLETA] La vista de jefatura. Se separó de la 3a
+a propósito: es la única parte del módulo donde una persona ve datos de otra, y
 merece su propio ciclo de revisión en vez de compartirlo con un generador de PDF.
-La verificación pendiente de este diseño —«que un `codUsuario` que no es
-subordinado devuelva vacío»— le corresponde a esa fase.
+
+La restricción se construyó en dos capas que se refuerzan: la **guarda** vive en
+`Sp_RTA_PerfilEquipo` —un `codUsuario` que no es subordinado devuelve cero filas
+en los seis conjuntos— y el **recorte de campos** vive en `EntPerfilEquipoCabecera`,
+que sencillamente no tiene dónde poner una cédula. `EntPerfilEquipoTests` falla el
+día que alguien le agregue una propiedad prohibida.
+
+Los documentos de respaldo **no** se le muestran a la jefatura. La matriz concede
+certificaciones y calla sobre sus respaldos, y el respaldo de una certificación
+suele ser un escaneo con la cédula impresa: sería la puerta trasera de la
+restricción.
 
 ## Verificación
 
@@ -423,9 +432,9 @@ uno **chico, limitado a las tres cosas que fallan en silencio**:
 1. La conversión de fecha con estilo 103 y el cálculo de edad.
 2. La lista blanca de campos editables — que un payload con `Cargo` no lo guarde.
 3. La guarda de jefatura — que un `codUsuario` que no es subordinado devuelva vacío.
-   **Pendiente: le corresponde a la fase 3b**, que es la que construye la vista de
-   jefatura. Hoy no hay nada que probar porque `ListaEquipo` y `PerfilEquipo` no
-   existen todavía.
+   **Cubierta** por `docs/sql/2026-09-15-prueba-guarda-jefatura.sql`, que lo
+   demuestra contra la base real dentro de una transacción revertida. No se puede
+   cubrir con una prueba unitaria porque la guarda vive en SQL y necesita datos.
 
 Un error en cualquiera de las tres no da la cara: la edad sale mal, el campo se guarda,
 el dato se muestra. Nadie va a volver a mirarlas.
@@ -440,7 +449,7 @@ Lista de comprobación manual por fase, con los casos que dictaron los datos:
 - Uno **de los 6 con cédula repetida**: no ve datos de la otra persona.
 - El jefe **con 49 reportes**: el buscador aguanta y lista.
 - Un intento de leer el perfil de alguien que no es subordinado: vuelve vacío.
-  **De la fase 3b**, cuando exista la vista de jefatura.
+  **Cubierto** por la demostración en SQL y por la lista de la fase 3b.
 - Alguien con fecha de nacimiento `dd/mm/yyyy` con día > 12: la edad sale correcta.
 
 ## Despliegue

@@ -5,9 +5,14 @@
    elige por si mismo un jefe real y uno de sus subordinados, y despues un
    tercero que NO le reporta, y comprueba que:
 
-     1. Pedir el perfil de su propio subordinado devuelve una fila de cabecera.
-     2. Pedir el perfil de alguien que no es suyo devuelve CERO filas.
+     1. La guarda reconoce a su propio subordinado.
+     2. La guarda niega a quien no le reporta a este jefe.
      3. La lista de equipo del jefe no contiene a ese tercero.
+     4. La lista de equipo del jefe si contiene al subordinado propio.
+     5. La lista de equipo de un jefe real no viene vacia.
+
+   Las cinco se evaluan siempre -un fallo en una no aborta las demas-, y el
+   resumen de cuantas fallaron va al final, despues del ROLLBACK.
 
    Es la verificacion numero 3 del diseno, que no se puede hacer con una
    prueba unitaria porque la guarda vive en SQL y necesita datos.

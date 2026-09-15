@@ -681,7 +681,7 @@ function PintarListaEquipo(lista) {
 
     if (lista.length === 0) {
         $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
-                       'No hay personas que coincidan con esa busqueda.</td></tr>');
+                       'No hay personas que coincidan con esa búsqueda.</td></tr>');
         return;
     }
 

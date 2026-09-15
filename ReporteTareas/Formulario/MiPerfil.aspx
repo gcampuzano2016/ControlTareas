@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=6" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=7" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -88,6 +88,13 @@
                     <li><a href="#tabFormacion" data-toggle="tab"><i class="fa fa-graduation-cap"></i> Formación</a></li>
                     <li><a href="#tabExperiencia" data-toggle="tab"><i class="fa fa-briefcase"></i> Experiencia</a></li>
                     <li><a href="#tabCargas" data-toggle="tab"><i class="fa fa-users"></i> Cargas familiares</a></li>
+                    <!-- Aparece sola: se muestra desde el JavaScript si la
+                         cabecera dice EsJefe. No la enciende ningun perfil ni
+                         ninguna fila de menu, asi que no hay una lista de jefes
+                         que mantener. Son 22 personas hoy. -->
+                    <li id="liTabEquipo" style="display: none">
+                        <a href="#tabEquipo" data-toggle="tab"><i class="fa fa-sitemap"></i> Mi equipo</a>
+                    </li>
                 </ul>
 
                 <div class="tab-content" style="padding-top: 15px">
@@ -342,6 +349,119 @@
                                             <i class="fa fa-plus"></i> Agregar
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabEquipo">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Mi equipo
+                                <span class="label label-default pull-right">
+                                    <i class="fa fa-lock"></i> Solo consulta
+                                </span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    Las personas que le reportan directamente. Puede consultar su
+                                    información laboral y de emergencia; los datos personales y las
+                                    cargas familiares no se muestran.
+                                </p>
+
+                                <div class="row">
+                                    <div class="form-group col-lg-6">
+                                        <label>Buscar (nombre, código o cargo):</label>
+                                        <input type="text" class="form-control" id="txtBuscarEquipo"
+                                               placeholder="Escriba para filtrar…"
+                                               onkeypress="if(event.keyCode==13){BuscarEquipo();return false;}" />
+                                    </div>
+                                    <div class="form-group col-lg-6" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary" onclick="BuscarEquipo()">
+                                            <i class="fa fa-search"></i> Buscar
+                                        </button>
+                                        <button type="button" class="btn btn-default" onclick="LimpiarBusquedaEquipo()">
+                                            Mostrar todos
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Ciudad</th><th style="width:70px">Ver</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoEquipo"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Se muestra al elegir a alguien de la lista. -->
+                        <div class="panel panel-default" id="panelSubordinado" style="display: none">
+                            <div class="panel-heading">
+                                <span id="subNombre">–</span>
+                                <button type="button" class="close" onclick="$('#panelSubordinado').hide()">&times;</button>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="col-lg-3 text-center">
+                                        <img id="subFoto" alt="Foto"
+                                             style="display: none; width: 96px; height: 96px; margin: 0 auto 10px;
+                                                    border-radius: 50%; object-fit: cover" />
+                                        <div id="subAvatar"
+                                             style="width: 96px; height: 96px; margin: 0 auto 10px; border-radius: 50%;
+                                                    background: #750202; color: #fff; font-size: 34px; line-height: 96px;">–</div>
+                                    </div>
+                                    <div class="col-lg-9">
+                                        <div class="row">
+                                            <div class="form-group col-lg-6"><label>Cargo</label>
+                                                <p class="form-control-static" id="subCargo">–</p></div>
+                                            <div class="form-group col-lg-6"><label>Área</label>
+                                                <p class="form-control-static" id="subArea">–</p></div>
+                                            <div class="form-group col-lg-6"><label>Ciudad</label>
+                                                <p class="form-control-static" id="subCiudad">–</p></div>
+                                            <div class="form-group col-lg-6"><label>Correo de notificación</label>
+                                                <p class="form-control-static" id="subCorreo">–</p></div>
+                                            <div class="form-group col-lg-6"><label>Jefe inmediato</label>
+                                                <p class="form-control-static" id="subJefe">–</p></div>
+                                            <div class="form-group col-lg-6"><label>Horario</label>
+                                                <p class="form-control-static" id="subHorario">–</p></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <hr />
+                                <h5><i class="fa fa-ambulance"></i> Contactos de emergencia</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" style="font-size: 90%">
+                                        <thead class="bg-primary"><tr><th>Nombre</th><th>Parentesco</th><th>Teléfono</th></tr></thead>
+                                        <tbody id="cuerpoSubEmergencia"></tbody>
+                                    </table>
+                                </div>
+
+                                <h5><i class="fa fa-graduation-cap"></i> Formación</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" style="font-size: 90%">
+                                        <thead class="bg-primary"><tr><th>Título</th><th>Institución</th><th>Nivel</th><th style="width:70px">Año</th></tr></thead>
+                                        <tbody id="cuerpoSubEstudios"></tbody>
+                                    </table>
+                                </div>
+
+                                <h5><i class="fa fa-certificate"></i> Certificaciones</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" style="font-size: 90%">
+                                        <thead class="bg-primary"><tr><th>Nombre</th><th>Entidad</th><th style="width:110px">Obtenida</th></tr></thead>
+                                        <tbody id="cuerpoSubCertificaciones"></tbody>
+                                    </table>
+                                </div>
+
+                                <h5><i class="fa fa-briefcase"></i> Experiencia</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered" style="font-size: 90%">
+                                        <thead class="bg-primary"><tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th></tr></thead>
+                                        <tbody id="cuerpoSubExperiencia"></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

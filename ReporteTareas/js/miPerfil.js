@@ -60,6 +60,7 @@ function CargarPerfil() {
         PintarExperiencia(respuesta.Experiencia);
         PintarCargasFamiliares(respuesta.CargasFamiliares);
         PintarFoto(respuesta.Foto);
+        MostrarPestanaEquipo(respuesta.Cabecera.EsJefe);
     });
 }
 
@@ -639,5 +640,151 @@ function EliminarDocumento(idDocumento) {
     PostPerfil("EliminarDocumento", { idDocumento: idDocumento }, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
         if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+/* ---------------------------------------------------------------- equipo -- */
+
+/* La pestana existe o no segun el dato, no segun un perfil ni una fila de
+   menu: si alguien tiene gente que le reporta, la ve. Son 22 personas hoy y
+   el dia que cambie no hay nada que mantener. */
+function MostrarPestanaEquipo(esJefe) {
+    if (!esJefe) { return; }
+
+    $("#liTabEquipo").show();
+    BuscarEquipo();
+}
+
+function BuscarEquipo() {
+    PostPerfil("ListaEquipo", { filtro: $("#txtBuscarEquipo").val() }, function (respuesta) {
+        // Un objeto con "estado" es un EntRespuesta, es decir, un error.
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        PintarListaEquipo(respuesta || []);
+    });
+}
+
+function LimpiarBusquedaEquipo() {
+    $("#txtBuscarEquipo").val("");
+    BuscarEquipo();
+}
+
+function PintarListaEquipo(lista) {
+    var $cuerpo = $("#cuerpoEquipo").empty();
+
+    /* Al cambiar la lista se cierra el detalle: dejarlo abierto mostraria a una
+       persona que ya no esta en los resultados. */
+    $("#panelSubordinado").hide();
+
+    if (lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'No hay personas que coincidan con esa busqueda.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, p) {
+        var $fila = $("<tr></tr>");
+
+        /* .text() y no concatenacion de HTML: estos nombres y cargos son de
+           OTRAS personas y los teclearon ellas o Talento Humano. */
+        $fila.append($("<td></td>").text(p.NombreCompleto || "–"));
+        $fila.append($("<td></td>").text(p.Cargo || "–"));
+        $fila.append($("<td></td>").text(p.Area || "–"));
+        $fila.append($("<td></td>").text(p.Ciudad || "–"));
+
+        var $ver = $('<button type="button" class="btn btn-primary btn-xs"><i class="fa fa-eye"></i></button>')
+            .on("click", function () { VerSubordinado(p.CodUsuario); });
+
+        $fila.append($('<td class="text-center"></td>').append($ver));
+        $cuerpo.append($fila);
+    });
+}
+
+function VerSubordinado(codUsuario) {
+    PostPerfil("PerfilEquipo", { codUsuario: codUsuario }, function (respuesta) {
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        /* El servidor no distingue "no es de su equipo" de "no existe", y aqui
+           tampoco: un mensaje distinto le confirmaria a quien prueba codigos
+           cual de ellos es real. */
+        if (!respuesta.PerfilEncontrado) {
+            MostrarMensaje("No pudimos mostrar ese perfil.", "warning");
+            $("#panelSubordinado").hide();
+            return;
+        }
+
+        PintarSubordinado(respuesta);
+    });
+}
+
+function PintarSubordinado(perfil) {
+    var c = perfil.Cabecera;
+
+    $("#subNombre").text(c.NombreCompleto || "–");
+    $("#subCargo").text(c.Cargo || "–");
+    $("#subArea").text(c.Area || "–");
+    $("#subCiudad").text(c.Ciudad || "–");
+    $("#subCorreo").text(c.CorreoNotificacion || "–");
+    $("#subJefe").text(c.JefeInmediato || "–");
+    $("#subHorario").text(c.Horario || "–");
+
+    if (perfil.Foto && perfil.Foto.DataUri) {
+        $("#subFoto").attr("src", perfil.Foto.DataUri).show();
+        $("#subAvatar").hide();
+    } else {
+        $("#subFoto").hide().removeAttr("src");
+        $("#subAvatar").text(Iniciales(c.NombreCompleto)).show();
+    }
+
+    PintarFilas("#cuerpoSubEmergencia", perfil.Emergencia, 3, function (x) {
+        return [x.Nombre, x.Parentesco, x.Telefono];
+    });
+
+    PintarFilas("#cuerpoSubEstudios", perfil.Estudios, 4, function (x) {
+        return [x.Titulo, x.Institucion, x.Nivel,
+                x.AnioGraduacion === null ? "–" : String(x.AnioGraduacion)];
+    });
+
+    PintarFilas("#cuerpoSubCertificaciones", perfil.Certificaciones, 3, function (x) {
+        return [x.Nombre, x.Entidad, x.FechaObtencion === "" ? "–" : x.FechaObtencion];
+    });
+
+    PintarFilas("#cuerpoSubExperiencia", perfil.Experiencia, 4, function (x) {
+        var desde = x.AnioDesde === null ? "" : String(x.AnioDesde);
+        var hasta = x.AnioHasta === null ? "Actual" : String(x.AnioHasta);
+        return [x.Empresa, x.Cargo, desde === "" ? "–" : desde + " - " + hasta, x.Funciones];
+    });
+
+    $("#panelSubordinado").show();
+}
+
+/* Las cuatro tablas del detalle son de solo lectura y tienen la misma forma:
+   vaciar, y pintar una celda por columna con .text(). Se comparte una funcion
+   en vez de repetir el bucle cuatro veces con distinto numero de columnas. */
+function PintarFilas(selectorCuerpo, lista, columnas, celdasDe) {
+    var $cuerpo = $(selectorCuerpo).empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append($('<tr></tr>').append(
+            $('<td class="text-center text-muted"></td>')
+                .attr("colspan", columnas)
+                .text("Sin registros.")));
+        return;
+    }
+
+    $.each(lista, function (i, x) {
+        var $fila = $("<tr></tr>");
+
+        $.each(celdasDe(x), function (j, valor) {
+            $fila.append($("<td></td>").text(valor || "–"));
+        });
+
+        $cuerpo.append($fila);
     });
 }

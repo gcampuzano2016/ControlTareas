@@ -248,7 +248,10 @@ Tres guardas:
 `EliminarEstudio` · `GuardarCertificacion` / `EliminarCertificacion` ·
 `GuardarExperiencia` / `EliminarExperiencia` · `GuardarEmergencia` /
 `EliminarEmergencia` · `GuardarCargaFamiliar` / `EliminarCargaFamiliar` · `ListaEquipo`
-· `PerfilEquipo` · `DescargarCV`
+· `PerfilEquipo`
+
+El CV no es una acción de este handler: se pide aparte, por `GET`, a
+`DescargarPerfil.ashx?cv=1` (ver "El CV" más abajo).
 
 Los documentos van por `multipart` en una rama de `AdministrarPerfil.ashx`, no
 en `CargaArchivos.ashx`. Este diseño decía lo contrario y la fase 3a lo corrigió:

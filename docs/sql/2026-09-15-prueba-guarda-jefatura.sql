@@ -24,6 +24,17 @@ BEGIN TRY
 
     DECLARE @Jefe VARCHAR(50), @Suyo VARCHAR(50), @Ajeno VARCHAR(50);
 
+    /* Cuenta los FALLO de las cinco comprobaciones de abajo. Son sondas de solo
+       lectura sobre los mismos datos, sin cambiarlos entre una y otra, asi que
+       un fallo en una no dice nada sobre si la siguiente es valida -a
+       diferencia del script de borrado del que se copio el patron TRY/CATCH,
+       que si modifica datos y donde seguir tras un fallo si seria arriesgado-.
+       Por eso aqui no se usa RAISERROR en cada comprobacion: abortaria en la
+       primera y OK 2 y OK 3 -las dos unicas que esta fase existe para
+       demostrar- podrian quedar sin evaluar. Se acumulan y se lanza un solo
+       RAISERROR al final, despues del ROLLBACK. */
+    DECLARE @Fallos INT = 0;
+
     /* Se excluyen los codigos repetidos en los DOS extremos. Sin esto, el TOP 1
        elige al primero por orden alfabetico, que resulta ser uno de los usuarios
        con Cod_Usuario duplicado: el procedimiento se niega con razon -no puede
@@ -74,13 +85,19 @@ BEGIN TRY
     IF dbo.Fn_RTA_EsSubordinado(@Jefe, @Suyo) = 1
         PRINT 'OK 1: la guarda reconoce a su propio subordinado.';
     ELSE
-        RAISERROR('FALLO 1: la guarda no reconoce a un subordinado real.', 16, 1);
+    BEGIN
+        SET @Fallos = @Fallos + 1;
+        PRINT 'FALLO 1: la guarda no reconoce a un subordinado real.';
+    END
 
     /* --- 2. alguien ajeno: la guarda TIENE que decir que no --- */
     IF dbo.Fn_RTA_EsSubordinado(@Jefe, @Ajeno) = 0
         PRINT 'OK 2: la guarda niega a quien no le reporta a este jefe.';
     ELSE
-        RAISERROR('FALLO 2: la guarda de jefatura NO bloqueo a un usuario ajeno.', 16, 1);
+    BEGIN
+        SET @Fallos = @Fallos + 1;
+        PRINT 'FALLO 2: la guarda de jefatura NO bloqueo a un usuario ajeno.';
+    END
 
     /* --- 2b. y el procedimiento completo, para verlo con los ojos ---
        Estas dos llamadas no se pueden aseverar desde T-SQL por lo dicho arriba,
@@ -103,22 +120,36 @@ BEGIN TRY
     IF (SELECT COUNT(*) FROM #Lista WHERE CodUsuario = @Ajeno) = 0
         PRINT 'OK 3: la lista del equipo no contiene a quien no le reporta.';
     ELSE
-        RAISERROR('FALLO 3: la lista del equipo incluyo a alguien que no es subordinado.', 16, 1);
+    BEGIN
+        SET @Fallos = @Fallos + 1;
+        PRINT 'FALLO 3: la lista del equipo incluyo a alguien que no es subordinado.';
+    END
 
     IF (SELECT COUNT(*) FROM #Lista WHERE CodUsuario = @Suyo) = 1
         PRINT 'OK 4: la lista del equipo si contiene al subordinado propio.';
     ELSE
-        RAISERROR('FALLO 4: la lista del equipo no contiene a un subordinado real de este jefe.', 16, 1);
+    BEGIN
+        SET @Fallos = @Fallos + 1;
+        PRINT 'FALLO 4: la lista del equipo no contiene a un subordinado real de este jefe.';
+    END
 
     IF (SELECT COUNT(*) FROM #Lista) > 0
         PRINT 'OK 5: la lista del equipo devolvio al menos una persona.';
     ELSE
-        RAISERROR('FALLO 5: la lista del equipo de un jefe real vino vacia.', 16, 1);
+    BEGIN
+        SET @Fallos = @Fallos + 1;
+        PRINT 'FALLO 5: la lista del equipo de un jefe real vino vacia.';
+    END
 
     DROP TABLE #Lista;
 
     ROLLBACK TRANSACTION;
     PRINT 'Transaccion revertida. La base quedo exactamente como estaba.';
+
+    /* El RAISERROR se lanza AQUI, despues del ROLLBACK, para que la
+       transaccion quede cerrada pase lo que pase con las comprobaciones. */
+    IF @Fallos > 0
+        RAISERROR('La demostracion fallo en %d comprobacion(es). Ver los FALLO de arriba.', 16, 1, @Fallos);
 
 END TRY
 BEGIN CATCH

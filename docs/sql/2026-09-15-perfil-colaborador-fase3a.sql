@@ -279,7 +279,7 @@ IF OBJECT_ID('dbo.Sp_RTA_PerfilColaborador','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_PerfilColaborador;
 GO
 
-/* Todo el perfil de una persona en una sola ida: ocho result sets.
+/* Todo el perfil de una persona en una sola ida: nueve result sets.
 
    La cabecera es un LEFT JOIN contra Empleados a proposito. 119 de 231
    usuarios activos no tienen ficha enlazada; con INNER JOIN entrarian y verian
@@ -292,9 +292,10 @@ GO
    rompe para 80 de 133 personas sin dar error. La conversion la hace
    NegPerfilCampos.EdadDesdeTexto, que tiene pruebas.
 
-   Los result sets 4 a 8 se llenan a partir de la fase 2 (cargas familiares
-   llega en el 8). El procedimiento ya los declaraba desde la fase 1 para que
-   las fases siguientes no tuvieran que volver a tocar la base. */
+   Los result sets 4 a 9 se llenan a partir de la fase 2 (cargas familiares
+   llega en el 8 y la foto de perfil en el 9). El procedimiento ya los
+   declaraba desde la fase 1 para que las fases siguientes no tuvieran que
+   volver a tocar la base. */
 CREATE PROCEDURE dbo.Sp_RTA_PerfilColaborador
     @Cod_Usuario VARCHAR(50)
 AS
@@ -304,7 +305,7 @@ BEGIN
     /* R_Usuarios no tiene indice unico sobre Cod_Usuario -su llave real es
        Id_Usuario- y hay codigos repetidos entre usuarios activos (el caso
        '0000' son dos personas distintas). Si se entregara CUALQUIERA de los
-       ocho result sets en ese caso, el contacto personal, los contactos de
+       nueve result sets en ese caso, el contacto personal, los contactos de
        emergencia y todo lo demas que cuelga de Cod_Usuario vendria mezclado
        o seria de la otra persona -domicilio, telefono personal, a
        quien llamar en una emergencia-, sin forma de saber de quien es cada
@@ -312,10 +313,10 @@ BEGIN
        JSON ya viajo al navegador: cerrar la puerta de la cabecera y dejar
        las demas abiertas serviria de poco.
 
-       Por eso @CodigoRepetido se aplica en el WHERE de los ocho SELECT, no
+       Por eso @CodigoRepetido se aplica en el WHERE de los nueve SELECT, no
        solo en la cabecera: el criterio es "no se entrega nada", no "no se
        entrega la cabecera". No hay un RETURN anticipado a proposito -el Dao
-       recorre los result sets por posicion y espera que los ocho siempre
+       recorre los result sets por posicion y espera que los nueve siempre
        vengan, aunque vacios; un RETURN rompe ese contrato.
 
        Mismo criterio que CapaDato/DaoFirmaUsuario.cs (comentario del metodo

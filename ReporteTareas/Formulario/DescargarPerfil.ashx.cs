@@ -23,7 +23,7 @@ namespace JsonJQueryNetPerfil
         {
             if (context.Session == null || context.Session["UserLogin"] == null)
             {
-                NoDisponible(context, "Su sesion expiro. Vuelva a iniciar sesion.");
+                NoDisponible(context, "Su sesión expiró. Vuelva a iniciar sesión.");
                 return;
             }
 
@@ -31,14 +31,14 @@ namespace JsonJQueryNetPerfil
 
             if (codUsuario == "")
             {
-                NoDisponible(context, "No se pudo identificar al usuario de la sesion.");
+                NoDisponible(context, "No se pudo identificar al usuario de la sesión.");
                 return;
             }
 
             int idDocumento;
             if (!int.TryParse(context.Request.QueryString["doc"], out idDocumento) || idDocumento <= 0)
             {
-                NoDisponible(context, "No se indico que documento descargar.");
+                NoDisponible(context, "No se indicó qué documento descargar.");
                 return;
             }
 
@@ -60,7 +60,7 @@ namespace JsonJQueryNetPerfil
 
             if (doc == null)
             {
-                NoDisponible(context, "No se encontro ese documento.");
+                NoDisponible(context, "No se encontró ese documento.");
                 return;
             }
 
@@ -68,7 +68,7 @@ namespace JsonJQueryNetPerfil
 
             if (!File.Exists(rutaFisica))
             {
-                NoDisponible(context, "El archivo ya no esta disponible en el servidor.");
+                NoDisponible(context, "El archivo ya no está disponible en el servidor.");
                 return;
             }
 
@@ -76,7 +76,7 @@ namespace JsonJQueryNetPerfil
             context.Response.Buffer = true;
             context.Response.ContentType = TipoDeContenido(doc.NombreArchivoCodigo);
             context.Response.AddHeader("Content-Disposition",
-                                       "attachment;filename=" + NombreSeguro(doc.NombreArchivo));
+                                       "attachment;filename=\"" + NombreSeguro(doc.NombreArchivo) + "\"");
             context.Response.TransmitFile(rutaFisica);
             context.Response.End();
         }

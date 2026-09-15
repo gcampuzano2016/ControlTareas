@@ -965,16 +965,24 @@ namespace CapaPruebas
         /// handler es alcanzable por HTTP directo y la columna es VARCHAR(MAX):
         /// sin tope, un POST podria dejar megabytes en la fila que se lee en
         /// cada carga del perfil.
+        ///
+        /// La cadena es multiplo de 4 y solo tiene caracteres base64 validos a
+        /// proposito: asi decodifica sin problema y el UNICO motivo por el que
+        /// esta prueba puede fallar es el limite de longitud. Con una cadena de
+        /// largo 500001 -como estaba escrita antes- Convert.FromBase64String
+        /// reventaba por longitud invalida y la prueba pasaba aunque se borrara
+        /// el limite, que es justo lo que tenia que detectar.
         /// </summary>
         [TestMethod]
         public void ValidarFoto_DemasiadoGrande_DaError()
         {
             EntPerfilFoto foto = new EntPerfilFoto
             {
-                Base64 = new string('A', 500001),
+                Base64 = new string('A', 500004),
                 Tipo   = "image/jpeg"
             };
-            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+
+            StringAssert.Contains(NegPerfilCampos.ValidarFoto(foto), "demasiado grande");
         }
 
         /* ----------------------------------------------------- documentos ---- */

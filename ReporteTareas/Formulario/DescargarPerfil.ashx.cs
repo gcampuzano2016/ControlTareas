@@ -117,7 +117,7 @@ namespace JsonJQueryNetPerfil
             context.Response.Clear();
             context.Response.Buffer = true;
             context.Response.ContentType = "application/pdf";
-            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + nombre);
+            context.Response.AddHeader("Content-Disposition", "attachment;filename=\"" + nombre + "\"");
             context.Response.BinaryWrite(pdf);
             context.Response.End();
         }

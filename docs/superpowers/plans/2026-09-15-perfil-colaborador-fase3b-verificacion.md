@@ -8,7 +8,7 @@ Directory. Esta lista la corre el usuario después de desplegar.
 - [ ] El script `docs/sql/2026-09-15-perfil-colaborador-fase3b.sql` está aplicado
       en producción, sin `RAISERROR` en la salida.
 - [ ] La demostración `docs/sql/2026-09-15-prueba-guarda-jefatura.sql` corrió con
-      sus cuatro `OK` y terminó revirtiendo la transacción.
+      sus cinco `OK` y terminó revirtiendo la transacción.
 - [ ] Los binarios de las fases 2, 3a y 3b están desplegados.
 
 ## La pestaña aparece cuando debe

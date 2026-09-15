@@ -306,6 +306,170 @@ namespace CapaDato
             return respuesta;
         }
 
+        /// <summary>
+        /// Traduce el codigo que devuelven los procedimientos del modulo.
+        /// 0 correcto, -1 el registro no es suyo o no existe, -2 su Cod_Usuario
+        /// esta repetido y no se puede saber de quien seria el dato.
+        /// </summary>
+        private static EntRespuesta RespuestaDe(int resultado, string mensajeExito, string mensajeNoEncontrado)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            if (resultado == -2)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
+                respuesta.tipoMensaje = "warning";
+            }
+            else if (resultado == 0)
+            {
+                respuesta.estado = "1";
+                respuesta.mensaje = mensajeExito;
+                respuesta.tipoMensaje = "success";
+            }
+            else
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = mensajeNoEncontrado;
+                respuesta.tipoMensaje = "warning";
+            }
+
+            return respuesta;
+        }
+
+        /// <summary>Ejecuta un procedimiento de escritura y devuelve su Respuestas.</summary>
+        private static int EjecutarEscritura(string procedimiento, Action<SqlCommand> ponerParametros)
+        {
+            int resultado = -1;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand(procedimiento, cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                ponerParametros(cmd);
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
+        public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarEstudio", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",    SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@IdEstudio",      SqlDbType.Int).Value          = e.IdEstudio;
+                cmd.Parameters.Add("@Nivel",          SqlDbType.VarChar,  60).Value = e.Nivel;
+                cmd.Parameters.Add("@Institucion",    SqlDbType.VarChar, 200).Value = e.Institucion;
+                cmd.Parameters.Add("@Titulo",         SqlDbType.VarChar, 200).Value = e.Titulo;
+                cmd.Parameters.Add("@AnioGraduacion", SqlDbType.SmallInt).Value     = e.AnioGraduacion ?? 0;
+                cmd.Parameters.Add("@Ip",             SqlDbType.VarChar,  64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Estudio guardado.", "No se encontró ese estudio.");
+        }
+
+        public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarEstudio", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdEstudio",   SqlDbType.Int).Value         = idEstudio;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Estudio eliminado.", "No se encontró ese estudio.");
+        }
+
+        public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarCertificacion", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",     SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@IdCertificacion", SqlDbType.Int).Value          = c.IdCertificacion;
+                cmd.Parameters.Add("@Nombre",          SqlDbType.VarChar, 200).Value = c.Nombre;
+                cmd.Parameters.Add("@Entidad",         SqlDbType.VarChar, 200).Value = c.Entidad;
+                cmd.Parameters.Add("@FechaObtencion",  SqlDbType.VarChar,  10).Value = c.FechaObtencion ?? "";
+                cmd.Parameters.Add("@Ip",              SqlDbType.VarChar,  64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Certificación guardada.", "No se encontró esa certificación.");
+        }
+
+        public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarCertificacion", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",     SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdCertificacion", SqlDbType.Int).Value         = idCertificacion;
+                cmd.Parameters.Add("@Ip",              SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Certificación eliminada.", "No se encontró esa certificación.");
+        }
+
+        public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarExperiencia", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",   SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@IdExperiencia", SqlDbType.Int).Value          = x.IdExperiencia;
+                cmd.Parameters.Add("@Empresa",       SqlDbType.VarChar, 200).Value = x.Empresa;
+                cmd.Parameters.Add("@Cargo",         SqlDbType.VarChar, 200).Value = x.Cargo;
+                cmd.Parameters.Add("@AnioDesde",     SqlDbType.SmallInt).Value     = x.AnioDesde ?? 0;
+                cmd.Parameters.Add("@AnioHasta",     SqlDbType.SmallInt).Value     = x.AnioHasta ?? 0;
+                cmd.Parameters.Add("@Funciones",     SqlDbType.VarChar, -1).Value  = x.Funciones ?? "";
+                cmd.Parameters.Add("@Ip",            SqlDbType.VarChar,  64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Experiencia guardada.", "No se encontró esa experiencia.");
+        }
+
+        public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarExperiencia", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",   SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdExperiencia", SqlDbType.Int).Value         = idExperiencia;
+                cmd.Parameters.Add("@Ip",            SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Experiencia eliminada.", "No se encontró esa experiencia.");
+        }
+
+        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarCargaFamiliar", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",     SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@IdCargaFam",      SqlDbType.Int).Value          = c.IdCargaFam;
+                cmd.Parameters.Add("@Nombre",          SqlDbType.VarChar, 150).Value = c.Nombre;
+                cmd.Parameters.Add("@Parentesco",      SqlDbType.VarChar,  50).Value = c.Parentesco;
+                cmd.Parameters.Add("@FechaNacimiento", SqlDbType.VarChar,  10).Value = c.FechaNacimiento ?? "";
+                cmd.Parameters.Add("@Ip",              SqlDbType.VarChar,  64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Carga familiar guardada.", "No se encontró esa carga familiar.");
+        }
+
+        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarCargaFamiliar", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdCargaFam",  SqlDbType.Int).Value         = idCargaFam;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Carga familiar eliminada.", "No se encontró esa carga familiar.");
+        }
+
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();

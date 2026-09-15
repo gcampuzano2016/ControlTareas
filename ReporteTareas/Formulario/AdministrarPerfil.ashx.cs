@@ -66,6 +66,54 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(EliminarEmergencia(context, parametros[0]["parameters"]));
                 }
 
+                if (Action == "GuardarEstudio")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarEstudio(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarEstudio")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarEstudio(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "GuardarCertificacion")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarCertificacion(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarCertificacion")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarCertificacion(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "GuardarExperiencia")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarExperiencia(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarExperiencia")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarExperiencia(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "GuardarCargaFamiliar")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarCargaFamiliar(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarCargaFamiliar")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarCargaFamiliar(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -206,6 +254,223 @@ namespace JsonJQueryNetPerfil
             {
                 return responseMessage("0", "Error al eliminar el contacto. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Las ocho escrituras de la hoja de vida comparten la misma forma:
+        /// identidad de la sesion, validacion en el servidor, y recien entonces
+        /// la base. La validacion va aqui y no solo en el navegador porque este
+        /// handler es alcanzable por HTTP directo.
+        /// </summary>
+        private string GuardarEstudio(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilEstudio estudio = new EntPerfilEstudio
+                {
+                    IdEstudio      = Convert.ToInt32(Texto(campos, "idEstudio", "0")),
+                    Nivel          = Texto(campos, "nivel", ""),
+                    Institucion    = Texto(campos, "institucion", ""),
+                    Titulo         = Texto(campos, "titulo", ""),
+                    AnioGraduacion = EnteroNuloDelPayload(campos, "anioGraduacion")
+                };
+
+                string error = NegPerfilCampos.ValidarEstudio(estudio);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                return ToJson(NegPerfil.GuardarEstudio(codUsuario, estudio, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar el estudio. " + ex.Message, "danger");
+            }
+        }
+
+        private string EliminarEstudio(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int id = Convert.ToInt32(Texto(campos, "idEstudio", "0"));
+                return ToJson(NegPerfil.EliminarEstudio(codUsuario, id, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al eliminar el estudio. " + ex.Message, "danger");
+            }
+        }
+
+        private string GuardarCertificacion(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilCertificacion cert = new EntPerfilCertificacion
+                {
+                    IdCertificacion = Convert.ToInt32(Texto(campos, "idCertificacion", "0")),
+                    Nombre          = Texto(campos, "nombre", ""),
+                    Entidad         = Texto(campos, "entidad", ""),
+                    FechaObtencion  = Texto(campos, "fechaObtencion", "")
+                };
+
+                string error = NegPerfilCampos.ValidarCertificacion(cert);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                return ToJson(NegPerfil.GuardarCertificacion(codUsuario, cert, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar la certificación. " + ex.Message, "danger");
+            }
+        }
+
+        private string EliminarCertificacion(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int id = Convert.ToInt32(Texto(campos, "idCertificacion", "0"));
+                return ToJson(NegPerfil.EliminarCertificacion(codUsuario, id, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al eliminar la certificación. " + ex.Message, "danger");
+            }
+        }
+
+        private string GuardarExperiencia(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilExperiencia exp = new EntPerfilExperiencia
+                {
+                    IdExperiencia = Convert.ToInt32(Texto(campos, "idExperiencia", "0")),
+                    Empresa       = Texto(campos, "empresa", ""),
+                    Cargo         = Texto(campos, "cargo", ""),
+                    AnioDesde     = EnteroNuloDelPayload(campos, "anioDesde"),
+                    AnioHasta     = EnteroNuloDelPayload(campos, "anioHasta"),
+                    Funciones     = Texto(campos, "funciones", "")
+                };
+
+                string error = NegPerfilCampos.ValidarExperiencia(exp);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                return ToJson(NegPerfil.GuardarExperiencia(codUsuario, exp, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar la experiencia. " + ex.Message, "danger");
+            }
+        }
+
+        private string EliminarExperiencia(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int id = Convert.ToInt32(Texto(campos, "idExperiencia", "0"));
+                return ToJson(NegPerfil.EliminarExperiencia(codUsuario, id, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al eliminar la experiencia. " + ex.Message, "danger");
+            }
+        }
+
+        private string GuardarCargaFamiliar(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilCargaFamiliar carga = new EntPerfilCargaFamiliar
+                {
+                    IdCargaFam      = Convert.ToInt32(Texto(campos, "idCargaFam", "0")),
+                    Nombre          = Texto(campos, "nombre", ""),
+                    Parentesco      = Texto(campos, "parentesco", ""),
+                    FechaNacimiento = Texto(campos, "fechaNacimiento", "")
+                };
+
+                string error = NegPerfilCampos.ValidarCargaFamiliar(carga);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                return ToJson(NegPerfil.GuardarCargaFamiliar(codUsuario, carga, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar la carga familiar. " + ex.Message, "danger");
+            }
+        }
+
+        private string EliminarCargaFamiliar(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int id = Convert.ToInt32(Texto(campos, "idCargaFam", "0"));
+                return ToJson(NegPerfil.EliminarCargaFamiliar(codUsuario, id, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al eliminar la carga familiar. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Un entero opcional del payload. Devuelve null cuando la clave no vino,
+        /// vino vacia o no es un numero: para un anio, el cero significaria "anio
+        /// cero" y no "no lo se".
+        /// </summary>
+        private static int? EnteroNuloDelPayload(dynamic campos, string clave)
+        {
+            string texto = Texto(campos, clave, "");
+            if (texto == "") { return null; }
+
+            int valor;
+            if (!int.TryParse(texto, out valor)) { return null; }
+
+            return valor;
         }
 
         /// <summary>Lee una clave del payload dinamico, con valor por omision.</summary>

@@ -45,5 +45,45 @@ namespace CapaNegocio
         {
             return DaoPerfil.EliminarEmergencia(codUsuario, idContacto, ip);
         }
+
+        public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
+        {
+            return DaoPerfil.GuardarEstudio(codUsuario, e, ip);
+        }
+
+        public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
+        {
+            return DaoPerfil.EliminarEstudio(codUsuario, idEstudio, ip);
+        }
+
+        public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
+        {
+            return DaoPerfil.GuardarCertificacion(codUsuario, c, ip);
+        }
+
+        public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
+        {
+            return DaoPerfil.EliminarCertificacion(codUsuario, idCertificacion, ip);
+        }
+
+        public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
+        {
+            return DaoPerfil.GuardarExperiencia(codUsuario, x, ip);
+        }
+
+        public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
+        {
+            return DaoPerfil.EliminarExperiencia(codUsuario, idExperiencia, ip);
+        }
+
+        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
+        {
+            return DaoPerfil.GuardarCargaFamiliar(codUsuario, c, ip);
+        }
+
+        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
+        {
+            return DaoPerfil.EliminarCargaFamiliar(codUsuario, idCargaFam, ip);
+        }
     }
 }

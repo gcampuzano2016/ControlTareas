@@ -1432,6 +1432,7 @@
     <Compile Include="clases\HtmlSolicitud.cs" />
     <Compile Include="clases\PDF.cs" />
     <Compile Include="clases\PdfLista.cs" />
+    <Compile Include="clases\PdfHojaVida.cs" />
     <Compile Include="clases\SeguridadHelper.cs" />
     <Compile Include="clases\RespuestaJson.cs" />
     <Compile Include="Connected Services\Autentificacion2\Reference.cs">

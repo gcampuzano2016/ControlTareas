@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.IO;
 using System.Web;
@@ -32,6 +33,12 @@ namespace JsonJQueryNetPerfil
             if (codUsuario == "")
             {
                 NoDisponible(context, "No se pudo identificar al usuario de la sesión.");
+                return;
+            }
+
+            if (context.Request.QueryString["cv"] == "1")
+            {
+                EntregarCv(context, codUsuario);
                 return;
             }
 
@@ -79,6 +86,52 @@ namespace JsonJQueryNetPerfil
                                        "attachment;filename=\"" + NombreSeguro(doc.NombreArchivo) + "\"");
             context.Response.TransmitFile(rutaFisica);
             context.Response.End();
+        }
+
+        /// <summary>
+        /// Genera y entrega el CV de quien lo pide.
+        ///
+        /// SOLO el propio. No hay parametro que diga de quien es el CV, y no es un
+        /// descuido: una jefatura consulta el perfil de su equipo, no se descarga
+        /// sus hojas de vida.
+        /// </summary>
+        private void EntregarCv(HttpContext context, string codUsuario)
+        {
+            EntPerfilCompleto perfil = NegPerfil.CargarPerfil(codUsuario);
+
+            if (!perfil.PerfilEncontrado)
+            {
+                NoDisponible(context, "No pudimos identificar su perfil de forma única. " +
+                                      "Escriba a Talento Humano para que corrijan su código de usuario.");
+                return;
+            }
+
+            byte[] pdf = PdfHojaVida.Generar(NegPerfilCv.Construir(perfil));
+
+            /* El codigo de usuario va al nombre del archivo y de ahi a una
+               cabecera HTTP: se deja solo lo alfanumerico. */
+            string nombre = "CV_" + SoloAlfanumerico(codUsuario) + "_" +
+                            DateTime.Now.ToString("yyyyMMdd_HHmmss",
+                                System.Globalization.CultureInfo.InvariantCulture) + ".pdf";
+
+            context.Response.Clear();
+            context.Response.Buffer = true;
+            context.Response.ContentType = "application/pdf";
+            context.Response.AddHeader("Content-Disposition", "attachment;filename=" + nombre);
+            context.Response.BinaryWrite(pdf);
+            context.Response.End();
+        }
+
+        private static string SoloAlfanumerico(string texto)
+        {
+            System.Text.StringBuilder limpio = new System.Text.StringBuilder();
+
+            foreach (char c in texto ?? "")
+            {
+                if (char.IsLetterOrDigit(c)) { limpio.Append(c); }
+            }
+
+            return limpio.Length == 0 ? "perfil" : limpio.ToString();
         }
 
         /// <summary>

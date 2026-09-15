@@ -50,6 +50,14 @@
                         <span id="perfilCiudad" class="label label-default">–</span>
                         <hr />
                         <p style="margin: 0"><b id="perfilEdad">–</b><br /><small class="text-muted">Edad</small></p>
+                        <hr />
+                        <!-- Enlace y no llamada de JavaScript: la respuesta es un
+                             archivo, no JSON, y un <a> con target es lo que el
+                             navegador ya sabe manejar. -->
+                        <a href="DescargarPerfil.ashx?cv=1" target="_blank"
+                           class="btn btn-primary btn-block btn-sm">
+                            <i class="fa fa-file-pdf-o"></i> Descargar mi hoja de vida
+                        </a>
                     </div>
                 </div>
 

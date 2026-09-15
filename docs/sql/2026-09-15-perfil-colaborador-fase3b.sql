@@ -44,9 +44,15 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    /* Recortado, igual que el selector de abajo compara Cod_Jefe_Inm. Si esta
+       cuenta comparara en crudo mientras el selector compara recortado, un
+       gemelo del jefe con relleno a la izquierda pasaria sin contarse aqui y
+       el selector traeria los subordinados de los dos jefes -el mismo defecto
+       que se corrigio en Sp_RTA_PerfilEquipo, y por la misma razon. */
     DECLARE @CodigoRepetido BIT = 0;
     IF (SELECT COUNT(*) FROM dbo.R_Usuarios
-         WHERE Cod_Usuario = @Cod_Jefe AND ISNULL(EstadoUsuario,0) = 0) > 1
+         WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Jefe))
+           AND ISNULL(EstadoUsuario,0) = 0) > 1
         SET @CodigoRepetido = 1;
 
     DECLARE @F VARCHAR(100) = LTRIM(RTRIM(ISNULL(@Filtro, '')));
@@ -316,10 +322,18 @@ IF NOT EXISTS (SELECT 1 FROM sys.sql_modules m
 
 /* Lo que NO puede aparecer. La matriz de permisos niega estos campos a la
    jefatura, y esta asercion es lo que impide que vuelvan por descuido en una
-   edicion futura del procedimiento. */
+   edicion futura de cualquiera de los dos procedimientos.
+
+   Cubre TAMBIEN a Sp_RTA_PerfilEquipoLista: esa lista une Empleados igual que
+   Sp_RTA_PerfilEquipo -para traer Ciudad- y esta a un e.Cedula de distancia de
+   la misma violacion. Sp_RTA_PerfilEquipoLista no tiene el comentario largo
+   que nombra la cedula y el domicilio -el que obligo a buscar "e.Cedula" con
+   el alias y no la palabra suelta-, asi que ningun patron de los de abajo
+   casa contra su propio texto hoy; se confirmo patron por patron antes de
+   sumarla aqui. */
 IF EXISTS (SELECT 1 FROM sys.sql_modules m
             JOIN sys.procedures p ON p.object_id = m.object_id
-           WHERE p.name = 'Sp_RTA_PerfilEquipo'
+           WHERE p.name IN ('Sp_RTA_PerfilEquipo', 'Sp_RTA_PerfilEquipoLista')
              AND (m.definition LIKE '%Perfil_ContactoPersonal%'
                   OR m.definition LIKE '%Emp_CargaFamiliar%'
                   OR m.definition LIKE '%Perfil_Documento%'
@@ -330,14 +344,14 @@ IF EXISTS (SELECT 1 FROM sys.sql_modules m
                      columna CON el alias y nada mas: en este archivo toda columna
                      de Empleados se lee como e.Algo, incluso en la forma
                      "Alias = e.Algo". Un patron mas ancho -la palabra suelta-
-                     casaria contra el comentario de este mismo procedimiento, que
+                     casaria contra el comentario de Sp_RTA_PerfilEquipo, que
                      nombra la cedula y el domicilio justo para decir que NO se
                      entregan, y la asercion fallaria en cada ejecucion. Una
                      asercion que grita en falso acaba desactivada. */
                   OR m.definition LIKE '%e.Cedula%'
                   OR m.definition LIKE '%e.EstadoCivil%'
                   OR m.definition LIKE '%e.Direccion%'))
-    RAISERROR('FALLO: Sp_RTA_PerfilEquipo toca datos que la matriz de permisos le niega a la jefatura.', 16, 1);
+    RAISERROR('FALLO: uno de los procedimientos de la vista de jefatura toca datos que la matriz de permisos le niega a la jefatura.', 16, 1);
 
 /* La misma prohibicion, pero preguntando por las COLUMNAS que el procedimiento
    devuelve en vez de por su texto. Esto no se puede burlar escribiendo la
@@ -353,6 +367,18 @@ IF EXISTS (SELECT 1
                            'Direccion', 'Domicilio', 'CorreoPersonal', 'TelefonoPersonal',
                            'EstadoCivil'))
     RAISERROR('FALLO: la cabecera de Sp_RTA_PerfilEquipo devuelve una columna que la matriz de permisos le niega a la jefatura.', 16, 1);
+
+/* La misma comprobacion, para el unico result set de Sp_RTA_PerfilEquipoLista.
+   Hoy devuelve CodUsuario, NombreCompleto, Cargo, Area y Ciudad -ninguna de
+   la lista de prohibidas-, pero sin esta asercion nada avisaria si alguien le
+   agrega una columna de la matriz negada. */
+IF EXISTS (SELECT 1
+             FROM sys.dm_exec_describe_first_result_set(
+                      N'EXEC dbo.Sp_RTA_PerfilEquipoLista @Cod_Jefe = NULL, @Filtro = NULL', NULL, 0)
+            WHERE name IN ('Cedula', 'FechaNacTexto', 'Fecha_nacimiento', 'Edad',
+                           'Direccion', 'Domicilio', 'CorreoPersonal', 'TelefonoPersonal',
+                           'EstadoCivil'))
+    RAISERROR('FALLO: Sp_RTA_PerfilEquipoLista devuelve una columna que la matriz de permisos le niega a la jefatura.', 16, 1);
 
 PRINT 'Fase 3b: script terminado.';
 GO

@@ -304,8 +304,36 @@ IF EXISTS (SELECT 1 FROM sys.sql_modules m
              AND (m.definition LIKE '%Perfil_ContactoPersonal%'
                   OR m.definition LIKE '%Emp_CargaFamiliar%'
                   OR m.definition LIKE '%Perfil_Documento%'
-                  OR m.definition LIKE '%Fecha_nacimiento%'))
+                  OR m.definition LIKE '%Fecha_nacimiento%'
+                  /* Empleados ya esta unida para traer nombre, cargo, area y
+                     ciudad, asi que anadir una de estas tres columnas al SELECT
+                     seria trivial y una lista de tablas no lo veria. Se busca la
+                     columna CON el alias y nada mas: en este archivo toda columna
+                     de Empleados se lee como e.Algo, incluso en la forma
+                     "Alias = e.Algo". Un patron mas ancho -la palabra suelta-
+                     casaria contra el comentario de este mismo procedimiento, que
+                     nombra la cedula y el domicilio justo para decir que NO se
+                     entregan, y la asercion fallaria en cada ejecucion. Una
+                     asercion que grita en falso acaba desactivada. */
+                  OR m.definition LIKE '%e.Cedula%'
+                  OR m.definition LIKE '%e.EstadoCivil%'
+                  OR m.definition LIKE '%e.Direccion%'))
     RAISERROR('FALLO: Sp_RTA_PerfilEquipo toca datos que la matriz de permisos le niega a la jefatura.', 16, 1);
+
+/* La misma prohibicion, pero preguntando por las COLUMNAS que el procedimiento
+   devuelve en vez de por su texto. Esto no se puede burlar escribiendo la
+   columna de otra forma: mira lo que la jefatura recibe.
+
+   Solo describe el PRIMER result set, que es la cabecera -y es donde
+   aterrizarian estos campos si alguien los anadiera-. Los otros cinco salen de
+   tablas Perfil_* que la asercion de arriba ya vigila por nombre de tabla. */
+IF EXISTS (SELECT 1
+             FROM sys.dm_exec_describe_first_result_set(
+                      N'EXEC dbo.Sp_RTA_PerfilEquipo @Cod_Jefe = NULL, @Cod_Usuario = NULL', NULL, 0)
+            WHERE name IN ('Cedula', 'FechaNacTexto', 'Fecha_nacimiento', 'Edad',
+                           'Direccion', 'Domicilio', 'CorreoPersonal', 'TelefonoPersonal',
+                           'EstadoCivil'))
+    RAISERROR('FALLO: la cabecera de Sp_RTA_PerfilEquipo devuelve una columna que la matriz de permisos le niega a la jefatura.', 16, 1);
 
 PRINT 'Fase 3b: script terminado.';
 GO

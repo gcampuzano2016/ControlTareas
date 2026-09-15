@@ -132,6 +132,18 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(EliminarDocumento(context, parametros[0]["parameters"]));
                 }
 
+                if (Action == "ListaEquipo")
+                {
+                    existAction = true;
+                    responseAction.Append(ListaEquipo(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "PerfilEquipo")
+                {
+                    existAction = true;
+                    responseAction.Append(PerfilEquipo(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -709,6 +721,71 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al quitar el documento. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// El equipo directo de quien esta conectado.
+        ///
+        /// El unico parametro que se acepta del cliente es el texto del
+        /// buscador. De quien es el equipo lo dice la sesion: no hay forma de
+        /// pedir el equipo de otra persona porque no hay donde decirlo.
+        /// </summary>
+        private string ListaEquipo(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codJefe = CodUsuarioSesion(context);
+                if (codJefe == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                string filtro = Texto(campos, "filtro", "");
+
+                return ToJson(NegPerfil.ListaEquipo(codJefe, filtro));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al cargar su equipo. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// El perfil recortado de alguien del equipo.
+        ///
+        /// Esta accion es la UNICA de todo el modulo que acepta del cliente el
+        /// codigo de otra persona. Por eso no se comprueba aqui si esa persona
+        /// es subordinada: se le pasa al procedimiento junto con el codigo del
+        /// jefe, que sale de la sesion, y es el procedimiento el que decide. Una
+        /// comprobacion en este metodo seria una segunda verdad que algun dia
+        /// discreparia de la primera.
+        ///
+        /// Cuando no es subordinado, PerfilEncontrado vuelve en false y el
+        /// mensaje es el mismo que cuando el codigo no existe. Distinguirlos le
+        /// confirmaria a quien esta probando codigos cual de ellos es real.
+        /// </summary>
+        private string PerfilEquipo(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codJefe = CodUsuarioSesion(context);
+                if (codJefe == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                string codUsuario = Texto(campos, "codUsuario", "");
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se indicó a quién consultar.", "warning");
+                }
+
+                return ToJson(NegPerfil.PerfilEquipo(codJefe, codUsuario));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al cargar el perfil. " + ex.Message, "danger");
             }
         }
 

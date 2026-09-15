@@ -109,5 +109,13 @@ namespace CapaNegocio
         {
             return DaoPerfil.EliminarDocumento(codUsuario, idDocumento, ip);
         }
+
+        /// <summary>
+        /// El documento con sus datos de archivo, o null si no es de esta persona.
+        /// </summary>
+        public static EntPerfilDocumento ObtenerDocumento(string codUsuario, int idDocumento)
+        {
+            return DaoPerfil.ObtenerDocumento(codUsuario, idDocumento);
+        }
     }
 }

@@ -503,6 +503,47 @@ namespace CapaDato
             return RespuestaDe(r, "Documento quitado.", "No se encontró ese documento.");
         }
 
+        /// <summary>
+        /// Los datos de archivo de un documento, SOLO si es de esta persona y
+        /// sigue activo. Devuelve null en cualquier otro caso.
+        ///
+        /// Este null es la guarda de la descarga entera: el handler no decide
+        /// nada, pregunta. Devolver un objeto vacio en vez de null seria peor
+        /// -habria que acordarse de mirar si viene vacio-, y una excepcion
+        /// convertiria en error lo que tambien es el caso normal de un enlace
+        /// viejo a un documento ya quitado.
+        /// </summary>
+        public static EntPerfilDocumento ObtenerDocumento(string codUsuario, int idDocumento)
+        {
+            EntPerfilDocumento doc = null;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilDocumentoArchivo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdDocumento", SqlDbType.Int).Value         = idDocumento;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        doc = new EntPerfilDocumento
+                        {
+                            IdDocumento         = idDocumento,
+                            NombreArchivo       = Texto(dr, "NombreArchivo"),
+                            NombreArchivoCodigo = Texto(dr, "NombreArchivoCodigo"),
+                            Ruta                = Texto(dr, "Ruta")
+                        };
+                    }
+                }
+            }
+
+            return doc;
+        }
+
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();

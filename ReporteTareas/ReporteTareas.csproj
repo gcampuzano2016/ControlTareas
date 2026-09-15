@@ -1316,6 +1316,7 @@
     <Content Include="Formulario\AprobarHorasExtras.aspx" />
     <Content Include="Formulario\CambiarEstadoTarea.aspx" />
     <Content Include="Formulario\CargaArchivos.ashx" />
+    <Content Include="Formulario\DescargarPerfil.ashx" />
     <Content Include="Formulario\CelulaAppdome.aspx" />
     <Content Include="Formulario\CelulaCisco.aspx" />
     <Content Include="Formulario\CelulaCiscoGYE.aspx" />
@@ -1357,6 +1358,7 @@
     <Content Include="Formulario\Tareas.aspx" />
     <Content Include="Formulario\TiempoTarea.aspx" />
     <Content Include="Formulario\ValidarTareas.aspx" />
+    <Content Include="descargas\perfil\web.config" />
     <Content Include="Global.asax" />
     <Content Include="Img\Buscar.png" />
     <Content Include="Img\Cancelar.ico" />
@@ -1490,6 +1492,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarMarcacion.ashx.cs">
       <DependentUpon>AdministrarMarcacion.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarPerfil.ashx.cs">
+      <DependentUpon>DescargarPerfil.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AprobacionTareasJefatura.aspx.cs">
       <DependentUpon>AprobacionTareasJefatura.aspx</DependentUpon>

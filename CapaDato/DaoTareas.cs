@@ -1113,6 +1113,30 @@ namespace CapaDato
                 dr.Read();
                 respuestaSP = Convert.ToInt32(dr["Respuestas"].ToString());
 
+                /* Al editar, el tipo de hora lo decide el horario del responsable,
+                   no el combo de la pantalla. Hay que devolverselo a la entidad:
+                   el handler compara el tipo nuevo contra el anterior para saber si
+                   pide la autorizacion a la jefatura. Sin esto, una hora que el
+                   sistema sube a 100% nunca llegaria a pedir la firma.
+
+                   TieneColumna deja que esta DLL siga sirviendo contra el
+                   procedimiento anterior, que no devuelve estas dos columnas. */
+                if (TieneColumna(dr, "TipoHoraCalculado"))
+                {
+                    int tipoCalculado;
+
+                    if (int.TryParse(
+                            ObtenerValorColumna(dr, "TipoHoraCalculado"),
+                            out tipoCalculado))
+                    {
+                        objDetalleTarea.Det_Horas_Extras_Tipo = tipoCalculado;
+                    }
+                }
+
+                string mensajeSP = TieneColumna(dr, "Mensaje")
+                    ? ObtenerValorColumna(dr, "Mensaje")
+                    : string.Empty;
+
                 if (respuestaSP == 1)
                 {
                     Respuesta.estado = respuestaSP.ToString();
@@ -1121,8 +1145,13 @@ namespace CapaDato
                 }
                 else
                 {
+                    /* El -7 trae la lista de tramos para registrar por separado.
+                       Ese detalle es lo unico que le dice al usuario que hacer, asi
+                       que si vino, se muestra en lugar del mensaje generico. */
                     Respuesta.estado = respuestaSP.ToString();
-                    Respuesta.mensaje = "Ocurrio un error al guardar los datos.";
+                    Respuesta.mensaje = string.IsNullOrEmpty(mensajeSP.Trim())
+                        ? "Ocurrio un error al guardar los datos."
+                        : mensajeSP;
                     Respuesta.tipoMensaje = "danger";
                 }
 

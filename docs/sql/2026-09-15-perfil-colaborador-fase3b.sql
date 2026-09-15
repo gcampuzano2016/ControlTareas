@@ -150,15 +150,23 @@ AS
 BEGIN
     SET NOCOUNT ON;
 
+    /* La guarda y el SELECT de la cabecera tienen que comparar exactamente
+       igual -recortado, y filtrando el mismo EstadoUsuario-. Si esta cuenta
+       vigilara un conjunto mas chico que el que el SELECT entrega, un gemelo
+       inactivo o un codigo con relleno a la izquierda pasaria la guarda sin
+       contarse aqui y el SELECT devolveria dos filas de dos personas
+       distintas, que el Dao mezclaria en una sola lectura. */
     DECLARE @CodigoRepetido BIT = 0;
     IF (SELECT COUNT(*) FROM dbo.R_Usuarios
-         WHERE Cod_Usuario = @Cod_Jefe AND ISNULL(EstadoUsuario,0) = 0) > 1
+         WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Jefe))
+           AND ISNULL(EstadoUsuario,0) = 0) > 1
         SET @CodigoRepetido = 1;
 
     /* El codigo del subordinado tambien puede estar repetido: en ese caso no se
        sabe de quien serian los datos y tampoco se entrega nada. */
     IF (SELECT COUNT(*) FROM dbo.R_Usuarios
-         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+         WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
+           AND ISNULL(EstadoUsuario,0) = 0) > 1
         SET @CodigoRepetido = 1;
 
     /* La condicion vive en Fn_RTA_EsSubordinado y no aqui, para que la
@@ -193,12 +201,13 @@ BEGIN
       LEFT JOIN dbo.Empleados  e ON e.Cod_Usuario = u.Cod_Usuario
       LEFT JOIN dbo.R_Usuarios j ON LTRIM(RTRIM(j.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Jefe_Inm))
      WHERE  LTRIM(RTRIM(u.Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
+       AND  ISNULL(u.EstadoUsuario, 0) = 0
        AND  @EsSubordinado = 1;
 
     /* 2. contactos de emergencia */
     SELECT IdContacto, Nombre, Parentesco, Telefono
       FROM dbo.Perfil_ContactoEmergencia
-     WHERE Cod_Usuario = @Cod_Usuario
+     WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
        AND Estado = '1'
        AND @EsSubordinado = 1
      ORDER BY IdContacto;
@@ -206,7 +215,7 @@ BEGIN
     /* 3. estudios */
     SELECT IdEstudio, Nivel, Institucion, Titulo, AnioGraduacion
       FROM dbo.Perfil_Estudio
-     WHERE Cod_Usuario = @Cod_Usuario
+     WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
        AND Estado = '1'
        AND @EsSubordinado = 1
      ORDER BY ISNULL(AnioGraduacion, 0) DESC, IdEstudio;
@@ -214,7 +223,7 @@ BEGIN
     /* 4. certificaciones */
     SELECT IdCertificacion, Nombre, Entidad, FechaObtencion
       FROM dbo.Perfil_Certificacion
-     WHERE Cod_Usuario = @Cod_Usuario
+     WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
        AND Estado = '1'
        AND @EsSubordinado = 1
      ORDER BY FechaObtencion DESC, IdCertificacion;
@@ -222,7 +231,7 @@ BEGIN
     /* 5. experiencia */
     SELECT IdExperiencia, Empresa, Cargo, AnioDesde, AnioHasta, Funciones
       FROM dbo.Perfil_Experiencia
-     WHERE Cod_Usuario = @Cod_Usuario
+     WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
        AND Estado = '1'
        AND @EsSubordinado = 1
      ORDER BY ISNULL(AnioHasta, 9999) DESC, AnioDesde DESC;
@@ -230,7 +239,7 @@ BEGIN
     /* 6. foto */
     SELECT FotoBase64, FotoTipo
       FROM dbo.Perfil_Foto
-     WHERE Cod_Usuario = @Cod_Usuario
+     WHERE LTRIM(RTRIM(Cod_Usuario)) = LTRIM(RTRIM(@Cod_Usuario))
        AND @EsSubordinado = 1;
 END
 GO

@@ -976,5 +976,105 @@ namespace CapaPruebas
             };
             Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
         }
+
+        /* ----------------------------------------------------- documentos ---- */
+
+        [TestMethod]
+        public void ValidarDocumento_PdfDeCertificacion_NoDaError()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf", 120000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_JpgDeCargaFamiliar_NoDaError()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarDocumento("CARGAFAMILIAR", 3, "partida.jpg", 90000));
+        }
+
+        /// <summary>
+        /// La extension se compara en minusculas. Los telefonos suben ".JPG" en
+        /// mayusculas mas seguido de lo que parece.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDocumento_ExtensionEnMayusculas_NoDaError()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "TITULO.PDF", 120000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_OrigenDesconocido_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("EMPLEADOS", 7, "titulo.pdf", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_OrigenVacio_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("", 7, "titulo.pdf", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_SinIdOrigen_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 0, "titulo.pdf", 1000));
+        }
+
+        /// <summary>
+        /// La razon por la que esta lista es blanca y no negra. Un .aspx en una
+        /// carpeta del sitio es codigo que el servidor ejecuta: aceptarlo no es
+        /// un archivo raro, es entregar el servidor. Esta prueba existe para que
+        /// nadie convierta la lista blanca en una negra "para ser mas flexibles".
+        /// </summary>
+        [TestMethod]
+        public void ValidarDocumento_ExtensionAspx_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "malo.aspx", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_ExtensionExe_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "malo.exe", 1000));
+        }
+
+        /// <summary>
+        /// "titulo.pdf.aspx" tiene que mirarse por la ULTIMA extension, que es la
+        /// que decide como lo trata el servidor.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDocumento_DobleExtension_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf.aspx", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_SinExtension_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_NombreVacio_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "", 1000));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_ArchivoVacio_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf", 0));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_MasDeCincoMegas_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf", 5242881));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_CincoMegasExactos_NoDaError()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf", 5242880));
+        }
     }
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using CapaEntidad;
 
 namespace CapaNegocio
@@ -518,6 +519,88 @@ namespace CapaNegocio
             catch (FormatException)
             {
                 return "El formato de la foto no es el esperado.";
+            }
+
+            return "";
+        }
+
+        /// <summary>
+        /// De que puede colgar un documento. Los mismos dos valores que espera
+        /// Sp_RTA_PerfilGuardarDocumento; si algun dia se agrega un tercero, van
+        /// juntos o el procedimiento lo rechazara con -1 sin explicar por que.
+        /// </summary>
+        private static readonly string[] OrigenesDeDocumentoValidos = { "CERTIFICACION", "CARGAFAMILIAR" };
+
+        /// <summary>
+        /// Extensiones aceptadas. Lista BLANCA, y tiene que seguir siendolo: un
+        /// .aspx o un .ashx dentro de una carpeta del sitio es codigo que el
+        /// servidor ejecuta. Con una lista negra la pregunta pasa a ser de que
+        /// nos acordamos de prohibir, y basta olvidar una para entregar el
+        /// servidor.
+        /// </summary>
+        private static readonly string[] ExtensionesDeDocumentoValidas = { "pdf", "jpg", "jpeg", "png" };
+
+        /// <summary>5 MB. Web.config permite 200, pero un respaldo escaneado no los necesita.</summary>
+        private const long TamanoMaximoDocumento = 5242880;
+
+        /// <summary>
+        /// Valida un documento de respaldo antes de guardarlo. Cadena vacia si
+        /// esta bien.
+        ///
+        /// Lo que esta funcion NO valida, porque no puede: que el IdOrigen sea de
+        /// quien sube el archivo. Eso lo comprueba Sp_RTA_PerfilGuardarDocumento
+        /// contra la base y devuelve -1 si no lo es.
+        /// </summary>
+        public static string ValidarDocumento(string origen, int idOrigen, string nombreArchivo, long tamanoBytes)
+        {
+            string origenNormalizado = (origen ?? "").Trim().ToUpperInvariant();
+            bool origenValido = false;
+
+            for (int i = 0; i < OrigenesDeDocumentoValidos.Length; i++)
+            {
+                if (OrigenesDeDocumentoValidos[i] == origenNormalizado) { origenValido = true; }
+            }
+
+            if (!origenValido)
+            {
+                return "No se pudo determinar a qué registro corresponde el documento.";
+            }
+
+            if (idOrigen <= 0)
+            {
+                return "No se pudo determinar a qué registro corresponde el documento.";
+            }
+
+            string nombre = (nombreArchivo ?? "").Trim();
+
+            if (nombre == "")
+            {
+                return "No se recibió el archivo.";
+            }
+
+            /* GetExtension devuelve la ULTIMA, que es la que decide como trata el
+               servidor al archivo: "titulo.pdf.aspx" es un .aspx. */
+            string extension = Path.GetExtension(nombre).TrimStart('.').ToLowerInvariant();
+            bool extensionValida = false;
+
+            for (int i = 0; i < ExtensionesDeDocumentoValidas.Length; i++)
+            {
+                if (ExtensionesDeDocumentoValidas[i] == extension) { extensionValida = true; }
+            }
+
+            if (!extensionValida)
+            {
+                return "El documento debe ser un PDF o una imagen JPG o PNG.";
+            }
+
+            if (tamanoBytes <= 0)
+            {
+                return "El archivo está vacío.";
+            }
+
+            if (tamanoBytes > TamanoMaximoDocumento)
+            {
+                return "El documento no puede pesar más de 5 MB.";
             }
 
             return "";

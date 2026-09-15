@@ -97,5 +97,17 @@ namespace CapaNegocio
         {
             return DaoPerfil.EliminarFoto(codUsuario, ip);
         }
+
+        /// <summary>Registra un documento de respaldo del usuario de la sesion.</summary>
+        public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
+        {
+            return DaoPerfil.GuardarDocumento(codUsuario, doc, ip);
+        }
+
+        /// <summary>Borrado logico de un documento del usuario de la sesion.</summary>
+        public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
+        {
+            return DaoPerfil.EliminarDocumento(codUsuario, idDocumento, ip);
+        }
     }
 }

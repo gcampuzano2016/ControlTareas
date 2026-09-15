@@ -467,6 +467,42 @@ namespace CapaDato
             return RespuestaDe(r, "Su foto se quitó.", "No tenía ninguna foto guardada.");
         }
 
+        /// <summary>
+        /// Registra un documento de respaldo.
+        ///
+        /// El procedimiento devuelve -1 cuando el IdOrigen no es de esta persona:
+        /// es la unica comprobacion posible de que el documento se cuelga de algo
+        /// suyo, porque el handler ve un numero y no sabe de quien es.
+        /// </summary>
+        public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarDocumento", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario",         SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@Origen",              SqlDbType.VarChar,  20).Value = doc.Origen;
+                cmd.Parameters.Add("@IdOrigen",            SqlDbType.Int).Value          = doc.IdOrigen;
+                cmd.Parameters.Add("@NombreArchivo",       SqlDbType.VarChar, 260).Value = doc.NombreArchivo;
+                cmd.Parameters.Add("@NombreArchivoCodigo", SqlDbType.VarChar, 260).Value = doc.NombreArchivoCodigo;
+                cmd.Parameters.Add("@Ruta",                SqlDbType.VarChar, 400).Value = doc.Ruta;
+                cmd.Parameters.Add("@Ip",                  SqlDbType.VarChar,  64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Documento adjuntado.", "No se encontró el registro al que quiere adjuntarlo.");
+        }
+
+        /// <summary>Borrado logico de un documento. El archivo se queda en el disco.</summary>
+        public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarDocumento", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@IdDocumento", SqlDbType.Int).Value         = idDocumento;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Documento quitado.", "No se encontró ese documento.");
+        }
+
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();

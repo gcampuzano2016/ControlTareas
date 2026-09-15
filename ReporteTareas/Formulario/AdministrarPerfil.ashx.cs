@@ -126,10 +126,27 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(EliminarFoto(context));
                 }
 
+                if (Action == "EliminarDocumento")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarDocumento(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
                 }
+            }
+            else if (context.Request.Files.Count > 0)
+            {
+                /* La subida de documentos es lo unico que no viaja como JSON: un
+                   archivo necesita multipart. Va en ESTE handler y no en
+                   CargaArchivos.ashx -que es donde vive la subida del resto del
+                   sistema- porque aquel se declara sin IRequiresSessionState: alli
+                   context.Session es null y la identidad la manda el cliente en un
+                   campo cifrado del formulario. Todo este modulo descansa en lo
+                   contrario. */
+                responseAction.Append(SubirDocumento(context));
             }
             else
             {
@@ -530,6 +547,103 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al quitar la foto. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Recibe un documento de respaldo y lo cuelga de una certificacion o de
+        /// una carga familiar.
+        ///
+        /// El orden importa: primero la base y despues el disco. Si se escribiera
+        /// el archivo antes y la base lo rechazara -porque el IdOrigen no es de
+        /// esta persona, o porque su codigo esta repetido-, quedaria un archivo
+        /// huerfano en el servidor que nada volveria a nombrar.
+        /// </summary>
+        private string SubirDocumento(HttpContext context)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                string origen = (context.Request.Form.Get("origen") ?? "").Trim().ToUpperInvariant();
+
+                int idOrigen;
+                if (!int.TryParse(context.Request.Form.Get("idOrigen"), out idOrigen)) { idOrigen = 0; }
+
+                HttpPostedFile archivo = context.Request.Files.Get(0);
+
+                /* Path.GetFileName descarta cualquier ruta que venga en el nombre.
+                   Sin esto, un nombre como "..\..\Formulario\algo.pdf" saldria del
+                   directorio previsto. */
+                string nombreArchivo = System.IO.Path.GetFileName(archivo.FileName ?? "");
+
+                string error = NegPerfilCampos.ValidarDocumento(origen, idOrigen, nombreArchivo,
+                                                                archivo.ContentLength);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                string extension = System.IO.Path.GetExtension(nombreArchivo).TrimStart('.').ToLowerInvariant();
+
+                /* El nombre en disco NO lo elige el cliente: lo arma el servidor con
+                   un GUID. Asi dos personas que suban "cedula.pdf" no se pisan, y la
+                   direccion del archivo no se puede adivinar desde otra sesion. */
+                string nombreCodigo = "Perfil_" + Guid.NewGuid().ToString("N") + "." + extension;
+
+                const string rutaApp = "~/descargas/perfil/";
+                string carpeta = context.Server.MapPath(rutaApp);
+
+                if (!System.IO.Directory.Exists(carpeta))
+                {
+                    System.IO.Directory.CreateDirectory(carpeta);
+                }
+
+                EntPerfilDocumento doc = new EntPerfilDocumento
+                {
+                    Origen              = origen,
+                    IdOrigen            = idOrigen,
+                    NombreArchivo       = nombreArchivo,
+                    NombreArchivoCodigo = nombreCodigo,
+                    /* Se guarda la ruta de la aplicacion y no la fisica: asi el
+                       registro sigue sirviendo si el sitio cambia de carpeta. */
+                    Ruta                = rutaApp
+                };
+
+                EntRespuesta respuesta = NegPerfil.GuardarDocumento(codUsuario, doc,
+                                                                    context.Request.UserHostAddress);
+
+                if (respuesta.estado != "1") { return ToJson(respuesta); }
+
+                archivo.SaveAs(System.IO.Path.Combine(carpeta, nombreCodigo));
+
+                return ToJson(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al subir el documento. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>Borrado logico de un documento del usuario de la sesion.</summary>
+        private string EliminarDocumento(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int id = Convert.ToInt32(Texto(campos, "idDocumento", "0"));
+
+                return ToJson(NegPerfil.EliminarDocumento(codUsuario, id, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al quitar el documento. " + ex.Message, "danger");
             }
         }
 

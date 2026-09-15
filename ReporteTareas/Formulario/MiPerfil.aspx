@@ -59,6 +59,8 @@
                     <li><a href="#tabContacto" data-toggle="tab"><i class="fa fa-envelope"></i> Contacto y domicilio</a></li>
                     <li><a href="#tabEmergencia" data-toggle="tab"><i class="fa fa-ambulance"></i> Emergencia</a></li>
                     <li><a href="#tabFormacion" data-toggle="tab"><i class="fa fa-graduation-cap"></i> Formación</a></li>
+                    <li><a href="#tabExperiencia" data-toggle="tab"><i class="fa fa-briefcase"></i> Experiencia</a></li>
+                    <li><a href="#tabCargas" data-toggle="tab"><i class="fa fa-users"></i> Cargas familiares</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-top: 15px">
@@ -228,6 +230,88 @@
                                         <input type="month" class="form-control" id="ceFecha" /></div>
                                     <div class="form-group col-lg-2" style="padding-top: 25px">
                                         <button type="button" class="btn btn-primary btn-block" onclick="AgregarCertificacion()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabExperiencia">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Experiencia laboral
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    Deje el año de fin vacío si sigue trabajando ahí.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoExperiencia"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-3"><label>Empresa</label>
+                                        <input type="text" class="form-control" id="exEmpresa" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Cargo</label>
+                                        <input type="text" class="form-control" id="exCargo" maxlength="200" /></div>
+                                    <div class="form-group col-lg-2"><label>Desde (año)</label>
+                                        <input type="number" class="form-control" id="exDesde" min="1940" max="2100" /></div>
+                                    <div class="form-group col-lg-2"><label>Hasta (año)</label>
+                                        <input type="number" class="form-control" id="exHasta" min="1940" max="2100" placeholder="Actual" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarExperiencia()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-lg-12"><label>Funciones principales</label>
+                                        <textarea class="form-control" id="exFunciones" rows="2"></textarea></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabCargas">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Cargas familiares
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    Las personas que dependen económicamente de usted.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th style="width:130px">Parentesco</th><th style="width:140px">Fecha de nacimiento</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoCargas"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-5"><label>Nombre completo</label>
+                                        <input type="text" class="form-control" id="cfNombre" maxlength="150" /></div>
+                                    <div class="form-group col-lg-3"><label>Parentesco</label>
+                                        <select class="form-control" id="cfParentesco">
+                                            <option value="">Seleccione…</option>
+                                            <option>Hijo/a</option><option>Cónyuge</option>
+                                            <option>Padre</option><option>Madre</option><option>Otro</option>
+                                        </select></div>
+                                    <div class="form-group col-lg-2"><label>Fecha de nacimiento</label>
+                                        <input type="date" class="form-control" id="cfFecha" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarCargaFamiliar()">
                                             <i class="fa fa-plus"></i> Agregar
                                         </button>
                                     </div>

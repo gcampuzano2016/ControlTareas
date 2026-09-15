@@ -57,6 +57,8 @@ function CargarPerfil() {
         PintarEmergencia(respuesta.Emergencia);
         PintarEstudios(respuesta.Estudios);
         PintarCertificaciones(respuesta.Certificaciones);
+        PintarExperiencia(respuesta.Experiencia);
+        PintarCargasFamiliares(respuesta.CargasFamiliares);
     });
 }
 
@@ -303,6 +305,111 @@ function AgregarCertificacion() {
 
 function EliminarCertificacion(idCertificacion) {
     PostPerfil("EliminarCertificacion", { idCertificacion: idCertificacion }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarExperiencia(lista) {
+    var $cuerpo = $("#cuerpoExperiencia").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado experiencia laboral.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, x) {
+        /* AnioHasta nulo significa "sigue ahi", no "no se sabe". */
+        var periodo = x.AnioDesde + " – " + (x.AnioHasta === null ? "Actual" : x.AnioHasta);
+
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(x.Empresa));
+        $fila.append($("<td></td>").text(x.Cargo));
+        $fila.append($("<td></td>").text(periodo));
+        $fila.append($("<td></td>").text(x.Funciones));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarExperiencia(' + x.IdExperiencia + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarExperiencia() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idExperiencia: 0,
+        empresa:       $("#exEmpresa").val(),
+        cargo:         $("#exCargo").val(),
+        anioDesde:     $("#exDesde").val(),
+        anioHasta:     $("#exHasta").val(),
+        funciones:     $("#exFunciones").val()
+    };
+
+    PostPerfil("GuardarExperiencia", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#exEmpresa, #exCargo, #exDesde, #exHasta, #exFunciones").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarExperiencia(idExperiencia) {
+    PostPerfil("EliminarExperiencia", { idExperiencia: idExperiencia }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarCargasFamiliares(lista) {
+    var $cuerpo = $("#cuerpoCargas").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+                       'Todavía no ha registrado ninguna carga familiar.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, c) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(c.Nombre));
+        $fila.append($("<td></td>").text(c.Parentesco));
+        $fila.append($("<td></td>").text(c.FechaNacimiento));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarCargaFamiliar(' + c.IdCargaFam + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarCargaFamiliar() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idCargaFam:      0,
+        nombre:          $("#cfNombre").val(),
+        parentesco:      $("#cfParentesco").val(),
+        fechaNacimiento: $("#cfFecha").val()
+    };
+
+    PostPerfil("GuardarCargaFamiliar", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#cfNombre, #cfFecha").val("");
+            $("#cfParentesco").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarCargaFamiliar(idCargaFam) {
+    PostPerfil("EliminarCargaFamiliar", { idCargaFam: idCargaFam }, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
         if (respuesta.estado === "1") { CargarPerfil(); }
     });

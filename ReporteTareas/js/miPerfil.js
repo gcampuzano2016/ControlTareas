@@ -55,6 +55,8 @@ function CargarPerfil() {
         PintarCabecera(respuesta.Cabecera);
         PintarContacto(respuesta.Contacto);
         PintarEmergencia(respuesta.Emergencia);
+        PintarEstudios(respuesta.Estudios);
+        PintarCertificaciones(respuesta.Certificaciones);
     });
 }
 
@@ -198,6 +200,109 @@ function AgregarEmergencia() {
 
 function EliminarEmergencia(idContacto) {
     PostPerfil("EliminarEmergencia", { idContacto: idContacto }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+/* Los nombres de instituciones y titulos los teclea el propio usuario, asi que
+   todo entra con .text(). Nunca concatenando HTML. */
+function PintarEstudios(lista) {
+    var $cuerpo = $("#cuerpoEstudios").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado ningún estudio.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, e) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(e.Nivel));
+        $fila.append($("<td></td>").text(e.Institucion));
+        $fila.append($("<td></td>").text(e.Titulo));
+        $fila.append($("<td></td>").text(e.AnioGraduacion === null ? "–" : e.AnioGraduacion));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarEstudio(' + e.IdEstudio + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarEstudio() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idEstudio:      0,
+        nivel:          $("#esNivel").val(),
+        institucion:    $("#esInstitucion").val(),
+        titulo:         $("#esTitulo").val(),
+        anioGraduacion: $("#esAnio").val()
+    };
+
+    PostPerfil("GuardarEstudio", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#esNivel").val("");
+            $("#esInstitucion, #esTitulo, #esAnio").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarEstudio(idEstudio) {
+    PostPerfil("EliminarEstudio", { idEstudio: idEstudio }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarCertificaciones(lista) {
+    var $cuerpo = $("#cuerpoCertificaciones").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+                       'Todavía no ha registrado ninguna certificación.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, c) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(c.Nombre));
+        $fila.append($("<td></td>").text(c.Entidad));
+        $fila.append($("<td></td>").text(c.FechaObtencion === "" ? "–" : c.FechaObtencion));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarCertificacion(' + c.IdCertificacion + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarCertificacion() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idCertificacion: 0,
+        nombre:          $("#ceNombre").val(),
+        entidad:         $("#ceEntidad").val(),
+        fechaObtencion:  $("#ceFecha").val()
+    };
+
+    PostPerfil("GuardarCertificacion", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#ceNombre, #ceEntidad, #ceFecha").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarCertificacion(idCertificacion) {
+    PostPerfil("EliminarCertificacion", { idCertificacion: idCertificacion }, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
         if (respuesta.estado === "1") { CargarPerfil(); }
     });

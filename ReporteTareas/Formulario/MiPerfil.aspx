@@ -58,6 +58,7 @@
                     <li class="active"><a href="#tabPersonal" data-toggle="tab"><i class="fa fa-lock"></i> Datos personales</a></li>
                     <li><a href="#tabContacto" data-toggle="tab"><i class="fa fa-envelope"></i> Contacto y domicilio</a></li>
                     <li><a href="#tabEmergencia" data-toggle="tab"><i class="fa fa-ambulance"></i> Emergencia</a></li>
+                    <li><a href="#tabFormacion" data-toggle="tab"><i class="fa fa-graduation-cap"></i> Formación</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-top: 15px">
@@ -155,6 +156,78 @@
                                         <input type="tel" class="form-control" id="emTelefono" maxlength="50" /></div>
                                     <div class="form-group col-lg-2" style="padding-top: 25px">
                                         <button type="button" class="btn btn-primary btn-block" onclick="AgregarEmergencia()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabFormacion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Estudios
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">Formación académica formal.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nivel</th><th>Institución</th><th>Título</th><th style="width:80px">Año</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoEstudios"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-3"><label>Nivel</label>
+                                        <select class="form-control" id="esNivel">
+                                            <option value="">Seleccione…</option>
+                                            <option>Bachillerato</option><option>Tercer nivel</option>
+                                            <option>Cuarto nivel (Maestría)</option><option>Doctorado</option>
+                                        </select></div>
+                                    <div class="form-group col-lg-3"><label>Institución</label>
+                                        <input type="text" class="form-control" id="esInstitucion" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Título obtenido</label>
+                                        <input type="text" class="form-control" id="esTitulo" maxlength="200" /></div>
+                                    <div class="form-group col-lg-1"><label>Año</label>
+                                        <input type="number" class="form-control" id="esAnio" min="1940" max="2100" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarEstudio()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Certificaciones
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">Cursos y certificaciones.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th>Entidad emisora</th><th style="width:120px">Obtenida</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoCertificaciones"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-4"><label>Nombre de la certificación</label>
+                                        <input type="text" class="form-control" id="ceNombre" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Entidad emisora</label>
+                                        <input type="text" class="form-control" id="ceEntidad" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Fecha de obtención</label>
+                                        <input type="month" class="form-control" id="ceFecha" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarCertificacion()">
                                             <i class="fa fa-plus"></i> Agregar
                                         </button>
                                     </div>

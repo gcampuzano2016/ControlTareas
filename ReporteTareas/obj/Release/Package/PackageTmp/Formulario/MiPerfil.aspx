@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=4" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=6" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -22,15 +22,42 @@
             <div class="col-lg-3">
                 <div class="panel panel-default">
                     <div class="panel-body text-center">
+                        <!-- Dos representaciones excluyentes: la foto si la hay,
+                             y si no las iniciales, que es lo que la fase 1 dejo. -->
+                        <img id="perfilFoto" alt="Foto de perfil"
+                             style="display: none; width: 96px; height: 96px; margin: 0 auto 12px;
+                                    border-radius: 50%; object-fit: cover" />
                         <div id="perfilAvatar"
                              style="width: 96px; height: 96px; margin: 0 auto 12px; border-radius: 50%;
                                     background: #750202; color: #fff; font-size: 34px; line-height: 96px;">–</div>
                         <h4 id="perfilNombre" style="margin: 0 0 4px">–</h4>
                         <p id="perfilCargo" class="text-muted" style="margin: 0 0 10px">–</p>
+
+                        <!-- El input va oculto y lo dispara el boton: el control de
+                             archivo nativo no se puede estilar y desentona. -->
+                        <input type="file" id="inFoto" accept="image/jpeg,image/png" style="display: none" />
+                        <p style="margin: 0 0 10px">
+                            <button type="button" class="btn btn-default btn-xs" onclick="ElegirFoto()">
+                                <i class="fa fa-camera"></i> Cambiar foto
+                            </button>
+                            <button type="button" id="btnQuitarFoto" class="btn btn-default btn-xs"
+                                    style="display: none" onclick="QuitarFoto()">
+                                <i class="fa fa-trash"></i> Quitar
+                            </button>
+                        </p>
+
                         <span id="perfilArea" class="label label-primary">–</span>
                         <span id="perfilCiudad" class="label label-default">–</span>
                         <hr />
                         <p style="margin: 0"><b id="perfilEdad">–</b><br /><small class="text-muted">Edad</small></p>
+                        <hr />
+                        <!-- Enlace y no llamada de JavaScript: la respuesta es un
+                             archivo, no JSON, y un <a> con target es lo que el
+                             navegador ya sabe manejar. -->
+                        <a href="DescargarPerfil.ashx?cv=1" target="_blank"
+                           class="btn btn-primary btn-block btn-sm">
+                            <i class="fa fa-file-pdf-o"></i> Descargar mi hoja de vida
+                        </a>
                     </div>
                 </div>
 
@@ -58,6 +85,9 @@
                     <li class="active"><a href="#tabPersonal" data-toggle="tab"><i class="fa fa-lock"></i> Datos personales</a></li>
                     <li><a href="#tabContacto" data-toggle="tab"><i class="fa fa-envelope"></i> Contacto y domicilio</a></li>
                     <li><a href="#tabEmergencia" data-toggle="tab"><i class="fa fa-ambulance"></i> Emergencia</a></li>
+                    <li><a href="#tabFormacion" data-toggle="tab"><i class="fa fa-graduation-cap"></i> Formación</a></li>
+                    <li><a href="#tabExperiencia" data-toggle="tab"><i class="fa fa-briefcase"></i> Experiencia</a></li>
+                    <li><a href="#tabCargas" data-toggle="tab"><i class="fa fa-users"></i> Cargas familiares</a></li>
                 </ul>
 
                 <div class="tab-content" style="padding-top: 15px">
@@ -163,9 +193,169 @@
                         </div>
                     </div>
 
+                    <div class="tab-pane" id="tabFormacion">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Estudios
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">Formación académica formal.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nivel</th><th>Institución</th><th>Título</th><th style="width:80px">Año</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoEstudios"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-3"><label>Nivel</label>
+                                        <select class="form-control" id="esNivel">
+                                            <option value="">Seleccione…</option>
+                                            <option>Bachillerato</option><option>Tercer nivel</option>
+                                            <option>Cuarto nivel (Maestría)</option><option>Doctorado</option>
+                                        </select></div>
+                                    <div class="form-group col-lg-3"><label>Institución</label>
+                                        <input type="text" class="form-control" id="esInstitucion" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Título obtenido</label>
+                                        <input type="text" class="form-control" id="esTitulo" maxlength="200" /></div>
+                                    <div class="form-group col-lg-1"><label>Año</label>
+                                        <input type="number" class="form-control" id="esAnio" min="1940" max="2100" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarEstudio()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Certificaciones
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">Cursos y certificaciones.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th>Entidad emisora</th><th style="width:120px">Obtenida</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoCertificaciones"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-4"><label>Nombre de la certificación</label>
+                                        <input type="text" class="form-control" id="ceNombre" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Entidad emisora</label>
+                                        <input type="text" class="form-control" id="ceEntidad" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Fecha de obtención</label>
+                                        <input type="month" class="form-control" id="ceFecha" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarCertificacion()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabExperiencia">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Experiencia laboral
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    Deje el año de fin vacío si sigue trabajando ahí.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoExperiencia"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-3"><label>Empresa</label>
+                                        <input type="text" class="form-control" id="exEmpresa" maxlength="200" /></div>
+                                    <div class="form-group col-lg-3"><label>Cargo</label>
+                                        <input type="text" class="form-control" id="exCargo" maxlength="200" /></div>
+                                    <div class="form-group col-lg-2"><label>Desde (año)</label>
+                                        <input type="number" class="form-control" id="exDesde" min="1940" max="2100" /></div>
+                                    <div class="form-group col-lg-2"><label>Hasta (año)</label>
+                                        <input type="number" class="form-control" id="exHasta" min="1940" max="2100" placeholder="Actual" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarExperiencia()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="form-group col-lg-12"><label>Funciones principales</label>
+                                        <textarea class="form-control" id="exFunciones" rows="2"></textarea></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="tabCargas">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Cargas familiares
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    Las personas que dependen económicamente de usted.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th style="width:130px">Parentesco</th><th style="width:140px">Fecha de nacimiento</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoCargas"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-5"><label>Nombre completo</label>
+                                        <input type="text" class="form-control" id="cfNombre" maxlength="150" /></div>
+                                    <div class="form-group col-lg-3"><label>Parentesco</label>
+                                        <select class="form-control" id="cfParentesco">
+                                            <option value="">Seleccione…</option>
+                                            <option>Hijo/a</option><option>Cónyuge</option>
+                                            <option>Padre</option><option>Madre</option><option>Otro</option>
+                                        </select></div>
+                                    <div class="form-group col-lg-2"><label>Fecha de nacimiento</label>
+                                        <input type="date" class="form-control" id="cfFecha" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarCargaFamiliar()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </div>
+
+        <!-- Un solo control de archivo para toda la pantalla. Antes de abrirlo se
+             le cuelga con .data() a que fila pertenece: un input por fila serian
+             tantos como respaldos pueda tener la persona, creados y destruidos en
+             cada repintado. -->
+        <input type="file" id="inDocumento" accept=".pdf,.jpg,.jpeg,.png" style="display: none" />
 
         <!-- Modal Informativo -->
         <div class="modal fade" id="modalMensajeInformativo" tabindex="-1" role="dialog" aria-labelledby="modalMensajeInformativoLabel" aria-hidden="true">

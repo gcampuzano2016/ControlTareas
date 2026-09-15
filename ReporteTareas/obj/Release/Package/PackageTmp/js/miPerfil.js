@@ -55,6 +55,11 @@ function CargarPerfil() {
         PintarCabecera(respuesta.Cabecera);
         PintarContacto(respuesta.Contacto);
         PintarEmergencia(respuesta.Emergencia);
+        PintarEstudios(respuesta.Estudios);
+        PintarCertificaciones(respuesta.Certificaciones);
+        PintarExperiencia(respuesta.Experiencia);
+        PintarCargasFamiliares(respuesta.CargasFamiliares);
+        PintarFoto(respuesta.Foto);
     });
 }
 
@@ -81,6 +86,21 @@ function PintarCabecera(c) {
 
     if (!c.TieneFicha) {
         $("#perfilSinFicha").show();
+    }
+}
+
+/* La foto y las iniciales son excluyentes: si hay foto, las iniciales sobran.
+   Esta funcion corre despues de PintarCabecera, que es la que escribe las
+   iniciales, asi que el orden de las dos llamadas importa. */
+function PintarFoto(foto) {
+    if (foto && foto.DataUri) {
+        $("#perfilFoto").attr("src", foto.DataUri).show();
+        $("#perfilAvatar").hide();
+        $("#btnQuitarFoto").show();
+    } else {
+        $("#perfilFoto").hide().removeAttr("src");
+        $("#perfilAvatar").show();
+        $("#btnQuitarFoto").hide();
     }
 }
 
@@ -203,6 +223,216 @@ function EliminarEmergencia(idContacto) {
     });
 }
 
+/* Los nombres de instituciones y titulos los teclea el propio usuario, asi que
+   todo entra con .text(). Nunca concatenando HTML. */
+function PintarEstudios(lista) {
+    var $cuerpo = $("#cuerpoEstudios").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado ningún estudio.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, e) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(e.Nivel));
+        $fila.append($("<td></td>").text(e.Institucion));
+        $fila.append($("<td></td>").text(e.Titulo));
+        $fila.append($("<td></td>").text(e.AnioGraduacion === null ? "–" : e.AnioGraduacion));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarEstudio(' + e.IdEstudio + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarEstudio() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idEstudio:      0,
+        nivel:          $("#esNivel").val(),
+        institucion:    $("#esInstitucion").val(),
+        titulo:         $("#esTitulo").val(),
+        anioGraduacion: $("#esAnio").val()
+    };
+
+    PostPerfil("GuardarEstudio", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#esNivel").val("");
+            $("#esInstitucion, #esTitulo, #esAnio").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarEstudio(idEstudio) {
+    PostPerfil("EliminarEstudio", { idEstudio: idEstudio }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarCertificaciones(lista) {
+    var $cuerpo = $("#cuerpoCertificaciones").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado ninguna certificación.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, c) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(c.Nombre));
+        $fila.append($("<td></td>").text(c.Entidad));
+        $fila.append($("<td></td>").text(c.FechaObtencion === "" ? "–" : c.FechaObtencion));
+        $fila.append(CeldaDocumentos("CERTIFICACION", c.IdCertificacion));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarCertificacion(' + c.IdCertificacion + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarCertificacion() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idCertificacion: 0,
+        nombre:          $("#ceNombre").val(),
+        entidad:         $("#ceEntidad").val(),
+        fechaObtencion:  $("#ceFecha").val()
+    };
+
+    PostPerfil("GuardarCertificacion", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#ceNombre, #ceEntidad, #ceFecha").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarCertificacion(idCertificacion) {
+    PostPerfil("EliminarCertificacion", { idCertificacion: idCertificacion }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarExperiencia(lista) {
+    var $cuerpo = $("#cuerpoExperiencia").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado experiencia laboral.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, x) {
+        /* AnioHasta nulo significa "sigue ahi", no "no se sabe". */
+        var periodo = x.AnioDesde + " – " + (x.AnioHasta === null ? "Actual" : x.AnioHasta);
+
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(x.Empresa));
+        $fila.append($("<td></td>").text(x.Cargo));
+        $fila.append($("<td></td>").text(periodo));
+        $fila.append($("<td></td>").text(x.Funciones));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarExperiencia(' + x.IdExperiencia + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarExperiencia() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idExperiencia: 0,
+        empresa:       $("#exEmpresa").val(),
+        cargo:         $("#exCargo").val(),
+        anioDesde:     $("#exDesde").val(),
+        anioHasta:     $("#exHasta").val(),
+        funciones:     $("#exFunciones").val()
+    };
+
+    PostPerfil("GuardarExperiencia", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#exEmpresa, #exCargo, #exDesde, #exHasta, #exFunciones").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarExperiencia(idExperiencia) {
+    PostPerfil("EliminarExperiencia", { idExperiencia: idExperiencia }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+function PintarCargasFamiliares(lista) {
+    var $cuerpo = $("#cuerpoCargas").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
+                       'Todavía no ha registrado ninguna carga familiar.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, c) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(c.Nombre));
+        $fila.append($("<td></td>").text(c.Parentesco));
+        $fila.append($("<td></td>").text(c.FechaNacimiento));
+        $fila.append(CeldaDocumentos("CARGAFAMILIAR", c.IdCargaFam));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarCargaFamiliar(' + c.IdCargaFam + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarCargaFamiliar() {
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
+        return;
+    }
+
+    var datos = {
+        idCargaFam:      0,
+        nombre:          $("#cfNombre").val(),
+        parentesco:      $("#cfParentesco").val(),
+        fechaNacimiento: $("#cfFecha").val()
+    };
+
+    PostPerfil("GuardarCargaFamiliar", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#cfNombre, #cfFecha").val("");
+            $("#cfParentesco").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarCargaFamiliar(idCargaFam) {
+    PostPerfil("EliminarCargaFamiliar", { idCargaFam: idCargaFam }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
 function Iniciales(nombre) {
     if (!nombre) { return "–"; }
     var partes = nombre.trim().split(/\s+/);
@@ -224,4 +454,190 @@ function MostrarMensaje(mensaje, tipo) {
     $("#modalMensajeInformativoTipo").css("background", color);
     $("#MensajeInformativo").html(mensaje);
     $("#modalMensajeInformativo").modal("show");
+}
+
+/* ------------------------------------------------------------------ foto -- */
+
+/* 256 es el doble de los 96 px con los que se muestra: se ve nitida en
+   pantallas de densidad doble y sigue pesando unos 25 KB en base64. */
+var FOTO_LADO = 256;
+
+function ElegirFoto() {
+    $("#inFoto").click();
+}
+
+$(document).on("change", "#inFoto", function () {
+    var archivo = this.files && this.files[0];
+
+    /* Se limpia el input antes de nada: si no, volver a elegir el mismo archivo
+       no dispara "change" y el usuario cree que el boton dejo de funcionar. */
+    this.value = "";
+
+    if (!archivo) { return; }
+
+    if (archivo.type !== "image/jpeg" && archivo.type !== "image/png") {
+        MostrarMensaje("La foto debe ser una imagen JPG o PNG.", "warning");
+        return;
+    }
+
+    var lector = new FileReader();
+
+    lector.onload = function (e) {
+        var imagen = new Image();
+        imagen.onload = function () { EnviarFoto(RecortarCuadrado(imagen)); };
+        imagen.onerror = function () {
+            MostrarMensaje("No pudimos leer esa imagen. Pruebe con otra.", "warning");
+        };
+        imagen.src = e.target.result;
+    };
+
+    lector.onerror = function () {
+        MostrarMensaje("No pudimos leer ese archivo. Intente nuevamente.", "warning");
+    };
+
+    lector.readAsDataURL(archivo);
+});
+
+/* Recorta el cuadrado central y reduce a 256x256.
+   Se hace en el navegador y no en el servidor porque lo que viaja es el
+   resultado: la foto de 4 MB de un telefono sale de la maquina convertida en
+   unos 25 KB. El servidor igual valida lo que recibe -es alcanzable por HTTP
+   directo- pero no tiene que cargar con la imagen original. */
+function RecortarCuadrado(imagen) {
+    var lado = Math.min(imagen.width, imagen.height);
+    var x = (imagen.width - lado) / 2;
+    var y = (imagen.height - lado) / 2;
+
+    var lienzo = document.createElement("canvas");
+    lienzo.width = FOTO_LADO;
+    lienzo.height = FOTO_LADO;
+    lienzo.getContext("2d").drawImage(imagen, x, y, lado, lado, 0, 0, FOTO_LADO, FOTO_LADO);
+
+    /* Siempre JPEG, aunque el original sea PNG: una foto de una persona pesa
+       mucho menos en JPEG y la transparencia no aporta nada en un avatar. */
+    return lienzo.toDataURL("image/jpeg", 0.85);
+}
+
+function EnviarFoto(dataUri) {
+    /* El servidor guarda solo el payload; el prefijo "data:image/jpeg;base64,"
+       lo vuelve a armar al leer. Mandar el data URI entero lo rechaza
+       ValidarFoto a proposito. */
+    var coma = dataUri.indexOf(",");
+
+    PostPerfil("GuardarFoto", { base64: dataUri.substring(coma + 1), tipo: "image/jpeg" },
+        function (respuesta) {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            if (respuesta.estado === "1") { CargarPerfil(); }
+        });
+}
+
+function QuitarFoto() {
+    PostPerfil("EliminarFoto", {}, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+/* ------------------------------------------------------------ documentos -- */
+
+/* Los respaldos vienen todos en una sola lista y la pantalla los reparte: asi
+   una unica consulta sirve a las dos pestanias. */
+function DocumentosDe(origen, idOrigen) {
+    var encontrados = [];
+
+    if (_perfil && _perfil.Documentos) {
+        $.each(_perfil.Documentos, function (i, d) {
+            if (d.Origen === origen && d.IdOrigen === idOrigen) { encontrados.push(d); }
+        });
+    }
+
+    return encontrados;
+}
+
+/* La celda de respaldos de una fila: los que ya tiene, y el enlace para sumar
+   uno mas. Se arma con jQuery y .text() -nunca concatenando HTML- porque el
+   nombre del archivo lo escribio la persona al guardarlo en su maquina. */
+function CeldaDocumentos(origen, idOrigen) {
+    var $celda = $('<td class="text-center"></td>');
+
+    $.each(DocumentosDe(origen, idOrigen), function (i, d) {
+        var $fila = $('<div style="margin-bottom:3px"></div>');
+
+        var $enlace = $('<a target="_blank" style="font-size:11px"></a>')
+            .attr("href", "DescargarPerfil.ashx?doc=" + d.IdDocumento)
+            .attr("title", d.NombreArchivo)
+            .text(d.NombreArchivo);
+
+        var $quitar = $('<a href="javascript:void(0)" title="Quitar" style="margin-left:6px">' +
+                        '<i class="fa fa-times text-danger"></i></a>')
+            .on("click", function () { EliminarDocumento(d.IdDocumento); });
+
+        $celda.append($fila.append($enlace).append($quitar));
+    });
+
+    var $adjuntar = $('<a href="javascript:void(0)" style="font-size:11px">' +
+                      '<i class="fa fa-paperclip"></i> Adjuntar</a>')
+        .on("click", function () { PedirArchivo(origen, idOrigen); });
+
+    return $celda.append($adjuntar);
+}
+
+/* Le cuelga al input compartido a que fila pertenece y lo abre. */
+function PedirArchivo(origen, idOrigen) {
+    $("#inDocumento").data("origen", origen).data("idOrigen", idOrigen).click();
+}
+
+$(document).on("change", "#inDocumento", function () {
+    var archivo = this.files && this.files[0];
+    var origen = $(this).data("origen");
+    var idOrigen = $(this).data("idOrigen");
+
+    /* Se limpia antes de nada: si no, elegir dos veces el mismo archivo no
+       vuelve a disparar "change". */
+    this.value = "";
+
+    if (!archivo) { return; }
+
+    /* Mismo limite y mismo mensaje que NegPerfilCampos.ValidarDocumento. El
+       servidor sigue siendo quien valida de verdad -esto es comodidad, no
+       seguridad-, pero sin este chequeo un archivo de 40 MB no llega ni a
+       esa validacion: IIS lo corta antes (alrededor de 28 MB) y el usuario
+       ve el mensaje generico de error de red, mientras que uno de 10 MB si
+       llega al servidor y recibe el mensaje correcto. La misma accion no
+       deberia contar dos historias distintas segun el tamano del archivo. */
+    if (archivo.size > 5242880) {
+        MostrarMensaje("El documento no puede pesar más de 5 MB.", "warning");
+        return;
+    }
+
+    var datos = new FormData();
+    datos.append("origen", origen);
+    datos.append("idOrigen", idOrigen);
+    datos.append("archivo", archivo);
+
+    /* Esta llamada no puede usar PostPerfil: aquella manda JSON y esto es
+       multipart. processData y contentType en false son lo que hace que jQuery
+       entregue el FormData tal cual y deje que el navegador ponga el boundary. */
+    $.ajax({
+        type: "POST",
+        url: "AdministrarPerfil.ashx",
+        data: datos,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        success: function (respuesta) {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            if (respuesta.estado === "1") { CargarPerfil(); }
+        },
+        error: function () {
+            MostrarMensaje("No pudimos subir el archivo. Intente nuevamente.", "danger");
+        }
+    });
+});
+
+function EliminarDocumento(idDocumento) {
+    PostPerfil("EliminarDocumento", { idDocumento: idDocumento }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
 }

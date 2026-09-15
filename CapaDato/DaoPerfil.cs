@@ -117,13 +117,13 @@ namespace CapaDato
             if (resultado == -2)
             {
                 respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.";
+                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
                 respuesta.tipoMensaje = "warning";
                 return respuesta;
             }
 
             respuesta.estado = "1";
-            respuesta.mensaje = "Tus datos de contacto se guardaron correctamente.";
+            respuesta.mensaje = "Sus datos de contacto se guardaron correctamente.";
             respuesta.tipoMensaje = "success";
             return respuesta;
         }
@@ -166,7 +166,7 @@ namespace CapaDato
             if (resultado == -2)
             {
                 respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.";
+                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
                 respuesta.tipoMensaje = "warning";
                 return respuesta;
             }
@@ -179,7 +179,14 @@ namespace CapaDato
             }
             else
             {
-                // El unico camino a -1 es un IdContacto que no es de esta persona.
+                /* El unico camino a -1 es un IdContacto que no es de esta persona,
+                   es decir, un intento de editar un contacto ajeno (idContacto != 0
+                   y no encontrado). El procedimiento soporta la edicion y esta
+                   traduccion existe para ese caso, pero en la fase 1 la pantalla
+                   solo ofrece agregar (idContacto = 0) y quitar: no hay ningun
+                   boton ni flujo que arme un GuardarEmergencia con idContacto > 0,
+                   asi que esta rama no se alcanza hoy desde la interfaz. Se deja
+                   lista para la fase 2, cuando se habilite editar. */
                 respuesta.estado = "0";
                 respuesta.mensaje = "No se encontró ese contacto de emergencia.";
                 respuesta.tipoMensaje = "warning";
@@ -218,7 +225,7 @@ namespace CapaDato
             if (resultado == -2)
             {
                 respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.";
+                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
                 respuesta.tipoMensaje = "warning";
                 return respuesta;
             }

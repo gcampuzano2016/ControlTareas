@@ -71,6 +71,15 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
                 }
             }
+            else
+            {
+                /* Sesion valida pero ContentType que no es JSON: no cae en ningun
+                   else if de arriba y, sin esta rama, salia con 200 y cuerpo vacio.
+                   El cliente lee eso como si el servidor no hubiera respondido nada
+                   -no como un error de negocio con mensaje-, asi que se devuelve un
+                   responseMessage explicito en vez de dejar el StringBuilder vacio. */
+                responseAction.Append(responseMessage("0", "La solicitud no tiene el formato esperado.", "danger"));
+            }
 
             context.Response.ContentType = "application/json";
             // La app corre en windows-1252; se fuerza UTF-8 en los bytes para que
@@ -135,11 +144,12 @@ namespace JsonJQueryNetPerfil
         /// <summary>
         /// Guarda un contacto de emergencia del usuario de la sesion.
         ///
-        /// IdContacto = 0 es alta; cualquier otro valor, edicion. El servidor
-        /// vuelve a validar con NegPerfilCampos.ValidarEmergencia aunque el
-        /// navegador ya lo haya hecho: el handler es alcanzable por HTTP
-        /// directo, y una validacion que solo viva en el cliente no es una
-        /// validacion.
+        /// IdContacto = 0 es alta; cualquier otro valor, edicion. El navegador
+        /// no valida nada -AgregarEmergencia() en miPerfil.js envia lo que
+        /// haya en los campos, tal cual-, asi que esta es la unica validacion
+        /// que existe: NegPerfilCampos.ValidarEmergencia. El handler ademas es
+        /// alcanzable por HTTP directo, asi que aunque el cliente validara,
+        /// esta seguiria siendo obligatoria.
         /// </summary>
         private string GuardarEmergencia(HttpContext context, dynamic campos)
         {

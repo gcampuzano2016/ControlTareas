@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=3" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=4" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -38,7 +38,7 @@
                 <div id="perfilSinFicha" class="alert alert-warning" style="display: none; font-size: 12px">
                     <i class="fa fa-info-circle"></i>
                     Algunos datos administrados por Talento Humano todavía no están
-                    asociados a tu usuario. Puedes usar el resto del perfil con normalidad.
+                    asociados a su usuario. Puede usar el resto del perfil con normalidad.
                 </div>
 
                 <!-- Caso distinto y mas grave: el codigo de usuario esta repetido en
@@ -47,8 +47,8 @@
                      a mostrarte los datos de otra persona. Afecta a 4 usuarios activos. -->
                 <div id="perfilNoIdentificado" class="alert alert-danger" style="display: none; font-size: 12px">
                     <i class="fa fa-exclamation-triangle"></i>
-                    No pudimos identificar tu perfil de forma única: tu código de usuario
-                    está repetido en el sistema. Escribe a Talento Humano para que lo corrijan.
+                    No pudimos identificar su perfil de forma única: su código de usuario
+                    está repetido en el sistema. Escriba a Talento Humano para que lo corrijan.
                 </div>
             </div>
 
@@ -117,8 +117,9 @@
                                             <option>Viudo/a</option>
                                         </select>
                                         <p class="text-muted" id="notaEstadoCivilSinFicha" style="display:none;">
-                                            Este dato lo administra Talento Humano y todavía no hay una ficha asociada a tu usuario.
-                                        </p></div>
+                                            Este dato lo administra Talento Humano y todavía no hay una ficha asociada a su usuario.
+                                        </p>
+                                        <p class="text-muted" id="notaEstadoCivilValorSinCalzar" style="display:none;"></p></div>
                                 </div>
                                 <button type="button" class="btn btn-primary" onclick="GuardarContacto()">
                                     <i class="fa fa-save"></i> Guardar cambios
@@ -134,7 +135,7 @@
                             </div>
                             <div class="panel-body">
                                 <p class="text-muted" style="font-size: 12px">
-                                    A quién debemos llamar si te ocurre algo. Puedes registrar más de uno.
+                                    A quién debemos llamar si le ocurre algo. Puede registrar más de uno.
                                 </p>
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover" style="font-size: 90%">
@@ -165,5 +166,23 @@
                 </div>
             </div>
         </div>
+
+        <!-- Modal Informativo -->
+        <div class="modal fade" id="modalMensajeInformativo" tabindex="-1" role="dialog" aria-labelledby="modalMensajeInformativoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #fcf8e3" id="modalMensajeInformativoTipo">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="myModalLabel">Informativo</h4>
+                    </div>
+                    <div class="modal-body" id="MensajeInformativo">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal -->
     </div>
 </asp:Content>

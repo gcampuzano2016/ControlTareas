@@ -37,7 +37,7 @@ namespace CapaEntidad
         public string Horario { get; set; } = "";
 
         /// <summary>
-        /// false para los 113 usuarios sin ficha de empleado enlazada. La
+        /// false para los 119 usuarios sin ficha de empleado enlazada. La
         /// pantalla lo usa para explicar por que faltan datos en vez de mostrar
         /// campos vacios sin motivo aparente.
         /// </summary>

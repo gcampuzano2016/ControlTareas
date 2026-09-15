@@ -88,7 +88,43 @@ function PintarContacto(c) {
     $("#inDireccion").val(c.Direccion || "");
     $("#inCorreoPersonal").val(c.CorreoPersonal || "");
     $("#inTelefonoPersonal").val(c.TelefonoPersonal || "");
-    $("#inEstadoCivil").val(c.EstadoCivil || "");
+
+    /* En produccion conviven varias capitalizaciones del mismo estado civil
+       ("soltero/a", "Soltero", "SOLTERO/A"...) porque distintas personas de
+       Talento Humano lo escribieron a mano con los anios. $.val(x) compara
+       tal cual, con mayusculas y minusculas, asi que la mayoria de esos
+       valores no calzaba con ninguna opcion del combo y se veia "Seleccione…"
+       como si el dato no existiera. Se busca la opcion ignorando mayusculas
+       y espacios en vez de forzar el valor crudo. */
+    var estadoCivil = c.EstadoCivil || "";
+    var $estadoCivil = $("#inEstadoCivil");
+    var normalizado = estadoCivil.trim().toUpperCase();
+    var $opcionQueCalza = null;
+
+    $estadoCivil.find("option").each(function () {
+        if ($(this).text().trim().toUpperCase() === normalizado) {
+            $opcionQueCalza = $(this);
+            return false;
+        }
+    });
+
+    if (normalizado === "") {
+        $estadoCivil.val("");
+        $("#notaEstadoCivilValorSinCalzar").hide();
+    } else if ($opcionQueCalza) {
+        $estadoCivil.val($opcionQueCalza.val());
+        $("#notaEstadoCivilValorSinCalzar").hide();
+    } else {
+        /* Ninguna opcion calza (por ejemplo "NN" o cualquier variante rara):
+           se deja "Seleccione…" pero no se pierde el dato. Si se forzara aca
+           una opcion del combo y la persona guardara, se sobrescribiria en
+           Empleados.EstadoCivil -de donde lo lee el modulo medico- con una
+           tercera capitalizacion inventada por esta pantalla. */
+        $estadoCivil.val("");
+        $("#notaEstadoCivilValorSinCalzar")
+            .text("Valor registrado por Talento Humano: " + estadoCivil)
+            .show();
+    }
 
     /* Sin ficha de Talento Humano enlazada, el procedimiento no tiene donde
        escribir el estado civil: el UPDATE afecta cero filas. Se deshabilita
@@ -107,7 +143,7 @@ function GuardarContacto() {
        que el codigo de usuario esta repetido: PerfilEncontrado en falso es
        exactamente ese caso (ver CargarPerfil). */
     if (_perfil && !_perfil.PerfilEncontrado) {
-        MostrarMensaje("No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.", "warning");
+        MostrarMensaje("No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.", "warning");
         return;
     }
 
@@ -128,7 +164,7 @@ function PintarEmergencia(lista) {
 
     if (!lista || lista.length === 0) {
         $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
-                       'Todavía no has registrado ningún contacto de emergencia.</td></tr>');
+                       'Todavía no ha registrado ningún contacto de emergencia.</td></tr>');
         return;
     }
 
@@ -172,4 +208,20 @@ function Iniciales(nombre) {
     var partes = nombre.trim().split(/\s+/);
     if (partes.length === 1) { return partes[0].substring(0, 2).toUpperCase(); }
     return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
+}
+
+/* ----------------------------- utilitarios ------------------------------- */
+
+/* Copiada tal cual de parametrizacionHorarioUsuario.js. Cada pantalla lleva
+   su propia copia (es el patron de la casa); no se crea una utilidad
+   compartida solo para esta pantalla. */
+function MostrarMensaje(mensaje, tipo) {
+    var color = "#fcf8e3";
+    if (tipo == "success") { color = "#dff0d8"; }
+    if (tipo == "danger") { color = "#f2dede"; }
+    if (tipo == "warning") { color = "#fcf8e3"; }
+
+    $("#modalMensajeInformativoTipo").css("background", color);
+    $("#MensajeInformativo").html(mensaje);
+    $("#modalMensajeInformativo").modal("show");
 }

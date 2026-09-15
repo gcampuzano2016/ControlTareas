@@ -147,7 +147,7 @@ namespace CapaNegocio
                 else
                 {
                     /* Cualquier otro caracter rechaza el telefono. */
-                    return "El teléfono solo puede tener números, espacios, guiones y paréntesis.";
+                    return "El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.";
                 }
             }
 

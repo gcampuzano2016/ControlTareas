@@ -6,6 +6,12 @@
    2. Cod_Usuario en Empleados y en Emp_CargaFamiliar
    3. Poblado del enlace por cedula
    4. Sp_RTA_PerfilColaborador
+   (no hay seccion 5: en el plan original la seccion 5 era "Aserciones y
+    reporte para RRHH", justo despues de la 4. Al agregar despues
+    Sp_RTA_PerfilGuardarContacto y las de emergencia, esa seccion se corrio
+    al final -hoy es la 8, porque las aserciones tienen que ir despues de
+    que existan las tablas y los SP que reportan- y nadie volvio a ocupar el
+    5. Se deja el salto documentado en vez de renumerar todo el script)
    6. Sp_RTA_PerfilGuardarContacto
    7. Sp_RTA_PerfilGuardarEmergencia y Sp_RTA_PerfilEliminarEmergencia
    8. Aserciones y reporte de excepciones para RRHH
@@ -266,7 +272,7 @@ END
 GO
 
 /* Emp_CargaFamiliar tiene 0 filas: nunca se uso. Recibe Cod_Usuario para que
-   los 113 usuarios sin ficha de empleado tambien puedan registrar cargas. */
+   los 119 usuarios sin ficha de empleado tambien puedan registrar cargas. */
 IF NOT EXISTS (SELECT 1 FROM INFORMATION_SCHEMA.COLUMNS
                WHERE TABLE_NAME = 'Emp_CargaFamiliar' AND COLUMN_NAME = 'Cod_Usuario')
 BEGIN
@@ -332,7 +338,7 @@ GO
 
 /* Todo el perfil de una persona en una sola ida: siete result sets.
 
-   La cabecera es un LEFT JOIN contra Empleados a proposito. 113 de 231
+   La cabecera es un LEFT JOIN contra Empleados a proposito. 119 de 231
    usuarios activos no tienen ficha enlazada; con INNER JOIN entrarian y verian
    una pantalla en blanco. Con LEFT ven su nombre, su area y todo lo que si se
    sabe de ellos, y las secciones nuevas -que cuelgan de Cod_Usuario- les
@@ -482,7 +488,7 @@ GO
    donde RRHH ya lo mantiene y lo lee su propia pantalla.
 
    El estado civil solo se actualiza si la persona tiene ficha enlazada. Para
-   los 113 sin ficha no hay donde escribirlo; se ignora en silencio en vez de
+   los 119 sin ficha no hay donde escribirlo; se ignora en silencio en vez de
    fallar, porque el resto del guardado si tiene sentido para ellos.
 
    @CodigoRepetido reproduce EXACTAMENTE el mismo calculo y el mismo criterio
@@ -542,6 +548,14 @@ BEGIN
            varchar(64). Con una IPv6 este UPDATE no truncaria en silencio -fallaria
            con "String or binary data would be truncated" y se caeria el guardado
            entero, incluido lo que si cabia-. Se recorta aqui a proposito. */
+
+        /* Este UPDATE no escribe Usu_Modificacion. No es un descuido: en
+           Empleados esa columna es numeric(5), pensada para un correlativo
+           interno de RRHH, y no admite un Cod_Usuario (varchar). No hay forma
+           de dejar aqui quien hizo el cambio; queda Fec_Modificacion e
+           Ip_Modificacion como unico rastro. Las tablas nuevas de este script
+           (Perfil_ContactoPersonal, Perfil_ContactoEmergencia, ...) si tienen
+           Usu_Modificacion varchar(50) por esto mismo. */
         UPDATE dbo.Empleados
            SET EstadoCivil      = @EstadoCivil,
                Fec_Modificacion = GETDATE(),

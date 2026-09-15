@@ -245,7 +245,7 @@ namespace CapaPruebas
                 Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "no tengo"
             };
 
-            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.",
                             NegPerfilCampos.ValidarEmergencia(contacto));
         }
 
@@ -291,7 +291,7 @@ namespace CapaPruebas
                 Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "mi cedula es 1710034678, no tengo celular"
             };
 
-            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.",
                             NegPerfilCampos.ValidarEmergencia(contacto));
         }
 
@@ -303,7 +303,7 @@ namespace CapaPruebas
                 Nombre = "Lucia Ortiz Vega", Parentesco = "Madre", Telefono = "aaa1234567bbb"
             };
 
-            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones y paréntesis.",
+            Assert.AreEqual("El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.",
                             NegPerfilCampos.ValidarEmergencia(contacto));
         }
 
@@ -342,7 +342,7 @@ namespace CapaPruebas
         }
 
         [TestMethod]
-        public void ValidarEmergencia_PocosDígitosCaracteresValidos_Rechaza()
+        public void ValidarEmergencia_PocosDigitosCaracteresValidos_Rechaza()
         {
             // Cobertura del mensaje "al menos 7 digitos": con caracteres validos
             // pero insuficientes. Asegura que ese mensaje siga siendo alcanzable

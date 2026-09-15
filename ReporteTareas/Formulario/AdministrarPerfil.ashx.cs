@@ -54,6 +54,18 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(GuardarContacto(context, parametros[0]["parameters"]));
                 }
 
+                if (Action == "GuardarEmergencia")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarEmergencia(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarEmergencia")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarEmergencia(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -118,6 +130,85 @@ namespace JsonJQueryNetPerfil
             {
                 return responseMessage("0", "Error al guardar el contacto. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Guarda un contacto de emergencia del usuario de la sesion.
+        ///
+        /// IdContacto = 0 es alta; cualquier otro valor, edicion. El servidor
+        /// vuelve a validar con NegPerfilCampos.ValidarEmergencia aunque el
+        /// navegador ya lo haya hecho: el handler es alcanzable por HTTP
+        /// directo, y una validacion que solo viva en el cliente no es una
+        /// validacion.
+        /// </summary>
+        private string GuardarEmergencia(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilEmergencia contacto = new EntPerfilEmergencia
+                {
+                    IdContacto = Convert.ToInt32(Texto(campos, "idContacto", "0")),
+                    Nombre     = Texto(campos, "nombre", ""),
+                    Parentesco = Texto(campos, "parentesco", ""),
+                    Telefono   = Texto(campos, "telefono", "")
+                };
+
+                /* Se valida en el servidor y no solo en el navegador: el handler
+                   es alcanzable por HTTP directo. */
+                string error = NegPerfilCampos.ValidarEmergencia(contacto);
+                if (error != "")
+                {
+                    return responseMessage("0", error, "warning");
+                }
+
+                return ToJson(NegPerfil.GuardarEmergencia(codUsuario, contacto,
+                                                          context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar el contacto de emergencia. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>Elimina (borrado logico) un contacto de emergencia del usuario de la sesion.</summary>
+        private string EliminarEmergencia(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                int idContacto = Convert.ToInt32(Texto(campos, "idContacto", "0"));
+
+                return ToJson(NegPerfil.EliminarEmergencia(codUsuario, idContacto,
+                                                           context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al eliminar el contacto. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>Lee una clave del payload dinamico, con valor por omision.</summary>
+        private static string Texto(dynamic campos, string clave, string omision)
+        {
+            var d = campos as System.Collections.Generic.IDictionary<string, object>;
+            if (d == null) { return omision; }
+
+            object valor;
+            if (!d.TryGetValue(clave, out valor) || valor == null) { return omision; }
+
+            string texto = valor.ToString().Trim();
+            return texto == "" ? omision : texto;
         }
 
         /// <summary>De quien es este perfil. Sale de la sesion, nunca del cliente.</summary>

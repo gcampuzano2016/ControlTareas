@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=2" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -126,7 +126,41 @@
                             </div>
                         </div>
                     </div>
-                    <div class="tab-pane" id="tabEmergencia"></div>
+                    <div class="tab-pane" id="tabEmergencia">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Contactos de emergencia
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">
+                                    A quién debemos llamar si te ocurre algo. Puedes registrar más de uno.
+                                </p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover" style="font-size: 90%">
+                                        <thead class="bg-primary">
+                                            <tr><th>Nombre</th><th>Parentesco</th><th>Teléfono</th><th style="width:90px">Quitar</th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoEmergencia"></tbody>
+                                    </table>
+                                </div>
+                                <hr />
+                                <div class="row">
+                                    <div class="form-group col-lg-4"><label>Nombre completo</label>
+                                        <input type="text" class="form-control" id="emNombre" maxlength="150" /></div>
+                                    <div class="form-group col-lg-3"><label>Parentesco</label>
+                                        <input type="text" class="form-control" id="emParentesco" maxlength="50" /></div>
+                                    <div class="form-group col-lg-3"><label>Teléfono</label>
+                                        <input type="tel" class="form-control" id="emTelefono" maxlength="50" /></div>
+                                    <div class="form-group col-lg-2" style="padding-top: 25px">
+                                        <button type="button" class="btn btn-primary btn-block" onclick="AgregarEmergencia()">
+                                            <i class="fa fa-plus"></i> Agregar
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                 </div>
             </div>

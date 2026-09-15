@@ -7,8 +7,7 @@
    3. Poblado del enlace por cedula
    4. Sp_RTA_PerfilColaborador
    6. Sp_RTA_PerfilGuardarContacto
-   7. La agrega una tarea posterior (las demas pantallas del modulo),
-      antes de la seccion 8, para que las aserciones sigan corriendo al final.
+   7. Sp_RTA_PerfilGuardarEmergencia y Sp_RTA_PerfilEliminarEmergencia
    8. Aserciones y reporte de excepciones para RRHH
 
    Las secciones estan en el orden en que deben ejecutarse.
@@ -556,10 +555,128 @@ GO
 PRINT 'Sp_RTA_PerfilGuardarContacto creado.';
 GO
 
+/* ----------------------------------------------------- 7. emergencia ------ */
+
+IF OBJECT_ID('dbo.Sp_RTA_PerfilGuardarEmergencia','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_PerfilGuardarEmergencia;
+GO
+
+/* IdContacto = 0 significa alta; cualquier otro, edicion.
+
+   El WHERE de la edicion lleva Cod_Usuario ademas del IdContacto a proposito:
+   sin eso, mandar el IdContacto de otra persona editaria su contacto. El
+   IdContacto viene del cliente y no se puede confiar en el; el Cod_Usuario
+   viene de la sesion y si.
+
+   @CodigoRepetido reproduce EXACTAMENTE el mismo calculo y el mismo criterio
+   -solo usuarios activos- que Sp_RTA_PerfilColaborador y
+   Sp_RTA_PerfilGuardarContacto. Hay 4 usuarios activos con el Cod_Usuario
+   repetido, y en un caso ('0000') son dos personas distintas con su propio
+   login y su propia sesion, ambas cargando el mismo valor. Sin este bloqueo,
+   cualquiera de las dos veria y podria borrar los contactos de emergencia de
+   la otra -exactamente el dato cuyo proposito es que alguien reciba una
+   llamada cuando hay una urgencia-. Devuelve -2, igual que
+   Sp_RTA_PerfilGuardarContacto, para que la capa de datos lo distinga de un
+   guardado normal y muestre un mensaje explicito en vez de fingir exito.
+   El RETURN es necesario: un SELECT de retorno no interrumpe la ejecucion en
+   T-SQL, y sin el RETURN el procedimiento informaria el bloqueo y de todos
+   modos escribiria. */
+CREATE PROCEDURE dbo.Sp_RTA_PerfilGuardarEmergencia
+    @Cod_Usuario VARCHAR(50),
+    @IdContacto  INT,
+    @Nombre      VARCHAR(150),
+    @Parentesco  VARCHAR(50),
+    @Telefono    VARCHAR(50),
+    @Ip          VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @CodigoRepetido BIT = 0;
+
+    IF (SELECT COUNT(*) FROM dbo.R_Usuarios
+         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+        SET @CodigoRepetido = 1;
+
+    IF @CodigoRepetido = 1
+    BEGIN
+        SELECT Respuestas = -2, IdContacto = @IdContacto;
+        RETURN;
+    END
+
+    IF @IdContacto = 0
+    BEGIN
+        INSERT INTO dbo.Perfil_ContactoEmergencia
+            (Cod_Usuario, Nombre, Parentesco, Telefono, Usu_Modificacion, Ip_Modificacion)
+        VALUES (@Cod_Usuario, @Nombre, @Parentesco, @Telefono, @Cod_Usuario, @Ip);
+
+        SELECT Respuestas = 0, IdContacto = SCOPE_IDENTITY();
+    END
+    ELSE
+    BEGIN
+        UPDATE dbo.Perfil_ContactoEmergencia
+           SET Nombre           = @Nombre,
+               Parentesco       = @Parentesco,
+               Telefono         = @Telefono,
+               Fec_Modificacion = SYSDATETIME(),
+               Usu_Modificacion = @Cod_Usuario,
+               Ip_Modificacion  = @Ip
+         WHERE IdContacto  = @IdContacto
+           AND Cod_Usuario = @Cod_Usuario;
+
+        SELECT Respuestas = CASE WHEN @@ROWCOUNT = 0 THEN -1 ELSE 0 END,
+               IdContacto = @IdContacto;
+    END
+END
+GO
+PRINT 'Sp_RTA_PerfilGuardarEmergencia creado.';
+GO
+
+IF OBJECT_ID('dbo.Sp_RTA_PerfilEliminarEmergencia','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_PerfilEliminarEmergencia;
+GO
+
+/* Borrado logico, y con Cod_Usuario en el WHERE por la misma razon de arriba.
+
+   Lleva el mismo @CodigoRepetido y el mismo RETURN que
+   Sp_RTA_PerfilGuardarEmergencia y por la misma razon: sin el, una de las dos
+   personas que comparten Cod_Usuario podria borrar el contacto de emergencia
+   de la otra con solo mandar su IdContacto. */
+CREATE PROCEDURE dbo.Sp_RTA_PerfilEliminarEmergencia
+    @Cod_Usuario VARCHAR(50),
+    @IdContacto  INT,
+    @Ip          VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @CodigoRepetido BIT = 0;
+
+    IF (SELECT COUNT(*) FROM dbo.R_Usuarios
+         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+        SET @CodigoRepetido = 1;
+
+    IF @CodigoRepetido = 1
+    BEGIN
+        SELECT Respuestas = -2;
+        RETURN;
+    END
+
+    UPDATE dbo.Perfil_ContactoEmergencia
+       SET Estado           = '0',
+           Fec_Modificacion = SYSDATETIME(),
+           Usu_Modificacion = @Cod_Usuario,
+           Ip_Modificacion  = @Ip
+     WHERE IdContacto  = @IdContacto
+       AND Cod_Usuario = @Cod_Usuario;
+
+    SELECT Respuestas = CASE WHEN @@ROWCOUNT = 0 THEN -1 ELSE 0 END;
+END
+GO
+PRINT 'Sp_RTA_PerfilEliminarEmergencia creado.';
+GO
+
 /* ------------------------------------------ 8. aserciones y excepciones --- */
-/* La seccion 7 (las demas pantallas del modulo) la agrega una tarea
-   posterior, insertada antes de este bloque, para que las aserciones y el
-   reporte de RRHH sigan corriendo al final del script. */
 
 /* Aserciones: si algo de esto falla, el script no dejo la base como se espera. */
 IF OBJECT_ID('dbo.Sp_RTA_PerfilColaborador','P') IS NULL

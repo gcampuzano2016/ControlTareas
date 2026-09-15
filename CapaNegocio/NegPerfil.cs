@@ -33,5 +33,17 @@ namespace CapaNegocio
         {
             return DaoPerfil.GuardarContacto(codUsuario, contacto, ip);
         }
+
+        /// <summary>Alta o edicion de un contacto de emergencia del usuario de la sesion.</summary>
+        public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
+        {
+            return DaoPerfil.GuardarEmergencia(codUsuario, c, ip);
+        }
+
+        /// <summary>Borrado logico de un contacto de emergencia del usuario de la sesion.</summary>
+        public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
+        {
+            return DaoPerfil.EliminarEmergencia(codUsuario, idContacto, ip);
+        }
     }
 }

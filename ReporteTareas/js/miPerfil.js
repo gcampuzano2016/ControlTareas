@@ -54,6 +54,7 @@ function CargarPerfil() {
 
         PintarCabecera(respuesta.Cabecera);
         PintarContacto(respuesta.Contacto);
+        PintarEmergencia(respuesta.Emergencia);
     });
 }
 
@@ -119,6 +120,50 @@ function GuardarContacto() {
 
     PostPerfil("GuardarContacto", datos, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+    });
+}
+
+function PintarEmergencia(lista) {
+    var $cuerpo = $("#cuerpoEmergencia").empty();
+
+    if (!lista || lista.length === 0) {
+        $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+                       'Todavía no has registrado ningún contacto de emergencia.</td></tr>');
+        return;
+    }
+
+    $.each(lista, function (i, c) {
+        var $fila = $("<tr></tr>");
+        $fila.append($("<td></td>").text(c.Nombre));
+        $fila.append($("<td></td>").text(c.Parentesco));
+        $fila.append($("<td></td>").text(c.Telefono));
+        $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
+                     'onclick="EliminarEmergencia(' + c.IdContacto + ')"><i class="fa fa-trash"></i></button></td>');
+        $cuerpo.append($fila);
+    });
+}
+
+function AgregarEmergencia() {
+    var datos = {
+        idContacto: 0,
+        nombre:     $("#emNombre").val(),
+        parentesco: $("#emParentesco").val(),
+        telefono:   $("#emTelefono").val()
+    };
+
+    PostPerfil("GuardarEmergencia", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") {
+            $("#emNombre, #emParentesco, #emTelefono").val("");
+            CargarPerfil();
+        }
+    });
+}
+
+function EliminarEmergencia(idContacto) {
+    PostPerfil("EliminarEmergencia", { idContacto: idContacto }, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
     });
 }
 

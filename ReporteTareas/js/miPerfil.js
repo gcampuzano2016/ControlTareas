@@ -1,0 +1,90 @@
+/* ============================================================================
+   Pantalla: Mi perfil
+   Handler : AdministrarPerfil.ashx
+
+   El Cod_Usuario no se manda nunca: el handler lo saca de la sesion. Si algun
+   dia hace falta ver el perfil de otra persona, es una accion distinta con su
+   propia validacion, no un parametro de estas.
+   ============================================================================ */
+
+var _perfil = null;
+
+$(document).ready(function () {
+    CargarPerfil();
+});
+
+/* Llama al handler con el formato [{action, parameters}] */
+function PostPerfil(action, parameters, onSuccess) {
+    var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
+
+    $.ajax({
+        type: "POST",
+        url: "AdministrarPerfil.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            onSuccess(respuesta);
+        },
+        error: function () {
+            MostrarMensaje("La operación está tomando demasiado tiempo o la red está saturada. Intente nuevamente.", "danger");
+        }
+    });
+}
+
+function CargarPerfil() {
+    PostPerfil("CargarPerfil", {}, function (respuesta) {
+        // Un objeto con "estado" es un EntRespuesta, es decir, un error.
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        _perfil = respuesta;
+
+        /* Cero filas de cabecera no es "no tiene datos": es que su codigo de usuario
+           esta repetido en R_Usuarios y el procedimiento se nego a adivinar cual de
+           las dos personas es. Mostrar la pantalla vacia seria peor que no mostrarla:
+           pareceria que el perfil no tiene nada, cuando el problema es de identidad. */
+        if (!respuesta.PerfilEncontrado) {
+            $("#perfilNoIdentificado").show();
+            $(".nav-tabs, .tab-content").hide();
+            return;
+        }
+
+        PintarCabecera(respuesta.Cabecera);
+    });
+}
+
+function PintarCabecera(c) {
+    $("#perfilNombre").text(c.NombreCompleto || "–");
+    $("#perfilCargo").text(c.Cargo || "–");
+    $("#perfilArea").text(c.Area || "–");
+    $("#perfilCiudad").text(c.Ciudad || "–");
+    $("#perfilAvatar").text(Iniciales(c.NombreCompleto));
+
+    // Edad null significa "no se sabe": guion, nunca cero.
+    $("#perfilEdad").text(c.Edad === null ? "–" : c.Edad + " años");
+
+    $("#dpNombre").text(c.NombreCompleto || "–");
+    $("#dpCedula").text(c.Cedula || "–");
+    $("#dpFnac").text(c.FechaNacTexto || "–");
+    $("#dpCargo").text(c.Cargo || "–");
+    $("#dpArea").text(c.Area || "–");
+    $("#dpJefe").text(c.JefeInmediato || "–");
+    $("#dpCiudad").text(c.Ciudad || "–");
+    $("#dpCorreo").text(c.CorreoNotificacion || "–");
+    // 143 de 231 no tienen horario asignado todavia: guion, no cadena vacia.
+    $("#dpHorario").text(c.Horario || "–");
+
+    if (!c.TieneFicha) {
+        $("#perfilSinFicha").show();
+    }
+}
+
+function Iniciales(nombre) {
+    if (!nombre) { return "–"; }
+    var partes = nombre.trim().split(/\s+/);
+    if (partes.length === 1) { return partes[0].substring(0, 2).toUpperCase(); }
+    return (partes[0].charAt(0) + partes[1].charAt(0)).toUpperCase();
+}

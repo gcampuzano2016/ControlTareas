@@ -1115,6 +1115,7 @@
     <Content Include="Formulario\ListaEmpleados.aspx" />
     <Content Include="Formulario\ObtenerNuevaListaTareas.ashx" />
     <Content Include="Formulario\PaginaError.aspx" />
+    <Content Include="Formulario\MiPerfil.aspx" />
     <Content Include="Formulario\Perfiles.aspx" />
     <Content Include="Formulario\PruebaMenu.aspx" />
     <Content Include="Formulario\RegistroActividad.aspx" />
@@ -1163,6 +1164,7 @@
     <Content Include="js\InformacionContratos.js" />
     <Content Include="js\Inventario.js" />
     <Content Include="js\jquery.blockUI.js" />
+    <Content Include="js\miPerfil.js" />
     <Content Include="js\Perfiles.js" />
     <Content Include="js\Producto.js" />
     <Content Include="js\PruebaMenu.js" />
@@ -1742,6 +1744,13 @@
     </Compile>
     <Compile Include="Formulario\PaginaError.aspx.designer.cs">
       <DependentUpon>PaginaError.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\MiPerfil.aspx.cs">
+      <DependentUpon>MiPerfil.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\MiPerfil.aspx.designer.cs">
+      <DependentUpon>MiPerfil.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\Perfiles.aspx.cs">
       <DependentUpon>Perfiles.aspx</DependentUpon>

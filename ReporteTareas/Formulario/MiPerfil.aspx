@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=5" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=6" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -22,11 +22,30 @@
             <div class="col-lg-3">
                 <div class="panel panel-default">
                     <div class="panel-body text-center">
+                        <!-- Dos representaciones excluyentes: la foto si la hay,
+                             y si no las iniciales, que es lo que la fase 1 dejo. -->
+                        <img id="perfilFoto" alt="Foto de perfil"
+                             style="display: none; width: 96px; height: 96px; margin: 0 auto 12px;
+                                    border-radius: 50%; object-fit: cover" />
                         <div id="perfilAvatar"
                              style="width: 96px; height: 96px; margin: 0 auto 12px; border-radius: 50%;
                                     background: #750202; color: #fff; font-size: 34px; line-height: 96px;">–</div>
                         <h4 id="perfilNombre" style="margin: 0 0 4px">–</h4>
                         <p id="perfilCargo" class="text-muted" style="margin: 0 0 10px">–</p>
+
+                        <!-- El input va oculto y lo dispara el boton: el control de
+                             archivo nativo no se puede estilar y desentona. -->
+                        <input type="file" id="inFoto" accept="image/jpeg,image/png" style="display: none" />
+                        <p style="margin: 0 0 10px">
+                            <button type="button" class="btn btn-default btn-xs" onclick="ElegirFoto()">
+                                <i class="fa fa-camera"></i> Cambiar foto
+                            </button>
+                            <button type="button" id="btnQuitarFoto" class="btn btn-default btn-xs"
+                                    style="display: none" onclick="QuitarFoto()">
+                                <i class="fa fa-trash"></i> Quitar
+                            </button>
+                        </p>
+
                         <span id="perfilArea" class="label label-primary">–</span>
                         <span id="perfilCiudad" class="label label-default">–</span>
                         <hr />

@@ -48,6 +48,12 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(CargarPerfil(context));
                 }
 
+                if (Action == "GuardarContacto")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarContacto(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -82,6 +88,35 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al cargar el perfil. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Guarda el contacto del usuario de la sesion.
+        ///
+        /// El payload pasa por NegPerfilCampos.LeerContacto, que solo lee las
+        /// cuatro claves permitidas. Un payload que traiga cargo o cedula no
+        /// falla: esos valores simplemente no tienen donde aterrizar.
+        /// </summary>
+        private string GuardarContacto(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                var diccionario = campos as System.Collections.Generic.IDictionary<string, object>;
+                EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(diccionario);
+
+                return ToJson(NegPerfil.GuardarContacto(codUsuario, contacto,
+                                                        context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar el contacto. " + ex.Message, "danger");
             }
         }
 

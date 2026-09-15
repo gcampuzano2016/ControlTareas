@@ -1,7 +1,7 @@
 <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="MiPerfil.aspx.cs" Inherits="ReporteTareas.Formulario.MiPerfil" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=1" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -95,7 +95,34 @@
                         </div>
                     </div>
 
-                    <div class="tab-pane" id="tabContacto"></div>
+                    <div class="tab-pane" id="tabContacto">
+                        <div class="panel panel-default">
+                            <div class="panel-heading">
+                                Contacto y domicilio
+                                <span class="label label-info pull-right"><i class="fa fa-pencil"></i> Editable</span>
+                            </div>
+                            <div class="panel-body">
+                                <div class="row">
+                                    <div class="form-group col-lg-12"><label>Dirección de domicilio</label>
+                                        <input type="text" class="form-control" id="inDireccion" maxlength="400" /></div>
+                                    <div class="form-group col-lg-6"><label>Correo personal</label>
+                                        <input type="email" class="form-control" id="inCorreoPersonal" maxlength="150" /></div>
+                                    <div class="form-group col-lg-6"><label>Número de teléfono</label>
+                                        <input type="tel" class="form-control" id="inTelefonoPersonal" maxlength="50" /></div>
+                                    <div class="form-group col-lg-6"><label>Estado civil</label>
+                                        <select class="form-control" id="inEstadoCivil">
+                                            <option value="">Seleccione…</option>
+                                            <option>Soltero/a</option><option>Casado/a</option>
+                                            <option>Unión de hecho</option><option>Divorciado/a</option>
+                                            <option>Viudo/a</option>
+                                        </select></div>
+                                </div>
+                                <button type="button" class="btn btn-primary" onclick="GuardarContacto()">
+                                    <i class="fa fa-save"></i> Guardar cambios
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                     <div class="tab-pane" id="tabEmergencia"></div>
 
                 </div>

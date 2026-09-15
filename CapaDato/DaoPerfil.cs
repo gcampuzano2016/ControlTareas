@@ -85,6 +85,32 @@ namespace CapaDato
             return perfil;
         }
 
+        /// <summary>Guarda el contacto editable. Devuelve el resultado listo para el cliente.</summary>
+        public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilGuardarContacto", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Usuario",      SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@CorreoPersonal",   SqlDbType.VarChar, 150).Value = contacto.CorreoPersonal;
+                cmd.Parameters.Add("@TelefonoPersonal", SqlDbType.VarChar,  50).Value = contacto.TelefonoPersonal;
+                cmd.Parameters.Add("@Direccion",        SqlDbType.VarChar, 400).Value = contacto.Direccion;
+                cmd.Parameters.Add("@EstadoCivil",      SqlDbType.VarChar, 100).Value = contacto.EstadoCivil;
+                cmd.Parameters.Add("@Ip",               SqlDbType.VarChar,  64).Value = ip ?? "";
+                cnx.Open();
+                cmd.ExecuteNonQuery();
+            }
+
+            respuesta.estado = "1";
+            respuesta.mensaje = "Tus datos de contacto se guardaron correctamente.";
+            respuesta.tipoMensaje = "success";
+            return respuesta;
+        }
+
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();

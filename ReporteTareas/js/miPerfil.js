@@ -53,6 +53,7 @@ function CargarPerfil() {
         }
 
         PintarCabecera(respuesta.Cabecera);
+        PintarContacto(respuesta.Contacto);
     });
 }
 
@@ -80,6 +81,26 @@ function PintarCabecera(c) {
     if (!c.TieneFicha) {
         $("#perfilSinFicha").show();
     }
+}
+
+function PintarContacto(c) {
+    $("#inDireccion").val(c.Direccion || "");
+    $("#inCorreoPersonal").val(c.CorreoPersonal || "");
+    $("#inTelefonoPersonal").val(c.TelefonoPersonal || "");
+    $("#inEstadoCivil").val(c.EstadoCivil || "");
+}
+
+function GuardarContacto() {
+    var datos = {
+        correoPersonal:   $("#inCorreoPersonal").val(),
+        telefonoPersonal: $("#inTelefonoPersonal").val(),
+        direccion:        $("#inDireccion").val(),
+        estadoCivil:      $("#inEstadoCivil").val()
+    };
+
+    PostPerfil("GuardarContacto", datos, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+    });
 }
 
 function Iniciales(nombre) {

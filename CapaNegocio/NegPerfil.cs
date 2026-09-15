@@ -27,5 +27,11 @@ namespace CapaNegocio
 
             return perfil;
         }
+
+        /// <summary>Guarda el contacto editable del usuario de la sesion.</summary>
+        public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
+        {
+            return DaoPerfil.GuardarContacto(codUsuario, contacto, ip);
+        }
     }
 }

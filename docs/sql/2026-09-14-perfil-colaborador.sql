@@ -6,8 +6,9 @@
    2. Cod_Usuario en Empleados y en Emp_CargaFamiliar
    3. Poblado del enlace por cedula
    4. Sp_RTA_PerfilColaborador
-   6-7. Las agregan tareas posteriores (guardar contacto y demas pantallas),
-        antes de la seccion 8, para que las aserciones sigan corriendo al final.
+   6. Sp_RTA_PerfilGuardarContacto
+   7. La agrega una tarea posterior (las demas pantallas del modulo),
+      antes de la seccion 8, para que las aserciones sigan corriendo al final.
    8. Aserciones y reporte de excepciones para RRHH
 
    Las secciones estan en el orden en que deben ejecutarse.
@@ -471,10 +472,70 @@ GO
 PRINT 'Sp_RTA_PerfilColaborador creado.';
 GO
 
+/* ------------------------------------------------ 6. guardar el contacto -- */
+
+IF OBJECT_ID('dbo.Sp_RTA_PerfilGuardarContacto','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_PerfilGuardarContacto;
+GO
+
+/* Escribe en dos sitios porque el dato vive en dos sitios: lo nuevo va a
+   Perfil_ContactoPersonal y el estado civil se queda en Empleados, que es
+   donde RRHH ya lo mantiene y lo lee su propia pantalla.
+
+   El estado civil solo se actualiza si la persona tiene ficha enlazada. Para
+   los 113 sin ficha no hay donde escribirlo; se ignora en silencio en vez de
+   fallar, porque el resto del guardado si tiene sentido para ellos. */
+CREATE PROCEDURE dbo.Sp_RTA_PerfilGuardarContacto
+    @Cod_Usuario      VARCHAR(50),
+    @CorreoPersonal   VARCHAR(150),
+    @TelefonoPersonal VARCHAR(50),
+    @Direccion        VARCHAR(400),
+    @EstadoCivil      VARCHAR(100),
+    @Ip               VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    MERGE dbo.Perfil_ContactoPersonal AS destino
+    USING (SELECT @Cod_Usuario AS Cod_Usuario) AS origen
+       ON destino.Cod_Usuario = origen.Cod_Usuario
+    WHEN MATCHED THEN
+        UPDATE SET CorreoPersonal   = @CorreoPersonal,
+                   TelefonoPersonal = @TelefonoPersonal,
+                   Direccion        = @Direccion,
+                   Fec_Modificacion = SYSDATETIME(),
+                   Usu_Modificacion = @Cod_Usuario,
+                   Ip_Modificacion  = @Ip
+    WHEN NOT MATCHED THEN
+        INSERT (Cod_Usuario, CorreoPersonal, TelefonoPersonal, Direccion,
+                Usu_Modificacion, Ip_Modificacion)
+        VALUES (@Cod_Usuario, @CorreoPersonal, @TelefonoPersonal, @Direccion,
+                @Cod_Usuario, @Ip);
+
+    IF LTRIM(RTRIM(ISNULL(@EstadoCivil,''))) <> ''
+    BEGIN
+        /* LEFT(@Ip, 32) no es cosmetica: Empleados.Ip_Modificacion es varchar(32),
+           mas angosta que las columnas equivalentes de las tablas nuevas, que son
+           varchar(64). Con una IPv6 este UPDATE no truncaria en silencio -fallaria
+           con "String or binary data would be truncated" y se caeria el guardado
+           entero, incluido lo que si cabia-. Se recorta aqui a proposito. */
+        UPDATE dbo.Empleados
+           SET EstadoCivil      = @EstadoCivil,
+               Fec_Modificacion = GETDATE(),
+               Ip_Modificacion  = LEFT(@Ip, 32)
+         WHERE Cod_Usuario = @Cod_Usuario;
+    END
+
+    SELECT Respuestas = 0;
+END
+GO
+PRINT 'Sp_RTA_PerfilGuardarContacto creado.';
+GO
+
 /* ------------------------------------------ 8. aserciones y excepciones --- */
-/* Las secciones 6 y 7 (guardar contacto y las demas pantallas del modulo)
-   las agregan tareas posteriores, insertadas antes de este bloque, para que
-   las aserciones y el reporte de RRHH sigan corriendo al final del script. */
+/* La seccion 7 (las demas pantallas del modulo) la agrega una tarea
+   posterior, insertada antes de este bloque, para que las aserciones y el
+   reporte de RRHH sigan corriendo al final del script. */
 
 /* Aserciones: si algo de esto falla, el script no dejo la base como se espera. */
 IF OBJECT_ID('dbo.Sp_RTA_PerfilColaborador','P') IS NULL

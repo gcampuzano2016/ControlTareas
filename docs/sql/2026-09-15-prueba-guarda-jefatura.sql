@@ -123,6 +123,6 @@ BEGIN TRY
 END TRY
 BEGIN CATCH
     IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;
-    PRINT 'Error, transaccion no revertida: ' + ERROR_MESSAGE();
+    PRINT 'Error, la transaccion quedo revertida: ' + ERROR_MESSAGE();
 END CATCH
 GO

@@ -23,12 +23,20 @@ BEGIN TRANSACTION;
 
 DECLARE @Jefe VARCHAR(50), @Suyo VARCHAR(50), @Ajeno VARCHAR(50);
 
-/* Un jefe con al menos un subordinado, y uno de sus subordinados. */
+/* Se excluyen los codigos repetidos en los DOS extremos. Sin esto, el TOP 1
+   elige al primero por orden alfabetico, que resulta ser uno de los usuarios
+   con Cod_Usuario duplicado: el procedimiento se niega con razon -no puede
+   saber de cual de dos personas son los datos- y el bloque de abajo sale
+   vacio, como si la funcionalidad estuviera rota. */
 SELECT TOP 1 @Jefe = LTRIM(RTRIM(s.Cod_Jefe_Inm)), @Suyo = LTRIM(RTRIM(s.Cod_Usuario))
   FROM dbo.R_Usuarios s
   JOIN dbo.R_Usuarios u ON LTRIM(RTRIM(u.Cod_Usuario)) = LTRIM(RTRIM(s.Cod_Jefe_Inm))
                        AND ISNULL(u.EstadoUsuario,0) = 0
  WHERE ISNULL(s.EstadoUsuario,0) = 0
+   AND (SELECT COUNT(*) FROM dbo.R_Usuarios r
+         WHERE r.Cod_Usuario = s.Cod_Usuario AND ISNULL(r.EstadoUsuario,0) = 0) = 1
+   AND (SELECT COUNT(*) FROM dbo.R_Usuarios r
+         WHERE r.Cod_Usuario = s.Cod_Jefe_Inm AND ISNULL(r.EstadoUsuario,0) = 0) = 1
  ORDER BY s.Cod_Usuario;
 
 /* Alguien activo que NO le reporta a ese jefe y que no es el jefe mismo. */
@@ -52,6 +60,14 @@ PRINT 'Jefe elegido, un subordinado suyo y un tercero ajeno. No se imprimen los 
 
    Sp_RTA_PerfilEquipoLista si devuelve un unico result set, asi que ese si se
    captura de verdad. */
+
+/* Que cubren OK 1 y OK 2, y que no: aseveran sobre Fn_RTA_EsSubordinado, que
+   es la condicion de "le reporta a este jefe". El procedimiento aplica ADEMAS
+   una guarda de codigo de usuario repetido que esta funcion no conoce, asi que
+   un OK aqui no garantiza por si solo que el procedimiento entregue datos. Por
+   eso las dos llamadas de abajo se miran: son la unica forma de ver el
+   comportamiento completo, porque un procedimiento de seis result sets de
+   formas distintas no se puede capturar con INSERT ... EXEC. */
 
 /* --- 1. su propio subordinado: la guarda TIENE que decir que si --- */
 IF dbo.Fn_RTA_EsSubordinado(@Jefe, @Suyo) = 1
@@ -88,10 +104,15 @@ IF (SELECT COUNT(*) FROM #Lista WHERE CodUsuario = @Ajeno) = 0
 ELSE
     RAISERROR('FALLO 3: la lista del equipo incluyo a alguien que no es subordinado.', 16, 1);
 
-IF (SELECT COUNT(*) FROM #Lista) > 0
-    PRINT 'OK 4: la lista del equipo devolvio al menos una persona.';
+IF (SELECT COUNT(*) FROM #Lista WHERE CodUsuario = @Suyo) = 1
+    PRINT 'OK 4: la lista del equipo si contiene al subordinado propio.';
 ELSE
-    RAISERROR('FALLO 4: la lista del equipo de un jefe real vino vacia.', 16, 1);
+    RAISERROR('FALLO 4: la lista del equipo no contiene a un subordinado real de este jefe.', 16, 1);
+
+IF (SELECT COUNT(*) FROM #Lista) > 0
+    PRINT 'OK 5: la lista del equipo devolvio al menos una persona.';
+ELSE
+    RAISERROR('FALLO 5: la lista del equipo de un jefe real vino vacia.', 16, 1);
 
 DROP TABLE #Lista;
 

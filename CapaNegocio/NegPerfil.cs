@@ -1,5 +1,6 @@
 using CapaDato;
 using CapaEntidad;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -116,6 +117,22 @@ namespace CapaNegocio
         public static EntPerfilDocumento ObtenerDocumento(string codUsuario, int idDocumento)
         {
             return DaoPerfil.ObtenerDocumento(codUsuario, idDocumento);
+        }
+
+        /// <summary>El equipo directo de una jefatura.</summary>
+        public static List<EntPerfilEquipoItem> ListaEquipo(string codJefe, string filtro)
+        {
+            return DaoPerfil.ListaEquipo(codJefe, filtro);
+        }
+
+        /// <summary>
+        /// El perfil recortado de un subordinado. Devuelve PerfilEncontrado en
+        /// false si esa persona no le reporta a quien pregunta: la comprobacion
+        /// la hace el procedimiento, no esta capa.
+        /// </summary>
+        public static EntPerfilEquipo PerfilEquipo(string codJefe, string codUsuario)
+        {
+            return DaoPerfil.PerfilEquipo(codJefe, codUsuario);
         }
     }
 }

@@ -1,5 +1,6 @@
 using CapaEntidad;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -585,6 +586,172 @@ namespace CapaDato
             }
 
             return doc;
+        }
+
+        /// <summary>
+        /// El equipo directo de una jefatura, filtrado por texto en el servidor.
+        ///
+        /// Sin paginacion a proposito: el equipo mas grande de la empresa es de
+        /// 49 personas y una lista de ese tamanio no necesita paginarse. Si algun
+        /// dia deja de ser cierto, se vera en esta consulta antes que en ningun
+        /// otro sitio.
+        /// </summary>
+        public static List<EntPerfilEquipoItem> ListaEquipo(string codJefe, string filtro)
+        {
+            List<EntPerfilEquipoItem> lista = new List<EntPerfilEquipoItem>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilEquipoLista", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Jefe", SqlDbType.VarChar,  50).Value = codJefe;
+                cmd.Parameters.Add("@Filtro",   SqlDbType.VarChar, 100).Value = filtro ?? string.Empty;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(new EntPerfilEquipoItem
+                        {
+                            CodUsuario     = Texto(dr, "CodUsuario"),
+                            NombreCompleto = Texto(dr, "NombreCompleto"),
+                            Cargo          = Texto(dr, "Cargo"),
+                            Area           = Texto(dr, "Area"),
+                            Ciudad         = Texto(dr, "Ciudad")
+                        });
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        /// <summary>
+        /// El perfil de un subordinado, tal como lo ve su jefatura.
+        ///
+        /// Recorre SEIS result sets por posicion, igual que CargarPerfil. El
+        /// procedimiento devuelve los seis siempre, aunque vacios: por eso aqui
+        /// no hay ningun atajo que se salte los restantes cuando la cabecera
+        /// viene sin filas.
+        ///
+        /// Cero filas en la cabecera NO es un error que haya que distinguir:
+        /// significa que esa persona no le reporta a quien pregunta, o que
+        /// alguno de los dos codigos esta repetido. Los dos casos salen igual
+        /// -PerfilEncontrado en false- a proposito.
+        /// </summary>
+        public static EntPerfilEquipo PerfilEquipo(string codJefe, string codUsuario)
+        {
+            EntPerfilEquipo perfil = new EntPerfilEquipo();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilEquipo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Jefe",    SqlDbType.VarChar, 50).Value = codJefe;
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    /* 1. cabecera recortada */
+                    if (dr.Read())
+                    {
+                        perfil.PerfilEncontrado            = true;
+                        perfil.Cabecera.CodUsuario         = Texto(dr, "CodUsuario");
+                        perfil.Cabecera.NombreCompleto     = Texto(dr, "NombreCompleto");
+                        perfil.Cabecera.Cargo              = Texto(dr, "Cargo");
+                        perfil.Cabecera.Area               = Texto(dr, "Area");
+                        perfil.Cabecera.Ciudad             = Texto(dr, "Ciudad");
+                        perfil.Cabecera.CorreoNotificacion = Texto(dr, "CorreoNotificacion");
+                        perfil.Cabecera.JefeInmediato      = Texto(dr, "JefeInmediato");
+                        perfil.Cabecera.Horario            = Texto(dr, "Horario");
+                    }
+
+                    /* 2. contactos de emergencia */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Emergencia.Add(new EntPerfilEmergencia
+                            {
+                                IdContacto = EnteroDe(dr, "IdContacto"),
+                                Nombre     = Texto(dr, "Nombre"),
+                                Parentesco = Texto(dr, "Parentesco"),
+                                Telefono   = Texto(dr, "Telefono")
+                            });
+                        }
+                    }
+
+                    /* 3. estudios */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Estudios.Add(new EntPerfilEstudio
+                            {
+                                IdEstudio      = EnteroDe(dr, "IdEstudio"),
+                                Nivel          = Texto(dr, "Nivel"),
+                                Institucion    = Texto(dr, "Institucion"),
+                                Titulo         = Texto(dr, "Titulo"),
+                                AnioGraduacion = EnteroNuloDe(dr, "AnioGraduacion")
+                            });
+                        }
+                    }
+
+                    /* 4. certificaciones */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Certificaciones.Add(new EntPerfilCertificacion
+                            {
+                                IdCertificacion = EnteroDe(dr, "IdCertificacion"),
+                                Nombre          = Texto(dr, "Nombre"),
+                                Entidad         = Texto(dr, "Entidad"),
+                                FechaObtencion  = FechaMesDe(dr, "FechaObtencion")
+                            });
+                        }
+                    }
+
+                    /* 5. experiencia */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Experiencia.Add(new EntPerfilExperiencia
+                            {
+                                IdExperiencia = EnteroDe(dr, "IdExperiencia"),
+                                Empresa       = Texto(dr, "Empresa"),
+                                Cargo         = Texto(dr, "Cargo"),
+                                AnioDesde     = EnteroNuloDe(dr, "AnioDesde"),
+                                AnioHasta     = EnteroNuloDe(dr, "AnioHasta"),
+                                Funciones     = Texto(dr, "Funciones")
+                            });
+                        }
+                    }
+
+                    /* 6. foto */
+                    if (dr.NextResult() && dr.Read())
+                    {
+                        string base64 = Texto(dr, "FotoBase64");
+
+                        if (base64 != "")
+                        {
+                            string tipo = Texto(dr, "FotoTipo");
+                            if (tipo == "") { tipo = "image/jpeg"; }
+
+                            /* Solo DataUri, igual que en CargarPerfil: las tres
+                               propiedades juntas duplicarian el JSON por nada. */
+                            perfil.Foto.DataUri = "data:" + tipo + ";base64," + base64;
+                        }
+                    }
+                }
+            }
+
+            return perfil;
         }
 
         private static string Texto(SqlDataReader dr, string columna)

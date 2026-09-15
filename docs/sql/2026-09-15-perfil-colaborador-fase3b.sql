@@ -65,6 +65,16 @@ BEGIN
      WHERE  LTRIM(RTRIM(u.Cod_Jefe_Inm)) = LTRIM(RTRIM(@Cod_Jefe))
        AND  ISNULL(u.EstadoUsuario, 0) = 0
        AND  @CodigoRepetido = 0
+
+       /* Si el CODIGO DEL SUBORDINADO esta repetido, Sp_RTA_PerfilEquipo se
+          niega a abrirlo -no puede saber de cual de dos personas serian los
+          datos-. Antes esta lista no aplicaba esa misma regla y mostraba la
+          fila igual: la jefatura la veia, pulsaba el ojo y recibia "No pudimos
+          mostrar ese perfil" siempre, sin explicacion. Mejor no listar a
+          alguien que no se puede abrir, que listarlo con un boton que nunca
+          funciona. */
+       AND  (SELECT COUNT(*) FROM dbo.R_Usuarios r
+              WHERE r.Cod_Usuario = u.Cod_Usuario AND ISNULL(r.EstadoUsuario,0) = 0) = 1
        AND  (@F = ''
              OR ISNULL(NULLIF(LTRIM(RTRIM(e.Nombre)), ''), u.Nom_Usuario) LIKE '%' + @F + '%'
              OR LTRIM(RTRIM(u.Cod_Usuario)) LIKE '%' + @F + '%'

@@ -281,7 +281,7 @@ function PintarCertificaciones(lista) {
     var $cuerpo = $("#cuerpoCertificaciones").empty();
 
     if (!lista || lista.length === 0) {
-        $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
                        'Todavía no ha registrado ninguna certificación.</td></tr>');
         return;
     }
@@ -291,6 +291,7 @@ function PintarCertificaciones(lista) {
         $fila.append($("<td></td>").text(c.Nombre));
         $fila.append($("<td></td>").text(c.Entidad));
         $fila.append($("<td></td>").text(c.FechaObtencion === "" ? "–" : c.FechaObtencion));
+        $fila.append(CeldaDocumentos("CERTIFICACION", c.IdCertificacion));
         $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
                      'onclick="EliminarCertificacion(' + c.IdCertificacion + ')"><i class="fa fa-trash"></i></button></td>');
         $cuerpo.append($fila);
@@ -385,7 +386,7 @@ function PintarCargasFamiliares(lista) {
     var $cuerpo = $("#cuerpoCargas").empty();
 
     if (!lista || lista.length === 0) {
-        $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+        $cuerpo.append('<tr><td colspan="5" class="text-center text-muted">' +
                        'Todavía no ha registrado ninguna carga familiar.</td></tr>');
         return;
     }
@@ -395,6 +396,7 @@ function PintarCargasFamiliares(lista) {
         $fila.append($("<td></td>").text(c.Nombre));
         $fila.append($("<td></td>").text(c.Parentesco));
         $fila.append($("<td></td>").text(c.FechaNacimiento));
+        $fila.append(CeldaDocumentos("CARGAFAMILIAR", c.IdCargaFam));
         $fila.append('<td class="text-center"><button type="button" class="btn btn-danger btn-xs" ' +
                      'onclick="EliminarCargaFamiliar(' + c.IdCargaFam + ')"><i class="fa fa-trash"></i></button></td>');
         $cuerpo.append($fila);
@@ -531,6 +533,98 @@ function EnviarFoto(dataUri) {
 
 function QuitarFoto() {
     PostPerfil("EliminarFoto", {}, function (respuesta) {
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+        if (respuesta.estado === "1") { CargarPerfil(); }
+    });
+}
+
+/* ------------------------------------------------------------ documentos -- */
+
+/* Los respaldos vienen todos en una sola lista y la pantalla los reparte: asi
+   una unica consulta sirve a las dos pestanias. */
+function DocumentosDe(origen, idOrigen) {
+    var encontrados = [];
+
+    if (_perfil && _perfil.Documentos) {
+        $.each(_perfil.Documentos, function (i, d) {
+            if (d.Origen === origen && d.IdOrigen === idOrigen) { encontrados.push(d); }
+        });
+    }
+
+    return encontrados;
+}
+
+/* La celda de respaldos de una fila: los que ya tiene, y el enlace para sumar
+   uno mas. Se arma con jQuery y .text() -nunca concatenando HTML- porque el
+   nombre del archivo lo escribio la persona al guardarlo en su maquina. */
+function CeldaDocumentos(origen, idOrigen) {
+    var $celda = $('<td class="text-center"></td>');
+
+    $.each(DocumentosDe(origen, idOrigen), function (i, d) {
+        var $fila = $('<div style="margin-bottom:3px"></div>');
+
+        var $enlace = $('<a target="_blank" style="font-size:11px"></a>')
+            .attr("href", "DescargarPerfil.ashx?doc=" + d.IdDocumento)
+            .attr("title", d.NombreArchivo)
+            .text(d.NombreArchivo);
+
+        var $quitar = $('<a href="javascript:void(0)" title="Quitar" style="margin-left:6px">' +
+                        '<i class="fa fa-times text-danger"></i></a>')
+            .on("click", function () { EliminarDocumento(d.IdDocumento); });
+
+        $celda.append($fila.append($enlace).append($quitar));
+    });
+
+    var $adjuntar = $('<a href="javascript:void(0)" style="font-size:11px">' +
+                      '<i class="fa fa-paperclip"></i> Adjuntar</a>')
+        .on("click", function () { PedirArchivo(origen, idOrigen); });
+
+    return $celda.append($adjuntar);
+}
+
+/* Le cuelga al input compartido a que fila pertenece y lo abre. */
+function PedirArchivo(origen, idOrigen) {
+    $("#inDocumento").data("origen", origen).data("idOrigen", idOrigen).click();
+}
+
+$(document).on("change", "#inDocumento", function () {
+    var archivo = this.files && this.files[0];
+    var origen = $(this).data("origen");
+    var idOrigen = $(this).data("idOrigen");
+
+    /* Se limpia antes de nada: si no, elegir dos veces el mismo archivo no
+       vuelve a disparar "change". */
+    this.value = "";
+
+    if (!archivo) { return; }
+
+    var datos = new FormData();
+    datos.append("origen", origen);
+    datos.append("idOrigen", idOrigen);
+    datos.append("archivo", archivo);
+
+    /* Esta llamada no puede usar PostPerfil: aquella manda JSON y esto es
+       multipart. processData y contentType en false son lo que hace que jQuery
+       entregue el FormData tal cual y deje que el navegador ponga el boundary. */
+    $.ajax({
+        type: "POST",
+        url: "AdministrarPerfil.ashx",
+        data: datos,
+        processData: false,
+        contentType: false,
+        dataType: "json",
+        success: function (respuesta) {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            if (respuesta.estado === "1") { CargarPerfil(); }
+        },
+        error: function () {
+            MostrarMensaje("No pudimos subir el archivo. Intente nuevamente.", "danger");
+        }
+    });
+});
+
+function EliminarDocumento(idDocumento) {
+    PostPerfil("EliminarDocumento", { idDocumento: idDocumento }, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
         if (respuesta.estado === "1") { CargarPerfil(); }
     });

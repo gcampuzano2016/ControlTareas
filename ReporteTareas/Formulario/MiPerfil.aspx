@@ -234,7 +234,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover" style="font-size: 90%">
                                         <thead class="bg-primary">
-                                            <tr><th>Nombre</th><th>Entidad emisora</th><th style="width:120px">Obtenida</th><th style="width:70px">Quitar</th></tr>
+                                            <tr><th>Nombre</th><th>Entidad emisora</th><th style="width:120px">Obtenida</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoCertificaciones"></tbody>
                                     </table>
@@ -312,7 +312,7 @@
                                 <div class="table-responsive">
                                     <table class="table table-bordered table-hover" style="font-size: 90%">
                                         <thead class="bg-primary">
-                                            <tr><th>Nombre</th><th style="width:130px">Parentesco</th><th style="width:140px">Fecha de nacimiento</th><th style="width:70px">Quitar</th></tr>
+                                            <tr><th>Nombre</th><th style="width:130px">Parentesco</th><th style="width:140px">Fecha de nacimiento</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoCargas"></tbody>
                                     </table>
@@ -342,6 +342,12 @@
                 </div>
             </div>
         </div>
+
+        <!-- Un solo control de archivo para toda la pantalla. Antes de abrirlo se
+             le cuelga con .data() a que fila pertenece: un input por fila serian
+             tantos como respaldos pueda tener la persona, creados y destruidos en
+             cada repintado. -->
+        <input type="file" id="inDocumento" accept=".pdf,.jpg,.jpeg,.png" style="display: none" />
 
         <!-- Modal Informativo -->
         <div class="modal fade" id="modalMensajeInformativo" tabindex="-1" role="dialog" aria-labelledby="modalMensajeInformativoLabel" aria-hidden="true">

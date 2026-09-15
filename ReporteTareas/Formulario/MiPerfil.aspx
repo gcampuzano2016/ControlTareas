@@ -115,7 +115,10 @@
                                             <option>Soltero/a</option><option>Casado/a</option>
                                             <option>Unión de hecho</option><option>Divorciado/a</option>
                                             <option>Viudo/a</option>
-                                        </select></div>
+                                        </select>
+                                        <p class="text-muted" id="notaEstadoCivilSinFicha" style="display:none;">
+                                            Este dato lo administra Talento Humano y todavía no hay una ficha asociada a tu usuario.
+                                        </p></div>
                                 </div>
                                 <button type="button" class="btn btn-primary" onclick="GuardarContacto()">
                                     <i class="fa fa-save"></i> Guardar cambios

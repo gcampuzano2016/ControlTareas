@@ -85,11 +85,20 @@ namespace CapaDato
             return perfil;
         }
 
-        /// <summary>Guarda el contacto editable. Devuelve el resultado listo para el cliente.</summary>
+        /// <summary>
+        /// Guarda el contacto editable. Devuelve el resultado listo para el cliente.
+        ///
+        /// El procedimiento devuelve -2 en Respuestas cuando el Cod_Usuario esta
+        /// repetido entre usuarios activos: el mismo caso que Sp_RTA_PerfilColaborador
+        /// bloquea en la lectura. Sin esta traduccion, dos sesiones con el mismo
+        /// codigo podrian pisarse el contacto sin que ninguna se entere -la lectura
+        /// ya esta cerrada para ese caso, pero el guardado no lo estaba-.
+        /// </summary>
         public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
         {
             EntRespuesta respuesta = new EntRespuesta();
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+            int resultado;
 
             using (SqlConnection cnx = conexion.conectar())
             using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilGuardarContacto", cnx))
@@ -102,7 +111,15 @@ namespace CapaDato
                 cmd.Parameters.Add("@EstadoCivil",      SqlDbType.VarChar, 100).Value = contacto.EstadoCivil;
                 cmd.Parameters.Add("@Ip",               SqlDbType.VarChar,  64).Value = ip ?? "";
                 cnx.Open();
-                cmd.ExecuteNonQuery();
+                resultado = (int)cmd.ExecuteScalar();
+            }
+
+            if (resultado == -2)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
             }
 
             respuesta.estado = "1";

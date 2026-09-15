@@ -88,9 +88,28 @@ function PintarContacto(c) {
     $("#inCorreoPersonal").val(c.CorreoPersonal || "");
     $("#inTelefonoPersonal").val(c.TelefonoPersonal || "");
     $("#inEstadoCivil").val(c.EstadoCivil || "");
+
+    /* Sin ficha de Talento Humano enlazada, el procedimiento no tiene donde
+       escribir el estado civil: el UPDATE afecta cero filas. Se deshabilita
+       el campo y se explica antes de que la persona lo llene, en vez de
+       dejar que lo guarde y descubra despues -al recargar y verlo vacio-
+       que no sirvio de nada. Los otros tres campos si se guardan para
+       todo el mundo y quedan habilitados. */
+    var tieneFicha = _perfil && _perfil.Cabecera && _perfil.Cabecera.TieneFicha;
+    $("#inEstadoCivil").prop("disabled", !tieneFicha);
+    $("#notaEstadoCivilSinFicha").toggle(!tieneFicha);
 }
 
 function GuardarContacto() {
+    /* La comprobacion real esta en el servidor -el handler es alcanzable por
+       HTTP directo-, pero esta evita una peticion inutil cuando ya se sabe
+       que el codigo de usuario esta repetido: PerfilEncontrado en falso es
+       exactamente ese caso (ver CargarPerfil). */
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar tu perfil de forma única. Escribe a Talento Humano para que corrijan tu código de usuario.", "warning");
+        return;
+    }
+
     var datos = {
         correoPersonal:   $("#inCorreoPersonal").val(),
         telefonoPersonal: $("#inTelefonoPersonal").val(),

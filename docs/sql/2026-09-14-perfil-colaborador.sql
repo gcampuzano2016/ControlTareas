@@ -484,7 +484,19 @@ GO
 
    El estado civil solo se actualiza si la persona tiene ficha enlazada. Para
    los 113 sin ficha no hay donde escribirlo; se ignora en silencio en vez de
-   fallar, porque el resto del guardado si tiene sentido para ellos. */
+   fallar, porque el resto del guardado si tiene sentido para ellos.
+
+   @CodigoRepetido reproduce EXACTAMENTE el mismo calculo y el mismo criterio
+   -solo usuarios activos- que usa Sp_RTA_PerfilColaborador para bloquear sus
+   siete SELECT. La lectura ya se negaba a adivinar de quien es el dato
+   cuando dos personas activas comparten Cod_Usuario; sin este mismo bloqueo
+   aca, el guardado quedaba como la puerta abierta: una de las dos sesiones
+   pisaria en el MERGE la unica fila de Perfil_ContactoPersonal de ese
+   codigo -la de la otra persona- y, como la lectura si esta cerrada,
+   ninguna de las dos se enteraria nunca. Devuelve -2 (no colisiona con los
+   valores que ya existen) para que la capa de datos distinga este caso de
+   un guardado correcto y muestre un mensaje explicito en vez de fingir
+   exito. */
 CREATE PROCEDURE dbo.Sp_RTA_PerfilGuardarContacto
     @Cod_Usuario      VARCHAR(50),
     @CorreoPersonal   VARCHAR(150),
@@ -495,6 +507,18 @@ CREATE PROCEDURE dbo.Sp_RTA_PerfilGuardarContacto
 AS
 BEGIN
     SET NOCOUNT ON;
+
+    DECLARE @CodigoRepetido BIT = 0;
+
+    IF (SELECT COUNT(*) FROM dbo.R_Usuarios
+         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+        SET @CodigoRepetido = 1;
+
+    IF @CodigoRepetido = 1
+    BEGIN
+        SELECT Respuestas = -2;
+        RETURN;
+    END
 
     MERGE dbo.Perfil_ContactoPersonal AS destino
     USING (SELECT @Cod_Usuario AS Cod_Usuario) AS origen

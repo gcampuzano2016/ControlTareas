@@ -261,9 +261,11 @@ las tildes.
 ### Flujo de carga
 
 `CargarPerfil` no recibe parámetros. Llama a `Sp_RTA_PerfilColaborador @Cod_Usuario`,
-que devuelve **siete result sets** en una sola ida: cabecera, estudios, certificaciones,
-experiencia, emergencia, cargas familiares y documentos. El Dao los recorre con
-`NextResult()`. Seis pestañas, una consulta.
+que devuelve **ocho result sets** en una sola ida, en este orden: cabecera, contacto
+personal, contactos de emergencia, estudios, certificaciones, experiencia, documentos
+de respaldo y cargas familiares. El Dao los recorre con `NextResult()`, por posición:
+ver la Decisión 1 de la fase 2 sobre por qué las cargas familiares van al final y no
+donde parecería natural agruparlas. Seis pestañas, una consulta.
 
 La cabecera es `R_Usuarios LEFT JOIN Empleados ON Cod_Usuario` —**LEFT**, que es lo que
 hace entrar a los 119 sin ficha— y la edad sale de
@@ -358,11 +360,21 @@ Decisiones de implementacion tomadas durante la fase 2 que el diseño original n
    hacia atrás los que van detrás, y sus datos habrían aterrizado en la propiedad
    equivocada sin generar ningún error — un cambio silencioso de nombres de campos.
 
-2. **La tabla `Emp_CargaFamiliar` usa `'Activo'`/`'Inactivo'` en vez de `'1'`/`'0'`.**
-   Esta tabla la comparte tanto `RRHHEmpleados.aspx` (pantalla de Talento Humano) como
-   el perfil. Para mantener coherencia con la otra pantalla, que ya usaba el texto, el
-   filtro de lectura es `<> 'Inactivo'` en vez de `= 'Activo'`. Esta formulacion permite
-   que tambien sean visibles las filas que la pantalla de RRHH inserta sin asignar estado.
+2. **La tabla `Emp_CargaFamiliar` usa `'1'`/`'0'`, igual que las otras cinco tablas del
+   módulo.** La implementación inicial de esta fase había usado `'Activo'`/`'Inactivo'`
+   -el vocabulario de `RRHHEmpleados.aspx`, la otra pantalla que comparte esta tabla-
+   razonando que asi las dos pantallas "se entenderían" sobre el estado de una carga.
+   Ese razonamiento no se sostuvo y la revisión final de la fase lo revirtió: el
+   procedimiento de borrado de RRHH (`Sp_RTACambiarEstadoCargaFam`) es un *toggle por
+   nombre sobre toda la tabla* (`WHERE Nombre = @Nombre`, sin filtrar por dueño), y
+   escribir `'Activo'` desde el perfil lo habría despertado -hasta entonces dormido
+   porque ninguna fila tenía `Estado` escrito-, con riesgo de que desactivara la carga
+   de una persona y reactivara la que otra ya había borrado. Con `'1'`/`'0'` ese `CASE`
+   cae siempre en su `ELSE` y no alcanza las filas del perfil. Ademas, compartir
+   vocabulario nunca aportó nada: las filas de `RRHHEmpleados.aspx` tienen
+   `Cod_Usuario` nulo y las del perfil tienen `IdEmpleado` nulo, así que ninguna
+   pantalla puede ver las filas de la otra sea cual sea el filtro de `Estado` que use
+   cada una. Ver `docs/sql/2026-09-14-perfil-colaborador-fase2.sql` para el detalle.
 
 3. **`IdEmpleado` se deja nulo en la tabla `Emp_CargaFamiliar`.**
    Las cargas familiares cuelgan de `Cod_Usuario` en vez de de `IdEmpleado`, para que

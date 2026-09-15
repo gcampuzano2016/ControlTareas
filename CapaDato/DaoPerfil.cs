@@ -162,40 +162,24 @@ namespace CapaDato
         /// repetido entre usuarios activos: el mismo caso que Sp_RTA_PerfilColaborador
         /// bloquea en la lectura. Sin esta traduccion, dos sesiones con el mismo
         /// codigo podrian pisarse el contacto sin que ninguna se entere -la lectura
-        /// ya esta cerrada para ese caso, pero el guardado no lo estaba-.
+        /// ya esta cerrada para ese caso, pero el guardado no lo estaba-. RespuestaDe
+        /// centraliza el mensaje de ese -2; el "No se pudo guardar" de abajo no se
+        /// alcanza hoy -el procedimiento solo devuelve 0 o -2-, pero RespuestaDe lo
+        /// exige para el caso general.
         /// </summary>
         public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
         {
-            EntRespuesta respuesta = new EntRespuesta();
-            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
-            int resultado;
-
-            using (SqlConnection cnx = conexion.conectar())
-            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilGuardarContacto", cnx))
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarContacto", cmd =>
             {
-                cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@Cod_Usuario",      SqlDbType.VarChar,  50).Value = codUsuario;
                 cmd.Parameters.Add("@CorreoPersonal",   SqlDbType.VarChar, 150).Value = contacto.CorreoPersonal;
                 cmd.Parameters.Add("@TelefonoPersonal", SqlDbType.VarChar,  50).Value = contacto.TelefonoPersonal;
                 cmd.Parameters.Add("@Direccion",        SqlDbType.VarChar, 400).Value = contacto.Direccion;
                 cmd.Parameters.Add("@EstadoCivil",      SqlDbType.VarChar, 100).Value = contacto.EstadoCivil;
                 cmd.Parameters.Add("@Ip",               SqlDbType.VarChar,  64).Value = ip ?? "";
-                cnx.Open();
-                resultado = (int)cmd.ExecuteScalar();
-            }
+            });
 
-            if (resultado == -2)
-            {
-                respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
-                respuesta.tipoMensaje = "warning";
-                return respuesta;
-            }
-
-            respuesta.estado = "1";
-            respuesta.mensaje = "Sus datos de contacto se guardaron correctamente.";
-            respuesta.tipoMensaje = "success";
-            return respuesta;
+            return RespuestaDe(r, "Sus datos de contacto se guardaron correctamente.", "No se pudo guardar el contacto.");
         }
 
         /// <summary>
@@ -207,62 +191,29 @@ namespace CapaDato
         /// Sin esta traduccion, dos personas distintas compartiendo el mismo
         /// codigo verian y podrian borrar los contactos de emergencia de la
         /// otra -el dato cuyo proposito es que alguien reciba una llamada
-        /// cuando hay una urgencia-.
+        /// cuando hay una urgencia-. RespuestaDe centraliza ese mensaje.
+        ///
+        /// El unico camino al mensaje de "no encontrado" es un IdContacto que no
+        /// es de esta persona, es decir, un intento de editar un contacto ajeno
+        /// (idContacto != 0 y no encontrado). El procedimiento soporta la
+        /// edicion, pero la pantalla solo ofrece agregar (idContacto = 0) y
+        /// quitar: no hay boton ni flujo que arme un GuardarEmergencia con
+        /// idContacto > 0, asi que esta rama no se alcanza hoy desde la
+        /// interfaz. Se deja lista para cuando se habilite editar.
         /// </summary>
         public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
         {
-            EntRespuesta respuesta = new EntRespuesta();
-            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
-            int resultado = -1;
-
-            using (SqlConnection cnx = conexion.conectar())
-            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilGuardarEmergencia", cnx))
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarEmergencia", cmd =>
             {
-                cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar,  50).Value = codUsuario;
                 cmd.Parameters.Add("@IdContacto",  SqlDbType.Int).Value          = c.IdContacto;
                 cmd.Parameters.Add("@Nombre",      SqlDbType.VarChar, 150).Value = c.Nombre;
                 cmd.Parameters.Add("@Parentesco",  SqlDbType.VarChar,  50).Value = c.Parentesco;
                 cmd.Parameters.Add("@Telefono",    SqlDbType.VarChar,  50).Value = c.Telefono;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar,  64).Value = ip ?? "";
-                cnx.Open();
+            });
 
-                using (SqlDataReader dr = cmd.ExecuteReader())
-                {
-                    if (dr.Read()) { resultado = int.Parse(dr["Respuestas"].ToString()); }
-                }
-            }
-
-            if (resultado == -2)
-            {
-                respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
-                respuesta.tipoMensaje = "warning";
-                return respuesta;
-            }
-
-            if (resultado == 0)
-            {
-                respuesta.estado = "1";
-                respuesta.mensaje = "Contacto de emergencia guardado.";
-                respuesta.tipoMensaje = "success";
-            }
-            else
-            {
-                /* El unico camino a -1 es un IdContacto que no es de esta persona,
-                   es decir, un intento de editar un contacto ajeno (idContacto != 0
-                   y no encontrado). El procedimiento soporta la edicion y esta
-                   traduccion existe para ese caso, pero en la fase 1 la pantalla
-                   solo ofrece agregar (idContacto = 0) y quitar: no hay ningun
-                   boton ni flujo que arme un GuardarEmergencia con idContacto > 0,
-                   asi que esta rama no se alcanza hoy desde la interfaz. Se deja
-                   lista para la fase 2, cuando se habilite editar. */
-                respuesta.estado = "0";
-                respuesta.mensaje = "No se encontró ese contacto de emergencia.";
-                respuesta.tipoMensaje = "warning";
-            }
-
-            return respuesta;
+            return RespuestaDe(r, "Contacto de emergencia guardado.", "No se encontró ese contacto de emergencia.");
         }
 
         /// <summary>
@@ -273,37 +224,14 @@ namespace CapaDato
         /// </summary>
         public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
         {
-            EntRespuesta respuesta = new EntRespuesta();
-            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
-            int resultado = -1;
-
-            using (SqlConnection cnx = conexion.conectar())
-            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilEliminarEmergencia", cnx))
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarEmergencia", cmd =>
             {
-                cmd.CommandType = CommandType.StoredProcedure;
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdContacto",  SqlDbType.Int).Value         = idContacto;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
-                cnx.Open();
+            });
 
-                using (SqlDataReader dr = cmd.ExecuteReader())
-                {
-                    if (dr.Read()) { resultado = int.Parse(dr["Respuestas"].ToString()); }
-                }
-            }
-
-            if (resultado == -2)
-            {
-                respuesta.estado = "0";
-                respuesta.mensaje = "No pudimos identificar su perfil de forma única. Escriba a Talento Humano para que corrijan su código de usuario.";
-                respuesta.tipoMensaje = "warning";
-                return respuesta;
-            }
-
-            respuesta.estado      = resultado == 0 ? "1" : "0";
-            respuesta.mensaje     = resultado == 0 ? "Contacto eliminado." : "No se encontró ese contacto.";
-            respuesta.tipoMensaje = resultado == 0 ? "success" : "warning";
-            return respuesta;
+            return RespuestaDe(r, "Contacto eliminado.", "No se encontró ese contacto.");
         }
 
         /// <summary>

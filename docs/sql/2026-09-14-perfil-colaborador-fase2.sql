@@ -354,12 +354,43 @@ IF OBJECT_ID('dbo.Sp_RTA_PerfilGuardarCargaFamiliar','P') IS NOT NULL
 GO
 
 /* Emp_CargaFamiliar NO es una tabla de este modulo: la comparte
-   RRHHEmpleados.aspx. De ahi tres diferencias con los otros procedimientos:
+   RRHHEmpleados.aspx. De ahi varias diferencias con los otros procedimientos:
 
-   1. Estado usa 'Activo'/'Inactivo', no '1'/'0'. Es el vocabulario que maneja
-      Sp_RTACambiarEstadoCargaFam, el procedimiento de RRHH que alterna el
-      estado. Si aqui escribieramos '1', una carga creada desde el perfil no se
-      podria desactivar desde RRHH y viceversa.
+   1. Estado usa '1'/'0', igual que las demas tablas del modulo, y NO
+      'Activo'/'Inactivo' como se penso en una version anterior de este script.
+
+      RRHHEmpleados.aspx borra con Sp_RTACambiarEstadoCargaFam, que hace esto:
+
+          UPDATE Emp_CargaFamiliar
+             SET Estado = CASE WHEN Estado='Activo' THEN 'Inactivo'
+                                WHEN Estado='Inactivo' THEN 'Activo'
+                                ELSE Estado END
+           WHERE Nombre = @Nombre;
+
+      Es un TOGGLE, POR NOMBRE, sobre TODA la tabla -sin filtrar por
+      IdEmpleado ni por ningun otro dueno-. Hoy no hace nada porque ninguna
+      fila tiene Estado escrito y todas caen en el ELSE. Esta fase es lo que
+      lo despierta: en cuanto una fila del perfil escribiera 'Activo', ese
+      boton empezaria a alcanzarla, desactivando la carga de una persona y
+      -si dos personas comparten nombre- REACTIVANDO la que la otra ya
+      habia borrado. Sin Usu_Modificacion en esta tabla, no queda registro de
+      quien lo hizo.
+
+      Con '1' en Estado, el CASE de arriba cae siempre en el ELSE (ni
+      'Activo' ni 'Inactivo' hacen match) y estas filas quedan intocables
+      para ese boton. No hace falta -ni se debe- tocar una sola linea de
+      Sp_RTACambiarEstadoCargaFam: alcanza con no hablar su mismo vocabulario.
+
+      La version anterior de este comentario decia que el filtro de lectura
+      del octavo result set era "<> 'Inactivo'" y no "= 'Activo'" porque
+      "RRHHEmpleados.aspx inserta sin escribir Estado". Ese razonamiento
+      resulto no sostenerse: las filas que crea RRHHEmpleados.aspx tienen
+      Cod_Usuario NULO -esa pantalla no lo conoce- y por lo tanto NUNCA
+      pueden salir del SELECT del perfil, que siempre filtra por
+      Cod_Usuario = @Cod_Usuario, sea cual sea el filtro de Estado que use.
+      Las dos pantallas son ciegas entre si al leer (una filtra por
+      IdEmpleado, la otra por Cod_Usuario), asi que compartir vocabulario en
+      Estado no aportaba nada y si abria la puerta al toggle de arriba.
 
    2. Ip_Modificacion es varchar(32), mas angosta que el varchar(64) de las
       tablas nuevas. Con una IPv6 este INSERT no truncaria: fallaria con
@@ -403,7 +434,7 @@ BEGIN
             (Cod_Usuario, Nombre, Parentesco, Fecha_nacimiento,
              Estado, Fec_Modificacion, Ip_Modificacion)
         VALUES (@Cod_Usuario, @Nombre, @Parentesco, @Nacimiento,
-                'Activo', GETDATE(), LEFT(@Ip, 32));
+                '1', GETDATE(), LEFT(@Ip, 32));
 
         SELECT Respuestas = 0, IdCargaFam = SCOPE_IDENTITY();
     END
@@ -430,7 +461,10 @@ IF OBJECT_ID('dbo.Sp_RTA_PerfilEliminarCargaFamiliar','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_PerfilEliminarCargaFamiliar;
 GO
 
-/* Escribe 'Inactivo', no '0', para que RRHH lo vea como desactivado. */
+/* Escribe '0', igual que el borrado logico de las demas tablas del modulo.
+   Ver el comentario de Sp_RTA_PerfilGuardarCargaFamiliar: con '0' el toggle
+   de Sp_RTACambiarEstadoCargaFam (que solo entiende 'Activo'/'Inactivo') cae
+   en su ELSE y no alcanza esta fila. */
 CREATE PROCEDURE dbo.Sp_RTA_PerfilEliminarCargaFamiliar
     @Cod_Usuario VARCHAR(50),
     @IdCargaFam  INT,
@@ -452,7 +486,7 @@ BEGIN
     END
 
     UPDATE dbo.Emp_CargaFamiliar
-       SET Estado           = 'Inactivo',
+       SET Estado           = '0',
            Fec_Modificacion = GETDATE(),
            Ip_Modificacion  = LEFT(@Ip, 32)
      WHERE IdCargaFam  = @IdCargaFam
@@ -614,16 +648,20 @@ BEGIN
        amplia por el final. Insertarlo en medio desplazaria los conjuntos 4 a 7
        y sus datos aterrizarian en la propiedad equivocada, sin ningun error.
 
-       El filtro es "distinto de Inactivo" y no "igual a Activo" porque
-       RRHHEmpleados.aspx inserta sin escribir Estado, dejandolo NULL. Con
-       = 'Activo' no veriamos las filas que crea esa pantalla. */
+       El filtro es Estado = '1', igual que en las otras cinco tablas del
+       modulo, y no el vocabulario 'Activo'/'Inactivo' de RRHHEmpleados.aspx.
+       Da lo mismo para efectos de este SELECT: las filas que crea esa
+       pantalla tienen Cod_Usuario NULO -no lo conoce- y jamas pasan el
+       WHERE Cod_Usuario = @Cod_Usuario de aqui, sea cual sea el filtro de
+       Estado. Ver el comentario de Sp_RTA_PerfilGuardarCargaFamiliar para el
+       porque completo de usar '1'/'0' en esta tabla compartida. */
     SELECT IdCargaFam,
            Nombre,
            Parentesco,
            FechaNacTexto = CONVERT(VARCHAR(10), Fecha_nacimiento, 23)
       FROM dbo.Emp_CargaFamiliar
      WHERE Cod_Usuario = @Cod_Usuario
-       AND ISNULL(Estado,'') <> 'Inactivo'
+       AND Estado = '1'
        AND @CodigoRepetido = 0
      ORDER BY Fecha_nacimiento DESC, IdCargaFam;
 END
@@ -651,11 +689,18 @@ IF OBJECT_ID('dbo.Sp_RTA_PerfilEliminarCargaFamiliar','P') IS NULL
     RAISERROR('FALLO: Sp_RTA_PerfilEliminarCargaFamiliar no quedo creado.', 16, 1);
 
 /* El octavo result set tiene que estar: el Dao lo lee por posicion y si
-   faltara leeria nulos sin quejarse. */
+   faltara leeria nulos sin quejarse. Se apunta al texto de la consulta -no a
+   un comentario- porque es la unica verificacion automatizada del contrato
+   posicional, que es el riesgo alrededor del cual se diseno esta fase: un
+   LIKE contra un comentario pasaria aunque alguien borrara el SELECT y
+   dejara el texto explicativo, y fallaria si alguien solo reformula el
+   comentario sin tocar nada. Exigiendo el FROM y una columna propia de la
+   tabla, al menos falla si el SELECT desaparece. */
 IF NOT EXISTS (SELECT 1 FROM sys.sql_modules m
                 JOIN sys.procedures p ON p.object_id = m.object_id
                WHERE p.name = 'Sp_RTA_PerfilColaborador'
-                 AND m.definition LIKE '%8. cargas familiares%')
+                 AND m.definition LIKE '%FROM dbo.Emp_CargaFamiliar%'
+                 AND m.definition LIKE '%IdCargaFam%')
     RAISERROR('FALLO: Sp_RTA_PerfilColaborador no tiene el octavo result set.', 16, 1);
 
 PRINT 'Aserciones de la fase 2 OK.';

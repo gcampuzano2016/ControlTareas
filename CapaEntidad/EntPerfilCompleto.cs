@@ -3,9 +3,10 @@ using System.Collections.Generic;
 namespace CapaEntidad
 {
     /// <summary>
-    /// Lo que devuelve una sola llamada a Sp_RTA_PerfilColaborador. En la fase 1
-    /// se llenan cabecera, contacto y emergencia; las listas de las fases 2 y 3
-    /// se agregan aca cuando existan.
+    /// Lo que devuelve una sola llamada a Sp_RTA_PerfilColaborador. La fase 1
+    /// llena cabecera, contacto y emergencia; la fase 2 agrego Estudios,
+    /// Certificaciones, Experiencia y CargasFamiliares, que ya estan aca abajo.
+    /// Documentos de respaldo es de la fase 3 y todavia no tiene propiedad.
     /// </summary>
     public class EntPerfilCompleto
     {

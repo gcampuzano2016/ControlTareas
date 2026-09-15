@@ -164,8 +164,10 @@ namespace JsonJQueryNetPerfil
         /// Guarda el contacto del usuario de la sesion.
         ///
         /// El payload pasa por NegPerfilCampos.LeerContacto, que solo lee las
-        /// cuatro claves permitidas. Un payload que traiga cargo o cedula no
-        /// falla: esos valores simplemente no tienen donde aterrizar.
+        /// cuatro claves permitidas -eso filtra claves ajenas, como cargo o
+        /// cedula, que simplemente no tienen donde aterrizar-, y despues por
+        /// NegPerfilCampos.ValidarContacto, que filtra VALORES: sin esto, un
+        /// POST directo podia escribir cualquier texto en Empleados.EstadoCivil.
         /// </summary>
         private string GuardarContacto(HttpContext context, dynamic campos)
         {
@@ -179,6 +181,12 @@ namespace JsonJQueryNetPerfil
 
                 var diccionario = campos as System.Collections.Generic.IDictionary<string, object>;
                 EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(diccionario);
+
+                string error = NegPerfilCampos.ValidarContacto(contacto);
+                if (error != "")
+                {
+                    return responseMessage("0", error, "warning");
+                }
 
                 return ToJson(NegPerfil.GuardarContacto(codUsuario, contacto,
                                                         context.Request.UserHostAddress));

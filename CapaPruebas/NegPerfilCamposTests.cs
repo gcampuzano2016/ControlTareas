@@ -650,6 +650,37 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void ValidarExperiencia_DesdeDemasiadoAntiguo_Rechaza()
+        {
+            // Rama alcanzable y sin ejercitar detectada en la revision final de la
+            // fase 2: el mismo piso de 1940 que usa ValidarEstudio.
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = 1939, AnioHasta = 1945
+            };
+
+            Assert.AreEqual("El año en que empezó no parece correcto.",
+                            NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_HastaMasDeUnAnioEnElFuturo_Rechaza()
+        {
+            // Rama alcanzable y sin ejercitar detectada en la revision final de la
+            // fase 2. AnioHasta admite el anio proximo (a diferencia de AnioDesde,
+            // que solo admite el actual) pero no mas alla de eso.
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = System.DateTime.Today.Year, AnioHasta = System.DateTime.Today.Year + 2
+            };
+
+            Assert.AreEqual("El año en que terminó no puede estar en el futuro.",
+                            NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
         public void ValidarExperiencia_Nula_Rechaza()
         {
             Assert.AreEqual("No se recibió la experiencia laboral.",
@@ -736,6 +767,121 @@ namespace CapaPruebas
         {
             Assert.AreEqual("No se recibió la carga familiar.",
                             NegPerfilCampos.ValidarCargaFamiliar(null));
+        }
+
+        /* -------------------------------------------- contacto personal ----- */
+
+        /// <summary>
+        /// GuardarContacto era la unica de las doce escrituras del modulo sin un
+        /// Validar* propio: LeerContacto es lista blanca de CLAVES, no de
+        /// VALORES, asi que un POST directo podia escribir cualquier texto en
+        /// Empleados.EstadoCivil -un campo que mantiene Talento Humano y lee el
+        /// modulo medico-. Estas pruebas cubren ValidarContacto.
+        /// </summary>
+        [TestMethod]
+        public void ValidarContacto_CuatroCamposVacios_SinError()
+        {
+            var contacto = new EntPerfilContacto
+            {
+                CorreoPersonal = "", TelefonoPersonal = "", Direccion = "", EstadoCivil = ""
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto),
+                            "los cuatro campos son opcionales");
+        }
+
+        [TestMethod]
+        public void ValidarContacto_Nulo_Rechaza()
+        {
+            Assert.AreEqual("No se recibió el contacto.", NegPerfilCampos.ValidarContacto(null));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_EstadoCivilDeLaLista_SinError()
+        {
+            var contacto = new EntPerfilContacto { EstadoCivil = "Casado/a" };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_EstadoCivilInventado_Rechaza()
+        {
+            var contacto = new EntPerfilContacto { EstadoCivil = "Enamorado/a" };
+
+            Assert.AreEqual("El estado civil no es válido.", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_TelefonoConSeparadores_SinError()
+        {
+            // Misma regla que el telefono de emergencia: contar digitos, no caracteres.
+            var contacto = new EntPerfilContacto { TelefonoPersonal = "099 123-4567" };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_TelefonoDeCincoDigitos_Rechaza()
+        {
+            var contacto = new EntPerfilContacto { TelefonoPersonal = "12345" };
+
+            Assert.AreEqual("El teléfono debe tener entre 7 y 15 dígitos.",
+                            NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_TelefonoConLetras_Rechaza()
+        {
+            // Mismo caracter invalido que ValidarEmergencia, pero con el mensaje
+            // propio de contacto personal: las dos comparten la logica de conteo,
+            // no el mensaje.
+            var contacto = new EntPerfilContacto { TelefonoPersonal = "no tengo" };
+
+            Assert.AreEqual("El teléfono debe tener entre 7 y 15 dígitos.",
+                            NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_CorreoSinArroba_Rechaza()
+        {
+            var contacto = new EntPerfilContacto { CorreoPersonal = "alguiengmail.com" };
+
+            Assert.AreEqual("El correo personal no es válido.", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_CorreoSinPuntoDespuesDeArroba_Rechaza()
+        {
+            var contacto = new EntPerfilContacto { CorreoPersonal = "alguien@gmailcom" };
+
+            Assert.AreEqual("El correo personal no es válido.", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_CorreoSinNadaAntesDeLaArroba_Rechaza()
+        {
+            var contacto = new EntPerfilContacto { CorreoPersonal = "@gmail.com" };
+
+            Assert.AreEqual("El correo personal no es válido.", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_CorreoValido_SinError()
+        {
+            var contacto = new EntPerfilContacto { CorreoPersonal = "alguien@gmail.com" };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto));
+        }
+
+        [TestMethod]
+        public void ValidarContacto_DireccionCualquiera_SinError()
+        {
+            // Direccion no se valida mas alla de la lista blanca de LeerContacto:
+            // es texto libre.
+            var contacto = new EntPerfilContacto { Direccion = "Av. Amazonas y Naciones Unidas" };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto));
         }
     }
 }

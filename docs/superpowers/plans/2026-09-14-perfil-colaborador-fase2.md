@@ -2601,11 +2601,11 @@ Expected: `0 Error(s)` y **56 de 56**.
 | Agregar experiencia con año de fin anterior al de inicio | Lo rechaza |
 | Agregar experiencia **sin año de fin** | Lo acepta y la tabla muestra *"Actual"* |
 | Agregar una carga familiar con fecha futura | Lo rechaza |
-| Agregar una carga familiar desde el perfil | **Aparece también en `RRHHEmpleados.aspx`**, y al desactivarla desde ahí desaparece del perfil |
+| Agregar una carga familiar desde el perfil | Se guarda y aparece en la lista del perfil. **No aparece en `RRHHEmpleados.aspx`** — es por diseño, no un defecto: `IdEmpleado` se deja nulo a propósito para que los 119 sin ficha también puedan registrar cargas, y esa pantalla lee `WHERE IdEmpleado = @IdEmpleado`, así que nunca va a coincidir, ni siquiera para los 112 que sí tienen ficha |
 | Un usuario **de los 119 sin ficha** | Puede registrar cargas familiares con normalidad |
 | Un usuario **de los 4 con código repetido** | Las pestañas siguen ocultas; si fuerza un guardado desde la consola, recibe el aviso y no se escribe nada |
 
-El penúltimo y el antepenúltimo son los que nadie más va a probar: verifican que las dos pantallas que comparten `Emp_CargaFamiliar` se entienden entre sí.
+El antepenúltimo es el que nadie más va a probar: confirma que una carga familiar cargada desde el perfil, en efecto, no se ve desde Talento Humano. Esto hay que comunicárselo a RRHH antes de presentar el módulo, para que no lo descubran como si fuera una falla: las cargas familiares que la gente registre desde su perfil no van a aparecer en `RRHHEmpleados.aspx` en ninguna fase futura mientras esa pantalla siga filtrando por `IdEmpleado`.
 
 - [ ] **Step 5: Commit**
 

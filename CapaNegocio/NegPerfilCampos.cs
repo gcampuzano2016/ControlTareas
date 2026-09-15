@@ -127,39 +127,135 @@ namespace CapaNegocio
                 return "Escriba el teléfono del contacto de emergencia.";
             }
 
-            /* Se cuentan digitos ASCII, no caracteres: "099 123-4567" es un
-               telefono perfectamente valido. Solo se aceptan separadores que la
-               gente usa de verdad: espacio, guion, parentesis, signo +, punto. */
-            int digitos = 0;
-            foreach (char c in contacto.Telefono)
+            switch (ValidarFormatoTelefono(contacto.Telefono))
             {
-                /* char.IsDigit aceptaria digitos Unicode (arabigo-indicos,
-                   devanagari). Aqui se exige ASCII explicito. */
+                case ResultadoFormatoTelefono.CaracterInvalido:
+                    return "El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.";
+                case ResultadoFormatoTelefono.MuyPocosDigitos:
+                    return "El teléfono debe tener al menos 7 dígitos.";
+                case ResultadoFormatoTelefono.MuyMuchosDigitos:
+                    return "El teléfono no puede tener más de 15 dígitos.";
+                default:
+                    return "";
+            }
+        }
+
+        /// <summary>Lo que puede pasar al contar los digitos de un telefono en texto libre.</summary>
+        private enum ResultadoFormatoTelefono
+        {
+            Valido,
+            CaracterInvalido,
+            MuyPocosDigitos,
+            MuyMuchosDigitos
+        }
+
+        /// <summary>
+        /// Cuenta los digitos ASCII de un telefono en texto libre y clasifica el
+        /// resultado. Comparte esta logica ValidarEmergencia y ValidarContacto
+        /// -antes vivia solo en ValidarEmergencia y quedaba fuera de alcance de
+        /// ValidarContacto- para que las dos reglas de telefono no se
+        /// desincronicen si alguna cambia despues.
+        ///
+        /// Se cuentan digitos ASCII, no caracteres: "099 123-4567" es un
+        /// telefono perfectamente valido. Solo se aceptan separadores que la
+        /// gente usa de verdad: espacio, guion, parentesis, signo +, punto.
+        /// char.IsDigit aceptaria digitos Unicode (arabigo-indicos,
+        /// devanagari); aqui se exige ASCII explicito.
+        /// </summary>
+        private static ResultadoFormatoTelefono ValidarFormatoTelefono(string telefono)
+        {
+            int digitos = 0;
+            foreach (char c in telefono)
+            {
                 if (c >= '0' && c <= '9')
                 {
                     digitos++;
                 }
-                /* Los separadores permitidos. */
                 else if (c == ' ' || c == '-' || c == '(' || c == ')' || c == '+' || c == '.')
                 {
                     /* Nada: son caracteres permitidos. */
                 }
                 else
                 {
-                    /* Cualquier otro caracter rechaza el telefono. */
-                    return "El teléfono solo puede tener números, espacios, guiones, paréntesis, signo más y puntos.";
+                    return ResultadoFormatoTelefono.CaracterInvalido;
                 }
             }
 
-            if (digitos < DigitosMinimosTelefono)
+            if (digitos < DigitosMinimosTelefono) { return ResultadoFormatoTelefono.MuyPocosDigitos; }
+            if (digitos > DigitosMaximosTelefono) { return ResultadoFormatoTelefono.MuyMuchosDigitos; }
+
+            return ResultadoFormatoTelefono.Valido;
+        }
+
+        /* Las cuatro opciones que ofrece el combo de estado civil en la pantalla.
+           No es una tabla de catalogo porque no vale la pena una tabla de cinco
+           filas fijas para esto. */
+        private static readonly string[] EstadosCivilesValidos =
+        {
+            "Soltero/a", "Casado/a", "Unión de hecho", "Divorciado/a", "Viudo/a"
+        };
+
+        /// <summary>
+        /// Cadena vacia si el contacto personal sirve; si no, el mensaje para el
+        /// usuario.
+        ///
+        /// GuardarContacto es la unica de las doce escrituras del modulo que no
+        /// llamaba a un Validar*: un POST directo podia escribir cualquier texto
+        /// en Empleados.EstadoCivil, un campo que mantiene Talento Humano y lee
+        /// el modulo medico. Los otros tres campos son de la lista blanca de
+        /// LeerContacto, pero esa lista solo filtra CLAVES, no valores.
+        /// </summary>
+        public static string ValidarContacto(EntPerfilContacto contacto)
+        {
+            if (contacto == null)
             {
-                return "El teléfono debe tener al menos 7 dígitos.";
+                return "No se recibió el contacto.";
             }
 
-            if (digitos > DigitosMaximosTelefono)
+            /* Los cuatro campos son opcionales: la persona puede guardar solo el
+               que quiera y dejar el resto tal como estaba. */
+            if (!string.IsNullOrWhiteSpace(contacto.EstadoCivil))
             {
-                return "El teléfono no puede tener más de 15 dígitos.";
+                bool valido = false;
+                foreach (string opcion in EstadosCivilesValidos)
+                {
+                    if (opcion == contacto.EstadoCivil) { valido = true; break; }
+                }
+
+                if (!valido)
+                {
+                    return "El estado civil no es válido.";
+                }
             }
+
+            if (!string.IsNullOrWhiteSpace(contacto.TelefonoPersonal)
+                && ValidarFormatoTelefono(contacto.TelefonoPersonal) != ResultadoFormatoTelefono.Valido)
+            {
+                return "El teléfono debe tener entre 7 y 15 dígitos.";
+            }
+
+            if (!string.IsNullOrWhiteSpace(contacto.CorreoPersonal))
+            {
+                string correo = contacto.CorreoPersonal;
+                int arroba = correo.IndexOf('@');
+
+                /* "algo antes" exige arroba > 0; "algo despues" exige que no sea
+                   el ultimo caracter; el punto se busca desde despues de la
+                   arroba, no en el correo completo, porque un punto solo en la
+                   parte local ("nombre.apellido@dominio") no cuenta. */
+                bool tieneAlgoAntes  = arroba > 0;
+                bool tieneAlgoDespues = arroba >= 0 && arroba < correo.Length - 1;
+                bool tienePuntoDespues = arroba >= 0 && correo.IndexOf('.', arroba + 1) > arroba;
+
+                if (!tieneAlgoAntes || !tieneAlgoDespues || !tienePuntoDespues)
+                {
+                    return "El correo personal no es válido.";
+                }
+            }
+
+            /* Direccion no se valida mas alla de lo que ya hace la lista blanca
+               de LeerContacto: es texto libre y no hay forma razonable de
+               distinguir una direccion valida de una que no lo es. */
 
             return "";
         }
@@ -275,6 +371,12 @@ namespace CapaNegocio
                 return "Indique el año en que empezó.";
             }
 
+            /* AnioDesde solo admite hasta el anio actual, mientras que AnioHasta
+               (mas abajo) admite hasta el anio proximo. La asimetria es
+               deliberada y no un descuido: un empleo que ya empezo no puede
+               tener fecha de inicio en el futuro, pero un contrato a plazo fijo
+               si tiene una fecha de fin conocida de antemano, igual que
+               AnioGraduacion en ValidarEstudio. */
             if (exp.AnioDesde.Value > DateTime.Today.Year)
             {
                 return "El año en que empezó no puede estar en el futuro.";

@@ -86,6 +86,10 @@
     <Compile Include="EntPerfilCompleto.cs" />
     <Compile Include="EntPerfilContacto.cs" />
     <Compile Include="EntPerfilEmergencia.cs" />
+    <Compile Include="EntPerfilEstudio.cs" />
+    <Compile Include="EntPerfilCertificacion.cs" />
+    <Compile Include="EntPerfilExperiencia.cs" />
+    <Compile Include="EntPerfilCargaFamiliar.cs" />
     <Compile Include="EntPerfilInicio.cs" />
     <Compile Include="EntPerfiles.cs" />
     <Compile Include="EntPoliza.cs" />

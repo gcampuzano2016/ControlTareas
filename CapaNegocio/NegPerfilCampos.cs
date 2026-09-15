@@ -163,5 +163,186 @@ namespace CapaNegocio
 
             return "";
         }
+
+        /* Rango plausible para un anio academico o laboral. El piso es el mismo
+           1940 que usa el reporte de excepciones del script para marcar fechas de
+           nacimiento absurdas. El techo es el anio proximo, no el actual: alguien
+           que se gradua en diciembre registra su titulo en enero. */
+        private const int AnioMinimoPlausible = 1940;
+
+        /// <summary>Cadena vacia si el estudio sirve; si no, el mensaje para el usuario.</summary>
+        public static string ValidarEstudio(EntPerfilEstudio estudio)
+        {
+            if (estudio == null) { return "No se recibió el estudio."; }
+
+            if (string.IsNullOrWhiteSpace(estudio.Nivel))
+            {
+                return "Seleccione el nivel de estudio.";
+            }
+
+            if (string.IsNullOrWhiteSpace(estudio.Institucion))
+            {
+                return "Escriba la institución donde estudió.";
+            }
+
+            if (string.IsNullOrWhiteSpace(estudio.Titulo))
+            {
+                return "Escriba el título obtenido.";
+            }
+
+            /* El anio es opcional: "no lo recuerdo" es una respuesta legitima y no
+               debe impedir que registre el estudio. Solo se valida si vino. */
+            if (estudio.AnioGraduacion.HasValue)
+            {
+                if (estudio.AnioGraduacion.Value > DateTime.Today.Year + 1)
+                {
+                    return "El año de graduación no puede ser posterior al próximo año.";
+                }
+
+                if (estudio.AnioGraduacion.Value < AnioMinimoPlausible)
+                {
+                    return "El año de graduación no parece correcto.";
+                }
+            }
+
+            return "";
+        }
+
+        /// <summary>Cadena vacia si la certificacion sirve; si no, el mensaje.</summary>
+        public static string ValidarCertificacion(EntPerfilCertificacion cert)
+        {
+            if (cert == null) { return "No se recibió la certificación."; }
+
+            if (string.IsNullOrWhiteSpace(cert.Nombre))
+            {
+                return "Escriba el nombre de la certificación.";
+            }
+
+            if (string.IsNullOrWhiteSpace(cert.Entidad))
+            {
+                return "Escriba la entidad que la emitió.";
+            }
+
+            /* La fecha es opcional. Si vino, tiene que ser "yyyy-MM" -lo que produce
+               un input type="month"- y con formato explicito, por la misma razon que
+               la fecha de nacimiento: sin el, la cultura del servidor decide y en
+               produccion no es la misma que aqui. */
+            if (!string.IsNullOrWhiteSpace(cert.FechaObtencion))
+            {
+                DateTime obtenida;
+                bool valida = DateTime.TryParseExact(cert.FechaObtencion.Trim(),
+                                                     "yyyy-MM",
+                                                     CultureInfo.InvariantCulture,
+                                                     DateTimeStyles.None,
+                                                     out obtenida);
+                if (!valida)
+                {
+                    return "La fecha de obtención no es válida.";
+                }
+
+                /* Se compara contra el primer dia del mes siguiente: una certificacion
+                   obtenida "este mes" es valida aunque el dia 1 ya haya pasado. */
+                DateTime inicioMesSiguiente = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1).AddMonths(1);
+                if (obtenida >= inicioMesSiguiente)
+                {
+                    return "La fecha de obtención no puede estar en el futuro.";
+                }
+            }
+
+            return "";
+        }
+
+        /// <summary>Cadena vacia si la experiencia sirve; si no, el mensaje.</summary>
+        public static string ValidarExperiencia(EntPerfilExperiencia exp)
+        {
+            if (exp == null) { return "No se recibió la experiencia laboral."; }
+
+            if (string.IsNullOrWhiteSpace(exp.Empresa))
+            {
+                return "Escriba el nombre de la empresa.";
+            }
+
+            if (string.IsNullOrWhiteSpace(exp.Cargo))
+            {
+                return "Escriba el cargo que ocupó.";
+            }
+
+            /* Aqui el anio de inicio SI es obligatorio, al reves que en los estudios:
+               el CV ordena la experiencia por fecha, y una fila sin anio no tiene
+               donde colocarse. */
+            if (!exp.AnioDesde.HasValue)
+            {
+                return "Indique el año en que empezó.";
+            }
+
+            if (exp.AnioDesde.Value > DateTime.Today.Year)
+            {
+                return "El año en que empezó no puede estar en el futuro.";
+            }
+
+            if (exp.AnioDesde.Value < AnioMinimoPlausible)
+            {
+                return "El año en que empezó no parece correcto.";
+            }
+
+            /* AnioHasta nulo significa "sigo ahi", no "no se sabe". Por eso no se
+               exige, pero si vino tiene que ser coherente. */
+            if (exp.AnioHasta.HasValue)
+            {
+                if (exp.AnioHasta.Value < exp.AnioDesde.Value)
+                {
+                    return "El año en que terminó no puede ser anterior al año en que empezó.";
+                }
+
+                if (exp.AnioHasta.Value > DateTime.Today.Year + 1)
+                {
+                    return "El año en que terminó no puede estar en el futuro.";
+                }
+            }
+
+            return "";
+        }
+
+        /// <summary>Cadena vacia si la carga familiar sirve; si no, el mensaje.</summary>
+        public static string ValidarCargaFamiliar(EntPerfilCargaFamiliar carga)
+        {
+            if (carga == null) { return "No se recibió la carga familiar."; }
+
+            if (string.IsNullOrWhiteSpace(carga.Nombre))
+            {
+                return "Escriba el nombre completo de la carga familiar.";
+            }
+
+            if (string.IsNullOrWhiteSpace(carga.Parentesco))
+            {
+                return "Seleccione el parentesco.";
+            }
+
+            /* Aqui la fecha SI es obligatoria, al reves que en las certificaciones:
+               Talento Humano usa la edad para saber si la carga sigue siendolo, y
+               sin fecha ese calculo no existe. */
+            if (string.IsNullOrWhiteSpace(carga.FechaNacimiento))
+            {
+                return "Indique la fecha de nacimiento.";
+            }
+
+            DateTime nacimiento;
+            bool fechaValida = DateTime.TryParseExact(carga.FechaNacimiento.Trim(),
+                                                      "yyyy-MM-dd",
+                                                      CultureInfo.InvariantCulture,
+                                                      DateTimeStyles.None,
+                                                      out nacimiento);
+            if (!fechaValida)
+            {
+                return "La fecha de nacimiento no es válida.";
+            }
+
+            if (nacimiento.Date > DateTime.Today)
+            {
+                return "La fecha de nacimiento no puede estar en el futuro.";
+            }
+
+            return "";
+        }
     }
 }

@@ -355,5 +355,387 @@ namespace CapaPruebas
             Assert.AreEqual("El teléfono debe tener al menos 7 dígitos.",
                             NegPerfilCampos.ValidarEmergencia(contacto));
         }
+
+        /* ------------------------------------------------------ estudios ---- */
+
+        [TestMethod]
+        public void ValidarEstudio_CompletoYCorrecto_SinError()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas", AnioGraduacion = 2019
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_SinTitulo_Rechaza()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "   ", AnioGraduacion = 2019
+            };
+
+            Assert.AreEqual("Escriba el título obtenido.", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_SinInstitucion_Rechaza()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "", Titulo = "Ingenieria en Sistemas",
+                AnioGraduacion = 2019
+            };
+
+            Assert.AreEqual("Escriba la institución donde estudió.", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_SinNivel_Rechaza()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas", AnioGraduacion = 2019
+            };
+
+            Assert.AreEqual("Seleccione el nivel de estudio.", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_AnioEnElFuturo_Rechaza()
+        {
+            // Se permite el anio que viene -alguien que se gradua en diciembre lo
+            // registra en enero- pero no mas alla.
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas",
+                AnioGraduacion = System.DateTime.Today.Year + 2
+            };
+
+            Assert.AreEqual("El año de graduación no puede ser posterior al próximo año.",
+                            NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_AnioProximo_LoAcepta()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas",
+                AnioGraduacion = System.DateTime.Today.Year + 1
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_AnioDemasiadoAntiguo_Rechaza()
+        {
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas", AnioGraduacion = 1939
+            };
+
+            Assert.AreEqual("El año de graduación no parece correcto.",
+                            NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_SinAnio_LoAcepta()
+        {
+            // Nulo es "no lo recuerdo", que es legitimo y no debe bloquear el registro.
+            var e = new EntPerfilEstudio
+            {
+                Nivel = "Tercer nivel", Institucion = "Universidad Central del Ecuador",
+                Titulo = "Ingenieria en Sistemas", AnioGraduacion = null
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarEstudio(e));
+        }
+
+        [TestMethod]
+        public void ValidarEstudio_Nulo_Rechaza()
+        {
+            Assert.AreEqual("No se recibió el estudio.", NegPerfilCampos.ValidarEstudio(null));
+        }
+
+        /* ------------------------------------------------ certificaciones --- */
+
+        [TestMethod]
+        public void ValidarCertificacion_CompletaYCorrecta_SinError()
+        {
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "ITIL Foundation v4", Entidad = "AXELOS", FechaObtencion = "2023-05"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_SinNombre_Rechaza()
+        {
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "", Entidad = "AXELOS", FechaObtencion = "2023-05"
+            };
+
+            Assert.AreEqual("Escriba el nombre de la certificación.",
+                            NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_SinEntidad_Rechaza()
+        {
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "ITIL Foundation v4", Entidad = "  ", FechaObtencion = "2023-05"
+            };
+
+            Assert.AreEqual("Escriba la entidad que la emitió.",
+                            NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_FechaConFormatoRaro_Rechaza()
+        {
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "ITIL Foundation v4", Entidad = "AXELOS", FechaObtencion = "mayo 2023"
+            };
+
+            Assert.AreEqual("La fecha de obtención no es válida.",
+                            NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_FechaFutura_Rechaza()
+        {
+            string futura = System.DateTime.Today.AddYears(1).ToString("yyyy-MM");
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "ITIL Foundation v4", Entidad = "AXELOS", FechaObtencion = futura
+            };
+
+            Assert.AreEqual("La fecha de obtención no puede estar en el futuro.",
+                            NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_SinFecha_LaAcepta()
+        {
+            var c = new EntPerfilCertificacion
+            {
+                Nombre = "ITIL Foundation v4", Entidad = "AXELOS", FechaObtencion = ""
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarCertificacion(c));
+        }
+
+        [TestMethod]
+        public void ValidarCertificacion_Nula_Rechaza()
+        {
+            Assert.AreEqual("No se recibió la certificación.",
+                            NegPerfilCampos.ValidarCertificacion(null));
+        }
+
+        /* ----------------------------------------------------- experiencia -- */
+
+        [TestMethod]
+        public void ValidarExperiencia_CompletaYCorrecta_SinError()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = 2017, AnioHasta = 2019, Funciones = "Mesa de ayuda."
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_SinEmpresa_Rechaza()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "", Cargo = "Tecnico de Soporte N1", AnioDesde = 2017, AnioHasta = 2019
+            };
+
+            Assert.AreEqual("Escriba el nombre de la empresa.",
+                            NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_SinCargo_Rechaza()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "   ", AnioDesde = 2017, AnioHasta = 2019
+            };
+
+            Assert.AreEqual("Escriba el cargo que ocupó.", NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_SinAnioDesde_Rechaza()
+        {
+            // A diferencia del anio de graduacion, este si es obligatorio: sin el,
+            // el CV no puede ordenar la experiencia, que es para lo que existe.
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = null, AnioHasta = 2019
+            };
+
+            Assert.AreEqual("Indique el año en que empezó.", NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_HastaAnteriorADesde_Rechaza()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = 2019, AnioHasta = 2017
+            };
+
+            Assert.AreEqual("El año en que terminó no puede ser anterior al año en que empezó.",
+                            NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_MismoAnioDesdeYHasta_LoAcepta()
+        {
+            // Un contrato de pocos meses empieza y termina el mismo anio.
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = 2019, AnioHasta = 2019
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_HastaNulo_SignificaActualidad()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = 2017, AnioHasta = null
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_DesdeEnElFuturo_Rechaza()
+        {
+            var x = new EntPerfilExperiencia
+            {
+                Empresa = "SoporteTec Cia. Ltda.", Cargo = "Tecnico de Soporte N1",
+                AnioDesde = System.DateTime.Today.Year + 1
+            };
+
+            Assert.AreEqual("El año en que empezó no puede estar en el futuro.",
+                            NegPerfilCampos.ValidarExperiencia(x));
+        }
+
+        [TestMethod]
+        public void ValidarExperiencia_Nula_Rechaza()
+        {
+            Assert.AreEqual("No se recibió la experiencia laboral.",
+                            NegPerfilCampos.ValidarExperiencia(null));
+        }
+
+        /* ------------------------------------------------ carga familiar ---- */
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_CompletaYCorrecta_SinError()
+        {
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "Mateo Comina Ortiz", Parentesco = "Hijo/a", FechaNacimiento = "2019-06-02"
+            };
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_SinNombre_Rechaza()
+        {
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "", Parentesco = "Hijo/a", FechaNacimiento = "2019-06-02"
+            };
+
+            Assert.AreEqual("Escriba el nombre completo de la carga familiar.",
+                            NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_SinParentesco_Rechaza()
+        {
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "Mateo Comina Ortiz", Parentesco = "", FechaNacimiento = "2019-06-02"
+            };
+
+            Assert.AreEqual("Seleccione el parentesco.", NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_FechaFutura_Rechaza()
+        {
+            string futura = System.DateTime.Today.AddDays(1).ToString("yyyy-MM-dd");
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "Mateo Comina Ortiz", Parentesco = "Hijo/a", FechaNacimiento = futura
+            };
+
+            Assert.AreEqual("La fecha de nacimiento no puede estar en el futuro.",
+                            NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_FechaConFormatoRaro_Rechaza()
+        {
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "Mateo Comina Ortiz", Parentesco = "Hijo/a", FechaNacimiento = "02/06/2019"
+            };
+
+            Assert.AreEqual("La fecha de nacimiento no es válida.",
+                            NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_SinFecha_Rechaza()
+        {
+            // Aqui la fecha SI es obligatoria: sin ella no se sabe si la carga
+            // sigue siendo carga, que es para lo que Talento Humano la usa.
+            var c = new EntPerfilCargaFamiliar
+            {
+                Nombre = "Mateo Comina Ortiz", Parentesco = "Hijo/a", FechaNacimiento = ""
+            };
+
+            Assert.AreEqual("Indique la fecha de nacimiento.",
+                            NegPerfilCampos.ValidarCargaFamiliar(c));
+        }
+
+        [TestMethod]
+        public void ValidarCargaFamiliar_Nula_Rechaza()
+        {
+            Assert.AreEqual("No se recibió la carga familiar.",
+                            NegPerfilCampos.ValidarCargaFamiliar(null));
+        }
     }
 }

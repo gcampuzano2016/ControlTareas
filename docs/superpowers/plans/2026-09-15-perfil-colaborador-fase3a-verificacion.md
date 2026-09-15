@@ -14,7 +14,7 @@ Directory. Esta lista la corre el usuario después de desplegar.
 - [ ] Los binarios de la **fase 2** y los de esta están desplegados. La fase 2
       quedó con el SQL aplicado y los binarios sin publicar.
 - [ ] La carpeta `descargas/perfil/` existe en el servidor **con su `web.config`
-      dentro**. Si se publicó sin sincronizar y el archivo no viajó, cópialo a
+      dentro**. Si se publicó sin sincronizar y el archivo no viajó, cópielo a
       mano: sin él, los documentos quedan servidos por IIS a quien acierte el
       nombre.
 

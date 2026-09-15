@@ -420,6 +420,9 @@ uno **chico, limitado a las tres cosas que fallan en silencio**:
 1. La conversión de fecha con estilo 103 y el cálculo de edad.
 2. La lista blanca de campos editables — que un payload con `Cargo` no lo guarde.
 3. La guarda de jefatura — que un `codUsuario` que no es subordinado devuelva vacío.
+   **Pendiente: le corresponde a la fase 3b**, que es la que construye la vista de
+   jefatura. Hoy no hay nada que probar porque `ListaEquipo` y `PerfilEquipo` no
+   existen todavía.
 
 Un error en cualquiera de las tres no da la cara: la edad sale mal, el campo se guarda,
 el dato se muestra. Nadie va a volver a mirarlas.
@@ -434,6 +437,7 @@ Lista de comprobación manual por fase, con los casos que dictaron los datos:
 - Uno **de los 6 con cédula repetida**: no ve datos de la otra persona.
 - El jefe **con 49 reportes**: el buscador aguanta y lista.
 - Un intento de leer el perfil de alguien que no es subordinado: vuelve vacío.
+  **De la fase 3b**, cuando exista la vista de jefatura.
 - Alguien con fecha de nacimiento `dd/mm/yyyy` con día > 12: la edad sale correcta.
 
 ## Despliegue

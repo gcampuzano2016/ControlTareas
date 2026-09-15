@@ -129,11 +129,28 @@ namespace CapaDato
                         }
                     }
 
-                    /* 7. documentos de respaldo: son de la fase 3. Se salta el
-                       conjunto sin leerlo, pero HAY que saltarlo: el Dao avanza
-                       por posicion y sin este NextResult las cargas familiares
-                       se leerian de la lista de documentos. */
-                    dr.NextResult();
+                    /* 7. documentos de respaldo */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Documentos.Add(new EntPerfilDocumento
+                            {
+                                IdDocumento   = EnteroDe(dr, "IdDocumento"),
+                                Origen        = Texto(dr, "Origen"),
+                                IdOrigen      = EnteroDe(dr, "IdOrigen"),
+                                NombreArchivo = Texto(dr, "NombreArchivo")
+
+                                /* NombreArchivoCodigo y Ruta se dejan vacias a
+                                   proposito aunque el conjunto las traiga: esta
+                                   lista se serializa entera al navegador y el
+                                   nombre del archivo en disco no tiene nada que
+                                   hacer alli. La descarga los pide aparte, con
+                                   ObtenerDocumento, que ademas comprueba de
+                                   quien es el documento. */
+                            });
+                        }
+                    }
 
                     /* 8. cargas familiares */
                     if (dr.NextResult())
@@ -147,6 +164,24 @@ namespace CapaDato
                                 Parentesco      = Texto(dr, "Parentesco"),
                                 FechaNacimiento = Texto(dr, "FechaNacTexto")
                             });
+                        }
+                    }
+
+                    /* 9. foto de perfil. Cero filas es el caso normal: nadie
+                       tiene foto el primer dia. */
+                    if (dr.NextResult() && dr.Read())
+                    {
+                        string base64 = Texto(dr, "FotoBase64");
+
+                        if (base64 != "")
+                        {
+                            string tipo = Texto(dr, "FotoTipo");
+                            if (tipo == "") { tipo = "image/jpeg"; }
+
+                            /* Se llena solo DataUri y no Base64 ni Tipo: ver el
+                               comentario de EntPerfilFoto. El molde del data URI
+                               es el de DaoFirmaUsuario. */
+                            perfil.Foto.DataUri = "data:" + tipo + ";base64," + base64;
                         }
                     }
                 }

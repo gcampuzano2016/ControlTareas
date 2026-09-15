@@ -5,8 +5,9 @@ namespace CapaEntidad
     /// <summary>
     /// Lo que devuelve una sola llamada a Sp_RTA_PerfilColaborador. La fase 1
     /// llena cabecera, contacto y emergencia; la fase 2 agrego Estudios,
-    /// Certificaciones, Experiencia y CargasFamiliares, que ya estan aca abajo.
-    /// Documentos de respaldo es de la fase 3 y todavia no tiene propiedad.
+    /// Certificaciones, Experiencia y CargasFamiliares; la fase 3a agrego
+    /// Documentos (el septimo conjunto, que hasta ahora se saltaba) y Foto
+    /// (el noveno, nuevo).
     /// </summary>
     public class EntPerfilCompleto
     {
@@ -22,6 +23,16 @@ namespace CapaEntidad
         /// sin ficha tambien las registran.
         /// </summary>
         public List<EntPerfilCargaFamiliar> CargasFamiliares { get; set; }
+
+        /// <summary>
+        /// Los respaldos de todas las certificaciones y cargas familiares en una
+        /// sola lista. La pantalla la reparte por Origen e IdOrigen; asi una sola
+        /// consulta sirve a las dos pestanias.
+        /// </summary>
+        public List<EntPerfilDocumento> Documentos { get; set; }
+
+        /// <summary>La foto. DataUri vacia cuando la persona no subio ninguna.</summary>
+        public EntPerfilFoto Foto { get; set; }
 
         /// <summary>
         /// false por defecto: el usuario no se pudo identificar de forma unica
@@ -42,6 +53,8 @@ namespace CapaEntidad
             Certificaciones = new List<EntPerfilCertificacion>();
             Experiencia = new List<EntPerfilExperiencia>();
             CargasFamiliares = new List<EntPerfilCargaFamiliar>();
+            Documentos = new List<EntPerfilDocumento>();
+            Foto = new EntPerfilFoto();
         }
     }
 }

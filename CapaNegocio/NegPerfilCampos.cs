@@ -446,5 +446,81 @@ namespace CapaNegocio
 
             return "";
         }
+
+        /// <summary>
+        /// Los unicos tipos de imagen que se aceptan. Lista blanca y no negra:
+        /// un SVG puede traer JavaScript adentro, y con una lista negra la
+        /// pregunta pasa a ser "de que nos acordamos de prohibir".
+        /// </summary>
+        private static readonly string[] TiposDeFotoValidos = { "image/jpeg", "image/png" };
+
+        /// <summary>
+        /// Longitud maxima del base64 de la foto. 500 000 caracteres son unos
+        /// 366 KB de imagen: el navegador manda alrededor de 25 KB -reduce a
+        /// 256x256 antes de subir- asi que esto es un techo, no un limite de uso.
+        /// Se mide sobre el texto y antes de decodificar para no gastar memoria
+        /// decodificando lo que se va a rechazar.
+        /// </summary>
+        private const int LargoMaximoFoto = 500000;
+
+        /// <summary>
+        /// Valida la foto que llega del navegador. Cadena vacia si esta bien.
+        ///
+        /// Va en el servidor y no solo en el navegador porque AdministrarPerfil.ashx
+        /// es alcanzable por HTTP directo: lo que el canvas del navegador garantiza
+        /// -que sea un JPEG de 256x256- no lo garantiza nadie para un POST hecho a
+        /// mano.
+        /// </summary>
+        public static string ValidarFoto(EntPerfilFoto foto)
+        {
+            if (foto == null) { return "No se recibió la foto."; }
+
+            string tipo = (foto.Tipo ?? "").Trim().ToLowerInvariant();
+            bool tipoValido = false;
+
+            for (int i = 0; i < TiposDeFotoValidos.Length; i++)
+            {
+                if (TiposDeFotoValidos[i] == tipo) { tipoValido = true; }
+            }
+
+            if (!tipoValido)
+            {
+                return "La foto debe ser una imagen JPG o PNG.";
+            }
+
+            string base64 = (foto.Base64 ?? "").Trim();
+
+            if (base64 == "")
+            {
+                return "No se recibió el contenido de la foto.";
+            }
+
+            /* El navegador manda solo el payload. Si llega el data URI completo,
+               guardarlo dejaria el prefijo dentro del base64 y la imagen no se
+               veria nunca sin que nada avise. */
+            if (base64.StartsWith("data:"))
+            {
+                return "El formato de la foto no es el esperado.";
+            }
+
+            if (base64.Length > LargoMaximoFoto)
+            {
+                return "La foto es demasiado grande. Use una imagen más liviana.";
+            }
+
+            /* Que decodifique es la prueba de que es base64 de verdad. Sin esto,
+               cualquier texto quedaria guardado como si fuera una imagen y el
+               fallo aparecería recien en el navegador de la persona. */
+            try
+            {
+                Convert.FromBase64String(base64);
+            }
+            catch (FormatException)
+            {
+                return "El formato de la foto no es el esperado.";
+            }
+
+            return "";
+        }
     }
 }

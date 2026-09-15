@@ -883,5 +883,98 @@ namespace CapaPruebas
 
             Assert.AreEqual("", NegPerfilCampos.ValidarContacto(contacto));
         }
+
+        /* ---------------------------------------------------------- foto ---- */
+
+        /* Un PNG de 1x1 real, en base64. Sirve de "foto valida" en las pruebas
+           sin depender de ningun archivo. */
+        private const string PngDeUnPixel =
+            "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
+
+        [TestMethod]
+        public void ValidarFoto_JpegValido_NoDaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = PngDeUnPixel, Tipo = "image/jpeg" };
+            Assert.AreEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        [TestMethod]
+        public void ValidarFoto_PngValido_NoDaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = PngDeUnPixel, Tipo = "image/png" };
+            Assert.AreEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        [TestMethod]
+        public void ValidarFoto_Nula_DaError()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(null));
+        }
+
+        [TestMethod]
+        public void ValidarFoto_SinContenido_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = "", Tipo = "image/jpeg" };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        /// <summary>
+        /// Un SVG puede traer JavaScript adentro. Si algun dia se sirviera como
+        /// archivo en vez de como data URI, seria XSS almacenado. La lista es
+        /// blanca: solo JPEG y PNG.
+        /// </summary>
+        [TestMethod]
+        public void ValidarFoto_TipoSvg_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = PngDeUnPixel, Tipo = "image/svg+xml" };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        [TestMethod]
+        public void ValidarFoto_TipoVacio_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = PngDeUnPixel, Tipo = "" };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        /// <summary>
+        /// El navegador manda solo el payload. Si llega el data URI entero, el
+        /// base64 guardado quedaria con el prefijo dentro y la imagen no se
+        /// veria nunca, sin ningun error que lo delate.
+        /// </summary>
+        [TestMethod]
+        public void ValidarFoto_ConPrefijoDataUri_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto
+            {
+                Base64 = "data:image/jpeg;base64," + PngDeUnPixel,
+                Tipo   = "image/jpeg"
+            };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        [TestMethod]
+        public void ValidarFoto_Base64Invalido_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto { Base64 = "esto no es base64 %%%", Tipo = "image/png" };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
+
+        /// <summary>
+        /// El navegador reduce la foto a 256x256 antes de mandarla, pero el
+        /// handler es alcanzable por HTTP directo y la columna es VARCHAR(MAX):
+        /// sin tope, un POST podria dejar megabytes en la fila que se lee en
+        /// cada carga del perfil.
+        /// </summary>
+        [TestMethod]
+        public void ValidarFoto_DemasiadoGrande_DaError()
+        {
+            EntPerfilFoto foto = new EntPerfilFoto
+            {
+                Base64 = new string('A', 500001),
+                Tipo   = "image/jpeg"
+            };
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFoto(foto));
+        }
     }
 }

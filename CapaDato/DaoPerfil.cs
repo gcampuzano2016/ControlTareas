@@ -433,6 +433,40 @@ namespace CapaDato
             return RespuestaDe(r, "Carga familiar eliminada.", "No se encontró esa carga familiar.");
         }
 
+        /// <summary>
+        /// Guarda o reemplaza la foto. Una fila por persona: no hay historial.
+        /// </summary>
+        public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarFoto", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                /* -1 es el largo que SqlDbType.VarChar usa para VARCHAR(MAX). Sin
+                   el, el parametro se trunca a 8000 caracteres y la foto llega
+                   cortada: se guarda sin error y no se ve. */
+                cmd.Parameters.Add("@FotoBase64",  SqlDbType.VarChar, -1).Value = foto.Base64;
+                cmd.Parameters.Add("@FotoTipo",    SqlDbType.VarChar, 50).Value = foto.Tipo;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Su foto se actualizó.", "No se pudo guardar la foto.");
+        }
+
+        /// <summary>
+        /// Quita la foto. Borrado fisico -Perfil_Foto no tiene columna Estado-,
+        /// a diferencia del resto del modulo.
+        /// </summary>
+        public static EntRespuesta EliminarFoto(string codUsuario, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilEliminarFoto", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+            });
+
+            return RespuestaDe(r, "Su foto se quitó.", "No tenía ninguna foto guardada.");
+        }
+
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();

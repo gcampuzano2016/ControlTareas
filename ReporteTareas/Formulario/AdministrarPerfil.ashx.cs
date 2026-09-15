@@ -114,6 +114,18 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(EliminarCargaFamiliar(context, parametros[0]["parameters"]));
                 }
 
+                if (Action == "GuardarFoto")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarFoto(context, parametros[0]["parameters"]));
+                }
+
+                if (Action == "EliminarFoto")
+                {
+                    existAction = true;
+                    responseAction.Append(EliminarFoto(context));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -462,6 +474,62 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al eliminar la carga familiar. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Guarda la foto del usuario de la sesion.
+        ///
+        /// El navegador reduce la imagen a 256x256 y la manda en base64 por el
+        /// mismo canal JSON que todo lo demas, en vez de por multipart: son unos
+        /// 25 KB y no hay archivo que guardar en disco -la foto vive en la base,
+        /// como la firma-, asi que un multipart solo agregaria un camino mas.
+        /// </summary>
+        private string GuardarFoto(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                EntPerfilFoto foto = new EntPerfilFoto
+                {
+                    Base64 = Texto(campos, "base64", ""),
+                    Tipo   = Texto(campos, "tipo", "")
+                };
+
+                string error = NegPerfilCampos.ValidarFoto(foto);
+                if (error != "") { return responseMessage("0", error, "warning"); }
+
+                return ToJson(NegPerfil.GuardarFoto(codUsuario, foto, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar la foto. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Quita la foto. No recibe parametros: solo se puede quitar la propia.
+        /// </summary>
+        private string EliminarFoto(HttpContext context)
+        {
+            try
+            {
+                string codUsuario = CodUsuarioSesion(context);
+                if (codUsuario == "")
+                {
+                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                }
+
+                return ToJson(NegPerfil.EliminarFoto(codUsuario, context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al quitar la foto. " + ex.Message, "danger");
             }
         }
 

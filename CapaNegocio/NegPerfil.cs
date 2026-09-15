@@ -85,5 +85,17 @@ namespace CapaNegocio
         {
             return DaoPerfil.EliminarCargaFamiliar(codUsuario, idCargaFam, ip);
         }
+
+        /// <summary>Guarda o reemplaza la foto del usuario de la sesion.</summary>
+        public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
+        {
+            return DaoPerfil.GuardarFoto(codUsuario, foto, ip);
+        }
+
+        /// <summary>Quita la foto del usuario de la sesion.</summary>
+        public static EntRespuesta EliminarFoto(string codUsuario, string ip)
+        {
+            return DaoPerfil.EliminarFoto(codUsuario, ip);
+        }
     }
 }

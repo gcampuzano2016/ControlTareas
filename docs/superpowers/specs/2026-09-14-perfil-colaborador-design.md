@@ -250,8 +250,19 @@ Tres guardas:
 `EliminarEmergencia` · `GuardarCargaFamiliar` / `EliminarCargaFamiliar` · `ListaEquipo`
 · `PerfilEquipo` · `DescargarCV`
 
-Los documentos van por `multipart` reusando `CargaArchivos.ashx`, que es donde ya vive
-la subida real.
+Los documentos van por `multipart` en una rama de `AdministrarPerfil.ashx`, no
+en `CargaArchivos.ashx`. Este diseño decía lo contrario y la fase 3a lo corrigió:
+`CargaArchivos` se declara sin `IRequiresSessionState`, así que ahí
+`context.Session` es `null` y la identidad se la manda el cliente en un campo
+cifrado del formulario. Todo este módulo descansa en lo contrario. Se reusa el
+patrón —`Request.Files`, `SaveAs`, `MapPath`— y no el handler.
+
+Los archivos se guardan en `~/descargas/perfil/` con un nombre que genera el
+servidor, esa carpeta lleva un `web.config` con `<handlers><clear /></handlers>`
+para que IIS no los sirva directamente, y la descarga pasa por
+`DescargarPerfil.ashx`, que le pregunta a la base de quién es el documento antes
+de leer el disco. El patrón de la casa —`<a href="../descargas/...">`— sirve para
+el adjunto de una tarea, no para la partida de nacimiento de un hijo.
 
 Respuestas con `EntRespuesta` (`estado`/`mensaje`/`tipoMensaje`) y `MostrarMensaje`,
 como el resto. Se usa el `ToJson` local con `JavaScriptSerializer` que ya trae
@@ -261,9 +272,9 @@ las tildes.
 ### Flujo de carga
 
 `CargarPerfil` no recibe parámetros. Llama a `Sp_RTA_PerfilColaborador @Cod_Usuario`,
-que devuelve **ocho result sets** en una sola ida, en este orden: cabecera, contacto
+que devuelve **nueve result sets** en una sola ida, en este orden: cabecera, contacto
 personal, contactos de emergencia, estudios, certificaciones, experiencia, documentos
-de respaldo y cargas familiares. El Dao los recorre con `NextResult()`, por posición:
+de respaldo, cargas familiares y foto. El Dao los recorre con `NextResult()`, por posición:
 ver la Decisión 1 de la fase 2 sobre por qué las cargas familiares van al final y no
 donde parecería natural agruparlas. Seis pestañas, una consulta.
 
@@ -304,10 +315,18 @@ inmediato. Un jefe de jefe no ve a los nietos.
 
 ### El CV
 
-`DescargarCV` arma el HTML en el servidor con los mismos datos que ya cargó el perfil,
-genera el PDF con **PdfSharp/HtmlRenderer** en `~/descargas/` con nombre
-`CV_<Cod_Usuario>_<timestamp>.pdf` y devuelve la ruta. El marcado va con tablas y
-estilos en línea, como `HtmlSolicitud`, por las limitaciones de CSS del renderizador.
+`DescargarPerfil.ashx?cv=1` arma el HTML en el servidor con los mismos datos que
+ya carga el perfil, genera el PDF con **PdfSharp/HtmlRenderer** en memoria y lo
+escribe directo en la respuesta, con el nombre de descarga
+`CV_<Cod_Usuario>_<timestamp>.pdf`. Este diseño decía que se escribiera en
+`~/descargas/`; la fase 3a decidió no hacerlo: un CV lleva la cédula, la fecha de
+nacimiento y el domicilio de una persona, y un archivo en una carpeta servida por
+IIS es un archivo que alguien más puede pedir. El marcado va con tablas y estilos
+en línea, como `HtmlSolicitud`, por las limitaciones de CSS del renderizador.
+
+El armado del HTML vive en `CapaNegocio.NegPerfilCv` y el renderizado en
+`ReporteTareas.clases.PdfHojaVida`: el corte no es decorativo, es lo que permite
+probar el escapado del HTML sin base de datos ni servidor.
 
 **Solo del perfil propio.** Una jefatura consulta el perfil de su equipo; no se descarga
 sus hojas de vida.
@@ -382,9 +401,16 @@ Decisiones de implementacion tomadas durante la fase 2 que el diseño original n
    normalidad. Si hubiera dependencia de `IdEmpleado`, solo los 112 con ficha podrian
    cargarlas.
 
-**Fase 3 — lo visual y lo compartido.** Foto, documentos de respaldo reales sobre
-`CargaArchivos.ashx`, CV en PDF y vista de jefatura — al final porque sin la fase 2 no
-tendría casi nada que mostrar.
+**Fase 3a — lo visual y lo propio.** [COMPLETA] Foto de perfil, documentos de
+respaldo y CV en PDF. La foto entra como noveno result set, por el final, por la
+misma razón que las cargas familiares entraron como octavo: el contrato es
+posicional y se amplía por el final.
+
+**Fase 3b — lo compartido.** La vista de jefatura. Se separó de la 3a a
+propósito: es la única parte del módulo donde una persona ve datos de otra, y
+merece su propio ciclo de revisión en vez de compartirlo con un generador de PDF.
+La verificación pendiente de este diseño —«que un `codUsuario` que no es
+subordinado devuelva vacío»— le corresponde a esa fase.
 
 ## Verificación
 

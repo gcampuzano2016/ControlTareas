@@ -598,6 +598,18 @@ $(document).on("change", "#inDocumento", function () {
 
     if (!archivo) { return; }
 
+    /* Mismo limite y mismo mensaje que NegPerfilCampos.ValidarDocumento. El
+       servidor sigue siendo quien valida de verdad -esto es comodidad, no
+       seguridad-, pero sin este chequeo un archivo de 40 MB no llega ni a
+       esa validacion: IIS lo corta antes (alrededor de 28 MB) y el usuario
+       ve el mensaje generico de error de red, mientras que uno de 10 MB si
+       llega al servidor y recibe el mensaje correcto. La misma accion no
+       deberia contar dos historias distintas segun el tamano del archivo. */
+    if (archivo.size > 5242880) {
+        MostrarMensaje("El documento no puede pesar más de 5 MB.", "warning");
+        return;
+    }
+
     var datos = new FormData();
     datos.append("origen", origen);
     datos.append("idOrigen", idOrigen);

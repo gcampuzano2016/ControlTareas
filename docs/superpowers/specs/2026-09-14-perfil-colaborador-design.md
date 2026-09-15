@@ -343,8 +343,32 @@ Entregable adicional, no de código: el listado de los **119 sin enlace de ficha
 cédula, 6 con cédula repetida, 16 con jefe que no resuelve y 8 fechas de nacimiento
 fuera de rango**, para RRHH.
 
-**Fase 2 — la hoja de vida.** Formación, Certificaciones, Experiencia y cargas
+**Fase 2 — la hoja de vida.** [COMPLETA] Formacion, Certificaciones, Experiencia y cargas
 familiares con `Cod_Usuario`. Todo para los 231.
+
+Decisiones de implementacion tomadas durante la fase 2 que el diseño original no preveía:
+
+1. **Las cargas familiares se leen en un octavo result set, añadido al final.**
+   El procedimiento `Sp_RTA_PerfilColaborador` devuelve estos siete conjuntos:
+   cabecera, contacto personal, contactos de emergencia, estudios, certificaciones,
+   experiencia y documentos de respaldo. El Dao `DaoPerfil` recorre estos conjuntos
+   por posición con `NextResult()`. Las cargas familiares se agregaron como el octavo
+   conjunto, al final, porque un contrato posicional se amplía por el extremo final,
+   nunca por el medio. Insertar las cargas entre los siete existentes habría desplazado
+   hacia atrás los que van detrás, y sus datos habrían aterrizado en la propiedad
+   equivocada sin generar ningún error — un cambio silencioso de nombres de campos.
+
+2. **La tabla `Emp_CargaFamiliar` usa `'Activo'`/`'Inactivo'` en vez de `'1'`/`'0'`.**
+   Esta tabla la comparte tanto `RRHHEmpleados.aspx` (pantalla de Talento Humano) como
+   el perfil. Para mantener coherencia con la otra pantalla, que ya usaba el texto, el
+   filtro de lectura es `<> 'Inactivo'` en vez de `= 'Activo'`. Esta formulacion permite
+   que tambien sean visibles las filas que la pantalla de RRHH inserta sin asignar estado.
+
+3. **`IdEmpleado` se deja nulo en la tabla `Emp_CargaFamiliar`.**
+   Las cargas familiares cuelgan de `Cod_Usuario` en vez de de `IdEmpleado`, para que
+   los 119 usuarios sin ficha de empleado enlazada puedan registrar sus cargas con
+   normalidad. Si hubiera dependencia de `IdEmpleado`, solo los 112 con ficha podrian
+   cargarlas.
 
 **Fase 3 — lo visual y lo compartido.** Foto, documentos de respaldo reales sobre
 `CargaArchivos.ashx`, CV en PDF y vista de jefatura — al final porque sin la fase 2 no

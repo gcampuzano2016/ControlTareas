@@ -557,7 +557,10 @@ namespace JsonJQueryNetPerfil
         /// El orden importa: primero la base y despues el disco. Si se escribiera
         /// el archivo antes y la base lo rechazara -porque el IdOrigen no es de
         /// esta persona, o porque su codigo esta repetido-, quedaria un archivo
-        /// huerfano en el servidor que nada volveria a nombrar.
+        /// huerfano en el servidor que nada volveria a nombrar. Ese orden no se
+        /// invierte; en cambio, si el disco falla DESPUES de la base, la fila
+        /// recien insertada se compensa dandola de baja (ver el catch del SaveAs
+        /// mas abajo), para no dejar un documento listado sin archivo detras.
         /// </summary>
         private string SubirDocumento(HttpContext context)
         {
@@ -616,7 +619,36 @@ namespace JsonJQueryNetPerfil
 
                 if (respuesta.estado != "1") { return ToJson(respuesta); }
 
-                archivo.SaveAs(System.IO.Path.Combine(carpeta, nombreCodigo));
+                try
+                {
+                    archivo.SaveAs(System.IO.Path.Combine(carpeta, nombreCodigo));
+                }
+                catch
+                {
+                    /* La fila ya existe y el archivo no. El caso habitual es que la
+                       identidad del grupo de aplicaciones no tenga permiso de
+                       escritura sobre la carpeta la primera vez que se despliega.
+                       Sin esto, la fila queda activa: el usuario ve un error y cree
+                       que no paso nada, pero en la siguiente carga el documento
+                       aparece en su lista con un enlace que al pulsarlo dice "El
+                       archivo ya no esta disponible en el servidor", y se queda asi
+                       hasta que alguien lo borre a mano. Se da de baja para que eso
+                       no ocurra. */
+                    try
+                    {
+                        NegPerfil.EliminarDocumento(codUsuario, doc.IdDocumento,
+                                                    context.Request.UserHostAddress);
+                    }
+                    catch
+                    {
+                        /* Si tambien falla el borrado de compensacion no hay mas que
+                           hacer aca dentro: lo que si hay que evitar es que ese
+                           segundo fallo se trague el mensaje y el usuario se quede
+                           sin ninguna respuesta. */
+                    }
+
+                    return responseMessage("0", "No se pudo guardar el archivo en el servidor. Intente nuevamente.", "danger");
+                }
 
                 return ToJson(respuesta);
             }

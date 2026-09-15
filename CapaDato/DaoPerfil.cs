@@ -322,6 +322,42 @@ namespace CapaDato
             return resultado;
         }
 
+        /// <summary>
+        /// Como EjecutarEscritura, pero ademas devuelve el identificador que el
+        /// procedimiento entrega junto a Respuestas. Existe para que quien escribe
+        /// pueda deshacer lo escrito: sin el Id, una fila recien insertada no se
+        /// puede compensar si el paso siguiente falla.
+        /// </summary>
+        private static int EjecutarEscrituraConId(string procedimiento, Action<SqlCommand> ponerParametros,
+                                                  string columnaId, out int id)
+        {
+            int resultado = -1;
+            id = 0;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand(procedimiento, cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                ponerParametros(cmd);
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        resultado = Convert.ToInt32(dr["Respuestas"]);
+                        if (dr[columnaId] != System.DBNull.Value)
+                        {
+                            id = Convert.ToInt32(dr[columnaId]);
+                        }
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
         public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarEstudio", cmd =>
@@ -476,7 +512,8 @@ namespace CapaDato
         /// </summary>
         public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
         {
-            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarDocumento", cmd =>
+            int idDocumento;
+            int r = EjecutarEscrituraConId("Sp_RTA_PerfilGuardarDocumento", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario",         SqlDbType.VarChar,  50).Value = codUsuario;
                 cmd.Parameters.Add("@Origen",              SqlDbType.VarChar,  20).Value = doc.Origen;
@@ -485,7 +522,13 @@ namespace CapaDato
                 cmd.Parameters.Add("@NombreArchivoCodigo", SqlDbType.VarChar, 260).Value = doc.NombreArchivoCodigo;
                 cmd.Parameters.Add("@Ruta",                SqlDbType.VarChar, 400).Value = doc.Ruta;
                 cmd.Parameters.Add("@Ip",                  SqlDbType.VarChar,  64).Value = ip ?? "";
-            });
+            }, "IdDocumento", out idDocumento);
+
+            /* El Id se devuelve por la entidad -y no como parametro nuevo, para no
+               tocar la firma de este metodo ni la de NegPerfil.GuardarDocumento-
+               para que el handler pueda compensar: si el SaveAs en disco falla
+               despues de este insert, necesita saber que fila dar de baja. */
+            doc.IdDocumento = idDocumento;
 
             return RespuestaDe(r, "Documento adjuntado.", "No se encontró el registro al que quiere adjuntarlo.");
         }

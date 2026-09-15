@@ -12,6 +12,15 @@ namespace CapaEntidad
         public EntPerfilCabecera Cabecera { get; set; }
         public EntPerfilContacto Contacto { get; set; }
         public List<EntPerfilEmergencia> Emergencia { get; set; }
+        public List<EntPerfilEstudio> Estudios { get; set; }
+        public List<EntPerfilCertificacion> Certificaciones { get; set; }
+        public List<EntPerfilExperiencia> Experiencia { get; set; }
+
+        /// <summary>
+        /// Cuelgan de Cod_Usuario, no de la ficha de empleado: los 119 usuarios
+        /// sin ficha tambien las registran.
+        /// </summary>
+        public List<EntPerfilCargaFamiliar> CargasFamiliares { get; set; }
 
         /// <summary>
         /// false por defecto: el usuario no se pudo identificar de forma unica
@@ -28,6 +37,10 @@ namespace CapaEntidad
             Cabecera = new EntPerfilCabecera();
             Contacto = new EntPerfilContacto();
             Emergencia = new List<EntPerfilEmergencia>();
+            Estudios = new List<EntPerfilEstudio>();
+            Certificaciones = new List<EntPerfilCertificacion>();
+            Experiencia = new List<EntPerfilExperiencia>();
+            CargasFamiliares = new List<EntPerfilCargaFamiliar>();
         }
     }
 }

@@ -1,4 +1,5 @@
 using CapaEntidad;
+using System;
 using System.Data;
 using System.Data.SqlClient;
 
@@ -78,7 +79,76 @@ namespace CapaDato
                         }
                     }
 
-                    /* Los result sets 4 a 7 existen y se ignoran hasta la fase 2. */
+                    /* 4. estudios */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Estudios.Add(new EntPerfilEstudio
+                            {
+                                IdEstudio      = EnteroDe(dr, "IdEstudio"),
+                                Nivel          = Texto(dr, "Nivel"),
+                                Institucion    = Texto(dr, "Institucion"),
+                                Titulo         = Texto(dr, "Titulo"),
+                                AnioGraduacion = EnteroNuloDe(dr, "AnioGraduacion")
+                            });
+                        }
+                    }
+
+                    /* 5. certificaciones */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Certificaciones.Add(new EntPerfilCertificacion
+                            {
+                                IdCertificacion = EnteroDe(dr, "IdCertificacion"),
+                                Nombre          = Texto(dr, "Nombre"),
+                                Entidad         = Texto(dr, "Entidad"),
+                                /* La fecha viaja como "yyyy-MM" para que el input
+                                   type="month" del navegador la reciba tal cual. */
+                                FechaObtencion  = FechaMesDe(dr, "FechaObtencion")
+                            });
+                        }
+                    }
+
+                    /* 6. experiencia */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.Experiencia.Add(new EntPerfilExperiencia
+                            {
+                                IdExperiencia = EnteroDe(dr, "IdExperiencia"),
+                                Empresa       = Texto(dr, "Empresa"),
+                                Cargo         = Texto(dr, "Cargo"),
+                                AnioDesde     = EnteroNuloDe(dr, "AnioDesde"),
+                                AnioHasta     = EnteroNuloDe(dr, "AnioHasta"),
+                                Funciones     = Texto(dr, "Funciones")
+                            });
+                        }
+                    }
+
+                    /* 7. documentos de respaldo: son de la fase 3. Se salta el
+                       conjunto sin leerlo, pero HAY que saltarlo: el Dao avanza
+                       por posicion y sin este NextResult las cargas familiares
+                       se leerian de la lista de documentos. */
+                    dr.NextResult();
+
+                    /* 8. cargas familiares */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            perfil.CargasFamiliares.Add(new EntPerfilCargaFamiliar
+                            {
+                                IdCargaFam      = EnteroDe(dr, "IdCargaFam"),
+                                Nombre          = Texto(dr, "Nombre"),
+                                Parentesco      = Texto(dr, "Parentesco"),
+                                FechaNacimiento = Texto(dr, "FechaNacTexto")
+                            });
+                        }
+                    }
                 }
             }
 
@@ -239,6 +309,33 @@ namespace CapaDato
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == System.DBNull.Value ? "" : dr[columna].ToString().Trim();
+        }
+
+        /// <summary>Entero de una columna que el esquema declara NOT NULL.</summary>
+        private static int EnteroDe(SqlDataReader dr, string columna)
+        {
+            return dr[columna] == System.DBNull.Value ? 0 : Convert.ToInt32(dr[columna]);
+        }
+
+        /// <summary>
+        /// Entero de una columna que si puede venir nula. Devuelve null y no cero:
+        /// para un anio, el cero se leeria como un dato real.
+        /// </summary>
+        private static int? EnteroNuloDe(SqlDataReader dr, string columna)
+        {
+            if (dr[columna] == System.DBNull.Value) { return null; }
+            return Convert.ToInt32(dr[columna]);
+        }
+
+        /// <summary>
+        /// Una fecha como texto "yyyy-MM", que es lo que consume un input
+        /// type="month". Cadena vacia si la columna viene nula.
+        /// </summary>
+        private static string FechaMesDe(SqlDataReader dr, string columna)
+        {
+            if (dr[columna] == System.DBNull.Value) { return ""; }
+            return Convert.ToDateTime(dr[columna]).ToString("yyyy-MM",
+                       System.Globalization.CultureInfo.InvariantCulture);
         }
     }
 }

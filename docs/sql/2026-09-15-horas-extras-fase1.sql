@@ -43,7 +43,7 @@ BEGIN
 
         CONSTRAINT PK_HE_Parametro PRIMARY KEY (IdParametro)
     );
-    CREATE INDEX IX_HE_Parametro_Clave ON dbo.HE_Parametro (Clave, FechaVigenciaDesde DESC);
+    CREATE UNIQUE INDEX UX_HE_Parametro_Clave ON dbo.HE_Parametro (Clave, FechaVigenciaDesde DESC);
     PRINT 'HE_Parametro creada.';
 END
 ELSE PRINT 'HE_Parametro ya existia.';
@@ -253,15 +253,49 @@ GO
 
 /* ------------------------------------------------- 8. aserciones ----------- */
 
-IF OBJECT_ID('dbo.HE_Parametro','U')             IS NULL RAISERROR('FALLO: HE_Parametro no quedo creada.', 16, 1);
-IF OBJECT_ID('dbo.HE_ColaboradorParametro','U')  IS NULL RAISERROR('FALLO: HE_ColaboradorParametro no quedo creada.', 16, 1);
-IF OBJECT_ID('dbo.HE_Salario','U')               IS NULL RAISERROR('FALLO: HE_Salario no quedo creada.', 16, 1);
-IF OBJECT_ID('dbo.HE_Periodo','U')               IS NULL RAISERROR('FALLO: HE_Periodo no quedo creada.', 16, 1);
-IF OBJECT_ID('dbo.HE_Detalle','U')               IS NULL RAISERROR('FALLO: HE_Detalle no quedo creada.', 16, 1);
-IF OBJECT_ID('dbo.HE_DetalleAuditoria','U')      IS NULL RAISERROR('FALLO: HE_DetalleAuditoria no quedo creada.', 16, 1);
+DECLARE @Fallos INT = 0;
+
+IF OBJECT_ID('dbo.HE_Parametro','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_Parametro no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_ColaboradorParametro','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_ColaboradorParametro no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_Salario','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_Salario no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_Periodo','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_Periodo no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_Detalle','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_Detalle no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_DetalleAuditoria','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_DetalleAuditoria no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
 
 IF (SELECT COUNT(*) FROM dbo.HE_Parametro WHERE FechaVigenciaDesde = '2026-09-01') <> 7
+BEGIN
     RAISERROR('FALLO: no quedaron los 7 parametros con la vigencia inicial.', 16, 1);
+    SET @Fallos += 1;
+END
 
 /* Un colaborador no puede tener dos filas de parametros: el calculo tomaria
    una al azar. El indice unico lo impide, y esta asercion comprueba que el
@@ -269,17 +303,34 @@ IF (SELECT COUNT(*) FROM dbo.HE_Parametro WHERE FechaVigenciaDesde = '2026-09-01
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
                 WHERE object_id = OBJECT_ID('dbo.HE_ColaboradorParametro')
                   AND name = 'UX_HE_ColaboradorParametro_Empleado' AND is_unique = 1)
+BEGIN
     RAISERROR('FALLO: falta el indice UNICO por empleado en HE_ColaboradorParametro.', 16, 1);
+    SET @Fallos += 1;
+END
 
 IF NOT EXISTS (SELECT 1 FROM sys.indexes
                 WHERE object_id = OBJECT_ID('dbo.HE_Detalle')
                   AND name = 'UX_HE_Detalle_PeriodoEmpleado' AND is_unique = 1)
+BEGIN
     RAISERROR('FALLO: falta el indice UNICO por periodo y empleado en HE_Detalle.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF NOT EXISTS (SELECT 1 FROM sys.indexes
+                WHERE object_id = OBJECT_ID('dbo.HE_Parametro')
+                  AND name = 'UX_HE_Parametro_Clave' AND is_unique = 1)
+BEGIN
+    RAISERROR('FALLO: falta el indice UNICO por clave y fecha vigencia en HE_Parametro.', 16, 1);
+    SET @Fallos += 1;
+END
 
 /* Este script no puede haber cargado personas. Si lo hizo, algo se colo. */
 IF (SELECT COUNT(*) FROM dbo.HE_ColaboradorParametro) > 0
    AND NOT EXISTS (SELECT 1 FROM dbo.HE_ColaboradorParametro WHERE Usu_Modificacion <> 'carga-inicial')
     PRINT 'AVISO: HE_ColaboradorParametro ya tiene filas. Vienen de la carga generada, no de este script.';
 
-PRINT 'Horas Extras fase 1: estructura y parametros listos.';
+IF @Fallos > 0
+    RAISERROR('FALLO: %d verificaciones no pasaron. La estructura NO quedo lista.', 16, 1, @Fallos);
+ELSE
+    PRINT 'Horas Extras fase 1: estructura y parametros listos.';
 GO

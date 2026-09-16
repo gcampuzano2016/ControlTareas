@@ -76,39 +76,78 @@ namespace JsonJQueryNetHorasExtras
             context.Response.Write(salida.ToString());
         }
 
+        /// <summary>
+        /// Sin este try/catch -el unico handler de la aplicacion que no lo
+        /// tenia; el resto de la casa lleva entre 5 y 21, AdministrarPerfiles
+        /// es el molde- una SqlException cualquiera (procedimiento faltante,
+        /// timeout, deadlock, un indice unico violado por dos peticiones
+        /// concurrentes) sale como pagina de error de ASP.NET en vez de JSON.
+        /// jQuery no la puede parsear, y con customErrors en Off y debug en
+        /// true en el Web.config, lo que llega al navegador es una pantalla
+        /// amarilla con traza -y el usuario solo ve "No se pudo contactar al
+        /// servidor", sin ninguna pista de la causa real-.
+        /// </summary>
         private string ListarPeriodos()
         {
-            EntRespuesta r = new EntRespuesta();
-            r.estado = "1";
-            r.resultado = NegHorasExtrasPantalla.ListarPeriodos();
-            r.tipoMensaje = "success";
-            return new JavaScriptSerializer().Serialize(r);
+            try
+            {
+                EntRespuesta r = new EntRespuesta();
+                r.estado = "1";
+                r.resultado = NegHorasExtrasPantalla.ListarPeriodos();
+                r.tipoMensaje = "success";
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al listar los periodos. " + ex.Message, "danger");
+            }
         }
 
         private string AbrirPeriodo(HttpContext context, dynamic p)
         {
-            int anio = Entero(p["anio"]);
-            int mes = Entero(p["mes"]);
-            EntRespuesta r = NegHorasExtrasPantalla.AbrirPeriodo(anio, mes, Usuario(context), Ip(context));
-            return new JavaScriptSerializer().Serialize(r);
+            try
+            {
+                int anio = Entero(p["anio"]);
+                int mes = Entero(p["mes"]);
+                EntRespuesta r = NegHorasExtrasPantalla.AbrirPeriodo(anio, mes, Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al abrir el periodo. " + ex.Message, "danger");
+            }
         }
 
         private string CargarPeriodo(dynamic p)
         {
-            EntRespuesta r = NegHorasExtrasPantalla.CargarPantalla(Entero(p["idPeriodo"]));
-            return new JavaScriptSerializer().Serialize(r);
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.CargarPantalla(Entero(p["idPeriodo"]));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al cargar el periodo. " + ex.Message, "danger");
+            }
         }
 
         private string GuardarFila(HttpContext context, dynamic p)
         {
-            EntRespuesta r = NegHorasExtrasPantalla.GuardarHoras(
-                Entero(p["idPeriodo"]),
-                Convert.ToInt64(Entero(p["idEmpleado"])),
-                Decimal(p["horas50"]),
-                Decimal(p["horas100"]),
-                Convert.ToString(p["observacion"]),
-                Usuario(context), Ip(context));
-            return new JavaScriptSerializer().Serialize(r);
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.GuardarHoras(
+                    Entero(p["idPeriodo"]),
+                    EnteroLargo(p["idEmpleado"]),
+                    Decimal(p["horas50"]),
+                    Decimal(p["horas100"]),
+                    Convert.ToString(p["observacion"]),
+                    Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al guardar la fila. " + ex.Message, "danger");
+            }
         }
 
         private static bool TienePermiso(HttpContext context)
@@ -134,6 +173,20 @@ namespace JsonJQueryNetHorasExtras
         {
             int n;
             return int.TryParse(Convert.ToString(v), out n) ? n : 0;
+        }
+
+        /// <summary>
+        /// IdEmpleado es BIGINT en la base y long en EntHeFila. Antes se leia
+        /// con Entero() y se ensanchaba con Convert.ToInt64: un identificador
+        /// que no entrara en un int32 se truncaba a un numero cualquiera -o a
+        /// 0- antes de siquiera llegar a compararse, y la respuesta salia
+        /// "Esa persona no esta en este periodo": un fallo real, pero por la
+        /// razon equivocada.
+        /// </summary>
+        private static long EnteroLargo(object v)
+        {
+            long n;
+            return long.TryParse(Convert.ToString(v), out n) ? n : 0L;
         }
 
         /// <summary>

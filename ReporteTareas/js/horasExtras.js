@@ -58,12 +58,14 @@ window.onbeforeunload = function () {
    invoca ademas de mostrar el mensaje, para que quien llamo pueda decidir
    como seguir (por ejemplo, continuar con la siguiente fila de un lote).
 
-   suprimirAviso es tambien opcional: evita el modal automatico de un mensaje
-   de exito con advertencia (estado "1" con mensaje no vacio). Sirve para el
-   guardado por lotes, donde cada fila puede traer su propio aviso y mostrar
-   uno por fila seria un bombardeo de modales; el lote junta los avisos y
-   muestra uno solo al terminar. */
-function PostHE(action, parameters, onSuccess, onError, suprimirAviso) {
+   suprimirMensaje es tambien opcional: evita el modal automatico, tanto en
+   exito con advertencia (estado "1" con mensaje no vacio) como en el propio
+   fallo. Sirve para el guardado por lotes: cada fila puede traer su propio
+   aviso, o su propio fallo -por ejemplo si el periodo se cierra a mitad de
+   camino-, y mostrar un modal por fila seria una cadena de decenas de
+   modales encima del resumen final. El lote junta todo y muestra un unico
+   resumen al terminar. */
+function PostHE(action, parameters, onSuccess, onError, suprimirMensaje) {
     var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
 
     $.ajax({
@@ -79,15 +81,15 @@ function PostHE(action, parameters, onSuccess, onError, suprimirAviso) {
                    se guardaron al abrir, etc.). Descartarlo porque la
                    operacion en si tuvo exito era el defecto: la advertencia
                    es justo la que Nomina necesita ver. */
-                if (!suprimirAviso && r.mensaje) { MostrarMensaje(r.mensaje, r.tipoMensaje || "warning"); }
+                if (!suprimirMensaje && r.mensaje) { MostrarMensaje(r.mensaje, r.tipoMensaje || "warning"); }
                 onSuccess(r);
             } else {
-                MostrarMensaje(r.mensaje, r.tipoMensaje);
+                if (!suprimirMensaje) { MostrarMensaje(r.mensaje, r.tipoMensaje); }
                 if (onError) { onError(r); }
             }
         },
         error: function () {
-            MostrarMensaje("No se pudo contactar al servidor. Intente nuevamente.", "danger");
+            if (!suprimirMensaje) { MostrarMensaje("No se pudo contactar al servidor. Intente nuevamente.", "danger"); }
             if (onError) { onError(null); }
         }
     });
@@ -159,12 +161,22 @@ function AbrirPeriodoSeleccionado() {
         return;
     }
 
+    /* Abrir un periodo son unas 66 idas a la base -una por colaborador, mas
+       la cabecera- y tarda varios segundos. Sin deshabilitar el boton, un
+       doble clic manda dos peticiones concurrentes que chocan entre si contra
+       el indice unico de HE_Periodo. Se reactiva en los dos caminos, exito y
+       error, para que un fallo no deje el boton inutilizable. */
+    $("#btnAbrirPeriodo").prop("disabled", true);
+
     /* Abrir un periodo que ya existe es inofensivo -NegHorasExtrasPantalla lo
        trata igual que cargarlo-, asi que este mismo boton sirve tanto para
        crear un mes nuevo como para volver a uno existente. */
     PostHE("AbrirPeriodo", { anio: anio, mes: mes }, function (r) {
         CargarListaPeriodos(r.resultado.Periodo.IdPeriodo);
         PintarPantalla(r.resultado);
+        $("#btnAbrirPeriodo").prop("disabled", false);
+    }, function () {
+        $("#btnAbrirPeriodo").prop("disabled", false);
     });
 }
 
@@ -367,13 +379,37 @@ $(document).on("input", ".he-horas50, .he-horas100, .he-observacion", function (
     MarcarFilaSucia($(this).closest("tr"));
 });
 
+/* Guarda el valor con el que se entro a la celda, para poder restaurarlo si
+   lo que se escribe supera el tope (ver el blur, abajo). */
+$(document).on("focus", ".he-horas50, .he-horas100", function () {
+    $(this).data("valor-antes", $(this).val());
+});
+
 /* Al salir de una celda de horas se valida, se normaliza a dos decimales y se
    recalcula la fila EN EL CLIENTE. No se guarda: eso solo lo hace el boton
-   Guardar, a proposito -el diseño descarto el autoguardado-. */
+   Guardar, a proposito -el diseño descarto el autoguardado-.
+
+   El tope de 200 es un RECHAZO, no una sustitucion: 200 horas es un numero
+   que se paga, y convertir "250" en "200.00" en silencio dejaria pagar un
+   tope que nadie autorizo a escribir -y el servidor nunca llega a verlo,
+   porque la celda ya viajaria con 200-. Se restaura el valor con el que se
+   entro a la celda y se avisa, en vez de sustituir. Un dato ilegible (texto,
+   sin sentido) si se sigue tratando como cero: no es una cantidad real que
+   alguien haya querido pagar, es la ausencia de un dato bueno. */
 $(document).on("blur", ".he-horas50, .he-horas100", function () {
     var $celda = $(this);
-    var validado = ValidarNumero($celda.val());
-    $celda.val(FormatoDosDecimales(validado));
+    var detalle = ValidarNumeroConDetalle($celda.val());
+
+    if (detalle.recortado) {
+        $celda.val($celda.data("valor-antes") || FormatoDosDecimales(0));
+        MostrarMensaje("El máximo por celda es 200 horas. Se mantuvo el valor anterior.", "warning");
+    } else if (detalle.invalido) {
+        $celda.val(FormatoDosDecimales(0));
+        MostrarMensaje("Solo se aceptan números positivos, con máximo 2 decimales.", "warning");
+    } else {
+        $celda.val(FormatoDosDecimales(detalle.valor));
+    }
+
     RecalcularFilaLocal($celda.closest("tr"));
 });
 
@@ -401,6 +437,16 @@ $(document).on("keydown", ".he-horas50, .he-horas100, .he-observacion", function
    valor por fila, empezando en la celda donde se pego. Si el portapapeles
    trae un solo valor -sin salto de linea- se deja que el navegador pegue
    normal en esa unica celda.
+
+   El reparto es por POSICION -$filas.eq(indice)-, y la grilla no tiene una
+   columna de cedula con la que verificar la correspondencia: el diseño la
+   recorto. Eso no es un detalle menor: la plantilla real de Nomina tiene una
+   persona activa menos en la hoja de horas que en la de colaboradores, asi
+   que una columna de 61 valores pegada sobre una grilla de 62 filas corre
+   cada numero de ahi en adelante a la persona equivocada, y son numeros
+   plausibles -nadie los nota, se guardan igual-. Por eso el pegado NO aplica
+   nada de una: primero pregunta, con nombres y cantidades, y solo reparte si
+   alguien confirma. Ver ConfirmarPegado.
 
    Dos detalles que no son opcionales:
 
@@ -431,7 +477,67 @@ $(document).on("paste", ".he-horas50, .he-horas100", function (e) {
     var valores = texto.split(/\r\n|\r|\n/);
     if (valores.length > 0 && valores[valores.length - 1] === "") { valores.pop(); }
 
-    var invalidos = 0, recortados = 0;
+    if (valores.length === 0 || indiceInicio < 0) { return; }
+
+    ConfirmarPegado(valores, clase, $filas, indiceInicio);
+});
+
+/* El nombre del colaborador es la primera celda de la fila. */
+function NombreDeFila($fila) {
+    return $fila && $fila.length ? $.trim($fila.find("td").first().text()) : "–";
+}
+
+/* Muestra el ancla que le falta al reparto por posicion: cuantos valores
+   trae el portapapeles, cuantas filas visibles hay desde donde se pego, y en
+   que colaborador empieza y en cual termina. No aplica nada hasta que la
+   persona confirma en el modal -nunca con confirm() del navegador, que no
+   deja lugar para mostrar esta informacion con formato-. */
+function ConfirmarPegado(valores, clase, $filas, indiceInicio) {
+    var filasDisponibles = $filas.length - indiceInicio;
+    var indiceFin = Math.min(indiceInicio + valores.length, $filas.length) - 1;
+
+    var nombreInicio = NombreDeFila($filas.eq(indiceInicio));
+    var nombreFin = NombreDeFila($filas.eq(indiceFin));
+
+    var $cuerpo = $("<div></div>");
+
+    $cuerpo.append(
+        $("<p></p>").append(
+            "Va a pegar ",
+            $("<strong></strong>").text(valores.length),
+            " valor(es) sobre ",
+            $("<strong></strong>").text(filasDisponibles),
+            " fila(s) visibles, empezando en «",
+            $("<strong></strong>").text(nombreInicio),
+            "» y terminando en «",
+            $("<strong></strong>").text(nombreFin),
+            "»."
+        )
+    );
+
+    if (valores.length > filasDisponibles) {
+        $cuerpo.append($("<p class='text-warning'></p>").text(
+            "Sobran " + (valores.length - filasDisponibles) +
+            " valor(es) sin fila visible donde caer: no se van a usar."));
+    } else if (valores.length < filasDisponibles) {
+        $cuerpo.append($("<p class='text-muted'></p>").text(
+            "Quedan filas visibles después de «" + nombreFin + "» que este pegado no toca."));
+    }
+
+    $cuerpo.append($("<p></p>").text("¿Los números corresponden a estas personas, en este orden?"));
+
+    MostrarConfirmacion($cuerpo, function () {
+        AplicarPegado(valores, clase, $filas, indiceInicio);
+    });
+}
+
+/* Reparte los valores ya confirmados. El tope de 200 es un rechazo: la celda
+   que lo supera se deja tal cual estaba, no se sustituye por 200 -mismo
+   criterio que el blur de una celda escrita a mano-, y se informa por
+   nombre, no solo por cantidad. */
+function AplicarPegado(valores, clase, $filas, indiceInicio) {
+    var invalidos = 0;
+    var filasRecortadas = [];
 
     $.each(valores, function (i, valor) {
         var $fila = $filas.eq(indiceInicio + i);
@@ -449,8 +555,13 @@ $(document).on("paste", ".he-horas50, .he-horas100", function (e) {
         if ($celda.prop("disabled")) { return; }
 
         var detalle = ValidarNumeroConDetalle(crudo);
+
+        if (detalle.recortado) {
+            filasRecortadas.push(NombreDeFila($fila));
+            return;
+        }
+
         if (detalle.invalido) { invalidos++; }
-        if (detalle.recortado) { recortados++; }
 
         $celda.val(FormatoDosDecimales(detalle.valor));
         MarcarFilaSucia($fila);
@@ -459,9 +570,30 @@ $(document).on("paste", ".he-horas50, .he-horas100", function (e) {
 
     var avisos = [];
     if (invalidos > 0) { avisos.push(invalidos + " valor(es) no eran números válidos y se dejaron en 0"); }
-    if (recortados > 0) { avisos.push(recortados + " valor(es) superaban 200 y se recortaron a 200"); }
-    if (avisos.length > 0) { MostrarMensaje(avisos.join("; ") + ".", "warning"); }
-});
+    if (filasRecortadas.length > 0) {
+        avisos.push("Superaban 200 horas y no se modificaron: " + filasRecortadas.join(", "));
+    }
+    if (avisos.length > 0) { MostrarMensaje(avisos.join(". ") + ".", "warning"); }
+}
+
+/* El modal de confirmacion de la casa: nunca confirm() ni alert() del
+   navegador, que no permiten mostrar nombres en negrita ni una lista.
+   .off().on() antes de asignar el manejador: sin eso, cada pegado sumaria un
+   manejador mas al mismo boton y una confirmacion vieja se dispararia junto
+   con la nueva. */
+function MostrarConfirmacion(contenido, alConfirmar) {
+    var $cuerpo = $("#textoConfirmarPegado").empty();
+
+    if (typeof contenido === "string") { $cuerpo.text(contenido); }
+    else { $cuerpo.append(contenido); }
+
+    $("#btnConfirmarPegado").off("click").on("click", function () {
+        $("#modalConfirmarPegado").modal("hide");
+        alConfirmar();
+    });
+
+    $("#modalConfirmarPegado").modal("show");
+}
 
 function MarcarFilaSucia($fila) {
     $fila.attr("data-dirty", "1");
@@ -602,6 +734,13 @@ function GuardarUnaAUna(lista, indice, fallidas, avisos) {
         return;
     }
 
+    /* Un lote son hasta unas 250 idas a la base -cuatro por fila: leer,
+       revalidar, guardar, releer- y puede tardar 20-30 segundos con el boton
+       deshabilitado. Sin un indicador de avance, la pantalla se ve congelada
+       y no hay forma de distinguir "esta trabajando" de "se colgo". */
+    $("#lblGuardado").removeClass("text-warning text-muted").addClass("text-info")
+        .text("Guardando " + (indice + 1) + " de " + lista.length + "…").show();
+
     var item = lista[indice];
 
     PostHE("GuardarFila", {
@@ -616,7 +755,7 @@ function GuardarUnaAUna(lista, indice, fallidas, avisos) {
     }, function () {
         fallidas.push(item.nombre || ("empleado " + item.idEmpleado));
         GuardarUnaAUna(lista, indice + 1, fallidas, avisos);
-    }, true /* suprimirAviso: los avisos del lote se juntan y se muestran una sola vez al terminar */);
+    }, true /* suprimirMensaje: cada fila fallida NO abre su propio modal -si el periodo se cierra a mitad del lote, serian decenas encadenados-; el resumen final es el unico aviso */);
 }
 
 /* Cierra el lote SIEMPRE con una relectura del periodo desde el servidor -asi
@@ -651,11 +790,14 @@ function TerminarLoteDeGuardado(fallidas, avisos) {
 /* ----------------------------------------------------------- utilitarios -- */
 
 /* Solo numerico, mayor o igual a cero, maximo 2 decimales y tope de 200 por
-   celda. Un dato ilegible vale cero, igual que del lado del servidor: es la
-   misma regla en los dos lenguajes. No distingue "invalido" de "valido pero
-   recortado a 200" con un valor de retorno -las dos veces el numero final es
-   el mismo (0 o 200)-, asi que quien necesite saber CUAL de los dos paso
-   -el pegado desde Excel, para el aviso resumido- usa ValidarNumeroConDetalle. */
+   celda. "Invalido" (texto sin sentido) y "recortado" (numero valido pero
+   por encima de 200) NO se resuelven igual: un dato ilegible vale cero -no
+   es una cantidad real, es la ausencia de un dato bueno-, pero un numero por
+   encima del tope es un rechazo, no una sustitucion -200 horas se pagan, y
+   convertir en silencio un "250" en "200.00" dejaria pagar un tope que nadie
+   escribio-. Por eso esta funcion devuelve los dos casos por separado y deja
+   que cada quien la llama decida que hacer: el blur de una celda restaura el
+   valor anterior si esta recortado; el pegado deja esa fila sin tocar. */
 function ValidarNumeroConDetalle(texto) {
     var limpio = String(texto == null ? "" : texto).trim().replace(",", ".");
     if (limpio === "") { return { valor: 0, invalido: false, recortado: false }; }
@@ -671,19 +813,6 @@ function ValidarNumeroConDetalle(texto) {
     }
 
     return { valor: numero, invalido: false, recortado: false };
-}
-
-/* silencioso evita el modal -se usa cuando quien llama va a resumir varios
-   resultados en un solo aviso, como el pegado desde Excel-. */
-function ValidarNumero(texto, silencioso) {
-    var d = ValidarNumeroConDetalle(texto);
-
-    if (!silencioso) {
-        if (d.invalido) { MostrarMensaje("Solo se aceptan números positivos, con máximo 2 decimales.", "warning"); }
-        else if (d.recortado) { MostrarMensaje("El máximo por celda es 200 horas.", "warning"); }
-    }
-
-    return d.valor;
 }
 
 function NumeroDe(texto) {

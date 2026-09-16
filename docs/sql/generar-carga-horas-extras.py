@@ -274,7 +274,7 @@ def main():
     L.append('   unico archivo de la fase que contiene datos personales. */')
     L.append('CREATE TABLE #C (Cedula VARCHAR(20), Empresa VARCHAR(120), Jornada INT,')
     L.append('                 DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40),')
-    L.append('                 Cargo VARCHAR(200) NULL);')
+    L.append('                 Cargo VARCHAR(200) NULL, Estado CHAR(1));')
     L.append('CREATE TABLE #S (Cedula VARCHAR(20), Monto DECIMAL(18,2), Desde DATE, Origen VARCHAR(20),')
     L.append('                 Observacion VARCHAR(400) NULL);')
     L.append('')
@@ -285,10 +285,15 @@ def main():
         motivo = 'NULL' if aplica == '1' and situacion == 'Activo' else q(situacion)
         divisor = c['DivisorManual'].strip()
         divisor_sql = divisor if divisor else 'NULL'
-        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s, %s);' % (
+        # Estado refleja lo que RRHH marco en la plantilla, no AplicaHE: son
+        # dos cosas distintas. Una persona puede estar Activo pero sin
+        # aplicar horas extras (NoAplicaHorasExtras); Estado solo distingue
+        # si sigue en la empresa.
+        estado = "'1'" if c['Activo'].strip().upper() == 'SI' else "'0'"
+        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s, %s, %s);' % (
             q(c['Cedula'].strip()), q(c['Empresa'].strip()),
             c['JornadaHorasDia'].strip() or '0', divisor_sql, aplica, motivo,
-            q(c['Cargo'].strip())))
+            q(c['Cargo'].strip()), estado))
 
     L.append('')
     for s in salarios:
@@ -310,16 +315,17 @@ def main():
     L.append('END')
     L.append('')
     L.append('MERGE dbo.HE_ColaboradorParametro AS d')
-    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.DivisorManual, c.AplicaHE, c.Motivo, c.Empresa, c.Cargo')
+    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.DivisorManual, c.AplicaHE, c.Motivo, c.Empresa, c.Cargo, c.Estado')
     L.append('         FROM #C c JOIN dbo.Empleados e ON LTRIM(RTRIM(e.Cedula)) = c.Cedula) AS o')
     L.append('   ON d.IdEmpleado = o.IdEmpleado')
     L.append(' WHEN MATCHED THEN UPDATE SET d.JornadaHorasDia = o.Jornada, d.DivisorManual = o.DivisorManual,')
     L.append('                              d.AplicaHE = o.AplicaHE, d.MotivoNoAplica = o.Motivo,')
     L.append('                              d.Empresa = o.Empresa, d.Cargo = o.Cargo,')
+    L.append('                              d.Estado = o.Estado,')
     L.append('                              d.Fec_Modificacion = SYSDATETIME(),')
     L.append("                              d.Usu_Modificacion = 'carga-plantilla'")
-    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, DivisorManual, AplicaHE, MotivoNoAplica, Empresa, Cargo, Usu_Modificacion)')
-    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.DivisorManual, o.AplicaHE, o.Motivo, o.Empresa, o.Cargo, 'carga-plantilla');")
+    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, DivisorManual, AplicaHE, MotivoNoAplica, Empresa, Cargo, Estado, Usu_Modificacion)')
+    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.DivisorManual, o.AplicaHE, o.Motivo, o.Empresa, o.Cargo, o.Estado, 'carga-plantilla');")
     L.append('')
     L.append('/* Los sueldos no se pisan: se insertan los que falten. Un historial no se')
     L.append('   reescribe, se le agregan filas. */')

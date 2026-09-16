@@ -180,6 +180,55 @@ function AbrirPeriodoSeleccionado() {
     });
 }
 
+/* Cerrar deja de admitir cambios: nadie mas guarda horas en este periodo
+   hasta que alguien -solo perfil 18- lo reabra. La confirmacion dice eso
+   mismo, no "esta seguro?", y nunca es un confirm() del navegador. */
+function ConfirmarCerrarPeriodo() {
+    if (!_idPeriodoActual) { return; }
+
+    MostrarConfirmacion(
+        "El período dejará de admitir cambios: nadie podrá guardar horas ni observaciones hasta que se reabra.",
+        EjecutarCerrarPeriodo,
+        "Cerrar período",
+        "Sí, cerrar período"
+    );
+}
+
+function EjecutarCerrarPeriodo() {
+    $("#btnCerrarPeriodo").prop("disabled", true);
+    PostHE("CerrarPeriodo", { idPeriodo: _idPeriodoActual }, function (r) {
+        PintarPantalla(r.resultado);
+        $("#btnCerrarPeriodo").prop("disabled", false);
+    }, function () {
+        $("#btnCerrarPeriodo").prop("disabled", false);
+    });
+}
+
+/* Reabrir es la excepcion, no la norma: solo perfil 18 -este boton ni
+   siquiera se pinta para los demas, y el handler lo vuelve a comprobar por su
+   cuenta-. La confirmacion avisa que va a quedar registrado quien lo hizo,
+   porque desde la tarea 1 eso es verdad: hay auditoria de por medio. */
+function ConfirmarReabrirPeriodo() {
+    if (!_idPeriodoActual) { return; }
+
+    MostrarConfirmacion(
+        "El período volverá a admitir cambios, y quedará registrado quién lo reabrió.",
+        EjecutarReabrirPeriodo,
+        "Reabrir período",
+        "Sí, reabrir período"
+    );
+}
+
+function EjecutarReabrirPeriodo() {
+    $("#btnReabrirPeriodo").prop("disabled", true);
+    PostHE("ReabrirPeriodo", { idPeriodo: _idPeriodoActual }, function (r) {
+        PintarPantalla(r.resultado);
+        $("#btnReabrirPeriodo").prop("disabled", false);
+    }, function () {
+        $("#btnReabrirPeriodo").prop("disabled", false);
+    });
+}
+
 function PintarPantalla(pantalla) {
     _idPeriodoActual = pantalla.Periodo.IdPeriodo;
     _periodoAbierto = pantalla.Periodo.EstaAbierto;
@@ -200,6 +249,10 @@ function ActualizarEstadoPeriodo(periodo) {
     var $lbl = $("#lblEstadoPeriodo").text(periodo.EstadoPeriodo)
         .removeClass("label-success label-default label-danger");
 
+    /* Los tres colores salen de dos-tema.css a traves de las clases de
+       Bootstrap que ya trae la casa -label-success, label-default y
+       label-danger-, la misma paleta que el §5.1 funcional pide: verde
+       Abierto, gris Cerrado, rojo Anulado. */
     if (periodo.EstadoPeriodo === "Abierto") { $lbl.addClass("label-success"); }
     else if (periodo.EstadoPeriodo === "Anulado") { $lbl.addClass("label-danger"); }
     else { $lbl.addClass("label-default"); }
@@ -207,6 +260,29 @@ function ActualizarEstadoPeriodo(periodo) {
     /* En Cerrado o Anulado el boton de guardado desaparece: no hay nada que
        guardar en un periodo de solo lectura. */
     $("#btnGuardar").toggle(periodo.EstaAbierto);
+
+    /* Cerrar (14 o 18) solo tiene sentido sobre un periodo Abierto. Reabrir
+       (solo 18, y solo cortesia visual -la barrera real esta en el handler-)
+       solo sobre uno Cerrado: un periodo Anulado no se reabre desde aqui. */
+    $("#btnCerrarPeriodo").toggle(periodo.EstaAbierto);
+    $("#btnReabrirPeriodo").toggle(periodo.EstadoPeriodo === "Cerrado" && HE_PUEDE_REABRIR);
+
+    ActualizarInfoCierre(periodo);
+}
+
+/* Quien cerro el periodo y cuando, de un vistazo -sin esto, FechaCierre y
+   UsuarioCierre viajaban en el payload desde la fase 2 y no se mostraban en
+   ningun lado. Solo tiene sentido con el periodo Cerrado: uno Abierto nunca
+   tiene fecha de cierre, y uno Anulado no es el caso que pidio el §5.1. */
+function ActualizarInfoCierre(periodo) {
+    var $info = $("#lblInfoCierre");
+
+    if (periodo.EstadoPeriodo === "Cerrado" && periodo.FechaCierre) {
+        $info.text("Cerrado por " + (periodo.UsuarioCierre || "–") +
+                    " el " + FormatoFechaHora(periodo.FechaCierre)).show();
+    } else {
+        $info.hide();
+    }
 }
 
 /* ------------------------------------------------------------------ grilla -- */
@@ -578,14 +654,25 @@ function AplicarPegado(valores, clase, $filas, indiceInicio) {
 
 /* El modal de confirmacion de la casa: nunca confirm() ni alert() del
    navegador, que no permiten mostrar nombres en negrita ni una lista.
-   .off().on() antes de asignar el manejador: sin eso, cada pegado sumaria un
+   .off().on() antes de asignar el manejador: sin eso, cada llamada sumaria un
    manejador mas al mismo boton y una confirmacion vieja se dispararia junto
-   con la nueva. */
-function MostrarConfirmacion(contenido, alConfirmar) {
+   con la nueva.
+
+   Nacio solo para el pegado desde Excel, con titulo y boton fijos en el
+   marcado. Cerrar y reabrir el periodo lo reusan con su propio titulo y
+   texto de boton -titulo/textoBoton son opcionales y caen en los mismos
+   valores de siempre si no se dan, asi que el pegado sigue exactamente
+   igual-. Los dos se fijan SIEMPRE, nunca solo cuando vienen dados: el modal
+   es uno solo compartido por toda la pantalla, y sin esto un titulo de un
+   cierre anterior se quedaria pegado en la siguiente confirmacion de pegado. */
+function MostrarConfirmacion(contenido, alConfirmar, titulo, textoBoton) {
     var $cuerpo = $("#textoConfirmarPegado").empty();
 
     if (typeof contenido === "string") { $cuerpo.text(contenido); }
     else { $cuerpo.append(contenido); }
+
+    $("#modalConfirmarPegadoLabel").text(titulo || "Confirmar pegado");
+    $("#btnConfirmarPegado").text(textoBoton || "Sí, aplicar");
 
     $("#btnConfirmarPegado").off("click").on("click", function () {
         $("#modalConfirmarPegado").modal("hide");
@@ -813,6 +900,25 @@ function ValidarNumeroConDetalle(texto) {
     }
 
     return { valor: numero, invalido: false, recortado: false };
+}
+
+/* JavaScriptSerializer manda un DateTime como "\/Date(ticks)\/" -el formato
+   de ASP.NET Ajax, no ISO 8601-, asi que un new Date(valor) directo sobre
+   FechaCierre daria "Invalid Date". Se intenta ese formato primero y se cae a
+   un parseo directo por si algun dia cambia; cualquier fecha invalida se
+   muestra vacia en vez de "NaN/NaN/NaN NaN:NaN" en pantalla. */
+function FormatoFechaHora(valor) {
+    if (!valor) { return ""; }
+
+    var match = /\/Date\((-?\d+)\)\//.exec(valor);
+    var fecha = match ? new Date(parseInt(match[1], 10)) : new Date(valor);
+    if (isNaN(fecha.getTime())) { return ""; }
+
+    var dd = ("0" + fecha.getDate()).slice(-2);
+    var mm = ("0" + (fecha.getMonth() + 1)).slice(-2);
+    var hh = ("0" + fecha.getHours()).slice(-2);
+    var mi = ("0" + fecha.getMinutes()).slice(-2);
+    return dd + "/" + mm + "/" + fecha.getFullYear() + " " + hh + ":" + mi;
 }
 
 function NumeroDe(texto) {

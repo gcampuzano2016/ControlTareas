@@ -37,6 +37,19 @@ namespace JsonJQueryNetHorasExtras
         /// <summary>Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el menu les muestra la pantalla.</summary>
         private static readonly int[] PerfilesAutorizados = { 14, 18 };
 
+        /// <summary>
+        /// Solo Super Admin (18) puede reabrir un periodo cerrado. Separacion de
+        /// funciones: quien opera el mes puede cerrarlo, pero deshacer un cierre
+        /// formal exige otro perfil.
+        ///
+        /// Se comprueba AQUI y no solo ocultando el boton: ocultarlo es cortesia
+        /// para quien no puede, no una barrera para quien no debe. El
+        /// procedimiento SQL no conoce perfiles y NegHorasExtrasPantalla.ReabrirPeriodo
+        /// tampoco los comprueba a proposito -este handler es el unico lugar
+        /// donde existe esta barrera.
+        /// </summary>
+        private static readonly int[] PerfilesQueReabren = { 18 };
+
         public void ProcessRequest(HttpContext context)
         {
             StringBuilder salida = new StringBuilder();
@@ -45,7 +58,7 @@ namespace JsonJQueryNetHorasExtras
             {
                 salida.Append(Mensaje("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
-            else if (!TienePermiso(context))
+            else if (!EstaEn(context, PerfilesAutorizados))
             {
                 salida.Append(Mensaje("0", "No tiene permisos para esta pantalla.", "danger"));
             }
@@ -64,6 +77,8 @@ namespace JsonJQueryNetHorasExtras
                 if (accion == "AbrirPeriodo")   { existe = true; salida.Append(AbrirPeriodo(context, parametros[0]["parameters"])); }
                 if (accion == "CargarPeriodo")  { existe = true; salida.Append(CargarPeriodo(parametros[0]["parameters"])); }
                 if (accion == "GuardarFila")    { existe = true; salida.Append(GuardarFila(context, parametros[0]["parameters"])); }
+                if (accion == "CerrarPeriodo")  { existe = true; salida.Append(CerrarPeriodo(context, parametros[0]["parameters"])); }
+                if (accion == "ReabrirPeriodo") { existe = true; salida.Append(ReabrirPeriodo(context, parametros[0]["parameters"])); }
 
                 if (!existe) { salida.Append(Mensaje("0", "La acción solicitada no existe.", "danger")); }
             }
@@ -150,11 +165,48 @@ namespace JsonJQueryNetHorasExtras
             }
         }
 
-        private static bool TienePermiso(HttpContext context)
+        /// <summary>
+        /// Cerrar (14 o 18) y reabrir (solo 18) comparten esta misma forma de
+        /// comprobar perfil; solo cambia la lista contra la que se compara.
+        /// </summary>
+        private string CerrarPeriodo(HttpContext context, dynamic p)
+        {
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.CerrarPeriodo(
+                    Entero(p["idPeriodo"]), Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al cerrar el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private string ReabrirPeriodo(HttpContext context, dynamic p)
+        {
+            if (!EstaEn(context, PerfilesQueReabren))
+            {
+                return Mensaje("0", "Su perfil no puede reabrir un período cerrado.", "warning");
+            }
+
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.ReabrirPeriodo(
+                    Entero(p["idPeriodo"]), Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al reabrir el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private static bool EstaEn(HttpContext context, int[] perfiles)
         {
             int idPerfil;
             if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
+            return Array.IndexOf(perfiles, idPerfil) >= 0;
         }
 
         private static string Usuario(HttpContext context)

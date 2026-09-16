@@ -1,7 +1,12 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="HorasExtras.aspx.cs" Inherits="ReporteTareas.Formulario.HorasExtras" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/horasExtras.js?v=1" type="text/javascript"></script>
+    <script type="text/javascript">
+        /* Solo para mostrar u ocultar el boton de reabrir. La barrera real
+           esta en AdministrarHorasExtras.ashx.cs. */
+        var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
+    </script>
+    <script src="../js/horasExtras.js?v=2" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -115,6 +120,7 @@
                                 <p class="form-control-static">
                                     <span id="lblEstadoPeriodo" class="label label-default">–</span>
                                 </p>
+                                <p class="text-muted" id="lblInfoCierre" style="font-size: 11px; margin: 0; display: none"></p>
                             </div>
                             <div class="form-group col-lg-2">
                                 <label>Abrir año</label>
@@ -168,6 +174,12 @@
                             </div>
                             <div class="form-group col-lg-3" style="padding-top: 25px; text-align: right">
                                 <span id="lblGuardado" class="text-muted" style="display: none; margin-right: 10px"></span>
+                                <button type="button" class="btn btn-default" id="btnCerrarPeriodo" onclick="ConfirmarCerrarPeriodo()" style="display: none">
+                                    <i class="fa fa-lock"></i> Cerrar período
+                                </button>
+                                <button type="button" class="btn btn-default" id="btnReabrirPeriodo" onclick="ConfirmarReabrirPeriodo()" style="display: none">
+                                    <i class="fa fa-unlock"></i> Reabrir período
+                                </button>
                                 <button type="button" class="btn btn-primary" id="btnGuardar" onclick="GuardarTodo()">
                                     <i class="fa fa-save"></i> Guardar
                                 </button>
@@ -290,12 +302,15 @@
         </div>
         <!-- /.modal -->
 
-        <!-- Modal de confirmacion para el pegado de una columna desde Excel.
-             El reparto es por POSICION -no hay columna de cedula en la grilla
-             con la que verificar la correspondencia-, asi que antes de tocar
-             ninguna celda se le muestra a la persona en que colaborador
-             empieza y en cual termina, para que confirme que la plantilla que
-             copio calza con las filas visibles. -->
+        <!-- Modal de confirmacion generico de esta pantalla -MostrarConfirmacion
+             en horasExtras.js le cambia titulo, texto y boton segun quien lo
+             llame-, en vez de confirm()/alert() del navegador, que no dejan
+             mostrar nombres en negrita ni una lista. Nacio para el pegado de
+             una columna desde Excel -el reparto es por POSICION, no hay
+             columna de cedula con la que verificar la correspondencia, asi
+             que antes de tocar ninguna celda se le muestra a la persona en
+             que colaborador empieza y en cual termina- y lo reusan cerrar y
+             reabrir el periodo. -->
         <div class="modal fade" id="modalConfirmarPegado" tabindex="-1" role="dialog" aria-labelledby="modalConfirmarPegadoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">

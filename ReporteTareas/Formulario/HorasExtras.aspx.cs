@@ -36,5 +36,19 @@ namespace ReporteTareas.Formulario
                 Response.Redirect("~/Formulario/Principal.aspx", true);
             }
         }
+
+        /// <summary>
+        /// Solo para que la pantalla decida si ENSEnA el boton de reabrir. La
+        /// barrera de verdad esta en AdministrarHorasExtras.ashx.cs: esto es
+        /// cortesia para quien no puede, no una barrera para quien no debe.
+        /// </summary>
+        protected bool PuedeReabrir
+        {
+            get
+            {
+                int idPerfil;
+                return int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil) && idPerfil == 18;
+            }
+        }
     }
 }

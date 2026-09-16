@@ -138,7 +138,7 @@
                                 </select>
                             </div>
                             <div class="form-group col-lg-3" style="padding-top: 25px">
-                                <button type="button" class="btn btn-default" onclick="AbrirPeriodoSeleccionado()">
+                                <button type="button" class="btn btn-default" id="btnAbrirPeriodo" onclick="AbrirPeriodoSeleccionado()">
                                     <i class="fa fa-folder-open"></i> Abrir / actualizar período
                                 </button>
                             </div>
@@ -284,6 +284,30 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal -->
+
+        <!-- Modal de confirmacion para el pegado de una columna desde Excel.
+             El reparto es por POSICION -no hay columna de cedula en la grilla
+             con la que verificar la correspondencia-, asi que antes de tocar
+             ninguna celda se le muestra a la persona en que colaborador
+             empieza y en cual termina, para que confirme que la plantilla que
+             copio calza con las filas visibles. -->
+        <div class="modal fade" id="modalConfirmarPegado" tabindex="-1" role="dialog" aria-labelledby="modalConfirmarPegadoLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="modalConfirmarPegadoLabel">Confirmar pegado</h4>
+                    </div>
+                    <div class="modal-body" id="textoConfirmarPegado">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnConfirmarPegado">Sí, aplicar</button>
                     </div>
                 </div>
             </div>

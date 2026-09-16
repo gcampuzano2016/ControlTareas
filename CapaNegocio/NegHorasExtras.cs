@@ -130,12 +130,21 @@ namespace CapaNegocio
             r.Divisor = Divisor(insumo, parametros);
 
             /* Equivalente al IFERROR del Excel. Sin esto, un divisor en cero
-               lanzaria DivideByZeroException a media nomina. Horas negativas
-               no son credito: son dato malo que bloquea el cierre de periodo
-               como salario cero o divisor cero. La pantalla no deberia
-               permitirlas, pero el calculo no confia en la pantalla. */
-            if (r.Divisor <= 0 || insumo.SalarioBaseVigente <= 0m ||
-                insumo.Horas50 < 0m || insumo.Horas100 < 0m)
+               lanzaria DivideByZeroException a media nomina. */
+            if (r.Divisor <= 0 || insumo.SalarioBaseVigente <= 0m)
+            {
+                r.TieneAdvertencia = true;
+                r.ValorHoraOrdinaria = 0m;
+                r.ValorHora50 = 0m;
+                r.ValorHora100 = 0m;
+                r.TotalHoras = insumo.Horas50 + insumo.Horas100;
+                return r;
+            }
+
+            /* Horas negativas no son credito: son dato malo que bloquea el
+               cierre de periodo. La pantalla no deberia permitirlas, pero el
+               calculo no confia en la pantalla. */
+            if (insumo.Horas50 < 0m || insumo.Horas100 < 0m)
             {
                 r.TieneAdvertencia = true;
                 r.ValorHoraOrdinaria = 0m;

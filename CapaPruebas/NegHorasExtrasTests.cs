@@ -133,6 +133,7 @@ namespace CapaPruebas
             Assert.AreEqual(0m, r.ValorHoraOrdinaria);
             Assert.AreEqual(0.00m, r.TotalHE);
             Assert.IsTrue(r.TieneAdvertencia);
+            Assert.AreEqual(10m, r.TotalHoras);
         }
 
         [TestMethod]
@@ -143,6 +144,7 @@ namespace CapaPruebas
             Assert.AreEqual(0m, r.ValorHoraOrdinaria);
             Assert.AreEqual(0.00m, r.TotalHE);
             Assert.IsTrue(r.TieneAdvertencia);
+            Assert.AreEqual(10m, r.TotalHoras);
         }
 
         /// <summary>
@@ -277,14 +279,16 @@ namespace CapaPruebas
         }
 
         /// <summary>
-        /// Con advertencia, el total de horas debe ser cero para que no se
+        /// Con horas negativas, el total de horas debe ser cero para que no se
         /// cuele un numero negativo en una columna que alguien suma en pantalla.
-        /// La advertencia es la senial; un cero con aviso es mas limpio.
+        /// La advertencia es la senial; un cero con aviso es mas limpio. (Con
+        /// salario cero o divisor cero, las horas se muestran porque son dato
+        /// valido: lo que falta es el sueldo de la persona.)
         /// </summary>
         [TestMethod]
-        public void Caso9c_ConAdvertencia_TotalHorasCero()
+        public void Caso9c_HorasNegativas_TotalHorasCero()
         {
-            EntHeResultado r = NegHorasExtras.Calcular(Insumo(0m, 8, 10m, 0m), Par());
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(1200m, 8, -5m, 0m), Par());
 
             Assert.AreEqual(0.00m, r.TotalHoras);
             Assert.IsTrue(r.TieneAdvertencia);

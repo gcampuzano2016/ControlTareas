@@ -1312,6 +1312,7 @@
     <Content Include="Formulario\AdministrarPerfiles.ashx" />
     <Content Include="Formulario\AdministrarPerfil.ashx" />
     <Content Include="Formulario\AdministrarHorasExtras.ashx" />
+    <Content Include="Formulario\DescargarHorasExtras.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
@@ -1496,6 +1497,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarHorasExtras.ashx.cs">
       <DependentUpon>AdministrarHorasExtras.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarHorasExtras.ashx.cs">
+      <DependentUpon>DescargarHorasExtras.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarMarcacion.ashx.cs">
       <DependentUpon>AdministrarMarcacion.ashx</DependentUpon>

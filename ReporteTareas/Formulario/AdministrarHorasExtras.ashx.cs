@@ -34,8 +34,17 @@ namespace JsonJQueryNetHorasExtras
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
-        /// <summary>Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el menu les muestra la pantalla.</summary>
-        private static readonly int[] PerfilesAutorizados = { 14, 18 };
+        /// <summary>
+        /// Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el
+        /// menu les muestra la pantalla.
+        ///
+        /// internal, no private: DescargarHorasExtras.ashx.cs -mismo namespace,
+        /// mismo proyecto de presentacion- reusa esta misma lista para su propia
+        /// comprobacion de perfil en vez de declarar la suya. Los dos handlers
+        /// protegen el mismo dato (el sueldo del periodo) con el mismo criterio;
+        /// si este criterio cambia algun dia, cambia en un solo lugar.
+        /// </summary>
+        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
 
         /// <summary>
         /// Solo Super Admin (18) puede reabrir un periodo cerrado. Separacion de

@@ -192,10 +192,17 @@ function AbrirPeriodoSeleccionado() {
    confirmar, y para intentarlo de nuevo necesitaria que OTRA PERSONA -solo
    perfil 18- le reabra el periodo primero. Ese costo no lo puede ver quien
    solo esta respondiendo "si" a un "esta seguro?", asi que aqui no se le
-   pregunta: se le pide que guarde o descarte antes de poder cerrar. El modal
-   de confirmacion de Bootstrap bloquea la grilla de fondo con su backdrop,
-   asi que no hace falta repetir esta comprobacion despues de que la persona
-   confirme. */
+   pregunta: se le pide que guarde o descarte antes de poder cerrar.
+
+   No hace falta repetir esta comprobacion despues de que la persona confirme,
+   y conviene saber POR QUE depende de dos cosas distintas de Bootstrap 3 y no
+   de una: el backdrop del modal bloquea el raton, y enforceFocus reatrapa el
+   foco dentro del modal en cada focusin de fuera, que es lo que impide llegar
+   a una celda con el teclado. Si algun dia se reemplaza o se parchea
+   bootstrap.min.js, lo segundo es lo que hay que comprobar que siga estando:
+   sin enforceFocus se podria tabular hasta una celda con el modal abierto y
+   editarla, y entonces esta comprobacion SI tendria que repetirse al
+   confirmar. */
 function ConfirmarCerrarPeriodo() {
     if (!_idPeriodoActual) { return; }
 

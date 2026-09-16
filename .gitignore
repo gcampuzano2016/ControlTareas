@@ -54,3 +54,12 @@ appsettings.config
 # ~38 MB de dependencias que ya viven en el bin/ de las otras capas.
 CapaPruebas/bin/
 CapaPruebas/obj/
+
+# Insumos de carga con datos personales. La plantilla de horas extras trae
+# nombres, cedulas y sueldos de 64 personas y este repositorio es PUBLICO.
+# Los archivos entran por aqui, se procesan, y nunca se versionan.
+Actualizacion/
+
+# Los scripts de carga que genera docs/sql/generar-carga-horas-extras.py.
+# Se versiona el generador -que es logica- y no su salida -que son datos-.
+docs/sql/carga-generada/

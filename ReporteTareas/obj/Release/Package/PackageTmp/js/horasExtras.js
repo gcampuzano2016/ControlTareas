@@ -260,9 +260,44 @@ function EjecutarReabrirPeriodo() {
     });
 }
 
+/* Exporta a Excel el periodo que esta cargado ahora mismo. El boton esta
+   habilitado desde que hay un periodo cargado -se habilita aqui mismo, en
+   PintarPantalla- y se deja visible tanto en Abierto como en Cerrado: revisar
+   el archivo antes de cerrar es legitimo, y el propio archivo dice
+   PROVISIONAL en su interior mientras el periodo no este cerrado.
+
+   El archivo sale de lo que hay en la base -DescargarHorasExtras.ashx vuelve
+   a leer el periodo por su cuenta con NegHorasExtrasPantalla.CargarPantalla,
+   no recibe nada de esta pantalla-, no de lo que se ve en pantalla. Con
+   cambios sin guardar se avisa con el mismo modal informativo que usa el
+   cierre (ver ConfirmarCerrarPeriodo) y no se descarga: quien exportara 40
+   filas editadas sin guardar se llevaria un archivo que no coincide con lo
+   que tiene delante, y no tendria forma de notarlo. */
+function ExportarExcel() {
+    if (!_idPeriodoActual) { return; }
+
+    if (HayCambiosSinGuardar()) {
+        MostrarMensaje(
+            "Hay cambios sin guardar. El archivo se genera con lo último guardado en la " +
+            "base, no con lo que ve en pantalla: guárdelos o descártelos antes de exportar " +
+            "para que coincidan.",
+            "warning"
+        );
+        return;
+    }
+
+    window.location.href = "DescargarHorasExtras.ashx?periodo=" + encodeURIComponent(_idPeriodoActual);
+}
+
 function PintarPantalla(pantalla) {
     _idPeriodoActual = pantalla.Periodo.IdPeriodo;
     _periodoAbierto = pantalla.Periodo.EstaAbierto;
+
+    /* Habilitado desde la primera vez que se carga un periodo, y se queda asi
+       para el resto de la sesion en esta pantalla -cambiar de periodo o de
+       estado nunca lo vuelve a deshabilitar, porque siempre hay un periodo
+       cargado a partir de aqui. */
+    $("#btnExportarExcel").prop("disabled", false);
 
     /* Factor50/Factor100 vienen del servidor en cada carga: son los que
        HE_Parametro tenia vigentes cuando esta misma pantalla se calculo alla.

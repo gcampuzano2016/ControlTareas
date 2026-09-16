@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=2" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=3" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -179,6 +179,9 @@
                                 </button>
                                 <button type="button" class="btn btn-default" id="btnReabrirPeriodo" onclick="ConfirmarReabrirPeriodo()" style="display: none">
                                     <i class="fa fa-unlock"></i> Reabrir período
+                                </button>
+                                <button type="button" class="btn btn-default" id="btnExportarExcel" onclick="ExportarExcel()" disabled="disabled">
+                                    <i class="fa fa-file-excel-o"></i> Exportar a Excel
                                 </button>
                                 <button type="button" class="btn btn-primary" id="btnGuardar" onclick="GuardarTodo()">
                                     <i class="fa fa-save"></i> Guardar

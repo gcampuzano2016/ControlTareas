@@ -11,6 +11,29 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
+/* ----------------------------------------------------------- GUARD -------- */
+/* Si la fase 4 ya esta aplicada, este script NO debe volver a correr.
+
+   La fase 4 recrea Sp_RTA_HeGuardarFila con un parametro mas -@HorasOrigen, que
+   es lo que distingue una fila sembrada de las tareas de una escrita a mano-.
+   Si alguien vuelve a correr ESTE script despues de aquel, el DROP/CREATE de
+   mas abajo lo devuelve a 23 parametros y el DAO desplegado, que manda 24,
+   empieza a dar "too many arguments" en CADA guardado. Peor todavia: la columna
+   HorasOrigen se queda en la tabla pero ya nadie la escribe, asi que toda fila
+   editada a mano seguiria diciendo 'Tareas' y la siembra la pisaria.
+
+   Igual que el de la fase 2, se salta el script entero: CREATE PROCEDURE tiene
+   que ser la primera instruccion de su lote y no se puede envolver en un IF.
+
+   La senal es HE_Periodo.FechaInicio, que solo existe si la fase 4 corrio. */
+IF EXISTS (SELECT 1 FROM sys.columns
+            WHERE object_id = OBJECT_ID('dbo.HE_Periodo') AND name = 'FechaInicio')
+BEGIN
+    PRINT 'La fase 4 ya esta aplicada: este script la deshace. No se ejecuta.';
+    SET NOEXEC ON;
+END
+GO
+
 /* ------------------------------------ 1. la auditoria admite texto --------- */
 /* ValorAnterior y ValorNuevo son DECIMAL(9,2) y sirven para Horas50 y Horas100.
    Observacion tambien es editable desde la pantalla y es texto: sin estas dos
@@ -723,4 +746,10 @@ IF @Fallos > 0
     RAISERROR('FALLO: %d verificaciones no pasaron.', 16, 1, @Fallos);
 ELSE
     PRINT 'Horas Extras fase 3: auditoria y cierre listos.';
+GO
+
+/* Deshace el guard de la cabecera: sin esto, la sesion de quien corriera el
+   script se quedaria en NOEXEC y todo lo que ejecutara despues -en la misma
+   ventana- se analizaria sin ejecutarse, en silencio. */
+SET NOEXEC OFF;
 GO

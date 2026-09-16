@@ -10,6 +10,34 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
+/* ----------------------------------------------------------- GUARD -------- */
+/* Si la fase 3 ya esta aplicada, este script NO debe volver a correr.
+
+   La fase 3 recrea Sp_RTA_HeGuardarFila con un parametro mas -@Auditar, que es
+   lo que hace que un cambio de horas quede auditado-. Si alguien vuelve a
+   correr ESTE script despues de aquel, el DROP/CREATE de mas abajo lo devuelve
+   a 22 parametros y el DAO desplegado, que manda 23, empieza a dar "too many
+   arguments" en CADA guardado. Quien lo sufra ve "no se pudieron guardar estas
+   filas" sin ninguna pista de la causa.
+
+   El resto de este script es inofensivo de repetir, pero no hay forma de
+   saltarse solo una seccion: CREATE PROCEDURE tiene que ser la primera
+   instruccion de su lote y no se puede envolver en un IF. Asi que se salta el
+   script entero, que es lo correcto: si la fase 3 esta puesta, todo lo que
+   este script crea ya existe.
+
+   El aviso de DESPLIEGUE.md -"si dudas si ya corriste uno, correlo de nuevo"-
+   es cierto de cada script por separado y falso del conjunto. Este guard es lo
+   que lo vuelve cierto tambien del conjunto. */
+IF OBJECT_ID('dbo.Sp_RTA_HeCerrarPeriodo','P') IS NOT NULL
+BEGIN
+    PRINT 'La fase 3 ya esta aplicada. Este script NO se ejecuta: recrearia';
+    PRINT 'Sp_RTA_HeGuardarFila sin el parametro @Auditar y romperia todos los';
+    PRINT 'guardados. Para modificarlo, usa 2026-09-16-horas-extras-fase3.sql.';
+    SET NOEXEC ON;
+END
+GO
+
 /* --------------------------------------------------------- 1. periodos ---- */
 IF OBJECT_ID('dbo.Sp_RTA_HeListarPeriodos','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_HeListarPeriodos;
@@ -280,4 +308,10 @@ IF @Fallos > 0
     RAISERROR('FALLO: %d de los cinco procedimientos no quedaron creados.', 16, 1, @Fallos);
 ELSE
     PRINT 'Horas Extras fase 2: los cinco procedimientos quedaron creados.';
+GO
+
+/* Deshace el guard de la cabecera: sin esto, la sesion de quien corriera el
+   script se quedaria en NOEXEC y todo lo que ejecutara despues -en la misma
+   ventana- se analizaria sin ejecutarse, en silencio. */
+SET NOEXEC OFF;
 GO

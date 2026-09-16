@@ -238,7 +238,7 @@ BEGIN
     (
         IdAuditoria      INT IDENTITY(1,1) NOT NULL,
         IdDetalle        INT           NOT NULL,
-        Campo            VARCHAR(20)   NOT NULL,   -- Horas50 | Horas100
+        Campo            VARCHAR(20)   NOT NULL,   -- Horas50 | Horas100 | Observacion
         ValorAnterior    DECIMAL(9,2)  NULL,
         ValorNuevo       DECIMAL(9,2)  NULL,
         Fecha            DATETIME2(0)  NOT NULL

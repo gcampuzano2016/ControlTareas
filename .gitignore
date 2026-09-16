@@ -66,3 +66,22 @@ docs/sql/carga-generada/
 
 # Bytecode de Python. El repo versiona el generador de la carga, no su cache.
 __pycache__/
+
+# Lo que la gente sube o descarga desde la aplicacion. Son documentos de
+# personas -informes, PDF con codigos de registro, capturas- y este
+# repositorio es PUBLICO: un git add -A sin esta regla los publica.
+#
+# OJO, dos medias verdades que conviene no confundir:
+#   1. Esto NO desversiona los que ya estan dentro. Hay 18 archivos y 6 hojas
+#      clinicas ya publicados en el historial; sacarlos exige reescribir la
+#      historia, no una regla aqui. Esta regla solo impide que entren mas.
+#   2. La excepcion de abajo es OBLIGATORIA. descargas/perfil/web.config lleva
+#      <handlers><clear /></handlers> y es lo unico que impide que IIS sirva
+#      como archivos estaticos las partidas de nacimiento y cedulas que la
+#      gente adjunta. Si dejara de versionarse, el dia que alguien despliegue
+#      sin el, la guarda de DescargarPerfil.ashx se puede saltar pidiendo el
+#      archivo por su ruta. Y su ausencia NO da ningun error.
+ReporteTareas/descargas/*
+!ReporteTareas/descargas/perfil/
+ReporteTareas/descargas/perfil/*
+!ReporteTareas/descargas/perfil/web.config

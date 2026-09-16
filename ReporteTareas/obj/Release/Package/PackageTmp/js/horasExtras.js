@@ -286,7 +286,16 @@ function ExportarExcel() {
         return;
     }
 
-    window.location.href = "DescargarHorasExtras.ashx?periodo=" + encodeURIComponent(_idPeriodoActual);
+    /* window.open(..., "_blank") y no window.location.href: con
+       Content-Disposition:attachment el navegador se queda donde esta de
+       cualquier forma, pero cuando el handler falla responde texto plano SIN
+       esa cabecera -es justo lo que hace al fallar-, y ahi location.href
+       navegaba la pestaña actual: la pantalla de horas extras desaparecia,
+       reemplazada por el mensaje de error, y con ella cualquier cambio sin
+       guardar que hubiera. Mismo patron que el enlace target="_blank" de la
+       descarga de MiPerfil.aspx, adaptado a un boton porque este necesita las
+       dos comprobaciones de arriba antes de poder armar la URL. */
+    window.open("DescargarHorasExtras.ashx?periodo=" + encodeURIComponent(_idPeriodoActual), "_blank");
 }
 
 function PintarPantalla(pantalla) {

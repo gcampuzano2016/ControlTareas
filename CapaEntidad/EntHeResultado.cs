@@ -19,8 +19,11 @@ namespace CapaEntidad
         public decimal TotalHE { get; set; }
 
         /// <summary>
-        /// El salario o el divisor son cero y la hora ordinaria salio en cero.
-        /// La fila se muestra en rojo y bloquea el cierre del periodo: no es un
+        /// Se activa en cualquiera de estos casos: el insumo o los parametros
+        /// llegan nulos; alguna hora (50% o 100%) es negativa; o el salario
+        /// vigente o el divisor son cero. En todos, la hora ordinaria y los
+        /// totales quedan en cero -nunca un numero negativo o inventado. La
+        /// fila se muestra en rojo y bloquea el cierre del periodo: no es un
         /// error de programa, es un dato que alguien tiene que arreglar.
         /// </summary>
         public bool TieneAdvertencia { get; set; }

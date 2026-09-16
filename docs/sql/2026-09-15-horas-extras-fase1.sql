@@ -13,6 +13,14 @@
    una que en R_Usuarios comparten seis usuarios activos distintos.
 
    Idempotente: se puede correr dos veces sin dano.
+
+   Estado CHAR(1) aparece en varias tablas de este script (HE_ColaboradorParametro,
+   HE_Salario) pero NINGUN codigo de la fase 1 lo lee ni lo filtra: ni el
+   generador de la carga, ni el verificador, ni NegHorasExtras. Existe para
+   un borrado logico que todavia no tiene dueno. El DAO de la fase 2 tiene
+   OBLIGACION de filtrar Estado = '1' en cada SELECT que toque estas tablas;
+   si no lo hace, una fila dada de baja logica sigue participando del
+   calculo como si estuviera activa.
    ============================================================================ */
 
 SET NOCOUNT ON;
@@ -41,7 +49,19 @@ BEGIN
         Usu_Modificacion   VARCHAR(50)   NULL,
         Ip_Modificacion    VARCHAR(64)   NULL,
 
-        CONSTRAINT PK_HE_Parametro PRIMARY KEY (IdParametro)
+        CONSTRAINT PK_HE_Parametro PRIMARY KEY (IdParametro),
+
+        /* NegHorasExtras redondea con Math.Round(v, p.DecimalesMonto, ...),
+           pero HE_Detalle.Total50, Total100 y TotalHE son DECIMAL(18,2) FIJOS.
+           Si este parametro pidiera mas de 2 decimales -exactamente lo que
+           el permiso de administrar parametros va a exponer- C# calcularia
+           75.0375 y la columna guardaria 75.04 SIN ERROR, rompiendo en
+           silencio el invariante que la fase escribio una prueba para
+           proteger. El limite va aqui, no en las columnas: en nomina el
+           dinero va a dos decimales: lo que sobra es la configurabilidad,
+           no la precision. */
+        CONSTRAINT CK_HE_Parametro_DecimalesMonto
+            CHECK (Clave <> 'DecimalesMonto' OR Valor <= 2)
     );
     CREATE UNIQUE INDEX UX_HE_Parametro_Clave ON dbo.HE_Parametro (Clave, FechaVigenciaDesde DESC);
     PRINT 'HE_Parametro creada.';
@@ -109,7 +129,16 @@ BEGIN
         Usu_Modificacion   VARCHAR(50)   NULL,
         Ip_Modificacion    VARCHAR(64)   NULL,
 
-        CONSTRAINT PK_HE_Salario PRIMARY KEY (IdSalario)
+        CONSTRAINT PK_HE_Salario PRIMARY KEY (IdSalario),
+
+        /* Origen ya no es decorativo: NegHorasExtras.SalarioVigente desempata
+           por esta columna cuando dos filas comparten fecha de vigencia
+           (Ajuste gana a Rol, documento funcional 2.2). El comentario de
+           arriba dice cuales son los dos valores permitidos; este CHECK hace
+           que sea imposible cargar un tercero. Si RRHH escribe "Ajuste
+           salarial" en una celda, la carga generada fallaria aqui en vez de
+           tratarse como Rol en silencio. */
+        CONSTRAINT CK_HE_Salario_Origen CHECK (Origen IN ('Rol','Ajuste'))
     );
     CREATE INDEX IX_HE_Salario_Vigencia
         ON dbo.HE_Salario (IdEmpleado, FechaVigenciaDesde DESC);
@@ -232,6 +261,10 @@ GO
 
    Se insertan solo si no existe ya una vigencia para esa clave, para que
    correr el script dos veces no duplique ni pise un valor que alguien ajusto. */
+-- Misma fecha que VIGENCIA_ROL en docs/sql/generar-carga-horas-extras.py.
+-- No se unifican -son lenguajes distintos-, pero si cambia una hay que
+-- revisar la otra: son la vigencia inicial de dos cosas relacionadas
+-- (los parametros de calculo aqui, los sueldos de rol alla).
 DECLARE @Desde DATE = '2026-09-01';
 
 INSERT INTO dbo.HE_Parametro (Clave, Valor, FechaVigenciaDesde, Usu_Modificacion)

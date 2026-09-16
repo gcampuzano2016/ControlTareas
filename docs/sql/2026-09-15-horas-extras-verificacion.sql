@@ -29,6 +29,21 @@ DECLARE @EsperadoNoAplicaHE            INT = 3;
 DECLARE @EsperadoConDivisorManual      INT = 0;
 DECLARE @EsperadoParametrosVigentes    INT = 7;
 DECLARE @EsperadoNoExistenEnEmpleados  INT = 0;
+DECLARE @EsperadoAjustes               INT = 5;
+DECLARE @EsperadoRol                   INT = 64;
+DECLARE @EsperadoMontoNoPositivo       INT = 0;
+DECLARE @EsperadoConObservacion        INT = 69;
+DECLARE @EsperadoConHorarioAsignado    INT = 58;
+
+/* Origen paso a decidir cuanto cobran 5 personas: el desempate de
+   NegHorasExtras.SalarioVigente da prioridad al ajuste sobre el rol cuando
+   dos filas comparten fecha de vigencia. Esta fecha de corte no es un
+   parametro del sistema, es solo el punto donde se comprueba el desempate:
+   con todos los sueldos vigentes desde el 2026-09-01, cualquier fecha
+   posterior sirve. */
+DECLARE @FechaCorte                    DATE = '2026-09-30';
+DECLARE @EsperadoConSueldoVigente      INT = 64;
+DECLARE @EsperadoVigenteEsAjuste       INT = 5;
 
 SELECT Comprobacion = 'colaboradores cargados (esperado ' + CONVERT(VARCHAR(12), @EsperadoColaboradores) + ')',
        Valor        = CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_ColaboradorParametro
@@ -68,14 +83,63 @@ UNION ALL
 SELECT 'colaboradores que no existen en Empleados (esperado ' + CONVERT(VARCHAR(12), @EsperadoNoExistenEnEmpleados) + ')',
        CONVERT(VARCHAR(12), COUNT(*))
   FROM dbo.HE_ColaboradorParametro c
- WHERE NOT EXISTS (SELECT 1 FROM dbo.Empleados e WHERE e.IdEmpleado = c.IdEmpleado);
+ WHERE NOT EXISTS (SELECT 1 FROM dbo.Empleados e WHERE e.IdEmpleado = c.IdEmpleado)
+UNION ALL
+/* Estas cuatro no existian en la ronda anterior: las diez comprobaciones de
+   arriba no miran Origen, y si esa columna llegara vacia el generador la
+   trataria como Rol y las diez seguirian dando su numero esperado. */
+SELECT 'sueldos con Origen = Ajuste (esperado ' + CONVERT(VARCHAR(12), @EsperadoAjustes) + ')',
+       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Origen = 'Ajuste'
+UNION ALL
+SELECT 'sueldos con Origen = Rol (esperado ' + CONVERT(VARCHAR(12), @EsperadoRol) + ')',
+       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Origen = 'Rol'
+UNION ALL
+SELECT 'sueldos con Monto no positivo (esperado ' + CONVERT(VARCHAR(12), @EsperadoMontoNoPositivo) + ')',
+       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Monto <= 0
+UNION ALL
+SELECT 'sueldos con Observacion informada (esperado ' + CONVERT(VARCHAR(12), @EsperadoConObservacion) + ')',
+       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Observacion IS NOT NULL;
 
 /* La jornada que declara la plantilla contra la que el sistema ya conoce.
-   58 de los 64 tienen horario asignado. Esto NO corrige nada: reporta para que
-   RRHH lo mire, porque el Excel no es autoridad sobre el horario de nadie. */
-SELECT Comprobacion = 'colaboradores con horario asignado en el sistema',
+   Esto NO corrige nada: reporta para que RRHH lo mire, porque el Excel no es
+   autoridad sobre el horario de nadie. */
+SELECT Comprobacion = 'colaboradores con horario asignado en el sistema (esperado '
+                       + CONVERT(VARCHAR(12), @EsperadoConHorarioAsignado) + ' de '
+                       + CONVERT(VARCHAR(12), @EsperadoColaboradores) + ')',
        Valor        = CONVERT(VARCHAR(12), COUNT(DISTINCT c.IdEmpleado))
   FROM dbo.HE_ColaboradorParametro c
   JOIN dbo.Empleados e ON e.IdEmpleado = c.IdEmpleado
   JOIN dbo.R_UsuarioHorarioLaboral uh ON uh.Id_Responsable = e.Cod_Usuario AND uh.Activo = 1;
+
+/* La comprobacion mas importante de todas: es el sustituto de la validacion
+   de corte del 9.5 funcional, bloqueada porque RRHH no ha entregado
+   Calculadora_Horas_Extras_50_100.xlsx. Mientras ese archivo no llegue, esta
+   es la unica prueba de que el desempate de salario funciona sobre datos
+   reales. Replica en SQL la misma regla que NegHorasExtras.SalarioVigente
+   aplica en C#: la fecha de vigencia mas reciente que no sea posterior al
+   corte, y a igual fecha gana Ajuste sobre Rol. IdSalario DESC es un tercer
+   desempate defensivo para dos filas identicas en fecha Y origen, que hoy no
+   ocurre en los datos pero que la consulta no debe asumir.
+
+   Solo cuenta, nunca un monto: este archivo se versiona y el repositorio es
+   publico. */
+;WITH Vigente AS (
+    SELECT h.IdEmpleado, h.Monto, h.Origen,
+           ROW_NUMBER() OVER (PARTITION BY h.IdEmpleado
+                               ORDER BY h.FechaVigenciaDesde DESC,
+                                        CASE WHEN h.Origen = 'Ajuste' THEN 1 ELSE 0 END DESC,
+                                        h.IdSalario DESC) AS Orden
+      FROM dbo.HE_Salario h
+     WHERE h.FechaVigenciaDesde <= @FechaCorte
+)
+SELECT Comprobacion = 'empleados con sueldo vigente mayor que cero al '
+                       + CONVERT(VARCHAR(12), @FechaCorte, 23) + ' (esperado '
+                       + CONVERT(VARCHAR(12), @EsperadoConSueldoVigente) + ')',
+       Valor        = CONVERT(VARCHAR(12), COUNT(*))
+  FROM Vigente WHERE Orden = 1 AND Monto > 0
+UNION ALL
+SELECT 'empleados cuyo sueldo vigente al ' + CONVERT(VARCHAR(12), @FechaCorte, 23)
+       + ' es el del ajuste (esperado ' + CONVERT(VARCHAR(12), @EsperadoVigenteEsAjuste) + ')',
+       CONVERT(VARCHAR(12), COUNT(*))
+  FROM Vigente WHERE Orden = 1 AND Origen = 'Ajuste';
 GO

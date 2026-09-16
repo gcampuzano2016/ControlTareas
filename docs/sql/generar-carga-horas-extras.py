@@ -31,9 +31,38 @@ PLANTILLA = os.path.join(RAIZ, 'Actualizacion', 'Plantilla_Carga_Modulo_HE.xlsx'
 SALIDA_DIR = os.path.join(RAIZ, 'docs', 'sql', 'carga-generada')
 SALIDA = os.path.join(SALIDA_DIR, 'carga-horas-extras.sql')
 
+# Misma fecha que @Desde en docs/sql/2026-09-15-horas-extras-fase1.sql (los
+# parametros iniciales). No se unifican -son lenguajes distintos-, pero si
+# cambia una hay que revisar la otra.
 VIGENCIA_ROL = '2026-09-01'
 
 EXCEL_ORIGEN = date(1899, 12, 30)
+
+# Los unicos dos valores que acepta HE_Salario.Origen (CHECK en el DDL de la
+# fase 1). Mapea version en mayusculas -> forma canonica que se escribe en
+# el script generado, para que variaciones de formato de la plantilla
+# ("AJUSTE", "ajuste ") no rompan la carga por una diferencia cosmetica,
+# pero cualquier otra cosa ("Ajuste salarial") si se rechace.
+ORIGENES_VALIDOS = {'ROL': 'Rol', 'AJUSTE': 'Ajuste'}
+
+
+def origen_normalizado(crudo):
+    """Vacio se trata como Rol (comportamiento historico de la plantilla,
+    donde el 100% de las filas de rol no traen esta columna). Cualquier otra
+    cosa que no sea exactamente Rol o Ajuste (case-insensitive, con trim)
+    devuelve None: quien llama debe rechazar la fila."""
+    t = (crudo or '').strip()
+    if t == '':
+        return 'Rol'
+    return ORIGENES_VALIDOS.get(t.upper())
+
+
+def longitud_valida(texto, maximo):
+    """Que quepa en la columna VARCHAR sin truncar. Un valor mas largo que
+    la columna dispara el error 2628 de SQL Server, y ese error trae el
+    valor truncado dentro de su propio mensaje: eso es un dato personal
+    saliendo por el CATCH. Se corta aqui, antes de que llegue a la base."""
+    return len(texto or '') <= maximo
 
 
 def fecha_de_excel(crudo, por_omision):
@@ -171,13 +200,22 @@ def main():
         return 1
 
     # Fila/columna en el mensaje, nunca el valor de la celda: puede ser un
-    # dato personal (sueldo) y este generador no lo imprime ni en un error.
+    # dato personal (sueldo, nota de RRHH) y este generador no lo imprime ni
+    # en un error.
     filas_invalidas = []
     for i, c in enumerate(colaboradores, start=2):
         if not es_entero(c['JornadaHorasDia']):
             filas_invalidas.append('hoja Colaboradores, fila %d, columna JornadaHorasDia: no es un entero.' % i)
         if not es_entero(c['DivisorManual']):
             filas_invalidas.append('hoja Colaboradores, fila %d, columna DivisorManual: no es un entero.' % i)
+        if not longitud_valida(c['Cedula'], 20):
+            filas_invalidas.append('hoja Colaboradores, fila %d, columna Cedula: supera 20 caracteres.' % i)
+        if not longitud_valida(c['Empresa'], 120):
+            filas_invalidas.append('hoja Colaboradores, fila %d, columna Empresa: supera 120 caracteres.' % i)
+        if not longitud_valida(c['Situacion'], 40):
+            filas_invalidas.append(
+                'hoja Colaboradores, fila %d, columna Situacion: supera 40 caracteres '
+                '(se guarda en MotivoNoAplica).' % i)
     for i, s in enumerate(salarios, start=2):
         if not es_numero(s['Monto']):
             filas_invalidas.append('hoja Salarios, fila %d, columna Monto: no es un numero.' % i)
@@ -187,6 +225,16 @@ def main():
                 'hoja Salarios, fila %d, columna FechaVigenciaDesde: fecha en formato '
                 'ambiguo, no es un serial de Excel. No se adivina el formato: corrija '
                 'la celda con el formato de fecha nativo de Excel.' % i)
+        if not longitud_valida(s['Cedula'], 20):
+            filas_invalidas.append('hoja Salarios, fila %d, columna Cedula: supera 20 caracteres.' % i)
+        if not longitud_valida(s['Observacion'], 400):
+            filas_invalidas.append('hoja Salarios, fila %d, columna Observacion: supera 400 caracteres.' % i)
+        origen_valido = origen_normalizado(s['Origen'])
+        if origen_valido is None:
+            filas_invalidas.append(
+                'hoja Salarios, fila %d, columna Origen: no es "Rol" ni "Ajuste".' % i)
+        elif not longitud_valida(origen_valido, 20):
+            filas_invalidas.append('hoja Salarios, fila %d, columna Origen: supera 20 caracteres.' % i)
     if filas_invalidas:
         print('Hay %d filas con datos que no se pueden interpretar con seguridad. No se genera nada.' % len(filas_invalidas))
         for msg in filas_invalidas:
@@ -219,8 +267,11 @@ def main():
     L.append('   de aqui la llave es IdEmpleado: hay una cedula que en R_Usuarios')
     L.append('   comparten seis usuarios activos, y elegir uno seria inventar. */')
     L.append('DECLARE @Faltantes INT;')
-    L.append('CREATE TABLE #C (Cedula VARCHAR(20), Nombre NVARCHAR(400), Empresa VARCHAR(120),')
-    L.append('                 Jornada INT, DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40));')
+    L.append('/* Sin columna de nombre: HE_ColaboradorParametro no la tiene, el MERGE')
+    L.append('   nunca la leyo, y son 64 nombres completos de peso muerto dentro del')
+    L.append('   unico archivo de la fase que contiene datos personales. */')
+    L.append('CREATE TABLE #C (Cedula VARCHAR(20), Empresa VARCHAR(120), Jornada INT,')
+    L.append('                 DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40));')
     L.append('CREATE TABLE #S (Cedula VARCHAR(20), Monto DECIMAL(18,2), Desde DATE, Origen VARCHAR(20),')
     L.append('                 Observacion VARCHAR(400) NULL);')
     L.append('')
@@ -231,15 +282,16 @@ def main():
         motivo = 'NULL' if aplica == '1' and situacion == 'Activo' else q(situacion)
         divisor = c['DivisorManual'].strip()
         divisor_sql = divisor if divisor else 'NULL'
-        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s, %s);' % (
-            q(c['Cedula'].strip()), q(c['NombreCompleto'].strip()), q(c['Empresa'].strip()),
+        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s);' % (
+            q(c['Cedula'].strip()), q(c['Empresa'].strip()),
             c['JornadaHorasDia'].strip() or '0', divisor_sql, aplica, motivo))
 
     L.append('')
     for s in salarios:
         desde = fecha_de_excel(s['FechaVigenciaDesde'], VIGENCIA_ROL)
+        origen = origen_normalizado(s['Origen'])
         L.append('INSERT INTO #S VALUES (%s, %s, %s, %s, %s);' % (
-            q(s['Cedula'].strip()), s['Monto'].strip() or '0', q(desde), q(s['Origen'].strip() or 'Rol'),
+            q(s['Cedula'].strip()), s['Monto'].strip() or '0', q(desde), q(origen),
             q(s['Observacion'].strip())))
 
     L.append('')
@@ -279,7 +331,17 @@ def main():
     L.append('END TRY')
     L.append('BEGIN CATCH')
     L.append('    IF @@TRANCOUNT > 0 ROLLBACK TRANSACTION;')
-    L.append("    PRINT 'Error, la carga quedo revertida: ' + ERROR_MESSAGE();")
+    L.append('    /* 2628 (truncamiento de string) y 8152 (truncamiento numerico)')
+    L.append('       incluyen el valor truncado DENTRO de su propio ERROR_MESSAGE().')
+    L.append('       Aqui ese valor puede ser un dato personal -una nota de RRHH, un')
+    L.append('       sueldo-, y el generador valida longitudes antes de llegar hasta')
+    L.append('       aqui precisamente para que esto no pase; esto es la ultima linea')
+    L.append('       de defensa. Numero y linea del error se imprimen siempre; el')
+    L.append('       mensaje completo, solo cuando NO es uno de esos dos. */')
+    L.append("    PRINT 'Error, la carga quedo revertida. ERROR_NUMBER=' + CONVERT(VARCHAR(12), ERROR_NUMBER())")
+    L.append("                                          + ' ERROR_LINE=' + CONVERT(VARCHAR(12), ERROR_LINE());")
+    L.append('    IF ERROR_NUMBER() NOT IN (2628, 8152)')
+    L.append("        PRINT 'Detalle: ' + ERROR_MESSAGE();")
     L.append('END CATCH')
     L.append('GO')
 

@@ -45,16 +45,6 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// El corte de un periodo es el ULTIMO dia del mes. Con el primero, un
-        /// ajuste salarial que entra en vigencia a mitad de mes quedaria fuera
-        /// y la persona cobraria el mes entero al sueldo anterior.
-        /// </summary>
-        public static DateTime UltimoDiaDelMes(int anio, int mes)
-        {
-            return new DateTime(anio, mes, DateTime.DaysInMonth(anio, mes));
-        }
-
-        /// <summary>
         /// Rellena una fila a partir de su salario y los parametros. Es el unico
         /// punto donde la pantalla toca el calculo, y delega entero en
         /// NegHorasExtras: aqui no hay ni una division ni un factor.
@@ -157,9 +147,43 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Decide con que horas se queda la fila. Tres entradas y una regla: la
+        /// correccion manual gana siempre; si nadie corrigio, mandan las tareas.
+        ///
+        /// Que la siembra se repita en cada apertura no es un descuido: al 2026-09-16
+        /// el 80% de las horas del periodo seguia en "Solicitado", asi que volver a
+        /// abrir es como entran las que se aprobaron despues.
+        ///
+        /// La Observacion se preserva pase lo que pase: es una nota de quien reviso,
+        /// no un numero que se recalcule.
+        /// </summary>
+        public static void ResolverHoras(EntHeFila fila, EntHeFila anterior, EntHeFila aprobadas)
+        {
+            if (fila == null) { return; }
+
+            if (anterior != null) { fila.Observacion = anterior.Observacion; }
+
+            bool esManual = anterior != null
+                            && string.Equals(anterior.HorasOrigen, "Manual", StringComparison.OrdinalIgnoreCase);
+
+            if (esManual)
+            {
+                fila.Horas50 = anterior.Horas50;
+                fila.Horas100 = anterior.Horas100;
+                fila.HorasOrigen = "Manual";
+                return;
+            }
+
+            fila.Horas50 = aprobadas != null ? aprobadas.Horas50 : 0m;
+            fila.Horas100 = aprobadas != null ? aprobadas.Horas100 : 0m;
+            fila.HorasOrigen = "Tareas";
+        }
+
+        /// <summary>
         /// Si dos filas son identicas en todo lo que Sp_RTA_HeGuardarFila
         /// escribe -los snapshots del colaborador, el divisor, los tres
-        /// valores hora, las horas, los totales y la observacion-.
+        /// valores hora, las horas, los totales, la observacion y el origen
+        /// de las horas-.
         ///
         /// Reabrir un periodo llama a GuardarFila para cada colaborador sin
         /// comparar antes, y el UPDATE del procedimiento pisa
@@ -176,6 +200,12 @@ namespace CapaNegocio
         /// tratan null y "" como el mismo valor: el DAO nunca devuelve null
         /// para estas columnas, pero una fila armada en memoria si podria
         /// llegar sin inicializar.
+        ///
+        /// HorasOrigen entra en la comparacion porque el UPDATE tambien lo
+        /// escribe. Si faltara aqui, una fila que solo cambia de origen -la
+        /// que alguien corrigio a mano y despues vuelve a ser sembrable, o al
+        /// reves- se daria por igual y no se escribiria: la siembra se
+        /// perderia sin un solo error.
         /// </summary>
         public static bool FilaSinCambios(EntHeFila nueva, EntHeFila anterior)
         {
@@ -198,7 +228,8 @@ namespace CapaNegocio
                 && nueva.Total100 == anterior.Total100
                 && nueva.TotalHoras == anterior.TotalHoras
                 && nueva.TotalHE == anterior.TotalHE
-                && TextoIgual(nueva.Observacion, anterior.Observacion);
+                && TextoIgual(nueva.Observacion, anterior.Observacion)
+                && TextoIgual(nueva.HorasOrigen, anterior.HorasOrigen);
         }
 
         private static bool TextoIgual(string a, string b)
@@ -313,21 +344,34 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Abre un periodo: lo crea si no existe y le arma el snapshot, una fila
-        /// por colaborador activo.
+        /// Abre un periodo -un rango de fechas, ya no un mes calendario-: lo
+        /// crea si no existe y le arma el snapshot, una fila por colaborador
+        /// activo, con las horas extras ya aprobadas del rango sembradas.
         ///
-        /// Correrlo dos veces sobre el mismo mes es inofensivo y ademas util: si
-        /// la primera vez fallo a medias, la segunda completa lo que falte. Lo
-        /// que NO hace es pisar las horas ya digitadas de una fila que existe,
-        /// porque Sp_RTA_HeGuardarFila recibe las horas que se le pasan y aqui
-        /// solo se le pasan las de la fila que ya estaba.
+        /// Correrlo dos veces sobre el mismo rango es inofensivo y ademas
+        /// necesario: si la primera vez fallo a medias, la segunda completa lo
+        /// que falte, y sobre todo entran las horas que se aprobaron despues
+        /// de la ultima apertura -al 2026-09-16 el 80% del periodo seguia en
+        /// "Solicitado"-. Lo que NO pisa es una correccion manual: eso lo
+        /// decide ResolverHoras, fila por fila.
         /// </summary>
-        public static EntRespuesta AbrirPeriodo(int anio, int mes, string usuario, string ip)
+        public static EntRespuesta AbrirPeriodo(DateTime inicio, DateTime fin, string usuario, string ip)
         {
             EntRespuesta respuesta = new EntRespuesta();
 
             int idPeriodo;
-            int creado = DaoHorasExtras.CrearPeriodo(anio, mes, usuario, ip, out idPeriodo);
+            int creado = DaoHorasExtras.CrearPeriodo(inicio, fin, usuario, ip, out idPeriodo);
+
+            /* El solapamiento no es "no se pudo": es un rango que pisa a otro
+               periodo, y quien lo vea tiene que saber que le paso para poder
+               corregir las fechas en vez de reintentar lo mismo. */
+            if (creado == -5)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "El rango se cruza con otro periodo ya abierto.";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
 
             if (creado != 0 || idPeriodo <= 0)
             {
@@ -348,11 +392,21 @@ namespace CapaNegocio
             foreach (EntHeFila f in existente.Filas) { yaEstan[f.IdEmpleado] = f; }
 
             EntHeParametros parametros = NegHeParametros.Vigentes();
-            DateTime corte = UltimoDiaDelMes(anio, mes);
+
+            /* El corte es el ULTIMO dia del rango. Con el primero, un ajuste
+               salarial que entra en vigencia a mitad de periodo quedaria fuera
+               y la persona cobraria el periodo entero al sueldo anterior. */
+            DateTime corte = fin;
 
             List<EntHeFila> colaboradores;
             Dictionary<long, List<EntHeSalario>> salarios;
             DaoHorasExtras.LeerInsumos(corte, out colaboradores, out salarios);
+
+            /* Las horas ya aprobadas del rango, una sola lectura para las 62
+               filas. Solo trae a quien tiene alguna: el que no esta en el
+               diccionario no registro ninguna, y ResolverHoras lo traduce a
+               cero. */
+            Dictionary<long, EntHeFila> aprobadas = DaoHorasExtras.LeerHorasAprobadas(inicio, fin);
 
             /* GuardarFila puede fallar fila por fila -por ejemplo si alguien
                cierra el periodo a mitad del bucle-. No se detalla cual: basta
@@ -372,12 +426,8 @@ namespace CapaNegocio
             {
                 EntHeFila anterior = yaEstan.ContainsKey(fila.IdEmpleado) ? yaEstan[fila.IdEmpleado] : null;
 
-                if (anterior != null)
-                {
-                    fila.Horas50 = anterior.Horas50;
-                    fila.Horas100 = anterior.Horas100;
-                    fila.Observacion = anterior.Observacion;
-                }
+                ResolverHoras(fila, anterior,
+                              aprobadas.ContainsKey(fila.IdEmpleado) ? aprobadas[fila.IdEmpleado] : null);
 
                 List<EntHeSalario> historial = salarios.ContainsKey(fila.IdEmpleado)
                                                ? salarios[fila.IdEmpleado]
@@ -401,7 +451,7 @@ namespace CapaNegocio
                    reapertura. Auditarlas llenaria la tabla de ruido y
                    enterraria los cambios reales, que son lo unico que
                    importa en una disputa de nomina. */
-                int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, false);
+                int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, false, fila.HorasOrigen);
                 if (guardado != 0) { filasConError++; }
             }
 
@@ -534,6 +584,12 @@ namespace CapaNegocio
             fila.Horas100 = horas100;
             fila.Observacion = observacion ?? "";
 
+            /* Aqui hay una persona escribiendo, asi que la fila pasa a ser
+               Manual. Es lo unico que hace que su correccion sobreviva a la
+               proxima apertura: ResolverHoras respeta lo manual y vuelve a
+               sembrar todo lo demas desde las horas aprobadas. */
+            fila.HorasOrigen = "Manual";
+
             /* El 6.6 funcional manda revalidar la elegibilidad y el sueldo contra
                la base al guardar, porque pudieron cambiar desde que se cargo la
                pantalla. No choca con el snapshot: el snapshot protege al periodo
@@ -542,7 +598,7 @@ namespace CapaNegocio
                esta abierto, que un sueldo corregido se aplique es lo correcto:
                si no, alguien arregla un sueldo mal cargado y el periodo del mes
                sigue pagando sobre el equivocado, sin avisar. */
-            DateTime corte = UltimoDiaDelMes(pantalla.Periodo.Anio, pantalla.Periodo.Mes);
+            DateTime corte = pantalla.Periodo.FechaFin;
 
             List<EntHeFila> colaboradores;
             Dictionary<long, List<EntHeSalario>> salarios;
@@ -594,7 +650,7 @@ namespace CapaNegocio
             /* auditar = true: es una persona editando una fila, y registrar
                eso es lo que el 8 funcional exige que no falte -el Excel no
                dejaba rastro de quien escribio una hora-. */
-            int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, true);
+            int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, true, fila.HorasOrigen);
 
             if (guardado == -2)
             {

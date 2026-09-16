@@ -24,23 +24,11 @@ namespace CapaPruebas
             return p;
         }
 
-        [TestMethod]
-        public void UltimoDiaDelMes_Septiembre2026_Da30()
-        {
-            Assert.AreEqual(new DateTime(2026, 9, 30), NegHorasExtrasPantalla.UltimoDiaDelMes(2026, 9));
-        }
-
-        [TestMethod]
-        public void UltimoDiaDelMes_FebreroBisiesto_Da29()
-        {
-            Assert.AreEqual(new DateTime(2028, 2, 29), NegHorasExtrasPantalla.UltimoDiaDelMes(2028, 2));
-        }
-
         /// <summary>
-        /// El corte tiene que ser el ULTIMO dia del mes y no el primero. Con el
-        /// primero, un ajuste que entra en vigencia el dia 1 del periodo se
+        /// El corte tiene que ser el ULTIMO dia del rango y no el primero. Con
+        /// el primero, un ajuste que entra en vigencia el dia 1 del periodo se
         /// tomaria, pero uno que entra el dia 15 quedaria fuera y la persona
-        /// cobraria el mes entero al sueldo viejo.
+        /// cobraria el periodo entero al sueldo viejo.
         /// </summary>
         [TestMethod]
         public void AplicarCalculo_UsaElSalarioVigenteAlCorte()
@@ -51,7 +39,7 @@ namespace CapaPruebas
                 new EntHeSalario { Monto = 1500m, FechaVigenciaDesde = new DateTime(2026, 9, 15), Origen = "Ajuste" }
             };
 
-            decimal alCorte = NegHorasExtras.SalarioVigente(historial, NegHorasExtrasPantalla.UltimoDiaDelMes(2026, 9));
+            decimal alCorte = NegHorasExtras.SalarioVigente(historial, new DateTime(2026, 9, 30));
 
             Assert.AreEqual(1500m, alCorte);
         }
@@ -246,6 +234,105 @@ namespace CapaPruebas
         /// viceversa con TotalHoras50) el resultado seria 3 en vez de 0.39, o
         /// 0.39 en vez de 3, y la prueba lo marcaria.
         /// </summary>
+        /// <summary>
+        /// La siembra: al abrir el periodo, una fila nueva se queda con las
+        /// horas ya aprobadas del rango, y marcada como "Tareas" para que la
+        /// proxima apertura vuelva a sembrarla.
+        /// </summary>
+        [TestMethod]
+        public void SiembraLaFilaNuevaConLasHorasAprobadas()
+        {
+            EntHeFila fila = new EntHeFila();
+            fila.IdEmpleado = 68;
+            EntHeFila aprobadas = new EntHeFila();
+            aprobadas.Horas50 = 6.98m;
+            aprobadas.Horas100 = 37.82m;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, null, aprobadas);
+
+            Assert.AreEqual(6.98m, fila.Horas50);
+            Assert.AreEqual(37.82m, fila.Horas100);
+            Assert.AreEqual("Tareas", fila.HorasOrigen);
+        }
+
+        /// <summary>
+        /// La correccion de una persona gana sobre la siembra. Si no, reabrir
+        /// el periodo -que pasa cada vez que alguien incorpora a un
+        /// colaborador nuevo- borraria en silencio lo que Nomina ya reviso.
+        /// </summary>
+        [TestMethod]
+        public void NoPisaLaCorreccionManualAlReabrir()
+        {
+            EntHeFila fila = new EntHeFila();
+            EntHeFila anterior = new EntHeFila();
+            anterior.Horas50 = 3m;
+            anterior.Horas100 = 0m;
+            anterior.HorasOrigen = "Manual";
+            EntHeFila aprobadas = new EntHeFila();
+            aprobadas.Horas50 = 6.98m;
+            aprobadas.Horas100 = 37.82m;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, anterior, aprobadas);
+
+            Assert.AreEqual(3m, fila.Horas50);
+            Assert.AreEqual(0m, fila.Horas100);
+            Assert.AreEqual("Manual", fila.HorasOrigen);
+        }
+
+        [TestMethod]
+        public void VuelveASembrarLaFilaQueSeguiaSiendoDeTareas()
+        {
+            /* Las aprobaciones llegan tarde: al 2026-09-16 el 80% de las horas del
+               periodo seguia en Solicitado. Reabrir es como entran las que se
+               aprobaron despues. */
+            EntHeFila fila = new EntHeFila();
+            EntHeFila anterior = new EntHeFila();
+            anterior.Horas50 = 2m;
+            anterior.HorasOrigen = "Tareas";
+            EntHeFila aprobadas = new EntHeFila();
+            aprobadas.Horas50 = 9m;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, anterior, aprobadas);
+
+            Assert.AreEqual(9m, fila.Horas50);
+            Assert.AreEqual("Tareas", fila.HorasOrigen);
+        }
+
+        /// <summary>
+        /// Quien no aparece en el diccionario de aprobadas es que no registro
+        /// ninguna hora: se traduce a cero, y la fila sigue siendo sembrable.
+        /// </summary>
+        [TestMethod]
+        public void SinHorasAprobadasLaFilaQuedaEnCeroYSigueSiendoSembrable()
+        {
+            EntHeFila fila = new EntHeFila();
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, null, null);
+
+            Assert.AreEqual(0m, fila.Horas50);
+            Assert.AreEqual(0m, fila.Horas100);
+            Assert.AreEqual("Tareas", fila.HorasOrigen);
+        }
+
+        /// <summary>
+        /// La Observacion es una nota de quien reviso, no un numero que se
+        /// recalcule: sobrevive a la siembra.
+        /// </summary>
+        [TestMethod]
+        public void LaObservacionSePreservaAunqueSeVuelvaASembrar()
+        {
+            EntHeFila fila = new EntHeFila();
+            EntHeFila anterior = new EntHeFila();
+            anterior.Observacion = "revisar con el jefe";
+            anterior.HorasOrigen = "Tareas";
+            EntHeFila aprobadas = new EntHeFila();
+            aprobadas.Horas50 = 9m;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, anterior, aprobadas);
+
+            Assert.AreEqual("revisar con el jefe", fila.Observacion);
+        }
+
         [TestMethod]
         public void SumarTotales_SumaLosTotalesYaRedondeados()
         {
@@ -384,6 +471,24 @@ namespace CapaPruebas
             nueva.Observacion = "cambio real";
 
             Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(nueva, FilaCompleta()));
+        }
+
+        /// <summary>
+        /// El origen de las horas es una columna mas del UPDATE. Si
+        /// FilaSinCambios no lo mirara, una fila que solo cambia de origen se
+        /// daria por igual y no se escribiria: la siembra se perderia sin un
+        /// solo error a la vista.
+        /// </summary>
+        [TestMethod]
+        public void FilaSinCambios_ConUnOrigenDistinto_DaFalse()
+        {
+            EntHeFila nueva = FilaCompleta();
+            nueva.HorasOrigen = "Tareas";
+
+            EntHeFila anterior = FilaCompleta();
+            anterior.HorasOrigen = "Manual";
+
+            Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(nueva, anterior));
         }
 
         /// <summary>

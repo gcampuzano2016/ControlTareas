@@ -39,7 +39,7 @@ namespace CapaNegocio
         private const int FilaDeResumen = 4;
         // Fila 5 queda en blanco a proposito, como separador antes de los encabezados.
         private const int FilaDeEncabezados = 6;
-        private const int UltimaColumna = 22;
+        private const int UltimaColumna = 23;
 
         private const string FormatoMoneda = "#,##0.00";
         private const string FormatoHoras = "#,##0.00";
@@ -50,7 +50,7 @@ namespace CapaNegocio
         // Nomina veria horas x tarifa sin cuadrar con el total de la fila.
         private const string FormatoValorHora = "#,##0.000000";
 
-        // El orden aqui define el orden de las columnas 1..22 en la hoja. Las
+        // El orden aqui define el orden de las columnas 1..23 en la hoja. Las
         // columnas de dinero llevan la moneda en el propio encabezado: el
         // archivo no la dice en ningun otro sitio.
         private static readonly string[] Encabezados = new string[]
@@ -76,7 +76,8 @@ namespace CapaNegocio
             "Total HE (USD)",
             "Motivo No Aplica",
             "Advertencia",
-            "Observación"
+            "Observación",
+            "Origen de las Horas"
         };
 
         /// <summary>Los seis totales que se acumulan por fila, en dinero y horas.</summary>
@@ -92,8 +93,9 @@ namespace CapaNegocio
 
         /// <summary>
         /// Nombre de archivo con el codigo de documento controlado que usan los
-        /// demas exportadores del sistema. Lleva el periodo (para identificar
-        /// de que mes es) y la fecha y hora de armado (para distinguir dos
+        /// demas exportadores del sistema. Lleva el rango del periodo (para
+        /// identificar que fechas cubre, que ya no tienen por que ser un mes
+        /// calendario) y la fecha y hora de armado (para distinguir dos
         /// exportaciones del mismo periodo hechas en dias distintos, por
         /// ejemplo tras reabrir y volver a cerrar).
         /// </summary>
@@ -101,8 +103,8 @@ namespace CapaNegocio
         {
             DateTime ahora = DateTime.Now;
             return "F-CS-001 Reporte de Horas Extras"
-                + periodo.Anio.ToString(CultureInfo.InvariantCulture)
-                + periodo.Mes.ToString("00", CultureInfo.InvariantCulture)
+                + periodo.FechaInicio.ToString("yyyyMMdd", CultureInfo.InvariantCulture)
+                + "_" + periodo.FechaFin.ToString("yyyyMMdd", CultureInfo.InvariantCulture)
                 + "_" + ahora.ToString("yyyyMMdd", CultureInfo.InvariantCulture)
                 + "_" + ahora.ToString("HHmmss", CultureInfo.InvariantCulture)
                 + ".xlsx";
@@ -193,9 +195,17 @@ namespace CapaNegocio
             return new ExcelPackage();
         }
 
+        /// <summary>
+        /// La etiqueta del periodo: su rango completo. Un periodo ya no es un
+        /// mes, asi que "09/2026" mentiria en cuanto alguien abra una quincena.
+        /// </summary>
         private static string TextoPeriodo(EntHePeriodo periodo)
         {
-            return string.Format(CultureInfo.InvariantCulture, "{0:00}/{1}", periodo.Mes, periodo.Anio);
+            return string.Format(
+                CultureInfo.InvariantCulture,
+                "{0:dd/MM/yyyy} - {1:dd/MM/yyyy}",
+                periodo.FechaInicio,
+                periodo.FechaFin);
         }
 
         /// <summary>Titulo, cierre, fecha de generacion y resumen: la cabecera comun a las dos hojas.</summary>
@@ -426,6 +436,11 @@ namespace CapaNegocio
                 hoja.Cells[fila, 21].Value = TieneAdvertencia(f) ? "Sí" : "";
                 hoja.Cells[fila, 22].Value = f.Observacion;
 
+                // Ultima columna: de donde salieron las horas. Nomina necesita
+                // distinguir lo que sembro el sistema desde las tareas aprobadas
+                // de lo que corrigio una persona a mano.
+                hoja.Cells[fila, 23].Value = f.HorasOrigen;
+
                 fila++;
             }
 
@@ -510,6 +525,7 @@ namespace CapaNegocio
             hoja.Column(6).Width = 22;
             hoja.Column(20).Width = 26;
             hoja.Column(22).Width = 30;
+            hoja.Column(23).Width = 18;
         }
     }
 }

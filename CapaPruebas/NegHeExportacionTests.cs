@@ -13,7 +13,7 @@ namespace CapaPruebas
     /// celdas.
     ///
     /// Muchas de estas pruebas recorren toda la fila en vez de apuntar a una
-    /// columna fija, a proposito: el orden exacto de las 22 columnas no es
+    /// columna fija, a proposito: el orden exacto de las 23 columnas no es
     /// parte del contrato (solo lo son las constantes publicas de
     /// NegHeExportacion), asi que una prueba que dependiera de un numero de
     /// columna que no sea publico se romperia con un reacomodo inocente.
@@ -29,8 +29,8 @@ namespace CapaPruebas
             EntHePantalla p = new EntHePantalla();
             p.Periodo = new EntHePeriodo();
             p.Periodo.IdPeriodo = 7;
-            p.Periodo.Anio = 2026;
-            p.Periodo.Mes = 9;
+            p.Periodo.FechaInicio = new DateTime(2026, 8, 17);
+            p.Periodo.FechaFin = new DateTime(2026, 9, 15);
             p.Periodo.EstadoPeriodo = estado;
 
             EntHeFila f = new EntHeFila();
@@ -76,8 +76,8 @@ namespace CapaPruebas
         {
             EntHePantalla p = new EntHePantalla();
             p.Periodo = new EntHePeriodo();
-            p.Periodo.Anio = 2026;
-            p.Periodo.Mes = 9;
+            p.Periodo.FechaInicio = new DateTime(2026, 8, 17);
+            p.Periodo.FechaFin = new DateTime(2026, 9, 15);
             p.Periodo.EstadoPeriodo = "Cerrado";
 
             EntHeFila f = new EntHeFila();
@@ -219,16 +219,17 @@ namespace CapaPruebas
         }
 
         [TestMethod]
-        public void NombreDeArchivo_LlevaElPeriodoYLaExtension()
+        public void NombreDeArchivo_LlevaElRangoYLaExtension()
         {
             EntHePeriodo p = new EntHePeriodo();
-            p.Anio = 2026;
-            p.Mes = 9;
+            p.FechaInicio = new DateTime(2026, 8, 17);
+            p.FechaFin = new DateTime(2026, 9, 15);
 
             string nombre = NegHeExportacion.NombreDeArchivo(p);
 
-            StringAssert.Contains(nombre, "2026");
-            StringAssert.Contains(nombre, "09");
+            /* El rango completo, no el mes: dos periodos del mismo mes -dos
+               quincenas- tienen que dar nombres distintos. */
+            StringAssert.Contains(nombre, "20260817_20260915");
             StringAssert.EndsWith(nombre, ".xlsx");
         }
 
@@ -309,7 +310,28 @@ namespace CapaPruebas
             int fila = NegHeExportacion.PrimeraFilaDeDatos;
 
             Assert.IsTrue(FilaContiene(hoja, fila, "4242"), "No se encontro el IdEmpleado en ninguna columna.");
-            Assert.IsTrue(FilaContiene(hoja, fila, "09/2026"), "No se encontro una columna con el periodo repetido en la fila.");
+            Assert.IsTrue(FilaContiene(hoja, fila, "17/08/2026 - 15/09/2026"), "No se encontro una columna con el periodo repetido en la fila.");
+        }
+
+        /// <summary>
+        /// Nomina tiene que poder distinguir lo que sembro el sistema desde
+        /// las tareas aprobadas de lo que corrigio una persona: sin esa
+        /// columna, las dos cosas se ven igual en el archivo.
+        /// </summary>
+        [TestMethod]
+        public void Construir_ExportaElOrigenDeLasHoras()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Cerrado");
+            pantalla.Filas[0].HorasOrigen = "Manual";
+
+            ExcelWorksheet hoja = Abrir(NegHeExportacion.Construir(pantalla));
+
+            Assert.IsTrue(
+                FilaContiene(hoja, NegHeExportacion.PrimeraFilaDeDatos - 1, "Origen de las Horas"),
+                "Falta el encabezado de la columna de origen.");
+            Assert.IsTrue(
+                FilaContiene(hoja, NegHeExportacion.PrimeraFilaDeDatos, "Manual"),
+                "No se encontro el origen de las horas en ninguna columna de la fila.");
         }
 
         /// <summary>

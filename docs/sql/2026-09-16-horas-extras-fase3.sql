@@ -409,13 +409,30 @@ BEGIN
     SET @Fallos += 1;
 END
 
-/* El parametro nuevo tiene que existir Y tener valor por omision, o las
-   llamadas de 22 parametros que ya hay en produccion dejarian de funcionar. */
+/* El parametro nuevo tiene que existir, o las llamadas de 22 parametros que
+   ya hay en produccion dejarian de funcionar.
+
+   Esta asercion comprobaba ANTES tambien has_default_value = 1, y fallaba
+   siempre. No por un defecto del procedimiento: sys.parameters.has_default_value
+   solo se llena para objetos CLR y vale 0 para TODOS los parametros de un
+   procedimiento T-SQL, tengan o no valor por omision -se puede ver comparando
+   @Auditar con @IdPeriodo, que no tiene ninguno y tambien sale 0-.
+
+   Que el valor por omision funciona no se puede afirmar desde el catalogo:
+   se comprueba llamando al procedimiento con 22 parametros. Sobre un
+   IdPeriodo inexistente devuelve Respuestas = -1 sin tocar ninguna fila, asi
+   que es una prueba inofensiva:
+
+     EXEC dbo.Sp_RTA_HeGuardarFila @IdPeriodo=-999, @IdEmpleado=-999, ... ,
+          @Usuario='prueba', @Ip='';
+
+   Si el default faltara, esa llamada daria "expects parameter '@Auditar'"
+   en vez de -1. */
 IF NOT EXISTS (SELECT 1 FROM sys.parameters
                 WHERE object_id = OBJECT_ID('dbo.Sp_RTA_HeGuardarFila')
-                  AND name = '@Auditar' AND has_default_value = 1)
+                  AND name = '@Auditar')
 BEGIN
-    RAISERROR('FALLO: @Auditar no existe o no tiene valor por omision.', 16, 1);
+    RAISERROR('FALLO: el parametro @Auditar no quedo en Sp_RTA_HeGuardarFila.', 16, 1);
     SET @Fallos += 1;
 END
 

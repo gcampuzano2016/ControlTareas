@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=4" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=5" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -88,6 +88,29 @@
            ganaba, dejando esta columna con el color de texto normal en vez
            del atenuado. */
         #tablaHE td.he-col-derivada { color: var(--crm-tinta-suave); }
+
+        /* Origen de las horas. «Tareas» es lo normal -lo sembró el sistema
+           desde las solicitudes ya aprobadas- y va en gris discreto, con el
+           mismo par de colores que .label-default; «Manual» es lo excepcional
+           -alguien revisó esa fila y la corrigió a mano- y va en azul, que es
+           el único color de esta pantalla que no significa ni bien ni mal,
+           solo «mírame».
+
+           El azul va en hexadecimal y no en una variable porque la paleta de
+           dos-tema.css no tiene ninguno: sus cinco colores son acento, verde,
+           ámbar, rojo y neutro, todos con carga de significado. Se respeta la
+           forma de la casa -tinte de fondo, color saturado de texto- sin
+           inventar una variable global para una sola pantalla. */
+        .he-origen {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: var(--crm-r-pildora);
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .he-origen-tareas { background: var(--crm-neutro-tinte); color: var(--crm-tinta-suave); }
+        .he-origen-manual { background: #E8EFF8; color: #1B4F8A; }
     </style>
 </asp:Content>
 
@@ -122,26 +145,18 @@
                                 </p>
                                 <p class="text-muted" id="lblInfoCierre" style="font-size: 11px; margin: 0; display: none"></p>
                             </div>
+                            <!-- El período dejó de ser un mes calendario: es un rango libre, y
+                                 con eso entran las quincenas, que es lo que Nómina pide de
+                                 verdad. Dos input type="date", que mandan siempre yyyy-MM-dd
+                                 sin importar el idioma del navegador -es justo el formato que
+                                 espera Fecha() en AdministrarHorasExtras.ashx.cs-. -->
                             <div class="form-group col-lg-2">
-                                <label>Abrir año</label>
-                                <input type="number" class="form-control" id="inAnioAbrir" min="2020" max="2100" />
+                                <label>Desde</label>
+                                <input type="date" class="form-control" id="inFechaInicio" />
                             </div>
                             <div class="form-group col-lg-2">
-                                <label>Abrir mes</label>
-                                <select class="form-control" id="inMesAbrir">
-                                    <option value="1">Enero</option>
-                                    <option value="2">Febrero</option>
-                                    <option value="3">Marzo</option>
-                                    <option value="4">Abril</option>
-                                    <option value="5">Mayo</option>
-                                    <option value="6">Junio</option>
-                                    <option value="7">Julio</option>
-                                    <option value="8">Agosto</option>
-                                    <option value="9">Septiembre</option>
-                                    <option value="10">Octubre</option>
-                                    <option value="11">Noviembre</option>
-                                    <option value="12">Diciembre</option>
-                                </select>
+                                <label>Hasta</label>
+                                <input type="date" class="form-control" id="inFechaFin" />
                             </div>
                             <div class="form-group col-lg-3" style="padding-top: 25px">
                                 <button type="button" class="btn btn-default" id="btnAbrirPeriodo" onclick="AbrirPeriodoSeleccionado()">
@@ -255,11 +270,15 @@
                                         <th>Total horas</th>
                                         <th>Total HE (USD)</th>
                                         <th>Observación</th>
+                                        <!-- Columna nueva de la fase 4, al final de las que ya
+                                             había: dice si las horas las sembró el sistema desde
+                                             las tareas aprobadas o si las revisó una persona. -->
+                                        <th>Origen</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cuerpoHE">
                                     <tr>
-                                        <td colspan="15" class="text-center text-muted">
+                                        <td colspan="16" class="text-center text-muted">
                                             Seleccione o abra un período para comenzar.
                                         </td>
                                     </tr>
@@ -277,6 +296,7 @@
                                         <td class="he-col-derivada" id="piePago100" style="display: none">USD 0.00</td>
                                         <td id="pieTotalHoras">0.00</td>
                                         <td id="pieTotalHE">USD 0.00</td>
+                                        <td></td>
                                         <td></td>
                                     </tr>
                                 </tfoot>

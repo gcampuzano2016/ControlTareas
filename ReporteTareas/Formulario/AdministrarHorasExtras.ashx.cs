@@ -127,13 +127,35 @@ namespace JsonJQueryNetHorasExtras
             }
         }
 
+        /// <summary>
+        /// El periodo ya no es un mes calendario sino un rango libre de
+        /// fechas, asi que lo que llega son dos fechas y no dos enteros.
+        ///
+        /// Las dos se comprueban ANTES de llamar a CapaNegocio: una fecha que
+        /// no parsea vale DateTime.MinValue -mismo criterio que Entero() y
+        /// Decimal(), donde un dato ilegible vale cero-, y abrir un periodo
+        /// que empieza el 01/01/0001 no es un rango que nadie quisiera pedir:
+        /// es un formulario a medio llenar. Sin esta comprobacion llegaria al
+        /// procedimiento y volveria como "No se pudo abrir el periodo", que no
+        /// le dice a nadie que lo que falta es teclear las fechas.
+        ///
+        /// El solapamiento con otro periodo NO se comprueba aqui: eso lo
+        /// resuelve NegHorasExtrasPantalla.AbrirPeriodo, que es quien conoce el
+        /// codigo -5 del procedimiento y devuelve su propio mensaje.
+        /// </summary>
         private string AbrirPeriodo(HttpContext context, dynamic p)
         {
             try
             {
-                int anio = Entero(p["anio"]);
-                int mes = Entero(p["mes"]);
-                EntRespuesta r = NegHorasExtrasPantalla.AbrirPeriodo(anio, mes, Usuario(context), Ip(context));
+                DateTime inicio = Fecha(p["fechaInicio"]);
+                DateTime fin = Fecha(p["fechaFin"]);
+
+                if (inicio == DateTime.MinValue || fin == DateTime.MinValue)
+                {
+                    return Mensaje("0", "Indique la fecha de inicio y la de fin del periodo.", "warning");
+                }
+
+                EntRespuesta r = NegHorasExtrasPantalla.AbrirPeriodo(inicio, fin, Usuario(context), Ip(context));
                 return new JavaScriptSerializer().Serialize(r);
             }
             catch (Exception ex)
@@ -274,6 +296,31 @@ namespace JsonJQueryNetHorasExtras
             return decimal.TryParse(texto, System.Globalization.NumberStyles.AllowDecimalPoint,
                                     System.Globalization.CultureInfo.InvariantCulture, out d) && d >= 0m
                    ? d : 0m;
+        }
+
+        /// <summary>
+        /// Una fecha ilegible vale DateTime.MinValue, igual que un numero
+        /// ilegible vale cero en Entero() y en Decimal(): este handler no
+        /// adivina que fecha quiso escribir alguien, solo distingue "hay una
+        /// fecha" de "no la hay", y quien llama decide que hacer con eso.
+        ///
+        /// ParseExact con "yyyy-MM-dd" e InvariantCulture, no Parse: un
+        /// input type="date" manda SIEMPRE ese formato, independientemente
+        /// del idioma del navegador, y un Parse con la cultura del servidor
+        /// leeria "2026-09-16" bien por casualidad pero confundiria dia y mes
+        /// el dia que algo mande "09/16/2026" o "16/09/2026". Aqui solo se
+        /// acepta lo que de verdad manda la pantalla.
+        /// </summary>
+        private static DateTime Fecha(object v)
+        {
+            DateTime f;
+            string texto = Convert.ToString(v);
+            if (texto == null) { return DateTime.MinValue; }
+
+            return DateTime.TryParseExact(texto.Trim(), "yyyy-MM-dd",
+                                          System.Globalization.CultureInfo.InvariantCulture,
+                                          System.Globalization.DateTimeStyles.None, out f)
+                   ? f : DateTime.MinValue;
         }
 
         private static string Mensaje(string estado, string mensaje, string tipo)

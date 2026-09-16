@@ -126,6 +126,10 @@
     <Compile Include="EntUsuario.cs" />
     <Compile Include="EntVacaciones.cs" />
     <Compile Include="ERegistroTrabajo.cs" />
+    <Compile Include="EntHeInsumo.cs" />
+    <Compile Include="EntHeParametros.cs" />
+    <Compile Include="EntHeResultado.cs" />
+    <Compile Include="EntHeSalario.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

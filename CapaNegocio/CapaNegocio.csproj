@@ -207,6 +207,7 @@
     <Compile Include="NegPerfil.cs" />
     <Compile Include="NegPerfilCampos.cs" />
     <Compile Include="NegPerfilCv.cs" />
+    <Compile Include="NegHorasExtras.cs" />
     <Compile Include="NegPerfilInicio.cs" />
     <Compile Include="NegPerfiles.cs" />
     <Compile Include="NegPlanRecuperacion.cs" />

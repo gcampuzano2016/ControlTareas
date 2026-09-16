@@ -39,6 +39,7 @@
     <Compile Include="NegPerfilCvTests.cs" />
     <Compile Include="EntPerfilEquipoTests.cs" />
     <Compile Include="NegHorasExtrasTests.cs" />
+    <Compile Include="NegHorasExtrasPantallaTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=3" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=4" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */

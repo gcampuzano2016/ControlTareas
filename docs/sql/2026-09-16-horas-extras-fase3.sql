@@ -556,6 +556,59 @@ BEGIN
 END
 GO
 
+/* ------------------------- 5c. la descarga que se registra ---------------- */
+/* Agregado en la fase 3b, sobre este mismo archivo -ya ejecutado en
+   produccion- porque es idempotente y los procedimientos se recrean: correrlo
+   de nuevo solo agrega este procedimiento, no repite nada de arriba. */
+IF OBJECT_ID('dbo.Sp_RTA_HeRegistrarDescarga','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeRegistrarDescarga;
+GO
+/* Respuestas: 0 registrado, -1 el periodo no existe -y aun asi se registro-.
+
+   Es la unica accion de todo el modulo que saca el sueldo de las 62 personas
+   del periodo de un solo clic: DescargarHorasExtras.ashx arma el xlsx entero
+   en memoria y lo entrega. La edicion celda por celda ya quedaba en
+   HE_DetalleAuditoria (Sp_RTA_HeGuardarFila); la descarga del archivo
+   completo no quedaba registrada en ningun lado hasta ahora, y el acceso por
+   perfil sin rastro es control a medias: impide, pero no deja saber quien lo
+   uso ni cuando.
+
+   EstadoAnterior y EstadoNuevo llevan los dos el estado REAL del periodo, y
+   son iguales porque descargar no cambia nada -misma lectura de la columna
+   que Sp_RTA_HeRegistrarReaperturaDenegada: "de que estado a que estado paso
+   esto" es de ninguno a ninguno-.
+
+   El periodo inexistente se registra igual, con 'NoExiste' en los dos
+   estados, por la misma razon que en la reapertura denegada: un IdPeriodo
+   inventado es el caso mas sospechoso de todos, y es tambien el unico que con
+   seguridad no salio de la pantalla. No hay clave foranea contra HE_Periodo
+   -el modulo entero no las usa-, asi que no rompe nada. */
+CREATE PROCEDURE dbo.Sp_RTA_HeRegistrarDescarga
+    @IdPeriodo INT,
+    @Usuario   VARCHAR(50),
+    @Ip        VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Estado VARCHAR(10);
+    SELECT @Estado = EstadoPeriodo FROM dbo.HE_Periodo WHERE IdPeriodo = @IdPeriodo;
+
+    DECLARE @EstadoRegistrado VARCHAR(10) = ISNULL(@Estado, 'NoExiste');
+
+    INSERT INTO dbo.HE_PeriodoAuditoria (IdPeriodo, Accion, EstadoAnterior, EstadoNuevo, Usuario, Ip)
+    VALUES (@IdPeriodo, 'Descargar', @EstadoRegistrado, @EstadoRegistrado, @Usuario, @Ip);
+
+    IF @Estado IS NULL
+    BEGIN
+        SELECT Respuestas = -1;
+        RETURN;
+    END
+
+    SELECT Respuestas = 0;
+END
+GO
+
 /* ------------------------------------------------- 6. aserciones ----------- */
 
 /* Todo este bloque va en un solo batch, sin GO en medio: un GO entre el
@@ -605,6 +658,12 @@ END
 IF OBJECT_ID('dbo.Sp_RTA_HeRegistrarReaperturaDenegada','P') IS NULL
 BEGIN
     RAISERROR('FALLO: Sp_RTA_HeRegistrarReaperturaDenegada no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeRegistrarDescarga','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeRegistrarDescarga no quedo creado.', 16, 1);
     SET @Fallos += 1;
 END
 

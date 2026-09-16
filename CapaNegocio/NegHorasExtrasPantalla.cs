@@ -297,6 +297,22 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Deja constancia de que alguien descargo el periodo en Excel: la unica
+        /// accion de este modulo que saca el sueldo de las 62 personas de un
+        /// clic, y hasta ahora la unica sin rastro -la edicion celda por celda
+        /// ya lo tenia, dentro de Sp_RTA_HeGuardarFila-.
+        ///
+        /// NO comprueba perfiles, igual que ReabrirPeriodo: eso ya lo hizo el
+        /// handler antes de llegar aqui. Una excepcion de la base se deja
+        /// subir tal cual -no hay try/catch aqui- para que el handler decida:
+        /// sin registro, no hay descarga.
+        /// </summary>
+        public static void RegistrarDescarga(int idPeriodo, string usuario, string ip)
+        {
+            DaoHorasExtras.RegistrarDescarga(idPeriodo, usuario, ip);
+        }
+
+        /// <summary>
         /// Abre un periodo: lo crea si no existe y le arma el snapshot, una fila
         /// por colaborador activo.
         ///

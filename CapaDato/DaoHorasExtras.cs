@@ -191,6 +191,37 @@ namespace CapaDato
             return resultado;
         }
 
+        /// <summary>
+        /// Deja constancia en HE_PeriodoAuditoria de que alguien descargo el
+        /// periodo en Excel. Respuestas: 0 registrado, -1 el periodo no existe
+        /// -y aun asi se registro-.
+        ///
+        /// Quien puede llamar a esto lo decide la capa web: la base no conoce
+        /// perfiles y este metodo no comprueba ninguno.
+        /// </summary>
+        public static int RegistrarDescarga(int idPeriodo, string usuario, string ip)
+        {
+            int resultado = -1;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeRegistrarDescarga", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
         public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar)
         {
             int resultado = -1;

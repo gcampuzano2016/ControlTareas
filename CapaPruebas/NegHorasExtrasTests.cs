@@ -211,5 +211,83 @@ namespace CapaPruebas
             Assert.AreEqual(0.13m, totalesPorFila[0]);
             Assert.AreEqual(0.39m, NegHorasExtras.TotalDelPeriodo(totalesPorFila));
         }
+
+        /// <summary>
+        /// A igual fecha de vigencia, el ajuste manda sobre el rol (documento
+        /// funcional 2.2). El ajuste es el que sustituye al rol. El criterio es
+        /// por origen, no por posicion en la lista, porque RRHH puede mantener
+        /// la plantilla en cualquier orden.
+        ///
+        /// Este caso pone el rol DESPUES del ajuste en la lista: si el codigo
+        /// ganador fuera "el ultimo", fallaria. Es decir, la prueba falla con
+        /// el codigo viejo y pasa con el nuevo.
+        /// </summary>
+        [TestMethod]
+        public void Caso8c_AjusteYRolMismaFecha_ElAjusteGanaPorOrigen()
+        {
+            List<EntHeSalario> historial = new List<EntHeSalario>
+            {
+                new EntHeSalario { Monto = 1500m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "Ajuste" },
+                new EntHeSalario { Monto = 1200m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "Rol" }
+            };
+
+            Assert.AreEqual(1500m, NegHorasExtras.SalarioVigente(historial, new DateTime(2026, 9, 30)));
+        }
+
+        /// <summary>
+        /// La comparacion de origen es case-insensitive con trim, porque la
+        /// plantilla que mantiene RRHH puede tener variaciones de formato.
+        /// </summary>
+        [TestMethod]
+        public void Caso8d_AjusteConMayusculasYEspacios_SeReconoc()
+        {
+            List<EntHeSalario> historial = new List<EntHeSalario>
+            {
+                new EntHeSalario { Monto = 1500m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "  AJUSTE  " },
+                new EntHeSalario { Monto = 1200m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "Rol" }
+            };
+
+            Assert.AreEqual(1500m, NegHorasExtras.SalarioVigente(historial, new DateTime(2026, 9, 30)));
+        }
+
+        /// <summary>
+        /// Horas negativas son dato malo: bloquean el cierre como salario
+        /// cero o divisor cero, no son un credito silencioso en la nomina.
+        /// </summary>
+        [TestMethod]
+        public void Caso9_HorasNegativas50_MarcarAdvertenciaYPagaCero()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(1200m, 8, -5m, 0m), Par());
+
+            Assert.AreEqual(0.00m, r.Total50);
+            Assert.AreEqual(0.00m, r.Total100);
+            Assert.AreEqual(0.00m, r.TotalHE);
+            Assert.IsTrue(r.TieneAdvertencia);
+        }
+
+        [TestMethod]
+        public void Caso9b_HorasNegativas100_MarcarAdvertenciaYPagaCero()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(1200m, 8, 0m, -3m), Par());
+
+            Assert.AreEqual(0.00m, r.Total50);
+            Assert.AreEqual(0.00m, r.Total100);
+            Assert.AreEqual(0.00m, r.TotalHE);
+            Assert.IsTrue(r.TieneAdvertencia);
+        }
+
+        /// <summary>
+        /// Con advertencia, el total de horas debe ser cero para que no se
+        /// cuele un numero negativo en una columna que alguien suma en pantalla.
+        /// La advertencia es la senial; un cero con aviso es mas limpio.
+        /// </summary>
+        [TestMethod]
+        public void Caso9c_ConAdvertencia_TotalHorasCero()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(0m, 8, 10m, 0m), Par());
+
+            Assert.AreEqual(0.00m, r.TotalHoras);
+            Assert.IsTrue(r.TieneAdvertencia);
+        }
     }
 }

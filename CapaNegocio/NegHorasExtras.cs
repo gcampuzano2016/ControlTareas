@@ -24,6 +24,14 @@ namespace CapaNegocio
         /// El sueldo que rige a una fecha: el mas reciente cuya vigencia no sea
         /// posterior al corte. Cero si no hay ninguno, que el calculo traduce a
         /// hora ordinaria cero y fila marcada.
+        ///
+        /// A igual fecha de vigencia, gana el ajuste sobre el rol (documento
+        /// funcional 2.2): el ajuste sustituye al rol. La comparacion es
+        /// case-insensitive con trim para que variaciones de formato en la
+        /// plantilla que mantiene RRHH no cambien la decision de pago.
+        ///
+        /// Si el desempate es entre dos filas del mismo origen, gana la ultima
+        /// de la lista: es estable y no hay criterio de negocio que aplicar.
         /// </summary>
         public static decimal SalarioVigente(List<EntHeSalario> historial, DateTime corte)
         {
@@ -31,19 +39,51 @@ namespace CapaNegocio
 
             decimal vigente = 0m;
             DateTime mejor = DateTime.MinValue;
+            string origenGanador = "";
 
             foreach (EntHeSalario s in historial)
             {
                 if (s == null) { continue; }
                 if (s.FechaVigenciaDesde > corte) { continue; }
 
-                /* >= y no >: si dos montos comparten fecha de vigencia, gana el
-                   ultimo de la lista, que es el que la consulta trae mas
-                   reciente. Es arbitrario pero tiene que ser estable. */
-                if (s.FechaVigenciaDesde >= mejor)
+                /* Si es una fecha mas reciente, gana sin mirar origen. */
+                if (s.FechaVigenciaDesde > mejor)
                 {
                     mejor = s.FechaVigenciaDesde;
                     vigente = s.Monto;
+                    origenGanador = s.Origen ?? "";
+                }
+                /* Si es la misma fecha, solo gana si su origen es superior al
+                   del actual ganador (ajuste > rol) o si son del mismo origen
+                   y esta al final de la lista (estable). */
+                else if (s.FechaVigenciaDesde == mejor)
+                {
+                    string origenActual = (s.Origen ?? "").Trim().ToUpperInvariant();
+                    string origenActualGanador = origenGanador.Trim().ToUpperInvariant();
+                    bool esAjuste = origenActual == "AJUSTE";
+                    bool eraAjuste = origenActualGanador == "AJUSTE";
+
+                    /* A igual fecha: ajuste manda sobre rol. Si son del mismo
+                       origen, el ultimo de la lista (esta iteracion) gana. */
+                    if (esAjuste && !eraAjuste)
+                    {
+                        vigente = s.Monto;
+                        origenGanador = s.Origen ?? "";
+                    }
+                    else if (!esAjuste && !eraAjuste)
+                    {
+                        /* Dos roles en la misma fecha: el ultimo gana. */
+                        vigente = s.Monto;
+                        origenGanador = s.Origen ?? "";
+                    }
+                    else if (esAjuste && eraAjuste)
+                    {
+                        /* Dos ajustes en la misma fecha: el ultimo gana. */
+                        vigente = s.Monto;
+                        origenGanador = s.Origen ?? "";
+                    }
+                    /* esAjuste=false && eraAjuste=true: el rol no gana sobre
+                       el ajuste, se mantiene el vigente. */
                 }
             }
 
@@ -90,14 +130,18 @@ namespace CapaNegocio
             r.Divisor = Divisor(insumo, parametros);
 
             /* Equivalente al IFERROR del Excel. Sin esto, un divisor en cero
-               lanzaria DivideByZeroException a media nomina. */
-            if (r.Divisor <= 0 || insumo.SalarioBaseVigente <= 0m)
+               lanzaria DivideByZeroException a media nomina. Horas negativas
+               no son credito: son dato malo que bloquea el cierre de periodo
+               como salario cero o divisor cero. La pantalla no deberia
+               permitirlas, pero el calculo no confia en la pantalla. */
+            if (r.Divisor <= 0 || insumo.SalarioBaseVigente <= 0m ||
+                insumo.Horas50 < 0m || insumo.Horas100 < 0m)
             {
                 r.TieneAdvertencia = true;
                 r.ValorHoraOrdinaria = 0m;
                 r.ValorHora50 = 0m;
                 r.ValorHora100 = 0m;
-                r.TotalHoras = insumo.Horas50 + insumo.Horas100;
+                r.TotalHoras = 0m;
                 return r;
             }
 

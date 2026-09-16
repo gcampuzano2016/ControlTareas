@@ -253,6 +253,29 @@ namespace CapaPruebas
         }
 
         /// <summary>
+        /// Caso8c y esta juntas fijan que el ganador es el mismo
+        /// independientemente del orden de la lista. En produccion, el orden
+        /// no lo decide RRHH sino el DAO de la fase 2 via un ORDER BY en SQL
+        /// Server, que a fecha igual es arbitrario (el indice es por IdEmpleado
+        /// y FechaVigenciaDesde DESC, no hay tercera columna). Por eso el
+        /// desempate no puede depender del orden.
+        ///
+        /// Este caso pone el rol ANTES del ajuste, al contrario de Caso8c.
+        /// Ambas deben devolver el ajuste (1500).
+        /// </summary>
+        [TestMethod]
+        public void Caso8e_AjusteYRolMismaFecha_IndependienteDelOrden()
+        {
+            List<EntHeSalario> historial = new List<EntHeSalario>
+            {
+                new EntHeSalario { Monto = 1200m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "Rol" },
+                new EntHeSalario { Monto = 1500m, FechaVigenciaDesde = new DateTime(2026, 9, 1), Origen = "Ajuste" }
+            };
+
+            Assert.AreEqual(1500m, NegHorasExtras.SalarioVigente(historial, new DateTime(2026, 9, 30)));
+        }
+
+        /// <summary>
         /// Horas negativas son dato malo: bloquean el cierre como salario
         /// cero o divisor cero, no son un credito silencioso en la nomina.
         /// </summary>

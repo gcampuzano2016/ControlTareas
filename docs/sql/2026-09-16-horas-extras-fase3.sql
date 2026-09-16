@@ -46,7 +46,44 @@ BEGIN
 END
 GO
 
-/* --------------------------- 2. guardar fila, ahora con auditoria ---------- */
+/* ------------------------------- 2. la auditoria del periodo --------------- */
+/* Pocas filas -una por cierre y una por reapertura, no una por colaborador-.
+
+   Se crea porque acabamos de restringir quien puede reabrir un periodo -solo
+   el perfil 18, decision de la capa web- y una restriccion sin registro es
+   medio control: impide, pero no deja saber quien la uso ni cuando. Sin esta
+   tabla, HE_Periodo solo guarda el ULTIMO cierre: cerrar el dia A con un
+   usuario, reabrir, y cerrar de nuevo el dia B con otro usuario borra todo
+   rastro del primer cierre. Esta tabla es la que preserva la historia
+   completa, cierre por cierre y reapertura por reapertura.
+
+   Estilo igual al resto del modulo: IDENTITY, constraints con nombre,
+   DATETIME2(0) con SYSDATETIME() por omision, y sin claves foraneas -el
+   modulo entero no las usa-. */
+IF OBJECT_ID('dbo.HE_PeriodoAuditoria','U') IS NULL
+BEGIN
+    CREATE TABLE dbo.HE_PeriodoAuditoria
+    (
+        IdPeriodoAuditoria INT IDENTITY(1,1) NOT NULL,
+        IdPeriodo          INT          NOT NULL,
+        Accion             VARCHAR(10)  NOT NULL,   -- Cerrar | Reabrir
+        EstadoAnterior     VARCHAR(10)  NOT NULL,
+        EstadoNuevo        VARCHAR(10)  NOT NULL,
+        Fecha              DATETIME2(0) NOT NULL
+            CONSTRAINT DF_HePeriodoAud_Fecha DEFAULT (SYSDATETIME()),
+        Usuario            VARCHAR(50)  NULL,
+        Ip                 VARCHAR(64)  NULL,
+
+        CONSTRAINT PK_HE_PeriodoAuditoria PRIMARY KEY (IdPeriodoAuditoria)
+    );
+    CREATE INDEX IX_HE_PeriodoAuditoria_Periodo_Fecha
+        ON dbo.HE_PeriodoAuditoria (IdPeriodo, Fecha DESC);
+    PRINT 'HE_PeriodoAuditoria creada.';
+END
+ELSE PRINT 'HE_PeriodoAuditoria ya existia.';
+GO
+
+/* --------------------------- 3. guardar fila, ahora con auditoria ---------- */
 IF OBJECT_ID('dbo.Sp_RTA_HeGuardarFila','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_HeGuardarFila;
 GO
@@ -68,7 +105,21 @@ GO
    verdad, y ahi ISNULL(..., '') si hace falta para no confundir NULL con ''.
 
    Respuestas: 0 bien, -1 el periodo no existe, -2 el periodo no esta Abierto.
-   Devuelve ademas IdDetalle, que es con lo que se escribe la auditoria. */
+   Devuelve ademas IdDetalle, que es con lo que se escribe la auditoria.
+
+   Sobre @Auditar = 0 por omision: los scripts SQL se despliegan antes que los
+   binarios, asi que hay una ventana en la que el DAO viejo -sin este
+   parametro- sigue llamando a este procedimiento. Con el valor por omision en
+   0 esa ventana no audita nada, lo cual es inofensivo porque en esa ventana
+   todavia nadie esta editando con el codigo nuevo. Si el valor por omision
+   fuera 1, esa misma ventana escribiria auditoria de mas en cada apertura de
+   periodo -62 filas de ruido por AbrirPeriodo, que nunca manda @Auditar=1-.
+   Quien llame sin pasar @Auditar por accion u omision obtiene entonces
+   comportamiento de AbrirPeriodo -sin auditoria-, nunca al reves: si el
+   llamador olvidadizo fuera GuardarHoras, la fila se guardaria igual, pero
+   el cambio quedaria sin rastro y sin ningun error que lo delate. Por
+   eso GuardarHoras debe pasar @Auditar = 1 explicito; no hay forma de que la
+   base lo detecte por si sola. */
 CREATE PROCEDURE dbo.Sp_RTA_HeGuardarFila
     @IdPeriodo               INT,
     @IdEmpleado              BIGINT,
@@ -188,7 +239,7 @@ BEGIN
 END
 GO
 
-/* ----------------------------------------- 3. cerrar el periodo ------------ */
+/* ----------------------------------------- 4. cerrar el periodo ------------ */
 IF OBJECT_ID('dbo.Sp_RTA_HeCerrarPeriodo','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_HeCerrarPeriodo;
 GO
@@ -197,7 +248,13 @@ GO
 
    El -3 es la validacion del 6 funcional: una fila cuyo valor hora salio en
    cero es un dato malo -falta el sueldo- y cerrar el mes con ella dejaria
-   congelado un pago que nadie calculo. */
+   congelado un pago que nadie calculo.
+
+   El cierre queda registrado en HE_PeriodoAuditoria, en el mismo camino que
+   hace el UPDATE de HE_Periodo: el INSERT va justo despues, antes del unico
+   SELECT final que devuelve exito. Los tres RETURN de arriba -periodo
+   inexistente, no Abierto, filas en cero- salen del procedimiento sin pasar
+   por ahi, asi que nunca se audita un cierre que no ocurrio. */
 CREATE PROCEDURE dbo.Sp_RTA_HeCerrarPeriodo
     @IdPeriodo INT,
     @Usuario   VARCHAR(50),
@@ -240,11 +297,14 @@ BEGIN
            UsuarioCierre = @Usuario, Ip_Modificacion = @Ip
      WHERE IdPeriodo = @IdPeriodo;
 
+    INSERT INTO dbo.HE_PeriodoAuditoria (IdPeriodo, Accion, EstadoAnterior, EstadoNuevo, Usuario, Ip)
+    VALUES (@IdPeriodo, 'Cerrar', @Estado, 'Cerrado', @Usuario, @Ip);
+
     SELECT Respuestas = 0, FilasConProblema = 0;
 END
 GO
 
-/* --------------------------------------- 4. reabrir el periodo ------------- */
+/* --------------------------------------- 5. reabrir el periodo ------------- */
 IF OBJECT_ID('dbo.Sp_RTA_HeReabrirPeriodo','P') IS NOT NULL
     DROP PROCEDURE dbo.Sp_RTA_HeReabrirPeriodo;
 GO
@@ -255,8 +315,14 @@ GO
    periodo este en un estado desde el que reabrir tenga sentido.
 
    FechaCierre y UsuarioCierre NO se borran: son el rastro de que este mes
-   estuvo cerrado alguna vez y quien lo cerro. Borrarlos haria que un periodo
-   reabierto fuera indistinguible de uno que nunca se cerro. */
+   estuvo cerrado alguna vez y quien lo cerro LA ULTIMA VEZ -si se reabre y se
+   vuelve a cerrar, estas dos columnas quedan con el cierre mas reciente y el
+   anterior se pierde de HE_Periodo-. La historia COMPLETA, cierre por cierre y
+   reapertura por reapertura, esta en HE_PeriodoAuditoria: cada cierre y cada
+   reapertura de este periodo, con su usuario, su ip y la fecha, en el orden en
+   que ocurrieron. Restringir quien reabre a un solo perfil sin dejar este
+   registro seria un control a medias: impediria pero no permitiria saber
+   quien lo uso. */
 CREATE PROCEDURE dbo.Sp_RTA_HeReabrirPeriodo
     @IdPeriodo INT,
     @Usuario   VARCHAR(50),
@@ -284,11 +350,14 @@ BEGIN
        SET EstadoPeriodo = 'Abierto', Ip_Modificacion = @Ip
      WHERE IdPeriodo = @IdPeriodo;
 
+    INSERT INTO dbo.HE_PeriodoAuditoria (IdPeriodo, Accion, EstadoAnterior, EstadoNuevo, Usuario, Ip)
+    VALUES (@IdPeriodo, 'Reabrir', @Estado, 'Abierto', @Usuario, @Ip);
+
     SELECT Respuestas = 0;
 END
 GO
 
-/* ------------------------------------------------- 5. aserciones ----------- */
+/* ------------------------------------------------- 6. aserciones ----------- */
 
 /* Todo este bloque va en un solo batch, sin GO en medio: un GO entre el
    DECLARE y su ultimo uso hace fallar el script entero con "must declare
@@ -307,6 +376,12 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns
                 WHERE object_id = OBJECT_ID('dbo.HE_DetalleAuditoria') AND name = 'TextoNuevo')
 BEGIN
     RAISERROR('FALLO: HE_DetalleAuditoria.TextoNuevo no quedo creada.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.HE_PeriodoAuditoria','U') IS NULL
+BEGIN
+    RAISERROR('FALLO: HE_PeriodoAuditoria no quedo creada.', 16, 1);
     SET @Fallos += 1;
 END
 

@@ -127,9 +127,18 @@ namespace CapaPruebas
         }
 
         /// <summary>
-        /// El total del periodo es la suma de los totales YA redondeados, no el
-        /// redondeo de la suma. Con 0.125 por fila la diferencia se ve: tres
-        /// filas dan 0.39 sumando redondeados y 0.38 redondeando la suma.
+        /// Esta prueba NO distingue "sumar los redondeados" de "redondear la
+        /// suma": Total50 = 0.13m ya llega a dos decimales, y sumar tres veces
+        /// 0.13 da 0.39 con cualquiera de las dos formas. Esa distincion no se
+        /// puede dar por esta via porque Total50 siempre llega redondeado
+        /// desde Calcular; un fixture que la forzara estaria probando un caso
+        /// imposible.
+        ///
+        /// Lo que si atrapa: que el total en dinero salga del campo correcto.
+        /// Horas50 vale 1m y Total50 vale 0.13m -a proposito distintos-, asi
+        /// que si TotalPago50 se armara sumando Horas50 en vez de Total50 (o
+        /// viceversa con TotalHoras50) el resultado seria 3 en vez de 0.39, o
+        /// 0.39 en vez de 3, y la prueba lo marcaria.
         /// </summary>
         [TestMethod]
         public void SumarTotales_SumaLosTotalesYaRedondeados()
@@ -161,6 +170,30 @@ namespace CapaPruebas
             NegHorasExtrasPantalla.SumarTotales(p);
 
             Assert.AreEqual(0m, p.TotalPagar);
+        }
+
+        /// <summary>
+        /// Tope de horas por celda del lado del servidor. El documento
+        /// funcional lo declara como validacion de cliente, pero el cliente no
+        /// es de fiar: un dedazo de 10000 horas tiene que rechazarse aqui, no
+        /// pagarse.
+        /// </summary>
+        [TestMethod]
+        public void ExcedeTopePorCelda_Con201_DaTrue()
+        {
+            Assert.IsTrue(NegHorasExtrasPantalla.ExcedeTopePorCelda(201m));
+        }
+
+        [TestMethod]
+        public void ExcedeTopePorCelda_Con200_DaFalse()
+        {
+            Assert.IsFalse(NegHorasExtrasPantalla.ExcedeTopePorCelda(200m));
+        }
+
+        [TestMethod]
+        public void ExcedeTopePorCelda_ConDiezMil_DaTrue()
+        {
+            Assert.IsTrue(NegHorasExtrasPantalla.ExcedeTopePorCelda(10000m));
         }
     }
 }

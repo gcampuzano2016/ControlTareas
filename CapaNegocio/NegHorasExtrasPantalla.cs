@@ -17,6 +17,14 @@ namespace CapaNegocio
     public static class NegHorasExtrasPantalla
     {
         /// <summary>
+        /// Tope de horas por celda del lado del servidor. El documento
+        /// funcional lo declara como validacion de cliente, pero el cliente
+        /// no es de fiar: un dedazo de 10000 horas pasa el parseo y el
+        /// calculo si nadie lo detiene aqui.
+        /// </summary>
+        private const decimal TopeHorasPorCelda = 200m;
+
+        /// <summary>
         /// La lista de periodos, para el selector de la pantalla. Envuelve al
         /// DAO para que el handler nunca lo toque directo: toda la casa entra
         /// por CapaNegocio.
@@ -24,6 +32,16 @@ namespace CapaNegocio
         public static List<EntHePeriodo> ListarPeriodos()
         {
             return DaoHorasExtras.ListarPeriodos();
+        }
+
+        /// <summary>
+        /// Si una celda de horas supera el tope. No es dato corrupto como las
+        /// horas negativas -que se marcan y se pagan en cero-: es un error de
+        /// captura que hay que devolver para que lo corrijan, no absorber.
+        /// </summary>
+        public static bool ExcedeTopePorCelda(decimal horas)
+        {
+            return horas > TopeHorasPorCelda;
         }
 
         /// <summary>
@@ -143,6 +161,13 @@ namespace CapaNegocio
             Dictionary<long, List<EntHeSalario>> salarios;
             DaoHorasExtras.LeerInsumos(corte, out colaboradores, out salarios);
 
+            /* GuardarFila puede fallar fila por fila -por ejemplo si alguien
+               cierra el periodo a mitad del bucle-. No se detalla cual: basta
+               con cuantas, porque quien lo vea vuelve a abrir el periodo, que
+               es idempotente y se autocura. Callar el fallo aqui seria peor:
+               CargarPantalla devolveria exito con lo que haya quedado. */
+            int filasConError = 0;
+
             foreach (EntHeFila fila in colaboradores)
             {
                 if (yaEstan.ContainsKey(fila.IdEmpleado))
@@ -157,10 +182,20 @@ namespace CapaNegocio
                                                : new List<EntHeSalario>();
 
                 AplicarCalculo(fila, NegHorasExtras.SalarioVigente(historial, corte), parametros);
-                DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
+
+                int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
+                if (guardado != 0) { filasConError++; }
             }
 
-            return CargarPantalla(idPeriodo);
+            EntRespuesta resultado = CargarPantalla(idPeriodo);
+
+            if (filasConError > 0 && resultado.estado == "1")
+            {
+                resultado.mensaje = filasConError + " fila(s) no se pudieron guardar. Vuelva a abrir el período para reintentar.";
+                resultado.tipoMensaje = "warning";
+            }
+
+            return resultado;
         }
 
         /// <summary>El periodo, sus filas y el tablero, listos para la pantalla.</summary>
@@ -232,6 +267,19 @@ namespace CapaNegocio
                 return respuesta;
             }
 
+            /* Tope del lado del servidor: nunca confiar solo en el cliente.
+               Un dedazo de 10000 horas pasaria el parseo y el calculo si nadie
+               lo detiene aqui. No es como las horas negativas -que se marcan y
+               se pagan en cero porque son dato corrupto-: esto es un error de
+               captura que hay que devolver para que lo corrijan. */
+            if (ExcedeTopePorCelda(horas50) || ExcedeTopePorCelda(horas100))
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "Las horas de una celda no pueden superar " + TopeHorasPorCelda.ToString("0") + ".";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
             fila.Horas50 = horas50;
             fila.Horas100 = horas100;
             fila.Observacion = observacion ?? "";
@@ -250,10 +298,15 @@ namespace CapaNegocio
             Dictionary<long, List<EntHeSalario>> salarios;
             DaoHorasExtras.LeerInsumos(corte, out colaboradores, out salarios);
 
+            bool activoEnMaestro = false;
+
             foreach (EntHeFila actual in colaboradores)
             {
                 if (actual.IdEmpleado != idEmpleado) { continue; }
 
+                activoEnMaestro = true;
+                fila.CedulaSnapshot = actual.CedulaSnapshot;
+                fila.NombreSnapshot = actual.NombreSnapshot;
                 fila.AplicaHESnapshot = actual.AplicaHESnapshot;
                 fila.JornadaHorasDiaSnapshot = actual.JornadaHorasDiaSnapshot;
                 fila.DivisorManual = actual.DivisorManual;
@@ -262,11 +315,31 @@ namespace CapaNegocio
                 break;
             }
 
-            List<EntHeSalario> historial = salarios.ContainsKey(idEmpleado)
-                                           ? salarios[idEmpleado]
-                                           : new List<EntHeSalario>();
+            decimal salario;
 
-            AplicarCalculo(fila, NegHorasExtras.SalarioVigente(historial, corte), NegHeParametros.Vigentes());
+            if (activoEnMaestro)
+            {
+                List<EntHeSalario> historial = salarios.ContainsKey(idEmpleado)
+                                               ? salarios[idEmpleado]
+                                               : new List<EntHeSalario>();
+
+                salario = NegHorasExtras.SalarioVigente(historial, corte);
+            }
+            else
+            {
+                /* Ya no esta activo en el maestro -Sp_RTA_HeInsumos filtra
+                   Estado = '1' tanto para colaboradores como para el
+                   historial de sueldos-, asi que no hay con que revalidar. No
+                   se recalcula contra un historial vacio: eso daria salario
+                   cero, fila marcada con advertencia y el pago que ya tenia
+                   se borraria. Se usa el sueldo congelado del periodo -la
+                   jornada, el divisor y AplicaHESnapshot quedan como
+                   estaban- porque alguien que salio a mitad de mes trabajo
+                   horas antes de salir y Nomina tiene que poder pagarselas. */
+                salario = fila.SalarioBaseSnapshot;
+            }
+
+            AplicarCalculo(fila, salario, NegHeParametros.Vigentes());
 
             int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
 
@@ -286,7 +359,15 @@ namespace CapaNegocio
                 return respuesta;
             }
 
-            return CargarPantalla(idPeriodo);
+            EntRespuesta resultado = CargarPantalla(idPeriodo);
+
+            if (!activoEnMaestro && resultado.estado == "1")
+            {
+                resultado.mensaje = "Este colaborador ya no está activo en el maestro: se usó el sueldo congelado del período.";
+                resultado.tipoMensaje = "warning";
+            }
+
+            return resultado;
         }
     }
 }

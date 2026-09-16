@@ -143,18 +143,18 @@ namespace CapaDato
                 cmd.Parameters.Add("@EmpresaSnapshot", SqlDbType.VarChar, 120).Value = f.EmpresaSnapshot ?? "";
                 cmd.Parameters.Add("@CargoSnapshot", SqlDbType.VarChar, 200).Value = f.CargoSnapshot ?? "";
                 cmd.Parameters.Add("@JornadaHorasDiaSnapshot", SqlDbType.Int).Value = f.JornadaHorasDiaSnapshot;
-                cmd.Parameters.Add("@SalarioBaseSnapshot", SqlDbType.Decimal).Value = f.SalarioBaseSnapshot;
+                AddDecimalParam(cmd, "@SalarioBaseSnapshot", f.SalarioBaseSnapshot, 18, 2);
                 cmd.Parameters.Add("@AplicaHESnapshot", SqlDbType.Bit).Value = f.AplicaHESnapshot;
                 cmd.Parameters.Add("@Divisor", SqlDbType.Int).Value = f.Divisor;
-                cmd.Parameters.Add("@ValorHoraOrdinaria", SqlDbType.Decimal).Value = f.ValorHoraOrdinaria;
-                cmd.Parameters.Add("@ValorHora50", SqlDbType.Decimal).Value = f.ValorHora50;
-                cmd.Parameters.Add("@ValorHora100", SqlDbType.Decimal).Value = f.ValorHora100;
-                cmd.Parameters.Add("@Horas50", SqlDbType.Decimal).Value = f.Horas50;
-                cmd.Parameters.Add("@Horas100", SqlDbType.Decimal).Value = f.Horas100;
-                cmd.Parameters.Add("@Total50", SqlDbType.Decimal).Value = f.Total50;
-                cmd.Parameters.Add("@Total100", SqlDbType.Decimal).Value = f.Total100;
-                cmd.Parameters.Add("@TotalHoras", SqlDbType.Decimal).Value = f.TotalHoras;
-                cmd.Parameters.Add("@TotalHE", SqlDbType.Decimal).Value = f.TotalHE;
+                AddDecimalParam(cmd, "@ValorHoraOrdinaria", f.ValorHoraOrdinaria, 18, 6);
+                AddDecimalParam(cmd, "@ValorHora50", f.ValorHora50, 18, 6);
+                AddDecimalParam(cmd, "@ValorHora100", f.ValorHora100, 18, 6);
+                AddDecimalParam(cmd, "@Horas50", f.Horas50, 9, 2);
+                AddDecimalParam(cmd, "@Horas100", f.Horas100, 9, 2);
+                AddDecimalParam(cmd, "@Total50", f.Total50, 18, 2);
+                AddDecimalParam(cmd, "@Total100", f.Total100, 18, 2);
+                AddDecimalParam(cmd, "@TotalHoras", f.TotalHoras, 9, 2);
+                AddDecimalParam(cmd, "@TotalHE", f.TotalHE, 18, 2);
                 cmd.Parameters.Add("@Observacion", SqlDbType.VarChar, 400).Value = f.Observacion ?? "";
                 cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
                 cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
@@ -227,18 +227,23 @@ namespace CapaDato
         /// <summary>
         /// Los parametros vigentes hoy, tal cual estan en HE_Parametro.
         ///
-        /// Todavia no lo consume nadie: lo entrega esta tarea porque el DAO se
-        /// termina de una sola vez, y lo usara NegHorasExtrasPantalla en la
-        /// siguiente tarea de esta fase.
+        /// La tabla esta pensada para historial -UX_HE_Parametro_Clave la
+        /// indexa por (Clave, FechaVigenciaDesde DESC)-, asi que el filtro por
+        /// FechaVigenciaHasta IS NULL no basta para garantizar una sola fila
+        /// por clave. Si algun dia hubiera mas de una vigencia abierta para la
+        /// misma clave, se queda con la mas reciente que no sea futura, y no
+        /// con la que el lector visite al final.
         /// </summary>
         public static Dictionary<string, decimal> LeerParametrosVigentes()
         {
             Dictionary<string, decimal> valores = new Dictionary<string, decimal>();
+            Dictionary<string, DateTime> vigenciaElegida = new Dictionary<string, DateTime>();
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
             using (SqlConnection cnx = conexion.conectar())
             using (SqlCommand cmd = new SqlCommand(
-                "SELECT Clave, Valor FROM dbo.HE_Parametro WHERE FechaVigenciaHasta IS NULL", cnx))
+                "SELECT Clave, Valor, FechaVigenciaDesde FROM dbo.HE_Parametro " +
+                "WHERE FechaVigenciaHasta IS NULL AND FechaVigenciaDesde <= GETDATE()", cnx))
             {
                 cmd.CommandType = CommandType.Text;
                 cnx.Open();
@@ -247,7 +252,13 @@ namespace CapaDato
                 {
                     while (dr.Read())
                     {
-                        valores[Convert.ToString(dr["Clave"]).Trim()] = Convert.ToDecimal(dr["Valor"]);
+                        string clave = Convert.ToString(dr["Clave"]).Trim();
+                        DateTime desde = Convert.ToDateTime(dr["FechaVigenciaDesde"]);
+
+                        if (vigenciaElegida.ContainsKey(clave) && vigenciaElegida[clave] >= desde) { continue; }
+
+                        valores[clave] = Convert.ToDecimal(dr["Valor"]);
+                        vigenciaElegida[clave] = desde;
                     }
                 }
             }
@@ -272,6 +283,25 @@ namespace CapaDato
         private static string Texto(SqlDataReader dr, string columna)
         {
             return dr[columna] == DBNull.Value ? "" : Convert.ToString(dr[columna]).Trim();
+        }
+
+        /// <summary>
+        /// Un parametro decimal con Precision y Scale explicitos.
+        ///
+        /// Sin ellos, ADO.NET infiere la escala del decimal de .NET que le
+        /// llegue, y una division decimal puede dar hasta 28 digitos
+        /// significativos: eso no encaja en el DECIMAL(18,6) o DECIMAL(18,2)
+        /// real de la columna y puede lanzar "Arithmetic overflow". Hoy no
+        /// dispara porque los valores llegan ya redondeados, pero el DAO no
+        /// deberia depender de que quien lo llame se acuerde de redondear.
+        /// </summary>
+        private static void AddDecimalParam(SqlCommand cmd, string nombre, decimal valor, byte precision, byte scale)
+        {
+            SqlParameter p = new SqlParameter(nombre, SqlDbType.Decimal);
+            p.Precision = precision;
+            p.Scale = scale;
+            p.Value = valor;
+            cmd.Parameters.Add(p);
         }
     }
 }

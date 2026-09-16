@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using ReporteTareas.Controles;
+using System;
+using System.Collections.Generic;
 using System.Data;
 
 namespace ReporteTareas.Formulario
@@ -45,7 +41,7 @@ namespace ReporteTareas.Formulario
         {
             var estado = "";
             var IdRegistro = 0;
-            string  IdRegistroAranda = "";
+            string IdRegistroAranda = "";
             IdRegistro = Convert.ToInt32(dgv_Tareas.Rows[dgv_Tareas.SelectedIndex].Cells[1].Text);
 
             IdRegistroAranda = Convert.ToString(dgv_Tareas.Rows[dgv_Tareas.SelectedIndex].Cells[2].Text);
@@ -55,10 +51,10 @@ namespace ReporteTareas.Formulario
             LabelTareaActualText.Text = objTarea1.EstadoTarea;
 
 
-            if (IdRegistroAranda== "---------------")
+            if (IdRegistroAranda == "---------------")
             {
                 Session["IdRegistro"] = IdRegistro;
-                Session["IdRegistroAranda"] =0;
+                Session["IdRegistroAranda"] = 0;
                 Parte0.Visible = false;
                 Parte1.Visible = false;
                 Parte2.Visible = false;
@@ -84,7 +80,7 @@ namespace ReporteTareas.Formulario
                     ConsultarIncidente2.IncidentSoapClient incidente = new ConsultarIncidente2.IncidentSoapClient();
                     ConsultarIncidente2.IncidentDescription getObjectIncidentResponse = new ConsultarIncidente2.IncidentDescription();
 
-                    if(getObjectIncidentResponse != null)
+                    if (getObjectIncidentResponse != null)
                     {
                         getObjectIncidentResponse = incidente.GetObject(Convert.ToInt32(datosDoc[1]));
                         txtDescripcionCaso.Text = getObjectIncidentResponse.Subject.ToString();
@@ -105,7 +101,7 @@ namespace ReporteTareas.Formulario
                         txtProyecto.Text = getObjectIncidentResponse.ProjectName.ToString();
                     }
                 }
-                else if(datosDoc[0].ToString() == "RF")
+                else if (datosDoc[0].ToString() == "RF")
                 {
                     ConsultarTicket2.ServiceCallSoapClient service = new ConsultarTicket2.ServiceCallSoapClient();
                     ConsultarTicket2.ServiceCallDescription getObjectResponse = new ConsultarTicket2.ServiceCallDescription();
@@ -212,7 +208,7 @@ namespace ReporteTareas.Formulario
 
             }
 
-           
+
             txt_Cliente.Text = objTarea.Nom_Empresa;
             txt_NomResponsable.Text = objTarea.Nom_Responsable;
             txt_FchTenInicio.Text = objTarea.Fch_EstAtencion;
@@ -228,7 +224,7 @@ namespace ReporteTareas.Formulario
             txt_NomResponsable.Enabled = false;
             txt_FchTenInicio.Enabled = false;
             txt_FchTenFin.Enabled = false;
-          
+
             Panel1.Enabled = false;
             Panel1.Visible = false;
 
@@ -266,35 +262,35 @@ namespace ReporteTareas.Formulario
                 txt_Comentario.Text = "";
             }
             else
+            {
+
+                string[] datosDoc = dbl_Estado.SelectedValue.Split('-');
+
+                DataSet dataCatalogo = NegTareas.RTAConsultaCatalogoPorPadre(1, Convert.ToInt32(datosDoc[0]));
+
+
+                foreach (DataRow drCatalogo in dataCatalogo.Tables[0].Rows)
                 {
-
-                    string[] datosDoc = dbl_Estado.SelectedValue.Split('-');
-                    
-                    DataSet dataCatalogo = NegTareas.RTAConsultaCatalogoPorPadre(1, Convert.ToInt32(datosDoc[0]));
-                    
-
-                    foreach (DataRow drCatalogo in dataCatalogo.Tables[0].Rows)
+                    if (drCatalogo[8].ToString() == "1")
                     {
-                        if (drCatalogo[8].ToString() == "1")
-                        {
-                            txt_Comentario.Text = "";
-                            txt_Comentario.Enabled = true;
-                            txt_Comentario.Visible = true;
-                            lbl_Comentario.Visible = true;
+                        txt_Comentario.Text = "";
+                        txt_Comentario.Enabled = true;
+                        txt_Comentario.Visible = true;
+                        lbl_Comentario.Visible = true;
                     }
-                        else
-                        {
-                            txt_Comentario.Text = dbl_Estado.SelectedItem.ToString();
-                            txt_Comentario.Enabled = false;
-                            txt_Comentario.Visible = true;
-                            lbl_Comentario.Visible = true;
-                        }
-
+                    else
+                    {
+                        txt_Comentario.Text = dbl_Estado.SelectedItem.ToString();
+                        txt_Comentario.Enabled = false;
+                        txt_Comentario.Visible = true;
+                        lbl_Comentario.Visible = true;
                     }
 
-                    btn_Guardar.Enabled = true;
-                    btn_Guardar.Visible = true;
-                   
+                }
+
+                btn_Guardar.Enabled = true;
+                btn_Guardar.Visible = true;
+
 
             }
 
@@ -332,7 +328,7 @@ namespace ReporteTareas.Formulario
                 {
                     string[] datosDoc = dbl_Estado.SelectedValue.ToString().Split('-');
 
-                    
+
                     //ConsultarTicket2.ServiceCall serviceCall = new ConsultarTicket2.ServiceCall();
                     //serviceCall.Id = Convert.ToInt32(Id);
                     //serviceCall.StatusId = Convert.ToInt32(datosDoc[1]);
@@ -351,12 +347,12 @@ namespace ReporteTareas.Formulario
                     HisTarea.Det_Id_CompAranda = txt_Ticket.Text;
                     HisTarea.Det_Fch_RegDetalleIni = System.DateTime.Now.ToString();
                     HisTarea.Det_Fch_RegDetalleFin = "";
-                    HisTarea.Det_EstadoIni =  datosDoc[2];//
+                    HisTarea.Det_EstadoIni = datosDoc[2];//
                     HisTarea.Det_EstadoFin = "";
                     HisTarea.Det_Nom_Empresa = txt_Cliente.Text;
                     HisTarea.Det_Det_Tarea = txt_Comentario.Text;
                     //HisTarea.Det_Estado = dbl_Estado.SelectedItem.ToString();
-                    HisTarea.Det_Estado = datosDoc[0].ToString(); 
+                    HisTarea.Det_Estado = datosDoc[0].ToString();
                     HisTarea.Det_Motivo_Cambio_Estado = dbl_Estado.SelectedItem.ToString();
                     respu = NegTareas.RTA_IngresaHisTarea(HisTarea);
                     btn_Guardar.Enabled = false;

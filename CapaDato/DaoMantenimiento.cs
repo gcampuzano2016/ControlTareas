@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -54,7 +49,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -96,7 +94,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -173,14 +174,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
 
         }
 
-        public static List<EntMantenimiento> ConsultSp_RTAConsultaMantenimientoContrato(string FchIni, string FchFin, string orden, int tipo,int IdRequerimiento)
+        public static List<EntMantenimiento> ConsultSp_RTAConsultaMantenimientoContrato(string FchIni, string FchFin, string orden, int tipo, int IdRequerimiento)
         {
             List<EntMantenimiento> listaTareas = null;
 
@@ -225,12 +229,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
-        public static List<EntMantenimiento> ConsultSp_RTAListaMantenimientoContrato(string FchIni, string FchFin, string orden,int IdCliente, string Clasificacion, int tipo)
+        public static List<EntMantenimiento> ConsultSp_RTAListaMantenimientoContrato(string FchIni, string FchFin, string orden, int IdCliente, string Clasificacion, int tipo)
         {
             List<EntMantenimiento> listaTareas = null;
 
@@ -265,7 +272,7 @@ namespace CapaDato
                     Tarea.Descripcion = dr["Descripcion"].ToString();
                     Tarea.Clasificacion = dr["Clasificacion"].ToString();
                     Tarea.conteoArchivosAdjuntos = Convert.ToInt32(dr["conteoArchivosAdjuntos"].ToString());
-                    Tarea.Valor =Convert.ToDouble(dr["Valor"].ToString());
+                    Tarea.Valor = Convert.ToDouble(dr["Valor"].ToString());
                     listaTareas.Add(Tarea);
                 }
 
@@ -276,7 +283,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -310,8 +320,8 @@ namespace CapaDato
                 Respuesta.estado = "1";
                 Respuesta.mensaje = "OK";
                 Respuesta.tipoMensaje = "success";
-                Respuesta.resultadoTabla = dtResultados; 
-                
+                Respuesta.resultadoTabla = dtResultados;
+
 
             }
             catch (Exception ex)
@@ -322,7 +332,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -366,7 +379,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -427,7 +443,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -482,7 +501,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;

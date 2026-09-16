@@ -1,18 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using SendGridMail;
-using SendGridMail.Transport;
-using System.Net.Mail;
-using System.Net;
-using System.Security.Cryptography;
-using System.IO;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using PDF;
 using ReporteTareas.clases;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Net;
+using System.Net.Mail;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace CorreoHelper
 {
@@ -201,7 +197,7 @@ namespace CorreoHelper
                 parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
                 parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
 
-               contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
+                contenidoCorreo = AsuntoCorreoForeCast(estructuraContenidoCorreo);
 
                 respuestaEnvioCorreo = EnviarCorreoForeCast(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, Notificacion, "Notificación - Sistema de Gestión Interno");
 
@@ -331,6 +327,51 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnvioCorreoMarcacion
+        /// <summary>Correo de confirmación de una marcación (accion: 1=entrada, 2=salida).</summary>
+        public bool EnvioCorreoMarcacion(string correoDestino, string nombreUsuario, int accion, DateTime fechaHora)
+        {
+            EntParametrosCorreo parametrosServidorCorreo = new EntParametrosCorreo();
+            bool respuestaEnvioCorreo = false;
+
+            try
+            {
+                parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametrosServidorCorreo.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametrosServidorCorreo.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametrosServidorCorreo.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                string tipo = (accion == 1) ? "entrada" : "salida";
+                string fecha = fechaHora.ToString("dd/MM/yyyy");
+                string hora = fechaHora.ToString("HH:mm");
+
+                string titulo = "Registro de " + tipo + " - " + fecha + " " + hora;
+
+                string contenido =
+                    "<p>Estimado(a) " + nombreUsuario + ",</p>" +
+                    "<p>Se registró su <b>" + tipo + "</b> con los siguientes datos:</p>" +
+                    "<table cellpadding='6' style='border-collapse:collapse'>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Tipo</b></td><td style='border:1px solid #ddd'>" + tipo + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Fecha</b></td><td style='border:1px solid #ddd'>" + fecha + "</td></tr>" +
+                    "<tr><td style='border:1px solid #ddd'><b>Hora</b></td><td style='border:1px solid #ddd'>" + hora + "</td></tr>" +
+                    "</table>" +
+                    "<p>Si usted no reconoce este registro, comuníquese con Talento Humano.</p>" +
+                    "<p style='color:#888;font-size:11px'>Mensaje automático del Sistema de Gestión Interno. No responda a este correo.</p>";
+
+                respuestaEnvioCorreo = EnviarCorreo(correoDestino, titulo, contenido, parametrosServidorCorreo);
+            }
+            catch (Exception ex)
+            {
+                ErrorProceso = ex.Message.ToString().Trim();
+                respuestaEnvioCorreo = false;
+            }
+
+            return respuestaEnvioCorreo;
+        }
+        #endregion
+
         #region EnvioCorreoSolicitudEmpleado
         public bool EnvioCorreoSolicitudEmpleado(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, List<EntItemValor> listaCampos, string nombreArchivo, int codigoSolicitud)
         {
@@ -358,7 +399,7 @@ namespace CorreoHelper
                     if (parametrosContenido.Item == "texto2")
                     {
                         Colaborador = parametrosContenido.Valor;
-                       //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
+                        //VerErrores("Colaborador: " + Colaborador, "Log", "Detalle");
                     }
                     //cedula
                     else if (parametrosContenido.Item == "texto11")
@@ -377,23 +418,52 @@ namespace CorreoHelper
                     string rutaQR = generarRide.GenerarCodigoQR(Cedula + " " + Colaborador);
 
                     //VerErrores("rutaQR: " + rutaQR, "Log", "Detalle");
-                    
+
                     listaCampos.Add(new EntItemValor() { Item = "textoQR", Valor = "'" + rutaQR + "'" });
 
-                    contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
+                    /* El cuerpo del correo es el mismo documento que va adjunto, no una
+                       plantilla aparte. Antes eran dos cosas distintas para la misma
+                       solicitud: el adjunto con el formato nuevo, y el mensaje con una
+                       plantilla de 2021 que se veia como el documento anterior.
 
-                    foreach (EntItemValor parametrosContenido in listaCampos)
+                       Si por algo no se puede armar, se cae a la plantilla de siempre y
+                       el correo sale igual. */
+                    string cuerpoDocumento = CuerpoDelDocumento(generarRide, codigoSolicitud, "");
+
+                    if (!string.IsNullOrEmpty(cuerpoDocumento))
                     {
-                        contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
+                        contenidoCorreo = cuerpoDocumento;
+                    }
+                    else
+                    {
+                        contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
+
+                        foreach (EntItemValor parametrosContenido in listaCampos)
+                        {
+                            contenidoCorreo = contenidoCorreo.Replace("[" + parametrosContenido.Item + "]", parametrosContenido.Valor);
+                        }
                     }
 
-                    //VerErrores("contenidoCorreo: " + contenidoCorreo, "Log", "Detalle");
-                    respuestaEnvioCorreo = EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo);
-                    generarRide.EnvioCorreoEncuesta(contenidoCorreo, codigoSolicitud);
-                    //pdfLista.CrearPDF(contenidoCorreo, codigoSolicitud);
+                    /* La copia en PDF, con el mismo formato que el documento firmado.
+
+                       Va acotada en el tiempo y a proposito. La conversion a PDF corre
+                       dentro de la peticion que guarda la solicitud, y si se traba deja
+                       al usuario esperando para siempre: paso en produccion. Guardar la
+                       solicitud es lo importante; el adjunto es un extra que no puede
+                       costarle el tramite a nadie.
+
+                       Si no termina a tiempo se manda el correo sin adjunto y queda
+                       anotado. El documento se puede volver a generar despues desde el
+                       boton de descarga, que arma exactamente el mismo archivo. */
+                    string rutaAdjunto = DocumentoParaAdjuntar(generarRide, codigoSolicitud);
+
+                    respuestaEnvioCorreo = string.IsNullOrEmpty(rutaAdjunto)
+                        ? EnviarCorreo(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo)
+                        : EnviarCorreoPermiso(correosDestinatarios, correoTitulo, contenidoCorreo, parametrosServidorCorreo, rutaAdjunto);
                 }
-                else {
-                    
+                else
+                {
+
                     contenidoCorreo = EstructuraContenidoCorreoSolicitud(nombreArchivo);
 
                     foreach (EntItemValor parametrosContenido in listaCampos)
@@ -421,7 +491,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacion.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -438,7 +508,7 @@ namespace CorreoHelper
         {
 
             string mensaje = "";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -456,7 +526,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacionUsuario.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -474,7 +544,7 @@ namespace CorreoHelper
 
             string mensaje = "";
             string nombreArchivo = "contenidoCorreoNotificacionEncuesta.txt";
-            string path = "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\" + nombreArchivo;
+            string path = RutaPlantillaCorreo(nombreArchivo);
 
             if (File.Exists(path))
             {
@@ -483,6 +553,729 @@ namespace CorreoHelper
             }
 
             return mensaje;
+        }
+        #endregion
+
+        #region EnviarDocumentoATalentoHumano
+        /// <summary>
+        /// Le manda a Talento Humano el documento con las firmas que ya tiene, le dice
+        /// quien firmo, y le deja el acceso para poner la suya.
+        ///
+        /// Talento Humano es el ultimo paso: hasta que no valida y firma, el documento
+        /// no esta completo. Por eso el correo no le informa nada mas, le dice que
+        /// falta lo suyo.
+        /// </summary>
+        public bool EnviarDocumentoATalentoHumano(int codigoSolicitud, string correoRH, string asunto)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(correoRH)) { return false; }
+
+                string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+                if (string.IsNullOrEmpty(urlSitio)) { urlSitio = ""; }
+
+                PDFs generador = new PDFs();
+
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
+                                                   AccionesParaTalentoHumano(codigoSolicitud, correoRH));
+                if (string.IsNullOrEmpty(cuerpo)) { return false; }
+
+                string adjunto = DocumentoParaAdjuntar(generador, codigoSolicitud);
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return string.IsNullOrEmpty(adjunto)
+                    ? EnviarCorreo(correoRH, asunto, cuerpo, parametros)
+                    : EnviarCorreoPermiso(correoRH, asunto, cuerpo, parametros, adjunto);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnviarDocumentoATalentoHumano: " + ex.Message, "Log", "Detalle");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// El bloque final del correo a Talento Humano: quien firmo ya, y el acceso
+        /// para firmar.
+        ///
+        /// El boton lleva a la aplicacion y no a un enlace que firme de una. La firma
+        /// que cierra el documento tiene que quedar respaldada por quien inicio
+        /// sesion, no por quien tenga reenviado un correo.
+        /// </summary>
+        private string AccionesParaTalentoHumano(int codigoSolicitud, string correoRH)
+        {
+            const string Q = "'";
+
+            EntFirmaSolicitud colaborador = FirmaDe(codigoSolicitud, "COLABORADOR");
+            EntFirmaSolicitud jefe = FirmaDe(codigoSolicitud, "JEFE");
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
+            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">FALTA SU VALIDACIÓN</div>");
+
+            h.Append("<p style=" + Q + "margin:0 0 6px" + Q + ">").Append(Renglon("Colaborador", colaborador)).Append("</p>");
+            h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">").Append(Renglon("Jefe inmediato", jefe)).Append("</p>");
+
+            if (colaborador != null && jefe != null)
+            {
+                h.Append("<p style=" + Q + "margin:0 0 12px" + Q + ">Con las dos firmas puestas, el documento queda a la espera de la suya.</p>");
+            }
+
+            h.Append(BotonesDeValidacion(codigoSolicitud, correoRH, Q));
+            h.Append("</div>");
+
+            return h.ToString();
+        }
+
+        /// <summary>
+        /// Los dos botones de Talento Humano. Llevan a la misma pagina donde firma el
+        /// jefe: se dibuja o se sube la firma y recien ahi se aplica la decision.
+        ///
+        /// VG deja la solicitud en PROCESADO y RG en RECHAZADO GTH, que son los dos
+        /// estados que la aplicacion asocia a la firma de Talento Humano.
+        ///
+        /// Quien firma va cifrado en el propio enlace, resuelto desde CORREORH. Vale
+        /// la misma advertencia que para el jefe: el enlace es un portador, y la firma
+        /// se atribuye a quien lo tenga.
+        /// </summary>
+        private string BotonesDeValidacion(int codigoSolicitud, string correoRH, string Q)
+        {
+            string codRH = NegUsuario.RTA_CodigoUsuarioPorCorreo(correoRH);
+            string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
+
+            if (string.IsNullOrEmpty(codRH) || string.IsNullOrEmpty(urlSitio))
+            {
+                /* Sin poder identificarla no se le ofrece firmar desde el correo: la
+                   firma quedaria sin nombre. Se la manda a la aplicacion. */
+                return EnlaceALaAplicacion(codigoSolicitud, Q);
+            }
+
+            string baseUrl = urlSitio.TrimEnd(new char[] { (char)47 }) + "/Formulario/RespuestaAprobacion.aspx?idValor=";
+
+            string validar = baseUrl + Encrypt(
+                codigoSolicitud + ";" + codigoSolicitud + ";VG;" + codRH, "3m1l10100", "3m1l10100");
+
+            string rechazar = baseUrl + Encrypt(
+                codigoSolicitud + ";" + codigoSolicitud + ";RG;" + codRH, "3m1l10100", "3m1l10100");
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<table cellpadding=" + Q + "0" + Q + " cellspacing=" + Q + "0" + Q + "><tr>");
+
+            h.Append("<td style=" + Q + "padding-right:10px" + Q + "><a href=" + Q).Append(validar).Append(Q);
+            h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
+            h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Firmar y validar</a></td>");
+
+            h.Append("<td><a href=" + Q).Append(rechazar).Append(Q);
+            h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#ffffff; color:#C00000; ");
+            h.Append("border:1px solid #C00000; text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Rechazar</a></td>");
+
+            h.Append("</tr></table>");
+            h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Puede dibujar su firma o subir una imagen; el documento se cierra al confirmar.</p>");
+
+            return h.ToString();
+        }
+
+        /// <summary>El respaldo: entrar a la aplicacion a firmar.</summary>
+        private string EnlaceALaAplicacion(int codigoSolicitud, string Q)
+        {
+            string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+            if (string.IsNullOrEmpty(urlSitio)) { return ""; }
+
+            string url = urlSitio.TrimEnd(new char[] { (char)47 })
+                         + "/Formulario/ListaVacacionesPermiso.aspx?solicitud=" + codigoSolicitud;
+
+            return "<a href=" + Q + url + Q
+                   + " style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; "
+                   + "text-decoration:none; font-size:13px; font-weight:bold" + Q + ">Validar y firmar</a>";
+        }
+
+        /// <summary>Un renglon con el estado de una firma.</summary>
+        private string Renglon(string rotulo, EntFirmaSolicitud firma)
+        {
+            if (firma == null)
+            {
+                return "<b>" + rotulo + ":</b> <span style='color:#8A8A8A'>todavía no firma</span>";
+            }
+
+            string decision = firma.Decision == "RECHAZADO" ? " (rechazó)" : "";
+
+            return "<b>" + rotulo + ":</b> firmado por " + firma.Nombre + decision
+                   + " el " + firma.FechaFirma.ToString("dd/MM/yyyy HH:mm");
+        }
+
+        private EntFirmaSolicitud FirmaDe(int codigoSolicitud, string rol)
+        {
+            List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(codigoSolicitud);
+            if (firmas == null) { return null; }
+
+            foreach (EntFirmaSolicitud f in firmas)
+            {
+                if (f.Rol == rol && f.Secuencia == 1) { return f; }
+            }
+
+            return null;
+        }
+        #endregion
+
+        #region EnviarDocumentoAlColaborador
+        /// <summary>
+        /// Le manda al colaborador el documento tal como quedo, con las firmas que
+        /// haya hasta ese momento. Devuelve false si no se pudo.
+        ///
+        /// Existe porque la copia que recibe al pedir el permiso sale sin la firma del
+        /// jefe: en ese momento todavia no firmo. Cuando el jefe aprueba o rechaza,
+        /// esta funcion le manda el documento de nuevo, ahora si con esa firma.
+        ///
+        /// A quien se le manda sale de la propia firma del colaborador, que guarda su
+        /// Cod_Usuario. Es el dato mas confiable que hay: lo dejo el que firmo, no se
+        /// deduce de la sesion de quien esta aprobando.
+        /// </summary>
+        public bool EnviarDocumentoAlColaborador(int codigoSolicitud, string correoTitulo)
+        {
+            try
+            {
+                string correo = CorreoDelColaborador(codigoSolicitud);
+                if (string.IsNullOrEmpty(correo)) { return false; }
+
+                PDFs generador = new PDFs();
+
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud, "");
+                if (string.IsNullOrEmpty(cuerpo)) { return false; }
+
+                string adjunto = DocumentoParaAdjuntar(generador, codigoSolicitud);
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return string.IsNullOrEmpty(adjunto)
+                    ? EnviarCorreo(correo, correoTitulo, cuerpo, parametros)
+                    : EnviarCorreoPermiso(correo, correoTitulo, cuerpo, parametros, adjunto);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnviarDocumentoAlColaborador: " + ex.Message, "Log", "Detalle");
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// El correo de quien pidio la solicitud, sacado de su propia firma.
+        /// </summary>
+        private string CorreoDelColaborador(int codigoSolicitud)
+        {
+            List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(codigoSolicitud);
+            if (firmas == null) { return ""; }
+
+            foreach (EntFirmaSolicitud f in firmas)
+            {
+                if (f.Rol == "COLABORADOR" && !string.IsNullOrEmpty(f.Cod_Usuario))
+                {
+                    return NegUsuario.RTA_CorreoUsuario(f.Cod_Usuario);
+                }
+            }
+
+            return "";
+        }
+        #endregion
+
+        #region EnvioCorreoSolicitudJefe con documento
+        /// <summary>
+        /// El correo al jefe con el mismo documento que recibe el colaborador, mas
+        /// los botones de aprobar y rechazar.
+        ///
+        /// Antes el jefe recibia una plantilla aparte con unos pocos campos, asi que
+        /// aprobaba sin ver que iba a hacer la persona: ni el detalle del teletrabajo,
+        /// ni el plan de recuperacion, ni el saldo del permiso mensual.
+        ///
+        /// Es una sobrecarga y no un cambio del metodo de siempre porque ese lo usan
+        /// tambien el codigo de verificacion del login, la planificacion de vacaciones
+        /// y las cancelaciones, que no tienen documento que mostrar.
+        /// </summary>
+        public bool EnvioCorreoSolicitudJefe(string correosDestinatarios, string correoTitulo,
+                                             string estructuraContenidoCorreo, List<EntItemValor> listaCampos,
+                                             string nombreArchivo, int codigoSolicitud)
+        {
+            try
+            {
+                PDFs generador = new PDFs();
+                string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
+                                                   BotonesDeAprobacion(listaCampos));
+
+                if (string.IsNullOrEmpty(cuerpo))
+                {
+                    /* Sin documento se manda como siempre: el jefe tiene que poder
+                       aprobar aunque el documento no se haya podido armar. */
+                    return EnvioCorreoSolicitudJefe(correosDestinatarios, correoTitulo,
+                                                    estructuraContenidoCorreo, listaCampos, nombreArchivo);
+                }
+
+                EntParametrosCorreo parametros = new EntParametrosCorreo();
+                parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+                parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+                parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+                parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+                parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+                parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+                return EnviarCorreo(correosDestinatarios, correoTitulo, cuerpo, parametros);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("EnvioCorreoSolicitudJefe con documento: " + ex.Message, "Log", "Detalle");
+                return EnvioCorreoSolicitudJefe(correosDestinatarios, correoTitulo,
+                                                estructuraContenidoCorreo, listaCampos, nombreArchivo);
+            }
+        }
+
+        /// <summary>
+        /// Los dos botones, con las direcciones que ya venian en la lista de campos.
+        /// Se arman con tabla y estilos en linea porque Outlook no entiende mucho mas.
+        /// </summary>
+        private string BotonesDeAprobacion(List<EntItemValor> listaCampos)
+        {
+            /* Comilla simple para los atributos: el HTML va dentro de cadenas de C#,
+               y escaparla en cada uno haria esto ilegible. */
+            const string Q = "'";
+
+            string urlAprobar = ValorDe(listaCampos, "urlBoton1");
+            string urlRechazar = ValorDe(listaCampos, "urlBoton2");
+
+            if (string.IsNullOrEmpty(urlAprobar) && string.IsNullOrEmpty(urlRechazar)) { return ""; }
+
+            string etiquetaAprobar = ValorDe(listaCampos, "etiquetaBoton1");
+            string etiquetaRechazar = ValorDe(listaCampos, "etiquetaBoton2");
+
+            if (etiquetaAprobar == "") { etiquetaAprobar = "Aprobar"; }
+            if (etiquetaRechazar == "") { etiquetaRechazar = "Rechazar"; }
+
+            StringBuilder h = new StringBuilder();
+
+            h.Append("<div style=" + Q + "border-top:1px solid #D0D0D0; margin-top:26px; padding-top:16px" + Q + ">");
+            /* Con dos botones es una decision -aprobar o rechazar-; con uno solo es
+               una accion, que es el caso de Talento Humano. */
+            bool esDecision = urlAprobar != "" && urlRechazar != "";
+
+            h.Append("<div style=" + Q + "color:#8A8A8A; font-size:10px; font-weight:bold; letter-spacing:1px; margin-bottom:10px" + Q + ">");
+            h.Append(esDecision ? "SU DECISIÓN" : "ACCIÓN").Append("</div>");
+            h.Append("<table cellpadding=" + Q + "0" + Q + " cellspacing=" + Q + "0" + Q + "><tr>");
+
+            if (urlAprobar != "")
+            {
+                h.Append("<td style=" + Q + "padding-right:10px" + Q + "><a href=" + Q).Append(urlAprobar).Append(Q);
+                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#1F3864; color:#ffffff; ");
+                h.Append("text-decoration:none; font-size:13px; font-weight:bold" + Q + ">").Append(etiquetaAprobar).Append("</a></td>");
+            }
+
+            if (urlRechazar != "")
+            {
+                h.Append("<td><a href=" + Q).Append(urlRechazar).Append(Q);
+                h.Append(" style=" + Q + "display:inline-block; padding:10px 22px; background:#ffffff; color:#C00000; ");
+                h.Append("border:1px solid #C00000; text-decoration:none; font-size:13px; font-weight:bold" + Q + ">");
+                h.Append(etiquetaRechazar).Append("</a></td>");
+            }
+
+            h.Append("</tr></table>");
+            /* El aviso de la firma solo aplica a aprobar y rechazar: son los dos
+               caminos que piden firmar antes de aplicar la decision. */
+            if (esDecision)
+            {
+                h.Append("<p style=" + Q + "color:#8A8A8A; font-size:11px; margin-top:10px" + Q + ">Se le pedirá su firma antes de registrar la decisión.</p>");
+            }
+            h.Append("</div>");
+
+            return h.ToString();
+        }
+
+        private string ValorDe(List<EntItemValor> listaCampos, string item)
+        {
+            if (listaCampos == null) { return ""; }
+
+            foreach (EntItemValor campo in listaCampos)
+            {
+                if (campo.Item == item) { return campo.Valor ?? ""; }
+            }
+
+            return "";
+        }
+        #endregion
+
+        #region CuerpoDelDocumento
+        /// <summary>
+        /// El documento de la solicitud como cuerpo de correo, o cadena vacia.
+        ///
+        /// El logo se pasa por direccion web: en un correo file:/// apunta al disco
+        /// del servidor, que quien recibe el mensaje no tiene.
+        /// </summary>
+        private string CuerpoDelDocumento(PDFs generador, int codigoSolicitud, string htmlAcciones)
+        {
+            try
+            {
+                System.Web.HttpContext contexto = System.Web.HttpContext.Current;
+                if (contexto == null) { return ""; }
+
+                string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
+                if (string.IsNullOrEmpty(urlSitio)) { return ""; }
+
+                return generador.HtmlDeSolicitudParaCorreo(
+                    codigoSolicitud, urlSitio,
+                    contexto.Server.MapPath("~/descargas/"), htmlAcciones);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("CuerpoDelDocumento: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+        #endregion
+
+        #region DocumentoParaAdjuntar
+        /// <summary>
+        /// Cuanto se espera por el documento antes de mandar el correo sin el.
+        ///
+        /// Un PDF de una pagina se arma en un par de segundos. Treinta es holgado
+        /// para un servidor cargado y sigue siendo tolerable para quien esta
+        /// esperando que se guarde su solicitud.
+        /// </summary>
+        private const int SegundosParaElDocumento = 30;
+
+        /// <summary>
+        /// La ruta del documento recien generado, o cadena vacia si no se pudo o si
+        /// tardo demasiado.
+        ///
+        /// Corre en otro hilo para poder abandonarlo. Si la conversion se cuelga, el
+        /// hilo queda ahi hasta que termine o muera, pero la peticion del usuario
+        /// sigue: la solicitud se guarda y el correo sale igual.
+        ///
+        /// Por eso las rutas se resuelven aca y se le pasan hechas: en ese otro hilo
+        /// no hay HttpContext.
+        /// </summary>
+        private string DocumentoParaAdjuntar(PDFs generador, int codigoSolicitud)
+        {
+            try
+            {
+                System.Web.HttpContext contexto = System.Web.HttpContext.Current;
+                if (contexto == null) { return ""; }
+
+                string carpeta = contexto.Server.MapPath("~/descargas/");
+                string logo = contexto.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+
+                if (!System.IO.File.Exists(logo))
+                {
+                    logo = contexto.Server.MapPath("~/Img/logo_dos.png");
+                }
+                if (!System.IO.File.Exists(logo)) { logo = ""; }
+
+                string archivo = "";
+
+                System.Threading.Tasks.Task tarea = System.Threading.Tasks.Task.Factory.StartNew(
+                    delegate
+                    {
+                        archivo = generador.DocumentoDeSolicitud(codigoSolicitud, carpeta, logo);
+                    });
+
+                if (!tarea.Wait(SegundosParaElDocumento * 1000))
+                {
+                    VerErrores("DocumentoParaAdjuntar: la generacion del PDF de la solicitud "
+                               + codigoSolicitud + " paso de " + SegundosParaElDocumento
+                               + " segundos. El correo sale sin adjunto.", "Log", "Detalle");
+                    return "";
+                }
+
+                if (string.IsNullOrEmpty(archivo)) { return ""; }
+
+                return carpeta + archivo;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("DocumentoParaAdjuntar: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+        #endregion
+
+        #region TramosPorAutorizar
+        /// <summary>
+        /// Las filas de un guardado a las que hay que pedirles autorización.
+        ///
+        /// Normalmente la lista la arma el procedimiento, que puede haber insertado
+        /// varias: parte el rango en tramos según el horario del responsable.
+        ///
+        /// El caso raro, y la razón de que esto exista, es un despliegue a medias.
+        /// Esta DLL puede quedar arriba con la CapaDato anterior todavía en el
+        /// servidor —se hace así a propósito, para publicar el PDF nuevo sin activar
+        /// el partido en tramos—. Esa versión no llena IdsHorasExtras, y sin este
+        /// respaldo la guarda nueva daría siempre falso: dejarían de salir los
+        /// correos de autorización de horas extras sin ningún error que lo delate.
+        ///
+        /// Por eso se mira si la propiedad es null y no si está vacía. Son dos cosas
+        /// distintas: null es "la capa de datos no me dijo nada", vacío es "me dijo
+        /// que no hay ninguna". Tratarlas igual volvería a mandar correos por
+        /// permisos que no son horas extras.
+        ///
+        /// Cuando CapaDato.exe suba con el resto, esta segunda rama deja de usarse y
+        /// se puede borrar.
+        /// </summary>
+        /// <param name="respuesta">Lo que devolvió el alta.</param>
+        /// <param name="tipoElegido">El tipo que mandó la pantalla. Solo se usa en el respaldo.</param>
+        public static List<long> TramosPorAutorizar(EntRespuesta respuesta, long tipoElegido)
+        {
+            List<long> ids = new List<long>();
+
+            if (respuesta == null || respuesta.estado != "1") { return ids; }
+
+            if (respuesta.IdsHorasExtras != null)
+            {
+                foreach (string texto in respuesta.IdsHorasExtras.Split(','))
+                {
+                    long id;
+                    if (long.TryParse(texto.Trim(), out id) && id > 0) { ids.Add(id); }
+                }
+
+                return ids;
+            }
+
+            /* Respaldo: el criterio anterior, sobre la única fila que insertaba esa
+               versión. Lo decidía el combo de la pantalla. */
+            if (tipoElegido == 1 || tipoElegido == 2)
+            {
+                long unica;
+                if (long.TryParse(Convert.ToString(respuesta.resultado), out unica) && unica > 0)
+                {
+                    ids.Add(unica);
+                }
+            }
+
+            return ids;
+        }
+        #endregion
+
+        #region SolicitarAutorizacionHorasExtras
+        /// <summary>
+        /// Le pide al jefe inmediato que autorice UNA fila de horas extras.
+        ///
+        /// Vive acá y no en los handlers porque un solo guardado puede generar varias:
+        /// Sp_RTAInsertaDetalleTarea_V2 parte el rango en tramos según el horario del
+        /// responsable, así que 07:30 a 18:30 con jornada 08:30-17:30 deja dos tramos
+        /// suplementarios y uno normal. Cada tramo se autoriza por separado, porque
+        /// RespuestaAprobacion trabaja por Id_RegDetTareas y el jefe tiene que poder
+        /// aprobar la mañana y rechazar la tarde.
+        ///
+        /// Las horas y el tiempo salen de la fila guardada, NO del formulario: el
+        /// formulario tiene el rango completo, y mandarlo en los dos correos le pediría
+        /// al jefe autorizar once horas dos veces.
+        /// </summary>
+        public EntRespuesta SolicitarAutorizacionHorasExtras(
+            long idRegDetTarea,
+            string codUsuarioSesion,
+            string nombreSolicitante,
+            string nombreCliente)
+        {
+            EntRespuesta respuesta = new EntRespuesta
+            {
+                estado = "0",
+                mensaje = "No se pudo solicitar la autorización de las horas extras.",
+                tipoMensaje = "warning",
+                resultado = idRegDetTarea.ToString()
+            };
+
+            try
+            {
+                EntDetalleTarea fila =
+                    NegTareas.RTA_ConsultaDetalleTareaRTA(Convert.ToInt32(idRegDetTarea));
+
+                if (fila == null || fila.Id_RegDetTareas == 0)
+                {
+                    respuesta.mensaje =
+                        "No se encontró la actividad " + idRegDetTarea
+                        + " para solicitar la autorización.";
+
+                    return respuesta;
+                }
+
+                string horaDesde = ParteDeLaFecha(fila.Det_Fch_RegDetalleIni, "HH:mm");
+                string horaHasta = ParteDeLaFecha(fila.Det_Fch_RegDetalleFin, "HH:mm");
+
+                string valorEncritar1 = fila.Id_RegDetTareas.ToString() + ";"
+                    + fila.Id_RegTareas.ToString() + ";" + "D" + ";"
+                    + fila.Det_Horas_Extras_Tipo.ToString();
+
+                string valorEncritar2 = fila.Id_RegDetTareas.ToString() + ";"
+                    + fila.Id_RegTareas.ToString() + ";" + "R" + ";"
+                    + fila.Det_Horas_Extras_Tipo.ToString();
+
+                string valorIncritado1 = Encrypt(valorEncritar1, "3m1l10100", "3m1l10100");
+                string valorIncritado2 = Encrypt(valorEncritar2, "3m1l10100", "3m1l10100");
+
+                string urlSiteAprobacion =
+                    NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
+
+                string urlAprobacion = urlSiteAprobacion
+                    + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado1;
+
+                string urlRechazarAprobacion = urlSiteAprobacion
+                    + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado2;
+
+                List<EntItemValor> campos = new List<EntItemValor>();
+
+                campos.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE HORAS EXTRAS" });
+                campos.Add(new EntItemValor() { Item = "etiqueta1", Valor = "Orden de Servicio:" });
+                campos.Add(new EntItemValor() { Item = "texto1", Valor = fila.Det_Num_OrdenServicio });
+                campos.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Empresa:" });
+                campos.Add(new EntItemValor() { Item = "texto2", Valor = fila.Det_Nom_Empresa });
+                campos.Add(new EntItemValor() { Item = "etiqueta21", Valor = "Cliente:" });
+                campos.Add(new EntItemValor() { Item = "texto21", Valor = nombreCliente ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiqueta22", Valor = "Fecha:" });
+                campos.Add(new EntItemValor() { Item = "texto22", Valor = ParteDeLaFecha(fila.Det_Fch_RegDetalleIni, "dd/MM/yyyy") });
+                campos.Add(new EntItemValor() { Item = "etiqueta23", Valor = "Hora Inicio:" });
+                campos.Add(new EntItemValor() { Item = "texto23", Valor = horaDesde });
+                campos.Add(new EntItemValor() { Item = "etiqueta24", Valor = "Hora Fin:" });
+                campos.Add(new EntItemValor() { Item = "texto24", Valor = horaHasta });
+                campos.Add(new EntItemValor() { Item = "etiqueta25", Valor = "Tiempo:" });
+                campos.Add(new EntItemValor() { Item = "texto25", Valor = fila.Det_Tiempo });
+
+                /* La descripción la puso el procedimiento al insertar la fila: 50% o
+                   100% según el tramo. No se recalcula acá. */
+                if (fila.Det_Horas_Extras_Tipo == 1 || fila.Det_Horas_Extras_Tipo == 2)
+                {
+                    campos.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Tipo de Horas Extra:" });
+                    campos.Add(new EntItemValor() { Item = "texto3", Valor = fila.Det_Horas_Extras_Descripcion });
+                }
+
+                campos.Add(new EntItemValor() { Item = "etiqueta4", Valor = "Solicitante:" });
+                campos.Add(new EntItemValor() { Item = "texto4", Valor = nombreSolicitante ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiquetaDescripcion", Valor = "Descripción de la Tarea:" });
+                campos.Add(new EntItemValor() { Item = "textoDescripcion", Valor = fila.Det_Det_Tarea ?? string.Empty });
+                campos.Add(new EntItemValor() { Item = "etiquetaBoton1", Valor = "Aprobar" });
+                campos.Add(new EntItemValor() { Item = "urlBoton1", Valor = urlAprobacion });
+                campos.Add(new EntItemValor() { Item = "etiquetaBoton2", Valor = "Rechazar" });
+                campos.Add(new EntItemValor() { Item = "urlBoton2", Valor = urlRechazarAprobacion });
+
+                string correoJefeInmediato =
+                    NegUsuario.RTA_CorreoJefeInmediato(codUsuarioSesion);
+
+                bool seEnvio = EnvioCorreo(
+                    correoJefeInmediato,
+                    "Autorización de Horas Extras",
+                    EstructuraContenidoCorreo(),
+                    campos);
+
+                /* El estado pasa a 1 (solicitud enviada) aunque el correo haya fallado.
+                   La fila ya está pedida: dejarla en 0 la deja fuera del listado de
+                   pendientes y nadie la vuelve a mirar. Que el correo no salió se le
+                   avisa al usuario, que puede insistir.
+
+                   Antes esta llamada estaba detrás de un return, así que con el correo
+                   caído el estado no se movía nunca. */
+                EntRespuesta cambioEstado =
+                    NegTareas.RTAActualizarEstadoHorasExtras(Convert.ToInt32(idRegDetTarea), 1);
+
+                if (!seEnvio)
+                {
+                    respuesta.mensaje =
+                        "No se pudo enviar el correo de autorización de las horas de "
+                        + horaDesde + " a " + horaHasta + ".";
+
+                    return respuesta;
+                }
+
+                if (cambioEstado == null || cambioEstado.estado == "0")
+                {
+                    respuesta.mensaje =
+                        "Se envió el correo de las horas de " + horaDesde + " a " + horaHasta
+                        + ", pero no se pudo cambiar el estado de la solicitud.";
+
+                    return respuesta;
+                }
+
+                respuesta.estado = "1";
+                respuesta.tipoMensaje = "success";
+                respuesta.mensaje = "Autorización solicitada.";
+
+                return respuesta;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("SolicitarAutorizacionHorasExtras: " + ex.Message, "Log", "Detalle");
+
+                respuesta.mensaje =
+                    "Ocurrió un error al solicitar la autorización de las horas extras.";
+
+                return respuesta;
+            }
+        }
+
+        /// <summary>
+        /// Formatea como texto la fecha que viene de la base. Si no se puede leer se
+        /// devuelve tal cual: esto va a un correo, y una fecha cruda es mejor que nada.
+        /// </summary>
+        private string ParteDeLaFecha(string valor, string formato)
+        {
+            DateTime fecha;
+
+            if (DateTime.TryParse(valor, out fecha))
+            {
+                return fecha.ToString(formato);
+            }
+
+            return valor ?? string.Empty;
+        }
+        #endregion
+
+        #region RutaPlantillaCorreo
+        /// <summary>
+        /// Dónde está la plantilla de un correo.
+        ///
+        /// Los cuatro métodos de arriba la buscaban en una ruta absoluta de la
+        /// máquina de desarrollo del autor original. Cuando esa carpeta no existe
+        /// —o sea, en el servidor— File.Exists da falso, el método devuelve cadena
+        /// vacía, y el correo sale sin cuerpo sin ningún error que lo delate.
+        ///
+        /// Se conserva la ruta vieja como primera opción a propósito: si en algún
+        /// servidor alguien la creó a mano, lo que hoy funciona sigue funcionando
+        /// igual. Recién cuando no está se busca dentro del sitio, que es donde el
+        /// csproj despliega las plantillas.
+        /// </summary>
+        private string RutaPlantillaCorreo(string nombreArchivo)
+        {
+            string rutaHistorica =
+                "C:\\Desarrollo\\Desarrollo\\PRY_Sistema ReporteTareas\\ReporteTareas\\Formulario\\"
+                + nombreArchivo;
+
+            if (File.Exists(rutaHistorica))
+            {
+                return rutaHistorica;
+            }
+
+            /* Sin petición web no hay sitio desde el cual resolver la ruta relativa.
+               Ahí se devuelve la histórica y todo queda como estaba. */
+            if (System.Web.HttpContext.Current == null)
+            {
+                return rutaHistorica;
+            }
+
+            try
+            {
+                return System.Web.HttpContext.Current.Server.MapPath(
+                    "~/Formulario/" + nombreArchivo);
+            }
+            catch
+            {
+                return rutaHistorica;
+            }
         }
         #endregion
 
@@ -548,32 +1341,43 @@ namespace CorreoHelper
 
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
                 using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
                 {
+                    // El armado de destinatarios va DENTRO del try: una direccion mal
+                    // formada hace que mail.To.Add lance FormatException, y si eso ocurre
+                    // fuera del try la excepcion sube sin dejar rastro de por que no salio
+                    // el correo. Aqui se convierte en un false con ErrorProceso y bitacora.
                     try
                     {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in (correosDestinatarios ?? string.Empty).Split(new Char[] { ';' }))
+                        {
+                            if (correoIndividual.Trim() != "")
+                            {
+                                mail.To.Add(correoIndividual.Trim());
+                            }
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
                         smtp.Credentials = new NetworkCredential(emailFrom, password);
                         smtp.EnableSsl = enableSSL;
                         smtp.Send(mail);
                         Temp = true;
                     }
-                     catch (Exception ex)
+                    catch (Exception ex)
                     {
                         Temp = false;
                         ErrorProceso = ex.Message.ToString().Trim();
-                        VerErrores("ErrorProceso: " + ErrorProceso, "Log", "Detalle");
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
                     }
                 }
             }
@@ -582,7 +1386,7 @@ namespace CorreoHelper
             return Temp;
         }
 
-        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo,string RutaDocumento)
+        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
         {
             bool Temp = false;
 

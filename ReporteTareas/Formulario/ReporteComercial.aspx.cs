@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
-using ReporteTareas.Controles;
+﻿using ReporteTareas.Controles;
+using System;
 
 namespace ReporteTareas.Formulario
 {
@@ -25,7 +18,7 @@ namespace ReporteTareas.Formulario
                     try
                     {
 
-                     
+
                     }
                     catch (Exception ex)
                     { }

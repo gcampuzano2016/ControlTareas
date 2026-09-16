@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {

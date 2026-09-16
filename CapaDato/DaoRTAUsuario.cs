@@ -1,12 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
 
 namespace CapaDato
 {
@@ -39,7 +35,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
         }
@@ -77,7 +76,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -96,7 +98,7 @@ namespace CapaDato
                 cmd = new SqlCommand("Sp_RTAInsertaCodigoSeguridad", cnx);
                 cmd.Parameters.AddWithValue("@CodigoReset", objUsuario.CodigoReset);
                 cmd.Parameters.AddWithValue("@Log_Usuario", objUsuario.Log_Usuario);
-                
+
                 cmd.CommandType = CommandType.StoredProcedure;
                 cnx.Open();
                 dr = cmd.ExecuteReader();
@@ -109,7 +111,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -141,7 +146,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objUsuario;
         }
@@ -172,7 +180,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
         }
@@ -215,7 +226,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objUsuario;
         }
@@ -237,7 +251,7 @@ namespace CapaDato
                 objUsuario = new EntUsuario();
                 dr.Read();
 
-                //objUsuario.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
+                objUsuario.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
                 objUsuario.Cod_Usuario = dr["Cod_Usuario"].ToString();
                 objUsuario.Nom_Usuario = dr["Nom_Usuario"].ToString();
                 objUsuario.Log_Usuario = dr["Log_Usuario"].ToString();
@@ -257,7 +271,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objUsuario;
         }
@@ -281,7 +298,7 @@ namespace CapaDato
                 dr.Read();
 
                 resultado = dr["usuarioEsJefe"].ToString();
-                if(resultado == "true")
+                if (resultado == "true")
                 {
                     usuarioEsJefe = true;
                 }
@@ -298,7 +315,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return usuarioEsJefe;
         }
@@ -330,10 +350,13 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
-        }        
+        }
         public static string RTA_CorreoUsuario(string IdUsuario)
         {
 
@@ -362,7 +385,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
         }
@@ -390,7 +416,7 @@ namespace CapaDato
 
                     cmbUsuarios.Add(usuario);
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -398,11 +424,54 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbUsuarios;
         }
-        public static List<EntCombo> ConsultarDatosEmpleado(string Cod_Usuario,int Tipo)
+
+        public static List<EntCombo> ListaUsuariosComboSap(string Idusuario)
+        {
+            List<EntCombo> cmbUsuarios = null;
+            SqlCommand cmd = null;
+            SqlDataReader dr = null;
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                SqlConnection cnx = cn.conectar();
+                cmd = new SqlCommand("Sp_RTAConsultaUsuarioPorJefeSap", cnx);
+                cmd.Parameters.AddWithValue("@Cod_Jefe_Inm", Idusuario);
+                cmd.CommandType = CommandType.StoredProcedure;
+                cnx.Open();
+                dr = cmd.ExecuteReader();
+                cmbUsuarios = new List<EntCombo>();
+                while (dr.Read())
+                {
+                    EntCombo usuario = new EntCombo();
+
+                    usuario.Id = dr["Cod_Usuario"].ToString();
+                    usuario.Valor = dr["Nom_Usuario"].ToString();
+
+                    cmbUsuarios.Add(usuario);
+                }
+
+            }
+            catch (Exception ex)
+            {
+                cmbUsuarios = null;
+            }
+            finally
+            {
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
+            }
+            return cmbUsuarios;
+        }
+        public static List<EntCombo> ConsultarDatosEmpleado(string Cod_Usuario, int Tipo)
         {
             List<EntCombo> cmbUsuarios = null;
             SqlCommand cmd = null;
@@ -435,7 +504,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbUsuarios;
         }
@@ -476,7 +548,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbUsuarios;
         }
@@ -509,9 +584,54 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return resultado;
+        }
+
+
+        /// <summary>
+        /// El Cod_Usuario de quien tiene ese correo, o cadena vacia.
+        ///
+        /// Hace falta para atribuirle la firma a Talento Humano cuando valida desde el
+        /// correo: el destinatario se configura como direccion en
+        /// R_ParametrosConfiguracion.CORREORH, no como codigo de usuario.
+        ///
+        /// Va con consulta parametrizada y no con procedimiento porque es una lectura
+        /// de un solo campo y no vale una migracion de base.
+        ///
+        /// Si dos usuarios comparten correo se toma el de Id_Usuario mas alto, que es
+        /// el criterio que ya usan los procedimientos de firma ante los codigos
+        /// duplicados de R_Usuarios.
+        /// </summary>
+        public static string RTA_CodigoUsuarioPorCorreo(string correo)
+        {
+            if (string.IsNullOrEmpty(correo)) { return string.Empty; }
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand(
+                    "SELECT TOP 1 Cod_Usuario FROM dbo.R_Usuarios " +
+                    "WHERE E_Mail = @Correo AND ISNULL(Cod_Usuario, '') <> '' " +
+                    "ORDER BY Id_Usuario DESC", cnx))
+                {
+                    cmd.Parameters.Add("@Correo", SqlDbType.VarChar, 128).Value = correo.Trim();
+                    cnx.Open();
+
+                    object valor = cmd.ExecuteScalar();
+                    return valor == null ? string.Empty : valor.ToString();
+                }
+            }
+            catch (Exception)
+            {
+                return string.Empty;
+            }
         }
 
     }

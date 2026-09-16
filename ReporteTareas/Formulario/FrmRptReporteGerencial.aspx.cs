@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
+﻿using CapaEntidad;
 using ReporteTareas.Controles;
-using System.Data;
 using SeguridadAppHelper;
-using System.Text;
+using System;
+using System.Collections.Generic;
 
 namespace ReporteTareas.Formulario
 {
@@ -36,7 +29,7 @@ namespace ReporteTareas.Formulario
                     string IdCliente = "";
                     IdCliente = Session["IdCliente"].ToString();
 
-                    if(IdCliente == "0")
+                    if (IdCliente == "0")
                     {
                         txtIdCliente.Text = IdCliente.ToString();
                     }

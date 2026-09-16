@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -37,7 +34,7 @@ namespace CapaDato
                 while (dr.Read())
                 {
                     EntInfoFacturaProv factura = new EntInfoFacturaProv();
-                    i= i+1;
+                    i = i + 1;
                     factura.ID = i.ToString();
                     factura.Nombre = dr["NAME1"].ToString();
                     factura.Valor = dr["DMBTR"].ToString();
@@ -76,7 +73,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaFacturas;
@@ -120,7 +120,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaFacturas;
@@ -181,7 +184,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaFacturas;

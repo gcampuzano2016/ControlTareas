@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -52,9 +47,9 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@IdCliente", objEntCosteoServicio.IdCliente);
                 cmd.Parameters.AddWithValue("@Cliente", objEntCosteoServicio.Cliente);
                 cmd.Parameters.AddWithValue("@Concepto", objEntCosteoServicio.Concepto);
-                cmd.Parameters.AddWithValue("@UnidadNegocio", objEntCosteoServicio.UnidadNegocio );
-                cmd.Parameters.AddWithValue("@ResponsableDimen", objEntCosteoServicio.ResponsableDimen );
-                cmd.Parameters.AddWithValue("@TipoServicio", objEntCosteoServicio.TipoServicio );
+                cmd.Parameters.AddWithValue("@UnidadNegocio", objEntCosteoServicio.UnidadNegocio);
+                cmd.Parameters.AddWithValue("@ResponsableDimen", objEntCosteoServicio.ResponsableDimen);
+                cmd.Parameters.AddWithValue("@TipoServicio", objEntCosteoServicio.TipoServicio);
                 if (objEntCosteoServicio.PlazoEntrega == "")
                 {
                     cmd.Parameters.AddWithValue("@PlazoEntrega", Convert.ToDateTime("1900-01-01"));
@@ -84,7 +79,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@Costo", objEntCosteoServicio.Costo);
                 cmd.Parameters.AddWithValue("@Observacion", objEntCosteoServicio.Observacion);
                 cmd.Parameters.AddWithValue("@Usuario", objEntCosteoServicio.Usuario);
-                cmd.Parameters.AddWithValue("@Tipo", objEntCosteoServicio.Tipo );            
+                cmd.Parameters.AddWithValue("@Tipo", objEntCosteoServicio.Tipo);
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
                 dr.Read();
@@ -130,7 +125,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -170,7 +168,7 @@ namespace CapaDato
                     Tarea.IdCliente = Convert.ToInt32(dr["IdCliente"].ToString());
                     Tarea.Cliente = dr["Cliente"].ToString();
                     Tarea.Concepto = dr["Concepto"].ToString();
-                    Tarea.UnidadNegocio =dr["UnidadNegocio"].ToString();
+                    Tarea.UnidadNegocio = dr["UnidadNegocio"].ToString();
                     Tarea.ResponsableDimen = dr["ResponsableDimen"].ToString();
                     Tarea.TipoServicio = dr["TipoServicio"].ToString();
                     Tarea.PlazoEntrega = dr["PlazoEntrega"].ToString();
@@ -191,13 +189,16 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
 
-        public static List<EntCosteoServicio> ConsultaSp_RTAListaCosteServicios(string FchIni, string FchFin, int IdGerenteCuenta,  string sucursal, string ResponsableDimen, int idFecha)
+        public static List<EntCosteoServicio> ConsultaSp_RTAListaCosteServicios(string FchIni, string FchFin, int IdGerenteCuenta, string sucursal, string ResponsableDimen, int idFecha)
         {
             List<EntCosteoServicio> listaTareas = null;
 
@@ -256,7 +257,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -300,7 +304,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

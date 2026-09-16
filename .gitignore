@@ -1,0 +1,87 @@
+# Estado de la interfaz de Visual Studio (ventanas abiertas, breakpoints).
+# Es por maquina y por usuario: no aporta nada al repo y ensucia el diff
+# cada vez que se abre la solucion.
+*.suo
+.vs/**/suo*.tmp
+
+# Configuracion por usuario y por maquina. Traen rutas locales y el puerto de
+# IIS Express: si se commitean, le pisan la configuracion a cualquier otro que
+# clone el repo, y ensucian el diff en cada sesion de trabajo.
+*.user
+.vs/**/applicationhost.config
+
+# OJO: bin/ se trackea a proposito en este repo — el despliegue a produccion
+# sale de ahi, igual que de ReporteTareas/obj/Release/Package/. Esos dos no
+# se agregan aqui. Lo que sigue es solo lo que MSBuild regenera en cada build.
+
+# Intermedios de compilacion. Son copias de lo que ya vive en bin/ mas
+# archivos de trabajo del compilador: cambian en cada build y ensucian el
+# diff sin aportar nada.
+**/obj/Debug/
+**/obj/Release/
+
+# EXCEPCION: el paquete de despliegue a produccion vive dentro de obj/Release.
+# Se re-incluye la carpeta y adentro solo se conserva Package/.
+!ReporteTareas/obj/Release/
+ReporteTareas/obj/Release/*
+!ReporteTareas/obj/Release/Package/
+
+# Simbolos de depuracion: no hacen falta para ejecutar la aplicacion.
+*.pdb
+
+# Blindaje: adentro del paquete de despliegue no se ignora nada, para que las
+# reglas de arriba no puedan recortarlo por accidente.
+!ReporteTareas/obj/Release/Package/PackageTmp/**
+
+# El target Package deja ademas, sueltos en Package/, un .zip de ~150 MB y los
+# scripts de MSDeploy. El despliegue de este proyecto no los usa: copia a mano
+# el contenido de PackageTmp/. Se ignoran para que un `git add -A` distraido no
+# meta el zip al repositorio. Solo aplican a Package/ en si, no a PackageTmp/.
+ReporteTareas/obj/Release/Package/*.zip
+ReporteTareas/obj/Release/Package/*.cmd
+ReporteTareas/obj/Release/Package/*.xml
+ReporteTareas/obj/Release/Package/*.txt
+
+# Secretos. Los dos se crean a mano en cada maquina y en el servidor, a partir
+# de su .ejemplo, que si se versiona. Nunca commitear los reales.
+#   connections.config  cadenas de conexion, con las contrasenas de base
+#   appsettings.config  claves de cifrado de FileEncryptionService
+connections.config
+appsettings.config
+
+# EXCEPCION a la regla de arriba: CapaPruebas no se despliega nunca -no lo
+# referencia ningun proyecto- asi que su bin/ no tiene por que viajar. Son
+# ~38 MB de dependencias que ya viven en el bin/ de las otras capas.
+CapaPruebas/bin/
+CapaPruebas/obj/
+
+# Insumos de carga con datos personales. La plantilla de horas extras trae
+# nombres, cedulas y sueldos de 64 personas y este repositorio es PUBLICO.
+# Los archivos entran por aqui, se procesan, y nunca se versionan.
+Actualizacion/
+
+# Los scripts de carga que genera docs/sql/generar-carga-horas-extras.py.
+# Se versiona el generador -que es logica- y no su salida -que son datos-.
+docs/sql/carga-generada/
+
+# Bytecode de Python. El repo versiona el generador de la carga, no su cache.
+__pycache__/
+
+# Lo que la gente sube o descarga desde la aplicacion. Son documentos de
+# personas -informes, PDF con codigos de registro, capturas- y este
+# repositorio es PUBLICO: un git add -A sin esta regla los publica.
+#
+# OJO, dos medias verdades que conviene no confundir:
+#   1. Esto NO desversiona los que ya estan dentro. Hay 18 archivos y 6 hojas
+#      clinicas ya publicados en el historial; sacarlos exige reescribir la
+#      historia, no una regla aqui. Esta regla solo impide que entren mas.
+#   2. La excepcion de abajo es OBLIGATORIA. descargas/perfil/web.config lleva
+#      <handlers><clear /></handlers> y es lo unico que impide que IIS sirva
+#      como archivos estaticos las partidas de nacimiento y cedulas que la
+#      gente adjunta. Si dejara de versionarse, el dia que alguien despliegue
+#      sin el, la guarda de DescargarPerfil.ashx se puede saltar pidiendo el
+#      archivo por su ruta. Y su ausencia NO da ningun error.
+ReporteTareas/descargas/*
+!ReporteTareas/descargas/perfil/
+ReporteTareas/descargas/perfil/*
+!ReporteTareas/descargas/perfil/web.config

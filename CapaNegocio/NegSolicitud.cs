@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -25,9 +24,9 @@ namespace CapaNegocio
 
             return respuesta;
         }
-        public static List<EntSolicitud> ConsultaSp_RTAListaSolicitud(int Tipo, string Cod_Jefe_Inm, int Pagina, string EstadoSolicitud, string FchIni, string FchFin, int TipoSolicitud,string usuario)
+        public static List<EntSolicitud> ConsultaSp_RTAListaSolicitud(int Tipo, string Cod_Jefe_Inm, int Pagina, string EstadoSolicitud, string FchIni, string FchFin, int TipoSolicitud, string usuario,int tipofecha)
         {
-            return DaoSolicitud.ConsultaSp_RTAListaSolicitud( Tipo,  Cod_Jefe_Inm,  Pagina,  EstadoSolicitud, FchIni, FchFin, TipoSolicitud, usuario);
+            return DaoSolicitud.ConsultaSp_RTAListaSolicitud(Tipo, Cod_Jefe_Inm, Pagina, EstadoSolicitud, FchIni, FchFin, TipoSolicitud, usuario, tipofecha);
         }
 
         public static EntRespuesta ConsultaSp_RTAListaSolicitudAct(int Tipo, string Cod_Jefe_Inm, int Pagina, string EstadoSolicitud, string FchIni, string FchFin, int TipoSolicitud)

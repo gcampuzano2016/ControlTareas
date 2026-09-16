@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -17,7 +12,7 @@ namespace CapaDato
         {
             EntRespuesta Respuesta = new EntRespuesta();
             Int32 respuestaSP = 0;
-             string respuestaSP1 = "";
+            string respuestaSP1 = "";
             SqlCommand cmd = null;
             SqlDataReader dr = null;
 
@@ -68,7 +63,7 @@ namespace CapaDato
                 dr.Read();
 
                 respuestaSP1 = dr["Respuestas"].ToString();
-                if(respuestaSP1 == "")
+                if (respuestaSP1 == "")
                 {
                     respuestaSP = 1;
                 }
@@ -108,14 +103,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
 
         }
 
-        public static List<EntRebates> ConsultaSp_RTAListaRebetes(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago,string estado, string  Anio, string meses, int idFecha)
+        public static List<EntRebates> ConsultaSp_RTAListaRebetes(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago, string estado, string Anio, string meses, int idFecha)
         {
             List<EntRebates> listaTareas = null;
 
@@ -178,13 +176,16 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
 
-        public static EntRespuesta ConsultaSp_RTAListaRebetesDescargar(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago, string estado, string  Anio, string meses, int idFecha)
+        public static EntRespuesta ConsultaSp_RTAListaRebetesDescargar(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago, string estado, string Anio, string meses, int idFecha)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -227,7 +228,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -288,7 +292,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -361,7 +368,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -440,7 +450,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -453,7 +466,7 @@ namespace CapaDato
 
             SqlCommand cmd = null;
             SqlDataReader dr = null;
-            try 
+            try
             {
                 DaoReporTareaAranda cn = new DaoReporTareaAranda();
                 SqlConnection cnx = cn.conectar();
@@ -490,7 +503,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;

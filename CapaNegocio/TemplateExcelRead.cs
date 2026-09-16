@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using CapaEntidad;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
-using CapaEntidad;
+using System.Collections.Generic;
+using System.IO;
 
 namespace CapaNegocio
 {
@@ -22,8 +21,8 @@ namespace CapaNegocio
             }
             else
             {
-                    // Utilizar HSSFWorkbook para archivos .xls
-                    // workbook = new HSSFWorkbook(stream);
+                // Utilizar HSSFWorkbook para archivos .xls
+                // workbook = new HSSFWorkbook(stream);
             }
 
             if (workbook != null)
@@ -31,38 +30,36 @@ namespace CapaNegocio
                 ISheet sheet = workbook.GetSheetAt(0);
 
                 // Iterar a través de las filas y crear objetos VMContacto
-                 for (int i = 1; i <= sheet.LastRowNum; i++)
-                 {
-                     IRow row = sheet.GetRow(i);
+                for (int i = 1; i <= sheet.LastRowNum; i++)
+                {
+                    IRow row = sheet.GetRow(i);
 
-                     if (row != null)
-                     {
-                         EntEmpleado contacto = new EntEmpleado
-                         {
-                             Nombre = GetCellValue(row.GetCell(1)),
-                             Cedula = GetCellValue(row.GetCell(2)),
-                             Telefono = GetCellValue(row.GetCell(3)),
-                             Sociedad = GetCellValue(row.GetCell(4)),
-                             Ciudad = GetCellValue(row.GetCell(5)),
-                             AreaTrabajo = GetCellValue(row.GetCell(6)),
-                             PuestoTrabajo = GetCellValue(row.GetCell(7)),
-                             Direccion = GetCellValue(row.GetCell(8)),
-                             Sexo = GetCellValue(row.GetCell(9)),
-                             Fecha_Nacimiento = GetCellValue(row.GetCell(10)),
-                             Provincia = GetCellValue(row.GetCell(11)),
-                             Correo = GetCellValue(row.GetCell(12)),
-                             EstadoCivil = GetCellValue(row.GetCell(13))    
-                         };
+                    if (row != null)
+                    {
+                        EntEmpleado contacto = new EntEmpleado
+                        {
+                            Nombre = GetCellValue(row.GetCell(1)),
+                            Cedula = GetCellValue(row.GetCell(2)),
+                            Telefono = GetCellValue(row.GetCell(3)),
+                            Sociedad = GetCellValue(row.GetCell(4)),
+                            Ciudad = GetCellValue(row.GetCell(5)),
+                            AreaTrabajo = GetCellValue(row.GetCell(6)),
+                            PuestoTrabajo = GetCellValue(row.GetCell(7)),
+                            Direccion = GetCellValue(row.GetCell(8)),
+                            Sexo = GetCellValue(row.GetCell(9)),
+                            Fecha_Nacimiento = GetCellValue(row.GetCell(10)),
+                            Provincia = GetCellValue(row.GetCell(11)),
+                            Correo = GetCellValue(row.GetCell(12)),
+                            EstadoCivil = GetCellValue(row.GetCell(13))
+                        };
 
-                            lista.Add(contacto);
-                     }
-                 }
+                        lista.Add(contacto);
+                    }
+                }
             }
-            
 
             return lista;
         }
-
 
         private static string GetCellValue(ICell cell)
         {

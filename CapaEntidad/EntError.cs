@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -10,6 +6,6 @@ namespace CapaEntidad
     {
         public Exception CodError { get; set; }
         public string MenssageError { get; set; }
-       
+
     }
 }

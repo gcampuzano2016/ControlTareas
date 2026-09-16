@@ -1,0 +1,1599 @@
+/* ============================================================================
+   Tema DOS — capa visual sobre SB Admin 2
+   ----------------------------------------------------------------------------
+   Se carga DESPUES de sb-admin-2.css y solo redefine apariencia: color,
+   tipografia, espaciado y estados. No toca posicionamiento ni display, para no
+   romper metisMenu ni el colapso responsive de Bootstrap.
+
+   Ninguna de las 74 pantallas cambia de markup. Para revertir, basta con quitar
+   el <link> de Master.Master.
+
+   DIRECCION
+   ---------
+   ReporteTareas no es un CRM de ventas: es un CRM de personas y su tiempo.
+   Registra jornadas, tareas diarias, horas extras y aprobaciones. El registro
+   que maneja no es una oportunidad de negocio, es una jornada de trabajo.
+
+   La version anterior de este tema era densa e industrial: hairlines, radio de
+   2px, sin sombras. Esta la reemplaza por superficies que flotan: tarjetas
+   blancas sobre un fondo calido, aire suficiente para leer una tabla larga sin
+   cansarse, y un solo acento.
+
+   La paleta esta muestreada del archivo Img/logo_dos.png, no elegida a ojo. El
+   gris de fondo es CALIDO a proposito: el gris azulado es el reflejo automatico
+   de cualquier panel de administracion, y el bermellon de la marca se apaga
+   encima de un frio.
+
+   Tipografia: se usan las fuentes del sistema a proposito. La aplicacion corre
+   en red interna y ya depende de code.jquery.com para arrancar; no se le agrega
+   otra dependencia externa por una fuente. Segoe UI esta en todos los equipos.
+
+   LA FIRMA: el riel de diafragma
+   ------------------------------
+   Un bloque bermellon de 3px que aparece en exactamente dos lugares y siempre
+   significa lo mismo: "esto es lo que estas mirando". Va junto al titulo de cada
+   tarjeta y en el item de menu activo. Sale del diafragma del logo.
+
+   Los estados NO lo llevan: se resuelven con pildora tintada. Asi el riel
+   codifica una sola cosa y no compite consigo mismo.
+   ============================================================================ */
+
+:root {
+    /* --- Marca (muestreada del logo) --- */
+    --crm-acento:       #E53212;  /* el diafragma */
+    --crm-acento-hondo: #A81D0E;  /* la sombra metalica */
+    --crm-acento-tenue: rgba(229, 50, 18, .10);
+
+    /* --- Superficies: gris calido, nunca azulado --- */
+    --crm-fondo:         #F4F2EF;
+    --crm-superficie:    #FFFFFF;
+    --crm-superficie-alt:#FAF8F6;
+
+    /* --- Tinta --- */
+    --crm-tinta:       #211E1C;
+    --crm-tinta-media: #57514B;
+    --crm-tinta-suave: #857E77;
+
+    /* --- Lineas --- */
+    --crm-linea:       #E7E2DD;
+    --crm-linea-suave: #F0ECE8;
+
+    /* --- Estados: tinte de fondo + tinta del mismo tono --- */
+    --crm-verde:        #176B44;
+    --crm-verde-tinte:  #E6F2EB;
+    --crm-ambar:        #8A5600;
+    --crm-ambar-tinte:  #FAF0DC;
+    --crm-rojo:         #A81D0E;
+    --crm-rojo-tinte:   #FBEAE7;
+    --crm-neutro-tinte: #F0EDEA;
+
+    /* --- Barra lateral --- */
+    --crm-lateral:      #23201E;
+    --crm-lateral-alt:  #322E2B;
+    --crm-lateral-tinta:#C4BEB8;
+
+    /* --- Elevacion: dos capas, una de contacto y una de distancia --- */
+    --crm-sombra-1: 0 1px 2px rgba(33, 30, 28, .05), 0 1px 3px rgba(33, 30, 28, .05);
+    --crm-sombra-2: 0 2px 4px rgba(33, 30, 28, .05), 0 8px 20px rgba(33, 30, 28, .07);
+    --crm-sombra-3: 0 24px 56px rgba(33, 30, 28, .20);
+
+    /* --- Radios --- */
+    --crm-r-tarjeta: 12px;
+    --crm-r-control: 7px;
+    --crm-r-pildora: 999px;
+
+    /* --- Tipografia --- */
+    --crm-titulo: "Segoe UI Semibold", "Segoe UI", system-ui, Arial, sans-serif;
+    --crm-texto:  "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    --crm-dato:   Consolas, "Cascadia Mono", "Lucida Console", monospace;
+}
+
+/* ============================================================================
+   1. Base
+   ============================================================================ */
+
+body {
+    font-family: var(--crm-texto);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--crm-tinta);
+    background-color: var(--crm-fondo);
+    -webkit-font-smoothing: antialiased;
+}
+
+/* El fondo tiene que llegar al area de contenido. Las pantallas traen
+   style="padding: 0px" inline en #page-wrapper, que gana a cualquier padding
+   que se declare aca: por eso el aire se da con margin en las tarjetas. */
+#page-wrapper,
+#page-wrapper1,
+#page-wrapper-principal {
+    background-color: var(--crm-fondo);
+    border-left: 0;
+}
+
+/* UNICA excepcion a la regla de no tocar layout, y es para corregir un defecto
+   que ya existia: Bootstrap le da margin de -15px a .row esperando que el
+   contenedor tenga 15px de padding que lo compense, pero las pantallas traen
+   style="padding: 0px" inline en #page-wrapper y ese inline gana. Resultado:
+   cada pantalla desborda 15px a la derecha y aparece una barra de scroll
+   horizontal que no lleva a ninguna parte.
+
+   Se neutraliza solo en los .row que cuelgan directamente del wrapper. Los
+   .row anidados dentro de un panel conservan su comportamiento. */
+#page-wrapper > .row,
+#page-wrapper1 > .row,
+#page-wrapper-principal > .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+
+h1, h2, h3, h4, h5, .h1, .h2, .h3, .h4, .h5 {
+    font-family: var(--crm-titulo);
+    color: var(--crm-tinta);
+    letter-spacing: -.018em;
+}
+
+h3 { font-size: 22px; font-weight: 600; }
+h4 { font-size: 15px; font-weight: 600; }
+
+a { color: var(--crm-acento-hondo); text-decoration: none; }
+a:hover, a:focus { color: var(--crm-acento); text-decoration: none; }
+
+/* Foco visible en todo lo operable. El anillo bermellon es el guino al
+   diafragma del logo: donde esta puesta la atencion. */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+.btn:focus-visible {
+    outline: 2px solid var(--crm-acento);
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}
+
+/* ============================================================================
+   2. Barra superior
+   ============================================================================ */
+
+.navbar-static-top {
+    background: var(--crm-superficie);
+    border: 0;
+    border-bottom: 1px solid var(--crm-linea);
+    box-shadow: none;
+    min-height: 56px;
+}
+
+/* Master.Master deja un <p></p> vacio despues del logo. Bootstrap le da
+   margen inferior, asi que ese parrafo invisible estiraba la barra de 56px a
+   107px. Con la barra mas alta que los 51px en los que SB Admin 2 arranca la
+   barra lateral (sb-admin-2.css:175), el menu se montaba encima y tapaba el
+   logo. */
+.navbar-header > p:empty { display: none; }
+
+/* El logo no puede pasarse del alto de la barra. */
+.navbar-default .navbar-brand { padding: 13px 15px; height: auto; }
+.navbar-default .navbar-brand > img { max-height: 30px; width: auto; }
+
+/* La barra lateral arranca donde termina la barra superior: 56px de alto mas
+   1px de borde. Si alguna vez cambia el min-height de arriba, este numero
+   tiene que acompañarlo. */
+@media (min-width: 768px) {
+    .sidebar { margin-top: 57px; }
+}
+
+.navbar-default .navbar-brand,
+.navbar-top-links > li > a {
+    color: var(--crm-tinta);
+}
+
+/* Todo lo de la barra se alinea a los 56px de alto. Sin esto cada pieza traia
+   su propia medida —SB Admin 2 le pone min-height:50px a estos enlaces, y
+   Bootstrap le suma 15px de margen arriba y abajo a .navbar-text— y la barra
+   terminaba midiendo 80px, mas que los 57px donde arranca la barra lateral. */
+.navbar-top-links > li > a {
+    border-radius: var(--crm-r-control);
+    min-height: 0;
+    margin: 7px 2px;
+    padding: 9px 12px;
+    line-height: 1.4;
+}
+
+.navbar-top-links > li > a:hover,
+.navbar-top-links > li > a:focus {
+    background-color: var(--crm-neutro-tinte);
+    color: var(--crm-acento);
+}
+
+/* El nombre de quien esta trabajando: dato, no adorno. El line-height lo centra
+   sin margenes, que es lo que evita que estire la barra. */
+.navbar-top-links > li.navbar-text {
+    color: var(--crm-tinta-media) !important;
+    font-size: 13px;
+    margin: 0 !important;
+    padding: 0 14px 0 4px !important;
+    line-height: 56px;
+}
+
+/* Los botones de marcacion tambien se centran contra los 56px. */
+.navbar-top-links .navbar-btn { margin-top: 11px; margin-bottom: 11px; }
+
+.dropdown-menu {
+    border: 1px solid var(--crm-linea);
+    border-radius: var(--crm-r-control);
+    box-shadow: var(--crm-sombra-2);
+    padding: 6px;
+}
+
+.dropdown-menu > li > a {
+    border-radius: 5px;
+    padding: 8px 12px;
+    color: var(--crm-tinta-media);
+}
+
+.dropdown-menu > li > a:hover,
+.dropdown-menu > li > a:focus {
+    background-color: var(--crm-neutro-tinte);
+    color: var(--crm-tinta);
+}
+
+/* ============================================================================
+   3. Barra lateral
+   ============================================================================ */
+
+.navbar-default.sidebar,
+.sidebar ul.nav {
+    background-color: var(--crm-lateral);
+    border: 0;
+}
+
+/* SB Admin 2 separa cada opcion con una linea (sb-admin-2.css:137). Con items
+   redondeados esa linea los corta por la mitad y el menu se lee como una lista
+   de los 2000. El separador ahora es el espacio. */
+.sidebar ul li { border-bottom: 0; }
+
+.sidebar ul.nav { padding-top: 6px; }
+
+/* La barra lateral es position:absolute (sb-admin-2.css:171), asi que su alto
+   es el de sus opciones y no el de la pagina. En cuanto el contenido es mas
+   largo que el menu, debajo de la ultima opcion aparece el blanco de la pagina
+   y la columna se ve cortada por la mitad.
+
+   En vez de tocar el posicionamiento, se pinta la franja de 250px en el
+   contenedor raiz: el fondo llega hasta abajo aunque el menu se acabe antes.
+   El min-height cubre el caso contrario, cuando la pagina es mas corta que la
+   ventana.
+
+   Antes hay que resolver un problema de fondo: las columnas de Bootstrap son
+   flotantes, y varias pantallas ponen .col-lg-12 SIN un .row que lo contenga
+   (por ejemplo ActualizarTareas.aspx). Un contenedor con solo hijos flotantes
+   colapsa a cero, asi que #wrapper media 624px cuando su contenido media 1400.
+   Sin altura real ningun fondo puede llegar abajo. El clearfix lo devuelve a
+   su altura verdadera; es la correccion estandar y no mueve nada de sitio. */
+#page-wrapper::after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+/* El degradado va en el BODY, no en #wrapper. En Master.Master el
+   <div id="wrapper"> cierra justo despues del <nav>: contiene la barra
+   superior y el menu, pero NO el contenido de las pantallas, que cuelga de un
+   <div> hermano. Pintarlo ahi solo cubriria el alto de la barra.
+
+   La clase app-dos la pone el <body> de Master.Master. Login.aspx no la lleva,
+   que es como esa pantalla queda fuera de esta regla sin necesidad de :has(). */
+@media (min-width: 768px) {
+    body.app-dos {
+        min-height: 100vh;
+        background-image: linear-gradient(to right,
+            var(--crm-lateral) 0,
+            var(--crm-lateral) 250px,
+            var(--crm-fondo) 250px);
+        background-repeat: no-repeat;
+    }
+
+    /* Con el menu escondido no debe quedar una franja oscura vacia. */
+    html.menu-oculto body.app-dos { background-image: none; }
+}
+
+.sidebar .nav > li > a,
+.sidebar .nav-second-level li a {
+    color: var(--crm-lateral-tinta);
+    border-bottom: 0;
+    font-size: 13.5px;
+    padding: 11px 16px;
+    margin: 2px 8px;
+    border-radius: 8px;
+    position: relative;
+}
+
+.sidebar .nav > li > a:hover,
+.sidebar .nav > li > a:focus,
+.sidebar .nav-second-level li a:hover,
+.sidebar .nav-second-level li a:focus {
+    background-color: var(--crm-lateral-alt);
+    color: #FFFFFF;
+}
+
+/* FIRMA — el riel de diafragma. Marca UNA sola cosa: donde estoy. */
+.sidebar .nav > li > a.active,
+.sidebar .nav > li.active > a,
+.sidebar .nav-second-level li a.active {
+    background-color: var(--crm-lateral-alt);
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.sidebar .nav > li > a.active::before,
+.sidebar .nav > li.active > a::before,
+.sidebar .nav-second-level li a.active::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 3px;
+    height: 18px;
+    border-radius: 0 2px 2px 0;
+    background: var(--crm-acento);
+}
+
+.sidebar .nav-second-level li a { padding-left: 38px; font-size: 13px; }
+
+.sidebar .nav > li > a i.fa,
+.sidebar .nav-second-level li a i.fa {
+    color: #8E8781;
+    width: 18px;
+}
+
+.sidebar .nav > li > a:hover i.fa,
+.sidebar .nav > li > a.active i.fa,
+.sidebar .nav > li.active > a i.fa {
+    color: var(--crm-acento);
+}
+
+.sidebar .arrow { color: #6E6862; }
+
+/* ============================================================================
+   3b. Hamburguesa de escritorio
+   ----------------------------------------------------------------------------
+   Bootstrap 3 ya trae su propia hamburguesa (.navbar-toggle) pero solo aparece
+   por debajo de 768px. Esta es la de escritorio: permite esconder la barra
+   lateral para ganar 250px de ancho en las pantallas con tablas anchas.
+
+   La preferencia se recuerda en el navegador. Es indispensable: cada clic en
+   esta aplicacion recarga la pagina entera, y sin memoria el menu volveria a
+   abrirse en cada pantalla.
+   ============================================================================ */
+
+.dos-menu-boton {
+    display: none;
+    float: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--crm-r-control);
+    color: var(--crm-tinta-media);
+    font-size: 17px;
+    line-height: 1;
+    padding: 9px 13px;
+    margin: 8px 4px 8px 10px;
+}
+
+.dos-menu-boton:hover,
+.dos-menu-boton:focus {
+    background-color: var(--crm-neutro-tinte);
+    border-color: var(--crm-linea);
+    color: var(--crm-acento);
+}
+
+@media (min-width: 768px) {
+    .dos-menu-boton { display: inline-block; }
+}
+
+/* Solo transicionan las propiedades que animo, no "all". */
+.sidebar { transition: transform .18s ease; }
+#page-wrapper { transition: margin-left .18s ease; }
+
+/* El estado oculto vive en <html> para poder aplicarlo antes del primer
+   pintado y evitar que la barra parpadee al cargar cada pantalla. */
+@media (min-width: 768px) {
+    html.menu-oculto .sidebar {
+        transform: translateX(-100%);
+        visibility: hidden;
+    }
+
+    html.menu-oculto #page-wrapper,
+    html.menu-oculto #page-wrapper1,
+    html.menu-oculto #page-wrapper-principal {
+        margin-left: 0;
+        border-left: 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .sidebar, #page-wrapper { transition: none; }
+}
+
+/* ============================================================================
+   3c. Ubicacion actual en la barra superior
+   ----------------------------------------------------------------------------
+   Responde "donde estoy" sin depender de la barra lateral. Es lo que sostiene
+   que esconder el menu no desoriente: el nombre de la pantalla sigue arriba.
+   El texto lo toma el JS del propio menu, asi que no hay que mantenerlo aparte.
+   ============================================================================ */
+
+.dos-ubicacion {
+    display: none;
+    float: left;
+    line-height: 56px;
+    padding-left: 6px;
+    font-size: 13px;
+    color: var(--crm-tinta-media);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 46vw;
+}
+
+.dos-ubicacion-grupo { color: var(--crm-tinta-suave); }
+
+.dos-ubicacion-sep {
+    color: #C7C1BB;
+    margin: 0 7px;
+}
+
+.dos-ubicacion-hoja {
+    font-family: var(--crm-titulo);
+    font-weight: 600;
+    color: var(--crm-tinta);
+}
+
+@media (min-width: 768px) {
+    .dos-ubicacion { display: block; }
+}
+
+/* ============================================================================
+   3d. Filtro del menu
+   ----------------------------------------------------------------------------
+   Hay 48 pantallas repartidas en grupos que arrancan cerrados. Sin esto, dar
+   con una que no se visita seguido significa abrir grupo por grupo.
+   ============================================================================ */
+
+.dos-filtro {
+    padding: 12px 14px 10px;
+    border-bottom: 1px solid #322E2B;
+    background: var(--crm-lateral);
+}
+
+.dos-filtro input {
+    width: 100%;
+    box-sizing: border-box;
+    background: #191716;
+    border: 1px solid #3D3835;
+    border-radius: var(--crm-r-control);
+    color: #EDEBE8;
+    font-family: var(--crm-texto);
+    font-size: 13px;
+    padding: 8px 12px;
+}
+
+.dos-filtro input::placeholder { color: #7C7873; }
+.dos-filtro input::-ms-input-placeholder { color: #7C7873; }
+
+.dos-filtro input:focus {
+    outline: 0;
+    border-color: var(--crm-acento);
+    box-shadow: 0 0 0 3px rgba(229, 50, 18, .22);
+}
+
+.dos-filtro-vacio {
+    display: none;
+    padding-top: 8px;
+    font-size: 12px;
+    color: #8E8781;
+}
+
+/* ============================================================================
+   4. Tarjetas
+   ----------------------------------------------------------------------------
+   El cambio que mas se nota. Los paneles dejan de ser cajas con borde duro y
+   pasan a ser superficies que flotan sobre el fondo. Sin borde: la sombra de
+   dos capas es la que separa la tarjeta del fondo.
+   ============================================================================ */
+
+.panel {
+    border: 0;
+    border-radius: var(--crm-r-tarjeta);
+    background: var(--crm-superficie);
+    box-shadow: var(--crm-sombra-1);
+    margin-bottom: 18px;
+}
+
+/* Las pantallas traen style="padding: 0px" inline en las columnas, asi que el
+   aire lateral lo pone la tarjeta con su propio margen. */
+.col-lg-12 > .panel,
+.col-md-12 > .panel {
+    margin-left: 16px;
+    margin-right: 16px;
+}
+
+.panel-default > .panel-heading,
+.panel-primary > .panel-heading {
+    background: transparent;
+    background-image: none;
+    border-bottom: 1px solid var(--crm-linea-suave);
+    color: var(--crm-tinta);
+    padding: 16px 20px 14px 20px;
+    border-radius: var(--crm-r-tarjeta) var(--crm-r-tarjeta) 0 0;
+
+    /* FIRMA — el riel de diafragma junto al titulo de la tarjeta. */
+    font-family: var(--crm-titulo);
+    font-size: 14px;
+    font-weight: 600;
+    position: relative;
+}
+
+.panel-default > .panel-heading::before,
+.panel-primary > .panel-heading::before {
+    content: "";
+    position: absolute;
+    left: 20px;
+    top: 18px;
+    width: 3px;
+    height: 15px;
+    border-radius: 2px;
+    background: var(--crm-acento);
+}
+
+/* El riel ocupa su lugar: el contenido de la cabecera se corre. */
+.panel-default > .panel-heading,
+.panel-primary > .panel-heading { padding-left: 33px; }
+
+.panel-primary { border-color: transparent; }
+
+/* Los titulos dentro de la cabecera ya no repiten el tratamiento: el riel y la
+   cabecera lo dan. Aca solo se normaliza el tamano. */
+.panel-heading h4,
+.panel-heading h3 {
+    font-family: var(--crm-titulo);
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: -.01em;
+    text-transform: none;
+    color: var(--crm-tinta);
+    margin: 0;
+    line-height: 1.35;
+}
+
+.panel-body { padding: 20px; }
+
+.panel-footer {
+    background: var(--crm-superficie-alt);
+    border-top: 1px solid var(--crm-linea-suave);
+    border-radius: 0 0 var(--crm-r-tarjeta) var(--crm-r-tarjeta);
+    padding: 14px 20px;
+}
+
+.card, .card-primary {
+    border: 0;
+    border-radius: var(--crm-r-tarjeta);
+    background: var(--crm-superficie);
+    box-shadow: var(--crm-sombra-1);
+}
+
+.card-header {
+    border-bottom: 1px solid var(--crm-linea-suave);
+    padding: 16px 20px;
+    background: transparent;
+}
+
+.card-header h3 {
+    font-family: var(--crm-titulo);
+    font-size: 18px;
+    margin: 0;
+}
+
+/* La tarjeta bajo el cursor se levanta apenas. Es la unica animacion del tema
+   fuera del menu: informa que la superficie es una unidad, no decora. */
+.panel:hover { box-shadow: var(--crm-sombra-2); }
+.panel { transition: box-shadow .16s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+    .panel { transition: none; }
+}
+
+/* ============================================================================
+   5. Botones
+   ============================================================================ */
+
+.btn {
+    border-radius: var(--crm-r-control);
+    font-family: var(--crm-texto);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 9px 17px;
+    background-image: none;
+    text-shadow: none;
+    box-shadow: none;
+    border-width: 1px;
+    transition: background-color .14s ease, border-color .14s ease;
+}
+
+.btn-sm { padding: 6px 13px; font-size: 12.5px; border-radius: 6px; }
+.btn-xs { padding: 4px 10px; font-size: 12px; border-radius: 5px; }
+
+/* La accion que ejecuto: bermellon. En esta aplicacion "primary" y "success"
+   se usan indistintamente para el boton principal de cada pantalla. */
+.btn-primary,
+.btn-success {
+    background-color: var(--crm-acento);
+    border-color: var(--crm-acento);
+    color: #FFFFFF;
+    box-shadow: 0 1px 2px rgba(168, 29, 14, .24);
+}
+
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active,
+.btn-success:hover, .btn-success:focus, .btn-success:active {
+    background-color: var(--crm-acento-hondo);
+    border-color: var(--crm-acento-hondo);
+    color: #FFFFFF;
+}
+
+.btn-default {
+    background-color: var(--crm-superficie);
+    border-color: #D8D2CC;
+    color: var(--crm-tinta);
+}
+
+.btn-default:hover, .btn-default:focus {
+    background-color: var(--crm-superficie-alt);
+    border-color: #BDB6AF;
+    color: var(--crm-tinta);
+}
+
+/* Cautelar: cambia el estado de alguien mas. */
+.btn-warning {
+    background-color: var(--crm-superficie);
+    border-color: #DCC79A;
+    color: var(--crm-ambar);
+}
+
+.btn-warning:hover, .btn-warning:focus {
+    background-color: var(--crm-ambar-tinte);
+    border-color: var(--crm-ambar);
+    color: var(--crm-ambar);
+}
+
+/* Se usa 45 veces como accion secundaria. Sin esto conserva el celeste de
+   Bootstrap 3, que es el unico color del sistema que no sale de la marca. */
+.btn-info {
+    background-color: var(--crm-superficie);
+    border-color: #D8D2CC;
+    color: var(--crm-tinta-media);
+}
+
+.btn-info:hover, .btn-info:focus {
+    background-color: var(--crm-superficie-alt);
+    border-color: #BDB6AF;
+    color: var(--crm-tinta);
+}
+
+.btn-danger {
+    background-color: var(--crm-superficie);
+    border-color: #E3B3AC;
+    color: var(--crm-rojo);
+}
+
+.btn-danger:hover, .btn-danger:focus {
+    background-color: var(--crm-rojo);
+    border-color: var(--crm-rojo);
+    color: #FFFFFF;
+}
+
+.btn[disabled], .btn.disabled { opacity: .45; box-shadow: none; }
+
+/* Excepcion deliberada: Entrada / Salida de la barra superior.
+   Ahi el par verde-rojo no es decoracion, es el significado: la gente marca
+   su jornada de un vistazo y lleva años leyendo esos dos colores. Si ambos
+   heredaran el bermellon de marca, los dos botones se verian iguales. */
+.navbar-top-links .btn-success {
+    background-color: var(--crm-verde);
+    border-color: var(--crm-verde);
+    color: #FFFFFF;
+    box-shadow: none;
+}
+
+.navbar-top-links .btn-success:hover,
+.navbar-top-links .btn-success:focus {
+    background-color: #115436;
+    border-color: #115436;
+}
+
+.navbar-top-links .btn-danger {
+    background-color: var(--crm-rojo);
+    border-color: var(--crm-rojo);
+    color: #FFFFFF;
+}
+
+.navbar-top-links .btn-danger:hover,
+.navbar-top-links .btn-danger:focus {
+    background-color: #8C160A;
+    border-color: #8C160A;
+    color: #FFFFFF;
+}
+
+.navbar-top-links .btn i.fa { margin-right: 6px; }
+
+.btn-group > .btn:first-child { border-radius: var(--crm-r-control) 0 0 var(--crm-r-control); }
+.btn-group > .btn:last-child  { border-radius: 0 var(--crm-r-control) var(--crm-r-control) 0; }
+
+/* ============================================================================
+   6. Formularios
+   ============================================================================ */
+
+.form-control {
+    border: 1px solid #D8D2CC;
+    border-radius: var(--crm-r-control);
+    box-shadow: none;
+    height: 38px;
+    padding: 8px 12px;
+    font-size: 13.5px;
+    color: var(--crm-tinta);
+    background-color: var(--crm-superficie);
+    transition: border-color .14s ease, box-shadow .14s ease;
+}
+
+.form-control:focus {
+    border-color: var(--crm-acento);
+    box-shadow: 0 0 0 3px var(--crm-acento-tenue);
+}
+
+.form-control[disabled],
+.form-control[readonly] {
+    background-color: var(--crm-superficie-alt);
+    color: var(--crm-tinta-suave);
+}
+
+.form-group { margin-bottom: 16px; }
+
+.form-group > label,
+.control-label {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--crm-tinta-media);
+    margin-bottom: 6px;
+}
+
+.help-block { font-size: 12px; color: var(--crm-tinta-suave); margin: 5px 0 0; }
+
+.input-group-addon {
+    background-color: var(--crm-superficie-alt);
+    border-color: #D8D2CC;
+    border-radius: var(--crm-r-control);
+    color: var(--crm-tinta-suave);
+}
+
+/* ============================================================================
+   7. Tablas
+   ----------------------------------------------------------------------------
+   Filas altas y sin lineas verticales. En un listado largo, lo que ayuda a no
+   perder el renglon es el alto de fila y el resalte al pasar el cursor, no la
+   cuadricula.
+   ============================================================================ */
+
+.table {
+    font-size: 13.5px;
+    /* Las cifras se comparan en columna: un digito de mas salta a la vista. */
+    font-variant-numeric: tabular-nums;
+    margin-bottom: 0;
+}
+
+.table > thead > tr > th {
+    font-family: var(--crm-texto);
+    font-size: 11px;
+    letter-spacing: .07em;
+    text-transform: uppercase;
+    color: var(--crm-tinta-suave);
+    font-weight: 600;
+    background: transparent;
+    border-bottom: 1px solid var(--crm-linea);
+    border-top: 0;
+    padding: 12px 16px;
+    white-space: nowrap;
+    vertical-align: middle;
+}
+
+.table > tbody > tr > td {
+    border-top: 1px solid var(--crm-linea-suave);
+    padding: 14px 16px;
+    vertical-align: middle;
+    color: var(--crm-tinta-media);
+}
+
+/* La primera columna suele ser el identificador del registro. */
+.table > tbody > tr > td:first-child { color: var(--crm-tinta); font-weight: 600; }
+
+/* Hairlines en vez de cebra: menos ruido cuando hay muchas filas. */
+.table-striped > tbody > tr:nth-of-type(odd) { background-color: transparent; }
+.table-hover > tbody > tr:hover { background-color: var(--crm-superficie-alt); }
+.table-bordered, .table-bordered > tbody > tr > td, .table-bordered > thead > tr > th {
+    border-color: var(--crm-linea-suave);
+}
+
+/* Las tablas anchas se desplazan dentro de su tarjeta, no rompen la pagina. */
+.table-responsive, .dataTables_wrapper { overflow-x: auto; }
+
+/* ============================================================================
+   8. Estados
+   ----------------------------------------------------------------------------
+   Pildora tintada: fondo del tono al 10% y tinta del mismo tono. Es la lectura
+   de un CRM, y deja el riel bermellon libre para significar navegacion.
+   ============================================================================ */
+
+.label {
+    display: inline-block;
+    padding: 4px 11px;
+    border-radius: var(--crm-r-pildora);
+    font-family: var(--crm-texto);
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: .01em;
+    text-transform: none;
+    text-shadow: none;
+    white-space: nowrap;
+    line-height: 1.45;
+    vertical-align: middle;
+    background: var(--crm-neutro-tinte);
+    color: var(--crm-tinta-media);
+}
+
+.label-success  { background: var(--crm-verde-tinte);  color: var(--crm-verde); }
+.label-warning  { background: var(--crm-ambar-tinte);  color: var(--crm-ambar); }
+.label-danger   { background: var(--crm-rojo-tinte);   color: var(--crm-rojo); }
+.label-info     { background: var(--crm-verde-tinte);  color: var(--crm-verde); }
+.label-default  { background: var(--crm-neutro-tinte); color: var(--crm-tinta-media); }
+
+/* Las insignias numericas (contadores) son el dato, no el estado. */
+.badge {
+    background-color: var(--crm-neutro-tinte);
+    color: var(--crm-tinta-media);
+    font-family: var(--crm-dato);
+    font-size: 11px;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    border-radius: var(--crm-r-pildora);
+    padding: 3px 8px;
+}
+
+/* ============================================================================
+   9. Modales y avisos
+   ============================================================================ */
+
+.modal-content {
+    border: 0;
+    border-radius: var(--crm-r-tarjeta);
+    box-shadow: var(--crm-sombra-3);
+}
+
+.modal-header {
+    border-bottom: 1px solid var(--crm-linea-suave);
+    padding: 18px 22px;
+}
+
+.modal-title {
+    font-family: var(--crm-titulo);
+    font-size: 17px;
+    font-weight: 600;
+    color: var(--crm-tinta);
+    letter-spacing: -.015em;
+}
+
+.modal-body { padding: 22px; }
+
+.modal-footer {
+    border-top: 1px solid var(--crm-linea-suave);
+    padding: 16px 22px;
+    background: var(--crm-superficie-alt);
+    border-radius: 0 0 var(--crm-r-tarjeta) var(--crm-r-tarjeta);
+}
+
+.alert {
+    border-radius: var(--crm-r-control);
+    border-width: 1px;
+    padding: 13px 16px;
+    font-size: 13.5px;
+}
+
+.alert-success { background: var(--crm-verde-tinte); border-color: #C6E0D1; color: var(--crm-verde); }
+.alert-warning { background: var(--crm-ambar-tinte); border-color: #E6D3AB; color: var(--crm-ambar); }
+.alert-danger  { background: var(--crm-rojo-tinte);  border-color: #EDCBC5; color: var(--crm-rojo); }
+.alert-info    { background: var(--crm-neutro-tinte);border-color: var(--crm-linea); color: var(--crm-tinta-media); }
+
+/* ============================================================================
+   10. Detalles heredados que ya no aplican
+   ============================================================================ */
+
+/* SB Admin 2 trae degradados y sombras internas de su epoca. */
+.panel-heading,
+.navbar-static-top,
+.btn {
+    filter: none;
+}
+
+.pagination { border-radius: var(--crm-r-control); }
+
+.pagination > li > a,
+.pagination > li > span {
+    border-color: var(--crm-linea);
+    color: var(--crm-tinta-media);
+    padding: 7px 13px;
+}
+
+.pagination > .active > a,
+.pagination > .active > a:hover,
+.pagination > .active > span {
+    background-color: var(--crm-acento);
+    border-color: var(--crm-acento);
+}
+
+.nav-tabs { border-bottom: 1px solid var(--crm-linea); }
+
+.nav-tabs > li > a {
+    border: 0;
+    color: var(--crm-tinta-suave);
+    font-weight: 600;
+    font-size: 13.5px;
+    padding: 11px 16px;
+    border-radius: 0;
+}
+
+.nav-tabs > li > a:hover { background: transparent; color: var(--crm-tinta); }
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+    border: 0;
+    border-bottom: 2px solid var(--crm-acento);
+    color: var(--crm-tinta);
+    background: transparent;
+    font-weight: 600;
+}
+
+.well {
+    background: var(--crm-superficie-alt);
+    border: 1px solid var(--crm-linea-suave);
+    border-radius: var(--crm-r-control);
+    box-shadow: none;
+}
+
+hr { border-top-color: var(--crm-linea-suave); }
+
+/* ============================================================================
+   11. Componentes de terceros
+   ----------------------------------------------------------------------------
+   Cada libreria convive en dos versiones con selectores distintos, asi que hay
+   que cubrir ambos juegos o el tema queda a medias segun la pantalla:
+
+     select2 v3  -> global desde Master.Master     -> .select2-container
+     select2 v4  -> CDN en paginas puntuales       -> .select2-container--default
+     SweetAlert 1-> global desde Master.Master     -> .sweet-alert
+     SweetAlert 2-> 7 paginas                      -> .swal2-popup
+     datepicker  -> CDN jquery-ui "smoothness"     -> .ui-datepicker
+
+   Los CDN cargan DESPUES de este archivo en varias pantallas: de ahi los
+   !important. Se limitan a propiedades visuales (background, color, border) y
+   nunca a layout, para no romper el posicionamiento de los widgets.
+   ============================================================================ */
+
+/* --- select2 v4 ---------------------------------------------------------- */
+
+.select2-container--default .select2-selection--single,
+.select2-container--default .select2-selection--multiple {
+    height: 38px !important;
+    border: 1px solid #D8D2CC !important;
+    border-radius: var(--crm-r-control) !important;
+    background: var(--crm-superficie) !important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 36px;
+    padding-left: 12px;
+    color: var(--crm-tinta);
+    font-size: 13.5px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow { height: 36px; }
+
+.select2-container--default.select2-container--focus .select2-selection--single,
+.select2-container--default.select2-container--open .select2-selection--single {
+    border-color: var(--crm-acento) !important;
+    box-shadow: 0 0 0 3px var(--crm-acento-tenue);
+}
+
+.select2-dropdown {
+    border: 1px solid var(--crm-linea) !important;
+    border-radius: var(--crm-r-control) !important;
+    box-shadow: var(--crm-sombra-2);
+    overflow: hidden;
+}
+
+.select2-container--default .select2-results__option {
+    padding: 9px 12px;
+    font-size: 13.5px;
+    color: var(--crm-tinta-media);
+}
+
+.select2-container--default .select2-results__option--highlighted[aria-selected] {
+    background-color: var(--crm-neutro-tinte) !important;
+    color: var(--crm-tinta) !important;
+}
+
+.select2-container--default .select2-results__option[aria-selected="true"] {
+    background-color: var(--crm-acento) !important;
+    color: #FFFFFF !important;
+}
+
+.select2-container--default .select2-search--dropdown .select2-search__field {
+    border: 1px solid #D8D2CC !important;
+    border-radius: 6px !important;
+    padding: 7px 10px;
+}
+
+.select2-container--default .select2-selection--multiple .select2-selection__choice {
+    background-color: var(--crm-neutro-tinte) !important;
+    border: 1px solid var(--crm-linea) !important;
+    border-radius: var(--crm-r-pildora) !important;
+    color: var(--crm-tinta) !important;
+    padding: 2px 10px;
+}
+
+/* --- select2 v3 (el que carga Master.Master para todas las pantallas) ----- */
+
+.select2-container .select2-choice,
+.select2-container .select2-choices {
+    height: 38px !important;
+    line-height: 36px !important;
+    border: 1px solid #D8D2CC !important;
+    border-radius: var(--crm-r-control) !important;
+    background: var(--crm-superficie) !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    color: var(--crm-tinta) !important;
+    font-size: 13.5px;
+    padding-left: 12px;
+}
+
+.select2-container-active .select2-choice,
+.select2-container-active .select2-choices {
+    border-color: var(--crm-acento) !important;
+    box-shadow: 0 0 0 3px var(--crm-acento-tenue) !important;
+}
+
+.select2-drop {
+    border: 1px solid var(--crm-linea) !important;
+    border-radius: var(--crm-r-control) !important;
+    box-shadow: var(--crm-sombra-2) !important;
+    background: var(--crm-superficie) !important;
+}
+
+.select2-results .select2-highlighted {
+    background: var(--crm-neutro-tinte) !important;
+    color: var(--crm-tinta) !important;
+}
+
+.select2-drop .select2-search input {
+    border: 1px solid #D8D2CC !important;
+    border-radius: 6px !important;
+    background: var(--crm-superficie) !important;
+}
+
+/* --- Calendario de jQuery UI --------------------------------------------- */
+
+.ui-datepicker {
+    border: 1px solid var(--crm-linea) !important;
+    border-radius: var(--crm-r-tarjeta) !important;
+    box-shadow: var(--crm-sombra-2);
+    background: var(--crm-superficie) !important;
+    padding: 8px;
+    font-family: var(--crm-texto) !important;
+    font-size: 13px;
+    width: 19em;
+}
+
+.ui-datepicker .ui-datepicker-header {
+    background: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    color: var(--crm-tinta) !important;
+    font-family: var(--crm-titulo);
+    font-weight: 600;
+    padding: 6px 0 10px;
+}
+
+.ui-datepicker .ui-datepicker-title { font-size: 13.5px; }
+
+.ui-datepicker .ui-datepicker-prev,
+.ui-datepicker .ui-datepicker-next {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    top: 6px;
+    cursor: pointer;
+}
+
+.ui-datepicker .ui-datepicker-prev:hover,
+.ui-datepicker .ui-datepicker-next:hover {
+    background: var(--crm-neutro-tinte) !important;
+    border: 0 !important;
+}
+
+/* Las flechas de mes se dibujan con un caracter, no con el sprite de iconos de
+   jQuery UI. Ese sprite son dos PNG que vienen del CDN junto al tema
+   smoothness; si el CDN no responde, jQuery UI deja el texto "Prev"/"Next"
+   escondido con text-indent:-99999px y el usuario se queda sin forma de cambiar
+   de mes. Con un caracter siempre hay flecha. */
+.ui-datepicker .ui-datepicker-prev span,
+.ui-datepicker .ui-datepicker-next span {
+    background-image: none !important;
+    text-indent: 0 !important;
+    font-size: 0 !important;           /* oculta el texto "Prev" / "Next" */
+    line-height: 16px;
+}
+
+.ui-datepicker .ui-datepicker-prev span::before,
+.ui-datepicker .ui-datepicker-next span::before {
+    font-family: var(--crm-texto);
+    font-size: 20px;
+    line-height: 16px;
+    color: var(--crm-tinta-media);
+}
+
+.ui-datepicker .ui-datepicker-prev span::before { content: "\2039"; } /* ‹ */
+.ui-datepicker .ui-datepicker-next span::before { content: "\203A"; } /* › */
+
+.ui-datepicker .ui-datepicker-prev:hover span::before,
+.ui-datepicker .ui-datepicker-next:hover span::before { color: var(--crm-acento); }
+
+.ui-datepicker th {
+    font-size: 10.5px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--crm-tinta-suave) !important;
+    font-weight: 600;
+    border: 0;
+    padding: 6px 0;
+}
+
+.ui-datepicker td { padding: 1px; border: 0; }
+
+.ui-datepicker td a,
+.ui-datepicker td span {
+    text-align: center !important;
+    padding: 7px 0 !important;
+    border: 0 !important;
+    border-radius: 6px !important;
+    background: transparent !important;
+    background-image: none !important;
+    color: var(--crm-tinta-media) !important;
+    font-family: var(--crm-dato);
+    font-variant-numeric: tabular-nums;
+    font-size: 12.5px;
+}
+
+.ui-datepicker td a:hover {
+    background: var(--crm-neutro-tinte) !important;
+    color: var(--crm-tinta) !important;
+}
+
+/* Hoy: bermellon, porque es "donde estoy" en el tiempo. */
+.ui-datepicker td.ui-datepicker-today a {
+    background: var(--crm-acento-tenue) !important;
+    color: var(--crm-acento-hondo) !important;
+    font-weight: 700;
+}
+
+/* El dia elegido: la seleccion pesa mas que la referencia. */
+.ui-datepicker td.ui-datepicker-current-day a,
+.ui-datepicker td a.ui-state-active {
+    background: var(--crm-acento) !important;
+    color: #FFFFFF !important;
+    font-weight: 700;
+}
+
+.ui-datepicker td.ui-datepicker-unselectable span { color: #C7C1BB !important; }
+
+/* --- SweetAlert 1 --------------------------------------------------------- */
+
+.sweet-alert {
+    border-radius: var(--crm-r-tarjeta) !important;
+    box-shadow: var(--crm-sombra-3) !important;
+    font-family: var(--crm-texto) !important;
+    padding: 26px 24px 20px;
+}
+
+.sweet-alert h2 {
+    font-family: var(--crm-titulo) !important;
+    font-size: 20px !important;
+    font-weight: 600 !important;
+    color: var(--crm-tinta) !important;
+    letter-spacing: -.015em;
+    margin-bottom: 10px;
+}
+
+.sweet-alert p {
+    font-size: 14px !important;
+    color: var(--crm-tinta-media) !important;
+    font-weight: normal !important;
+}
+
+.sweet-alert button {
+    border-radius: var(--crm-r-control) !important;
+    font-family: var(--crm-texto) !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 10px 20px !important;
+    box-shadow: none !important;
+}
+
+.sweet-alert button.confirm {
+    background-color: var(--crm-acento) !important;
+    color: #FFFFFF !important;
+}
+
+.sweet-alert button.confirm:hover { background-color: var(--crm-acento-hondo) !important; }
+
+.sweet-alert button.cancel {
+    background-color: var(--crm-superficie) !important;
+    border: 1px solid #D8D2CC !important;
+    color: var(--crm-tinta) !important;
+}
+
+/* Los iconos conservan su forma y su animacion; solo cambian de color, para
+   que la gente siga reconociendo el mismo dialogo de siempre. */
+.sweet-alert .sa-icon.sa-success { border-color: var(--crm-verde) !important; }
+.sweet-alert .sa-icon.sa-success .sa-line { background-color: var(--crm-verde) !important; }
+.sweet-alert .sa-icon.sa-success .sa-placeholder { border-color: rgba(23, 107, 68, .25) !important; }
+
+.sweet-alert .sa-icon.sa-error { border-color: var(--crm-rojo) !important; }
+.sweet-alert .sa-icon.sa-error .sa-line { background-color: var(--crm-rojo) !important; }
+
+.sweet-alert .sa-icon.sa-warning { border-color: var(--crm-ambar) !important; }
+.sweet-alert .sa-icon.sa-warning .sa-body,
+.sweet-alert .sa-icon.sa-warning .sa-dot { background-color: var(--crm-ambar) !important; }
+
+.sweet-alert .sa-icon.sa-info { border-color: var(--crm-tinta-suave) !important; }
+.sweet-alert .sa-icon.sa-info::before,
+.sweet-alert .sa-icon.sa-info::after { background-color: var(--crm-tinta-suave) !important; }
+
+/* --- SweetAlert 2 --------------------------------------------------------- */
+
+.swal2-popup {
+    border-radius: var(--crm-r-tarjeta) !important;
+    box-shadow: var(--crm-sombra-3) !important;
+    font-family: var(--crm-texto) !important;
+}
+
+.swal2-title {
+    font-family: var(--crm-titulo) !important;
+    font-weight: 600 !important;
+    color: var(--crm-tinta) !important;
+    letter-spacing: -.015em;
+}
+
+.swal2-html-container { color: var(--crm-tinta-media) !important; font-size: 14px !important; }
+
+.swal2-styled.swal2-confirm {
+    background-color: var(--crm-acento) !important;
+    border-radius: var(--crm-r-control) !important;
+    font-weight: 600 !important;
+    box-shadow: none !important;
+}
+
+.swal2-styled.swal2-cancel {
+    background-color: var(--crm-superficie) !important;
+    border: 1px solid #D8D2CC !important;
+    color: var(--crm-tinta) !important;
+    border-radius: var(--crm-r-control) !important;
+    font-weight: 600 !important;
+}
+
+.swal2-icon.swal2-success { border-color: var(--crm-verde) !important; color: var(--crm-verde) !important; }
+.swal2-icon.swal2-success .swal2-success-ring { border-color: rgba(23, 107, 68, .25) !important; }
+.swal2-icon.swal2-success [class^='swal2-success-line'] { background-color: var(--crm-verde) !important; }
+
+.swal2-icon.swal2-error { border-color: var(--crm-rojo) !important; color: var(--crm-rojo) !important; }
+.swal2-icon.swal2-error [class^='swal2-x-mark-line'] { background-color: var(--crm-rojo) !important; }
+
+.swal2-icon.swal2-warning { border-color: var(--crm-ambar) !important; color: var(--crm-ambar) !important; }
+.swal2-icon.swal2-info    { border-color: var(--crm-tinta-suave) !important; color: var(--crm-tinta-suave) !important; }
+
+/* ============================================================================
+   12. Login
+   ----------------------------------------------------------------------------
+   Es la primera pantalla que ve todo el mundo y la unica que no usa
+   Master.Master, asi que hasta ahora quedaba fuera del tema.
+
+   Su markup trae etiquetas <font color> y estilos inline de otra epoca, y el
+   code-behind depende de los IDs de los controles asp:. Por eso NO se toca el
+   markup: lo unico que se agrego a Login.aspx es el <link> a este archivo. Todo
+   lo de abajo neutraliza esos atributos por selector. Un !important en hoja
+   gana a un style= inline, que es como se desarma el fondo gris #d3d3d3.
+   ============================================================================ */
+
+body:has(.login-panel) { background-color: var(--crm-fondo); }
+
+/* Respaldo para navegadores sin :has() — el contenedor pinta igual. */
+.login-panel { margin-top: 6vh; }
+
+.login-panel.panel,
+.login-panel.panel-info {
+    border: 0;
+    border-radius: var(--crm-r-tarjeta);
+    box-shadow: var(--crm-sombra-2);
+    overflow: hidden;
+}
+
+/* La cabecera lleva el logo y el nombre del sistema. Aca el riel de diafragma
+   no va: es la pantalla de entrada, no hay "donde estoy" que marcar. */
+.login-panel > .panel-heading {
+    background-color: var(--crm-superficie) !important;
+    border-bottom: 1px solid var(--crm-linea-suave);
+    padding: 30px 28px 24px;
+}
+
+.login-panel > .panel-heading::before { content: none; }
+
+/* El archivo Img/iconoDos.png trae una linea gris de 1px en su borde superior:
+   medidos sus pixeles, la fila y=0 da brillo 220 y de y=1 en adelante da 255.
+   Sobre la tarjeta blanca esa linea se ve como una raya suelta encima del logo.
+   Se recorta aca en vez de editar la imagen. Si algun dia se reemplaza el
+   archivo por uno limpio, esta regla se puede borrar sin mas. */
+.login-panel > .panel-heading img {
+    max-width: 168px;
+    height: auto !important;
+    clip-path: inset(1px 0 0 0);
+}
+
+.login-panel h1 {
+    font-family: var(--crm-titulo);
+    font-size: 21px;
+    font-weight: 600;
+    letter-spacing: -.02em;
+    color: var(--crm-tinta);
+    margin: 18px 0 4px;
+}
+
+/* Desarma los <font color> y <font size> del markup heredado. */
+.login-panel font {
+    color: inherit !important;
+    font-size: inherit !important;
+    font-family: inherit !important;
+}
+
+/* La version es un dato secundario, no un titulo. */
+.login-panel > .panel-heading > font {
+    display: inline-block;
+    font-size: 12px !important;
+    color: var(--crm-tinta-suave) !important;
+}
+
+/* El gris #d3d3d3 viene en un style= inline; el !important lo desarma. */
+.login-panel > .panel-body {
+    background-color: var(--crm-superficie) !important;
+    padding: 26px 28px 30px;
+}
+
+.login-panel fieldset { border: 0; margin: 0; padding: 0; }
+
+/* Las etiquetas eran <h4> rojos. Pasan a ser etiquetas de campo. */
+.login-panel .panel-title {
+    font-family: var(--crm-texto);
+    font-size: 12.5px !important;
+    font-weight: 600;
+    color: var(--crm-tinta-media) !important;
+    margin: 0 0 6px;
+    text-align: left;
+}
+
+.login-panel .panel-title b { font-weight: 600; }
+
+.login-panel .form-control { width: 100%; }
+
+/* Entrar es la unica accion de la pantalla: ocupa todo el ancho. */
+.login-panel .btn-primary {
+    width: 100%;
+    padding: 11px 18px;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.login-panel .text-danger {
+    color: var(--crm-rojo) !important;
+    font-size: 13px;
+    display: block;
+}
+
+/* El markup deja <br> sueltos que abren huecos cuando no hay mensaje. */
+.login-panel .panel-body > .form-group:last-child { margin-bottom: 0; }
+
+@media (max-width: 767px) {
+    .login-panel { margin-top: 3vh; }
+    .login-panel > .panel-heading { padding: 22px 20px 18px; }
+    .login-panel > .panel-body { padding: 20px; }
+}
+
+/* ----------------------------------------------------------------------------
+   Espera del inicio de sesion
+   ----------------------------------------------------------------------------
+   El login valida contra Active Directory, asi que entre el clic y la respuesta
+   pasan varios segundos sin ninguna senal. Sin aviso la gente vuelve a apretar
+   Ingresar creyendo que no tomo.
+
+   La capa tapa el formulario a proposito: ademas de informar, impide el segundo
+   envio mientras el primero esta en curso.
+   -------------------------------------------------------------------------- */
+
+.dos-esperando {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 1080;
+    background: rgba(244, 242, 239, .82);
+    text-align: center;
+}
+
+.dos-esperando.visible { display: block; }
+
+.dos-esperando-caja {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--crm-superficie);
+    border-radius: var(--crm-r-tarjeta);
+    box-shadow: var(--crm-sombra-2);
+    padding: 26px 34px;
+    min-width: 232px;
+}
+
+/* El anillo se abre por un lado, como el diafragma del logo. */
+.dos-esperando-aro {
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    border: 3px solid var(--crm-linea);
+    border-top-color: var(--crm-acento);
+    border-radius: 50%;
+    animation: dos-girar .7s linear infinite;
+}
+
+@keyframes dos-girar { to { transform: rotate(360deg); } }
+
+.dos-esperando-texto {
+    margin: 0;
+    font-size: 13.5px;
+    color: var(--crm-tinta-media);
+}
+
+/* Sin animacion, el aro se queda quieto pero el aviso sigue estando. */
+@media (prefers-reduced-motion: reduce) {
+    .dos-esperando-aro {
+        animation: none;
+        border-top-color: var(--crm-acento);
+    }
+}
+
+/* ----------------------------------------------------------------------------
+   Espera de las consultas — blockUI
+   ----------------------------------------------------------------------------
+   Master.Master registra ajaxStart/ajaxStop una sola vez, asi que esto aplica a
+   TODA llamada AJAX de las 74 pantallas sin tocar ninguna.
+
+   51 pantallas ya cargaban blockUI y traian su recuadro gris de fabrica. Lo que
+   sigue le da el mismo aro del inicio de sesion, para que la espera se vea igual
+   en todo el sistema.
+
+   Los selectores son los que genera blockUI y no se pueden cambiar: .blockUI es
+   la caja y .blockOverlay el fondo.
+
+   El "top" es obligatorio, no decorativo: al bloquear la pagina entera blockUI
+   no llama a su funcion center() (jquery.blockUI.js:442, solo corre cuando se
+   bloquea un elemento). La posicion vertical salia de defaults.css.top, y
+   Master.Master vacia ese objeto para que el aspecto lo mande esta hoja. Sin el
+   top de aca la caja queda en position:fixed con top:auto, o sea al final del
+   documento y fuera de la vista.
+   -------------------------------------------------------------------------- */
+
+.blockUI.blockMsg {
+    border: 0 !important;
+    background: var(--crm-superficie) !important;
+    border-radius: var(--crm-r-tarjeta) !important;
+    box-shadow: var(--crm-sombra-2) !important;
+    padding: 26px 34px !important;
+    width: auto !important;
+    min-width: 232px;
+    max-width: 86vw;               /* en celular no se sale de la pantalla */
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%);
+    cursor: wait;
+    font-family: var(--crm-texto);
+    font-size: 13.5px;
+    color: var(--crm-tinta-media);
+}
+
+/* El aro va antes del texto que blockUI pinta dentro de la caja. */
+.blockUI.blockMsg::before {
+    content: "";
+    display: block;
+    width: 34px;
+    height: 34px;
+    margin: 0 auto 14px;
+    border: 3px solid var(--crm-linea);
+    border-top-color: var(--crm-acento);
+    border-radius: 50%;
+    animation: dos-girar .7s linear infinite;
+}
+
+.blockUI.blockOverlay {
+    background: var(--crm-fondo) !important;
+    opacity: .78 !important;
+    cursor: wait;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .blockUI.blockMsg::before { animation: none; }
+}
+
+/* ----------------------------------------------------------------------------
+   Estado vacio
+   ----------------------------------------------------------------------------
+   El marcado lo genera js/dos-vacio.js. Los selectores de aca y las clases de
+   alla tienen que moverse juntos.
+
+   Sin borde ni fondo a proposito: esto vive dentro de una tarjeta blanca que ya
+   los tiene. Agregarlos dibujaria una caja dentro de otra.
+
+   Todos los colores salen de tokens existentes. No se introduce ninguno nuevo.
+   -------------------------------------------------------------------------- */
+
+.dos-vacio {
+    padding: 48px 24px;
+    text-align: center;
+    font-family: var(--crm-texto);
+}
+
+.dos-vacio__icono {
+    display: block;
+    margin-bottom: 16px;
+    font-size: 38px;
+    line-height: 1;
+    color: var(--crm-linea);
+}
+
+.dos-vacio__mensaje {
+    margin: 0;
+    font-size: 15px;
+    color: var(--crm-tinta-media);
+}
+
+.dos-vacio__pista {
+    margin: 6px 0 0;
+    font-size: 13px;
+    color: var(--crm-tinta-suave);
+}
+
+/* La variante de una linea, dentro de un .dropdown-menu de busqueda. El padding
+   es el mismo que el de los items reales (.dropdown-menu > li > a, arriba) para
+   que la lista no cambie de forma al quedarse sin resultados. Tinta suave y
+   cursiva para que se lea como un aviso y no como una opcion elegible. */
+.dos-vacio-linea {
+    padding: 8px 12px;
+    font-size: 13px;
+    font-style: italic;
+    color: var(--crm-tinta-suave);
+}

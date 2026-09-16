@@ -1,0 +1,290 @@
+using CapaEntidad;
+using CapaNegocio;
+using System;
+using System.Text;
+using System.Web;
+using System.Web.Script.Serialization;
+using System.Web.Services;
+
+namespace JsonJQueryNetHorasExtras
+{
+    /// <summary>
+    /// Handler de la pantalla de horas extras.
+    ///
+    /// IRequiresSessionState no es decorativo: sin el, context.Session es null en
+    /// un IHttpHandler y no habria identidad con la que sellar quien guardo que.
+    ///
+    /// Ninguna accion acepta un total del cliente. Las horas si vienen de ahi
+    /// -son lo que el usuario digita-, pero el dinero lo recalcula el servidor y
+    /// devuelve lo suyo.
+    ///
+    /// ListarPeriodos entra por NegHorasExtrasPantalla y no por DaoHorasExtras
+    /// directo: toda la casa entra por CapaNegocio, y ademas CapaDato no esta
+    /// referenciado por este proyecto -saltarse la capa aqui ni compilaria-.
+    ///
+    /// El control de acceso por perfil no es cosmetico: el menu solo controla
+    /// que se VEA la pantalla, no que se pueda LLAMAR al handler. Sin esta
+    /// comprobacion, cualquier usuario con sesion iniciada -no solo Nomina o
+    /// Talento Humano- podia pedir el sueldo de las 64 personas con una
+    /// peticion directa a este .ashx, sin pasar nunca por el menu. Mismo
+    /// patron que AdministrarPerfiles.ashx.cs: Id_Perfil sale de la sesion,
+    /// nunca del cliente.
+    /// </summary>
+    [WebService(Namespace = "http://tempuri.org/")]
+    [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
+    public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
+    {
+        /// <summary>
+        /// Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el
+        /// menu les muestra la pantalla.
+        ///
+        /// internal, no private: DescargarHorasExtras.ashx.cs -mismo namespace,
+        /// mismo proyecto de presentacion- reusa esta misma lista para su propia
+        /// comprobacion de perfil en vez de declarar la suya. Los dos handlers
+        /// protegen el mismo dato (el sueldo del periodo) con el mismo criterio;
+        /// si este criterio cambia algun dia, cambia en un solo lugar.
+        /// </summary>
+        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
+
+        /// <summary>
+        /// Solo Super Admin (18) puede reabrir un periodo cerrado. Separacion de
+        /// funciones: quien opera el mes puede cerrarlo, pero deshacer un cierre
+        /// formal exige otro perfil.
+        ///
+        /// Se comprueba AQUI y no solo ocultando el boton: ocultarlo es cortesia
+        /// para quien no puede, no una barrera para quien no debe. El
+        /// procedimiento SQL no conoce perfiles y NegHorasExtrasPantalla.ReabrirPeriodo
+        /// tampoco los comprueba a proposito -este handler es el unico lugar
+        /// donde existe esta barrera.
+        /// </summary>
+        private static readonly int[] PerfilesQueReabren = { 18 };
+
+        public void ProcessRequest(HttpContext context)
+        {
+            StringBuilder salida = new StringBuilder();
+
+            if (context.Session == null || context.Session["UserLogin"] == null)
+            {
+                salida.Append(Mensaje("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
+            }
+            else if (!EstaEn(context, PerfilesAutorizados))
+            {
+                salida.Append(Mensaje("0", "No tiene permisos para esta pantalla.", "danger"));
+            }
+            else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
+            {
+                var lector = new System.IO.StreamReader(context.Request.InputStream);
+                var json = lector.ReadToEnd();
+
+                JavaScriptSerializer s = new JavaScriptSerializer();
+                dynamic parametros = s.Deserialize(json.ToString(), typeof(object));
+
+                var accion = parametros[0]["action"];
+                bool existe = false;
+
+                if (accion == "ListarPeriodos") { existe = true; salida.Append(ListarPeriodos()); }
+                if (accion == "AbrirPeriodo")   { existe = true; salida.Append(AbrirPeriodo(context, parametros[0]["parameters"])); }
+                if (accion == "CargarPeriodo")  { existe = true; salida.Append(CargarPeriodo(parametros[0]["parameters"])); }
+                if (accion == "GuardarFila")    { existe = true; salida.Append(GuardarFila(context, parametros[0]["parameters"])); }
+                if (accion == "CerrarPeriodo")  { existe = true; salida.Append(CerrarPeriodo(context, parametros[0]["parameters"])); }
+                if (accion == "ReabrirPeriodo") { existe = true; salida.Append(ReabrirPeriodo(context, parametros[0]["parameters"])); }
+
+                if (!existe) { salida.Append(Mensaje("0", "La acción solicitada no existe.", "danger")); }
+            }
+            else
+            {
+                salida.Append(Mensaje("0", "Petición no válida.", "danger"));
+            }
+
+            context.Response.ContentType = "application/json";
+            context.Response.Write(salida.ToString());
+        }
+
+        /// <summary>
+        /// Sin este try/catch -el unico handler de la aplicacion que no lo
+        /// tenia; el resto de la casa lleva entre 5 y 21, AdministrarPerfiles
+        /// es el molde- una SqlException cualquiera (procedimiento faltante,
+        /// timeout, deadlock, un indice unico violado por dos peticiones
+        /// concurrentes) sale como pagina de error de ASP.NET en vez de JSON.
+        /// jQuery no la puede parsear, y con customErrors en Off y debug en
+        /// true en el Web.config, lo que llega al navegador es una pantalla
+        /// amarilla con traza -y el usuario solo ve "No se pudo contactar al
+        /// servidor", sin ninguna pista de la causa real-.
+        /// </summary>
+        private string ListarPeriodos()
+        {
+            try
+            {
+                EntRespuesta r = new EntRespuesta();
+                r.estado = "1";
+                r.resultado = NegHorasExtrasPantalla.ListarPeriodos();
+                r.tipoMensaje = "success";
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al listar los periodos. " + ex.Message, "danger");
+            }
+        }
+
+        private string AbrirPeriodo(HttpContext context, dynamic p)
+        {
+            try
+            {
+                int anio = Entero(p["anio"]);
+                int mes = Entero(p["mes"]);
+                EntRespuesta r = NegHorasExtrasPantalla.AbrirPeriodo(anio, mes, Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al abrir el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private string CargarPeriodo(dynamic p)
+        {
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.CargarPantalla(Entero(p["idPeriodo"]));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al cargar el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private string GuardarFila(HttpContext context, dynamic p)
+        {
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.GuardarHoras(
+                    Entero(p["idPeriodo"]),
+                    EnteroLargo(p["idEmpleado"]),
+                    Decimal(p["horas50"]),
+                    Decimal(p["horas100"]),
+                    Convert.ToString(p["observacion"]),
+                    Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al guardar la fila. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Cerrar (14 o 18) y reabrir (solo 18) comparten esta misma forma de
+        /// comprobar perfil; solo cambia la lista contra la que se compara.
+        /// </summary>
+        private string CerrarPeriodo(HttpContext context, dynamic p)
+        {
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.CerrarPeriodo(
+                    Entero(p["idPeriodo"]), Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al cerrar el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private string ReabrirPeriodo(HttpContext context, dynamic p)
+        {
+            if (!EstaEn(context, PerfilesQueReabren))
+            {
+                return Mensaje("0", "Su perfil no puede reabrir un período cerrado.", "warning");
+            }
+
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.ReabrirPeriodo(
+                    Entero(p["idPeriodo"]), Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al reabrir el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        private static bool EstaEn(HttpContext context, int[] perfiles)
+        {
+            int idPerfil;
+            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
+            return Array.IndexOf(perfiles, idPerfil) >= 0;
+        }
+
+        private static string Usuario(HttpContext context)
+        {
+            object v = context.Session["Cod_Usuario"];
+            return v == null ? "" : Convert.ToString(v).Trim();
+        }
+
+        private static string Ip(HttpContext context)
+        {
+            string ip = context.Request.UserHostAddress;
+            return string.IsNullOrEmpty(ip) ? "" : ip;
+        }
+
+        private static int Entero(object v)
+        {
+            int n;
+            return int.TryParse(Convert.ToString(v), out n) ? n : 0;
+        }
+
+        /// <summary>
+        /// IdEmpleado es BIGINT en la base y long en EntHeFila. Antes se leia
+        /// con Entero() y se ensanchaba con Convert.ToInt64: un identificador
+        /// que no entrara en un int32 se truncaba a un numero cualquiera -o a
+        /// 0- antes de siquiera llegar a compararse, y la respuesta salia
+        /// "Esa persona no esta en este periodo": un fallo real, pero por la
+        /// razon equivocada.
+        /// </summary>
+        private static long EnteroLargo(object v)
+        {
+            long n;
+            return long.TryParse(Convert.ToString(v), out n) ? n : 0L;
+        }
+
+        /// <summary>
+        /// Lo que manda el cliente puede venir con coma, vacio o con basura. Un
+        /// dato ilegible vale cero: el servidor no adivina cuantas horas quiso
+        /// escribir alguien.
+        ///
+        /// NumberStyles.AllowDecimalPoint, sin AllowLeadingSign: unas horas
+        /// nunca llevan signo, asi que "-5" no es un numero valido aqui, es
+        /// basura igual que "abc". El navegador ya no deja escribirlo -la
+        /// grilla lo rechaza en la celda-, pero este handler es alcanzable con
+        /// una peticion fabricada que se salte el navegador por completo, y
+        /// sin este limite un "-5" pasaba el parseo, NegHorasExtras lo dejaba
+        /// pasar tal cual a HE_Detalle -solo el dinero se pone en cero, las
+        /// horas negativas SI se guardan-, y el indicador de horas del
+        /// tablero podia quedar en negativo.
+        /// </summary>
+        private static decimal Decimal(object v)
+        {
+            decimal d;
+            string texto = Convert.ToString(v);
+            if (texto == null) { return 0m; }
+            texto = texto.Trim().Replace(",", ".");
+            return decimal.TryParse(texto, System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    System.Globalization.CultureInfo.InvariantCulture, out d) && d >= 0m
+                   ? d : 0m;
+        }
+
+        private static string Mensaje(string estado, string mensaje, string tipo)
+        {
+            EntRespuesta r = new EntRespuesta();
+            r.estado = estado;
+            r.mensaje = mensaje;
+            r.tipoMensaje = tipo;
+            return new JavaScriptSerializer().Serialize(r);
+        }
+
+        public bool IsReusable { get { return false; } }
+    }
+}

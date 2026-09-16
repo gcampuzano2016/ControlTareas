@@ -1,19 +1,14 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
     public class DaoRegistroTrabajo
     {
-        public static List<ERegistroTrabajo> ConsultSp_RTAListaReporteHorario(string FchIni, string FchFin,int Id_Usuario)
+        public static List<ERegistroTrabajo> ConsultSp_RTAListaReporteHorario(string FchIni, string FchFin, int Id_Usuario)
         {
             List<ERegistroTrabajo> listaTareas = null;
 
@@ -38,7 +33,7 @@ namespace CapaDato
                     ERegistroTrabajo Tarea = new ERegistroTrabajo();
                     Tarea.Id_Usuario = Convert.ToInt32(dr["Id_Usuario"].ToString());
                     Tarea.Nom_Usuario = dr["Nom_Usuario"].ToString();
-                    Tarea.HoraEntrada = Convert.ToDateTime( dr["HoraEntrada"].ToString());
+                    Tarea.HoraEntrada = Convert.ToDateTime(dr["HoraEntrada"].ToString());
                     Tarea.HoraAlmuerzoSale = Convert.ToDateTime(dr["HoraAlmuerzoSale"].ToString());
                     Tarea.HoraAlmuerzoEntra = Convert.ToDateTime(dr["HoraAlmuerzoEntra"].ToString());
                     Tarea.HoraSalida = Convert.ToDateTime(dr["HoraSalida"].ToString());
@@ -52,7 +47,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;

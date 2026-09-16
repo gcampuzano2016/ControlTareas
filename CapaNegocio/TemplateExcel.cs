@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using CapaDato;
 using OfficeOpenXml;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.RefAndLookup;
 using OfficeOpenXml.Table;
+using System;
 using System.Data;
 using System.IO;
-using OfficeOpenXml.Drawing;
-using System.Drawing;
-
 
 namespace CapaNegocio
 {
@@ -41,7 +34,6 @@ namespace CapaNegocio
 
             // Verifica si la carpeta del paciente ya existe
             string folderPath = Path.Combine(historiasClinicasFolder, nombrePaciente);
-
 
 
             // Combina la carpeta con el nombre del archivo de salida para obtener la ruta completa del archivo de salida
@@ -82,15 +74,24 @@ namespace CapaNegocio
                                     continue;
                                 s = s.Replace(deliminator[0], "").Replace(deliminator[1], "");
                                 var ss = s.Split('.');
+
+                                // POR esto:
                                 try
                                 {
-                                    c.Value = data.Tables[ss[0]].Rows[0][ss[1]];
+                                    if (ss.Length >= 2
+                                        && data.Tables[ss[0]] != null
+                                        && data.Tables[ss[0]].Rows.Count > 0
+                                        && data.Tables[ss[0]].Columns.Contains(ss[1]))
+                                    {
+                                        c.Value = data.Tables[ss[0]].Rows[0][ss[1]];
+                                    }
                                 }
                                 catch { }
                             }
                         }
 
-                        InsertImageFromTag(xls, nomHoja, ruta1, "{info.imagen}", ruta2, "{info.imagenProfesional}");
+                        //InsertImageFromTag(xls, nomHoja, ruta1, "{info.imagen}", ruta2, "{info.imagenProfesional}");
+                        //InsertImageFromTag(xls, nomHoja, ruta1, "{info.imagen}", ruta2, "{info.imagenProfesional}");
 
 
                         xls.Save();
@@ -98,6 +99,88 @@ namespace CapaNegocio
                 }
             }
         }
+
+
+        /*===============================================================================================================
+         *                      Nuevo metodo de encriptación actualizado y moderno
+         *==============================================================================================================*/
+        public static void FillReport2(string filename, string templatefilename, string nomHoja, DataSet data, string[] deliminator, string ruta1, string ruta2, string nombrePaciente)
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            string templateFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, templatefilename);
+            string outputFileName = Path.GetFileName(filename);
+            string historiasClinicasFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "HistoriasClinicas");
+            string folderPath = Path.Combine(historiasClinicasFolder, nombrePaciente);
+            string fullFilePath = Path.Combine(folderPath, outputFileName);
+
+            if (File.Exists(fullFilePath))
+                File.Delete(fullFilePath);
+
+            Directory.CreateDirectory(folderPath);
+
+            using (var file = new FileStream(fullFilePath, FileMode.CreateNew))
+            {
+                using (var temp = new FileStream(templateFilePath, FileMode.Open))
+                {
+                    using (var xls = new ExcelPackage(file, temp))
+                    {
+                        foreach (var n in xls.Workbook.Names)
+                        {
+                            FillWorksheetData(data, n.Worksheet, n, deliminator);
+                        }
+                        foreach (var ws in xls.Workbook.Worksheets)
+                        {
+                            foreach (var n in ws.Names)
+                            {
+                                FillWorksheetData(data, ws, n, deliminator);
+                            }
+                        }
+                        foreach (var ws in xls.Workbook.Worksheets)
+                        {
+                            foreach (var c in ws.Cells)
+                            {
+                                var s = "" + c.Value;
+                                if (s.StartsWith(deliminator[0]) == false &&
+                                    s.EndsWith(deliminator[1]) == false)
+                                    continue;
+                                s = s.Replace(deliminator[0], "").Replace(deliminator[1], "");
+                                var ss = s.Split('.');
+                                try
+                                {
+                                    c.Value = data.Tables[ss[0]].Rows[0][ss[1]];
+                                }
+                                catch { }
+                            }
+                        }
+                        xls.Save();
+                    }
+                }
+            } // ← aquí el archivo .xlsx ya está cerrado
+
+            string encryptedPath = fullFilePath + ".enc";
+
+            try
+            {
+                if (File.Exists(encryptedPath))
+                    File.Delete(encryptedPath);
+
+                var encryptor = new FileEncryptionService();
+                encryptor.EncryptFile(fullFilePath, encryptedPath);
+                File.Delete(fullFilePath);
+            }
+            catch (Exception ex)
+            {
+                // ✅ TEMPORAL: escribir error en un archivo de texto para verlo
+                string logError = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "error_encriptacion.txt");
+                File.WriteAllText(logError,
+                    "MENSAJE: " + ex.Message + Environment.NewLine +
+                    "INNER: " + ex.InnerException?.Message + Environment.NewLine +
+                    "STACK: " + ex.StackTrace
+                );
+            }
+        }
+
+
 
         //Limpia la etiqueta para la imagen despues de ingresarla
         private static void ClearCellContent(ExcelWorksheet worksheet, int row, int col)
@@ -143,8 +226,6 @@ namespace CapaNegocio
                 }
             }
         }
-
-
 
 
 

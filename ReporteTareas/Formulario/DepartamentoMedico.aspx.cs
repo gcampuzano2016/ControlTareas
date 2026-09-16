@@ -1,15 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
+﻿using CapaEntidad;
 using ReporteTareas.Controles;
-using System.Data;
 using SeguridadAppHelper;
-using System.Text;
+using System;
+using System.Collections.Generic;
 
 namespace ReporteTareas.Formulario
 {
@@ -53,9 +46,9 @@ namespace ReporteTareas.Formulario
                 }
                 else
                 {
-                        // Imprimir el error en la consola del navegador
-                     Response.Write($"<script>console.error('Error en PostBack:');</script>");
-                    
+                    // Imprimir el error en la consola del navegador
+                    Response.Write($"<script>console.error('Error en PostBack:');</script>");
+
                 }
             }
         }

@@ -2,9 +2,6 @@
 using CapaEntidad;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaNegocio
 {
@@ -15,15 +12,15 @@ namespace CapaNegocio
             switch (tipo)
             {
                 case 0:
-                    return DaoInfoFactProv.Consulta_Sp_RTAConsultarListaProveedores(fecIni, fecFin, txtfactura, txtcliente,tipo);
+                    return DaoInfoFactProv.Consulta_Sp_RTAConsultarListaProveedores(fecIni, fecFin, txtfactura, txtcliente, tipo);
                 case 2:
                     return DaoInfoFactProv.Consulta_Sp_RTAConsultarListaProveedoresRes(txtfactura, txtcliente);
                 case 1:
-                    return DaoInfoFactProv.Consulta_Sp_RTAConsultarListaProveedoresSum(txtfactura, txtcliente,tipo);
+                    return DaoInfoFactProv.Consulta_Sp_RTAConsultarListaProveedoresSum(txtfactura, txtcliente, tipo);
                 default:
                     throw new ArgumentException("Invalid tipo parameter", nameof(tipo));
             }
-        }       
+        }
 
     }
 }

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using ReporteTareas.Controles;
+using System;
 
 namespace ReporteTareas.Formulario
 {
@@ -97,7 +92,7 @@ namespace ReporteTareas.Formulario
             else
             {
                 //if (txt_Os.Text.Equals(""))
-                if(dbl_OS.SelectedItem.ToString().Equals("--Seleccione OS--"))
+                if (dbl_OS.SelectedItem.ToString().Equals("--Seleccione OS--"))
                 {
                     //Response.Write("<script>alert('Se debe ingresar una orden orden de servicio');</script>");
                     Response.Write("<script>alert('Se debe seleccionar una orden orden de servicio valida');</script>");

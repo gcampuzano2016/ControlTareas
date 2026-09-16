@@ -1,22 +1,379 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Security.Cryptography;
-using System.IO;
-using System.Text;
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.CompilerServices;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using CorreoHelper;
+using Microsoft.VisualBasic;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace ReporteTareas.Formulario
 {
     public partial class RespuestaAprobacion : System.Web.UI.Page
     {
+
+        #region Firma del jefe
+        /// <summary>
+        /// Muestra el pad y espera. La decision se aplica recien al confirmar.
+        /// </summary>
+        private void PedirFirma(string codigo)
+        {
+            bool aFavor = codigo == "SA" || codigo == "VG";
+            bool esTalentoHumano = codigo == "VG" || codigo == "RG";
+
+            if (esTalentoHumano)
+            {
+                litTituloFirma.Text = aFavor
+                    ? "Firme para validar la solicitud"
+                    : "Firme para rechazar la solicitud";
+
+                litAyudaFirma.Text = aFavor
+                    ? "Es la ultima firma: con la suya el documento queda cerrado. Dibujela con el mouse o el dedo, o suba una imagen."
+                    : "Su firma queda registrada junto al rechazo. Dibujela con el mouse o el dedo, o suba una imagen.";
+
+                btnConfirmar.Text = aFavor ? "Firmar y validar" : "Firmar y rechazar";
+            }
+            else
+            {
+                litTituloFirma.Text = aFavor
+                    ? "Firme para aprobar la solicitud"
+                    : "Firme para registrar el rechazo";
+
+                litAyudaFirma.Text = aFavor
+                    ? "Su firma queda en el documento que descarga el colaborador. Dibujela con el mouse o el dedo, o suba una imagen."
+                    : "Su firma queda registrada junto al rechazo. Dibujela con el mouse o el dedo, o suba una imagen.";
+
+                btnConfirmar.Text = aFavor ? "Firmar y aprobar" : "Firmar y rechazar";
+            }
+
+            lblmensaje.Text = "";
+            CargarFirmaGuardada(codigo);
+            pnlFirma.Visible = true;
+        }
+
+        /// <summary>
+        /// Deja servida en la pantalla la firma que esta persona guardo antes, para
+        /// que no tenga que volver a dibujarla.
+        ///
+        /// Aca no hay sesion: el pad no puede pedirsela al servidor como en el resto
+        /// de las pantallas, porque no hay un usuario autenticado a quien pedirsela.
+        /// Se resuelve desde el propio enlace, que es lo unico que dice quien va a
+        /// firmar: en Talento Humano viaja su codigo, y en el del jefe viaja el del
+        /// solicitante, del que se deduce su Cod_Jefe_Inm. Es la misma resolucion
+        /// que hace RegistrarFirma al momento de guardar, para que lo que se ofrece
+        /// y lo que se registra sean de la misma persona.
+        ///
+        /// Vale la advertencia de siempre sobre este enlace: es un portador. Quien
+        /// lo tenga reenviado ve esta pantalla, y ahora ademas la firma guardada de
+        /// quien deberia firmar. Se hace igual porque asi se pidio y porque el paso
+        /// que de verdad respalda la identidad -entrar a la aplicacion- sigue
+        /// existiendo; pero conviene saber que el enlace vale mas que antes.
+        ///
+        /// Si algo falla, se sigue sin firma guardada y la persona la dibuja. Nunca
+        /// corta la pantalla: es una comodidad, no un requisito.
+        /// </summary>
+        private void CargarFirmaGuardada(string codigo)
+        {
+            try
+            {
+                /* Con guarda: el control vive en el marcado, que se despliega aparte
+                   del ensamblado. Si llegan desparejos, esto no puede tumbar la
+                   pantalla de aprobacion. */
+                if (hfFirmaGuardada == null) { return; }
+
+                string[] parametrosSolicitud = hfParametros.Value.Split(new char[] { ';' });
+                if (parametrosSolicitud.Length < 4) { return; }
+
+                bool esTalentoHumano = codigo == "VG" || codigo == "RG";
+
+                string codFirmante = esTalentoHumano
+                    ? parametrosSolicitud[3]
+                    : CodigoDelJefe(parametrosSolicitud[3]);
+
+                if (string.IsNullOrEmpty(codFirmante)) { return; }
+
+                hfFirmaGuardada.Value = NegFirmaUsuario.Obtener(codFirmante);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("CargarFirmaGuardada: " + ex.Message, "Log", "Detalle");
+            }
+        }
+
+        /// <summary>
+        /// El jefe firmo: se guarda la firma y recien ahi se aplica la decision.
+        ///
+        /// El orden importa. Si fallara el cambio de estado queda una firma de un
+        /// paso que no se completo, y reintentar lo termina; al reves quedaria una
+        /// solicitud aprobada sin firma, que es justo lo que esto viene a evitar.
+        /// </summary>
+        protected void btnConfirmar_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string[] parametrosSolicitud = hfParametros.Value.Split(new char[] { ';' });
+                string codigo = parametrosSolicitud[2];
+
+                bool aFavor = codigo == "SA" || codigo == "VG";
+                bool esTalentoHumano = codigo == "VG" || codigo == "RG";
+                string rol = esTalentoHumano ? "GTH" : "JEFE";
+
+                long idVacaciones = Convert.ToInt64(parametrosSolicitud[0]);
+
+                /* Si ese paso ya esta firmado no se vuelve a aplicar nada. Pasa cuando
+                   se abre dos veces el mismo enlace del correo, que es comun. */
+                if (YaFirmo(idVacaciones, rol))
+                {
+                    pnlFirma.Visible = false;
+                    lblmensaje.Text = "Esta solicitud <b>ya fue firmada</b> en este paso. No se registro dos veces.";
+                    return;
+                }
+
+                if (!RegistrarFirma(idVacaciones, parametrosSolicitud[3], aFavor, esTalentoHumano))
+                {
+                    lblmensaje.Text = "<b>No se pudo registrar su firma.</b> Vuelva a intentarlo, o ingrese a la aplicacion para firmar desde ahi.";
+                    return;
+                }
+
+                pnlFirma.Visible = false;
+
+                if (esTalentoHumano) { AplicarValidacion(idVacaciones, parametrosSolicitud[3], aFavor); }
+                else if (aFavor) { AplicarAprobacion(parametrosSolicitud); }
+                else { AplicarRechazo(parametrosSolicitud); }
+
+                /* Y el colaborador recibe el documento con la firma recien puesta. La
+                   copia que le llego al pedir el permiso salio sin ella. */
+                EnvioCorreoHelper avisoColaborador = new EnvioCorreoHelper();
+                avisoColaborador.EnviarDocumentoAlColaborador(
+                    Convert.ToInt32(idVacaciones), AvisoParaElColaborador(esTalentoHumano, aFavor));
+            }
+            catch (Exception ex)
+            {
+                lblmensaje.Text = "Error al registrar la Aprobación o Rechazo. Error:" + ex.Message.ToString();
+            }
+        }
+
+        private bool YaFirmo(long idVacaciones, string rol)
+        {
+            List<EntFirmaSolicitud> firmas = NegFirmaSolicitud.Listar(idVacaciones);
+            if (firmas == null) { return false; }
+
+            foreach (EntFirmaSolicitud f in firmas)
+            {
+                if (f.Rol == rol && f.Secuencia == 1) { return true; }
+            }
+
+            return false;
+        }
+
+        /// <summary>El asunto del aviso que recibe el colaborador.</summary>
+        private string AvisoParaElColaborador(bool esTalentoHumano, bool aFavor)
+        {
+            if (esTalentoHumano)
+            {
+                return aFavor
+                    ? "Su solicitud fue validada por Talento Humano"
+                    : "Su solicitud fue rechazada por Talento Humano";
+            }
+
+            return aFavor
+                ? "Su solicitud fue aprobada por su jefe inmediato"
+                : "Su solicitud fue rechazada por su jefe inmediato";
+        }
+
+        /// <summary>
+        /// La decision de Talento Humano: deja la solicitud en PROCESADO o en
+        /// RECHAZADO GTH.
+        ///
+        /// Son los mismos dos estados, y los mismos tipos 8 y 7, que manda la pantalla
+        /// cuando Talento Humano firma dentro de la aplicacion. Se replican para que el
+        /// resultado no dependa de por donde se firmo.
+        /// </summary>
+        private void AplicarValidacion(long idVacaciones, string codUsuario, bool aFavor)
+        {
+            EntSolicitud registro = new EntSolicitud();
+            registro.IdVacaciones = Convert.ToInt32(idVacaciones);
+            registro.EstadoSolicitud = aFavor ? "PROCESADO" : "RECHAZADO GTH";
+            registro.MotivoAnulacion = aFavor
+                ? "Validado por Talento Humano desde el correo."
+                : "Rechazado por Talento Humano desde el correo.";
+            registro.Cod_Usuario = codUsuario;
+            registro.Tipo = aFavor ? 8 : 7;
+            registro.UsuarioAprobo = "";
+            registro.UsuarioRechazo = "";
+
+            EntRespuesta respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
+
+            if (respuesta != null && respuesta.estado == "1")
+            {
+                lblmensaje.Text = aFavor
+                    ? "Se registro la <b>VALIDACION</b> de la solicitud. El documento queda cerrado."
+                    : "Se registro el <b>RECHAZO</b> de la solicitud.";
+
+                if (aFavor) { PermisoAprobado.Visible = true; }
+                else { PermisoRechazado.Visible = true; }
+            }
+            else
+            {
+                lblmensaje.Text = "Su firma quedo registrada, pero <b>no se pudo cambiar el estado</b> de la solicitud. Ingrese a la aplicacion para terminarlo.";
+            }
+        }
+
+        /// <summary>
+        /// Guarda la firma como JEFE, secuencia 1: la misma que registra la pantalla
+        /// cuando el jefe aprueba desde la aplicacion.
+        ///
+        /// A quien se le atribuye: el enlace del correo lleva el codigo del
+        /// SOLICITANTE, no el del jefe, asi que el jefe se resuelve por su
+        /// Cod_Jefe_Inm. Es una inferencia, no una autenticacion: quien tenga el
+        /// enlace reenviado puede firmar por el. El camino con identidad real es que
+        /// el jefe entre a la aplicacion y firme ahi.
+        /// </summary>
+        private bool RegistrarFirma(long idVacaciones, string codDelEnlace, bool aFavor, bool esTalentoHumano)
+        {
+            try
+            {
+                byte[] trazo = TrazoDesdeDataUri(hfTrazo.Value);
+                if (trazo == null || trazo.Length == 0) { return false; }
+
+                /* En el enlace del jefe viaja el codigo del SOLICITANTE, asi que el jefe
+                   se resuelve por su Cod_Jefe_Inm. En el de Talento Humano viaja ya su
+                   propio codigo, resuelto desde CORREORH al armar el correo. */
+                string codFirmante = esTalentoHumano ? codDelEnlace : CodigoDelJefe(codDelEnlace);
+                if (string.IsNullOrEmpty(codFirmante)) { return false; }
+
+                string ip = Request.Headers["X-Forwarded-For"];
+                if (string.IsNullOrEmpty(ip)) { ip = Request.UserHostAddress; }
+                if (!string.IsNullOrEmpty(ip) && ip.Length > 45) { ip = ip.Substring(0, 45); }
+
+                string dispositivo = Request.UserAgent ?? "";
+                if (dispositivo.Length > 300) { dispositivo = dispositivo.Substring(0, 300); }
+
+                EntFirmaSolicitud firma = new EntFirmaSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Rol = esTalentoHumano ? "GTH" : "JEFE",
+                    Secuencia = 1,
+                    Decision = aFavor ? "APROBADO" : "RECHAZADO",
+                    Comentario = "Firmado desde el correo de aprobacion.",
+                    TrazoTipo = "image/png",
+                    Cod_Usuario = codFirmante
+                };
+
+                EntRespuesta guardada = NegFirmaSolicitud.Guardar(firma, trazo, ip, dispositivo);
+                return guardada != null && guardada.estado == "1";
+            }
+            catch (Exception ex)
+            {
+                VerErrores("RegistrarFirma: " + ex.Message, "Log", "Detalle");
+                return false;
+            }
+        }
+
+        /// <summary>El jefe inmediato de un colaborador, o cadena vacia.</summary>
+        private string CodigoDelJefe(string codSolicitante)
+        {
+            List<EntUsuario> datos = NegUsuario.ConsultarDatosReemplazo(codSolicitante, 1);
+            if (datos == null || datos.Count == 0) { return ""; }
+
+            return datos[0].Cod_Jefe_Inm ?? "";
+        }
+
+        /// <summary>Los bytes de un data URI "data:image/png;base64,...".</summary>
+        private byte[] TrazoDesdeDataUri(string dataUri)
+        {
+            if (string.IsNullOrEmpty(dataUri)) { return null; }
+
+            int coma = dataUri.IndexOf(',');
+            string base64 = coma >= 0 ? dataUri.Substring(coma + 1) : dataUri;
+
+            try { return Convert.FromBase64String(base64); }
+            catch { return null; }
+        }
+
+        private void AplicarAprobacion(string[] parametrosSolicitud)
+        {
+                EntRespuesta respuesta = new EntRespuesta();
+                EntSolicitud registro = new EntSolicitud();
+                registro.IdVacaciones = Convert.ToInt32(parametrosSolicitud[0]);
+                registro.EstadoSolicitud = "APROBADO";
+                registro.Cod_Usuario = parametrosSolicitud[3];
+                registro.Tipo = 5;
+                registro.UsuarioAprobo = "";
+                registro.UsuarioRechazo = "";
+                respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
+                if (respuesta.estado == "1")
+                {
+                    lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
+
+                    #region Enviar mail Recurso Humano
+                    /* Talento Humano es el ultimo filtro, tanto en vacaciones como en
+                       permisos: es quien pone la tercera firma del documento. Antes
+                       solo se le avisaba con el marcador "EM", que traen las
+                       vacaciones; los permisos vienen con "NO" y se quedaban sin
+                       aviso, asi que el tramite moria en la aprobacion del jefe. */
+                    EntSolicitud Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(
+                        0, Convert.ToInt32(parametrosSolicitud[0]));
+
+                    string CorreoRH = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CORREORH");
+                    EnviarCorreoRH(Lista, parametrosSolicitud[0], CorreoRH, parametrosSolicitud[3]);
+                    #endregion
+
+                    /* El marcador sigue decidiendo que imagen se le muestra al jefe. */
+                    if (parametrosSolicitud[4] == "EM")
+                    {
+                        Aprobados.Visible = true;
+                    }
+                    else if (parametrosSolicitud[4] == "NO")
+                    {
+                        PermisoAprobado.Visible = true;
+                    }
+                }
+                else
+                {
+                    lblmensaje.Text = "<b>No se pudo registrar</b> la APROBACION de la solicitud.";
+                    Aprobados.Visible = false;
+                }
+        }
+
+        private void AplicarRechazo(string[] parametrosSolicitud)
+        {
+                EntRespuesta respuesta = new EntRespuesta();
+                EntSolicitud registro = new EntSolicitud();
+                registro.IdVacaciones = Convert.ToInt32(parametrosSolicitud[0]);
+                registro.EstadoSolicitud = "RECHAZADO";
+                registro.Cod_Usuario = parametrosSolicitud[3];
+                registro.Tipo = 6;
+                registro.UsuarioAprobo = "";
+                registro.UsuarioRechazo = "";
+                respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
+                if (respuesta.estado == "1")
+                {
+                    lblmensaje.Text = "Se ha registrado el <b>RECHAZO</b> de la solicitud.";
+                    if (parametrosSolicitud[4] == "NO")
+                    {
+                        PermisoRechazado.Visible = true;
+                    }
+                    else if (parametrosSolicitud[4] == "EM")
+                    {
+                        Rechazado.Visible = true;
+                    }
+                }
+                else
+                {
+                    lblmensaje.Text = "<b>No se pudo registrar</b> el RECHAZO de la solicitud.";
+                    if (parametrosSolicitud[4] == "NO")
+                    {
+                        PermisoRechazado.Visible = true;
+                    }
+                    else if (parametrosSolicitud[4] == "EM")
+                    {
+                        Rechazado.Visible = true;
+                    }
+                }
+        }
+        #endregion
 
         #region Page_Load
         protected void Page_Load(object sender, EventArgs e)
@@ -82,80 +439,17 @@ namespace ReporteTareas.Formulario
                             lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
                             Aprobados.Visible = true;
                         }
-                        else if (parametrosSolicitud[2] == "SA")
+                        else if (parametrosSolicitud[2] == "SA" || parametrosSolicitud[2] == "SR"
+                                 || parametrosSolicitud[2] == "VG" || parametrosSolicitud[2] == "RG")
                         {
-                            EntRespuesta respuesta = new EntRespuesta();
-                            EntSolicitud registro = new EntSolicitud();
-                            registro.IdVacaciones = Convert.ToInt32(parametrosSolicitud[0]);
-                            registro.EstadoSolicitud = "APROBADO";
-                            registro.Cod_Usuario = parametrosSolicitud[3];
-                            registro.Tipo =5;
-                            registro.UsuarioAprobo = "";
-                            registro.UsuarioRechazo = "";
-                            respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
-                            if (respuesta.estado == "1")
-                            {
-                                lblmensaje.Text = "Se ha registrado la <b>APROBACION</b> de la solicitud.";
-                                
-                                #region Enviar mail Recurso Humano
-                                if (parametrosSolicitud[4] == "EM")
-                                {
-                                    EntSolicitud Lista = new EntSolicitud();
-                                    List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
-                                    string CorreoRH = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("CORREORH");
-                                    int tipo = 0;
-                                    EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
-                                    Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(tipo, Convert.ToInt32(parametrosSolicitud[0]));
-                                    EnviarCorreoRH(Lista, parametrosSolicitud[0], CorreoRH, parametrosSolicitud[3]);
-                                    Aprobados.Visible = true;
-                                }
-                                #endregion
-                                else if (parametrosSolicitud[4] == "NO")
-                                {
-                                    PermisoAprobado.Visible = true;
-                                }
-                            }
-                            else
-                            {
-                                lblmensaje.Text = "<b>No se pudo registrar</b> la APROBACION de la solicitud.";
-                                Aprobados.Visible = false;
-                            }
-                        }
-                        else if (parametrosSolicitud[2] == "SR")
-                        {
-                            EntRespuesta respuesta = new EntRespuesta();
-                            EntSolicitud registro = new EntSolicitud();
-                            registro.IdVacaciones = Convert.ToInt32(parametrosSolicitud[0]);
-                            registro.EstadoSolicitud = "RECHAZADO";
-                            registro.Cod_Usuario = parametrosSolicitud[3];
-                            registro.Tipo = 6;
-                            registro.UsuarioAprobo = "";
-                            registro.UsuarioRechazo = "";
-                            respuesta = NegSolicitud.RTA_ActualizarSolicitud(registro);
-                            if (respuesta.estado == "1")
-                            {
-                                lblmensaje.Text = "Se ha registrado el <b>RECHAZO</b> de la solicitud.";
-                                if (parametrosSolicitud[4] == "NO")
-                                {
-                                    PermisoRechazado.Visible = true;
-                                }
-                                else if (parametrosSolicitud[4] == "EM")
-                                {
-                                    Rechazado.Visible = true;
-                                }                              
-                            }
-                            else
-                            {
-                                lblmensaje.Text = "<b>No se pudo registrar</b> el RECHAZO de la solicitud.";
-                                if (parametrosSolicitud[4] == "NO")
-                                {
-                                    PermisoRechazado.Visible = true;
-                                }
-                                else if (parametrosSolicitud[4] == "EM")
-                                {
-                                    Rechazado.Visible = true;
-                                }
-                            }
+                            /* Ya no se aplica de una. La solicitud no cambia de estado
+                               hasta que el jefe firme: sin eso el PDF salia con el
+                               recuadro del jefe en "Pendiente" aunque hubiera aprobado.
+
+                               Los parametros viajan en el formulario para no volver a
+                               descifrar la URL en el postback. */
+                            hfParametros.Value = parametrosRecibidos;
+                            PedirFirma(parametrosSolicitud[2]);
                         }
                     }
                 }
@@ -217,7 +511,7 @@ namespace ReporteTareas.Formulario
         #endregion
 
         #region EnviarCorreoRH
-        public void EnviarCorreoRH(EntSolicitud Lista,string IdSolicitud,string correoUsuario,string IdUsuarioSession)
+        public void EnviarCorreoRH(EntSolicitud Lista, string IdSolicitud, string correoUsuario, string IdUsuarioSession)
         {
             EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
             List<EntItemValor> listaCamposCorreo = new List<EntItemValor>();
@@ -273,7 +567,16 @@ namespace ReporteTareas.Formulario
             bool respuestaEnvioCorreo = false;
             bool respuestaEnvioCorreoUsuario = false;
             //respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
-            respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoUsuario, "Registrar Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudRH.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudRH.txt");
+            /* Talento Humano recibe el mismo documento que el colaborador y el jefe,
+               con las firmas que ya tenga, y sus propios botones. Antes le llegaba la
+               plantilla contenidoCorreoNotificacionSolicitudRH.txt, que no esta
+               desplegada en el servidor: el correo salia con el cuerpo vacio. */
+            string asuntoRH = Lista.IdTipoSolicitud == 1
+                ? "Permiso firmado por el colaborador y su jefe - falta su validación"
+                : "Vacaciones firmadas por el colaborador y su jefe - falta su validación";
+
+            respuestaEnvioCorreo = envioCorreo.EnviarDocumentoATalentoHumano(
+                Convert.ToInt32(IdSolicitud), correoUsuario, asuntoRH);
         }
         #endregion
 

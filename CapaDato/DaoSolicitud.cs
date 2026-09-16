@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 
 namespace CapaDato
@@ -15,7 +10,7 @@ namespace CapaDato
     public class DaoSolicitud
     {
 
-        public static List<EntSolicitud> ConsultaSp_RTAListaSolicitud(int Tipo, string Cod_Jefe_Inm,int Pagina,string EstadoSolicitud,string FchIni,string FchFin, int TipoSolicitud,string usuario)
+        public static List<EntSolicitud> ConsultaSp_RTAListaSolicitud(int Tipo, string Cod_Jefe_Inm, int Pagina, string EstadoSolicitud, string FchIni, string FchFin, int TipoSolicitud, string usuario,int tipofecha)
         {
             List<EntSolicitud> listaTareas = null;
 
@@ -36,6 +31,7 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@FchFin", FchFin);
                 cmd.Parameters.AddWithValue("@TipoSolicitud", TipoSolicitud);
                 cmd.Parameters.AddWithValue("@Cod_Usuario", usuario);
+                cmd.Parameters.AddWithValue("@TipoFecha", tipofecha);
                 cmd.CommandType = CommandType.StoredProcedure;
                 dr = cmd.ExecuteReader();
                 listaTareas = new List<EntSolicitud>();
@@ -73,7 +69,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -102,6 +101,9 @@ namespace CapaDato
                 {
                     Tarea.IdVacaciones = Convert.ToInt32(dr["IdVacaciones"].ToString());
                     Tarea.FechaRegistro = dr["FechaRegistro"].ToString();
+                    /* El procedimiento ya lo devolvia y nadie lo leia. Hace falta para
+                       distinguir permiso de vacaciones en los avisos. */
+                    Tarea.IdTipoSolicitud = Convert.ToInt64(dr["IdTipoSolicitud"]);
                     Tarea.Cedula = dr["Cedula"].ToString();
                     Tarea.Colaborador = dr["Colaborador"].ToString();
                     Tarea.Departamento = dr["Departamento"].ToString();
@@ -132,7 +134,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Tarea;
@@ -177,7 +182,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -298,7 +306,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -370,7 +381,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -403,7 +417,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -444,7 +461,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return listaArchivosTarea;
         }
@@ -491,7 +511,7 @@ namespace CapaDato
                     Respuesta.tipoMensaje = "success";
                     Respuesta.resultado = respuestaSP.ToString();
                 }
-                else if(respuestaSP == 0)
+                else if (respuestaSP == 0)
                 {
                     Respuesta.estado = "0";
                     Respuesta.mensaje = "No hay información en estado APROBADO para actualizar.";
@@ -508,7 +528,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

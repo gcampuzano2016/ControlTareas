@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PLANTILLA. Copiar como appsettings.config (sin la extension .ejemplo) y
+  reemplazar los valores por los reales. El archivo resultante esta en
+  .gitignore a proposito: no debe entrar al repositorio.
+
+  CUIDADO, esto no es una contrasena cualquiera. De estos dos valores se
+  deriva, con Rfc2898DeriveBytes, la llave AES con la que FileEncryptionService
+  cifra archivos. Si cambian, los archivos ya cifrados NO se pueden volver a
+  descifrar. Al mover este archivo entre ambientes hay que copiar los valores
+  exactos, no generar nuevos.
+
+  Igual que connections.config, no viaja en la publicacion: se crea una sola
+  vez en cada maquina y en cada servidor.
+-->
+<appSettings>
+  <add key="EncryptionPassword" value="CLAVE_DE_CIFRADO" />
+  <add key="EncryptionSalt" value="SALT_DE_CIFRADO" />
+</appSettings>

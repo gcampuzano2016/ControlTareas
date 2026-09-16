@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  PLANTILLA. Copiar como connections.config (sin la extension .ejemplo) y
+  reemplazar las contrasenas por las reales. El archivo resultante esta en
+  .gitignore a proposito: no debe volver a entrar al repositorio.
+
+  Los servidores que estaban escritos en el codigo quedan abajo como
+  referencia; cambiar de ambiente ahora es editar Data Source e Initial
+  Catalog aqui, sin recompilar.
+
+    PRODUCCION       Data Source=192.168.11.14   Catalog=ReporTarea
+    PREPRODUCCION    Data Source=192.168.11.14   Catalog=ReporTareaPreProd
+    TEST             Data Source=192.168.11.14   Catalog=ReporTareaTest
+-->
+<connectionStrings>
+  <add name="ReporTarea" providerName="System.Data.SqlClient"
+       connectionString="Data Source=SERVIDOR; Initial Catalog=ReporTarea; User Id=USUARIO; Password=CONTRASENA" />
+  <add name="ArandaDb" providerName="System.Data.SqlClient"
+       connectionString="Data Source=SERVIDOR; Initial Catalog=ARANDADB; User Id=USUARIO; Password=CONTRASENA" />
+  <add name="Sap" providerName="System.Data.SqlClient"
+       connectionString="Data Source=SERVIDOR; Initial Catalog=DCP; User Id=USUARIO; Password=CONTRASENA" />
+</connectionStrings>

@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -70,7 +66,7 @@ namespace CapaNegocio
 
             return ObjRespuesta;
 
-        }   
+        }
         public static EntUsuario RTAConsultaUsuarioPorCodigo(string IdUsuario)
         {
             EntUsuario ObjRespuesta = new EntUsuario();
@@ -112,6 +108,12 @@ namespace CapaNegocio
             return respuesta;
 
         }
+        /// <summary>El Cod_Usuario de quien tiene ese correo, o cadena vacia.</summary>
+        public static string RTA_CodigoUsuarioPorCorreo(string correo)
+        {
+            return DaoRTAUsuario.RTA_CodigoUsuarioPorCorreo(correo);
+        }
+
         public static string RTA_CorreoUsuario(string IdUsuario)
         {
             string respuesta = "";
@@ -135,7 +137,7 @@ namespace CapaNegocio
         }
         public static string RTA_AutenticaUsuario(string IdUsuario, string Passw)
         {
-            var respuesta ="";
+            var respuesta = "";
 
             respuesta = DaoRTAUsuario.RTA_AutenticaUsuario(IdUsuario, Passw);
 
@@ -144,6 +146,11 @@ namespace CapaNegocio
         public static List<EntCombo> ListaUsuariosCombo(string Idusuario)
         {
             return DaoRTAUsuario.ListaUsuariosCombo(Idusuario);
+        }
+
+        public static List<EntCombo> ListaUsuariosComboSap(string Idusuario)
+        {
+            return DaoRTAUsuario.ListaUsuariosComboSap(Idusuario);
         }
         public static List<EntCombo> ConsultarDatosEmpleado(string Cod_Usuario, int Tipo)
         {
@@ -219,7 +226,7 @@ namespace CapaNegocio
             {
                 respuesta = "<div class='alert alert-warning " + botonCerrar + "'><button type = 'button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>" + mensaje + "</div>";
             }
-            
+
             if (tipoMensaje == "info")
             {
                 respuesta = "<div class='alert alert-info " + botonCerrar + "'><button type = 'button' class='close' data-dismiss='alert' aria-hidden='true'>×</button>" + mensaje + "</div>";

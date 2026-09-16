@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -16,7 +14,7 @@ namespace CapaNegocio
 
         public static EntRespuesta ConsultaSp_RTAListaForeCastDescargar(int Anio, int tipo)
         {
-            return DaoReporteGe.ConsultaSp_RTA_GenerarReporteGDOSDescargar(Anio,tipo);
+            return DaoReporteGe.ConsultaSp_RTA_GenerarReporteGDOSDescargar(Anio, tipo);
         }
     }
 }

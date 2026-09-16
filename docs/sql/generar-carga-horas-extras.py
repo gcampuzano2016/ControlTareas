@@ -216,6 +216,8 @@ def main():
             filas_invalidas.append(
                 'hoja Colaboradores, fila %d, columna Situacion: supera 40 caracteres '
                 '(se guarda en MotivoNoAplica).' % i)
+        if not longitud_valida(c['Cargo'], 200):
+            filas_invalidas.append('hoja Colaboradores, fila %d, columna Cargo: supera 200 caracteres.' % i)
     for i, s in enumerate(salarios, start=2):
         if not es_numero(s['Monto']):
             filas_invalidas.append('hoja Salarios, fila %d, columna Monto: no es un numero.' % i)
@@ -271,7 +273,8 @@ def main():
     L.append('   nunca la leyo, y son 64 nombres completos de peso muerto dentro del')
     L.append('   unico archivo de la fase que contiene datos personales. */')
     L.append('CREATE TABLE #C (Cedula VARCHAR(20), Empresa VARCHAR(120), Jornada INT,')
-    L.append('                 DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40));')
+    L.append('                 DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40),')
+    L.append('                 Cargo VARCHAR(200) NULL);')
     L.append('CREATE TABLE #S (Cedula VARCHAR(20), Monto DECIMAL(18,2), Desde DATE, Origen VARCHAR(20),')
     L.append('                 Observacion VARCHAR(400) NULL);')
     L.append('')
@@ -282,9 +285,10 @@ def main():
         motivo = 'NULL' if aplica == '1' and situacion == 'Activo' else q(situacion)
         divisor = c['DivisorManual'].strip()
         divisor_sql = divisor if divisor else 'NULL'
-        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s);' % (
+        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s, %s);' % (
             q(c['Cedula'].strip()), q(c['Empresa'].strip()),
-            c['JornadaHorasDia'].strip() or '0', divisor_sql, aplica, motivo))
+            c['JornadaHorasDia'].strip() or '0', divisor_sql, aplica, motivo,
+            q(c['Cargo'].strip())))
 
     L.append('')
     for s in salarios:
@@ -306,15 +310,16 @@ def main():
     L.append('END')
     L.append('')
     L.append('MERGE dbo.HE_ColaboradorParametro AS d')
-    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.DivisorManual, c.AplicaHE, c.Motivo, c.Empresa')
+    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.DivisorManual, c.AplicaHE, c.Motivo, c.Empresa, c.Cargo')
     L.append('         FROM #C c JOIN dbo.Empleados e ON LTRIM(RTRIM(e.Cedula)) = c.Cedula) AS o')
     L.append('   ON d.IdEmpleado = o.IdEmpleado')
     L.append(' WHEN MATCHED THEN UPDATE SET d.JornadaHorasDia = o.Jornada, d.DivisorManual = o.DivisorManual,')
     L.append('                              d.AplicaHE = o.AplicaHE, d.MotivoNoAplica = o.Motivo,')
-    L.append('                              d.Empresa = o.Empresa, d.Fec_Modificacion = SYSDATETIME(),')
+    L.append('                              d.Empresa = o.Empresa, d.Cargo = o.Cargo,')
+    L.append('                              d.Fec_Modificacion = SYSDATETIME(),')
     L.append("                              d.Usu_Modificacion = 'carga-plantilla'")
-    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, DivisorManual, AplicaHE, MotivoNoAplica, Empresa, Usu_Modificacion)')
-    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.DivisorManual, o.AplicaHE, o.Motivo, o.Empresa, 'carga-plantilla');")
+    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, DivisorManual, AplicaHE, MotivoNoAplica, Empresa, Cargo, Usu_Modificacion)')
+    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.DivisorManual, o.AplicaHE, o.Motivo, o.Empresa, o.Cargo, 'carga-plantilla');")
     L.append('')
     L.append('/* Los sueldos no se pisan: se insertan los que falten. Un historial no se')
     L.append('   reescribe, se le agregan filas. */')

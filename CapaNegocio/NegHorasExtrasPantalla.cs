@@ -58,24 +58,29 @@ namespace CapaNegocio
         /// Rellena una fila a partir de su salario y los parametros. Es el unico
         /// punto donde la pantalla toca el calculo, y delega entero en
         /// NegHorasExtras: aqui no hay ni una division ni un factor.
+        ///
+        /// El invariante que protege es uno solo: cuando no se puede resolver
+        /// un sueldo desde el maestro, nunca se pisa lo que el periodo ya tenia
+        /// congelado. Por eso "salarioCongelado" es un parametro obligatorio y
+        /// no algo que se infiere de fila.SalarioBaseSnapshot al entrar: leerlo
+        /// de ahi fallo en silencio la primera vez que un llamador (AbrirPeriodo)
+        /// armo una fila fresca sin haberlo trasladado antes -su
+        /// SalarioBaseSnapshot nacia en 0 por omision, y el resguardo nunca se
+        /// activaba-. Exigirlo como argumento obliga a cada llamador a
+        /// decidirlo explicitamente, en vez de depender de que alguien se
+        /// acuerde de poblar el campo por adelantado.
         /// </summary>
-        public static void AplicarCalculo(EntHeFila fila, decimal salario, EntHeParametros parametros)
+        public static void AplicarCalculo(EntHeFila fila, decimal salarioDelMaestro,
+                                          decimal salarioCongelado, EntHeParametros parametros)
         {
             if (fila == null) { return; }
 
-            /* Si no llega un sueldo vigente pero la fila ya tenia uno
-               congelado -el snapshot de un guardado anterior-, se conserva en
-               vez de pisarlo con cero. Sin este resguardo, cualquier motivo
-               por el que no se pudiera revalidar el sueldo -el colaborador ya
-               no esta activo, o esta activo pero no tiene ningun sueldo
-               vigente a la fecha de corte- borraria un pago ya calculado. Si
-               el propio snapshot tambien es cero, es el caso legitimo de
-               alguien que nunca tuvo sueldo cargado y no hay nada que
-               conservar: sigue la rama normal, con advertencia. */
-            if (salario <= 0m && fila.SalarioBaseSnapshot > 0m)
-            {
-                salario = fila.SalarioBaseSnapshot;
-            }
+            /* Si el maestro da un sueldo valido, ese gana -incluso si es
+               distinto del congelado: un sueldo corregido tiene que aplicarse-.
+               Si no da ninguno, sobrevive el congelado. Si ninguno de los dos
+               tiene nada, es el caso legitimo de alguien que nunca tuvo sueldo
+               cargado: sigue la rama normal, con advertencia. */
+            decimal salario = salarioDelMaestro > 0m ? salarioDelMaestro : salarioCongelado;
 
             fila.SalarioBaseSnapshot = salario;
 
@@ -134,6 +139,24 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// El sueldo congelado a usar como respaldo al reabrir un periodo: el
+        /// que ya tenia la fila existente, o cero si es la primera vez que el
+        /// colaborador aparece en el periodo -no hay nada que congelar todavia,
+        /// y ese es el caso legitimo de sin-sueldo si el maestro tampoco da
+        /// ninguno-.
+        ///
+        /// Separado en su propio metodo, puro, porque es exactamente el valor
+        /// que se perdia antes de esta correccion: la fila que arma AbrirPeriodo
+        /// nace fresca de LeerInsumos con SalarioBaseSnapshot en 0, y sin este
+        /// paso explicito ese 0 viajaba a AplicarCalculo como si fuera el
+        /// congelado real.
+        /// </summary>
+        public static decimal SalarioCongeladoAlReabrir(EntHeFila filaExistente)
+        {
+            return filaExistente == null ? 0m : filaExistente.SalarioBaseSnapshot;
+        }
+
+        /// <summary>
         /// Abre un periodo: lo crea si no existe y le arma el snapshot, una fila
         /// por colaborador activo.
         ///
@@ -182,20 +205,34 @@ namespace CapaNegocio
                CargarPantalla devolveria exito con lo que haya quedado. */
             int filasConError = 0;
 
+            /* Cuantas filas se quedaron con el sueldo congelado del periodo
+               porque el maestro no dio ninguno vigente al corte. No es un
+               error -el pago quedo bien calculado-, pero TieneAdvertencia no
+               se persiste ni se lee de vuelta: este aviso es la unica senal
+               que le llega a quien reabrio el periodo. */
+            int filasConSalarioCongelado = 0;
+
             foreach (EntHeFila fila in colaboradores)
             {
-                if (yaEstan.ContainsKey(fila.IdEmpleado))
+                EntHeFila anterior = yaEstan.ContainsKey(fila.IdEmpleado) ? yaEstan[fila.IdEmpleado] : null;
+
+                if (anterior != null)
                 {
-                    fila.Horas50 = yaEstan[fila.IdEmpleado].Horas50;
-                    fila.Horas100 = yaEstan[fila.IdEmpleado].Horas100;
-                    fila.Observacion = yaEstan[fila.IdEmpleado].Observacion;
+                    fila.Horas50 = anterior.Horas50;
+                    fila.Horas100 = anterior.Horas100;
+                    fila.Observacion = anterior.Observacion;
                 }
 
                 List<EntHeSalario> historial = salarios.ContainsKey(fila.IdEmpleado)
                                                ? salarios[fila.IdEmpleado]
                                                : new List<EntHeSalario>();
 
-                AplicarCalculo(fila, NegHorasExtras.SalarioVigente(historial, corte), parametros);
+                decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
+                decimal salarioCongelado = SalarioCongeladoAlReabrir(anterior);
+
+                if (salarioDelMaestro <= 0m && salarioCongelado > 0m) { filasConSalarioCongelado++; }
+
+                AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, parametros);
 
                 int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
                 if (guardado != 0) { filasConError++; }
@@ -203,9 +240,21 @@ namespace CapaNegocio
 
             EntRespuesta resultado = CargarPantalla(idPeriodo);
 
-            if (filasConError > 0 && resultado.estado == "1")
+            if (resultado.estado == "1" && (filasConError > 0 || filasConSalarioCongelado > 0))
             {
-                resultado.mensaje = filasConError + " fila(s) no se pudieron guardar. Vuelva a abrir el período para reintentar.";
+                List<string> avisos = new List<string>();
+
+                if (filasConError > 0)
+                {
+                    avisos.Add(filasConError + " fila(s) no se pudieron guardar");
+                }
+
+                if (filasConSalarioCongelado > 0)
+                {
+                    avisos.Add(filasConSalarioCongelado + " fila(s) sin sueldo vigente al corte usaron el sueldo congelado del período");
+                }
+
+                resultado.mensaje = string.Join("; ", avisos) + ". Vuelva a abrir el período si hace falta reintentar.";
                 resultado.tipoMensaje = "warning";
             }
 
@@ -336,22 +385,23 @@ namespace CapaNegocio
                ningun sueldo vigente a la fecha de corte -todos sus sueldos
                dados de baja, o su unica vigencia es posterior al corte-,
                "historial" trae filas pero SalarioVigente da cero igual. Los
-               dos casos llegan al mismo cero, y AplicarCalculo ya sabe
-               conservar el snapshot anterior en vez de pisarlo. */
+               dos casos llegan al mismo cero, y el sueldo congelado -el que
+               ya traia la fila antes de este guardado- se le pasa explicito
+               a AplicarCalculo, que es quien decide si hace falta usarlo. */
             List<EntHeSalario> historial = salarios.ContainsKey(idEmpleado)
                                            ? salarios[idEmpleado]
                                            : new List<EntHeSalario>();
 
             decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
-            decimal snapshotAnterior = fila.SalarioBaseSnapshot;
+            decimal salarioCongelado = fila.SalarioBaseSnapshot;
 
-            AplicarCalculo(fila, salarioDelMaestro, NegHeParametros.Vigentes());
+            AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, NegHeParametros.Vigentes());
 
             /* Se detecta aqui solo para avisar -la fila ya quedo bien
                calculada por AplicarCalculo-. La distincion entre "no esta
                activo" y "esta activo pero sin sueldo vigente" es solo para
                que el mensaje diga la causa correcta. */
-            bool seUsoSnapshot = salarioDelMaestro <= 0m && snapshotAnterior > 0m;
+            bool seUsoSnapshot = salarioDelMaestro <= 0m && salarioCongelado > 0m;
 
             int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
 

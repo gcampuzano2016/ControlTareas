@@ -65,7 +65,7 @@ namespace CapaPruebas
             f.Horas50 = 10m;
             f.Horas100 = 0m;
 
-            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, Parametros());
+            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, 0m, Parametros());
 
             Assert.AreEqual(1200m, f.SalarioBaseSnapshot);
             Assert.AreEqual(240, f.Divisor);
@@ -91,7 +91,7 @@ namespace CapaPruebas
             f.AplicaHESnapshot = true;
             f.Horas50 = 10m;
 
-            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, Parametros());
+            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, 0m, Parametros());
 
             Assert.AreEqual(120, f.Divisor);
             Assert.AreEqual(10m, f.ValorHoraOrdinaria);
@@ -106,7 +106,7 @@ namespace CapaPruebas
             f.AplicaHESnapshot = true;
             f.Horas50 = 10m;
 
-            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, Parametros());
+            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, 0m, Parametros());
 
             Assert.IsTrue(f.TieneAdvertencia);
             Assert.AreEqual(0m, f.TotalHE);
@@ -114,26 +114,62 @@ namespace CapaPruebas
         }
 
         /// <summary>
-        /// Si no llega un sueldo vigente pero la fila ya tenia uno congelado
-        /// -el snapshot de un guardado anterior-, no se pisa con cero. Cubre
-        /// tanto a quien ya no esta activo en el maestro como a quien esta
-        /// activo pero no tiene ningun sueldo vigente a la fecha de corte:
-        /// para AplicarCalculo los dos llegan igual, con salario 0.
+        /// Si no llega un sueldo vigente pero se pasa uno congelado -el
+        /// snapshot de un guardado anterior-, no se pisa con cero. Cubre tanto
+        /// a quien ya no esta activo en el maestro como a quien esta activo
+        /// pero no tiene ningun sueldo vigente a la fecha de corte: para
+        /// AplicarCalculo los dos llegan igual, con salarioDelMaestro en 0.
         /// </summary>
         [TestMethod]
-        public void AplicarCalculo_SinSueldoVigente_ConSnapshotPrevio_ConservaElSnapshot()
+        public void AplicarCalculo_SinSueldoVigente_ConCongeladoDisponible_UsaElCongelado()
         {
             EntHeFila f = new EntHeFila();
             f.JornadaHorasDiaSnapshot = 8;
             f.AplicaHESnapshot = true;
             f.Horas50 = 10m;
-            f.SalarioBaseSnapshot = 1200m;
 
-            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, Parametros());
+            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, 1200m, Parametros());
 
             Assert.AreEqual(1200m, f.SalarioBaseSnapshot);
             Assert.IsFalse(f.TieneAdvertencia);
             Assert.AreEqual(75.00m, f.Total50);
+        }
+
+        /// <summary>
+        /// Si el maestro SI da un sueldo valido, ese gana aunque haya uno
+        /// congelado distinto -un sueldo corregido tiene que aplicarse, no
+        /// quedarse pegado al anterior-.
+        /// </summary>
+        [TestMethod]
+        public void AplicarCalculo_ConSueldoDelMaestro_GanaSobreElCongelado()
+        {
+            EntHeFila f = new EntHeFila();
+            f.JornadaHorasDiaSnapshot = 8;
+            f.AplicaHESnapshot = true;
+            f.Horas50 = 10m;
+
+            NegHorasExtrasPantalla.AplicarCalculo(f, 1500m, 1200m, Parametros());
+
+            Assert.AreEqual(1500m, f.SalarioBaseSnapshot);
+        }
+
+        /// <summary>
+        /// Si ni el maestro ni lo congelado tienen un sueldo, es el caso
+        /// legitimo de alguien que nunca tuvo sueldo cargado: sigue la rama
+        /// normal, con advertencia y sin pagar.
+        /// </summary>
+        [TestMethod]
+        public void AplicarCalculo_SinMaestroYSinCongelado_EsElCasoLegitimoSinSueldo()
+        {
+            EntHeFila f = new EntHeFila();
+            f.JornadaHorasDiaSnapshot = 8;
+            f.AplicaHESnapshot = true;
+            f.Horas50 = 10m;
+
+            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, 0m, Parametros());
+
+            Assert.AreEqual(0m, f.SalarioBaseSnapshot);
+            Assert.IsTrue(f.TieneAdvertencia);
         }
 
         [TestMethod]
@@ -144,9 +180,56 @@ namespace CapaPruebas
             f.AplicaHESnapshot = false;
             f.Horas50 = 10m;
 
-            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, Parametros());
+            NegHorasExtrasPantalla.AplicarCalculo(f, 1200m, 0m, Parametros());
 
             Assert.AreEqual(0m, f.TotalHE);
+        }
+
+        /// <summary>
+        /// El sueldo congelado a usar al reabrir un periodo: el de la fila que
+        /// ya existia, o cero si es la primera vez que el colaborador aparece.
+        /// </summary>
+        [TestMethod]
+        public void SalarioCongeladoAlReabrir_ConFilaExistente_DevuelveSuSnapshot()
+        {
+            EntHeFila anterior = new EntHeFila();
+            anterior.SalarioBaseSnapshot = 1200m;
+
+            Assert.AreEqual(1200m, NegHorasExtrasPantalla.SalarioCongeladoAlReabrir(anterior));
+        }
+
+        [TestMethod]
+        public void SalarioCongeladoAlReabrir_SinFilaExistente_DaCero()
+        {
+            Assert.AreEqual(0m, NegHorasExtrasPantalla.SalarioCongeladoAlReabrir(null));
+        }
+
+        /// <summary>
+        /// Fija exactamente el defecto de la tercera ronda: reabrir un periodo
+        /// no puede borrarle el sueldo a quien ya no tiene uno vigente en el
+        /// maestro. Compone las dos piezas puras que AbrirPeriodo usa por fila
+        /// -SalarioCongeladoAlReabrir y AplicarCalculo- sin tocar el DAO: una
+        /// fila fresca como la que devuelve LeerInsumos (SalarioBaseSnapshot en
+        /// 0 por omision) mas la fila que ya existia en el periodo.
+        /// </summary>
+        [TestMethod]
+        public void Reapertura_SinSueldoVigenteEnElMaestro_NoPierdeElSueldoCongelado()
+        {
+            EntHeFila filaExistente = new EntHeFila();
+            filaExistente.SalarioBaseSnapshot = 1200m;
+
+            EntHeFila filaFresca = new EntHeFila();
+            filaFresca.JornadaHorasDiaSnapshot = 8;
+            filaFresca.AplicaHESnapshot = true;
+            filaFresca.Horas50 = 10m;
+
+            decimal salarioCongelado = NegHorasExtrasPantalla.SalarioCongeladoAlReabrir(filaExistente);
+
+            NegHorasExtrasPantalla.AplicarCalculo(filaFresca, 0m, salarioCongelado, Parametros());
+
+            Assert.AreEqual(1200m, filaFresca.SalarioBaseSnapshot);
+            Assert.IsFalse(filaFresca.TieneAdvertencia);
+            Assert.AreEqual(75.00m, filaFresca.Total50);
         }
 
         /// <summary>

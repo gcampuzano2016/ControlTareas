@@ -63,3 +63,6 @@ Actualizacion/
 # Los scripts de carga que genera docs/sql/generar-carga-horas-extras.py.
 # Se versiona el generador -que es logica- y no su salida -que son datos-.
 docs/sql/carga-generada/
+
+# Bytecode de Python. El repo versiona el generador de la carga, no su cache.
+__pycache__/

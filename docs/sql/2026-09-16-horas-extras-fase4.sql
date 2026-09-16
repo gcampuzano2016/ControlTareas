@@ -584,11 +584,23 @@ END
 
 /* --- 6. la asercion de corte --- */
 /* Medido en produccion el 2026-09-16 sobre el rango 17-ago / 15-sep: 9
-   colaboradores, 24,52 h al 50% y 97,78 h al 100%. Es la unica asercion que
+   colaboradores, 24,51 h al 50% y 97,79 h al 100%. Es la unica asercion que
    comprueba que el procedimiento nuevo devuelve LO CORRECTO y no solo que
    existe: si el puente de identidad se rompiera -por ejemplo invirtiendo el
    JOIN contra R_Usuarios, donde una cedula tiene seis cuentas- las horas se
    multiplicarian y esto lo cazaria.
+
+   OJO CON ESOS DOS TOTALES. La primera medicion a mano dio 24,52 y 97,78, y
+   esta asercion fallo en la primera ejecucion por un centavo en cada una. No
+   habia ningun defecto: la medicion sumaba los minutos de todos y redondeaba
+   UNA vez al final, mientras que el procedimiento redondea POR PERSONA. Manda
+   el procedimiento, porque HE_Detalle.Horas50 es DECIMAL(9,2): cada fila se
+   guarda ya redondeada y el total del periodo es una suma de valores
+   guardados. Redondear al final describiria un total que el sistema no
+   muestra en ninguna pantalla.
+
+   Si algun dia cambias el CAST del procedimiento, estos dos numeros cambian
+   con el, y no por eso esta roto. */
 
    INSERT ... EXEC para poder contar y sumar el result set. No se imprime
    ninguna fila: IdEmpleado identifica a una persona. */
@@ -605,15 +617,15 @@ BEGIN
         SET @Fallos += 1;
     END
 
-    IF ISNULL((SELECT SUM(Horas50) FROM #HeAprobadas), -1) <> 24.52
+    IF ISNULL((SELECT SUM(Horas50) FROM #HeAprobadas), -1) <> 24.51
     BEGIN
-        RAISERROR('FALLO: la suma de Horas50 del rango de corte no es 24.52.', 16, 1);
+        RAISERROR('FALLO: la suma de Horas50 del rango de corte no es 24.51.', 16, 1);
         SET @Fallos += 1;
     END
 
-    IF ISNULL((SELECT SUM(Horas100) FROM #HeAprobadas), -1) <> 97.78
+    IF ISNULL((SELECT SUM(Horas100) FROM #HeAprobadas), -1) <> 97.79
     BEGIN
-        RAISERROR('FALLO: la suma de Horas100 del rango de corte no es 97.78.', 16, 1);
+        RAISERROR('FALLO: la suma de Horas100 del rango de corte no es 97.79.', 16, 1);
         SET @Fallos += 1;
     END
 END

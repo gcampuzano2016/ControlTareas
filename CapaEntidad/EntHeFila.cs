@@ -44,6 +44,17 @@ namespace CapaEntidad
         public string Observacion { get; set; }
 
         /// <summary>
+        /// De donde salieron las horas de esta fila: "Tareas" si las sembro el
+        /// sistema desde las aprobaciones, "Manual" si alguien las corrigio.
+        ///
+        /// Decide si una reapertura la vuelve a sembrar: las manuales no se tocan.
+        /// Por eso se inicializa en "Tareas" y no en cadena vacia -- una fila nueva
+        /// que nadie ha corregido es sembrable, y una cadena vacia la dejaria en un
+        /// tercer estado que ninguna rama contempla.
+        /// </summary>
+        public string HorasOrigen { get; set; } = "Tareas";
+
+        /// <summary>
         /// Por que esta persona no aplica, o "EnRevisionSalarial" para alguien
         /// que SI aplica pero tiene el sueldo en revision. La columna de la base
         /// se llama MotivoNoAplica y el nombre enganna: hay dos personas que

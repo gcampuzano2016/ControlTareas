@@ -37,7 +37,7 @@ namespace CapaDato
             return lista;
         }
 
-        public static int CrearPeriodo(int anio, int mes, string usuario, string ip, out int idPeriodo)
+        public static int CrearPeriodo(DateTime inicio, DateTime fin, string usuario, string ip, out int idPeriodo)
         {
             int resultado = -1;
             int id = 0;
@@ -47,8 +47,8 @@ namespace CapaDato
             using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeCrearPeriodo", cnx))
             {
                 cmd.CommandType = CommandType.StoredProcedure;
-                cmd.Parameters.Add("@Anio", SqlDbType.Int).Value = anio;
-                cmd.Parameters.Add("@Mes", SqlDbType.Int).Value = mes;
+                cmd.Parameters.Add("@FechaInicio", SqlDbType.Date).Value = inicio;
+                cmd.Parameters.Add("@FechaFin", SqlDbType.Date).Value = fin;
                 cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
                 cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
                 cnx.Open();
@@ -222,7 +222,41 @@ namespace CapaDato
             return resultado;
         }
 
-        public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar)
+        /// <summary>
+        /// Las horas extras aprobadas en el rango, agregadas por colaborador. Devuelve
+        /// solo a quien tiene alguna: el que no aparece es que no registro ninguna, y
+        /// quien llama lo traduce a cero.
+        /// </summary>
+        public static Dictionary<long, EntHeFila> LeerHorasAprobadas(DateTime inicio, DateTime fin)
+        {
+            Dictionary<long, EntHeFila> resultado = new Dictionary<long, EntHeFila>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeHorasAprobadas", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@FechaInicio", SqlDbType.Date).Value = inicio;
+                cmd.Parameters.Add("@FechaFin", SqlDbType.Date).Value = fin;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        EntHeFila f = new EntHeFila();
+                        f.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                        f.Horas50 = Convert.ToDecimal(dr["Horas50"]);
+                        f.Horas100 = Convert.ToDecimal(dr["Horas100"]);
+                        resultado[f.IdEmpleado] = f;
+                    }
+                }
+            }
+
+            return resultado;
+        }
+
+        public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar, string horasOrigen)
         {
             int resultado = -1;
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
@@ -254,6 +288,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
                 cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
                 cmd.Parameters.Add("@Auditar", SqlDbType.Bit).Value = auditar;
+                cmd.Parameters.Add("@HorasOrigen", SqlDbType.VarChar, 10).Value = horasOrigen ?? "Manual";
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
@@ -311,6 +346,7 @@ namespace CapaDato
                             f.TotalHE = Convert.ToDecimal(dr["TotalHE"]);
                             f.Observacion = Texto(dr, "Observacion");
                             f.MotivoNoAplica = Texto(dr, "MotivoNoAplica");
+                            f.HorasOrigen = Texto(dr, "HorasOrigen");
                             pantalla.Filas.Add(f);
                         }
                     }
@@ -366,8 +402,8 @@ namespace CapaDato
         {
             EntHePeriodo p = new EntHePeriodo();
             p.IdPeriodo = Convert.ToInt32(dr["IdPeriodo"]);
-            p.Anio = Convert.ToInt32(dr["Anio"]);
-            p.Mes = Convert.ToInt32(dr["Mes"]);
+            p.FechaInicio = Convert.ToDateTime(dr["FechaInicio"]);
+            p.FechaFin = Convert.ToDateTime(dr["FechaFin"]);
             p.Descripcion = Texto(dr, "Descripcion");
             p.EstadoPeriodo = Texto(dr, "EstadoPeriodo");
             p.FechaCierre = dr["FechaCierre"] == DBNull.Value

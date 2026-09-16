@@ -6,8 +6,8 @@ namespace CapaEntidad
     public class EntHePeriodo
     {
         public int IdPeriodo { get; set; }
-        public int Anio { get; set; }
-        public int Mes { get; set; }
+        public DateTime FechaInicio { get; set; }
+        public DateTime FechaFin { get; set; }
         public string Descripcion { get; set; }
 
         /// <summary>"Abierto", "Cerrado" o "Anulado".</summary>

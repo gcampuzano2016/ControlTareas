@@ -44,13 +44,42 @@ def fecha_de_excel(crudo, por_omision):
 
     Devuelve siempre 'YYYY-MM-DD'. Si la celda viene vacia -el caso de los 64
     sueldos de rol- usa la fecha por omision.
+
+    Si el texto no es un serial entero, ANTES esta funcion devolvia el texto
+    crudo: SQL Server lo interpretaba segun el DATEFORMAT de la sesion y
+    podia meter un dia equivocado SIN error (01/09/2026 se puede leer como
+    9 de enero). Eso es peor que fallar ruidoso, asi que ese caso se valida
+    y se rechaza ANTES de llegar aqui (ver filas_invalidas en main). Si de
+    todos modos llega, es que la validacion previa se salto algo: se aborta
+    en vez de adivinar.
     """
     texto = (crudo or '').strip()
     if not texto:
         return por_omision
     if texto.isdigit():
         return (EXCEL_ORIGEN + timedelta(days=int(texto))).isoformat()
-    return texto
+    raise ValueError('fecha en formato ambiguo, no es un serial de Excel ni esta vacia')
+
+
+def es_entero(texto):
+    """Cadena vacia o un entero (sin signo, sin decimales). JornadaHorasDia
+    y DivisorManual van crudos como literal INT al script generado: un
+    texto que no sea esto rompe la sintaxis del SQL de salida."""
+    t = (texto or '').strip()
+    return t == '' or t.isdigit()
+
+
+def es_numero(texto):
+    """Cadena vacia o un numero con hasta un punto decimal. Monto va crudo
+    como literal DECIMAL al script generado."""
+    t = (texto or '').strip()
+    if t == '':
+        return True
+    try:
+        float(t)
+        return True
+    except ValueError:
+        return False
 
 
 def leer_hojas(ruta):
@@ -141,6 +170,29 @@ def main():
         print('Hay %d salarios cuya cedula no esta en Colaboradores. No se genera nada.' % len(huerfanos))
         return 1
 
+    # Fila/columna en el mensaje, nunca el valor de la celda: puede ser un
+    # dato personal (sueldo) y este generador no lo imprime ni en un error.
+    filas_invalidas = []
+    for i, c in enumerate(colaboradores, start=2):
+        if not es_entero(c['JornadaHorasDia']):
+            filas_invalidas.append('hoja Colaboradores, fila %d, columna JornadaHorasDia: no es un entero.' % i)
+        if not es_entero(c['DivisorManual']):
+            filas_invalidas.append('hoja Colaboradores, fila %d, columna DivisorManual: no es un entero.' % i)
+    for i, s in enumerate(salarios, start=2):
+        if not es_numero(s['Monto']):
+            filas_invalidas.append('hoja Salarios, fila %d, columna Monto: no es un numero.' % i)
+        texto_fecha = (s['FechaVigenciaDesde'] or '').strip()
+        if texto_fecha and not texto_fecha.isdigit():
+            filas_invalidas.append(
+                'hoja Salarios, fila %d, columna FechaVigenciaDesde: fecha en formato '
+                'ambiguo, no es un serial de Excel. No se adivina el formato: corrija '
+                'la celda con el formato de fecha nativo de Excel.' % i)
+    if filas_invalidas:
+        print('Hay %d filas con datos que no se pueden interpretar con seguridad. No se genera nada.' % len(filas_invalidas))
+        for msg in filas_invalidas:
+            print('  - %s' % msg)
+        return 1
+
     if not os.path.isdir(SALIDA_DIR):
         os.makedirs(SALIDA_DIR)
 
@@ -168,23 +220,27 @@ def main():
     L.append('   comparten seis usuarios activos, y elegir uno seria inventar. */')
     L.append('DECLARE @Faltantes INT;')
     L.append('CREATE TABLE #C (Cedula VARCHAR(20), Nombre NVARCHAR(400), Empresa VARCHAR(120),')
-    L.append('                 Jornada INT, AplicaHE BIT, Motivo VARCHAR(40));')
-    L.append('CREATE TABLE #S (Cedula VARCHAR(20), Monto DECIMAL(18,2), Desde DATE, Origen VARCHAR(20));')
+    L.append('                 Jornada INT, DivisorManual INT NULL, AplicaHE BIT, Motivo VARCHAR(40));')
+    L.append('CREATE TABLE #S (Cedula VARCHAR(20), Monto DECIMAL(18,2), Desde DATE, Origen VARCHAR(20),')
+    L.append('                 Observacion VARCHAR(400) NULL);')
     L.append('')
 
     for c in colaboradores:
         aplica = '1' if c['AplicaHE'].strip().upper() == 'SI' else '0'
         situacion = c['Situacion'].strip()
         motivo = 'NULL' if aplica == '1' and situacion == 'Activo' else q(situacion)
-        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s);' % (
+        divisor = c['DivisorManual'].strip()
+        divisor_sql = divisor if divisor else 'NULL'
+        L.append('INSERT INTO #C VALUES (%s, %s, %s, %s, %s, %s, %s);' % (
             q(c['Cedula'].strip()), q(c['NombreCompleto'].strip()), q(c['Empresa'].strip()),
-            c['JornadaHorasDia'].strip() or '0', aplica, motivo))
+            c['JornadaHorasDia'].strip() or '0', divisor_sql, aplica, motivo))
 
     L.append('')
     for s in salarios:
         desde = fecha_de_excel(s['FechaVigenciaDesde'], VIGENCIA_ROL)
-        L.append('INSERT INTO #S VALUES (%s, %s, %s, %s);' % (
-            q(s['Cedula'].strip()), s['Monto'].strip() or '0', q(desde), q(s['Origen'].strip() or 'Rol')))
+        L.append('INSERT INTO #S VALUES (%s, %s, %s, %s, %s);' % (
+            q(s['Cedula'].strip()), s['Monto'].strip() or '0', q(desde), q(s['Origen'].strip() or 'Rol'),
+            q(s['Observacion'].strip())))
 
     L.append('')
     L.append('/* Si alguna cedula no esta en Empleados, no se carga nada: media carga')
@@ -198,19 +254,20 @@ def main():
     L.append('END')
     L.append('')
     L.append('MERGE dbo.HE_ColaboradorParametro AS d')
-    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.AplicaHE, c.Motivo, c.Empresa')
+    L.append('USING (SELECT e.IdEmpleado, c.Jornada, c.DivisorManual, c.AplicaHE, c.Motivo, c.Empresa')
     L.append('         FROM #C c JOIN dbo.Empleados e ON LTRIM(RTRIM(e.Cedula)) = c.Cedula) AS o')
     L.append('   ON d.IdEmpleado = o.IdEmpleado')
-    L.append(' WHEN MATCHED THEN UPDATE SET d.JornadaHorasDia = o.Jornada, d.AplicaHE = o.AplicaHE,')
-    L.append('                              d.MotivoNoAplica = o.Motivo, d.Empresa = o.Empresa,')
-    L.append("                              d.Fec_Modificacion = SYSDATETIME(), d.Usu_Modificacion = 'carga-plantilla'")
-    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, AplicaHE, MotivoNoAplica, Empresa, Usu_Modificacion)')
-    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.AplicaHE, o.Motivo, o.Empresa, 'carga-plantilla');")
+    L.append(' WHEN MATCHED THEN UPDATE SET d.JornadaHorasDia = o.Jornada, d.DivisorManual = o.DivisorManual,')
+    L.append('                              d.AplicaHE = o.AplicaHE, d.MotivoNoAplica = o.Motivo,')
+    L.append('                              d.Empresa = o.Empresa, d.Fec_Modificacion = SYSDATETIME(),')
+    L.append("                              d.Usu_Modificacion = 'carga-plantilla'")
+    L.append(' WHEN NOT MATCHED THEN INSERT (IdEmpleado, JornadaHorasDia, DivisorManual, AplicaHE, MotivoNoAplica, Empresa, Usu_Modificacion)')
+    L.append("                        VALUES (o.IdEmpleado, o.Jornada, o.DivisorManual, o.AplicaHE, o.Motivo, o.Empresa, 'carga-plantilla');")
     L.append('')
     L.append('/* Los sueldos no se pisan: se insertan los que falten. Un historial no se')
     L.append('   reescribe, se le agregan filas. */')
-    L.append('INSERT INTO dbo.HE_Salario (IdEmpleado, Monto, FechaVigenciaDesde, Origen, Usu_Modificacion)')
-    L.append("SELECT e.IdEmpleado, s.Monto, s.Desde, s.Origen, 'carga-plantilla'")
+    L.append('INSERT INTO dbo.HE_Salario (IdEmpleado, Monto, FechaVigenciaDesde, Origen, Observacion, Usu_Modificacion)')
+    L.append("SELECT e.IdEmpleado, s.Monto, s.Desde, s.Origen, s.Observacion, 'carga-plantilla'")
     L.append('  FROM #S s JOIN dbo.Empleados e ON LTRIM(RTRIM(e.Cedula)) = s.Cedula')
     L.append(' WHERE NOT EXISTS (SELECT 1 FROM dbo.HE_Salario h')
     L.append('                    WHERE h.IdEmpleado = e.IdEmpleado AND h.FechaVigenciaDesde = s.Desde')
@@ -226,7 +283,10 @@ def main():
     L.append('END CATCH')
     L.append('GO')
 
-    with open(SALIDA, 'w', encoding='utf-8') as f:
+    # utf-8-sig: el BOM evita el mojibake de nombres con tildes y enies que
+    # ya paso una vez en este proyecto (MiPerfil.aspx), pero esta vez el
+    # destino es la base de datos, no una pantalla.
+    with open(SALIDA, 'w', encoding='utf-8-sig') as f:
         f.write('\n'.join(L) + '\n')
 
     print('Generado: %s' % SALIDA)

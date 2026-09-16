@@ -113,6 +113,29 @@ namespace CapaPruebas
             Assert.AreEqual(10m, f.TotalHoras, "las horas cargadas son validas: lo que falta es el sueldo");
         }
 
+        /// <summary>
+        /// Si no llega un sueldo vigente pero la fila ya tenia uno congelado
+        /// -el snapshot de un guardado anterior-, no se pisa con cero. Cubre
+        /// tanto a quien ya no esta activo en el maestro como a quien esta
+        /// activo pero no tiene ningun sueldo vigente a la fecha de corte:
+        /// para AplicarCalculo los dos llegan igual, con salario 0.
+        /// </summary>
+        [TestMethod]
+        public void AplicarCalculo_SinSueldoVigente_ConSnapshotPrevio_ConservaElSnapshot()
+        {
+            EntHeFila f = new EntHeFila();
+            f.JornadaHorasDiaSnapshot = 8;
+            f.AplicaHESnapshot = true;
+            f.Horas50 = 10m;
+            f.SalarioBaseSnapshot = 1200m;
+
+            NegHorasExtrasPantalla.AplicarCalculo(f, 0m, Parametros());
+
+            Assert.AreEqual(1200m, f.SalarioBaseSnapshot);
+            Assert.IsFalse(f.TieneAdvertencia);
+            Assert.AreEqual(75.00m, f.Total50);
+        }
+
         [TestMethod]
         public void AplicarCalculo_NoAplicaHE_ConHoras_PagaCero()
         {

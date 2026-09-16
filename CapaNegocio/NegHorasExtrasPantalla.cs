@@ -63,6 +63,20 @@ namespace CapaNegocio
         {
             if (fila == null) { return; }
 
+            /* Si no llega un sueldo vigente pero la fila ya tenia uno
+               congelado -el snapshot de un guardado anterior-, se conserva en
+               vez de pisarlo con cero. Sin este resguardo, cualquier motivo
+               por el que no se pudiera revalidar el sueldo -el colaborador ya
+               no esta activo, o esta activo pero no tiene ningun sueldo
+               vigente a la fecha de corte- borraria un pago ya calculado. Si
+               el propio snapshot tambien es cero, es el caso legitimo de
+               alguien que nunca tuvo sueldo cargado y no hay nada que
+               conservar: sigue la rama normal, con advertencia. */
+            if (salario <= 0m && fila.SalarioBaseSnapshot > 0m)
+            {
+                salario = fila.SalarioBaseSnapshot;
+            }
+
             fila.SalarioBaseSnapshot = salario;
 
             EntHeInsumo insumo = new EntHeInsumo();
@@ -315,31 +329,29 @@ namespace CapaNegocio
                 break;
             }
 
-            decimal salario;
+            /* Una sola via para resolver el sueldo, sin ramificar por
+               activoEnMaestro: si el colaborador no esta activo, no aparece
+               en ninguno de los dos result sets de Sp_RTA_HeInsumos y
+               "historial" sale vacio solo. Si esta activo pero no tiene
+               ningun sueldo vigente a la fecha de corte -todos sus sueldos
+               dados de baja, o su unica vigencia es posterior al corte-,
+               "historial" trae filas pero SalarioVigente da cero igual. Los
+               dos casos llegan al mismo cero, y AplicarCalculo ya sabe
+               conservar el snapshot anterior en vez de pisarlo. */
+            List<EntHeSalario> historial = salarios.ContainsKey(idEmpleado)
+                                           ? salarios[idEmpleado]
+                                           : new List<EntHeSalario>();
 
-            if (activoEnMaestro)
-            {
-                List<EntHeSalario> historial = salarios.ContainsKey(idEmpleado)
-                                               ? salarios[idEmpleado]
-                                               : new List<EntHeSalario>();
+            decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
+            decimal snapshotAnterior = fila.SalarioBaseSnapshot;
 
-                salario = NegHorasExtras.SalarioVigente(historial, corte);
-            }
-            else
-            {
-                /* Ya no esta activo en el maestro -Sp_RTA_HeInsumos filtra
-                   Estado = '1' tanto para colaboradores como para el
-                   historial de sueldos-, asi que no hay con que revalidar. No
-                   se recalcula contra un historial vacio: eso daria salario
-                   cero, fila marcada con advertencia y el pago que ya tenia
-                   se borraria. Se usa el sueldo congelado del periodo -la
-                   jornada, el divisor y AplicaHESnapshot quedan como
-                   estaban- porque alguien que salio a mitad de mes trabajo
-                   horas antes de salir y Nomina tiene que poder pagarselas. */
-                salario = fila.SalarioBaseSnapshot;
-            }
+            AplicarCalculo(fila, salarioDelMaestro, NegHeParametros.Vigentes());
 
-            AplicarCalculo(fila, salario, NegHeParametros.Vigentes());
+            /* Se detecta aqui solo para avisar -la fila ya quedo bien
+               calculada por AplicarCalculo-. La distincion entre "no esta
+               activo" y "esta activo pero sin sueldo vigente" es solo para
+               que el mensaje diga la causa correcta. */
+            bool seUsoSnapshot = salarioDelMaestro <= 0m && snapshotAnterior > 0m;
 
             int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
 
@@ -361,9 +373,11 @@ namespace CapaNegocio
 
             EntRespuesta resultado = CargarPantalla(idPeriodo);
 
-            if (!activoEnMaestro && resultado.estado == "1")
+            if (seUsoSnapshot && resultado.estado == "1")
             {
-                resultado.mensaje = "Este colaborador ya no está activo en el maestro: se usó el sueldo congelado del período.";
+                resultado.mensaje = activoEnMaestro
+                    ? "No se encontró un sueldo vigente a la fecha de corte: se usó el sueldo congelado del período."
+                    : "Este colaborador ya no está activo en el maestro: se usó el sueldo congelado del período.";
                 resultado.tipoMensaje = "warning";
             }
 

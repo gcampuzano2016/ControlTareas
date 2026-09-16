@@ -15,6 +15,7 @@ Uso:
 La plantilla se espera en Actualizacion/Plantilla_Carga_Modulo_HE.xlsx, que
 tambien esta ignorada.
 """
+import datetime
 import os
 import re
 import sys
@@ -254,6 +255,16 @@ def main():
     L.append('   CONTIENE DATOS PERSONALES: nombres, cedulas y sueldos. NO SE COMMITEA.')
     L.append('')
     L.append('   Idempotente: concilia por cedula contra Empleados y no duplica.')
+    L.append('')
+    # Esta carpeta esta fuera de git, asi que en la maquina de despliegue puede
+    # quedarse un archivo de una generacion anterior. Correrlo tiene exito y no
+    # da ninguna senal: simplemente carga lo que aquella version sabia cargar.
+    # La fecha es lo unico que distingue un generado de hoy de uno viejo.
+    L.append('   Generado el %s.' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
+    L.append('   Columnas que escribe: IdEmpleado, JornadaHorasDia, DivisorManual,')
+    L.append('   AplicaHE, MotivoNoAplica, Empresa, Cargo, Estado, y el historial')
+    L.append('   de sueldos con su Observacion. Si tu copia no menciona Cargo ni')
+    L.append('   Estado, es de la fase 1 y le faltan las dos: vuelve a generarla.')
     L.append('   ' + '=' * 74 + ' */')
     L.append('')
     L.append('SET NOCOUNT ON;')

@@ -1752,5 +1752,16 @@ Antes de dar la fase por terminada:
    | 4 | `docs/sql/2026-09-16-horas-extras-fase2-menu.sql` | La opción de menú |
    | 5 | Los binarios | Los scripts SQL van siempre antes (`DESPLIEGUE.md`) |
 
-   Comprobación rápida después del paso 2: `SELECT COUNT(*) FROM dbo.HE_ColaboradorParametro WHERE Cargo IS NOT NULL` debe dar **64**.
+   **Comprobación después del paso 2, y hacen falta las dos:**
+
+   ```sql
+   SELECT Cargos = COUNT(CASE WHEN Cargo IS NOT NULL THEN 1 END),   -- 64
+          Activos = COUNT(CASE WHEN Estado = '1' THEN 1 END),        -- 62
+          Inactivos = COUNT(CASE WHEN Estado = '0' THEN 1 END)       -- 2
+     FROM dbo.HE_ColaboradorParametro;
+   ```
+
+   La de `Estado` no es redundante. `docs/sql/carga-generada/` está fuera de git, así que en la máquina de despliegue puede haberse quedado el archivo generado durante la **fase 1**. Correrlo **tiene éxito**: no toca `Cargo` ni `Estado`, imprime «Carga de colaboradores y sueldos terminada» y deja los 64 como activos. El conteo de `Cargo` atraparía ese caso; el de `Estado` atrapa además el de un generado intermedio que traiga `Cargo` y no `Estado`.
+
+   Si los números no dan, **regenera** con `python docs/sql/generar-carga-horas-extras.py` y vuelve a correr la carga. La cabecera del archivo generado dice desde cuándo es y qué columnas escribe, precisamente para poder distinguir una copia vieja sin abrirla entera.
 3. **Comprobación manual mínima:** entrar con un usuario del perfil 14, abrir el período de septiembre 2026, verificar que aparecen 64 filas, digitar horas en una y guardar, y comprobar que el total de la fila y el del tablero cuadran con la calculadora. Después entrar con un perfil que no sea 14 ni 18 y comprobar que **la opción no aparece en el menú**.

@@ -157,6 +157,56 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Si dos filas son identicas en todo lo que Sp_RTA_HeGuardarFila
+        /// escribe -los snapshots del colaborador, el divisor, los tres
+        /// valores hora, las horas, los totales y la observacion-.
+        ///
+        /// Reabrir un periodo llama a GuardarFila para cada colaborador sin
+        /// comparar antes, y el UPDATE del procedimiento pisa
+        /// Fec_Modificacion y Usu_Modificacion en cada pasada. Como reabrir es
+        /// el mecanismo de autocuracion que se dispara cada vez que alguien
+        /// incorpora a un colaborador nuevo, el efecto acumulado es que esas
+        /// dos columnas dejan de significar "quien toco estas horas" para
+        /// pasar a significar "quien reabrio el mes por ultima vez" -y la
+        /// fase 3 monta la auditoria encima de esa idea-. Esta comparacion es
+        /// lo que evita escribir cuando no hace falta.
+        ///
+        /// Los decimales se comparan con == de decimal, que es por valor
+        /// -1.50m y 1.5m son iguales-, no por representacion. Las cadenas
+        /// tratan null y "" como el mismo valor: el DAO nunca devuelve null
+        /// para estas columnas, pero una fila armada en memoria si podria
+        /// llegar sin inicializar.
+        /// </summary>
+        public static bool FilaSinCambios(EntHeFila nueva, EntHeFila anterior)
+        {
+            if (nueva == null || anterior == null) { return false; }
+
+            return TextoIgual(nueva.CedulaSnapshot, anterior.CedulaSnapshot)
+                && TextoIgual(nueva.NombreSnapshot, anterior.NombreSnapshot)
+                && TextoIgual(nueva.EmpresaSnapshot, anterior.EmpresaSnapshot)
+                && TextoIgual(nueva.CargoSnapshot, anterior.CargoSnapshot)
+                && nueva.JornadaHorasDiaSnapshot == anterior.JornadaHorasDiaSnapshot
+                && nueva.SalarioBaseSnapshot == anterior.SalarioBaseSnapshot
+                && nueva.AplicaHESnapshot == anterior.AplicaHESnapshot
+                && nueva.Divisor == anterior.Divisor
+                && nueva.ValorHoraOrdinaria == anterior.ValorHoraOrdinaria
+                && nueva.ValorHora50 == anterior.ValorHora50
+                && nueva.ValorHora100 == anterior.ValorHora100
+                && nueva.Horas50 == anterior.Horas50
+                && nueva.Horas100 == anterior.Horas100
+                && nueva.Total50 == anterior.Total50
+                && nueva.Total100 == anterior.Total100
+                && nueva.TotalHoras == anterior.TotalHoras
+                && nueva.TotalHE == anterior.TotalHE
+                && TextoIgual(nueva.Observacion, anterior.Observacion);
+        }
+
+        private static bool TextoIgual(string a, string b)
+        {
+            return (a ?? "") == (b ?? "");
+        }
+
+        /// <summary>
         /// Abre un periodo: lo crea si no existe y le arma el snapshot, una fila
         /// por colaborador activo.
         ///
@@ -230,9 +280,16 @@ namespace CapaNegocio
                 decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
                 decimal salarioCongelado = SalarioCongeladoAlReabrir(anterior);
 
-                if (salarioDelMaestro <= 0m && salarioCongelado > 0m) { filasConSalarioCongelado++; }
-
                 AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, parametros);
+
+                /* Si la fila calculada es identica a la que ya esta en la
+                   base, no se escribe: ver FilaSinCambios para el porque. Una
+                   fila que no se escribe tampoco cuenta como que uso el
+                   sueldo congelado -si contara, el conteo volveria a hablar
+                   de las 62 en vez de las que de verdad se tocaron-. */
+                if (FilaSinCambios(fila, anterior)) { continue; }
+
+                if (salarioDelMaestro <= 0m && salarioCongelado > 0m) { filasConSalarioCongelado++; }
 
                 int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
                 if (guardado != 0) { filasConError++; }

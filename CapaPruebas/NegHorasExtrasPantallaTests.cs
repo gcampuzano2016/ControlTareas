@@ -301,5 +301,99 @@ namespace CapaPruebas
         {
             Assert.IsTrue(NegHorasExtrasPantalla.ExcedeTopePorCelda(10000m));
         }
+
+        /// <summary>Una fila con todos los campos que Sp_RTA_HeGuardarFila persiste.</summary>
+        private static EntHeFila FilaCompleta()
+        {
+            EntHeFila f = new EntHeFila();
+            f.CedulaSnapshot = "0102030405";
+            f.NombreSnapshot = "Persona de Prueba";
+            f.EmpresaSnapshot = "Empresa";
+            f.CargoSnapshot = "Cargo";
+            f.JornadaHorasDiaSnapshot = 8;
+            f.SalarioBaseSnapshot = 1200m;
+            f.AplicaHESnapshot = true;
+            f.Divisor = 240;
+            f.ValorHoraOrdinaria = 5m;
+            f.ValorHora50 = 7.5m;
+            f.ValorHora100 = 10m;
+            f.Horas50 = 10m;
+            f.Horas100 = 0m;
+            f.Total50 = 75.00m;
+            f.Total100 = 0m;
+            f.TotalHoras = 10m;
+            f.TotalHE = 75.00m;
+            f.Observacion = "";
+            return f;
+        }
+
+        [TestMethod]
+        public void FilaSinCambios_ConLosMismosValores_DaTrue()
+        {
+            Assert.IsTrue(NegHorasExtrasPantalla.FilaSinCambios(FilaCompleta(), FilaCompleta()));
+        }
+
+        /// <summary>
+        /// 1.50 y 1.5 son el mismo numero. Si la comparacion fuera por
+        /// representacion en vez de por valor, esta fila se reescribiria sin
+        /// que nada haya cambiado de verdad.
+        /// </summary>
+        [TestMethod]
+        public void FilaSinCambios_ConDecimalesEquivalentesEnDistintaRepresentacion_DaTrue()
+        {
+            EntHeFila nueva = FilaCompleta();
+            nueva.ValorHora50 = 7.50m;
+
+            EntHeFila anterior = FilaCompleta();
+            anterior.ValorHora50 = 7.5m;
+
+            Assert.IsTrue(NegHorasExtrasPantalla.FilaSinCambios(nueva, anterior));
+        }
+
+        /// <summary>
+        /// La base nunca devuelve null para Observacion -Texto() en el DAO
+        /// siempre da ""-, pero una fila armada en memoria si podria llegar
+        /// sin inicializar. Sin este trato, la primera reapertura reescribiria
+        /// las filas igual y el arreglo no serviria de nada.
+        /// </summary>
+        [TestMethod]
+        public void FilaSinCambios_ConObservacionNullYVacia_DaTrue()
+        {
+            EntHeFila nueva = FilaCompleta();
+            nueva.Observacion = "";
+
+            EntHeFila anterior = FilaCompleta();
+            anterior.Observacion = null;
+
+            Assert.IsTrue(NegHorasExtrasPantalla.FilaSinCambios(nueva, anterior));
+        }
+
+        [TestMethod]
+        public void FilaSinCambios_ConUnTotalDistinto_DaFalse()
+        {
+            EntHeFila nueva = FilaCompleta();
+            nueva.Total50 = 80.00m;
+
+            Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(nueva, FilaCompleta()));
+        }
+
+        [TestMethod]
+        public void FilaSinCambios_ConUnaObservacionDistinta_DaFalse()
+        {
+            EntHeFila nueva = FilaCompleta();
+            nueva.Observacion = "cambio real";
+
+            Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(nueva, FilaCompleta()));
+        }
+
+        /// <summary>
+        /// Sin fila anterior -la primera vez que el colaborador aparece en el
+        /// periodo- siempre se escribe: no hay nada contra que comparar.
+        /// </summary>
+        [TestMethod]
+        public void FilaSinCambios_SinFilaAnterior_DaFalse()
+        {
+            Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(FilaCompleta(), null));
+        }
     }
 }

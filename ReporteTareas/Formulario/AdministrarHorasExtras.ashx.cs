@@ -21,11 +21,22 @@ namespace JsonJQueryNetHorasExtras
     /// ListarPeriodos entra por NegHorasExtrasPantalla y no por DaoHorasExtras
     /// directo: toda la casa entra por CapaNegocio, y ademas CapaDato no esta
     /// referenciado por este proyecto -saltarse la capa aqui ni compilaria-.
+    ///
+    /// El control de acceso por perfil no es cosmetico: el menu solo controla
+    /// que se VEA la pantalla, no que se pueda LLAMAR al handler. Sin esta
+    /// comprobacion, cualquier usuario con sesion iniciada -no solo Nomina o
+    /// Talento Humano- podia pedir el sueldo de las 64 personas con una
+    /// peticion directa a este .ashx, sin pasar nunca por el menu. Mismo
+    /// patron que AdministrarPerfiles.ashx.cs: Id_Perfil sale de la sesion,
+    /// nunca del cliente.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
+        /// <summary>Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el menu les muestra la pantalla.</summary>
+        private static readonly int[] PerfilesAutorizados = { 14, 18 };
+
         public void ProcessRequest(HttpContext context)
         {
             StringBuilder salida = new StringBuilder();
@@ -33,6 +44,10 @@ namespace JsonJQueryNetHorasExtras
             if (context.Session == null || context.Session["UserLogin"] == null)
             {
                 salida.Append(Mensaje("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
+            }
+            else if (!TienePermiso(context))
+            {
+                salida.Append(Mensaje("0", "No tiene permisos para esta pantalla.", "danger"));
             }
             else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
@@ -96,6 +111,13 @@ namespace JsonJQueryNetHorasExtras
             return new JavaScriptSerializer().Serialize(r);
         }
 
+        private static bool TienePermiso(HttpContext context)
+        {
+            int idPerfil;
+            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
+            return Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
+        }
+
         private static string Usuario(HttpContext context)
         {
             object v = context.Session["Cod_Usuario"];
@@ -118,6 +140,16 @@ namespace JsonJQueryNetHorasExtras
         /// Lo que manda el cliente puede venir con coma, vacio o con basura. Un
         /// dato ilegible vale cero: el servidor no adivina cuantas horas quiso
         /// escribir alguien.
+        ///
+        /// NumberStyles.AllowDecimalPoint, sin AllowLeadingSign: unas horas
+        /// nunca llevan signo, asi que "-5" no es un numero valido aqui, es
+        /// basura igual que "abc". El navegador ya no deja escribirlo -la
+        /// grilla lo rechaza en la celda-, pero este handler es alcanzable con
+        /// una peticion fabricada que se salte el navegador por completo, y
+        /// sin este limite un "-5" pasaba el parseo, NegHorasExtras lo dejaba
+        /// pasar tal cual a HE_Detalle -solo el dinero se pone en cero, las
+        /// horas negativas SI se guardan-, y el indicador de horas del
+        /// tablero podia quedar en negativo.
         /// </summary>
         private static decimal Decimal(object v)
         {
@@ -125,8 +157,9 @@ namespace JsonJQueryNetHorasExtras
             string texto = Convert.ToString(v);
             if (texto == null) { return 0m; }
             texto = texto.Trim().Replace(",", ".");
-            return decimal.TryParse(texto, System.Globalization.NumberStyles.Any,
-                                    System.Globalization.CultureInfo.InvariantCulture, out d) ? d : 0m;
+            return decimal.TryParse(texto, System.Globalization.NumberStyles.AllowDecimalPoint,
+                                    System.Globalization.CultureInfo.InvariantCulture, out d) && d >= 0m
+                   ? d : 0m;
         }
 
         private static string Mensaje(string estado, string mensaje, string tipo)

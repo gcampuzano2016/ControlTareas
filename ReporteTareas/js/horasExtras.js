@@ -13,6 +13,22 @@ var _periodoAbierto = false;
 var MESES_HE = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
+/* Los factores de HE_Parametro (recargo 50% y 100%). Hoy NO viajan en el
+   payload de la pantalla -CargarPeriodo/GuardarFila mandan la fila ya
+   calculada por NegHorasExtras, no los parametros de calculo-, asi que
+   quedan declarados aqui, duplicando un dato que en rigor deberia vivir en
+   un solo lugar. Se necesitan para reproducir la cadena de calculo SIN
+   redondear un paso intermedio (ver RecalcularFilaLocal): multiplicar por
+   ValorHora50/ValorHora100, que el servidor ya redondeo a 6 decimales,
+   producia una diferencia de un centavo -siempre a la baja- en
+   aproximadamente 1 de cada 100 combinaciones de sueldo/divisor/horas. Si
+   HE_Parametro cambiara estos valores, este archivo quedaria desincronizado
+   hasta que alguien lo actualice a mano: lo correcto seria que viajaran en
+   el payload, pero agregarlos ahi es un cambio de contrato de
+   EntHePantalla/CapaNegocio/CapaDato que queda fuera de esta ronda. */
+var FACTOR_HE_50 = 1.5;
+var FACTOR_HE_100 = 2.0;
+
 $(document).ready(function () {
     var hoy = new Date();
     $("#inAnioAbrir").val(hoy.getFullYear());
@@ -30,8 +46,21 @@ window.onbeforeunload = function () {
     }
 };
 
-/* Llama al handler con el formato [{action, parameters}] */
-function PostHE(action, parameters, onSuccess) {
+/* Llama al handler con el formato [{action, parameters}].
+
+   onError es opcional: cuando no se da, un estado "0" o un fallo de red solo
+   muestran el mensaje y ahi se detiene la cadena -es lo que le paso al boton
+   Guardar en la revision: sin una rama de error explicita, la promesa nunca
+   seguia y el boton se quedaba deshabilitado para siempre-. Cuando se da, se
+   invoca ademas de mostrar el mensaje, para que quien llamo pueda decidir
+   como seguir (por ejemplo, continuar con la siguiente fila de un lote).
+
+   suprimirAviso es tambien opcional: evita el modal automatico de un mensaje
+   de exito con advertencia (estado "1" con mensaje no vacio). Sirve para el
+   guardado por lotes, donde cada fila puede traer su propio aviso y mostrar
+   uno por fila seria un bombardeo de modales; el lote junta los avisos y
+   muestra uno solo al terminar. */
+function PostHE(action, parameters, onSuccess, onError, suprimirAviso) {
     var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
 
     $.ajax({
@@ -41,39 +70,23 @@ function PostHE(action, parameters, onSuccess) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (r) {
-            if (r.estado === "1") { onSuccess(r); }
-            else { MostrarMensaje(r.mensaje, r.tipoMensaje); }
+            if (r.estado === "1") {
+                /* GuardarHoras y AbrirPeriodo pueden devolver estado "1" con
+                   un mensaje de advertencia (sueldo congelado, filas que no
+                   se guardaron al abrir, etc.). Descartarlo porque la
+                   operacion en si tuvo exito era el defecto: la advertencia
+                   es justo la que Nomina necesita ver. */
+                if (!suprimirAviso && r.mensaje) { MostrarMensaje(r.mensaje, r.tipoMensaje || "warning"); }
+                onSuccess(r);
+            } else {
+                MostrarMensaje(r.mensaje, r.tipoMensaje);
+                if (onError) { onError(r); }
+            }
         },
         error: function () {
             MostrarMensaje("No se pudo contactar al servidor. Intente nuevamente.", "danger");
+            if (onError) { onError(null); }
         }
-    });
-}
-
-/* Guarda una fila y REPINTA con lo que devolvio el servidor.
-   El calculo del cliente es solo para que el numero aparezca al instante; el
-   que vale es el del servidor. Si difieren, el usuario ve el numero saltar, y
-   esa es justamente la idea: una divergencia visible en vez de silenciosa.
-
-   Esta funcion queda disponible tal cual para guardar UNA fila suelta. El
-   boton "Guardar" del encabezado, que puede tener que guardar varias filas a
-   la vez, NO la reusa en bucle: si lo hiciera, el repintado completo que
-   dispara cada llamada borraria de la pantalla -antes de que le tocara su
-   turno- las horas que el usuario ya escribio en otra fila todavia no
-   guardada. GuardarTodo(), mas abajo, resuelve eso tomando una foto de los
-   valores pendientes antes de empezar y repintando una sola vez, al final. */
-function GuardarFila(idPeriodo, idEmpleado) {
-    var $fila = $('tr[data-empleado="' + idEmpleado + '"]');
-
-    PostHE("GuardarFila", {
-        idPeriodo: idPeriodo,
-        idEmpleado: idEmpleado,
-        horas50: $fila.find(".he-horas50").val(),
-        horas100: $fila.find(".he-horas100").val(),
-        observacion: $fila.find(".he-observacion").val()
-    }, function (r) {
-        PintarGrilla(r.resultado);
-        MarcarGuardado();
     });
 }
 
@@ -188,6 +201,15 @@ function PintarGrilla(pantalla) {
         });
     }
 
+    /* ConstruirFila crea las columnas derivadas siempre ocultas (display:none
+       inline). Si el usuario ya las habia mostrado con AlternarColumnasDerivadas
+       y despues se repinta la grilla -al guardar, al cambiar de periodo-, el
+       thead (que no se reconstruye) queda visible pero las celdas nuevas
+       quedan ocultas: la tabla se desalinea, 15 columnas de encabezado contra
+       9 de datos. Se reaplica aqui el estado vigente para que ambos coincidan
+       siempre, sin depender de cuando se repinte. */
+    $(".he-col-derivada").toggle(_columnasDerivadasVisibles);
+
     LimpiarMarcasSucias();
     PintarTotalesServidor(pantalla);
     AplicarFiltros();
@@ -209,8 +231,8 @@ function ConstruirFila(fila) {
         .attr("data-empresa", fila.EmpresaSnapshot || "")
         .attr("data-buscable", ((fila.NombreSnapshot || "") + " " + (fila.CedulaSnapshot || "") + " " +
                                 (fila.CargoSnapshot || "")).toLowerCase())
-        .data("valorhora50", fila.ValorHora50)
-        .data("valorhora100", fila.ValorHora100);
+        .data("salario", fila.SalarioBaseSnapshot)
+        .data("divisor", fila.Divisor);
 
     /* AplicaHESnapshot falso y AplicaHESnapshot verdadero con motivo NO son el
        mismo caso: el segundo son personas que SI cobran horas extras. La
@@ -345,7 +367,11 @@ $(document).on("blur", ".he-horas50, .he-horas100", function () {
     RecalcularFilaLocal($celda.closest("tr"));
 });
 
-/* Enter baja a la misma columna de la fila siguiente, como en Excel. */
+/* Enter baja a la misma columna de la fila siguiente, como en Excel.
+   nextAll se filtra con :visible: sin eso, con un filtro activo (empresa,
+   busqueda o "Solo con horas") el foco saltaba a un input oculto -que no es
+   un error, es un no-op silencioso: el usuario aprieta Enter y no pasa nada
+   visible, porque el input que recibio el foco no se ve en pantalla-. */
 $(document).on("keydown", ".he-horas50, .he-horas100, .he-observacion", function (e) {
     if (e.which !== 13) { return; }
     e.preventDefault();
@@ -355,7 +381,7 @@ $(document).on("keydown", ".he-horas50, .he-horas100, .he-observacion", function
               : $actual.hasClass("he-horas100") ? "he-horas100"
               : "he-observacion";
 
-    var $filaSiguiente = $actual.closest("tr").nextAll("tr[data-empleado]").first();
+    var $filaSiguiente = $actual.closest("tr").nextAll("tr[data-empleado]:visible").first();
     if ($filaSiguiente.length) {
         $filaSiguiente.find("." + clase).focus().select();
     }
@@ -364,7 +390,21 @@ $(document).on("keydown", ".he-horas50, .he-horas100, .he-observacion", function
 /* Pegar una columna copiada de Excel sobre Horas 50% / Horas 100%: reparte un
    valor por fila, empezando en la celda donde se pego. Si el portapapeles
    trae un solo valor -sin salto de linea- se deja que el navegador pegue
-   normal en esa unica celda. */
+   normal en esa unica celda.
+
+   Dos detalles que no son opcionales:
+
+   1) Solo se descarta el ULTIMO salto de linea -el que Excel agrega despues
+      de la ultima celda copiada-, nunca los intermedios. Una columna de 64
+      personas esta mayoritariamente vacia: con
+      "2\r\n\r\n\r\n4\r\n\r\n6\r\n" (fila 1 = 2, fila 4 = 4, fila 6 = 6),
+      quitar TODOS los vacios dejaba ["2","4","6"] y el 4 caia en la fila 2 -
+      cada celda vacia del portapapeles tiene que respetar su posicion y
+      dejar esa fila sin tocar, no desaparecer del reparto.
+   2) Solo se recorren las filas VISIBLES. Las que un filtro oculta -empresa,
+      busqueda, o "Solo con horas", que es lo natural antes de repasar- siguen
+      en el DOM porque AplicarFiltros usa .toggle(), y sin este filtro el
+      pegado tambien les repartia valores sin que nadie lo viera en pantalla. */
 $(document).on("paste", ".he-horas50, .he-horas100", function (e) {
     var portapapeles = (e.originalEvent.clipboardData || window.clipboardData);
     if (!portapapeles) { return; }
@@ -375,32 +415,42 @@ $(document).on("paste", ".he-horas50, .he-horas100", function (e) {
     e.preventDefault();
 
     var clase = $(this).hasClass("he-horas50") ? "he-horas50" : "he-horas100";
-    var $filas = $("#cuerpoHE tr[data-empleado]");
+    var $filas = $("#cuerpoHE tr[data-empleado]:visible");
     var indiceInicio = $filas.index($(this).closest("tr"));
-    var valores = texto.split(/\r\n|\r|\n/).filter(function (l) { return l !== ""; });
-    var invalidos = 0;
+
+    var valores = texto.split(/\r\n|\r|\n/);
+    if (valores.length > 0 && valores[valores.length - 1] === "") { valores.pop(); }
+
+    var invalidos = 0, recortados = 0;
 
     $.each(valores, function (i, valor) {
         var $fila = $filas.eq(indiceInicio + i);
         if ($fila.length === 0) { return false; }
 
-        var $celda = $fila.find("." + clase);
-        if ($celda.prop("disabled")) { return; }
-
         /* Una columna pegada puede traer varias columnas separadas por
            tabulador: solo se usa la primera. */
         var crudo = valor.split("\t")[0];
-        var validado = ValidarNumero(crudo, true);
-        if (String(crudo).trim() !== "" && validado === 0 && crudo.trim() !== "0") { invalidos++; }
 
-        $celda.val(FormatoDosDecimales(validado));
+        /* Celda vacia en el portapapeles = esa fila no se toca. Distinto de
+           "0": alguien pudo copiar una columna a medio llenar a proposito. */
+        if (crudo.trim() === "") { return; }
+
+        var $celda = $fila.find("." + clase);
+        if ($celda.prop("disabled")) { return; }
+
+        var detalle = ValidarNumeroConDetalle(crudo);
+        if (detalle.invalido) { invalidos++; }
+        if (detalle.recortado) { recortados++; }
+
+        $celda.val(FormatoDosDecimales(detalle.valor));
         MarcarFilaSucia($fila);
         RecalcularFilaLocal($fila);
     });
 
-    if (invalidos > 0) {
-        MostrarMensaje(invalidos + " valor(es) pegados no eran números válidos y se dejaron en 0.", "warning");
-    }
+    var avisos = [];
+    if (invalidos > 0) { avisos.push(invalidos + " valor(es) no eran números válidos y se dejaron en 0"); }
+    if (recortados > 0) { avisos.push(recortados + " valor(es) superaban 200 y se recortaron a 200"); }
+    if (avisos.length > 0) { MostrarMensaje(avisos.join("; ") + ".", "warning"); }
 });
 
 function MarcarFilaSucia($fila) {
@@ -424,17 +474,25 @@ function MarcarGuardado() {
         .text("Guardado " + hh + ":" + mm).show();
 }
 
-/* Recalcula una fila con los valores hora que ya trajo el servidor. Es una
-   vista previa: el total que manda es el que devuelve GuardarFila. */
+/* Recalcula una fila EN EL CLIENTE, reproduciendo la misma cadena que
+   NegHorasExtras.Calcular: hora ordinaria = salario / divisor, sin redondear;
+   horas x hora-ordinaria x factor, y recien ahi se redondea, una sola vez.
+   Multiplicar por ValorHora50/ValorHora100 -que el servidor ya redondeo a 6
+   decimales para mostrarlos en la grilla- arrastraba un redondeo intermedio
+   que el servidor nunca hace, y el total del cliente quedaba un centavo por
+   debajo del real en como 1 de cada 100 combinaciones. Es una vista previa
+   igual: el total que manda es el que devuelve el servidor al guardar. */
 function RecalcularFilaLocal($fila) {
     var horas50 = NumeroDe($fila.find(".he-horas50").val());
     var horas100 = NumeroDe($fila.find(".he-horas100").val());
     var aplica = !$fila.hasClass("he-fila-no-aplica");
-    var valorHora50 = parseFloat($fila.data("valorhora50")) || 0;
-    var valorHora100 = parseFloat($fila.data("valorhora100")) || 0;
 
-    var total50 = aplica ? RedondearDos(horas50 * valorHora50) : 0;
-    var total100 = aplica ? RedondearDos(horas100 * valorHora100) : 0;
+    var salario = parseFloat($fila.data("salario")) || 0;
+    var divisor = parseFloat($fila.data("divisor")) || 0;
+    var horaOrdinaria = divisor > 0 ? (salario / divisor) : 0;
+
+    var total50 = aplica ? RedondearDos(horas50 * horaOrdinaria * FACTOR_HE_50) : 0;
+    var total100 = aplica ? RedondearDos(horas100 * horaOrdinaria * FACTOR_HE_100) : 0;
     var totalHoras = horas50 + horas100;
     var totalHE = total50 + total100;
 
@@ -484,9 +542,15 @@ function ActualizarTotales(horas50, pago50, horas100, pago100, totalHoras, total
    pendientes. Toma la foto de sus valores antes de mandar la primera peticion
    y guarda una por una con esos valores fijos -no relee el DOM entre
    peticiones-, asi un repintado a mitad de camino nunca pisa el turno de la
-   fila que todavia no le tocaba. Solo se repinta al final, con la respuesta
-   de la ULTIMA fila: como GuardarHoras relee la base antes de responder, esa
-   respuesta ya incluye todo lo guardado en este mismo lote. */
+   fila que todavia no le tocaba.
+
+   El lote SIEMPRE termina con un CargarPeriodo, haya fallado alguna fila o
+   ninguna: es la unica fuente de verdad que no depende de cual peticion
+   respondio ultimo. Antes se repintaba solo con la respuesta de la fila
+   final, lo que funcionaba mientras todas tuvieran exito, pero dejaba el
+   boton Guardar deshabilitado para siempre si CUALQUIER fila fallaba a mitad
+   de camino -PostHE no seguia la cadena en el camino de error-, y la unica
+   salida era recargar la pagina y perder todo lo no guardado. */
 function GuardarTodo() {
     if (!_idPeriodoActual) { return; }
 
@@ -495,6 +559,9 @@ function GuardarTodo() {
         var $f = $(this);
         pendientes.push({
             idEmpleado: $f.attr("data-empleado"),
+            /* Primera celda de la fila: el nombre del colaborador. Solo se
+               usa para nombrar la fila en el aviso si algo falla. */
+            nombre: $.trim($f.find("td").first().text()),
             horas50: $f.find(".he-horas50").val(),
             horas100: $f.find(".he-horas100").val(),
             observacion: $f.find(".he-observacion").val()
@@ -507,17 +574,16 @@ function GuardarTodo() {
     }
 
     $("#btnGuardar").prop("disabled", true);
-    GuardarUnaAUna(pendientes, 0);
+    GuardarUnaAUna(pendientes, 0, [], []);
 }
 
-function GuardarUnaAUna(lista, indice) {
+function GuardarUnaAUna(lista, indice, fallidas, avisos) {
     if (indice >= lista.length) {
-        $("#btnGuardar").prop("disabled", false);
+        TerminarLoteDeGuardado(fallidas, avisos);
         return;
     }
 
     var item = lista[indice];
-    var esLaUltima = indice === lista.length - 1;
 
     PostHE("GuardarFila", {
         idPeriodo: _idPeriodoActual,
@@ -526,13 +592,40 @@ function GuardarUnaAUna(lista, indice) {
         horas100: item.horas100,
         observacion: item.observacion
     }, function (r) {
-        if (esLaUltima) {
-            PintarGrilla(r.resultado);
-            MarcarGuardado();
-            $("#btnGuardar").prop("disabled", false);
-        } else {
-            GuardarUnaAUna(lista, indice + 1);
+        if (r.mensaje) { avisos.push((item.nombre || ("empleado " + item.idEmpleado)) + ": " + r.mensaje); }
+        GuardarUnaAUna(lista, indice + 1, fallidas, avisos);
+    }, function () {
+        fallidas.push(item.nombre || ("empleado " + item.idEmpleado));
+        GuardarUnaAUna(lista, indice + 1, fallidas, avisos);
+    }, true /* suprimirAviso: los avisos del lote se juntan y se muestran una sola vez al terminar */);
+}
+
+/* Cierra el lote SIEMPRE con una relectura del periodo desde el servidor -asi
+   la pantalla refleja lo que de verdad quedo guardado, haya fallado una fila
+   o ninguna- y reactiva el boton Guardar en todos los casos: es la correccion
+   central de este punto, que antes solo pasaba por el camino feliz. */
+function TerminarLoteDeGuardado(fallidas, avisos) {
+    PostHE("CargarPeriodo", { idPeriodo: _idPeriodoActual }, function (r) {
+        PintarPantalla(r.resultado);
+        $("#btnGuardar").prop("disabled", false);
+
+        /* El indicador "Guardado hh:mm" se actualiza siempre que el lote
+           termino sin filas fallidas, avisos aparte: un aviso -sueldo
+           congelado, por ejemplo- no significa que la fila no se guardo. */
+        if (fallidas.length === 0) { MarcarGuardado(); }
+
+        if (fallidas.length > 0) {
+            MostrarMensaje("No se pudieron guardar estas filas, vuelva a intentarlo: " +
+                           fallidas.join(", ") + ".", "danger");
+        } else if (avisos.length > 0) {
+            MostrarMensaje(avisos.join(" | "), "warning");
         }
+    }, function () {
+        /* Ni siquiera la relectura final respondio: se reactiva el boton
+           igual -la alternativa es dejarlo deshabilitado para siempre- y se
+           deja la grilla tal cual esta, con sus marcas de "sucia" intactas,
+           para que el usuario pueda reintentar sin perder lo que escribio. */
+        $("#btnGuardar").prop("disabled", false);
     });
 }
 
@@ -540,27 +633,38 @@ function GuardarUnaAUna(lista, indice) {
 
 /* Solo numerico, mayor o igual a cero, maximo 2 decimales y tope de 200 por
    celda. Un dato ilegible vale cero, igual que del lado del servidor: es la
-   misma regla en los dos lenguajes. silencioso evita el modal al pegar
-   muchas celdas de una vez -se avisa una sola vez, con el conteo, despues-. */
-function ValidarNumero(texto, silencioso) {
+   misma regla en los dos lenguajes. No distingue "invalido" de "valido pero
+   recortado a 200" con un valor de retorno -las dos veces el numero final es
+   el mismo (0 o 200)-, asi que quien necesite saber CUAL de los dos paso
+   -el pegado desde Excel, para el aviso resumido- usa ValidarNumeroConDetalle. */
+function ValidarNumeroConDetalle(texto) {
     var limpio = String(texto == null ? "" : texto).trim().replace(",", ".");
-    if (limpio === "") { return 0; }
+    if (limpio === "") { return { valor: 0, invalido: false, recortado: false }; }
 
     if (!/^\d{1,3}(\.\d{1,2})?$/.test(limpio)) {
-        if (!silencioso) {
-            MostrarMensaje("Solo se aceptan números positivos, con máximo 2 decimales.", "warning");
-        }
-        return 0;
+        return { valor: 0, invalido: true, recortado: false };
     }
 
     var numero = parseFloat(limpio);
 
     if (numero > 200) {
-        if (!silencioso) { MostrarMensaje("El máximo por celda es 200 horas.", "warning"); }
-        return 200;
+        return { valor: 200, invalido: false, recortado: true };
     }
 
-    return numero;
+    return { valor: numero, invalido: false, recortado: false };
+}
+
+/* silencioso evita el modal -se usa cuando quien llama va a resumir varios
+   resultados en un solo aviso, como el pegado desde Excel-. */
+function ValidarNumero(texto, silencioso) {
+    var d = ValidarNumeroConDetalle(texto);
+
+    if (!silencioso) {
+        if (d.invalido) { MostrarMensaje("Solo se aceptan números positivos, con máximo 2 decimales.", "warning"); }
+        else if (d.recortado) { MostrarMensaje("El máximo por celda es 200 horas.", "warning"); }
+    }
+
+    return d.valor;
 }
 
 function NumeroDe(texto) {
@@ -580,8 +684,13 @@ function FormatoDosDecimales(valor) {
     return FormatoDecimales(valor, 2);
 }
 
-/* Copiada tal cual del patron de la casa (miPerfil.js, entre otras). Cada
-   pantalla lleva su propia copia; no hay una utilidad compartida. */
+/* Copiada del patron de la casa (miPerfil.js, entre otras), con una
+   diferencia: usa .text() y no .html(). Hoy todo lo que llega aqui es texto
+   plano -mensajes literales del servidor, o nombres que ya pasaron por
+   .text() al leerse de la grilla-, pero .html() es la puerta por la que
+   entraria una inyeccion el dia que un mensaje incluyera, por ejemplo, una
+   observacion escrita por un colaborador. Cada pantalla lleva su propia
+   copia; no hay una utilidad compartida. */
 function MostrarMensaje(mensaje, tipo) {
     var color = "#fcf8e3";
     if (tipo == "success") { color = "#dff0d8"; }
@@ -589,6 +698,6 @@ function MostrarMensaje(mensaje, tipo) {
     if (tipo == "warning") { color = "#fcf8e3"; }
 
     $("#modalMensajeInformativoTipo").css("background", color);
-    $("#MensajeInformativo").html(mensaje);
+    $("#MensajeInformativo").text(mensaje);
     $("#modalMensajeInformativo").modal("show");
 }

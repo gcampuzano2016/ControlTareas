@@ -41,21 +41,48 @@
             font-variant-numeric: tabular-nums;
         }
 
+        /* Los cuatro estilos condicionales de fila se pintan sobre las <td>,
+           no sobre el <tr>, y anclados a #tablaHE. Dos razones, las dos
+           encontradas en revision:
+
+           1) Un box-shadow inset sobre un <tr> no se pinta en Chrome/Edge
+              cuando la tabla tiene border-collapse -que Bootstrap 3 aplica a
+              toda .table-: Blink no compone box-shadow sobre filas de tabla
+              colapsadas (Firefox si). Justo las 2 personas reales en
+              revision salarial quedaban sin señal visual. Pintar sobre la
+              <td> con background-color o border evita el problema de raiz.
+           2) El color/fondo puesto en el <tr> perdia contra reglas mas
+              especificas de dos-tema.css que apuntan directo a la <td>
+              (".table > tbody > tr > td", el :first-child, y el :hover de
+              .table-hover que borraba el condicional al pasar el mouse). Un
+              selector anclado en el id de la tabla (#tablaHE) le gana a
+              cualquier combinacion de clases sin depender del orden en que
+              se cargan las hojas de estilo. */
+        #tablaHE > tbody > tr.he-fila-con-horas > td { background-color: var(--crm-verde-tinte); }
+        #tablaHE > tbody > tr.he-fila-no-aplica > td { background-color: var(--crm-neutro-tinte); color: var(--crm-tinta-suave); }
+        #tablaHE > tbody > tr.he-fila-error > td { background-color: var(--crm-rojo-tinte); }
+
         /* Orden de prioridad visual: con-horas (mas debil) < no-aplica < error
            (mas fuerte). El de mayor prioridad va declarado al final, para que
-           gane cuando una fila cae en mas de una condicion a la vez. */
-        .he-fila-con-horas { background-color: var(--crm-verde-tinte); }
-        .he-fila-no-aplica  { background-color: var(--crm-neutro-tinte); color: var(--crm-tinta-suave); }
-        .he-fila-error      { background-color: var(--crm-rojo-tinte); }
+           gane cuando una fila cae en mas de una condicion a la vez -las tres
+           reglas de arriba tienen la misma especificidad, asi que el orden de
+           declaracion es lo que decide-. */
 
-        /* La franja de "en revision" es un borde, no un fondo: convive con
-           cualquiera de los tres de arriba sin taparlo. */
-        .he-fila-revision { box-shadow: inset 4px 0 0 0 var(--crm-ambar); }
+        /* La franja de "en revision" es un borde real en la primera celda, no
+           un fondo: convive con cualquiera de los tres de arriba sin taparlo.
+           Con border-collapse, el borde mas ancho en un borde compartido es
+           el que se ve, asi que este border-left de 4px si se respeta. */
+        #tablaHE > tbody > tr.he-fila-revision > td:first-child { border-left: 4px solid var(--crm-ambar); }
 
         .he-fila-total td { font-weight: 600; border-top: 2px solid var(--crm-linea); }
 
         .he-horas50, .he-horas100 { text-align: right; }
-        .he-col-derivada { color: var(--crm-tinta-suave); }
+
+        /* Misma razon que los cuatro de arriba: ".table > tbody > tr > td"
+           de dos-tema.css tiene mas especificidad que una clase sola y
+           ganaba, dejando esta columna con el color de texto normal en vez
+           del atenuado. */
+        #tablaHE td.he-col-derivada { color: var(--crm-tinta-suave); }
     </style>
 </asp:Content>
 

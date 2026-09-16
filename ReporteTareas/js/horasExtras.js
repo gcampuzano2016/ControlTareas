@@ -848,7 +848,7 @@ function GuardarTodo() {
 
 function GuardarUnaAUna(lista, indice, fallidas, avisos) {
     if (indice >= lista.length) {
-        TerminarLoteDeGuardado(fallidas, avisos);
+        TerminarLoteDeGuardado(fallidas, avisos, lista.length);
         return;
     }
 
@@ -879,8 +879,17 @@ function GuardarUnaAUna(lista, indice, fallidas, avisos) {
 /* Cierra el lote SIEMPRE con una relectura del periodo desde el servidor -asi
    la pantalla refleja lo que de verdad quedo guardado, haya fallado una fila
    o ninguna- y reactiva el boton Guardar en todos los casos: es la correccion
-   central de este punto, que antes solo pasaba por el camino feliz. */
-function TerminarLoteDeGuardado(fallidas, avisos) {
+   central de este punto, que antes solo pasaba por el camino feliz.
+
+   El aviso de fallo depende del ESTADO que devuelve esa relectura, no de
+   adivinar por que fallo cada fila. Si otra persona cerro el periodo a mitad
+   del lote, todas las filas restantes fallan con el mismo -2 del
+   procedimiento y el mensaje generico "vuelva a intentarlo" era doblemente
+   falso: no decia la causa -que no es un fallo pasajero, es un cierre- y
+   pedia reintentar sobre una grilla que PintarPantalla acaba de repintar en
+   solo lectura, sin el boton Guardar y sin los valores digitados. Reintentar
+   ahi no es posible: hace falta que un Super Admin reabra el periodo. */
+function TerminarLoteDeGuardado(fallidas, avisos, total) {
     PostHE("CargarPeriodo", { idPeriodo: _idPeriodoActual }, function (r) {
         PintarPantalla(r.resultado);
         $("#btnGuardar").prop("disabled", false);
@@ -890,7 +899,18 @@ function TerminarLoteDeGuardado(fallidas, avisos) {
            congelado, por ejemplo- no significa que la fila no se guardo. */
         if (fallidas.length === 0) { MarcarGuardado(); }
 
-        if (fallidas.length > 0) {
+        if (fallidas.length > 0 && r.resultado && r.resultado.Periodo &&
+            !r.resultado.Periodo.EstaAbierto) {
+            var guardadas = (total || fallidas.length) - fallidas.length;
+            MostrarMensaje(
+                "El período se cerró mientras guardaba. Alcanzaron a guardarse " +
+                guardadas + " fila(s) y " + fallidas.length + " no: " +
+                fallidas.join(", ") + ". La grilla volvió a sólo lectura y lo que " +
+                "quedó sin guardar se perdió; para digitarlo de nuevo, un usuario " +
+                "con perfil Super Admin tiene que reabrir el período.",
+                "danger"
+            );
+        } else if (fallidas.length > 0) {
             MostrarMensaje("No se pudieron guardar estas filas, vuelva a intentarlo: " +
                            fallidas.join(", ") + ".", "danger");
         } else if (avisos.length > 0) {

@@ -109,9 +109,15 @@ GO
 
    Sobre @Auditar = 0 por omision: los scripts SQL se despliegan antes que los
    binarios, asi que hay una ventana en la que el DAO viejo -sin este
-   parametro- sigue llamando a este procedimiento. Con el valor por omision en
-   0 esa ventana no audita nada, lo cual es inofensivo porque en esa ventana
-   todavia nadie esta editando con el codigo nuevo. Si el valor por omision
+   parametro- sigue llamando a este procedimiento. Durante esa ventana el
+   sitio esta arriba y una persona de Nomina puede digitar horas con el codigo
+   viejo: esos cambios SI llegan a HE_Detalle y NO quedan auditados. No es una
+   perdida frente a lo que habia -la fase 2 no auditaba nada-, pero tampoco es
+   inofensivo: la auditoria empieza cuando llegan los binarios, no cuando
+   corre este script, y lo mismo vale al reves si alguna vez se revierten los
+   binarios dejando este procedimiento en su sitio. La ventana hay que
+   cerrarla operativamente -desplegar los binarios en la misma parada, con la
+   pantalla sin trafico-, no desde aqui. Si el valor por omision
    fuera 1, esa misma ventana escribiria auditoria de mas en cada apertura de
    periodo -62 filas de ruido por AbrirPeriodo, que nunca manda @Auditar=1-.
    Quien llame sin pasar @Auditar por accion u omision obtiene entonces

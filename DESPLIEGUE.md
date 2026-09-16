@@ -136,6 +136,17 @@ procedimientos declaran los parámetros nuevos con valor por defecto, así que e
 código viejo los sigue llamando sin enterarse. Por eso hay margen entre un paso
 y el otro, pero solo en ese sentido.
 
+**Ese margen es de funcionamiento, no de trazabilidad.** Un parámetro con valor
+por defecto hace que el código viejo no falle; no hace que se comporte como el
+nuevo. Cuando lo que agrega el script es un registro de auditoría, el código
+viejo sigue escribiendo el dato y deja de escribir el rastro, sin error que lo
+delate. Es exactamente el caso de `@Auditar` en `Sp_RTA_HeGuardarFila`
+(`docs/sql/2026-09-16-horas-extras-fase3.sql`): entre el script y los binarios,
+las horas que alguien digite se guardan sin quedar en `HE_DetalleAuditoria`.
+Con un cambio así, copia los binarios en la misma parada y no dejes la pantalla
+con tráfico en medio. Y si alguna vez revierte los binarios sin revertir el
+script, cuenta con lo mismo: vuelve a escribir sin auditar.
+
 Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Los
 `PRINT` te dicen si creó algo o si ya existía.
 

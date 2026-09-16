@@ -182,9 +182,33 @@ function AbrirPeriodoSeleccionado() {
 
 /* Cerrar deja de admitir cambios: nadie mas guarda horas en este periodo
    hasta que alguien -solo perfil 18- lo reabra. La confirmacion dice eso
-   mismo, no "esta seguro?", y nunca es un confirm() del navegador. */
+   mismo, no "esta seguro?", y nunca es un confirm() del navegador.
+
+   Con cambios sin guardar, cerrar NO se ofrece como confirmacion -se
+   RECHAZA de una-. Cambiar de periodo o abrir uno nuevo con cambios sin
+   guardar solo cuesta volver a teclear (SeleccionarPeriodo,
+   AbrirPeriodoSeleccionado); cerrar es distinto: las ediciones se perderian
+   Y el periodo quedaria cerrado con numeros que la persona nunca llego a
+   confirmar, y para intentarlo de nuevo necesitaria que OTRA PERSONA -solo
+   perfil 18- le reabra el periodo primero. Ese costo no lo puede ver quien
+   solo esta respondiendo "si" a un "esta seguro?", asi que aqui no se le
+   pregunta: se le pide que guarde o descarte antes de poder cerrar. El modal
+   de confirmacion de Bootstrap bloquea la grilla de fondo con su backdrop,
+   asi que no hace falta repetir esta comprobacion despues de que la persona
+   confirme. */
 function ConfirmarCerrarPeriodo() {
     if (!_idPeriodoActual) { return; }
+
+    if (HayCambiosSinGuardar()) {
+        MostrarMensaje(
+            "Hay cambios sin guardar. Guárdelos con el botón «Guardar», o descártelos " +
+            "seleccionando el período nuevamente, antes de cerrarlo: cerrar con cambios " +
+            "pendientes los perdería sin dejar ningún registro, y solo el perfil Super Admin " +
+            "podría reabrir el período para que pueda intentarlo de nuevo.",
+            "warning"
+        );
+        return;
+    }
 
     MostrarConfirmacion(
         "El período dejará de admitir cambios: nadie podrá guardar horas ni observaciones hasta que se reabra.",

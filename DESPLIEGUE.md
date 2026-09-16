@@ -147,6 +147,37 @@ Con un cambio así, copia los binarios en la misma parada y no dejes la pantalla
 con tráfico en medio. Y si alguna vez revierte los binarios sin revertir el
 script, cuenta con lo mismo: vuelve a escribir sin auditar.
 
+**La fase 4 de Horas Extras cambia el contrato de tres procedimientos y trae un
+guard cruzado con la fase 3.** El orden es el de siempre: primero
+`docs/sql/2026-09-16-horas-extras-fase4.sql`, después los binarios.
+
+El script convierte `HE_Periodo` de `(Anio, Mes)` a `(FechaInicio, FechaFin)`
+-las columnas `Anio` y `Mes` se eliminan-, agrega `HorasOrigen` a `HE_Detalle`,
+crea `Sp_RTA_HeHorasAprobadas` y modifica `HeCrearPeriodo` (que ahora rechaza
+rangos solapados con el código `-5`), `HeCargarPeriodo`, `HeListarPeriodos` y
+`HeGuardarFila`. Al abrir un período, las horas aprobadas en
+`R_DetTareasAranda` se siembran solas.
+
+`@HorasOrigen` en `Sp_RTA_HeGuardarFila` vale `'Manual'` por omisión, no
+`'Tareas'`, y es a propósito: durante la ventana entre el script y los
+binarios el DAO viejo sigue llamando al procedimiento sin ese parámetro
+mientras alguien de Nómina digita horas. Marcarlas como manuales es el lado
+seguro -una fila `'Manual'` no se vuelve a sembrar-, así que en el peor caso se
+pierde una siembra, que se puede volver a pedir, y nunca se pisa una
+corrección escrita a mano, que no se recupera.
+
+El script de la fase 3 (`docs/sql/2026-09-16-horas-extras-fase3.sql`) ahora
+trae su propio guard: si detecta que la fase 4 ya está aplicada -mira si
+`HE_Periodo.FechaInicio` existe- se salta entero con `NOEXEC`. **No lo vuelvas
+a correr a mano pensando que es inofensivo por ser idempotente en las fases
+anteriores**: en esta sí haría daño, porque recrearía `Sp_RTA_HeGuardarFila`
+con la firma vieja, de 23 parámetros, y cada guardado posterior fallaría hasta
+volver a correr la fase 4.
+
+Esta fase también sube `horasExtras.js` de `?v=4` a `?v=5`. Verifica con
+Ctrl+F5 después de copiar los binarios -ver sección 5-, porque un `?v=` viejo
+en el navegador sigue mostrando el período por mes en vez de por rango.
+
 Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Los
 `PRINT` te dicen si creó algo o si ya existía.
 

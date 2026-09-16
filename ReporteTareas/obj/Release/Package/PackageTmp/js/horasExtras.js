@@ -10,9 +10,6 @@
 var _idPeriodoActual = null;
 var _periodoAbierto = false;
 
-var MESES_HE = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-
 /* Los factores de recargo de HE_Parametro (50% y 100%), tal como los aplico
    el servidor a la pantalla que esta cargada ahora mismo. Se llenan desde
    pantalla.Factor50/Factor100 -que manda el servidor en CargarPeriodo,
@@ -32,10 +29,15 @@ var _factor100 = null;
 var FACTOR_HE_50_RESPALDO = 1.5;
 var FACTOR_HE_100_RESPALDO = 2.0;
 
+/* El rango propuesto al entrar es el mes en curso -del dia 1 al ultimo dia-,
+   que es lo que antes proponian el año y el mes de la pantalla vieja. No es
+   una restriccion: es el rango mas frecuente ya tecleado, y una quincena se
+   saca de ahi corriendo una de las dos fechas. */
 $(document).ready(function () {
     var hoy = new Date();
-    $("#inAnioAbrir").val(hoy.getFullYear());
-    $("#inMesAbrir").val(String(hoy.getMonth() + 1));
+
+    $("#inFechaInicio").val(ISOFecha(new Date(hoy.getFullYear(), hoy.getMonth(), 1)));
+    $("#inFechaFin").val(ISOFecha(new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0)));
 
     CargarListaPeriodos();
 });
@@ -106,8 +108,8 @@ function CargarListaPeriodos(idPeriodoASeleccionar) {
 
         /* Al entrar, se muestra el periodo Abierto mas reciente. Cerrar
            periodo es fase 3, asi que hoy puede haber mas de uno abierto a la
-           vez. Sp_RTA_HeListarPeriodos ordena por Anio DESC, Mes DESC, asi
-           que el primero de la lista que este Abierto es el mas reciente. */
+           vez. Sp_RTA_HeListarPeriodos ordena por FechaInicio DESC, asi que
+           el primero de la lista que este Abierto es el mas reciente. */
         var abierto = null;
         $.each(lista, function (i, p) {
             if (p.EstadoPeriodo === "Abierto") { abierto = p; return false; }
@@ -125,11 +127,23 @@ function PintarListaPeriodos(lista, idPeriodoASeleccionar) {
     $sel.append('<option value="">Seleccione…</option>');
 
     $.each(lista, function (i, p) {
-        var etiqueta = MESES_HE[p.Mes - 1] + " " + p.Anio + " — " + p.EstadoPeriodo;
-        $sel.append($("<option></option>").val(p.IdPeriodo).text(etiqueta));
+        $sel.append($("<option></option>").val(p.IdPeriodo)
+                                          .text(EtiquetaPeriodo(p) + " — " + p.EstadoPeriodo));
     });
 
     if (idPeriodoASeleccionar) { $sel.val(idPeriodoASeleccionar); }
+}
+
+/* El nombre de un periodo ya no es «Septiembre 2026»: es su rango. La
+   Descripcion la arma Sp_RTA_HeCrearPeriodo con las dos fechas
+   ("17/08/2026 - 15/09/2026"), y se prefiere sobre construirla aqui para que
+   la pantalla, el Excel y la base digan exactamente lo mismo. El respaldo
+   con FechaInicio/FechaFin es para las filas que quedaron sin descripcion
+   -las que se crearon antes de esta fase-: sin el, esas salian en blanco en
+   el desplegable y no habia forma de distinguirlas entre si. */
+function EtiquetaPeriodo(p) {
+    if (p.Descripcion) { return p.Descripcion; }
+    return FormatoFecha(p.FechaInicio) + " - " + FormatoFecha(p.FechaFin);
 }
 
 function SeleccionarPeriodo() {
@@ -148,11 +162,25 @@ function SeleccionarPeriodo() {
 }
 
 function AbrirPeriodoSeleccionado() {
-    var anio = parseInt($("#inAnioAbrir").val(), 10);
-    var mes = parseInt($("#inMesAbrir").val(), 10);
+    /* Un input type="date" devuelve siempre "yyyy-MM-dd" o cadena vacia, sin
+       importar el idioma del navegador -que solo cambia como se VE la fecha,
+       no como se lee-. Ese es justo el formato que espera Fecha() en el
+       handler, asi que el valor viaja tal cual, sin reformatear. */
+    var fechaInicio = $("#inFechaInicio").val();
+    var fechaFin = $("#inFechaFin").val();
 
-    if (!anio || !mes) {
-        MostrarMensaje("Indique año y mes para abrir el período.", "warning");
+    if (!fechaInicio || !fechaFin) {
+        MostrarMensaje("Indique la fecha de inicio y la de fin del período.", "warning");
+        return;
+    }
+
+    /* Comparacion de texto y no de Date: en "yyyy-MM-dd" el orden alfabetico
+       ES el cronologico, y asi no hay que construir dos Date -que sobre una
+       fecha sin hora se interpretan como UTC y pueden correrse un dia contra
+       la hora local-. El servidor lo vuelve a comprobar por su cuenta: esto
+       es para no gastar una ida al servidor en algo que se ve desde aqui. */
+    if (fechaInicio > fechaFin) {
+        MostrarMensaje("La fecha de inicio no puede ser posterior a la de fin.", "warning");
         return;
     }
 
@@ -169,9 +197,13 @@ function AbrirPeriodoSeleccionado() {
     $("#btnAbrirPeriodo").prop("disabled", true);
 
     /* Abrir un periodo que ya existe es inofensivo -NegHorasExtrasPantalla lo
-       trata igual que cargarlo-, asi que este mismo boton sirve tanto para
-       crear un mes nuevo como para volver a uno existente. */
-    PostHE("AbrirPeriodo", { anio: anio, mes: mes }, function (r) {
+       trata igual que cargarlo, y ademas siembra las horas que se aprobaron
+       despues de la ultima apertura-, asi que este mismo boton sirve tanto
+       para crear un rango nuevo como para volver a uno existente. Un rango
+       que PISA a otro periodo es harina de otro costal: ese lo rechaza el
+       servidor con su propio mensaje, y no se replica la comprobacion aqui
+       porque el cliente no conoce los rangos ya abiertos. */
+    PostHE("AbrirPeriodo", { fechaInicio: fechaInicio, fechaFin: fechaFin }, function (r) {
         CargarListaPeriodos(r.resultado.Periodo.IdPeriodo);
         PintarPantalla(r.resultado);
         $("#btnAbrirPeriodo").prop("disabled", false);
@@ -366,7 +398,7 @@ function PintarGrilla(pantalla) {
     var $cuerpo = $("#cuerpoHE").empty();
 
     if (!pantalla.Filas || pantalla.Filas.length === 0) {
-        $cuerpo.append('<tr><td colspan="15" class="text-center text-muted">' +
+        $cuerpo.append('<tr><td colspan="16" class="text-center text-muted">' +
                        'Este período no tiene colaboradores.</td></tr>');
     } else {
         $.each(pantalla.Filas, function (i, fila) {
@@ -378,8 +410,8 @@ function PintarGrilla(pantalla) {
        inline). Si el usuario ya las habia mostrado con AlternarColumnasDerivadas
        y despues se repinta la grilla -al guardar, al cambiar de periodo-, el
        thead (que no se reconstruye) queda visible pero las celdas nuevas
-       quedan ocultas: la tabla se desalinea, 15 columnas de encabezado contra
-       9 de datos. Se reaplica aqui el estado vigente para que ambos coincidan
+       quedan ocultas: la tabla se desalinea, 16 columnas de encabezado contra
+       10 de datos. Se reaplica aqui el estado vigente para que ambos coincidan
        siempre, sin depender de cuando se repinte. */
     $(".he-col-derivada").toggle(_columnasDerivadasVisibles);
 
@@ -460,7 +492,27 @@ function ConstruirFila(fila) {
         .prop("disabled", !_periodoAbierto);
     $fila.append($("<td></td>").append($obs));
 
+    $fila.append($('<td class="text-center"></td>').append(EtiquetaOrigen(fila.HorasOrigen)));
+
     return $fila;
+}
+
+/* De donde salieron las horas de esta fila. Lo que le importa a quien mira la
+   grilla es distinguir de un vistazo lo que revisó una persona: «Manual» es
+   la excepcion -alguien corrigio esa fila a mano, y volver a abrir el periodo
+   ya no la pisa- y por eso va en azul; «Tareas» es lo normal -sembrado desde
+   las solicitudes ya aprobadas- y va en gris discreto, para no gritar sesenta
+   veces lo mismo.
+
+   Cualquier valor que no sea "Manual" se pinta como "Tareas": el contrato
+   solo tiene esos dos, y una fila de un periodo viejo que llegue sin el campo
+   no es una correccion manual. */
+function EtiquetaOrigen(origen) {
+    var manual = String(origen || "").toLowerCase() === "manual";
+
+    return $("<span></span>")
+        .addClass("he-origen " + (manual ? "he-origen-manual" : "he-origen-tareas"))
+        .text(manual ? "Manual" : "Tareas");
 }
 
 /* Las seis columnas derivadas comparten esta forma: solo lectura, alineadas a
@@ -1014,6 +1066,23 @@ function FormatoFechaHora(valor) {
     var hh = ("0" + fecha.getHours()).slice(-2);
     var mi = ("0" + fecha.getMinutes()).slice(-2);
     return dd + "/" + mm + "/" + fecha.getFullYear() + " " + hh + ":" + mi;
+}
+
+/* La misma fecha de FormatoFechaHora pero sin la hora, para las de un periodo
+   -FechaInicio y FechaFin son DATE en la base: no tienen hora que mostrar-. */
+function FormatoFecha(valor) {
+    var conHora = FormatoFechaHora(valor);
+    return conHora === "" ? "" : conHora.split(" ")[0];
+}
+
+/* "yyyy-MM-dd" a partir de un Date LOCAL, que es el unico formato que acepta
+   el value de un input type="date". No se usa toISOString(): ese pasa antes
+   por UTC, y en Ecuador (UTC-5) el dia 1 del mes a las 00:00 locales sale
+   como el ultimo dia del mes anterior. */
+function ISOFecha(fecha) {
+    var mm = ("0" + (fecha.getMonth() + 1)).slice(-2);
+    var dd = ("0" + fecha.getDate()).slice(-2);
+    return fecha.getFullYear() + "-" + mm + "-" + dd;
 }
 
 function NumeroDe(texto) {

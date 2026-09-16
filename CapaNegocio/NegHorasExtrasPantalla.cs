@@ -238,7 +238,7 @@ namespace CapaNegocio
                 if (guardado != 0) { filasConError++; }
             }
 
-            EntRespuesta resultado = CargarPantalla(idPeriodo);
+            EntRespuesta resultado = CargarPantalla(idPeriodo, parametros);
 
             if (resultado.estado == "1" && (filasConError > 0 || filasConSalarioCongelado > 0))
             {
@@ -261,8 +261,24 @@ namespace CapaNegocio
             return resultado;
         }
 
-        /// <summary>El periodo, sus filas y el tablero, listos para la pantalla.</summary>
+        /// <summary>
+        /// El periodo, sus filas y el tablero, listos para la pantalla. Sin
+        /// parametros a mano: los lee una sola vez, para el llamador directo
+        /// -la accion CargarPeriodo del handler- que no calculo nada antes y
+        /// no tiene ninguno cargado.
+        /// </summary>
         public static EntRespuesta CargarPantalla(int idPeriodo)
+        {
+            return CargarPantalla(idPeriodo, null);
+        }
+
+        /// <summary>
+        /// Misma carga, pero recibe los parametros ya leidos. AbrirPeriodo y
+        /// GuardarHoras los necesitan de todos modos para AplicarCalculo, y
+        /// pasarlos aqui evita una segunda lectura de HE_Parametro en la misma
+        /// peticion -null significa "no los tengo, leelos vos"-.
+        /// </summary>
+        public static EntRespuesta CargarPantalla(int idPeriodo, EntHeParametros parametros)
         {
             EntRespuesta respuesta = new EntRespuesta();
             EntHePantalla pantalla = DaoHorasExtras.CargarPeriodo(idPeriodo);
@@ -274,6 +290,10 @@ namespace CapaNegocio
                 respuesta.tipoMensaje = "warning";
                 return respuesta;
             }
+
+            EntHeParametros p = parametros ?? NegHeParametros.Vigentes();
+            pantalla.Factor50 = p.Factor50;
+            pantalla.Factor100 = p.Factor100;
 
             SumarTotales(pantalla);
 
@@ -394,8 +414,9 @@ namespace CapaNegocio
 
             decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
             decimal salarioCongelado = fila.SalarioBaseSnapshot;
+            EntHeParametros parametros = NegHeParametros.Vigentes();
 
-            AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, NegHeParametros.Vigentes());
+            AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, parametros);
 
             /* Se detecta aqui solo para avisar -la fila ya quedo bien
                calculada por AplicarCalculo-. La distincion entre "no esta
@@ -421,7 +442,7 @@ namespace CapaNegocio
                 return respuesta;
             }
 
-            EntRespuesta resultado = CargarPantalla(idPeriodo);
+            EntRespuesta resultado = CargarPantalla(idPeriodo, parametros);
 
             if (seUsoSnapshot && resultado.estado == "1")
             {

@@ -13,21 +13,24 @@ var _periodoAbierto = false;
 var MESES_HE = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
                 "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 
-/* Los factores de HE_Parametro (recargo 50% y 100%). Hoy NO viajan en el
-   payload de la pantalla -CargarPeriodo/GuardarFila mandan la fila ya
-   calculada por NegHorasExtras, no los parametros de calculo-, asi que
-   quedan declarados aqui, duplicando un dato que en rigor deberia vivir en
-   un solo lugar. Se necesitan para reproducir la cadena de calculo SIN
-   redondear un paso intermedio (ver RecalcularFilaLocal): multiplicar por
-   ValorHora50/ValorHora100, que el servidor ya redondeo a 6 decimales,
-   producia una diferencia de un centavo -siempre a la baja- en
-   aproximadamente 1 de cada 100 combinaciones de sueldo/divisor/horas. Si
-   HE_Parametro cambiara estos valores, este archivo quedaria desincronizado
-   hasta que alguien lo actualice a mano: lo correcto seria que viajaran en
-   el payload, pero agregarlos ahi es un cambio de contrato de
-   EntHePantalla/CapaNegocio/CapaDato que queda fuera de esta ronda. */
-var FACTOR_HE_50 = 1.5;
-var FACTOR_HE_100 = 2.0;
+/* Los factores de recargo de HE_Parametro (50% y 100%), tal como los aplico
+   el servidor a la pantalla que esta cargada ahora mismo. Se llenan desde
+   pantalla.Factor50/Factor100 -que manda el servidor en CargarPeriodo,
+   AbrirPeriodo y GuardarFila- en PintarPantalla, y son la fuente de verdad
+   para RecalcularFilaLocal. */
+var _factor50 = null;
+var _factor100 = null;
+
+/* Estos dos son SOLO el respaldo para el primerisimo instante en que la
+   pantalla todavia no cargo ningun periodo -antes de la primera respuesta
+   del servidor, _factor50/_factor100 son null-. Nunca deberian usarse una
+   vez que hay un periodo cargado: si HE_Parametro cambiara estos valores, un
+   respaldo desactualizado que se usara por error mostraria un numero
+   equivocado en las 64 filas a la vez sin que nada lo avisara. Por eso
+   RecalcularFilaLocal cae en ellos solo si _factor50/_factor100 siguen en
+   null, nunca los prefiere sobre lo que trajo el servidor. */
+var FACTOR_HE_50_RESPALDO = 1.5;
+var FACTOR_HE_100_RESPALDO = 2.0;
 
 $(document).ready(function () {
     var hoy = new Date();
@@ -168,6 +171,13 @@ function AbrirPeriodoSeleccionado() {
 function PintarPantalla(pantalla) {
     _idPeriodoActual = pantalla.Periodo.IdPeriodo;
     _periodoAbierto = pantalla.Periodo.EstaAbierto;
+
+    /* Factor50/Factor100 vienen del servidor en cada carga: son los que
+       HE_Parametro tenia vigentes cuando esta misma pantalla se calculo alla.
+       Se toman de aqui, no de una constante local, para que un cambio en
+       HE_Parametro se refleje sin tocar este archivo. */
+    _factor50 = Number(pantalla.Factor50);
+    _factor100 = Number(pantalla.Factor100);
 
     ActualizarEstadoPeriodo(pantalla.Periodo);
     ActualizarFiltroEmpresa(pantalla.Filas);
@@ -481,7 +491,13 @@ function MarcarGuardado() {
    decimales para mostrarlos en la grilla- arrastraba un redondeo intermedio
    que el servidor nunca hace, y el total del cliente quedaba un centavo por
    debajo del real en como 1 de cada 100 combinaciones. Es una vista previa
-   igual: el total que manda es el que devuelve el servidor al guardar. */
+   igual: el total que manda es el que devuelve el servidor al guardar.
+
+   Los factores salen de _factor50/_factor100 -lo que trajo el servidor con
+   esta misma pantalla-, no de una constante local: los de respaldo solo se
+   usan si por algun motivo no llegaron (payload viejo o incompleto), y aun
+   asi es preferible mostrar el numero de respaldo a poner el total en cero
+   delante de Nomina. */
 function RecalcularFilaLocal($fila) {
     var horas50 = NumeroDe($fila.find(".he-horas50").val());
     var horas100 = NumeroDe($fila.find(".he-horas100").val());
@@ -491,8 +507,11 @@ function RecalcularFilaLocal($fila) {
     var divisor = parseFloat($fila.data("divisor")) || 0;
     var horaOrdinaria = divisor > 0 ? (salario / divisor) : 0;
 
-    var total50 = aplica ? RedondearDos(horas50 * horaOrdinaria * FACTOR_HE_50) : 0;
-    var total100 = aplica ? RedondearDos(horas100 * horaOrdinaria * FACTOR_HE_100) : 0;
+    var factor50 = (_factor50 !== null && !isNaN(_factor50)) ? _factor50 : FACTOR_HE_50_RESPALDO;
+    var factor100 = (_factor100 !== null && !isNaN(_factor100)) ? _factor100 : FACTOR_HE_100_RESPALDO;
+
+    var total50 = aplica ? RedondearDos(horas50 * horaOrdinaria * factor50) : 0;
+    var total100 = aplica ? RedondearDos(horas100 * horaOrdinaria * factor100) : 0;
     var totalHoras = horas50 + horas100;
     var totalHE = total50 + total100;
 

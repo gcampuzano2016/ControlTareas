@@ -18,6 +18,17 @@ namespace CapaEntidad
         public decimal TotalHoras { get; set; }
         public decimal TotalPagar { get; set; }
 
+        /// <summary>
+        /// Los factores de recargo vigentes (HE_Parametro), tal cual los uso el
+        /// servidor para calcular esta misma pantalla. Viajan aqui para que el
+        /// recalculo local de la grilla los tome de la respuesta en vez de
+        /// llevar su propia copia: sin esto, el dia que HE_Parametro cambiara
+        /// un factor, el cliente seguiria mostrando el numero viejo en las 64
+        /// filas a la vez, sin que nada lo avisara.
+        /// </summary>
+        public decimal Factor50 { get; set; }
+        public decimal Factor100 { get; set; }
+
         public EntHePantalla()
         {
             Filas = new List<EntHeFila>();

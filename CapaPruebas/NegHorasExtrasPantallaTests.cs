@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -408,8 +408,16 @@ namespace CapaPruebas
             string noAbierto = NegHorasExtrasPantalla.MensajeDeCierre(-2, 0);
             string enCero = NegHorasExtrasPantalla.MensajeDeCierre(-3, 7);
 
+            /* Las tres comparaciones, no solo las adyacentes. Con solo los dos
+               pares vecinos, cambiar el texto del -1 por cualquier cosa que
+               siguiera siendo distinta del -2 no romperia ninguna prueba: el
+               contenido del -1 quedaria sin fijar. */
             Assert.AreNotEqual(noExiste, noAbierto);
             Assert.AreNotEqual(noAbierto, enCero);
+            Assert.AreNotEqual(noExiste, enCero);
+
+            StringAssert.Contains(noExiste, "no existe");
+            StringAssert.Contains(noAbierto, "abierto");
             StringAssert.Contains(enCero, "7", "el mensaje tiene que decir cuantas filas estan mal");
         }
 

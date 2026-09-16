@@ -222,8 +222,8 @@ namespace CapaNegocio
                                  : "Hay " + filasConProblema.ToString() + " filas";
 
                 return cuantas + " sin sueldo vigente, con el valor hora en cero. "
-                     + "Corrija el sueldo de esas personas antes de cerrar: el periodo "
-                     + "quedaria congelado con un pago que nadie calculo.";
+                     + "Corrija el sueldo de esas personas antes de cerrar: el período "
+                     + "quedaría congelado con un pago que nadie calculó.";
             }
 
             return "No se pudo cerrar el periodo.";

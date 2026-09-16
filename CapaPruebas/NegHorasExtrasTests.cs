@@ -293,5 +293,21 @@ namespace CapaPruebas
             Assert.AreEqual(0.00m, r.TotalHoras);
             Assert.IsTrue(r.TieneAdvertencia);
         }
+
+        /// <summary>
+        /// El invariante critico: horas negativas siempre resultan en TotalHoras
+        /// cero, incluso si hay otros errores (salario cero, divisor cero).
+        /// Un numero negativo en una columna que se suma en pantalla es peor
+        /// que cualquier otra cosa. Esta prueba cubre la combinacion de dos
+        /// condiciones de error, que ninguna prueba anterior activaba.
+        /// </summary>
+        [TestMethod]
+        public void Caso9d_SalarioCeroYHorasNegativas_TotalHorasCero()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(0m, 8, -5m, 0m), Par());
+
+            Assert.AreEqual(0.00m, r.TotalHoras);
+            Assert.IsTrue(r.TieneAdvertencia);
+        }
     }
 }

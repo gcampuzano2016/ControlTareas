@@ -175,8 +175,8 @@
                                     A quién debemos llamar si le ocurre algo. Puede registrar más de uno.
                                 </p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Nombre</th><th>Parentesco</th><th>Teléfono</th><th style="width:90px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoEmergencia"></tbody>
@@ -209,8 +209,8 @@
                             <div class="panel-body">
                                 <p class="text-muted" style="font-size: 12px">Formación académica formal.</p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Nivel</th><th>Institución</th><th>Título</th><th style="width:80px">Año</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoEstudios"></tbody>
@@ -247,8 +247,8 @@
                             <div class="panel-body">
                                 <p class="text-muted" style="font-size: 12px">Cursos y certificaciones.</p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Nombre</th><th>Entidad emisora</th><th style="width:120px">Obtenida</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoCertificaciones"></tbody>
@@ -283,8 +283,8 @@
                                     Deje el año de fin vacío si sigue trabajando ahí.
                                 </p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoExperiencia"></tbody>
@@ -325,8 +325,8 @@
                                     Las personas que dependen económicamente de usted.
                                 </p>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Nombre</th><th style="width:130px">Parentesco</th><th style="width:140px">Fecha de nacimiento</th><th style="width:170px">Respaldo</th><th style="width:70px">Quitar</th></tr>
                                         </thead>
                                         <tbody id="cuerpoCargas"></tbody>
@@ -387,8 +387,8 @@
                                 </div>
 
                                 <div class="table-responsive">
-                                    <table class="table table-bordered table-hover" style="font-size: 90%">
-                                        <thead class="bg-primary">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
                                             <tr><th>Nombre</th><th>Cargo</th><th>Área</th><th>Ciudad</th><th style="width:70px">Ver</th></tr>
                                         </thead>
                                         <tbody id="cuerpoEquipo"></tbody>
@@ -434,32 +434,32 @@
                                 <hr />
                                 <h5><i class="fa fa-ambulance"></i> Contactos de emergencia</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" style="font-size: 90%">
-                                        <thead class="bg-primary"><tr><th>Nombre</th><th>Parentesco</th><th>Teléfono</th></tr></thead>
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Nombre</th><th>Parentesco</th><th>Teléfono</th></tr></thead>
                                         <tbody id="cuerpoSubEmergencia"></tbody>
                                     </table>
                                 </div>
 
                                 <h5><i class="fa fa-graduation-cap"></i> Formación</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" style="font-size: 90%">
-                                        <thead class="bg-primary"><tr><th>Título</th><th>Institución</th><th>Nivel</th><th style="width:70px">Año</th></tr></thead>
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Título</th><th>Institución</th><th>Nivel</th><th style="width:70px">Año</th></tr></thead>
                                         <tbody id="cuerpoSubEstudios"></tbody>
                                     </table>
                                 </div>
 
                                 <h5><i class="fa fa-certificate"></i> Certificaciones</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" style="font-size: 90%">
-                                        <thead class="bg-primary"><tr><th>Nombre</th><th>Entidad</th><th style="width:110px">Obtenida</th></tr></thead>
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Nombre</th><th>Entidad</th><th style="width:110px">Obtenida</th></tr></thead>
                                         <tbody id="cuerpoSubCertificaciones"></tbody>
                                     </table>
                                 </div>
 
                                 <h5><i class="fa fa-briefcase"></i> Experiencia</h5>
                                 <div class="table-responsive">
-                                    <table class="table table-bordered" style="font-size: 90%">
-                                        <thead class="bg-primary"><tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th></tr></thead>
+                                    <table class="table table-bordered">
+                                        <thead><tr><th>Empresa</th><th>Cargo</th><th style="width:110px">Período</th><th>Funciones</th></tr></thead>
                                         <tbody id="cuerpoSubExperiencia"></tbody>
                                     </table>
                                 </div>

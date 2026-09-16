@@ -33,14 +33,19 @@ namespace CapaNegocio
         private const string FormatoHoras = "#,##0.00";
         private const string FormatoEntero = "0";
 
+        // NegHorasExtras redondea el valor hora a 6 decimales (DecimalesValorHora)
+        // y la columna de la base es DECIMAL(18,6): si aqui se mostrara con dos,
+        // Nomina veria horas x tarifa sin cuadrar con el total de la fila.
+        private const string FormatoValorHora = "#,##0.000000";
+
         // El orden aqui define el orden de las columnas 1..18 en la hoja.
         private static readonly string[] Encabezados = new string[]
         {
-            "Cedula",
+            "Cédula",
             "Nombre",
             "Empresa",
             "Cargo",
-            "Jornada (h/dia)",
+            "Jornada (h/día)",
             "Salario Base",
             "Aplica HE",
             "Divisor",
@@ -53,7 +58,7 @@ namespace CapaNegocio
             "Total Pago 100%",
             "Total Horas",
             "Total HE",
-            "Observacion"
+            "Observación"
         };
 
         /// <summary>
@@ -73,13 +78,29 @@ namespace CapaNegocio
         /// <summary>
         /// Arma el libro completo y lo devuelve como bytes. Nunca toca disco:
         /// GetAsByteArray, nunca SaveAs(FileInfo).
+        ///
+        /// Precondicion: pantalla.Periodo no puede ser nulo. DaoHorasExtras /
+        /// NegHorasExtrasPantalla.CargarPantalla devuelve un Periodo nulo como
+        /// resultado legitimo cuando el periodo no existe, y quien llame aqui
+        /// debe haber comprobado eso antes (por ejemplo, mirando el estado de
+        /// esa respuesta). Si llega nulo de todos modos, se lanza ArgumentException
+        /// en vez de dejar una NullReferenceException muda.
         /// </summary>
         public static byte[] Construir(EntHePantalla pantalla)
         {
-            // EPPlus exige fijar el contexto de licencia antes del primer uso.
-            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            if (pantalla == null)
+            {
+                throw new ArgumentNullException(nameof(pantalla));
+            }
 
-            using (ExcelPackage paquete = new ExcelPackage())
+            if (pantalla.Periodo == null)
+            {
+                throw new ArgumentException(
+                    "No se puede armar el archivo: el periodo es nulo (el periodo no existe).",
+                    nameof(pantalla));
+            }
+
+            using (ExcelPackage paquete = CrearPaquete())
             {
                 ExcelWorksheet hoja = paquete.Workbook.Worksheets.Add(NombreHoja);
 
@@ -94,13 +115,25 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>
+        /// Unico lugar del archivo donde se crea un ExcelPackage. EPPlus exige
+        /// fijar el contexto de licencia antes del primer uso: concentrarlo aqui
+        /// evita que un futuro metodo publico cree el suyo propio y se ejecute
+        /// primero, sin que ninguna compilacion avise del olvido.
+        /// </summary>
+        private static ExcelPackage CrearPaquete()
+        {
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            return new ExcelPackage();
+        }
+
         private static void EscribirTitulo(ExcelWorksheet hoja, EntHePeriodo periodo)
         {
             bool cerrado = string.Equals(periodo.EstadoPeriodo, "Cerrado", StringComparison.OrdinalIgnoreCase);
 
             string titulo = string.Format(
                 CultureInfo.InvariantCulture,
-                "Reporte de Horas Extras - Periodo {0:00}/{1} - {2}{3}",
+                "Reporte de Horas Extras - Período {0:00}/{1} - {2}{3}",
                 periodo.Mes,
                 periodo.Anio,
                 periodo.EstadoPeriodo,
@@ -184,19 +217,22 @@ namespace CapaNegocio
                 hoja.Cells[fila, 6].Value = f.SalarioBaseSnapshot;
                 hoja.Cells[fila, 6].Style.Numberformat.Format = FormatoMoneda;
 
-                hoja.Cells[fila, 7].Value = f.AplicaHESnapshot ? "Si" : "No";
+                hoja.Cells[fila, 7].Value = f.AplicaHESnapshot ? "Sí" : "No";
 
                 hoja.Cells[fila, 8].Value = f.Divisor;
                 hoja.Cells[fila, 8].Style.Numberformat.Format = FormatoEntero;
 
+                // Valor hora: NegHorasExtras redondea a 6 decimales (DECIMAL(18,6)
+                // en la base). Mostrarlo con dos rompe la conciliacion horas x
+                // tarifa = total que este archivo existe para permitir a mano.
                 hoja.Cells[fila, 9].Value = f.ValorHoraOrdinaria;
-                hoja.Cells[fila, 9].Style.Numberformat.Format = FormatoMoneda;
+                hoja.Cells[fila, 9].Style.Numberformat.Format = FormatoValorHora;
 
                 hoja.Cells[fila, 10].Value = f.ValorHora50;
-                hoja.Cells[fila, 10].Style.Numberformat.Format = FormatoMoneda;
+                hoja.Cells[fila, 10].Style.Numberformat.Format = FormatoValorHora;
 
                 hoja.Cells[fila, 11].Value = f.ValorHora100;
-                hoja.Cells[fila, 11].Style.Numberformat.Format = FormatoMoneda;
+                hoja.Cells[fila, 11].Style.Numberformat.Format = FormatoValorHora;
 
                 hoja.Cells[fila, 12].Value = f.Horas50;
                 hoja.Cells[fila, 12].Style.Numberformat.Format = FormatoHoras;

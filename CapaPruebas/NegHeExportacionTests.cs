@@ -137,5 +137,21 @@ namespace CapaPruebas
 
             Assert.IsTrue(bytes.Length > 0);
         }
+
+        /// <summary>
+        /// NegHorasExtrasPantalla.CargarPantalla devuelve Periodo nulo como
+        /// resultado legitimo cuando el periodo no existe. Si eso llegara aqui
+        /// sin que quien llama lo haya comprobado antes, el error debe decir
+        /// que falta, no ser una NullReferenceException muda.
+        /// </summary>
+        [TestMethod]
+        [ExpectedException(typeof(ArgumentException))]
+        public void Construir_PeriodoNulo_LanzaExcepcionClara()
+        {
+            EntHePantalla pantalla = new EntHePantalla();
+            pantalla.Filas.Add(new EntHeFila());
+
+            NegHeExportacion.Construir(pantalla);
+        }
     }
 }

@@ -97,7 +97,7 @@ BEGIN
       FROM dbo.HE_ColaboradorParametro c
       JOIN dbo.Empleados e ON e.IdEmpleado = c.IdEmpleado
      WHERE c.Estado = '1'
-     ORDER BY e.Nombre;
+     ORDER BY e.Nombre, c.IdEmpleado;
 
     SELECT s.IdEmpleado, s.Monto, s.FechaVigenciaDesde, Origen = ISNULL(s.Origen, '')
       FROM dbo.HE_Salario s
@@ -116,6 +116,10 @@ GO
    Lo usan dos caminos: armar el snapshot al abrir un periodo, y guardar una
    edicion. Por eso recibe el snapshot completo y no solo las horas: al abrir,
    no hay fila que actualizar.
+
+   Ademas de Respuestas, siempre devuelve IdDetalle (misma forma en las tres
+   ramas: la fase 3 lo necesita para escribir HE_DetalleAuditoria). En las
+   ramas de error IdDetalle va NULL porque no hay fila que identificar.
 
    Respuestas: 0 bien, -1 el periodo no existe, -2 el periodo no esta Abierto. */
 CREATE PROCEDURE dbo.Sp_RTA_HeGuardarFila
@@ -150,15 +154,17 @@ BEGIN
 
     IF @Estado IS NULL
     BEGIN
-        SELECT Respuestas = -1;
+        SELECT Respuestas = -1, IdDetalle = CAST(NULL AS INT);
         RETURN;
     END
 
     IF @Estado <> 'Abierto'
     BEGIN
-        SELECT Respuestas = -2;
+        SELECT Respuestas = -2, IdDetalle = CAST(NULL AS INT);
         RETURN;
     END
+
+    DECLARE @IdDetalle INT;
 
     UPDATE dbo.HE_Detalle
        SET CedulaSnapshot = @CedulaSnapshot, NombreSnapshot = @NombreSnapshot,
@@ -188,9 +194,17 @@ BEGIN
              @Divisor, @ValorHoraOrdinaria, @ValorHora50, @ValorHora100,
              @Horas50, @Horas100, @Total50, @Total100, @TotalHoras, @TotalHE,
              @Observacion, @Usuario, @Ip);
+
+        SET @IdDetalle = CAST(SCOPE_IDENTITY() AS INT);
+    END
+    ELSE
+    BEGIN
+        SELECT @IdDetalle = IdDetalle
+          FROM dbo.HE_Detalle
+         WHERE IdPeriodo = @IdPeriodo AND IdEmpleado = @IdEmpleado;
     END
 
-    SELECT Respuestas = 0;
+    SELECT Respuestas = 0, IdDetalle = @IdDetalle;
 END
 GO
 
@@ -220,9 +234,50 @@ BEGIN
       FROM dbo.HE_Detalle d
       LEFT JOIN dbo.HE_ColaboradorParametro c ON c.IdEmpleado = d.IdEmpleado
      WHERE d.IdPeriodo = @IdPeriodo
-     ORDER BY d.NombreSnapshot;
+     ORDER BY d.NombreSnapshot, d.IdEmpleado;
 END
 GO
 
-PRINT 'Horas Extras fase 2: los cinco procedimientos quedaron creados.';
+/* ------------------------------------------------- aserciones -------------- */
+
+/* Todo este bloque va en un solo batch, sin GO en medio: un GO entre el
+   DECLARE y su ultimo uso hace fallar el script entero con "must declare
+   the scalar variable". Por eso va entero al final, despues del ultimo GO
+   de arriba, y no intercalado entre cada CREATE PROCEDURE. */
+DECLARE @Fallos INT = 0;
+
+IF OBJECT_ID('dbo.Sp_RTA_HeListarPeriodos','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeListarPeriodos no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeCrearPeriodo','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeCrearPeriodo no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeInsumos','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeInsumos no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeGuardarFila','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeGuardarFila no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeCargarPeriodo','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeCargarPeriodo no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF @Fallos > 0
+    RAISERROR('FALLO: %d de los cinco procedimientos no quedaron creados.', 16, 1, @Fallos);
+ELSE
+    PRINT 'Horas Extras fase 2: los cinco procedimientos quedaron creados.';
 GO

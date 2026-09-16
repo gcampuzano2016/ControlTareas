@@ -21,9 +21,17 @@ namespace CapaEntidad
         /// <summary>
         /// Se activa en cualquiera de estos casos: el insumo o los parametros
         /// llegan nulos; alguna hora (50% o 100%) es negativa; o el salario
-        /// vigente o el divisor son cero. En todos, la hora ordinaria y los
-        /// totales quedan en cero -nunca un numero negativo o inventado. La
-        /// fila se muestra en rojo y bloquea el cierre del periodo: no es un
+        /// vigente o el divisor son cero. En todos, los totales en dinero
+        /// quedan en cero -nunca un numero negativo o inventado.
+        ///
+        /// TotalHoras es la excepcion y la diferencia es deliberada: con horas
+        /// negativas queda en cero, porque el dato es basura y un negativo no
+        /// debe colarse en una columna que alguien suma; pero con salario o
+        /// divisor en cero conserva la suma de horas, porque esas horas son
+        /// validas -las cargo un jefe- y lo que falta es el sueldo. Ponerla en
+        /// cero ahi borraria de la pantalla que esa persona trabajo.
+        ///
+        /// La fila se muestra en rojo y bloquea el cierre del periodo: no es un
         /// error de programa, es un dato que alguien tiene que arreglar.
         /// </summary>
         public bool TieneAdvertencia { get; set; }

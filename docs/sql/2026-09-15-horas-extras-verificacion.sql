@@ -44,6 +44,7 @@ DECLARE @EsperadoConHorarioAsignado    INT = 58;
 DECLARE @FechaCorte                    DATE = '2026-09-30';
 DECLARE @EsperadoConSueldoVigente      INT = 64;
 DECLARE @EsperadoVigenteEsAjuste       INT = 5;
+DECLARE @EsperadoEmpateDeFechas        INT = 5;
 
 SELECT Comprobacion = 'colaboradores cargados (esperado ' + CONVERT(VARCHAR(12), @EsperadoColaboradores) + ')',
        Valor        = CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_ColaboradorParametro
@@ -98,7 +99,21 @@ SELECT 'sueldos con Monto no positivo (esperado ' + CONVERT(VARCHAR(12), @Espera
        CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Monto <= 0
 UNION ALL
 SELECT 'sueldos con Observacion informada (esperado ' + CONVERT(VARCHAR(12), @EsperadoConObservacion) + ')',
-       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Observacion IS NOT NULL;
+       CONVERT(VARCHAR(12), COUNT(*)) FROM dbo.HE_Salario WHERE Observacion IS NOT NULL
+UNION ALL
+/* Esta comprobacion existe para que la del desempate, mas abajo, no se
+   vuelva una prueba vacia. Esa consulta ordena por fecha DESC y solo
+   despues por Origen: si los ajustes llegaran con fecha POSTERIOR al rol
+   en vez de la misma, la fecha resolveria sola y el desempate por Origen
+   no se ejercitaria nunca -pero la consulta seguiria devolviendo 64 y 5,
+   aparentando que probo algo-. Este conteo afirma que el empate existe.
+   Si algun dia baja de 5, la comprobacion del desempate dejo de tener
+   sentido y hay que revisarla, no ignorarla. */
+SELECT 'empleados con dos sueldos en la MISMA fecha de vigencia (esperado '
+       + CONVERT(VARCHAR(12), @EsperadoEmpateDeFechas) + ')',
+       CONVERT(VARCHAR(12), COUNT(*)) FROM (
+    SELECT IdEmpleado, FechaVigenciaDesde FROM dbo.HE_Salario
+     GROUP BY IdEmpleado, FechaVigenciaDesde HAVING COUNT(*) > 1) y;
 
 /* La jornada que declara la plantilla contra la que el sistema ya conoce.
    Esto NO corrige nada: reporta para que RRHH lo mire, porque el Excel no es

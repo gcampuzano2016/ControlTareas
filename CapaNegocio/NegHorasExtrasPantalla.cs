@@ -207,6 +207,96 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Traduce el codigo del procedimiento de cierre a algo que una persona
+        /// pueda leer. Funcion pura y publica para poder probarla sin base.
+        /// </summary>
+        public static string MensajeDeCierre(int codigo, int filasConProblema)
+        {
+            if (codigo == -1) { return "Ese periodo no existe."; }
+            if (codigo == -2) { return "Solo se puede cerrar un periodo abierto."; }
+
+            if (codigo == -3)
+            {
+                string cuantas = filasConProblema == 1
+                                 ? "Hay 1 fila"
+                                 : "Hay " + filasConProblema.ToString() + " filas";
+
+                return cuantas + " sin sueldo vigente, con el valor hora en cero. "
+                     + "Corrija el sueldo de esas personas antes de cerrar: el periodo "
+                     + "quedaria congelado con un pago que nadie calculo.";
+            }
+
+            return "No se pudo cerrar el periodo.";
+        }
+
+        /// <summary>Cierra el periodo y devuelve la pantalla ya en estado cerrado.</summary>
+        public static EntRespuesta CerrarPeriodo(int idPeriodo, string usuario, string ip)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            int filasConProblema;
+            int codigo = DaoHorasExtras.CerrarPeriodo(idPeriodo, usuario, ip, out filasConProblema);
+
+            if (codigo != 0)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = MensajeDeCierre(codigo, filasConProblema);
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
+            EntRespuesta pantalla = CargarPantalla(idPeriodo);
+
+            if (pantalla.estado == "1")
+            {
+                pantalla.mensaje = "Periodo cerrado. Ya no admite cambios.";
+                pantalla.tipoMensaje = "success";
+            }
+
+            return pantalla;
+        }
+
+        /// <summary>
+        /// Reabre un periodo cerrado.
+        ///
+        /// NO comprueba perfiles: eso es de la capa web, que es la unica que
+        /// conoce la sesion. Este metodo asume que quien llega aqui ya tiene
+        /// permiso, y por eso el handler tiene que comprobarlo ANTES.
+        /// </summary>
+        public static EntRespuesta ReabrirPeriodo(int idPeriodo, string usuario, string ip)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            int codigo = DaoHorasExtras.ReabrirPeriodo(idPeriodo, usuario, ip);
+
+            if (codigo == -1)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "Ese periodo no existe.";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
+            if (codigo != 0)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "Solo se puede reabrir un periodo cerrado.";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
+            EntRespuesta pantalla = CargarPantalla(idPeriodo);
+
+            if (pantalla.estado == "1")
+            {
+                pantalla.mensaje = "Periodo reabierto. Vuelve a admitir cambios.";
+                pantalla.tipoMensaje = "success";
+            }
+
+            return pantalla;
+        }
+
+        /// <summary>
         /// Abre un periodo: lo crea si no existe y le arma el snapshot, una fila
         /// por colaborador activo.
         ///
@@ -291,7 +381,11 @@ namespace CapaNegocio
 
                 if (salarioDelMaestro <= 0m && salarioCongelado > 0m) { filasConSalarioCongelado++; }
 
-                int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
+                /* auditar = false: son 62 filas de golpe por cada apertura o
+                   reapertura. Auditarlas llenaria la tabla de ruido y
+                   enterraria los cambios reales, que son lo unico que
+                   importa en una disputa de nomina. */
+                int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, false);
                 if (guardado != 0) { filasConError++; }
             }
 
@@ -481,7 +575,10 @@ namespace CapaNegocio
                que el mensaje diga la causa correcta. */
             bool seUsoSnapshot = salarioDelMaestro <= 0m && salarioCongelado > 0m;
 
-            int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip);
+            /* auditar = true: es una persona editando una fila, y registrar
+               eso es lo que el 8 funcional exige que no falte -el Excel no
+               dejaba rastro de quien escribio una hora-. */
+            int guardado = DaoHorasExtras.GuardarFila(idPeriodo, fila, usuario, ip, true);
 
             if (guardado == -2)
             {

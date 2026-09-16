@@ -127,7 +127,71 @@ namespace CapaDato
             salarios = historial;
         }
 
-        public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip)
+        /// <summary>
+        /// Cierra el periodo. Respuestas: 0 bien, -1 no existe, -2 no estaba
+        /// abierto, -3 hay filas con valor hora en cero -y cuantas, en
+        /// filasConProblema-.
+        /// </summary>
+        public static int CerrarPeriodo(int idPeriodo, string usuario, string ip, out int filasConProblema)
+        {
+            int resultado = -1;
+            int conProblema = 0;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeCerrarPeriodo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read())
+                    {
+                        resultado = Convert.ToInt32(dr["Respuestas"]);
+                        conProblema = Convert.ToInt32(dr["FilasConProblema"]);
+                    }
+                }
+            }
+
+            filasConProblema = conProblema;
+            return resultado;
+        }
+
+        /// <summary>
+        /// Reabre un periodo cerrado. Respuestas: 0 bien, -1 no existe,
+        /// -2 no estaba cerrado.
+        ///
+        /// Quien puede llamar a esto lo decide la capa web: la base no conoce
+        /// perfiles y este metodo no comprueba ninguno.
+        /// </summary>
+        public static int ReabrirPeriodo(int idPeriodo, string usuario, string ip)
+        {
+            int resultado = -1;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeReabrirPeriodo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
+        public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar)
         {
             int resultado = -1;
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
@@ -158,6 +222,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@Observacion", SqlDbType.VarChar, 400).Value = f.Observacion ?? "";
                 cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
                 cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Auditar", SqlDbType.Bit).Value = auditar;
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())

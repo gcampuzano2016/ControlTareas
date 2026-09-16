@@ -395,5 +395,31 @@ namespace CapaPruebas
         {
             Assert.IsFalse(NegHorasExtrasPantalla.FilaSinCambios(FilaCompleta(), null));
         }
+
+        /// <summary>
+        /// El cierre traduce cada codigo del procedimiento a un mensaje distinto.
+        /// Un "no se pudo cerrar" generico obligaria a la persona a adivinar si
+        /// el problema es suyo, del periodo, o de los datos.
+        /// </summary>
+        [TestMethod]
+        public void MensajeDeCierre_CadaCodigoDiceAlgoDistinto()
+        {
+            string noExiste = NegHorasExtrasPantalla.MensajeDeCierre(-1, 0);
+            string noAbierto = NegHorasExtrasPantalla.MensajeDeCierre(-2, 0);
+            string enCero = NegHorasExtrasPantalla.MensajeDeCierre(-3, 7);
+
+            Assert.AreNotEqual(noExiste, noAbierto);
+            Assert.AreNotEqual(noAbierto, enCero);
+            StringAssert.Contains(enCero, "7", "el mensaje tiene que decir cuantas filas estan mal");
+        }
+
+        [TestMethod]
+        public void MensajeDeCierre_ConUnaSolaFila_NoDicePluralRaro()
+        {
+            string uno = NegHorasExtrasPantalla.MensajeDeCierre(-3, 1);
+
+            StringAssert.Contains(uno, "1");
+            Assert.IsFalse(uno.Contains("1 filas"), "con una fila el texto no debe decir '1 filas'");
+        }
     }
 }

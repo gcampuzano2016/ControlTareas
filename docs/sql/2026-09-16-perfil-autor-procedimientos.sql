@@ -20,6 +20,17 @@
    todavia no manda, y el modulo entero dejaria de guardar. Con el valor por
    omision, los binarios viejos se comportan igual que hoy.
 
+   Durante esa ventana -SQL puesto, binarios viejos- Empleados.Usu_ModificacionCod
+   y Emp_CargaFamiliar.Usu_Modificacion se llenan con el codigo del DUENO del
+   perfil, indistinguible de un autor real: los primeros valores de esas dos
+   columnas no prueban que nadie de Talento Humano haya tocado nada.
+
+   EL SENTIDO INVERSO NO ES SEGURO. Con SQL viejo y binarios nuevos -el que se
+   saltea este paso, y tambien el que revierte el SQL con los binarios ya
+   puestos- DaoPerfil manda @Usu_Accion por nombre a procedimientos que no lo
+   declaran: el modulo entero deja de guardar y el usuario ve en pantalla el
+   texto crudo de SQL Server.
+
    Sp_RTA_PerfilEliminarFoto NO esta aca: hace un DELETE fisico y, borrada la
    fila, no hay columna donde anotar al autor.
 
@@ -226,8 +237,10 @@ GO
 
    El WHERE de la edicion lleva Cod_Usuario ademas del IdContacto a proposito:
    sin eso, mandar el IdContacto de otra persona editaria su contacto. El
-   IdContacto viene del cliente y no se puede confiar en el; el Cod_Usuario
-   viene de la sesion y si.
+   IdContacto viene del cliente y no se puede confiar en el. El Cod_Usuario
+   tambien puede venir del cliente -es asi desde que Talento Humano puede
+   corregir el perfil de otro-; lo que lo hace confiable no es su origen sino
+   que NegPerfilAcceso ya decidio que este autor puede escribir ESE perfil.
 
    @CodigoRepetido reproduce EXACTAMENTE el mismo calculo y el mismo criterio
    -solo usuarios activos- que Sp_RTA_PerfilColaborador y
@@ -1110,8 +1123,36 @@ GO
    Si devuelve filas: anotarlas, correr el script, y volver a otorgar esos
    mismos permisos despues. No alcanza con mirar: el DROP ya los descarto.
 
-SELECT * FROM sys.database_permissions
- WHERE major_id IN (SELECT object_id FROM sys.procedures WHERE name LIKE 'Sp_RTA_Perfil%');
+   Esta consulta es toda la mitigacion del DROP+CREATE, asi que esta escrita
+   para ser de fiar y no para ser corta:
+
+     - class = 1 (OBJECT_OR_COLUMN) es obligatorio. sys.database_permissions
+       guarda permisos de muchas clases y major_id significa una cosa distinta
+       en cada una -en class 0 es la base, en class 4 un principal, en class 3
+       un esquema-, asi que sin el filtro el IN puede emparejar por numero un
+       permiso que no tiene nada que ver con estos procedimientos y hacer creer
+       que hay algo que reponer donde no lo hay.
+
+     - La lista es la de los 14 que ESTE script dropea, nombrados uno por uno, y
+       no 'Sp_RTA_Perfil%', que son 19: los otros 5 -Sp_RTA_PerfilEliminarFoto y
+       los cuatro de lectura- no se tocan aca y sus permisos no corren peligro.
+       Mezclarlos solo agrega filas que confunden.
+
+SELECT  procedimiento = OBJECT_NAME(dp.major_id),
+        beneficiario  = USER_NAME(dp.grantee_principal_id),
+        dp.permission_name,
+        dp.state_desc
+  FROM  sys.database_permissions dp
+ WHERE  dp.class = 1
+   AND  OBJECT_NAME(dp.major_id) IN
+        ('Sp_RTA_PerfilGuardarContacto',       'Sp_RTA_PerfilGuardarEmergencia',
+         'Sp_RTA_PerfilEliminarEmergencia',    'Sp_RTA_PerfilGuardarEstudio',
+         'Sp_RTA_PerfilEliminarEstudio',       'Sp_RTA_PerfilGuardarCertificacion',
+         'Sp_RTA_PerfilEliminarCertificacion', 'Sp_RTA_PerfilGuardarExperiencia',
+         'Sp_RTA_PerfilEliminarExperiencia',   'Sp_RTA_PerfilGuardarCargaFamiliar',
+         'Sp_RTA_PerfilEliminarCargaFamiliar', 'Sp_RTA_PerfilGuardarFoto',
+         'Sp_RTA_PerfilGuardarDocumento',      'Sp_RTA_PerfilEliminarDocumento')
+ ORDER BY procedimiento, beneficiario;
 
    ----------------------------------------------------------------------------
    2. DESPUES DE CORRER ESTE SCRIPT: que los 14 tengan el parametro

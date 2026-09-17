@@ -64,6 +64,25 @@ GO
 DECLARE @TipoCargaFam  VARCHAR(128), @LargoCargaFam  INT,
         @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
 
+/* Cuatro variables mas, que existen SOLO para el texto del mensaje.
+
+   RAISERROR admite como argumentos de sustitucion literales y variables
+   locales, nada mas: una llamada a funcion ahi -un ISNULL(), por ejemplo- da
+   "Msg 102, Incorrect syntax near 'ISNULL'". Y eso no seria solo un mensaje
+   feo: el DECLARE, los dos SELECT, el IF y el SET NOEXEC ON viven todos en el
+   MISMO lote, asi que un error de analisis se lleva puesta la guarda entera,
+   el script sigue con los ALTER TABLE y una columna del tipo equivocado pasa
+   por buena con un PRINT de "ya existia" -exactamente el escenario para el que
+   se escribio esta guarda-.
+
+   Se normaliza sobre variables aparte, y no sobre las cuatro de arriba, porque
+   el IF de abajo distingue NULL (la columna no existe: caso normal, no hay
+   nada que comprobar) de no NULL (existe y hay que mirarle el tipo).
+   Normalizar antes del IF borraria esa distincion y la guarda cambiaria de
+   sentido. Se llenan DENTRO del BEGIN, cuando el IF ya decidio. */
+DECLARE @MsgTipoCargaFam  VARCHAR(128), @MsgLargoCargaFam  INT,
+        @MsgTipoEmpleados VARCHAR(128), @MsgLargoEmpleados INT;
+
 SELECT @TipoCargaFam  = t.name,
        @LargoCargaFam = c.max_length
   FROM sys.columns c
@@ -84,7 +103,14 @@ SELECT @TipoEmpleados  = t.name,
 IF    (@TipoCargaFam  IS NOT NULL AND NOT (@TipoCargaFam  = 'varchar' AND (@LargoCargaFam  >= 50 OR @LargoCargaFam  = -1)))
    OR (@TipoEmpleados IS NOT NULL AND NOT (@TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1)))
 BEGIN
-    RAISERROR('Alguna columna de autor ya existe con un tipo que no sirve. Encontrado: Emp_CargaFamiliar.Usu_Modificacion = %s de largo %d y Empleados.Usu_ModificacionCod = %s de largo %d. En las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. No se creo ni se modifico ninguna columna, y el RESTO DE ESTE SCRIPT NO SE EJECUTO: revisar a mano que columna es esa y, una vez corregida, volver a correr este script entero. Script detenido.', 16, 1, ISNULL(@TipoCargaFam,'(no existe)'), ISNULL(@LargoCargaFam,0), ISNULL(@TipoEmpleados,'(no existe)'), ISNULL(@LargoEmpleados,0));
+    /* Recien aca, con el IF ya decidido: normalizar antes habria cambiado la
+       condicion de arriba, que necesita ver los NULL. */
+    SET @MsgTipoCargaFam   = ISNULL(@TipoCargaFam,  '(no existe)');
+    SET @MsgLargoCargaFam  = ISNULL(@LargoCargaFam,  0);
+    SET @MsgTipoEmpleados  = ISNULL(@TipoEmpleados, '(no existe)');
+    SET @MsgLargoEmpleados = ISNULL(@LargoEmpleados, 0);
+
+    RAISERROR('Alguna columna de autor ya existe con un tipo que no sirve. Encontrado: Emp_CargaFamiliar.Usu_Modificacion = %s de largo %d y Empleados.Usu_ModificacionCod = %s de largo %d. En las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. No se creo ni se modifico ninguna columna, y el RESTO DE ESTE SCRIPT NO SE EJECUTO: revisar a mano que columna es esa y, una vez corregida, volver a correr este script entero. Script detenido.', 16, 1, @MsgTipoCargaFam, @MsgLargoCargaFam, @MsgTipoEmpleados, @MsgLargoEmpleados);
     SET NOEXEC ON;
 END
 GO

@@ -216,7 +216,10 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Guarda el contacto del usuario de la sesion.
+        /// Guarda el contacto del perfil que indica PerfilIdentidad.Objetivo,
+        /// anotando como autor del cambio a PerfilIdentidad.Autor. No son lo
+        /// mismo: el perfil puede ser el de otro -Talento Humano corrigiendo-,
+        /// el autor sale siempre de la sesion.
         ///
         /// El payload pasa por NegPerfilCampos.LeerContacto, que solo lee las
         /// cuatro claves permitidas -eso filtra claves ajenas, como cargo o
@@ -258,7 +261,9 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Guarda un contacto de emergencia del usuario de la sesion.
+        /// Guarda un contacto de emergencia del perfil que indica
+        /// PerfilIdentidad.Objetivo, anotando como autor a
+        /// PerfilIdentidad.Autor.
         ///
         /// IdContacto = 0 es alta; cualquier otro valor, edicion. El navegador
         /// no valida nada -AgregarEmergencia() en miPerfil.js envia lo que
@@ -307,7 +312,8 @@ namespace JsonJQueryNetPerfil
             }
         }
 
-        /// <summary>Elimina (borrado logico) un contacto de emergencia del usuario de la sesion.</summary>
+        /// <summary>Elimina (borrado logico) un contacto de emergencia del perfil que
+        /// indica PerfilIdentidad.Objetivo, anotando como autor a PerfilIdentidad.Autor.</summary>
         private string EliminarEmergencia(HttpContext context, dynamic campos)
         {
             try
@@ -335,10 +341,18 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Las ocho escrituras de la hoja de vida comparten la misma forma:
-        /// identidad de la sesion, validacion en el servidor, y recien entonces
-        /// la base. La validacion va aqui y no solo en el navegador porque este
-        /// handler es alcanzable por HTTP directo.
+        /// Las ocho escrituras de la hoja de vida comparten la misma forma: dos
+        /// identidades, validacion en el servidor, y recien entonces la base.
+        ///
+        /// Las dos identidades no son la misma y no hay que volver a juntarlas.
+        /// DE QUIEN es el perfil lo resuelve PerfilIdentidad.Objetivo -puede ser
+        /// el de otro, si NegPerfilAcceso lo permite- y va a codUsuario. QUIEN
+        /// hace el cambio lo da PerfilIdentidad.Autor, que sale siempre de la
+        /// sesion y el cliente no puede influir, y va a codAutor. Reemplazar una
+        /// por la otra rompe la correccion de perfiles ajenos o falsea el autor.
+        ///
+        /// La validacion va aqui y no solo en el navegador porque este handler
+        /// es alcanzable por HTTP directo.
         /// </summary>
         private string GuardarEstudio(HttpContext context, dynamic campos)
         {
@@ -576,7 +590,8 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Guarda la foto del usuario de la sesion.
+        /// Guarda la foto del perfil que indica PerfilIdentidad.Objetivo,
+        /// anotando como autor a PerfilIdentidad.Autor.
         ///
         /// El navegador reduce la imagen a 256x256 y la manda en base64 por el
         /// mismo canal JSON que todo lo demas, en vez de por multipart: son unos
@@ -791,7 +806,8 @@ namespace JsonJQueryNetPerfil
             }
         }
 
-        /// <summary>Borrado logico de un documento del usuario de la sesion.</summary>
+        /// <summary>Borrado logico de un documento del perfil que indica
+        /// PerfilIdentidad.Objetivo, anotando como autor a PerfilIdentidad.Autor.</summary>
         private string EliminarDocumento(HttpContext context, dynamic campos)
         {
             try

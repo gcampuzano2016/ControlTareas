@@ -221,8 +221,66 @@ Esta fase también sube `horasExtras.js` de `?v=5` a `?v=6` y agrega
 `parametrosHorasExtras.js?v=1`. Verifica con Ctrl+F5 después de copiar los
 binarios -ver sección 5-.
 
+**La entrega 1 del Perfil del colaborador separa de quién es el perfil de quién
+lo toca, y trae dos scripts que corren en orden.** Primero
+`docs/sql/2026-09-16-perfil-autor-columnas.sql`, después
+`docs/sql/2026-09-16-perfil-autor-procedimientos.sql`, y recién después los
+binarios. El orden entre los dos scripts no es negociable: el segundo recrea
+tres procedimientos que escriben en las columnas que crea el primero, y si el
+primero no corrió se detiene solo con un mensaje que lo dice.
+
+El primero agrega `Emp_CargaFamiliar.Usu_Modificacion` y
+`Empleados.Usu_ModificacionCod`, las dos `varchar(50)` y nulas. El segundo
+recrea con `DROP`+`CREATE` los 14 procedimientos de escritura del módulo, cada
+uno con un parámetro nuevo `@Usu_Accion` -el autor del cambio-, opcional a
+propósito para que los binarios viejos sigan funcionando entre un paso y el
+otro.
+
+> **Antes de correr el segundo script, ejecuta la consulta de permisos que está
+> en su bloque `VERIFICACION`.** El `DROP` de cada uno de los 14 se lleva
+> puestos los permisos a nivel de objeto -un `GRANT EXECUTE` a un usuario o a un
+> rol- y el `CREATE` no los repone; ningún script de `docs/sql/` tiene un
+> `GRANT`, así que si se pierden no hay de dónde recuperarlos y el módulo de
+> perfil empieza a fallar con *"EXECUTE permission denied"* para todos. Lo
+> esperable es que devuelva **cero filas**. Si devuelve filas, anótalas antes de
+> correr el script y vuelve a otorgar esos mismos permisos después: mirar
+> después no sirve, el `DROP` ya los descartó.
+
+**Estos binarios llevan dentro las fases 2, 3a y 3b del módulo de perfil**, que
+estaban esperando desde el 2026-09-15 con su esquema ya aplicado y sin
+desplegar. Salen todas juntas en este mismo despliegue, así que la pantalla
+*Mi perfil* va a cambiar bastante más de lo que sugiere el nombre de la entrega:
+hoja de vida, foto y documentos de respaldo aparecen en la misma parada.
+
+> **El margen entre el script y los binarios funciona en un solo sentido.** SQL
+> nuevo con binarios viejos es seguro: `@Usu_Accion` tiene valor por omisión y
+> el módulo se comporta igual que antes. **SQL viejo con binarios nuevos deja
+> todo el módulo sin guardar**, porque `DaoPerfil` manda `@Usu_Accion` por
+> nombre a procedimientos que no lo declaran y el usuario ve en pantalla el
+> texto crudo de SQL Server. Es el caso de quien se saltea el script, y también
+> el de quien revierte el SQL con los binarios ya puestos: si hay que volver
+> atrás, se vuelven atrás los binarios primero.
+
+Ese margen tampoco es de trazabilidad, igual que en Horas Extras: mientras
+corran los binarios viejos, `Empleados.Usu_ModificacionCod` y
+`Emp_CargaFamiliar.Usu_Modificacion` se llenan con el código del **dueño** del
+perfil, indistinguible de un autor real. Los primeros valores de esas dos
+columnas no prueban que nadie de Talento Humano haya tocado nada.
+
+Los tres scripts de origen del módulo -`2026-09-14-perfil-colaborador.sql`,
+`2026-09-14-perfil-colaborador-fase2.sql` y
+`2026-09-15-perfil-colaborador-fase3a.sql`- ahora traen su propio guard, igual
+que el de la fase 3 de Horas Extras: si detectan que `@Usu_Accion` ya está
+aplicado, se saltan enteros con `NOEXEC`. **No los vuelvas a correr a mano
+pensando que son inofensivos por ser idempotentes**: recrearían los 14
+procedimientos sin `@Usu_Accion` y, los dos primeros, además devolverían
+`Sp_RTA_PerfilColaborador` a una versión más vieja que la vigente.
+
 Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Los
-`PRINT` te dicen si creó algo o si ya existía.
+`PRINT` te dicen si creó algo o si ya existía. La excepción son los scripts que
+una entrega posterior dejó atrás -la fase 3 de Horas Extras y los tres de origen
+del Perfil del colaborador-: esos traen un guard que los detiene solos, y el
+mensaje te dice cuál es el script vigente.
 
 ---
 

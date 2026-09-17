@@ -810,12 +810,30 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns
                    WHERE object_id = OBJECT_ID('dbo.Empleados')
                      AND name = 'Usu_ModificacionCod')
 BEGIN
+    /* SET NOEXEC ON y no RETURN: RETURN fuera de un procedimiento sale del LOTE,
+       no del script. Despues del GO la ejecucion seguiria y los 14 CREATE
+       PROCEDURE se intentarian igual, fallando uno por uno con errores de
+       columna inexistente en vez de con este mensaje. NOEXEC hace que los lotes
+       siguientes se analicen pero no se ejecuten. Se apaga al final del archivo. */
     RAISERROR('Falta correr 2026-09-16-perfil-autor-columnas.sql. Script detenido.', 16, 1);
-    RETURN;
+    SET NOEXEC ON;
 END
 GO
 
 PRINT '== Perfil: el autor en los 14 procedimientos - inicio ==';
+GO
+```
+
+Y **al final del archivo**, despues del ultimo procedimiento, siempre:
+
+```sql
+/* Incondicional: si la guarda de arriba encendio NOEXEC, apagarlo aca es lo que
+   evita que el resto de la sesion de SSMS quede sin ejecutar nada y parezca que
+   los scripts siguientes "no hacen nada". */
+SET NOEXEC OFF;
+GO
+
+PRINT '== Perfil: el autor en los 14 procedimientos - fin ==';
 GO
 ```
 
@@ -959,7 +977,7 @@ Repetir la misma forma para los otros 14. Dos advertencias concretas:
         }
 ```
 
-- **`GuardarEmergencia`, `GuardarEstudio`, `GuardarCertificacion`, `GuardarExperiencia`, `GuardarCargaFamiliar` y `GuardarDocumento`** usan `EjecutarEscrituraConId` (línea 332), no `EjecutarEscritura`. Se les agrega `@Usu_Accion` igual; lo que no cambia es cómo leen el id de vuelta.
+- **`GuardarDocumento` es el único que usa `EjecutarEscrituraConId`** (el ayudante de la línea 332); los otros catorce van por `EjecutarEscritura`. Se le agrega `@Usu_Accion` igual que a los demás; lo que no cambia es cómo lee el id de vuelta. Verificado método por método sobre `CapaDato/DaoPerfil.cs`, no supuesto.
 
 - [ ] **Step 2: Convertir los 15 métodos de `NegPerfil`**
 
@@ -1191,7 +1209,7 @@ y en la llamada a `NegPerfil`, agregar `codAutor` en segundo lugar.
 Los **tres sitios que no reciben `campos`** usan su propio extractor:
 
 - `CargarPerfil(HttpContext context)` — línea 185. Es lectura: **no necesita `codAutor`**. Cambiar la firma a `CargarPerfil(HttpContext context, dynamic campos)`, usar `CodigoPedidoJson(campos)`, y actualizar el despacho de la línea 47 a `CargarPerfil(context, parametros[0]["parameters"])`.
-- `EliminarFoto(HttpContext context)` — línea 547. Cambiar la firma a `EliminarFoto(HttpContext context, dynamic campos)`, usar `CodigoPedidoJson(campos)`, y actualizar el despacho de la línea 125.
+- `EliminarFoto(HttpContext context)` — línea 547. Cambiar la firma a `EliminarFoto(HttpContext context, dynamic campos)`, usar `CodigoPedidoJson(campos)`, y actualizar el despacho de la línea 126.
 - `SubirDocumento(HttpContext context)` — línea 577. Es la rama multipart: usa `PerfilIdentidad.CodigoPedidoFormulario(context)`.
 
 **No tocar `ListaEquipo` (738) ni `PerfilEquipo` (772).** Ahí el código de la sesión es el del **jefe**, no el del dueño de un perfil. Siguen llamando a `CodUsuarioSesion`, que por eso se conserva.
@@ -1237,6 +1255,11 @@ por:
 
             string codUsuario = objetivo.CodUsuario;
 ```
+
+Y **borrar el ayudante `CodUsuarioSesion` de ese archivo** (`DescargarPerfil.ashx.cs:171`).
+La línea 31 era su **única** llamada; al reemplazarla queda como método privado muerto.
+Ojo con no confundirse: en `AdministrarPerfil.ashx.cs` ese mismo ayudante **se queda**,
+porque `ListaEquipo` y `PerfilEquipo` lo siguen usando.
 
 - [ ] **Step 4: Compilar la solución entera**
 

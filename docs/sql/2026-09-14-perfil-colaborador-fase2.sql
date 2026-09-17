@@ -26,6 +26,43 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
+/* ----------------------------------------------------------- GUARD -------- */
+/* Si la entrega del autor del cambio ya esta aplicada, este script NO debe
+   volver a correr.
+
+   docs/sql/2026-09-16-perfil-autor-procedimientos.sql recrea los 14
+   procedimientos de escritura del modulo con un parametro mas, @Usu_Accion,
+   que es lo que distingue al AUTOR de un cambio del DUENO del perfil. Este
+   script define ocho de esos catorce -los de estudios, certificaciones,
+   experiencia y cargas familiares- SIN ese parametro. Volver a correrlo deja
+   SQL viejo debajo de binarios nuevos: DaoPerfil manda @Usu_Accion por nombre,
+   el procedimiento no lo declara, y esas escrituras fallan con SqlException
+   -el usuario ve el texto crudo de SQL Server- hasta que alguien vuelva a
+   correr el script del 2026-09-16.
+
+   Ademas este script define su propia version de Sp_RTA_PerfilColaborador, que
+   ya no es la vigente -lo es la de la fase 3a-, asi que volver a correrlo
+   tambien retrocede la LECTURA del perfil y se pierde el result set de la foto.
+
+   DESPLIEGUE.md dice que los scripts son idempotentes y que ante la duda se
+   vuelva a correr uno. Para este deja de ser cierto desde la entrega del
+   autor: de ahi este guard.
+
+   Se salta el script entero, no un pedazo: CREATE PROCEDURE tiene que ser la
+   primera instruccion de su lote y no se puede envolver en un IF. NOEXEC hace
+   que los lotes siguientes se analicen pero no se ejecuten. Se apaga al final
+   del archivo.
+
+   La senal es el parametro @Usu_Accion en Sp_RTA_PerfilGuardarContacto. */
+IF EXISTS (SELECT 1 FROM sys.parameters
+            WHERE object_id = OBJECT_ID('dbo.Sp_RTA_PerfilGuardarContacto')
+              AND name = '@Usu_Accion')
+BEGIN
+    RAISERROR('Este script quedo superado por docs/sql/2026-09-16-perfil-autor-procedimientos.sql. Sus ocho procedimientos de la hoja de vida no tienen @Usu_Accion y su Sp_RTA_PerfilColaborador ya no es la vigente, asi que volver a correrlo REVERTIRIA el modulo de perfil: esas escrituras fallarian con los binarios desplegados. No se ejecuto nada. Script detenido.', 16, 1);
+    SET NOEXEC ON;
+END
+GO
+
 /* ---------------------------------------------------------- 1. estudios --- */
 
 IF OBJECT_ID('dbo.Sp_RTA_PerfilGuardarEstudio','P') IS NOT NULL
@@ -707,4 +744,10 @@ PRINT 'Aserciones de la fase 2 OK.';
 GO
 
 PRINT 'Script 2026-09-14-perfil-colaborador-fase2 completado.';
+GO
+
+/* Incondicional: deshace el guard de la cabecera. Sin esto, la sesion de quien
+   corrio el script se quedaria en NOEXEC y todo lo que ejecutara despues -en la
+   misma ventana- se analizaria sin ejecutarse, en silencio. */
+SET NOEXEC OFF;
 GO

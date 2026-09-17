@@ -134,6 +134,14 @@ deja de listar.
 | script SQL, después los binarios | correcto |
 | binarios, después el script SQL | **falla** — la pantalla no lista nada hasta que corras el script |
 
+> **Hay una excepción documentada**, y es el script de menú de la entrega 2 del
+> Perfil del colaborador (`2026-09-17-perfil-personal-menu.sql`): ése va
+> **después** de copiar los archivos, porque es el único que produce algo
+> visible y antes de los binarios deja a los perfiles 14 y 18 una opción de menú
+> que da 404. El porqué y el orden completo están más abajo, en la sección de
+> esa entrega. Si un script futuro solo toca el menú, se le aplica el mismo
+> razonamiento.
+
 El orden correcto es seguro incluso si tardas en copiar los binarios: los
 procedimientos declaran los parámetros nuevos con valor por defecto, así que el
 código viejo los sigue llamando sin enterarse. Por eso hay margen entre un paso

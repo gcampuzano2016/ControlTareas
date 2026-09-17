@@ -11,9 +11,16 @@
 
     Los id de aqui adentro son los que busca miPerfil.js. No renombrar ninguno.
 
-    La pestana Equipo esta en el control pero PerfilesPersonal.aspx no la dibuja:
-    ListaEquipo toma al jefe de la SESION, asi que alli mostraria el equipo de
-    quien mira con el nombre de otro en la cabecera.
+    La pestana Equipo la trae SIEMPRE este control, tambien en PerfilesPersonal.aspx:
+    el marcado es el mismo para las dos pantallas. Lo que la mantiene apagada alli
+    no esta en el .aspx -no busques la linea que no la dibuja, no existe- sino en
+    miPerfil.js: nace con display:none y solo MostrarPestanaEquipo la enciende,
+    y esa funcion no hace nada cuando hay un perfil ajeno fijado (_codObjetivo).
+
+    La razon es que ListaEquipo y PerfilEquipo toman al jefe de la SESION, no al
+    dueno del perfil que se esta mirando: encendida sobre un perfil ajeno mostraria
+    el equipo de quien mira con el nombre de otro en la cabecera. No es cosmetica,
+    es el dato de una persona bajo la etiqueta de otra.
 --%>
     <div id="page-wrapper" style="padding: 0px">
         <div class="row">

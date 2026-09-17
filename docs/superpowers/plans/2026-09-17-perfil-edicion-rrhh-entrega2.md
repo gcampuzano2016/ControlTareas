@@ -642,7 +642,7 @@ Tres cambios, y sólo tres, sobre lo copiado:
 <%@ Register Src="~/Controles/PerfilFichas.ascx" TagPrefix="rta" TagName="PerfilFichas" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=8" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=9" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -928,8 +928,8 @@ Crear `ReporteTareas/Formulario/PerfilesPersonal.aspx`, **con BOM**:
 <%@ Register Src="~/Controles/PerfilFichas.ascx" TagPrefix="rta" TagName="PerfilFichas" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=8" type="text/javascript"></script>
-    <script src="../js/perfilesPersonal.js?v=1" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=9" type="text/javascript"></script>
+    <script src="../js/perfilesPersonal.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

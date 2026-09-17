@@ -163,7 +163,9 @@ para 14 y 18, y eso **no** es la barrera. La barrera es esta función.
 ### Las llamadas: 16 cambian, 2 se quedan
 
 `AdministrarPerfil.ashx.cs` tiene 18 apariciones de `CodUsuarioSesion(context)`.
-**Solo 16 cambian.**
+**Solo 16 cambian.** (Ojo: son 16 *sitios de `CodUsuarioSesion`*. No confundir con los
+despachos que leen `parameters`, que son otra cuenta y en la entrega 2 llegaron a 18.
+Mezclar las dos cuentas costó una tarea detenida.)
 
 Las 16 son `CargarPerfil` y las 15 escrituras: pasan a
 `PerfilIdentidad.Objetivo(context, ...)` para el **dueño**, y las escrituras
@@ -272,7 +274,10 @@ El movimiento es **solo marcado**: se corta el contenido de `<asp:Content>` y se
 pega. No se mueve lógica, porque `MiPerfil.aspx.cs` no tiene ninguna más allá de
 `RedireccionarALogin`.
 
-> **La pestaña «Equipo» no se dibuja en la pantalla nueva.** No es cosmética.
+> **La pestaña «Equipo» no se muestra en la pantalla nueva.** El control la trae
+> siempre —es el mismo marcado para las dos pantallas—; lo que la mantiene apagada
+> es `miPerfil.js`, que no la enciende cuando hay un perfil ajeno fijado. No hay
+> ninguna línea en el `.aspx` que deje de dibujarla: no la busques. Y no es cosmética.
 > `ListaEquipo` y `PerfilEquipo` siguen tomando al jefe **de la sesión**, así que
 > al abrir el perfil de otra persona esa pestaña mostraría el equipo de *quien
 > mira*, no el del perfil abierto — con el nombre de otro en la cabecera. El
@@ -441,3 +446,31 @@ El SQL siempre antes que los binarios, como manda `DESPLIEGUE.md`.
 | Primer `.ascx` del repositorio | El movimiento es solo marcado; si sale mal, se nota al primer render y no en producción. |
 | 14 procedimientos cambiados a mano | Un solo script, los 14 juntos, revisable de una sentada. |
 | Tocar dos tablas de Talento Humano | Solo se **agregan** columnas anulables; ningún `INSERT` existente las nombra. |
+
+
+---
+
+## Nota para quien reuse `PerfilFichas.ascx` en una tercera pantalla
+
+El control trae dentro el modal de avisos (`#modalMensajeInformativo`). **Si lo
+embebés dentro de un contenedor que arranque oculto, cualquier mensaje deja la
+página trabada tras un velo gris a pantalla completa, sin diálogo y sin forma de
+cerrarlo salvo recargar.**
+
+Bootstrap 3 sólo reubica un modal al `<body>` cuando el elemento no tiene padre;
+dentro del control lo tiene, así que le pone `display:block` a un nodo cuyo
+ancestro está oculto —el diálogo no se ve— pero igual agrega el `.modal-backdrop`
+y la clase `.modal-open`, y los manejadores de cierre quedan enganchados a un
+elemento que no recibe eventos.
+
+`perfilesPersonal.js` lo resuelve con una línea al principio de su `document.ready`:
+
+```javascript
+$("#modalMensajeInformativo").appendTo("body");
+```
+
+Está en el consumidor y no en el control a propósito —para no tocar «Mi perfil»,
+que funciona—, pero eso significa que **cada pantalla nueva que oculte el control
+tiene que acordarse de hacerlo**. Es el hallazgo Critical de la entrega 2, y se
+descubrió en la revisión final: ninguna revisión por tarea podía verlo, porque
+vive en la unión de dos tareas que por separado estaban bien.

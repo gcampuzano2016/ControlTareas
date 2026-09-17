@@ -115,8 +115,9 @@ namespace JsonJQueryNetPerfil
 
             if (!perfil.PerfilEncontrado)
             {
-                NoDisponible(context, "No pudimos identificar su perfil de forma única. " +
-                                      "Escriba a Talento Humano para que corrijan su código de usuario.");
+                NoDisponible(context, "No se pudo armar la hoja de vida: ese código de usuario " +
+                                      "está repetido entre usuarios activos y no se sabe de quién " +
+                                      "son los datos. Hay que corregirlo en el maestro de usuarios.");
                 return;
             }
 

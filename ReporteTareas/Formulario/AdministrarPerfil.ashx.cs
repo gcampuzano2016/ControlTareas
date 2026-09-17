@@ -49,112 +49,122 @@ namespace JsonJQueryNetPerfil
                 var Action = parametros[0]["action"];
                 bool existAction = false;
 
+                /* Se lee UNA vez y con tolerancia a que no venga. Antes cada accion
+                   hacia parametros[0]["parameters"] por su cuenta: un POST sin esa
+                   clave -ninguna pantalla manda uno, pero este handler es alcanzable
+                   por HTTP directo- lanzaba KeyNotFoundException fuera de todo try y
+                   mataba la peticion con un error de servidor en vez de con un JSON
+                   de error como el resto del modulo. */
+                var diccionarioRaiz = parametros[0] as System.Collections.Generic.IDictionary<string, object>;
+                object parametrosAccion = null;
+                if (diccionarioRaiz != null) { diccionarioRaiz.TryGetValue("parameters", out parametrosAccion); }
+
                 if (Action == "CargarPerfil")
                 {
                     existAction = true;
-                    responseAction.Append(CargarPerfil(context, parametros[0]["parameters"]));
+                    responseAction.Append(CargarPerfil(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarContacto")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarContacto(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarContacto(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarEmergencia")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarEmergencia(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarEmergencia(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarEmergencia")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarEmergencia(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarEmergencia(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarEstudio")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarEstudio(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarEstudio(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarEstudio")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarEstudio(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarEstudio(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarCertificacion")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarCertificacion(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarCertificacion(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarCertificacion")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarCertificacion(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarCertificacion(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarExperiencia")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarExperiencia(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarExperiencia(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarExperiencia")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarExperiencia(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarExperiencia(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarCargaFamiliar")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarCargaFamiliar(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarCargaFamiliar(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarCargaFamiliar")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarCargaFamiliar(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarCargaFamiliar(context, parametrosAccion));
                 }
 
                 if (Action == "GuardarFoto")
                 {
                     existAction = true;
-                    responseAction.Append(GuardarFoto(context, parametros[0]["parameters"]));
+                    responseAction.Append(GuardarFoto(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarFoto")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarFoto(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarFoto(context, parametrosAccion));
                 }
 
                 if (Action == "EliminarDocumento")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarDocumento(context, parametros[0]["parameters"]));
+                    responseAction.Append(EliminarDocumento(context, parametrosAccion));
                 }
 
                 if (Action == "ListaEquipo")
                 {
                     existAction = true;
-                    responseAction.Append(ListaEquipo(context, parametros[0]["parameters"]));
+                    responseAction.Append(ListaEquipo(context, parametrosAccion));
                 }
 
                 if (Action == "PerfilEquipo")
                 {
                     existAction = true;
-                    responseAction.Append(PerfilEquipo(context, parametros[0]["parameters"]));
+                    responseAction.Append(PerfilEquipo(context, parametrosAccion));
                 }
 
                 if (Action == "ListaPersonal")
                 {
                     existAction = true;
-                    responseAction.Append(ListaPersonal(context, parametros[0]["parameters"]));
+                    responseAction.Append(ListaPersonal(context, parametrosAccion));
                 }
 
                 if (!existAction)

@@ -1451,3 +1451,94 @@ SELECT Cod_Usuario, TelefonoPersonal, Usu_Modificacion, Fec_Modificacion
 ### D. Los cuatro códigos repetidos
 
 Buscarlos por nombre en el buscador: **no aparecen**. Es correcto y es lo que hay que avisarle a Talento Humano — esas personas necesitan que alguien les corrija el código en `R_Usuarios` antes de poder gestionarlas desde aquí.
+
+---
+
+## Verificación manual después del despliegue
+
+Se corre **después** de desplegar. Como esta entrega toca `miPerfil.js`, que es el archivo
+del que depende «Mi perfil», **hay que volver a correr entera la lista de la entrega 1**
+(al final de su plan) antes de empezar con ésta.
+
+> **Antes de nada:** confirmar que el `ReporteTareas.dll` del IIS es el recién publicado, y
+> que `PerfilesPersonal.aspx`, `Controles/PerfilFichas.ascx` y `js/perfilesPersonal.js`
+> llegaron al servidor. Si alguno no viajó, la pantalla da 404 o carga y no hace nada, **sin
+> ningún error de servidor**.
+
+### A. Antes de correr el script de menú
+
+Anotar qué opciones ve hoy en el menú **un usuario de perfil 14** y **uno de perfil 18**.
+Sirve una captura de pantalla.
+
+Esto no es ceremonia: el script hace `UPDATE Estado='0'` sobre la fila **del grupo**, y si
+esa fila estuviera en `'1'` para alguno de los dos, encenderla revelaría también cualquier
+**hoja hermana** que ya esté en `'0'` para ese perfil. Sin la foto de antes, no hay forma de
+notarlo después.
+
+### B. «Mi perfil» sigue igual para el usuario común
+
+Con un usuario **de perfil corriente**: cargar, guardar contacto, agregar y borrar un
+contacto de emergencia, subir y descargar un documento, descargar el CV, y —si es jefe— la
+pestaña **Equipo** sigue mostrando su equipo.
+
+El botón del CV tiene que seguir diciendo **«Descargar mi hoja de vida»**.
+
+Si algo de esto cambió, la entrega falló en su requisito central.
+
+### C. La pantalla nueva no existe para quien no debe
+
+1. Con un usuario corriente, **la opción no aparece en el menú**.
+2. Tecleando `PerfilesPersonal.aspx` en la barra de direcciones → **redirige a
+   `Principal.aspx`**; no muestra la pantalla vacía.
+3. Desde la consola del navegador en `MiPerfil.aspx`, con ese mismo usuario:
+
+```javascript
+$.ajax({ type:"POST", url:"AdministrarPerfil.ashx",
+  data: JSON.stringify([{action:"ListaPersonal", parameters:{filtro:"ar"}}]),
+  contentType:"application/json; charset=utf-8", dataType:"json",
+  success:function(r){ console.log(r); } });
+```
+
+→ **rechazo**. Éste es el caso que ni el menú ni la redirección protegen: el handler es
+alcanzable por HTTP directo.
+
+### D. La pantalla nueva funciona para Talento Humano
+
+Con un usuario **de perfil 14**:
+
+1. La opción aparece en el menú, colgando del mismo grupo que «Empleados».
+2. **Comparar el menú con la foto del punto A**: no tiene que haber aparecido **ninguna otra**
+   opción además de ésta. Si apareció alguna, es la hoja hermana que se reveló al encender el
+   grupo, y hay que decidir si corresponde que se vea.
+3. Buscar con **un** carácter → avisa que hacen falta dos, y no lista nada.
+4. Buscar con dos o más → lista personal activo, ordenado por nombre.
+5. Abrir a una persona → se muestran sus fichas, con su nombre en el aviso de arriba.
+6. **La pestaña «Equipo» NO aparece**, ni siquiera si esa persona es jefe. Es lo más fácil de
+   que se cuele, y si se colara mostraría el equipo **de quien mira** bajo el nombre de otro.
+7. El botón del CV dice **«Descargar la hoja de vida de \<nombre\>»** y entrega el CV **de esa
+   persona**.
+8. Guardar un cambio en su contacto, y comprobar en la base:
+
+```sql
+SELECT Cod_Usuario, TelefonoPersonal, Usu_Modificacion, Fec_Modificacion
+  FROM dbo.Perfil_ContactoPersonal
+ WHERE Cod_Usuario = 'CODIGO_DE_LA_OTRA_PERSONA';
+```
+
+`Cod_Usuario` es el de **la otra persona** y `Usu_Modificacion` el del **usuario de perfil
+14**. Si los dos son iguales, el autor no está llegando y la entrega 1 no está completa.
+
+9. Subir un documento al perfil de esa persona y volver a descargarlo desde la misma pantalla.
+
+### E. Los cuatro códigos repetidos
+
+Buscarlos por nombre: **no aparecen**, y es correcto. Hay que avisarle a Talento Humano: esas
+personas necesitan que alguien les corrija el código en `R_Usuarios` antes de poder
+gestionarlas desde aquí. Si no se les avisa, van a buscarlas, no las van a encontrar, y no van
+a tener forma de saber por qué.
+
+### Lo que no se puede comprobar a mano
+
+El borrado de compensación de `SubirDocumento` —el que deshace la fila cuando falla guardar el
+archivo en disco— también viaja con el código del perfil, pero provocarlo exige un fallo de
+escritura en el servidor. Queda verificado por lectura, no por ejecución.

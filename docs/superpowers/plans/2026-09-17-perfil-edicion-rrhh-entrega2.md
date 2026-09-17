@@ -305,8 +305,16 @@ BEGIN
        /* Misma regla que la lista de equipo: si el codigo esta repetido entre
           usuarios activos, Sp_RTA_PerfilColaborador se niega a abrir ese perfil.
           Mejor no listarlo que listarlo con un boton que nunca funciona. */
+       /* La comparacion va CRUDA, sin LTRIM/RTRIM, y no es un olvido: asi la
+          hace el original y asi la hace Sp_RTA_PerfilColaborador, que es el
+          que de verdad se niega a abrir estos perfiles. Esta subconsulta
+          tiene que contar como cuenta aquel: si recortara, dos codigos que
+          difieran solo por relleno a la izquierda se contarian como
+          repetidos y los DOS quedarian fuera de la lista, aunque el gate
+          deje abrir cada uno. Esconder a alguien que si se puede gestionar
+          es peor que mostrarlo. */
        AND  (SELECT COUNT(*) FROM dbo.R_Usuarios r
-              WHERE LTRIM(RTRIM(r.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Usuario))
+              WHERE r.Cod_Usuario = u.Cod_Usuario
                 AND ISNULL(r.EstadoUsuario,0) = 0) = 1
 
        AND  (ISNULL(NULLIF(LTRIM(RTRIM(e.Nombre)), ''), u.Nom_Usuario) LIKE '%' + @F + '%'
@@ -667,7 +675,10 @@ git show HEAD:ReporteTareas/Formulario/MiPerfil.aspx | grep -c 'id="'
 grep -c 'id="' ReporteTareas/Controles/PerfilFichas.ascx
 ```
 
-El segundo tiene que ser **el primero más uno** (el `id` nuevo del `<span>` del CV; el del `<a>` ya se cuenta si antes no lo tenía — comprobar cuál de los dos casos aplica y decirlo). Si falta alguno, se perdió marcado al cortar.
+El segundo tiene que ser **el primero más dos**. Verificado: el `<a>` del CV **no tenía
+`id`**, así que el Step 1 agrega dos (`lnkHojaVida` en el enlace y `txtHojaVida` en el
+`<span>` nuevo). Cualquier otro número significa que se perdió marcado al cortar, o que
+se agregó algo que no estaba pedido.
 
 - [ ] **Step 5: Commit**
 
@@ -714,12 +725,14 @@ Al principio de `ReporteTareas/js/miPerfil.js`, junto a `var _perfil = null;`:
    decide eso es NegPerfilAcceso, y rechaza a quien no sea perfil 14 o 18. */
 var _codObjetivo = "";
 
-/* Los cuatro caminos por los que sale el codigo del perfil. Tres pasan por
-   PostPerfil; los otros tres no, y por eso estan enumerados aca:
+/* Los cuatro caminos por los que el codigo del perfil sale al servidor.
+   El primero cubre las 16 acciones JSON de una sola vez; los otros tres NO
+   pasan por PostPerfil y por eso hay que acordarse de ellos uno por uno:
      1. PostPerfil          -> lo agrega a parameters
      2. PedirArchivo        -> lo agrega al FormData (multipart)
-     3. CeldaDocumentos     -> lo agrega a la URL de descarga
-     4. el enlace del CV    -> se le reescribe el href
+     3. CeldaDocumentos     -> lo agrega a la URL de descarga del documento
+     4. el enlace del CV    -> se le reescribe el href, porque es marcado
+                               estatico y ningun codigo lo tocaba antes
    Si aparece un quinto, va en esta lista. */
 function FijarPerfilObjetivo(codUsuario, nombre) {
     _codObjetivo = codUsuario || "";

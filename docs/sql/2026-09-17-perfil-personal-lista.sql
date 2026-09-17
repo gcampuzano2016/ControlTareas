@@ -34,6 +34,7 @@
    ============================================================================ */
 
 USE [ReporTarea];
+SET NOCOUNT ON;
 GO
 
 SET XACT_ABORT ON;
@@ -81,9 +82,18 @@ BEGIN
 
        /* Misma regla que la lista de equipo: si el codigo esta repetido entre
           usuarios activos, Sp_RTA_PerfilColaborador se niega a abrir ese perfil.
-          Mejor no listarlo que listarlo con un boton que nunca funciona. */
+          Mejor no listarlo que listarlo con un boton que nunca funciona.
+
+          La comparacion va CRUDA, sin LTRIM/RTRIM, y no es un olvido: asi la
+          hace el original y asi la hace Sp_RTA_PerfilColaborador, que es el
+          que de verdad se niega a abrir estos perfiles. Esta subconsulta
+          tiene que contar como cuenta aquel: si recortara, dos codigos que
+          difieran solo por relleno a la izquierda se contarian como
+          repetidos y los DOS quedarian fuera de la lista, aunque el gate
+          deje abrir cada uno. Esconder a alguien que si se puede gestionar
+          es peor que mostrarlo. */
        AND  (SELECT COUNT(*) FROM dbo.R_Usuarios r
-              WHERE LTRIM(RTRIM(r.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Usuario))
+              WHERE r.Cod_Usuario = u.Cod_Usuario
                 AND ISNULL(r.EstadoUsuario,0) = 0) = 1
 
        AND  (ISNULL(NULLIF(LTRIM(RTRIM(e.Nombre)), ''), u.Nom_Usuario) LIKE '%' + @F + '%'

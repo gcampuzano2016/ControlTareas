@@ -1169,6 +1169,7 @@
     <Content Include="js\Inventario.js" />
     <Content Include="js\jquery.blockUI.js" />
     <Content Include="js\miPerfil.js" />
+    <Content Include="js\perfilesPersonal.js" />
     <Content Include="js\horasExtras.js" />
     <Content Include="js\parametrosHorasExtras.js" />
     <Content Include="js\Perfiles.js" />

@@ -655,6 +655,51 @@ namespace CapaDato
         }
 
         /// <summary>
+        /// Todo el personal activo que calce con el filtro.
+        ///
+        /// Devuelve EntPerfilEquipoItem y no una entidad propia porque las cinco
+        /// columnas son las mismas que las de la lista de equipo: codigo, nombre,
+        /// cargo, area y ciudad. Una entidad nueva identica seria dos sitios donde
+        /// agregar una columna en vez de uno.
+        ///
+        /// No comprueba perfiles: eso lo hace AdministrarPerfil.ashx.cs antes de
+        /// llegar aca. Esta capa no conoce la sesion.
+        ///
+        /// Sin paginacion, igual que ListaEquipo: el procedimiento exige dos
+        /// caracteres de filtro, asi que nunca devuelve la plantilla entera.
+        /// </summary>
+        public static List<EntPerfilEquipoItem> ListaPersonal(string filtro)
+        {
+            List<EntPerfilEquipoItem> lista = new List<EntPerfilEquipoItem>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilPersonalLista", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Filtro", SqlDbType.VarChar, 100).Value = filtro ?? string.Empty;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(new EntPerfilEquipoItem
+                        {
+                            CodUsuario     = Texto(dr, "CodUsuario"),
+                            NombreCompleto = Texto(dr, "NombreCompleto"),
+                            Cargo          = Texto(dr, "Cargo"),
+                            Area           = Texto(dr, "Area"),
+                            Ciudad         = Texto(dr, "Ciudad")
+                        });
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        /// <summary>
         /// El perfil de un subordinado, tal como lo ve su jefatura.
         ///
         /// Recorre SEIS result sets por posicion, igual que CargarPerfil. El

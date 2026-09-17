@@ -44,6 +44,25 @@ namespace ReporteTareas.clases
             return NegPerfilAcceso.Objetivo(Autor(context), idPerfil, codPedido);
         }
 
+        /// <summary>
+        /// Si la sesion es de Talento Humano o Super Admin.
+        ///
+        /// Delega en NegPerfilAcceso, igual que Objetivo: la lista de perfiles
+        /// vive en un solo sitio y esta clase sigue sin decidir nada. Hace falta
+        /// aparte porque hay acciones -listar a todo el personal- que no son
+        /// "sobre el perfil de alguien" y por lo tanto no pasan por Objetivo.
+        /// </summary>
+        internal static bool EsRRHH(HttpContext context)
+        {
+            string idPerfil = "";
+            if (context.Session != null && context.Session["Id_Perfil"] != null)
+            {
+                idPerfil = context.Session["Id_Perfil"].ToString();
+            }
+
+            return NegPerfilAcceso.EsRRHH(idPerfil);
+        }
+
         /// <summary>El codigo pedido en el payload JSON, o cadena vacia.</summary>
         internal static string CodigoPedidoJson(dynamic campos)
         {

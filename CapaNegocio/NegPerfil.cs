@@ -139,6 +139,25 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// El personal activo que calce con el filtro, para la pantalla de
+        /// Talento Humano.
+        ///
+        /// La validacion del filtro va aqui y no solo en el navegador: el handler
+        /// es alcanzable por HTTP directo. Con el filtro invalido devuelve lista
+        /// vacia en vez de lanzar, para que la pantalla no tenga que distinguir
+        /// "no valido" de "sin resultados" -el mensaje se lo da el handler-.
+        /// </summary>
+        public static List<EntPerfilEquipoItem> ListaPersonal(string filtro)
+        {
+            if (NegPerfilCampos.ValidarFiltroPersonal(filtro) != "")
+            {
+                return new List<EntPerfilEquipoItem>();
+            }
+
+            return DaoPerfil.ListaPersonal(filtro);
+        }
+
+        /// <summary>
         /// El perfil recortado de un subordinado. Devuelve PerfilEncontrado en
         /// false si esa persona no le reporta a quien pregunta: la comprobacion
         /// la hace el procedimiento, no esta capa.

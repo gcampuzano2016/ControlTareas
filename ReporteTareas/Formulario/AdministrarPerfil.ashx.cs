@@ -151,6 +151,12 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(PerfilEquipo(context, parametros[0]["parameters"]));
                 }
 
+                if (Action == "ListaPersonal")
+                {
+                    existAction = true;
+                    responseAction.Append(ListaPersonal(context, parametros[0]["parameters"]));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -857,6 +863,44 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al cargar su equipo. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Todo el personal activo que calce con el filtro, para la pantalla de
+        /// Talento Humano.
+        ///
+        /// Es la UNICA accion del modulo que no habla del perfil de nadie en
+        /// particular, asi que no pasa por PerfilIdentidad.Objetivo: aqui la
+        /// pregunta no es "de quien es este perfil" sino "puede esta sesion ver
+        /// la nomina completa". Por eso comprueba el perfil directamente.
+        ///
+        /// Sin esta comprobacion, cualquiera con sesion iniciada podria pedir el
+        /// nombre, el cargo y el area de todo el personal con una peticion
+        /// directa a este .ashx, sin pasar nunca por el menu.
+        /// </summary>
+        private string ListaPersonal(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                if (!PerfilIdentidad.EsRRHH(context))
+                {
+                    return responseMessage("0", "No tiene permiso para ver el listado de personal.", "danger");
+                }
+
+                string filtro = Texto(campos, "filtro", "");
+
+                string error = NegPerfilCampos.ValidarFiltroPersonal(filtro);
+                if (error != "")
+                {
+                    return responseMessage("0", error, "warning");
+                }
+
+                return ToJson(NegPerfil.ListaPersonal(filtro));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al buscar personal. " + ex.Message, "danger");
             }
         }
 

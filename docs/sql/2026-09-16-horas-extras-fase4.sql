@@ -600,7 +600,7 @@ END
    muestra en ninguna pantalla.
 
    Si algun dia cambias el CAST del procedimiento, estos dos numeros cambian
-   con el, y no por eso esta roto. */
+   con el, y no por eso esta roto.
 
    INSERT ... EXEC para poder contar y sumar el result set. No se imprime
    ninguna fila: IdEmpleado identifica a una persona. */

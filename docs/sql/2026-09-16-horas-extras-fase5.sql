@@ -357,12 +357,15 @@ DECLARE @cols NVARCHAR(MAX) = STUFF
 ).value('.', 'NVARCHAR(MAX)'), 1, 1, '');
 
 /* Si Id_Menu es IDENTITY, el valor lo pone la base; si no lo es, hay que
-   calcularlo. Las dos ramas existen porque las fuentes se contradicen: el
-   script de la pantalla hermana y el del catalogo de horarios dan por hecho
-   que es IDENTITY -los dos usan SCOPE_IDENTITY() y los dos corrieron-, y la
-   medicion del 2026-09-16 dice que no lo es. Una de las dos esta equivocada y
-   no se puede comprobar desde aqui sin tocar la base, asi que el script
-   funciona igual en los dos mundos en vez de apostar por uno. */
+   calcularlo.
+
+   RESUELTO el 2026-09-16 contra produccion: SI es IDENTITY, asi que la rama
+   que corre es la de SCOPE_IDENTITY(). Las dos ramas se conservan igual. Se
+   escribieron porque las fuentes se contradecian -el script de la pantalla
+   hermana y el del catalogo de horarios la daban por IDENTITY, y una medicion
+   equivocada decia lo contrario-, y quedarse con las dos costo tres lineas y
+   evito apostar por el dato falso. Si algun dia se restaura esta base en un
+   entorno donde la columna se creo a mano, el script sigue funcionando. */
 DECLARE @EsIdentidad BIT =
     CASE WHEN EXISTS (SELECT 1 FROM sys.columns
                        WHERE object_id = OBJECT_ID('dbo.MenuDos')

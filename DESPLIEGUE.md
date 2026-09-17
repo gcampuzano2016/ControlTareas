@@ -178,6 +178,49 @@ Esta fase también sube `horasExtras.js` de `?v=4` a `?v=5`. Verifica con
 Ctrl+F5 después de copiar los binarios -ver sección 5-, porque un `?v=` viejo
 en el navegador sigue mostrando el período por mes en vez de por rango.
 
+**La fase 5 de Horas Extras agrega una pantalla para editar los parámetros de
+cálculo, y antes que nada corrige de dónde salen esos parámetros al calcular
+un período.** El orden es el de siempre -primero
+`docs/sql/2026-09-16-horas-extras-fase5.sql`, después los binarios-, pero acá
+el margen entre uno y otro importa más que en fases anteriores.
+
+Hasta esta fase, un período se calculaba con el sueldo vigente a la fecha de
+fin del período pero con los parámetros (`Factor50`, `Factor100`,
+`TopeDiario50`, etc.) vigentes **hoy** (`GETDATE()`): dos relojes distintos
+para el mismo cálculo. Con una sola versión de cada parámetro en
+`HE_Parametro` -que es lo único que ha existido hasta ahora- el error nunca se
+notó, porque "hoy" y "el único valor que hay" siempre coincidían. La pantalla
+nueva permite que una misma clave tenga varias versiones con vigencia
+distinta, y ahí el error sí se nota: un cambio de parámetro recalcularía en
+silencio períodos ya cerrados que no le corresponden. Por eso el arreglo del
+cálculo va incluido en los mismos binarios que la pantalla nueva -no llega
+después-: **el script y esos binarios no deben quedar separados mucho
+tiempo**. Con el script puesto y los binarios viejos todavía corriendo, un
+cambio de parámetro guardado a través de `Sp_RTA_HeParametroGuardar` se
+aplicaría a períodos que no le tocan, exactamente el bug que esta fase cierra.
+
+Qué trae el script:
+
+- `Sp_RTA_HeParametrosListar` - el historial completo de las siete claves, la
+  vigente y las cerradas.
+- `Sp_RTA_HeParametroGuardar` - **no pisa la fila vigente**: la cierra con
+  `FechaVigenciaHasta` e inserta una versión nueva. Devuelve `0` en éxito y
+  `-1` a `-5` según el motivo del rechazo.
+- El registro en el menú de `ParametrizacionHorasExtras.aspx`
+  (`Id_Menu 20083`), colgada del mismo grupo Nómina que `HorasExtras.aspx`
+  (`Id_MenuPadre 20081`), visible para los perfiles **14** y **18**.
+
+> **Ojo con la ventana entre el script y los binarios.** La entrada de menú
+> nace visible en cuanto corre el script, antes de que el `.aspx` esté
+> publicado. Quien tenga perfil 14 o 18 y le dé clic a esa opción va a ver un
+> 404 hasta que se copien los binarios. Se corrige solo al publicar -no hace
+> falta ninguna acción aparte-, pero conviene que quien despliega lo sepa para
+> no perder tiempo investigando un 404 esperado.
+
+Esta fase también sube `horasExtras.js` de `?v=5` a `?v=6` y agrega
+`parametrosHorasExtras.js?v=1`. Verifica con Ctrl+F5 después de copiar los
+binarios -ver sección 5-.
+
 Los scripts son idempotentes: si dudas si ya corriste uno, córrelo de nuevo. Los
 `PRINT` te dicen si creó algo o si ya existía.
 

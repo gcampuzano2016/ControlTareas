@@ -30,6 +30,14 @@
    corrigen despues del clon; el resto de columnas queda como en la fila
    modelo.
 
+   Esa busqueda por Href LIKE puede dar cero, una o mas de una fila, y las
+   tres se tratan distinto: cero o mas de una detienen el script -nunca se
+   elige una fila a ciegas con un TOP 1 sin ORDER BY; un grupo colgado de una
+   eleccion arbitraria seria un defecto silencioso, y ese principio ya esta
+   escrito en este modulo (Sp_RTA_PerfilColaborador se niega a devolver nada
+   cuando un Cod_Usuario esta repetido, en vez de elegir una de las dos
+   personas). Solo el caso de exactamente una fila sigue adelante.
+
    IMPORTANTE: en dbo.PerfilMenu la semantica de Estado esta INVERTIDA: '0'
    MUESTRA la opcion y '1' la OCULTA (Sp_RTA_ConsultarMenuPerfilUsuario filtra
    WHERE P.Estado = 0). Ademas, una hoja solo se ve si su grupo padre TAMBIEN
@@ -39,11 +47,14 @@
    Guarda al principio, en su propio lote, con SET NOEXEC ON / OFF y no con
    RETURN: un RETURN fuera de un procedimiento sale del lote, no del script, y
    el resto seguiria ejecutandose despues del GO -es el defecto que costo dos
-   rondas de arreglo en la entrega 1-. La guarda comprueba dos cosas: que el
-   grupo de RRHHEmpleados.aspx se pueda resolver, y que dbo.MenuDos.Id_Menu
-   siga siendo IDENTITY (de eso depende que el clon con SCOPE_IDENTITY() sea
-   seguro). Si cualquiera de las dos falla, el script se detiene entero y no
-   crea nada.
+   rondas de arreglo en la entrega 1-. La guarda comprueba tres cosas, cada
+   una con su propio RAISERROR: que exista exactamente una fila de
+   RRHHEmpleados.aspx con Id_MenuPadre distinto de cero (ni cero ni varias),
+   y que dbo.MenuDos.Id_Menu siga siendo IDENTITY (de eso depende que el clon
+   con SCOPE_IDENTITY() sea seguro). Si alguna falla, el script se detiene
+   entero y no crea nada. El COUNT(*) de la guarda y el SELECT TOP 1 del lote
+   principal comparten literalmente el mismo WHERE, para que la guarda
+   proteja exactamente lo mismo que el lote principal termina usando.
 
    Idempotente: se puede ejecutar varias veces sin duplicar la hoja ni las
    filas de PerfilMenu.
@@ -59,25 +70,39 @@ GO
 
 /* ------------------------------------------------------------ 0. guarda --- */
 
-/* Dos condiciones independientes, cada una con su propio RAISERROR y su
-   propio SET NOEXEC ON. Ninguna de las dos usa una funcion como argumento de
+/* Tres condiciones independientes, cada una con su propio RAISERROR y su
+   propio SET NOEXEC ON. Ninguna usa una funcion como argumento de
    sustitucion del RAISERROR -solo literales-: RAISERROR admite unicamente
    literales o variables locales ahi, una llamada a funcion no compila y se
    lleva puesto el lote entero, guarda incluida. Por eso no se usa ISNULL()
-   ni nada parecido dentro del texto del mensaje.
+   ni nada parecido dentro del texto de ningun mensaje.
+
+   Se cuenta primero y se decide despues, en vez de un TOP 1 sin ORDER BY
+   que elegiria una fila a ciegas si hubiera mas de una: determinista y
+   equivocado es peor que detenido, porque nadie lo descubre. Este COUNT(*)
+   y el SELECT TOP 1 del lote principal (mas abajo, despues del GO) usan
+   EXACTAMENTE el mismo WHERE a proposito: si contaran sobre un conjunto de
+   filas y despues eligieran sobre otro, esta guarda protegeria algo
+   distinto de lo que el lote principal termina usando.
 
    Va en su propio lote, ANTES de cualquier PRINT de inicio, para que una
    corrida detenida no imprima "inicio" como si hubiera sido normal. */
-DECLARE @IdGrupoCheck INT;
+DECLARE @NGrupo INT;
 
-SELECT TOP 1 @IdGrupoCheck = Id_MenuPadre
+SELECT @NGrupo = COUNT(*)
   FROM dbo.MenuDos
  WHERE Href LIKE '%RRHHEmpleados.aspx%'
    AND ISNULL(Id_MenuPadre, 0) <> 0;
 
-IF @IdGrupoCheck IS NULL
+IF @NGrupo = 0
 BEGIN
-    RAISERROR('No se encontro el grupo de menu de RRHHEmpleados.aspx (o esa fila no tiene Id_MenuPadre). Revisar a mano de que grupo debe colgar PerfilesPersonal.aspx. Script detenido.', 16, 1);
+    RAISERROR('No se encontro ninguna fila de RRHHEmpleados.aspx con Id_MenuPadre distinto de cero. Revisar a mano de que grupo debe colgar PerfilesPersonal.aspx. Script detenido.', 16, 1);
+    SET NOEXEC ON;
+END
+
+IF @NGrupo > 1
+BEGIN
+    RAISERROR('Se encontraron varias filas de RRHHEmpleados.aspx con Id_MenuPadre distinto de cero. No se elige ninguna a ciegas: revisar a mano de cual grupo debe colgar PerfilesPersonal.aspx. Script detenido.', 16, 1);
     SET NOEXEC ON;
 END
 
@@ -101,9 +126,12 @@ BEGIN TRANSACTION;
 
 /* Se recalculan aca @IdGrupo y @ModeloHoja: las variables de la guarda de
    arriba no cruzan el GO -cada lote tiene las suyas propias-. Si la guarda
-   no encontro el grupo, ya encendio NOEXEC ON y este lote ni se ejecuta; si
-   se ejecuta es porque el mismo SELECT va a encontrar lo mismo que encontro
-   la guarda. */
+   no encontro exactamente una fila, ya encendio NOEXEC ON y este lote ni se
+   ejecuta; si se ejecuta es porque la guarda ya confirmo que hay una sola
+   fila que cumple este WHERE, asi que el TOP 1 de aca no elige entre varias
+   -ya no queda mas que una para elegir-. El WHERE es literalmente el mismo
+   que el del COUNT(*) de la guarda: mismo conjunto de filas en los dos
+   lugares. */
 DECLARE @IdGrupo    INT;
 DECLARE @ModeloHoja INT;
 

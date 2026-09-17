@@ -203,7 +203,8 @@ namespace CapaDato
         /// alcanza hoy -el procedimiento solo devuelve 0 o -2-, pero RespuestaDe lo
         /// exige para el caso general.
         /// </summary>
-        public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
+        public static EntRespuesta GuardarContacto(string codUsuario, string codAutor,
+                                                   EntPerfilContacto contacto, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarContacto", cmd =>
             {
@@ -213,9 +214,21 @@ namespace CapaDato
                 cmd.Parameters.Add("@Direccion",        SqlDbType.VarChar, 400).Value = contacto.Direccion;
                 cmd.Parameters.Add("@EstadoCivil",      SqlDbType.VarChar, 100).Value = contacto.EstadoCivil;
                 cmd.Parameters.Add("@Ip",               SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",       SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Sus datos de contacto se guardaron correctamente.", "No se pudo guardar el contacto.");
+        }
+
+        /// <summary>
+        /// TEMPORAL. Sobrecarga de transicion: el autor es el dueno, que es como
+        /// se comportaba el modulo antes de que Talento Humano pudiera editar
+        /// perfiles ajenos. Se borra al final de la entrega 1, y ese borrado es
+        /// lo que demuestra que ningun sitio se quedo sin migrar.
+        /// </summary>
+        public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
+        {
+            return GuardarContacto(codUsuario, codUsuario, contacto, ip);
         }
 
         /// <summary>
@@ -237,7 +250,8 @@ namespace CapaDato
         /// idContacto > 0, asi que esta rama no se alcanza hoy desde la
         /// interfaz. Se deja lista para cuando se habilite editar.
         /// </summary>
-        public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
+        public static EntRespuesta GuardarEmergencia(string codUsuario, string codAutor,
+                                                     EntPerfilEmergencia c, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarEmergencia", cmd =>
             {
@@ -247,9 +261,16 @@ namespace CapaDato
                 cmd.Parameters.Add("@Parentesco",  SqlDbType.VarChar,  50).Value = c.Parentesco;
                 cmd.Parameters.Add("@Telefono",    SqlDbType.VarChar,  50).Value = c.Telefono;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Contacto de emergencia guardado.", "No se encontró ese contacto de emergencia.");
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
+        {
+            return GuardarEmergencia(codUsuario, codUsuario, c, ip);
         }
 
         /// <summary>
@@ -258,16 +279,23 @@ namespace CapaDato
         /// Misma traduccion del -2 que GuardarEmergencia y por la misma razon:
         /// el borrado tambien queda cerrado cuando el Cod_Usuario esta repetido.
         /// </summary>
-        public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
+        public static EntRespuesta EliminarEmergencia(string codUsuario, string codAutor, int idContacto, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarEmergencia", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdContacto",  SqlDbType.Int).Value         = idContacto;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Contacto eliminado.", "No se encontró ese contacto.");
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
+        {
+            return EliminarEmergencia(codUsuario, codUsuario, idContacto, ip);
         }
 
         /// <summary>
@@ -359,7 +387,7 @@ namespace CapaDato
             return resultado;
         }
 
-        public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
+        public static EntRespuesta GuardarEstudio(string codUsuario, string codAutor, EntPerfilEstudio e, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarEstudio", cmd =>
             {
@@ -370,24 +398,39 @@ namespace CapaDato
                 cmd.Parameters.Add("@Titulo",         SqlDbType.VarChar, 200).Value = e.Titulo;
                 cmd.Parameters.Add("@AnioGraduacion", SqlDbType.SmallInt).Value     = e.AnioGraduacion ?? 0;
                 cmd.Parameters.Add("@Ip",             SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",     SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Estudio guardado.", "No se encontró ese estudio.");
         }
 
-        public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
+        {
+            return GuardarEstudio(codUsuario, codUsuario, e, ip);
+        }
+
+        public static EntRespuesta EliminarEstudio(string codUsuario, string codAutor, int idEstudio, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarEstudio", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdEstudio",   SqlDbType.Int).Value         = idEstudio;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Estudio eliminado.", "No se encontró ese estudio.");
         }
 
-        public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
+        {
+            return EliminarEstudio(codUsuario, codUsuario, idEstudio, ip);
+        }
+
+        public static EntRespuesta GuardarCertificacion(string codUsuario, string codAutor,
+                                                        EntPerfilCertificacion c, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarCertificacion", cmd =>
             {
@@ -397,24 +440,40 @@ namespace CapaDato
                 cmd.Parameters.Add("@Entidad",         SqlDbType.VarChar, 200).Value = c.Entidad;
                 cmd.Parameters.Add("@FechaObtencion",  SqlDbType.VarChar,  10).Value = c.FechaObtencion ?? "";
                 cmd.Parameters.Add("@Ip",              SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",      SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Certificación guardada.", "No se encontró esa certificación.");
         }
 
-        public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
+        {
+            return GuardarCertificacion(codUsuario, codUsuario, c, ip);
+        }
+
+        public static EntRespuesta EliminarCertificacion(string codUsuario, string codAutor,
+                                                         int idCertificacion, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarCertificacion", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario",     SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdCertificacion", SqlDbType.Int).Value         = idCertificacion;
                 cmd.Parameters.Add("@Ip",              SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",      SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Certificación eliminada.", "No se encontró esa certificación.");
         }
 
-        public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
+        {
+            return EliminarCertificacion(codUsuario, codUsuario, idCertificacion, ip);
+        }
+
+        public static EntRespuesta GuardarExperiencia(string codUsuario, string codAutor,
+                                                      EntPerfilExperiencia x, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarExperiencia", cmd =>
             {
@@ -426,24 +485,39 @@ namespace CapaDato
                 cmd.Parameters.Add("@AnioHasta",     SqlDbType.SmallInt).Value     = x.AnioHasta ?? 0;
                 cmd.Parameters.Add("@Funciones",     SqlDbType.VarChar, -1).Value  = x.Funciones ?? "";
                 cmd.Parameters.Add("@Ip",            SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",    SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Experiencia guardada.", "No se encontró esa experiencia.");
         }
 
-        public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
+        {
+            return GuardarExperiencia(codUsuario, codUsuario, x, ip);
+        }
+
+        public static EntRespuesta EliminarExperiencia(string codUsuario, string codAutor, int idExperiencia, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarExperiencia", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario",   SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdExperiencia", SqlDbType.Int).Value         = idExperiencia;
                 cmd.Parameters.Add("@Ip",            SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",    SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Experiencia eliminada.", "No se encontró esa experiencia.");
         }
 
-        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
+        {
+            return EliminarExperiencia(codUsuario, codUsuario, idExperiencia, ip);
+        }
+
+        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, string codAutor,
+                                                        EntPerfilCargaFamiliar c, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarCargaFamiliar", cmd =>
             {
@@ -453,27 +527,41 @@ namespace CapaDato
                 cmd.Parameters.Add("@Parentesco",      SqlDbType.VarChar,  50).Value = c.Parentesco;
                 cmd.Parameters.Add("@FechaNacimiento", SqlDbType.VarChar,  10).Value = c.FechaNacimiento ?? "";
                 cmd.Parameters.Add("@Ip",              SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",      SqlDbType.VarChar,  50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Carga familiar guardada.", "No se encontró esa carga familiar.");
         }
 
-        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
+        {
+            return GuardarCargaFamiliar(codUsuario, codUsuario, c, ip);
+        }
+
+        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, string codAutor, int idCargaFam, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarCargaFamiliar", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdCargaFam",  SqlDbType.Int).Value         = idCargaFam;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Carga familiar eliminada.", "No se encontró esa carga familiar.");
         }
 
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
+        {
+            return EliminarCargaFamiliar(codUsuario, codUsuario, idCargaFam, ip);
+        }
+
         /// <summary>
         /// Guarda o reemplaza la foto. Una fila por persona: no hay historial.
         /// </summary>
-        public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
+        public static EntRespuesta GuardarFoto(string codUsuario, string codAutor, EntPerfilFoto foto, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilGuardarFoto", cmd =>
             {
@@ -484,17 +572,29 @@ namespace CapaDato
                 cmd.Parameters.Add("@FotoBase64",  SqlDbType.VarChar, -1).Value = foto.Base64;
                 cmd.Parameters.Add("@FotoTipo",    SqlDbType.VarChar, 50).Value = foto.Tipo;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Su foto se actualizó.", "No se pudo guardar la foto.");
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
+        {
+            return GuardarFoto(codUsuario, codUsuario, foto, ip);
         }
 
         /// <summary>
         /// Quita la foto. Borrado fisico -Perfil_Foto no tiene columna Estado-,
         /// a diferencia del resto del modulo.
         /// </summary>
-        public static EntRespuesta EliminarFoto(string codUsuario, string ip)
+        public static EntRespuesta EliminarFoto(string codUsuario, string codAutor, string ip)
         {
+            /* codAutor se recibe y no se usa, a proposito.
+               Sp_RTA_PerfilEliminarFoto hace un DELETE fisico sobre Perfil_Foto:
+               borrada la fila, no hay columna donde anotar al autor. El parametro
+               esta para que esta capa no tenga una excepcion de firma que haya que
+               recordar en cada sitio que la llama. */
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarFoto", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
@@ -504,6 +604,12 @@ namespace CapaDato
             return RespuestaDe(r, "Su foto se quitó.", "No tenía ninguna foto guardada.");
         }
 
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarFoto(string codUsuario, string ip)
+        {
+            return EliminarFoto(codUsuario, codUsuario, ip);
+        }
+
         /// <summary>
         /// Registra un documento de respaldo.
         ///
@@ -511,7 +617,8 @@ namespace CapaDato
         /// es la unica comprobacion posible de que el documento se cuelga de algo
         /// suyo, porque el handler ve un numero y no sabe de quien es.
         /// </summary>
-        public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
+        public static EntRespuesta GuardarDocumento(string codUsuario, string codAutor,
+                                                    EntPerfilDocumento doc, string ip)
         {
             int idDocumento;
             int r = EjecutarEscrituraConId("Sp_RTA_PerfilGuardarDocumento", cmd =>
@@ -523,6 +630,7 @@ namespace CapaDato
                 cmd.Parameters.Add("@NombreArchivoCodigo", SqlDbType.VarChar, 260).Value = doc.NombreArchivoCodigo;
                 cmd.Parameters.Add("@Ruta",                SqlDbType.VarChar, 400).Value = doc.Ruta;
                 cmd.Parameters.Add("@Ip",                  SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",          SqlDbType.VarChar,  50).Value = codAutor ?? "";
             }, "IdDocumento", out idDocumento);
 
             /* El Id se devuelve por la entidad -y no como parametro nuevo, para no
@@ -534,17 +642,30 @@ namespace CapaDato
             return RespuestaDe(r, "Documento adjuntado.", "No se encontró el registro al que quiere adjuntarlo.");
         }
 
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
+        {
+            return GuardarDocumento(codUsuario, codUsuario, doc, ip);
+        }
+
         /// <summary>Borrado logico de un documento. El archivo se queda en el disco.</summary>
-        public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
+        public static EntRespuesta EliminarDocumento(string codUsuario, string codAutor, int idDocumento, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarDocumento", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario;
                 cmd.Parameters.Add("@IdDocumento", SqlDbType.Int).Value         = idDocumento;
                 cmd.Parameters.Add("@Ip",          SqlDbType.VarChar, 64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar, 50).Value = codAutor ?? "";
             });
 
             return RespuestaDe(r, "Documento quitado.", "No se encontró ese documento.");
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
+        {
+            return EliminarDocumento(codUsuario, codUsuario, idDocumento, ip);
         }
 
         /// <summary>

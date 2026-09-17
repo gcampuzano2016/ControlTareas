@@ -29,86 +29,189 @@ namespace CapaNegocio
             return perfil;
         }
 
-        /// <summary>Guarda el contacto editable del usuario de la sesion.</summary>
+        /// <summary>
+        /// Guarda el contacto editable de un perfil.
+        ///
+        /// codUsuario es DE QUIEN es el perfil; codAutor es QUIEN lo esta
+        /// tocando. Hasta la edicion por Talento Humano eran siempre el mismo y
+        /// por eso habia un solo parametro.
+        /// </summary>
+        public static EntRespuesta GuardarContacto(string codUsuario, string codAutor,
+                                                   EntPerfilContacto contacto, string ip)
+        {
+            return DaoPerfil.GuardarContacto(codUsuario, codAutor, contacto, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
         {
-            return DaoPerfil.GuardarContacto(codUsuario, contacto, ip);
+            return GuardarContacto(codUsuario, codUsuario, contacto, ip);
         }
 
-        /// <summary>Alta o edicion de un contacto de emergencia del usuario de la sesion.</summary>
+        /// <summary>Alta o edicion de un contacto de emergencia. codAutor: ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarEmergencia(string codUsuario, string codAutor,
+                                                     EntPerfilEmergencia c, string ip)
+        {
+            return DaoPerfil.GuardarEmergencia(codUsuario, codAutor, c, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
         {
-            return DaoPerfil.GuardarEmergencia(codUsuario, c, ip);
+            return GuardarEmergencia(codUsuario, codUsuario, c, ip);
         }
 
-        /// <summary>Borrado logico de un contacto de emergencia del usuario de la sesion.</summary>
+        /// <summary>Borrado logico de un contacto de emergencia. codAutor: ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarEmergencia(string codUsuario, string codAutor, int idContacto, string ip)
+        {
+            return DaoPerfil.EliminarEmergencia(codUsuario, codAutor, idContacto, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
         {
-            return DaoPerfil.EliminarEmergencia(codUsuario, idContacto, ip);
+            return EliminarEmergencia(codUsuario, codUsuario, idContacto, ip);
         }
 
+        public static EntRespuesta GuardarEstudio(string codUsuario, string codAutor, EntPerfilEstudio e, string ip)
+        {
+            return DaoPerfil.GuardarEstudio(codUsuario, codAutor, e, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
         {
-            return DaoPerfil.GuardarEstudio(codUsuario, e, ip);
+            return GuardarEstudio(codUsuario, codUsuario, e, ip);
         }
 
+        public static EntRespuesta EliminarEstudio(string codUsuario, string codAutor, int idEstudio, string ip)
+        {
+            return DaoPerfil.EliminarEstudio(codUsuario, codAutor, idEstudio, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
         {
-            return DaoPerfil.EliminarEstudio(codUsuario, idEstudio, ip);
+            return EliminarEstudio(codUsuario, codUsuario, idEstudio, ip);
         }
 
+        public static EntRespuesta GuardarCertificacion(string codUsuario, string codAutor,
+                                                        EntPerfilCertificacion c, string ip)
+        {
+            return DaoPerfil.GuardarCertificacion(codUsuario, codAutor, c, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
         {
-            return DaoPerfil.GuardarCertificacion(codUsuario, c, ip);
+            return GuardarCertificacion(codUsuario, codUsuario, c, ip);
         }
 
+        public static EntRespuesta EliminarCertificacion(string codUsuario, string codAutor,
+                                                         int idCertificacion, string ip)
+        {
+            return DaoPerfil.EliminarCertificacion(codUsuario, codAutor, idCertificacion, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
         {
-            return DaoPerfil.EliminarCertificacion(codUsuario, idCertificacion, ip);
+            return EliminarCertificacion(codUsuario, codUsuario, idCertificacion, ip);
         }
 
+        public static EntRespuesta GuardarExperiencia(string codUsuario, string codAutor,
+                                                      EntPerfilExperiencia x, string ip)
+        {
+            return DaoPerfil.GuardarExperiencia(codUsuario, codAutor, x, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
         {
-            return DaoPerfil.GuardarExperiencia(codUsuario, x, ip);
+            return GuardarExperiencia(codUsuario, codUsuario, x, ip);
         }
 
+        public static EntRespuesta EliminarExperiencia(string codUsuario, string codAutor, int idExperiencia, string ip)
+        {
+            return DaoPerfil.EliminarExperiencia(codUsuario, codAutor, idExperiencia, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
         {
-            return DaoPerfil.EliminarExperiencia(codUsuario, idExperiencia, ip);
+            return EliminarExperiencia(codUsuario, codUsuario, idExperiencia, ip);
         }
 
+        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, string codAutor,
+                                                        EntPerfilCargaFamiliar c, string ip)
+        {
+            return DaoPerfil.GuardarCargaFamiliar(codUsuario, codAutor, c, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
         {
-            return DaoPerfil.GuardarCargaFamiliar(codUsuario, c, ip);
+            return GuardarCargaFamiliar(codUsuario, codUsuario, c, ip);
         }
 
+        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, string codAutor, int idCargaFam, string ip)
+        {
+            return DaoPerfil.EliminarCargaFamiliar(codUsuario, codAutor, idCargaFam, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
         {
-            return DaoPerfil.EliminarCargaFamiliar(codUsuario, idCargaFam, ip);
+            return EliminarCargaFamiliar(codUsuario, codUsuario, idCargaFam, ip);
         }
 
-        /// <summary>Guarda o reemplaza la foto del usuario de la sesion.</summary>
+        /// <summary>Guarda o reemplaza la foto. codAutor: ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarFoto(string codUsuario, string codAutor, EntPerfilFoto foto, string ip)
+        {
+            return DaoPerfil.GuardarFoto(codUsuario, codAutor, foto, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
         {
-            return DaoPerfil.GuardarFoto(codUsuario, foto, ip);
+            return GuardarFoto(codUsuario, codUsuario, foto, ip);
         }
 
-        /// <summary>Quita la foto del usuario de la sesion.</summary>
+        /// <summary>Quita la foto. codAutor se recibe y no se usa: ver DaoPerfil.EliminarFoto.</summary>
+        public static EntRespuesta EliminarFoto(string codUsuario, string codAutor, string ip)
+        {
+            return DaoPerfil.EliminarFoto(codUsuario, codAutor, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarFoto(string codUsuario, string ip)
         {
-            return DaoPerfil.EliminarFoto(codUsuario, ip);
+            return EliminarFoto(codUsuario, codUsuario, ip);
         }
 
-        /// <summary>Registra un documento de respaldo del usuario de la sesion.</summary>
+        /// <summary>Registra un documento de respaldo. codAutor: ver GuardarContacto.</summary>
+        public static EntRespuesta GuardarDocumento(string codUsuario, string codAutor,
+                                                    EntPerfilDocumento doc, string ip)
+        {
+            return DaoPerfil.GuardarDocumento(codUsuario, codAutor, doc, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
         {
-            return DaoPerfil.GuardarDocumento(codUsuario, doc, ip);
+            return GuardarDocumento(codUsuario, codUsuario, doc, ip);
         }
 
-        /// <summary>Borrado logico de un documento del usuario de la sesion.</summary>
+        /// <summary>Borrado logico de un documento. codAutor: ver GuardarContacto.</summary>
+        public static EntRespuesta EliminarDocumento(string codUsuario, string codAutor, int idDocumento, string ip)
+        {
+            return DaoPerfil.EliminarDocumento(codUsuario, codAutor, idDocumento, ip);
+        }
+
+        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver DaoPerfil.</summary>
         public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
         {
-            return DaoPerfil.EliminarDocumento(codUsuario, idDocumento, ip);
+            return EliminarDocumento(codUsuario, codUsuario, idDocumento, ip);
         }
 
         /// <summary>

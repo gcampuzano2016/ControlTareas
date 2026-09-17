@@ -2,8 +2,16 @@
    Horas Extras fase 5: los parametros se editan desde una pantalla
    ReporTarea  |  2026-09-16
 
-   PENDIENTE DE EJECUTAR. El usuario lo corre en produccion, en este orden:
-     1) las fases 1 a 4 (ya aplicadas)
+   YA EJECUTADO EN PRODUCCION el 2026-09-16, y verificado: los cinco codigos de
+   rechazo devuelven su valor sin escribir nada, y el guardado bueno cierra la
+   version vigente el dia anterior e inserta la nueva. Re-correrlo es
+   inofensivo: el guard de mas abajo lo salta entero.
+
+   Lo que queda pendiente cuando se lee esto son los BINARIOS, no el script.
+
+   El orden en el que se hizo, que es el que hay que repetir si algun dia se
+   restaura esta base en otro entorno:
+     1) las fases 1 a 4
      2) los binarios de la Task 1                (un periodo calcula con los
                                                   parametros que regian en el)
      3) ESTE SCRIPT                              (los dos procedimientos y el

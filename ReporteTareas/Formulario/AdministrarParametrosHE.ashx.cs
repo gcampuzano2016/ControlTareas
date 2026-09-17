@@ -1,4 +1,4 @@
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using System;
 using System.Collections.Generic;
@@ -49,22 +49,6 @@ namespace JsonJQueryNetHorasExtras
         /// pantalla, y nadie relaciona una cosa con la otra.
         /// </summary>
         internal static readonly int[] PerfilesAutorizados = { 14, 18 };
-
-        /// <summary>
-        /// Las claves cuyo valor no lo decide la empresa sino el Codigo del
-        /// Trabajo. La pantalla las marca para que quien administre entienda
-        /// que puede cambiarlas -el campo se edita igual- pero que hacerlo la
-        /// pone fuera de la ley, no solo fuera de politica.
-        ///
-        /// Vive aqui y no en el .aspx ni en el .js por la misma razon por la
-        /// que las etiquetas viven en NegHeParametroPantalla: la pantalla no
-        /// tiene que saber como se llaman las claves. Lo correcto seria que
-        /// NegHeParametroPantalla expusiera tambien este rasgo junto a
-        /// Etiqueta y Activo -queda anotado como deuda-; mientras tanto el
-        /// handler es el sitio menos malo: ya conoce las claves que hay,
-        /// porque las recibe de CapaNegocio, y es un solo lugar.
-        /// </summary>
-        private static readonly string[] ClavesFijadasPorLey = { "Factor50", "Factor100" };
 
         /// <summary>
         /// Lo que viaja a la pantalla por cada fila del historial. Es
@@ -243,7 +227,7 @@ namespace JsonJQueryNetHorasExtras
                     Etiqueta = NegHeParametroPantalla.EtiquetaDe(f.Clave),
                     Conocida = NegHeParametroPantalla.EsClaveConocida(f.Clave),
                     Activo = NegHeParametroPantalla.EsParametroActivo(f.Clave),
-                    FijadoPorLey = EsFijadoPorLey(f.Clave),
+                    FijadoPorLey = NegHeParametroPantalla.EsFijadoPorLey(f.Clave),
                     Valor = f.Valor,
                     FechaVigenciaDesde = f.FechaVigenciaDesde,
                     FechaVigenciaHasta = f.FechaVigenciaHasta,
@@ -255,18 +239,6 @@ namespace JsonJQueryNetHorasExtras
 
             respuesta.resultado = filas;
             return respuesta;
-        }
-
-        private static bool EsFijadoPorLey(string clave)
-        {
-            string buscada = (clave ?? "").Trim();
-
-            foreach (string c in ClavesFijadasPorLey)
-            {
-                if (string.Equals(c, buscada, StringComparison.OrdinalIgnoreCase)) { return true; }
-            }
-
-            return false;
         }
 
         private static bool EstaEn(HttpContext context, int[] perfiles)

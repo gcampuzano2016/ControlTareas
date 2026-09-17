@@ -1,4 +1,4 @@
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
 using System;
 using System.Collections.Generic;
@@ -28,13 +28,14 @@ namespace CapaNegocio
         {
             public string Clave;
             public string Etiqueta;
+            public bool FijadoPorLey;
             public bool Activo;
         }
 
         private static readonly List<ParametroConocido> ClavesConocidas = new List<ParametroConocido>
         {
-            new ParametroConocido { Clave = "Factor50", Etiqueta = "Factor de recargo al 50%", Activo = true },
-            new ParametroConocido { Clave = "Factor100", Etiqueta = "Factor de recargo al 100%", Activo = true },
+            new ParametroConocido { Clave = "Factor50", Etiqueta = "Factor de recargo al 50%", Activo = true, FijadoPorLey = true },
+            new ParametroConocido { Clave = "Factor100", Etiqueta = "Factor de recargo al 100%", Activo = true, FijadoPorLey = true },
             new ParametroConocido { Clave = "DiasMes", Etiqueta = "Dias del mes", Activo = true },
             new ParametroConocido { Clave = "HorasMesJornadaCompleta", Etiqueta = "Horas mensuales de jornada completa", Activo = true },
             new ParametroConocido { Clave = "DecimalesMonto", Etiqueta = "Decimales del monto", Activo = true },
@@ -68,6 +69,23 @@ namespace CapaNegocio
         {
             ParametroConocido p = Buscar(clave);
             return p != null && p.Activo;
+        }
+
+        /// <summary>
+        /// Si el valor de esta clave lo fija la ley y no la empresa. Los dos
+        /// factores de recargo -50% y 100%- los marca el Codigo del Trabajo:
+        /// son editables para no depender de un UPDATE a mano, no porque sean
+        /// una politica que se pueda decidir.
+        ///
+        /// Vive aqui y no en el handler por la misma razon que EtiquetaDe: es
+        /// el cuarto rasgo de un parametro, junto a la etiqueta y a si esta
+        /// activo. Tenerlo en otro sitio crea una segunda lista de claves, y
+        /// dos listas divergen en cuanto alguien anade la octava.
+        /// </summary>
+        public static bool EsFijadoPorLey(string clave)
+        {
+            ParametroConocido p = Buscar(clave);
+            return p != null && p.FijadoPorLey;
         }
 
         /// <summary>

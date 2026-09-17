@@ -82,5 +82,28 @@ namespace CapaPruebas
             Assert.AreEqual("Inventada", NegHeParametroPantalla.EtiquetaDe("Inventada"));
             Assert.AreEqual("", NegHeParametroPantalla.EtiquetaDe(null));
         }
+
+        [TestMethod]
+        public void EsFijadoPorLey_SoloLosDosFactoresDeRecargo()
+        {
+            /* El 50% y el 100% los marca el Codigo del Trabajo. Son editables
+               para no depender de un UPDATE a mano, no porque la empresa pueda
+               decidirlos. */
+            Assert.IsTrue(NegHeParametroPantalla.EsFijadoPorLey("Factor50"));
+            Assert.IsTrue(NegHeParametroPantalla.EsFijadoPorLey("Factor100"));
+
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("DiasMes"));
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("DecimalesMonto"));
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("HorasMesJornadaCompleta"));
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("TopeDiario50"));
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("TopeSemanal50"));
+        }
+
+        [TestMethod]
+        public void EsFijadoPorLey_ClaveDesconocidaONula_EsFalso()
+        {
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey("Inventada"));
+            Assert.IsFalse(NegHeParametroPantalla.EsFijadoPorLey(null));
+        }
 }
 }

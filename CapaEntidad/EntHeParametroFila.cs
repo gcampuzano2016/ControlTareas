@@ -17,10 +17,11 @@ namespace CapaEntidad
     {
         /// <summary>
         /// La llave de la fila. Queda en 0 cuando la lee
-        /// DaoHorasExtras.LeerHistorialParametros: al calculo no le hace
-        /// falta y la columna todavia no existe en produccion. La llena el
-        /// DAO de la pantalla de administracion, que es quien la usa para
-        /// identificar que version se esta editando.
+        /// DaoHorasExtras.LeerHistorialParametros, y eso es correcto: el
+        /// calculo elige por Clave y FechaVigenciaDesde, y no tiene por que
+        /// referirse a una fila concreta. La llena el DAO de la pantalla de
+        /// administracion, que es quien la usa para identificar que version
+        /// se esta editando.
         /// </summary>
         public int IdParametro { get; set; }
 

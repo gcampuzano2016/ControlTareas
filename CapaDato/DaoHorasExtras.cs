@@ -371,12 +371,12 @@ namespace CapaDato
         /// DESPUES del corte seguia rigiendo en el corte, y descartarla en el
         /// SQL la perderia.
         ///
-        /// NO se lee IdParametro a proposito. En produccion la tabla todavia no
-        /// tiene esa columna -la crea el ALTER de la fase 5- y estos binarios
-        /// salen ANTES que ese script: pedirla aqui tumbaria el calculo entero
-        /// con "Invalid column name". El calculo no la necesita; quien si la
-        /// necesita es la pantalla de administracion, y su DAO se escribe
-        /// despues del ALTER.
+        /// NO se lee IdParametro a proposito: el calculo elige por Clave y
+        /// FechaVigenciaDesde, y nunca necesita referirse a una fila concreta.
+        /// Quien si la necesita es la pantalla de administracion -para saber
+        /// que version se esta editando-, y esa la lee por su propio DAO.
+        /// Por eso EntHeParametroFila.IdParametro queda en 0 cuando la fila
+        /// viene de aqui, y eso es correcto, no un dato a medio cargar.
         /// </summary>
         public static List<EntHeParametroFila> LeerHistorialParametros(DateTime corte)
         {

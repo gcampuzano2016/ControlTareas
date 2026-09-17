@@ -40,6 +40,57 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
+/* ------------------------------------------------------------ 0. guarda --- */
+
+/* Antes de tocar nada: si alguna de las dos columnas YA existe pero no es
+   varchar de 50 o mas, este script no la toca y se detiene.
+
+   Que la columna exista no alcanza; lo que importa es que admita un
+   Cod_Usuario. El punto 3 del comentario de Sp_RTA_PerfilGuardarCargaFamiliar
+   (fase 2) afirma que Emp_CargaFamiliar.Usu_Modificacion "es numeric",
+   contradiciendo al punto 1 del mismo comentario, que dice que esa columna no
+   existe. Nadie puede resolver eso sin mirar la base, asi que lo resuelve el
+   script: sin esta guarda, un IF NOT EXISTS por nombre daria por buena una
+   columna numeric, los procedimientos de
+   2026-09-16-perfil-autor-procedimientos.sql se crearian sin quejarse y
+   fallarian recien al primer guardado de una carga familiar, en produccion, al
+   convertir un Cod_Usuario a numero.
+
+   Esta en un lote propio y ANTES del PRINT de inicio, y no dentro de cada
+   bloque, por dos razones: asi una corrida detenida no se lee "inicio ... fin"
+   como si hubiera sido normal, y asi el mensaje habla de las dos columnas de
+   una vez en vez de detenerse en la primera y dejar la segunda sin revisar y
+   sin mencionar. */
+DECLARE @TipoCargaFam  VARCHAR(128), @LargoCargaFam  INT,
+        @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
+
+SELECT @TipoCargaFam  = t.name,
+       @LargoCargaFam = c.max_length
+  FROM sys.columns c
+  JOIN sys.types   t ON t.user_type_id = c.user_type_id
+ WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
+   AND c.name      = 'Usu_Modificacion';
+
+SELECT @TipoEmpleados  = t.name,
+       @LargoEmpleados = c.max_length
+  FROM sys.columns c
+  JOIN sys.types   t ON t.user_type_id = c.user_type_id
+ WHERE c.object_id = OBJECT_ID('dbo.Empleados')
+   AND c.name      = 'Usu_ModificacionCod';
+
+/* NULL es el caso normal: la columna no existe todavia y no hay nada que
+   comprobar, la crea el bloque que corresponde. max_length = -1 es
+   varchar(MAX): mas ancha que 50, sirve igual. */
+IF    (@TipoCargaFam  IS NOT NULL AND NOT (@TipoCargaFam  = 'varchar' AND (@LargoCargaFam  >= 50 OR @LargoCargaFam  = -1)))
+   OR (@TipoEmpleados IS NOT NULL AND NOT (@TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1)))
+BEGIN
+    RAISERROR('Alguna columna de autor ya existe con un tipo que no sirve. Encontrado: Emp_CargaFamiliar.Usu_Modificacion = %s de largo %d y Empleados.Usu_ModificacionCod = %s de largo %d. En las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. No se creo ni se modifico ninguna columna, y el RESTO DE ESTE SCRIPT NO SE EJECUTO: revisar a mano que columna es esa y, una vez corregida, volver a correr este script entero. Script detenido.', 16, 1, ISNULL(@TipoCargaFam,'(no existe)'), ISNULL(@LargoCargaFam,0), ISNULL(@TipoEmpleados,'(no existe)'), ISNULL(@LargoEmpleados,0));
+    SET NOEXEC ON;
+END
+GO
+
+/* Despues de la guarda a proposito: una corrida detenida no llega a imprimir
+   "inicio" y se distingue de una normal con solo mirar la salida. */
 PRINT '== Perfil: columnas de autor - inicio ==';
 GO
 
@@ -59,37 +110,9 @@ BEGIN
         ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_Modificacion VARCHAR(50) NULL;
         PRINT 'Emp_CargaFamiliar.Usu_Modificacion creada.';
     END
-    ELSE
-    BEGIN
-        /* Que la columna exista no alcanza: lo que importa es que admita un
-           Cod_Usuario. El comentario del punto 3 de
-           Sp_RTA_PerfilGuardarCargaFamiliar (fase 2) afirma que esta columna
-           "es numeric", contradiciendo al punto 1 del mismo comentario, que
-           dice que no existe. Nadie puede resolver eso sin mirar la base, asi
-           que lo resuelve el script: si la encuentra y no es varchar de 50 o
-           mas, se detiene. Sin esto, el IF NOT EXISTS de arriba la daria por
-           buena por el solo hecho de llamarse igual, los procedimientos de
-           2026-09-16-perfil-autor-procedimientos.sql se crearian sin quejarse
-           y fallarian recien al primer guardado de una carga familiar, en
-           produccion, al convertir un Cod_Usuario a numero. */
-        DECLARE @TipoCargaFam VARCHAR(128), @LargoCargaFam INT;
-
-        SELECT @TipoCargaFam  = t.name,
-               @LargoCargaFam = c.max_length
-          FROM sys.columns c
-          JOIN sys.types   t ON t.user_type_id = c.user_type_id
-         WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-           AND c.name      = 'Usu_Modificacion';
-
-        /* max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
-        IF @TipoCargaFam = 'varchar' AND (@LargoCargaFam >= 50 OR @LargoCargaFam = -1)
-            PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
-        ELSE
-        BEGIN
-            RAISERROR('Emp_CargaFamiliar.Usu_Modificacion ya existe pero es %s de largo %d, y se esperaba varchar de 50 o mas: una columna asi no admite un Cod_Usuario. Revisar a mano que columna es antes de seguir; no se toca nada. Script detenido.', 16, 1, @TipoCargaFam, @LargoCargaFam);
-            SET NOEXEC ON;
-        END
-    END
+    /* Si llego hasta aca y la columna ya existe, la guarda de arriba ya
+       comprobo que es varchar de 50 o mas. */
+    ELSE PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
 END
 ELSE PRINT 'dbo.Emp_CargaFamiliar no existe. Omitido.';
 GO
@@ -108,38 +131,18 @@ BEGIN
         ALTER TABLE dbo.Empleados ADD Usu_ModificacionCod VARCHAR(50) NULL;
         PRINT 'Empleados.Usu_ModificacionCod creada.';
     END
-    ELSE
-    BEGIN
-        /* Mismo criterio que arriba, y aca importa mas todavia: al lado vive
-           Usu_Modificacion numeric(5). Si alguien alguna vez creo una
-           Usu_ModificacionCod con otro tipo, el IF NOT EXISTS la daria por
-           buena y Sp_RTA_PerfilGuardarContacto escribiria el autor del cambio
-           en una columna que no lo admite. */
-        DECLARE @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
-
-        SELECT @TipoEmpleados  = t.name,
-               @LargoEmpleados = c.max_length
-          FROM sys.columns c
-          JOIN sys.types   t ON t.user_type_id = c.user_type_id
-         WHERE c.object_id = OBJECT_ID('dbo.Empleados')
-           AND c.name      = 'Usu_ModificacionCod';
-
-        /* max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
-        IF @TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1)
-            PRINT 'Empleados.Usu_ModificacionCod ya existia.';
-        ELSE
-        BEGIN
-            RAISERROR('Empleados.Usu_ModificacionCod ya existe pero es %s de largo %d, y se esperaba varchar de 50 o mas: una columna asi no admite un Cod_Usuario. Revisar a mano que columna es antes de seguir; no se toca nada. Script detenido.', 16, 1, @TipoEmpleados, @LargoEmpleados);
-            SET NOEXEC ON;
-        END
-    END
+    /* Aca importa mas todavia que la guarda de arriba haya mirado el tipo: al
+       lado vive Usu_Modificacion numeric(5), y una Usu_ModificacionCod con el
+       tipo equivocado haria que Sp_RTA_PerfilGuardarContacto escribiera el
+       autor del cambio en una columna que no lo admite. */
+    ELSE PRINT 'Empleados.Usu_ModificacionCod ya existia.';
 END
 ELSE PRINT 'dbo.Empleados no existe. Omitido.';
 GO
 
-/* Incondicional: si alguna de las dos guardas de tipo encendio NOEXEC, apagarlo
-   aca es lo que evita que el resto de la sesion de SSMS quede sin ejecutar nada
-   y parezca que los scripts siguientes "no hacen nada". */
+/* Incondicional: si la guarda de tipo encendio NOEXEC, apagarlo aca es lo que
+   evita que el resto de la sesion de SSMS quede sin ejecutar nada y parezca que
+   los scripts siguientes "no hacen nada". */
 SET NOEXEC OFF;
 GO
 

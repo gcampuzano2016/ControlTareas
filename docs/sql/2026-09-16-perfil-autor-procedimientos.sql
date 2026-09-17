@@ -95,7 +95,11 @@ SELECT @TipoEmpleados  = t.name,
    max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
 IF @TipoCargaFam IS NULL OR @TipoEmpleados IS NULL
 BEGIN
-    RAISERROR('Falta correr 2026-09-16-perfil-autor-columnas.sql. Script detenido.', 16, 1);
+    /* "o falta la tabla" no es una formula de cortesia: si dbo.Emp_CargaFamiliar
+       o dbo.Empleados no existieran, el tipo daria NULL igual, y en ese caso
+       2026-09-16-perfil-autor-columnas.sql no habria fallado -habria dicho "no
+       existe. Omitido."-, asi que volver a correrlo no arreglaria nada. */
+    RAISERROR('No estan las dos columnas de autor: falta correr 2026-09-16-perfil-autor-columnas.sql, o falta alguna de las dos tablas (dbo.Emp_CargaFamiliar, dbo.Empleados). Script detenido.', 16, 1);
     SET NOEXEC ON;
 END
 ELSE IF NOT (@TipoCargaFam  = 'varchar' AND (@LargoCargaFam  >= 50 OR @LargoCargaFam  = -1))
@@ -1089,7 +1093,28 @@ PRINT '== Perfil: el autor en los 14 procedimientos - fin ==';
 GO
 
 /* ============================================================================
-   VERIFICACION (correr a mano despues del script)
+   VERIFICACION (correr a mano; las dos consultas, una ANTES y otra DESPUES)
+
+   ----------------------------------------------------------------------------
+   1. ANTES DE CORRER ESTE SCRIPT: los permisos a nivel de objeto
+
+   Cada procedimiento se hace DROP y CREATE, y el DROP se lleva puestos los
+   permisos que hubiera sobre el objeto: un GRANT EXECUTE a un usuario o a un
+   rol no vuelve solo, y el CREATE no lo repone. Ningun script de docs/sql/
+   tiene un GRANT, asi que si se perdiera no habria de donde recuperarlo y el
+   modulo de perfil empezaria a fallar con "EXECUTE permission denied" para
+   todos. Los tres scripts de origen ya crearon estos mismos 14 con DROP y
+   CREATE y el modulo funciona, o sea que lo esperable es que esto devuelva
+   CERO filas.
+
+   Si devuelve filas: anotarlas, correr el script, y volver a otorgar esos
+   mismos permisos despues. No alcanza con mirar: el DROP ya los descarto.
+
+SELECT * FROM sys.database_permissions
+ WHERE major_id IN (SELECT object_id FROM sys.procedures WHERE name LIKE 'Sp_RTA_Perfil%');
+
+   ----------------------------------------------------------------------------
+   2. DESPUES DE CORRER ESTE SCRIPT: que los 14 tengan el parametro
 
    Esperado: 19 filas. 14 con tieneUsuAccion = 1 -los de este script- y 5 con
    0: Sp_RTA_PerfilEliminarFoto (DELETE fisico, no hay donde anotar) y los

@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Perfil del colaborador: donde anotar QUIEN hizo el cambio
    ReporTarea  |  2026-09-16
 
@@ -16,10 +16,17 @@
    Las siete tablas Perfil_* ya tienen Usu_Modificacion VARCHAR(50) y no
    necesitan nada. Las dos que este script toca no son de este modulo:
 
-     Emp_CargaFamiliar   no tiene ninguna columna de autor.
+     Emp_CargaFamiliar   tiene Usu_Modificacion, pero es numeric(5). Verificado
+                         contra produccion el 2026-09-17: el comentario de la
+                         fase 2 que decia "no tiene columna de autor" estaba
+                         equivocado, y el que decia "es numeric" tenia razon.
+
      Empleados           tiene Usu_Modificacion, pero es numeric(5) -un
-                         correlativo interno de Talento Humano- y no admite un
-                         Cod_Usuario. No se convierte: se agrega una al lado.
+                         correlativo interno de Talento Humano-.
+
+   Ninguna de las dos admite un Cod_Usuario, y ninguna se convierte: se le
+   agrega a cada una Usu_ModificacionCod VARCHAR(50) NULL al lado, y la que ya
+   estaba no se toca -sigue recibiendo lo que le escriba el resto del sistema-.
 
    Las dos columnas son NULL y no las nombra ningun INSERT existente, asi que
    RRHHEmpleados.aspx sigue funcionando exactamente igual.
@@ -46,12 +53,10 @@ GO
    varchar de 50 o mas, este script no la toca y se detiene.
 
    Que la columna exista no alcanza; lo que importa es que admita un
-   Cod_Usuario. El punto 3 del comentario de Sp_RTA_PerfilGuardarCargaFamiliar
-   (fase 2) afirma que Emp_CargaFamiliar.Usu_Modificacion "es numeric",
-   contradiciendo al punto 1 del mismo comentario, que dice que esa columna no
-   existe. Nadie puede resolver eso sin mirar la base, asi que lo resuelve el
-   script: sin esta guarda, un IF NOT EXISTS por nombre daria por buena una
-   columna numeric, los procedimientos de
+   Cod_Usuario. El nombre elegido, Usu_ModificacionCod, es nuevo en las dos
+   tablas, asi que lo normal es que no exista; pero si alguien la creo antes a
+   mano con otro tipo, un IF NOT EXISTS por nombre la daria por buena, los
+   procedimientos de
    2026-09-16-perfil-autor-procedimientos.sql se crearian sin quejarse y
    fallarian recien al primer guardado de una carga familiar, en produccion, al
    convertir un Cod_Usuario a numero.
@@ -88,7 +93,7 @@ SELECT @TipoCargaFam  = t.name,
   FROM sys.columns c
   JOIN sys.types   t ON t.user_type_id = c.user_type_id
  WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-   AND c.name      = 'Usu_Modificacion';
+   AND c.name      = 'Usu_ModificacionCod';
 
 SELECT @TipoEmpleados  = t.name,
        @LargoEmpleados = c.max_length
@@ -110,7 +115,7 @@ BEGIN
     SET @MsgTipoEmpleados  = ISNULL(@TipoEmpleados, '(no existe)');
     SET @MsgLargoEmpleados = ISNULL(@LargoEmpleados, 0);
 
-    RAISERROR('Alguna columna de autor ya existe con un tipo que no sirve. Encontrado: Emp_CargaFamiliar.Usu_Modificacion = %s de largo %d y Empleados.Usu_ModificacionCod = %s de largo %d. En las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. No se creo ni se modifico ninguna columna, y el RESTO DE ESTE SCRIPT NO SE EJECUTO: revisar a mano que columna es esa y, una vez corregida, volver a correr este script entero. Script detenido.', 16, 1, @MsgTipoCargaFam, @MsgLargoCargaFam, @MsgTipoEmpleados, @MsgLargoEmpleados);
+    RAISERROR('Alguna columna de autor ya existe con un tipo que no sirve. Encontrado: Emp_CargaFamiliar.Usu_ModificacionCod = %s de largo %d y Empleados.Usu_ModificacionCod = %s de largo %d. En las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. Ojo: NO se refiere a Emp_CargaFamiliar.Usu_Modificacion, que existe y es numeric(5) a proposito y no se toca. No se creo ni se modifico ninguna columna, y el RESTO DE ESTE SCRIPT NO SE EJECUTO: revisar a mano que columna es esa y, una vez corregida, volver a correr este script entero. Script detenido.', 16, 1, @MsgTipoCargaFam, @MsgLargoCargaFam, @MsgTipoEmpleados, @MsgLargoEmpleados);
     SET NOEXEC ON;
 END
 GO
@@ -131,14 +136,14 @@ IF OBJECT_ID('dbo.Emp_CargaFamiliar','U') IS NOT NULL
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM sys.columns
                     WHERE object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-                      AND name = 'Usu_Modificacion')
+                      AND name = 'Usu_ModificacionCod')
     BEGIN
-        ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_Modificacion VARCHAR(50) NULL;
-        PRINT 'Emp_CargaFamiliar.Usu_Modificacion creada.';
+        ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_ModificacionCod VARCHAR(50) NULL;
+        PRINT 'Emp_CargaFamiliar.Usu_ModificacionCod creada.';
     END
     /* Si llego hasta aca y la columna ya existe, la guarda de arriba ya
        comprobo que es varchar de 50 o mas. */
-    ELSE PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
+    ELSE PRINT 'Emp_CargaFamiliar.Usu_ModificacionCod ya existia.';
 END
 ELSE PRINT 'dbo.Emp_CargaFamiliar no existe. Omitido.';
 GO
@@ -187,7 +192,7 @@ SELECT  tabla    = OBJECT_NAME(c.object_id),
         admiteNulo = c.is_nullable
   FROM  sys.columns c
   JOIN  sys.types  t ON t.user_type_id = c.user_type_id
- WHERE (OBJECT_NAME(c.object_id) = 'Emp_CargaFamiliar' AND c.name = 'Usu_Modificacion')
+ WHERE (OBJECT_NAME(c.object_id) = 'Emp_CargaFamiliar' AND c.name = 'Usu_ModificacionCod')
     OR (OBJECT_NAME(c.object_id) = 'Empleados'         AND c.name = 'Usu_ModificacionCod');
 
    ============================================================================ */

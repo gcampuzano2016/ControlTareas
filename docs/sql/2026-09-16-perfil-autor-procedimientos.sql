@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Perfil del colaborador: Usu_Modificacion pasa a guardar al AUTOR
    ReporTarea  |  2026-09-16
 
@@ -21,7 +21,7 @@
    omision, los binarios viejos se comportan igual que hoy.
 
    Durante esa ventana -SQL puesto, binarios viejos- Empleados.Usu_ModificacionCod
-   y Emp_CargaFamiliar.Usu_Modificacion se llenan con el codigo del DUENO del
+   y Emp_CargaFamiliar.Usu_ModificacionCod se llenan con el codigo del DUENO del
    perfil, indistinguible de un autor real: los primeros valores de esas dos
    columnas no prueban que nadie de Talento Humano haya tocado nada.
 
@@ -53,8 +53,8 @@
    2026-09-16-perfil-autor-columnas.sql, porque hasta ahora no habia donde:
 
      Sp_RTA_PerfilGuardarContacto        Empleados.Usu_ModificacionCod
-     Sp_RTA_PerfilGuardarCargaFamiliar   Emp_CargaFamiliar.Usu_Modificacion
-     Sp_RTA_PerfilEliminarCargaFamiliar  Emp_CargaFamiliar.Usu_Modificacion
+     Sp_RTA_PerfilGuardarCargaFamiliar   Emp_CargaFamiliar.Usu_ModificacionCod
+     Sp_RTA_PerfilEliminarCargaFamiliar  Emp_CargaFamiliar.Usu_ModificacionCod
 
    De donde salen los cuerpos:
      docs/sql/2026-09-14-perfil-colaborador.sql        (1, 2, 3)
@@ -74,12 +74,15 @@ GO
    procedimientos escriben en ellas y el CREATE fallaria al compilarse- y tienen
    que ser del tipo correcto. Lo segundo no es paranoia: el comentario del punto
    3 de Sp_RTA_PerfilGuardarCargaFamiliar (fase 2) afirma que
-   Emp_CargaFamiliar.Usu_Modificacion "es numeric", contradiciendo al punto 1
-   del mismo comentario, que dice que esa columna no existe. Si el que tuviera
-   razon fuera el punto 3, una comprobacion por nombre la daria por buena, los
-   14 procedimientos se crearian sin una queja y el error saldria recien al
-   primer guardado de una carga familiar, en produccion, al convertir un
-   Cod_Usuario a numero. */
+   Emp_CargaFamiliar.Usu_Modificacion "es numeric" y el punto 1 del mismo
+   comentario dice que esa columna no existe. Se consulto la base: el punto 3
+   tiene razon, la columna existe y es numeric(5). Por eso el autor no se guarda
+   ahi sino en Usu_ModificacionCod, una columna nueva que crea
+   2026-09-16-perfil-autor-columnas.sql, y por eso esta comprobacion mira el
+   tipo y no solo el nombre: una comprobacion por nombre a secas daria por buena
+   la numeric vieja, los 14 procedimientos se crearian sin una queja y el error
+   saldria recien al primer guardado de una carga familiar, en produccion, al
+   convertir un Cod_Usuario a numero. */
 DECLARE @TipoCargaFam  VARCHAR(128), @LargoCargaFam  INT,
         @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
 
@@ -88,7 +91,7 @@ SELECT @TipoCargaFam  = t.name,
   FROM sys.columns c
   JOIN sys.types   t ON t.user_type_id = c.user_type_id
  WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-   AND c.name      = 'Usu_Modificacion';
+   AND c.name      = 'Usu_ModificacionCod';
 
 SELECT @TipoEmpleados  = t.name,
        @LargoEmpleados = c.max_length
@@ -116,7 +119,7 @@ END
 ELSE IF NOT (@TipoCargaFam  = 'varchar' AND (@LargoCargaFam  >= 50 OR @LargoCargaFam  = -1))
      OR NOT (@TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1))
 BEGIN
-    RAISERROR('Las columnas de autor existen pero alguna no es del tipo esperado: Emp_CargaFamiliar.Usu_Modificacion es %s de largo %d y Empleados.Usu_ModificacionCod es %s de largo %d; en las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. Revisar 2026-09-16-perfil-autor-columnas.sql y la columna que sobra antes de seguir. Script detenido.', 16, 1, @TipoCargaFam, @LargoCargaFam, @TipoEmpleados, @LargoEmpleados);
+    RAISERROR('Las columnas de autor existen pero alguna no es del tipo esperado: Emp_CargaFamiliar.Usu_ModificacionCod es %s de largo %d y Empleados.Usu_ModificacionCod es %s de largo %d; en las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. Revisar 2026-09-16-perfil-autor-columnas.sql y la columna que sobra antes de seguir. Script detenido.', 16, 1, @TipoCargaFam, @LargoCargaFam, @TipoEmpleados, @LargoEmpleados);
     SET NOEXEC ON;
 END
 GO
@@ -777,15 +780,14 @@ GO
       "String or binary data would be truncated" y tumbaria el guardado entero.
       Por eso LEFT(@Ip, 32).
 
-   3. Usu_Modificacion es la columna NUEVA que creo
-      2026-09-16-perfil-autor-columnas.sql: varchar(50) y nullable. Hasta
-      entonces esta tabla no tenia ninguna columna de autor y lo que se
-      escribia desde el perfil quedaba sin registro de quien lo hizo. La
-      version anterior de este comentario decia que "Usu_Modificacion es
-      numeric y no admite un Cod_Usuario": eso es cierto de
-      Empleados.Usu_Modificacion -otra tabla-, no de esta. Por eso en
-      Empleados hubo que agregar Usu_ModificacionCod al lado y aqui alcanzo
-      con agregar Usu_Modificacion.
+   3. Usu_ModificacionCod es la columna NUEVA que creo
+      2026-09-16-perfil-autor-columnas.sql: varchar(50) y nullable. Esta tabla
+      ya tenia Usu_Modificacion, pero es numeric(5) -verificado contra la base-
+      y no admite un Cod_Usuario, asi que no se toca: sigue donde estaba, con
+      lo que haya escrito el resto del sistema. Empleados esta en el mismo
+      caso y recibio una columna con el mismo nombre por la misma razon. Lo
+      que se escribia desde el perfil quedaba hasta ahora sin registro de
+      quien lo hizo.
 
    IdEmpleado se deja nulo a proposito. La columna es nullable y 119 de 231
    usuarios no tienen ficha enlazada; sus cargas cuelgan solo de Cod_Usuario. */
@@ -824,7 +826,7 @@ BEGIN
     BEGIN
         INSERT INTO dbo.Emp_CargaFamiliar
             (Cod_Usuario, Nombre, Parentesco, Fecha_nacimiento,
-             Estado, Fec_Modificacion, Usu_Modificacion, Ip_Modificacion)
+             Estado, Fec_Modificacion, Usu_ModificacionCod, Ip_Modificacion)
         VALUES (@Cod_Usuario, @Nombre, @Parentesco, @Nacimiento,
                 '1', GETDATE(), @Usu_Accion, LEFT(@Ip, 32));   -- (d) escritura nueva
 
@@ -837,7 +839,7 @@ BEGIN
                Parentesco       = @Parentesco,
                Fecha_nacimiento = @Nacimiento,
                Fec_Modificacion = GETDATE(),
-               Usu_Modificacion = @Usu_Accion,   -- (d) escritura nueva
+               Usu_ModificacionCod = @Usu_Accion,   -- (d) escritura nueva
                Ip_Modificacion  = LEFT(@Ip, 32)
          WHERE IdCargaFam  = @IdCargaFam
            AND Cod_Usuario = @Cod_Usuario;
@@ -861,7 +863,8 @@ GO
    de Sp_RTACambiarEstadoCargaFam (que solo entiende 'Activo'/'Inactivo') cae
    en su ELSE y no alcanza esta fila. No cambiar sin entender esto.
 
-   Usu_Modificacion es la columna nueva de 2026-09-16-perfil-autor-columnas. */
+   Usu_ModificacionCod es la columna nueva de 2026-09-16-perfil-autor-columnas:
+   la Usu_Modificacion que ya existia es numeric(5) y no se toca. */
 CREATE PROCEDURE dbo.Sp_RTA_PerfilEliminarCargaFamiliar
     @Cod_Usuario VARCHAR(50),
     @IdCargaFam  INT,
@@ -891,7 +894,7 @@ BEGIN
     UPDATE dbo.Emp_CargaFamiliar
        SET Estado           = '0',
            Fec_Modificacion = GETDATE(),
-           Usu_Modificacion = @Usu_Accion,   -- (d) escritura nueva
+           Usu_ModificacionCod = @Usu_Accion,   -- (d) escritura nueva
            Ip_Modificacion  = LEFT(@Ip, 32)
      WHERE IdCargaFam  = @IdCargaFam
        AND Cod_Usuario = @Cod_Usuario;

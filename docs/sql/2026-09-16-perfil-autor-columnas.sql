@@ -24,6 +24,11 @@
    Las dos columnas son NULL y no las nombra ningun INSERT existente, asi que
    RRHHEmpleados.aspx sigue funcionando exactamente igual.
 
+   Si alguna de las dos ya existe pero con otro tipo, el script no la toca y se
+   detiene diciendo que encontro y que esperaba. Una columna que se llama igual
+   pero no admite un Cod_Usuario es peor que una que falta: no se nota hasta
+   que falla un guardado en produccion.
+
    Idempotente.
    ============================================================================ */
 
@@ -54,7 +59,37 @@ BEGIN
         ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_Modificacion VARCHAR(50) NULL;
         PRINT 'Emp_CargaFamiliar.Usu_Modificacion creada.';
     END
-    ELSE PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
+    ELSE
+    BEGIN
+        /* Que la columna exista no alcanza: lo que importa es que admita un
+           Cod_Usuario. El comentario del punto 3 de
+           Sp_RTA_PerfilGuardarCargaFamiliar (fase 2) afirma que esta columna
+           "es numeric", contradiciendo al punto 1 del mismo comentario, que
+           dice que no existe. Nadie puede resolver eso sin mirar la base, asi
+           que lo resuelve el script: si la encuentra y no es varchar de 50 o
+           mas, se detiene. Sin esto, el IF NOT EXISTS de arriba la daria por
+           buena por el solo hecho de llamarse igual, los procedimientos de
+           2026-09-16-perfil-autor-procedimientos.sql se crearian sin quejarse
+           y fallarian recien al primer guardado de una carga familiar, en
+           produccion, al convertir un Cod_Usuario a numero. */
+        DECLARE @TipoCargaFam VARCHAR(128), @LargoCargaFam INT;
+
+        SELECT @TipoCargaFam  = t.name,
+               @LargoCargaFam = c.max_length
+          FROM sys.columns c
+          JOIN sys.types   t ON t.user_type_id = c.user_type_id
+         WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
+           AND c.name      = 'Usu_Modificacion';
+
+        /* max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
+        IF @TipoCargaFam = 'varchar' AND (@LargoCargaFam >= 50 OR @LargoCargaFam = -1)
+            PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
+        ELSE
+        BEGIN
+            RAISERROR('Emp_CargaFamiliar.Usu_Modificacion ya existe pero es %s de largo %d, y se esperaba varchar de 50 o mas: una columna asi no admite un Cod_Usuario. Revisar a mano que columna es antes de seguir; no se toca nada. Script detenido.', 16, 1, @TipoCargaFam, @LargoCargaFam);
+            SET NOEXEC ON;
+        END
+    END
 END
 ELSE PRINT 'dbo.Emp_CargaFamiliar no existe. Omitido.';
 GO
@@ -73,9 +108,39 @@ BEGIN
         ALTER TABLE dbo.Empleados ADD Usu_ModificacionCod VARCHAR(50) NULL;
         PRINT 'Empleados.Usu_ModificacionCod creada.';
     END
-    ELSE PRINT 'Empleados.Usu_ModificacionCod ya existia.';
+    ELSE
+    BEGIN
+        /* Mismo criterio que arriba, y aca importa mas todavia: al lado vive
+           Usu_Modificacion numeric(5). Si alguien alguna vez creo una
+           Usu_ModificacionCod con otro tipo, el IF NOT EXISTS la daria por
+           buena y Sp_RTA_PerfilGuardarContacto escribiria el autor del cambio
+           en una columna que no lo admite. */
+        DECLARE @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
+
+        SELECT @TipoEmpleados  = t.name,
+               @LargoEmpleados = c.max_length
+          FROM sys.columns c
+          JOIN sys.types   t ON t.user_type_id = c.user_type_id
+         WHERE c.object_id = OBJECT_ID('dbo.Empleados')
+           AND c.name      = 'Usu_ModificacionCod';
+
+        /* max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
+        IF @TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1)
+            PRINT 'Empleados.Usu_ModificacionCod ya existia.';
+        ELSE
+        BEGIN
+            RAISERROR('Empleados.Usu_ModificacionCod ya existe pero es %s de largo %d, y se esperaba varchar de 50 o mas: una columna asi no admite un Cod_Usuario. Revisar a mano que columna es antes de seguir; no se toca nada. Script detenido.', 16, 1, @TipoEmpleados, @LargoEmpleados);
+            SET NOEXEC ON;
+        END
+    END
 END
 ELSE PRINT 'dbo.Empleados no existe. Omitido.';
+GO
+
+/* Incondicional: si alguna de las dos guardas de tipo encendio NOEXEC, apagarlo
+   aca es lo que evita que el resto de la sesion de SSMS quede sin ejecutar nada
+   y parezca que los scripts siguientes "no hacen nada". */
+SET NOEXEC OFF;
 GO
 
 PRINT '== Perfil: columnas de autor - fin ==';

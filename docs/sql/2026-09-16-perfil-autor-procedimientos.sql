@@ -59,21 +59,49 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
-/* Las dos columnas de autor tienen que existir antes: tres de estos
-   procedimientos escriben en ellas y el CREATE fallaria al compilarse. */
-IF NOT EXISTS (SELECT 1 FROM sys.columns
-                WHERE object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-                  AND name = 'Usu_Modificacion')
-   OR NOT EXISTS (SELECT 1 FROM sys.columns
-                   WHERE object_id = OBJECT_ID('dbo.Empleados')
-                     AND name = 'Usu_ModificacionCod')
+/* Las dos columnas de autor tienen que existir antes -tres de estos
+   procedimientos escriben en ellas y el CREATE fallaria al compilarse- y tienen
+   que ser del tipo correcto. Lo segundo no es paranoia: el comentario del punto
+   3 de Sp_RTA_PerfilGuardarCargaFamiliar (fase 2) afirma que
+   Emp_CargaFamiliar.Usu_Modificacion "es numeric", contradiciendo al punto 1
+   del mismo comentario, que dice que esa columna no existe. Si el que tuviera
+   razon fuera el punto 3, una comprobacion por nombre la daria por buena, los
+   14 procedimientos se crearian sin una queja y el error saldria recien al
+   primer guardado de una carga familiar, en produccion, al convertir un
+   Cod_Usuario a numero. */
+DECLARE @TipoCargaFam  VARCHAR(128), @LargoCargaFam  INT,
+        @TipoEmpleados VARCHAR(128), @LargoEmpleados INT;
+
+SELECT @TipoCargaFam  = t.name,
+       @LargoCargaFam = c.max_length
+  FROM sys.columns c
+  JOIN sys.types   t ON t.user_type_id = c.user_type_id
+ WHERE c.object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
+   AND c.name      = 'Usu_Modificacion';
+
+SELECT @TipoEmpleados  = t.name,
+       @LargoEmpleados = c.max_length
+  FROM sys.columns c
+  JOIN sys.types   t ON t.user_type_id = c.user_type_id
+ WHERE c.object_id = OBJECT_ID('dbo.Empleados')
+   AND c.name      = 'Usu_ModificacionCod';
+
+/* Las dos ramas encienden NOEXEC y no hacen RETURN: RETURN fuera de un
+   procedimiento sale del LOTE, no del script. Despues del GO la ejecucion
+   seguiria y los 14 CREATE PROCEDURE se intentarian igual, fallando uno por uno
+   con errores de columna en vez de con este mensaje. NOEXEC hace que los lotes
+   siguientes se analicen pero no se ejecuten. Se apaga al final del archivo.
+
+   max_length = -1 es varchar(MAX): mas ancha que 50, sirve igual. */
+IF @TipoCargaFam IS NULL OR @TipoEmpleados IS NULL
 BEGIN
-    /* SET NOEXEC ON y no RETURN: RETURN fuera de un procedimiento sale del LOTE,
-       no del script. Despues del GO la ejecucion seguiria y los 14 CREATE
-       PROCEDURE se intentarian igual, fallando uno por uno con errores de
-       columna inexistente en vez de con este mensaje. NOEXEC hace que los lotes
-       siguientes se analicen pero no se ejecuten. Se apaga al final del archivo. */
     RAISERROR('Falta correr 2026-09-16-perfil-autor-columnas.sql. Script detenido.', 16, 1);
+    SET NOEXEC ON;
+END
+ELSE IF NOT (@TipoCargaFam  = 'varchar' AND (@LargoCargaFam  >= 50 OR @LargoCargaFam  = -1))
+     OR NOT (@TipoEmpleados = 'varchar' AND (@LargoEmpleados >= 50 OR @LargoEmpleados = -1))
+BEGIN
+    RAISERROR('Las columnas de autor existen pero alguna no es del tipo esperado: Emp_CargaFamiliar.Usu_Modificacion es %s de largo %d y Empleados.Usu_ModificacionCod es %s de largo %d; en las dos se esperaba varchar de 50 o mas, porque van a recibir un Cod_Usuario. Revisar 2026-09-16-perfil-autor-columnas.sql y la columna que sobra antes de seguir. Script detenido.', 16, 1, @TipoCargaFam, @LargoCargaFam, @TipoEmpleados, @LargoEmpleados);
     SET NOEXEC ON;
 END
 GO

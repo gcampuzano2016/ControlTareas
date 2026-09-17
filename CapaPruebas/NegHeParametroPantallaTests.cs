@@ -1,4 +1,4 @@
-using CapaNegocio;
+﻿using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CapaPruebas
@@ -59,5 +59,28 @@ namespace CapaPruebas
         {
             Assert.IsFalse(NegHeParametroPantalla.EsParametroActivo("FactorInventado"));
         }
-    }
+    
+        [TestMethod]
+        public void EtiquetaDe_DevuelveElNombreLegible()
+        {
+            Assert.AreEqual("Factor de recargo al 50%",
+                            NegHeParametroPantalla.EtiquetaDe("Factor50"));
+        }
+
+        [TestMethod]
+        public void EtiquetaDe_LosTopesAvisanDeQueNoSeUsan()
+        {
+            /* La pantalla los muestra igual, pero nadie debe creer que
+               cambiarlos hace algo mientras RRHH no defina el umbral. */
+            StringAssert.Contains(NegHeParametroPantalla.EtiquetaDe("TopeDiario50"), "no usado");
+            StringAssert.Contains(NegHeParametroPantalla.EtiquetaDe("TopeSemanal50"), "no usado");
+        }
+
+        [TestMethod]
+        public void EtiquetaDe_ClaveDesconocida_LaDevuelveCrudaYNoEnBlanco()
+        {
+            Assert.AreEqual("Inventada", NegHeParametroPantalla.EtiquetaDe("Inventada"));
+            Assert.AreEqual("", NegHeParametroPantalla.EtiquetaDe(null));
+        }
+}
 }

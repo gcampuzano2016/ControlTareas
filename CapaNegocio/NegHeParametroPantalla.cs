@@ -71,6 +71,23 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// El nombre legible de una clave, para la pantalla. Se expone desde
+        /// aqui —y no se escribe en el .aspx— para que la etiqueta viva en el
+        /// mismo sitio que la lista de claves conocidas: escribirlas dos veces
+        /// es como una pantalla acaba llamando "Dias del mes" a algo que aqui
+        /// ya se renombro.
+        ///
+        /// Una clave desconocida se devuelve tal cual y no en blanco: si
+        /// alguien mete una a mano en la tabla, es mejor verla cruda en la
+        /// grilla que ver una fila sin nombre.
+        /// </summary>
+        public static string EtiquetaDe(string clave)
+        {
+            ParametroConocido p = Buscar(clave);
+            return p != null ? p.Etiqueta : (clave ?? "").Trim();
+        }
+
+        /// <summary>
         /// Traduce el codigo de Sp_RTA_HeParametroGuardar a texto que diga que
         /// hacer, no que fallo.
         ///

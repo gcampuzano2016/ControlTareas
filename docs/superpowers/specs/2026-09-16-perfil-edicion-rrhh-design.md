@@ -51,7 +51,7 @@ sino tres, cada uno con su propio transporte:
 
 | Superficie | Transporte | De dónde saca hoy la identidad |
 |---|---|---|
-| `AdministrarPerfil.ashx` — 13 acciones | JSON `[{action, parameters}]` | `CodUsuarioSesion(context)`, **18 llamadas** |
+| `AdministrarPerfil.ashx` — 13 acciones | JSON `[{action, parameters}]` | `CodUsuarioSesion(context)`, **18 llamadas, de las que cambian 16** |
 | `AdministrarPerfil.ashx` — subir documento | **multipart** (`Request.Files`) | la sesión |
 | `DescargarPerfil.ashx` — documento y CV | **GET query string** | la sesión |
 
@@ -160,12 +160,21 @@ comentario de que *«el menú solo controla que se VEA la pantalla, no que se pu
 LLAMAR al handler»*. Aquí aplica igual: la pantalla nueva estará en el menú solo
 para 14 y 18, y eso **no** es la barrera. La barrera es esta función.
 
-### Las 18 llamadas
+### Las llamadas: 16 cambian, 2 se quedan
 
-Las 18 apariciones de `CodUsuarioSesion(context)` en `AdministrarPerfil.ashx.cs`
-pasan a `PerfilIdentidad.Objetivo(context, ...)` para el **dueño**, y las
-escrituras suman `PerfilIdentidad.Autor(context)` para el **autor**. Dos
-conceptos que hasta hoy eran uno.
+`AdministrarPerfil.ashx.cs` tiene 18 apariciones de `CodUsuarioSesion(context)`.
+**Solo 16 cambian.**
+
+Las 16 son `CargarPerfil` y las 15 escrituras: pasan a
+`PerfilIdentidad.Objetivo(context, ...)` para el **dueño**, y las escrituras
+suman `PerfilIdentidad.Autor(context)` para el **autor**. Dos conceptos que hasta
+hoy eran uno.
+
+Las 2 que **no** cambian son `ListaEquipo` y `PerfilEquipo`: ahí el código de la
+sesión es el del **jefe**, no el del dueño de un perfil, y la pestaña «Equipo»
+sigue siendo de solo lectura sobre el equipo directo. Confundir esos dos
+significados es exactamente el error que la §3.1 describe. En el código quedan
+llamando a `CodUsuarioSesion`, que se conserva por eso.
 
 ---
 
@@ -180,10 +189,26 @@ conceptos que hasta hoy eran uno.
 Agregar columnas anulables no rompe a `RRHHEmpleados.aspx`: sus `INSERT` no las
 nombran. Es la razón por la que esta opción es barata.
 
-### 2.2 Los 15 procedimientos de escritura
+### 2.2 Los 14 procedimientos de escritura
 
-Cada uno gana `@Usu_Accion VARCHAR(50)`, y `Usu_Modificacion` pasa a guardar
-**ese** valor en lugar de `@Cod_Usuario`:
+Cada uno gana `@Usu_Accion VARCHAR(50) = NULL`, y `Usu_Modificacion` pasa a
+guardar **ese** valor en lugar de `@Cod_Usuario`.
+
+> **El parámetro es opcional, y eso no es pereza.** `DESPLIEGUE.md` manda el SQL
+> **antes** que los binarios. Si `@Usu_Accion` fuera obligatorio, entre el paso 1
+> y el paso 3 la aplicación viva llamaría a procedimientos que exigen un
+> parámetro que todavía no manda, y **todo el módulo dejaría de guardar**. Con el
+> valor por omisión, cada procedimiento arranca con:
+>
+> ```sql
+> SET @Usu_Accion = ISNULL(NULLIF(LTRIM(RTRIM(@Usu_Accion)), ''), @Cod_Usuario);
+> ```
+>
+> Los binarios viejos siguen funcionando exactamente igual que hoy — autor =
+> dueño — y en cuanto entran los nuevos, empiezan a mandarlo. La ventana deja de
+> ser peligrosa.
+
+Los 14, con `Sp_RTA_PerfilEliminarFoto` fuera por la razón de abajo:
 
 ```
 Sp_RTA_PerfilGuardarContacto          Sp_RTA_PerfilEliminarEmergencia
@@ -191,16 +216,25 @@ Sp_RTA_PerfilGuardarEmergencia        Sp_RTA_PerfilEliminarEstudio
 Sp_RTA_PerfilGuardarEstudio           Sp_RTA_PerfilEliminarCertificacion
 Sp_RTA_PerfilGuardarCertificacion     Sp_RTA_PerfilEliminarExperiencia
 Sp_RTA_PerfilGuardarExperiencia       Sp_RTA_PerfilEliminarCargaFamiliar
-Sp_RTA_PerfilGuardarCargaFamiliar     Sp_RTA_PerfilEliminarFoto
-Sp_RTA_PerfilGuardarFoto              Sp_RTA_PerfilEliminarDocumento
+Sp_RTA_PerfilGuardarCargaFamiliar     Sp_RTA_PerfilEliminarDocumento
+Sp_RTA_PerfilGuardarFoto
 Sp_RTA_PerfilGuardarDocumento
 ```
 
-Es mecánico y el compilador no ayuda: va en **un script único**, revisable de
-una sentada, con los 15 juntos.
+> **`Sp_RTA_PerfilEliminarFoto` queda fuera, y no por olvido.** Hace un `DELETE`
+> físico sobre `Perfil_Foto`: borrada la fila, no queda ninguna columna donde
+> anotar al autor. Un parámetro que no se usa es ruido, así que no se le agrega.
+> La consecuencia es real y se asume: **quitar una foto no deja rastro de quién
+> la quitó** — tampoco lo dejaba antes. Si algún día importa, hay que convertirlo
+> en borrado lógico, y eso es otro trabajo.
 
-Arrastra los mismos cambios de firma hacia arriba: 15 métodos en `DaoPerfil` y 15
-en `NegPerfil`. Ahí el compilador **sí** ayuda — ninguna llamada vieja compila.
+Es mecánico y el compilador no ayuda: va en **un script único**, revisable de
+una sentada, con los 14 juntos.
+
+Arrastra los cambios de firma hacia arriba: 15 métodos en `DaoPerfil` y 15 en
+`NegPerfil` — los 15, incluido `EliminarFoto`, para que la capa no tenga una
+excepción que haya que recordar. Ahí el compilador **sí** ayuda: ninguna llamada
+vieja compila.
 
 > **Lo que no se toca.** Las guardas de `Cod_Usuario` repetido (`Respuestas = -2`)
 > se quedan exactamente como están, y la comparación recortada de cada una
@@ -320,16 +354,45 @@ Esto no lo cubre ninguna prueba unitaria y hay que hacerlo a mano:
 
 ## 5. Despliegue
 
+### Se parte en dos entregas
+
+El corte no es por tamaño: es que **la primera entrega no cambia nada de lo que
+el usuario ve**, y eso la hace verificable por sí sola.
+
+| | Entrega 1 — la regla y el autor | Entrega 2 — la pantalla |
+|---|---|---|
+| **Código** | `NegPerfilAcceso` + pruebas, `PerfilIdentidad`, las 16 llamadas del handler, `DescargarPerfil.ashx`, 15 firmas en `DaoPerfil` y `NegPerfil` | `PerfilFichas.ascx`, la pantalla nueva, su `.js`, los tres retoques a `miPerfil.js` |
+| **SQL** | columnas de autor en las 2 tablas ajenas + los 14 procedimientos con `@Usu_Accion` | `Sp_RTA_PerfilPersonalLista` + script de menú |
+| **Qué ve el usuario** | **Nada.** `MiPerfil.aspx` sigue igual: no manda `codUsuario`, así que la regla devuelve el de la sesión, como hoy. | Talento Humano estrena la pantalla. |
+| **Qué se gana** | `Usu_Modificacion` empieza a guardar al autor de verdad. La regla queda probada y desplegada **antes** de que exista nada que la ejercite. | La capacidad se vuelve usable. |
+
+Al terminar la entrega 1 el sistema **ya es capaz** de que un perfil 14 edite a
+otro por HTTP directo, sin que exista pantalla para hacerlo. Es intencional: es
+exactamente lo que la entrega 2 va a usar, y permite probar la regla contra la
+base antes de construir encima.
+
+Cada entrega lleva su propio SQL y su propio despliegue.
+
+### Orden dentro de cada entrega
+
 El SQL siempre antes que los binarios, como manda `DESPLIEGUE.md`.
 
-1. Script de columnas de autor (`Emp_CargaFamiliar` y `Empleados`)
-2. Script de los 15 procedimientos con `@Usu_Accion` + `Sp_RTA_PerfilPersonalLista`
-3. Script de menú (`MenuDos` + `PerfilMenu`, perfiles 14 y 18, grupo padre incluido)
-4. Binarios
+**Entrega 1:**
 
-> **Esto viaja junto con las fases 2, 3a y 3b**, que llevan desde el 2026-09-15
-> con el esquema aplicado y los binarios sin desplegar. **Un solo despliegue, no
-> dos.**
+1. Script de columnas de autor (`Emp_CargaFamiliar` y `Empleados`)
+2. Script de los 14 procedimientos con `@Usu_Accion`
+3. Binarios
+
+**Entrega 2:**
+
+1. Script de `Sp_RTA_PerfilPersonalLista`
+2. Script de menú (`MenuDos` + `PerfilMenu`, perfiles 14 y 18, grupo padre incluido)
+3. Binarios
+
+> **La entrega 1 viaja junto con las fases 2, 3a y 3b**, que llevan desde el
+> 2026-09-15 con el esquema aplicado y los binarios sin desplegar. Esos binarios
+> no se despliegan solos y luego otra vez: salen **una sola vez**, con la entrega
+> 1 dentro.
 
 ### Las trampas que este módulo ya cobró
 
@@ -373,8 +436,8 @@ El SQL siempre antes que los binarios, como manda `DESPLIEGUE.md`.
 
 | Riesgo | Mitigación |
 |---|---|
-| Toda la seguridad descansa en una función | Vive en `CapaNegocio`, cubierta por 7 pruebas unitarias, y cierra por defecto ante cualquier entrada rara. |
+| Toda la seguridad descansa en una función | Vive en `CapaNegocio`, cubierta por 11 pruebas unitarias, y cierra por defecto ante cualquier entrada rara. |
 | Se apila sobre tres fases sin desplegar | El diseño minimiza el diff sobre esas fases: el handler cambia 18 líneas, la capa de negocio solo firmas, y el marcado se **mueve** sin reescribirse. |
 | Primer `.ascx` del repositorio | El movimiento es solo marcado; si sale mal, se nota al primer render y no en producción. |
-| 15 procedimientos cambiados a mano | Un solo script, los 15 juntos, revisable de una sentada. |
+| 14 procedimientos cambiados a mano | Un solo script, los 14 juntos, revisable de una sentada. |
 | Tocar dos tablas de Talento Humano | Solo se **agregan** columnas anulables; ningún `INSERT` existente las nombra. |

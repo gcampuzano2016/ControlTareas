@@ -1084,5 +1084,59 @@ namespace CapaPruebas
         {
             Assert.AreEqual("", NegPerfilCampos.ValidarDocumento("CERTIFICACION", 7, "titulo.pdf", 5242880));
         }
+
+        /* ------------------------------------ filtro del buscador de personal --- */
+
+        /// <summary>
+        /// El buscador de la pantalla de Talento Humano no lista a nadie hasta que
+        /// se escriben dos caracteres. La regla vive aca y no solo en el navegador
+        /// porque el handler es alcanzable por HTTP directo: sin esto, un POST con
+        /// el filtro vacio se lleva la plantilla entera de una sola vez.
+        /// </summary>
+        [TestMethod]
+        public void ValidarFiltroPersonal_Vacio_NoSePermite()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFiltroPersonal(""));
+        }
+
+        [TestMethod]
+        public void ValidarFiltroPersonal_Nulo_NoSePermite()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFiltroPersonal(null));
+        }
+
+        /// <summary>
+        /// Solo espacios es lo mismo que vacio. Sin el recorte, tres espacios
+        /// pasarian la comprobacion de largo y devolverian a todo el personal.
+        /// </summary>
+        [TestMethod]
+        public void ValidarFiltroPersonal_SoloEspacios_NoSePermite()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFiltroPersonal("   "));
+        }
+
+        [TestMethod]
+        public void ValidarFiltroPersonal_UnCaracter_NoSePermite()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFiltroPersonal("a"));
+        }
+
+        [TestMethod]
+        public void ValidarFiltroPersonal_UnCaracterConRelleno_NoSePermite()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarFiltroPersonal("  a  "));
+        }
+
+        [TestMethod]
+        public void ValidarFiltroPersonal_DosCaracteres_SePermite()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarFiltroPersonal("ab"));
+        }
+
+        [TestMethod]
+        public void ValidarFiltroPersonal_NombreCompleto_SePermite()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarFiltroPersonal("Rodriguez"));
+        }
     }
 }

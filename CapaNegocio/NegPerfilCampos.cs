@@ -605,5 +605,33 @@ namespace CapaNegocio
 
             return "";
         }
+
+        /// <summary>
+        /// Cuantos caracteres exige el buscador de personal antes de traer nada.
+        ///
+        /// No es un capricho de interfaz: sin minimo, un filtro vacio devuelve a
+        /// todo el personal activo de una sola vez, en una tabla sin paginar y en
+        /// un sistema donde DataTables no carga. Dos caracteres bastan para que
+        /// quien busca sepa a quien busca.
+        /// </summary>
+        public const int MinimoFiltroPersonal = 2;
+
+        /// <summary>
+        /// Valida el filtro del buscador de personal. Cadena vacia si sirve.
+        ///
+        /// Recorta antes de medir: sin eso, tres espacios pasan la comprobacion de
+        /// largo y el procedimiento recibe un filtro que no filtra nada.
+        /// </summary>
+        public static string ValidarFiltroPersonal(string filtro)
+        {
+            string limpio = (filtro ?? "").Trim();
+
+            if (limpio.Length < MinimoFiltroPersonal)
+            {
+                return "Escriba al menos " + MinimoFiltroPersonal + " caracteres para buscar.";
+            }
+
+            return "";
+        }
     }
 }

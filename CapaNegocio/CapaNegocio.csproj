@@ -209,6 +209,7 @@
     <Compile Include="NegPerfilCv.cs" />
     <Compile Include="NegHeExportacion.cs" />
     <Compile Include="NegHeParametros.cs" />
+    <Compile Include="NegHeParametroPantalla.cs" />
     <Compile Include="NegHorasExtras.cs" />
     <Compile Include="NegHorasExtrasPantalla.cs" />
     <Compile Include="NegPerfilInicio.cs" />

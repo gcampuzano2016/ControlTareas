@@ -80,6 +80,7 @@
     <Compile Include="DaoMenuPerfil.cs" />
     <Compile Include="DaoMenuUsuario.cs" />
     <Compile Include="DaoUsuarioAdmin.cs" />
+    <Compile Include="DaoHeParametro.cs" />
     <Compile Include="DaoHorasExtras.cs" />
     <Compile Include="DaoPerfil.cs" />
     <Compile Include="DaoPerfilInicio.cs" />

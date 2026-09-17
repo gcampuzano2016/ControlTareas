@@ -51,6 +51,7 @@
     <Compile Include="EntPerfilEquipoTests.cs" />
     <Compile Include="NegHorasExtrasTests.cs" />
     <Compile Include="NegHorasExtrasPantallaTests.cs" />
+    <Compile Include="NegHeParametroPantallaTests.cs" />
     <Compile Include="NegHeExportacionTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

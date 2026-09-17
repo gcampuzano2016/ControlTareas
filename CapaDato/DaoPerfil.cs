@@ -221,17 +221,6 @@ namespace CapaDato
         }
 
         /// <summary>
-        /// TEMPORAL. Sobrecarga de transicion: el autor es el dueno, que es como
-        /// se comportaba el modulo antes de que Talento Humano pudiera editar
-        /// perfiles ajenos. Se borra al final de la entrega 1, y ese borrado es
-        /// lo que demuestra que ningun sitio se quedo sin migrar.
-        /// </summary>
-        public static EntRespuesta GuardarContacto(string codUsuario, EntPerfilContacto contacto, string ip)
-        {
-            return GuardarContacto(codUsuario, codUsuario, contacto, ip);
-        }
-
-        /// <summary>
         /// Alta o edicion de un contacto de emergencia.
         ///
         /// El procedimiento devuelve -2 en Respuestas cuando el Cod_Usuario esta
@@ -267,12 +256,6 @@ namespace CapaDato
             return RespuestaDe(r, "Contacto de emergencia guardado.", "No se encontró ese contacto de emergencia.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarEmergencia(string codUsuario, EntPerfilEmergencia c, string ip)
-        {
-            return GuardarEmergencia(codUsuario, codUsuario, c, ip);
-        }
-
         /// <summary>
         /// Borrado logico de un contacto de emergencia.
         ///
@@ -290,12 +273,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Contacto eliminado.", "No se encontró ese contacto.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarEmergencia(string codUsuario, int idContacto, string ip)
-        {
-            return EliminarEmergencia(codUsuario, codUsuario, idContacto, ip);
         }
 
         /// <summary>
@@ -404,12 +381,6 @@ namespace CapaDato
             return RespuestaDe(r, "Estudio guardado.", "No se encontró ese estudio.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarEstudio(string codUsuario, EntPerfilEstudio e, string ip)
-        {
-            return GuardarEstudio(codUsuario, codUsuario, e, ip);
-        }
-
         public static EntRespuesta EliminarEstudio(string codUsuario, string codAutor, int idEstudio, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarEstudio", cmd =>
@@ -421,12 +392,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Estudio eliminado.", "No se encontró ese estudio.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarEstudio(string codUsuario, int idEstudio, string ip)
-        {
-            return EliminarEstudio(codUsuario, codUsuario, idEstudio, ip);
         }
 
         public static EntRespuesta GuardarCertificacion(string codUsuario, string codAutor,
@@ -446,12 +411,6 @@ namespace CapaDato
             return RespuestaDe(r, "Certificación guardada.", "No se encontró esa certificación.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarCertificacion(string codUsuario, EntPerfilCertificacion c, string ip)
-        {
-            return GuardarCertificacion(codUsuario, codUsuario, c, ip);
-        }
-
         public static EntRespuesta EliminarCertificacion(string codUsuario, string codAutor,
                                                          int idCertificacion, string ip)
         {
@@ -464,12 +423,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Certificación eliminada.", "No se encontró esa certificación.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarCertificacion(string codUsuario, int idCertificacion, string ip)
-        {
-            return EliminarCertificacion(codUsuario, codUsuario, idCertificacion, ip);
         }
 
         public static EntRespuesta GuardarExperiencia(string codUsuario, string codAutor,
@@ -491,12 +444,6 @@ namespace CapaDato
             return RespuestaDe(r, "Experiencia guardada.", "No se encontró esa experiencia.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarExperiencia(string codUsuario, EntPerfilExperiencia x, string ip)
-        {
-            return GuardarExperiencia(codUsuario, codUsuario, x, ip);
-        }
-
         public static EntRespuesta EliminarExperiencia(string codUsuario, string codAutor, int idExperiencia, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarExperiencia", cmd =>
@@ -508,12 +455,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Experiencia eliminada.", "No se encontró esa experiencia.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarExperiencia(string codUsuario, int idExperiencia, string ip)
-        {
-            return EliminarExperiencia(codUsuario, codUsuario, idExperiencia, ip);
         }
 
         public static EntRespuesta GuardarCargaFamiliar(string codUsuario, string codAutor,
@@ -533,12 +474,6 @@ namespace CapaDato
             return RespuestaDe(r, "Carga familiar guardada.", "No se encontró esa carga familiar.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarCargaFamiliar(string codUsuario, EntPerfilCargaFamiliar c, string ip)
-        {
-            return GuardarCargaFamiliar(codUsuario, codUsuario, c, ip);
-        }
-
         public static EntRespuesta EliminarCargaFamiliar(string codUsuario, string codAutor, int idCargaFam, string ip)
         {
             int r = EjecutarEscritura("Sp_RTA_PerfilEliminarCargaFamiliar", cmd =>
@@ -550,12 +485,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Carga familiar eliminada.", "No se encontró esa carga familiar.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarCargaFamiliar(string codUsuario, int idCargaFam, string ip)
-        {
-            return EliminarCargaFamiliar(codUsuario, codUsuario, idCargaFam, ip);
         }
 
         /// <summary>
@@ -578,12 +507,6 @@ namespace CapaDato
             return RespuestaDe(r, "Su foto se actualizó.", "No se pudo guardar la foto.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarFoto(string codUsuario, EntPerfilFoto foto, string ip)
-        {
-            return GuardarFoto(codUsuario, codUsuario, foto, ip);
-        }
-
         /// <summary>
         /// Quita la foto. Borrado fisico -Perfil_Foto no tiene columna Estado-,
         /// a diferencia del resto del modulo.
@@ -602,12 +525,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Su foto se quitó.", "No tenía ninguna foto guardada.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarFoto(string codUsuario, string ip)
-        {
-            return EliminarFoto(codUsuario, codUsuario, ip);
         }
 
         /// <summary>
@@ -642,12 +559,6 @@ namespace CapaDato
             return RespuestaDe(r, "Documento adjuntado.", "No se encontró el registro al que quiere adjuntarlo.");
         }
 
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta GuardarDocumento(string codUsuario, EntPerfilDocumento doc, string ip)
-        {
-            return GuardarDocumento(codUsuario, codUsuario, doc, ip);
-        }
-
         /// <summary>Borrado logico de un documento. El archivo se queda en el disco.</summary>
         public static EntRespuesta EliminarDocumento(string codUsuario, string codAutor, int idDocumento, string ip)
         {
@@ -660,12 +571,6 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Documento quitado.", "No se encontró ese documento.");
-        }
-
-        /// <summary>TEMPORAL. Se borra al final de la entrega 1. Ver GuardarContacto.</summary>
-        public static EntRespuesta EliminarDocumento(string codUsuario, int idDocumento, string ip)
-        {
-            return EliminarDocumento(codUsuario, codUsuario, idDocumento, ip);
         }
 
         /// <summary>

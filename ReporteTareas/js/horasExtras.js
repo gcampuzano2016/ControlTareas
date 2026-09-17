@@ -10,6 +10,13 @@
 var _idPeriodoActual = null;
 var _periodoAbierto = false;
 
+/* El rango del periodo que esta cargado, en "yyyy-MM-dd". Se guarda para poder
+   recalcular sin que nadie vuelva a teclear las fechas: reenviar un rango
+   distinto -aunque sea por un dia- no recalcularia nada, lo rechazaria por
+   solapamiento con este mismo periodo. */
+var _fechaInicioActual = null;
+var _fechaFinActual = null;
+
 /* Los factores de recargo de HE_Parametro (50% y 100%), tal como los aplico
    el servidor a la pantalla que esta cargada ahora mismo. Se llenan desde
    pantalla.Factor50/Factor100 -que manda el servidor en CargarPeriodo,
@@ -271,6 +278,45 @@ function EjecutarCerrarPeriodo() {
    siquiera se pinta para los demas, y el handler lo vuelve a comprobar por su
    cuenta-. La confirmacion avisa que va a quedar registrado quien lo hizo,
    porque desde la tarea 1 eso es verdad: hay auditoria de por medio. */
+/* Vuelve a consultar las aprobaciones del mismo rango y reescribe las filas
+   que nadie corrigio a mano. Es la misma accion que «Abrir periodo» -que es
+   idempotente para un rango identico-, pero sin pedirle a nadie que reescriba
+   las fechas.
+
+   Hace falta un boton propio porque elegir el periodo en el desplegable NO
+   recalcula: eso llama a CargarPeriodo, que solo lee lo guardado. Sin este
+   boton, alguien mira la foto de ayer y concluye que no han aprobado nada. */
+function ConfirmarRecalcular() {
+    if (!_idPeriodoActual || !_fechaInicioActual || !_fechaFinActual) { return; }
+
+    if (HayCambiosSinGuardar()) {
+        MostrarMensaje("Guarde los cambios antes de traer las aprobaciones nuevas.", "warning");
+        return;
+    }
+
+    MostrarConfirmacion(
+        "Se volverán a consultar las horas aprobadas del período. " +
+        "Las filas corregidas a mano no se tocan.",
+        EjecutarRecalcular,
+        "Traer aprobaciones nuevas",
+        "Sí, traer las nuevas"
+    );
+}
+
+function EjecutarRecalcular() {
+    $("#btnRecalcular").prop("disabled", true);
+
+    PostHE("AbrirPeriodo",
+           { fechaInicio: _fechaInicioActual, fechaFin: _fechaFinActual },
+           function (r) {
+               PintarPantalla(r.resultado);
+               $("#btnRecalcular").prop("disabled", false);
+           },
+           function () {
+               $("#btnRecalcular").prop("disabled", false);
+           });
+}
+
 function ConfirmarReabrirPeriodo() {
     if (!_idPeriodoActual) { return; }
 
@@ -333,6 +379,8 @@ function ExportarExcel() {
 function PintarPantalla(pantalla) {
     _idPeriodoActual = pantalla.Periodo.IdPeriodo;
     _periodoAbierto = pantalla.Periodo.EstaAbierto;
+    _fechaInicioActual = ISODesdeValor(pantalla.Periodo.FechaInicio);
+    _fechaFinActual = ISODesdeValor(pantalla.Periodo.FechaFin);
 
     /* Habilitado desde la primera vez que se carga un periodo, y se queda asi
        para el resto de la sesion en esta pantalla -cambiar de periodo o de
@@ -373,6 +421,12 @@ function ActualizarEstadoPeriodo(periodo) {
        solo sobre uno Cerrado: un periodo Anulado no se reabre desde aqui. */
     $("#btnCerrarPeriodo").toggle(periodo.EstaAbierto);
     $("#btnReabrirPeriodo").toggle(periodo.EstadoPeriodo === "Cerrado" && HE_PUEDE_REABRIR);
+
+    /* Traer aprobaciones nuevas solo sobre un periodo Abierto: en uno Cerrado
+       las cifras ya se liquidaron y resembrarlas cambiaria un pago cerrado sin
+       que quede rastro de por que. Si hace falta, primero se reabre -y eso si
+       queda auditado-. */
+    $("#btnRecalcular").toggle(periodo.EstaAbierto && !!_fechaInicioActual);
 
     ActualizarInfoCierre(periodo);
 }
@@ -1083,6 +1137,21 @@ function ISOFecha(fecha) {
     var mm = ("0" + (fecha.getMonth() + 1)).slice(-2);
     var dd = ("0" + fecha.getDate()).slice(-2);
     return fecha.getFullYear() + "-" + mm + "-" + dd;
+}
+
+/* "yyyy-MM-dd" a partir de lo que manda el servidor para FechaInicio/FechaFin.
+   Parsea igual que FormatoFechaHora -el mismo /Date(...)/ o una cadena ISO- y
+   despues reusa ISOFecha, para que el rango que se reenvia al recalcular sea
+   byte a byte el mismo con el que se abrio el periodo. Si difiriera en un dia,
+   el procedimiento lo rechazaria por solaparse consigo mismo. */
+function ISODesdeValor(valor) {
+    if (!valor) { return ""; }
+
+    var match = /\/Date\((-?\d+)\)\//.exec(valor);
+    var fecha = match ? new Date(parseInt(match[1], 10)) : new Date(valor);
+    if (isNaN(fecha.getTime())) { return ""; }
+
+    return ISOFecha(fecha);
 }
 
 function NumeroDe(texto) {

@@ -534,5 +534,71 @@ namespace CapaPruebas
             StringAssert.Contains(uno, "1");
             Assert.IsFalse(uno.Contains("1 filas"), "con una fila el texto no debe decir '1 filas'");
         }
+
+        /* ---------------- el resumen de lo que trajo una apertura ----------- */
+
+        [TestMethod]
+        public void ResumenDeLaSiembra_SinHorasNuevas_LoDiceExplicitamente()
+        {
+            /* Callar cuando no entro nada es lo peligroso: quien recalcula no
+               puede distinguir «no habia nada nuevo» de «no se ejecuto». */
+            string r = NegHorasExtrasPantalla.ResumenDeLaSiembra(0, 0m);
+
+            StringAssert.Contains(r, "No se aprobaron horas nuevas");
+        }
+
+        [TestMethod]
+        public void ResumenDeLaSiembra_ConHoras_DiceCuantasYCuantosColaboradores()
+        {
+            string r = NegHorasExtrasPantalla.ResumenDeLaSiembra(3, 38.5m);
+
+            StringAssert.Contains(r, "38.50");
+            StringAssert.Contains(r, "3 colaboradores");
+        }
+
+        [TestMethod]
+        public void ResumenDeLaSiembra_UnSoloColaborador_NoDiceColaboradores()
+        {
+            string r = NegHorasExtrasPantalla.ResumenDeLaSiembra(1, 2m);
+
+            StringAssert.Contains(r, "1 colaborador");
+            Assert.IsFalse(r.Contains("1 colaboradores"),
+                           "con uno solo el texto no debe decir '1 colaboradores'");
+        }
+
+        [TestMethod]
+        public void ResumenDeLaSiembra_HorasNuevasDeGenteQueYaTenia_NoInventaColaboradores()
+        {
+            /* Entraron horas, pero de personas que ya figuraban: el conteo de
+               personas es cero y el mensaje no debe hablar de colaboradores. */
+            string r = NegHorasExtrasPantalla.ResumenDeLaSiembra(0, 12.25m);
+
+            StringAssert.Contains(r, "12.25");
+            Assert.IsFalse(r.Contains("colaborador"),
+                           "si nadie nuevo entro, el texto no debe mencionar colaboradores");
+        }
+
+        [TestMethod]
+        public void ResumenDeLaSiembra_UsaPuntoDecimalSinImportarLaCultura()
+        {
+            /* El servidor puede estar en es-EC, donde el separador es la coma.
+               El resto del modulo formatea con cultura invariante y esto no
+               puede ser la excepcion. */
+            System.Globalization.CultureInfo previa = System.Threading.Thread.CurrentThread.CurrentCulture;
+
+            try
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture =
+                    new System.Globalization.CultureInfo("es-EC");
+
+                string r = NegHorasExtrasPantalla.ResumenDeLaSiembra(2, 7.5m);
+
+                StringAssert.Contains(r, "7.50");
+            }
+            finally
+            {
+                System.Threading.Thread.CurrentThread.CurrentCulture = previa;
+            }
+        }
     }
 }

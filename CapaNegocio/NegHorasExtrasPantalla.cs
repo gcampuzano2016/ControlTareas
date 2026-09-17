@@ -2,6 +2,7 @@ using CapaDato;
 using CapaEntidad;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace CapaNegocio
 {
@@ -422,12 +423,37 @@ namespace CapaNegocio
                que le llega a quien reabrio el periodo. */
             int filasConSalarioCongelado = 0;
 
+            /* Cuanto entro de nuevo respecto a lo que ya habia. Es la unica
+               senal de que valio la pena recalcular: sin esto, para saber si
+               alguien aprobo algo desde la ultima vez hay que comparar dos
+               Excel a mano.
+
+               Se cuenta solo lo que SUBE. Una fila que baja -porque una
+               aprobacion se revirtio- no resta aqui: mezclar las dos
+               direcciones en un numero daria cero cuando entraron cinco horas
+               y salieron cinco, que es justo el caso que hay que ver. */
+            int personasQueEntraron = 0;
+            decimal horasQueEntraron = 0m;
+
             foreach (EntHeFila fila in colaboradores)
             {
                 EntHeFila anterior = yaEstan.ContainsKey(fila.IdEmpleado) ? yaEstan[fila.IdEmpleado] : null;
 
                 ResolverHoras(fila, anterior,
                               aprobadas.ContainsKey(fila.IdEmpleado) ? aprobadas[fila.IdEmpleado] : null);
+
+                /* Antes del descarte por FilaSinCambios a proposito: si las
+                   horas cambiaron, la fila no se descarta, asi que contar aqui
+                   da lo mismo y se lee al lado de ResolverHoras, que es quien
+                   acaba de decidirlas. */
+                decimal horasAntes = anterior != null ? anterior.Horas50 + anterior.Horas100 : 0m;
+                decimal horasAhora = fila.Horas50 + fila.Horas100;
+
+                if (horasAhora > horasAntes)
+                {
+                    horasQueEntraron += horasAhora - horasAntes;
+                    if (horasAntes == 0m) { personasQueEntraron++; }
+                }
 
                 List<EntHeSalario> historial = salarios.ContainsKey(fila.IdEmpleado)
                                                ? salarios[fila.IdEmpleado]
@@ -474,8 +500,48 @@ namespace CapaNegocio
                 resultado.mensaje = string.Join("; ", avisos) + ". Vuelva a abrir el período si hace falta reintentar.";
                 resultado.tipoMensaje = "warning";
             }
+            else if (resultado.estado == "1")
+            {
+                resultado.mensaje = ResumenDeLaSiembra(personasQueEntraron, horasQueEntraron);
+                resultado.tipoMensaje = horasQueEntraron > 0m ? "success" : "info";
+            }
 
             return resultado;
+        }
+
+        /// <summary>
+        /// Que trajo esta apertura. Se dice SIEMPRE, tambien cuando no entro
+        /// nada: «no entro nada nuevo» y «no llegue a consultar» se ven igual
+        /// en la pantalla si el unico aviso es el que aparece cuando hay algo,
+        /// y confundirlos lleva a dar por cerrado un periodo al que todavia le
+        /// faltan aprobaciones.
+        ///
+        /// Las horas van con dos decimales y punto decimal invariante: es el
+        /// mismo criterio que usa el resto del modulo para no depender de la
+        /// cultura del servidor.
+        /// </summary>
+        public static string ResumenDeLaSiembra(int personas, decimal horas)
+        {
+            if (horas <= 0m)
+            {
+                return "No se aprobaron horas nuevas en este rango desde la última vez.";
+            }
+
+            string texto = "Entraron "
+                           + horas.ToString("0.00", CultureInfo.InvariantCulture)
+                           + " horas aprobadas";
+
+            if (personas == 1)
+            {
+                texto += ", de 1 colaborador que antes no tenía ninguna";
+            }
+            else if (personas > 1)
+            {
+                texto += ", de " + personas.ToString(CultureInfo.InvariantCulture)
+                         + " colaboradores que antes no tenían ninguna";
+            }
+
+            return texto + ".";
         }
 
         /// <summary>

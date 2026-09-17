@@ -282,6 +282,52 @@ una entrega posterior dejó atrás -la fase 3 de Horas Extras y los tres de orig
 del Perfil del colaborador-: esos traen un guard que los detiene solos, y el
 mensaje te dice cuál es el script vigente.
 
+**La entrega 2 del Perfil del colaborador agrega la pantalla con la que Talento
+Humano consulta y corrige el perfil de cualquier colaborador, y trae dos
+scripts independientes entre sí** -no comparten nada, se pueden correr en
+cualquier orden uno respecto del otro-, pero los dos van, como siempre, antes
+que los binarios:
+
+1. `docs/sql/2026-09-17-perfil-personal-lista.sql` - crea
+   `Sp_RTA_PerfilPersonalLista`, el mismo SELECT de `Sp_RTA_PerfilEquipoLista`
+   sin el filtro por jefatura: el personal activo entero, para que Talento
+   Humano busque a cualquiera.
+2. `docs/sql/2026-09-17-perfil-personal-menu.sql` - registra
+   `PerfilesPersonal.aspx` en el menú, colgada del mismo grupo que
+   `RRHHEmpleados.aspx`, visible para los perfiles 14 y 18.
+
+> **Esta entrega exige que la entrega 1 ya esté desplegada, en la base y en los
+> binarios.** La pantalla nueva pide perfiles ajenos -de cualquier colaborador,
+> no del usuario que la abre- y quién es el dueño de un perfil frente a quién lo
+> edita es exactamente lo que separó la entrega 1 (`@Usu_Accion`,
+> `Usu_Modificacion`, `Usu_ModificacionCod`). Sin eso desplegado, el handler
+> `AdministrarPerfil.ashx` rechaza cualquier perfil que no sea el propio: la
+> pantalla se ve, el menú la lista, la búsqueda hasta puede listar personal,
+> pero abrir a cualquiera de ellos vuelve rechazado. No es un 404 ni un error
+> de servidor -es más engañoso-: la pantalla se ve pero no sirve.
+
+> **El script de menú enciende también la fila del grupo, no solo la de la
+> hoja nueva.** `2026-09-17-perfil-personal-menu.sql` hace
+> `UPDATE PerfilMenu SET Estado='0'` para los perfiles 14 y 18 sobre dos filas
+> cada uno: la de `PerfilesPersonal.aspx` y la de **su grupo**, el mismo del
+> que ya cuelga `RRHHEmpleados.aspx`. Si la fila del grupo estuviera hoy en
+> `'1'` para alguno de los dos perfiles, encenderla no solo destapa la pantalla
+> nueva: también revela cualquier **hoja hermana** de ese mismo grupo que ya
+> tuviera `Estado='0'` para ese perfil pero que el padre en `'1'` mantenía
+> tapada. Es improbable -el perfil 14 ya tiene que ver ese grupo, o no le
+> renderizaría `RRHHEmpleados.aspx`-, pero `MenuDos` y `PerfilMenu` los
+> comparte todo el menú del sistema, no solo este módulo. Por eso hay que
+> mirar el menú completo de un usuario de perfil 14 y de uno de perfil 18
+> **antes y después** de correr el script, y confirmar que no apareció
+> ninguna opción que antes no estaba.
+
+Esta entrega también sube `miPerfil.js` de `?v=7` a `?v=8`: el mismo archivo
+ahora sabe de quién es el perfil que muestra (vacío en "Mi perfil", fijado por
+el buscador de `PerfilesPersonal.aspx`) y por eso lo comparten las dos
+pantallas. Para "Mi perfil" el comportamiento no cambia. Además agrega
+`perfilesPersonal.js?v=1`. Verifica con Ctrl+F5 después de copiar los
+binarios -ver sección 5-.
+
 ---
 
 ## 5. Verificar después de desplegar

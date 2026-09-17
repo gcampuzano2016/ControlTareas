@@ -600,5 +600,67 @@ namespace CapaPruebas
                 System.Threading.Thread.CurrentThread.CurrentCulture = previa;
             }
         }
+
+        private static EntHeParametroFila NuevoParametro(string clave, decimal valor,
+                                                         DateTime desde, DateTime? hasta)
+        {
+            EntHeParametroFila f = new EntHeParametroFila();
+            f.Clave = clave;
+            f.Valor = valor;
+            f.FechaVigenciaDesde = desde;
+            f.FechaVigenciaHasta = hasta;
+            return f;
+        }
+
+        [TestMethod]
+        public void ParametroVigente_EligeLaVersionQueRegiaEnLaFechaDeCorte()
+        {
+            List<EntHeParametroFila> historial = new List<EntHeParametroFila>();
+            historial.Add(NuevoParametro("Factor50", 1.5m, new DateTime(2026, 1, 1), null));
+            historial.Add(NuevoParametro("Factor50", 1.6m, new DateTime(2026, 11, 1), null));
+
+            decimal enAgosto = NegHeParametros.ValorAlCorte(historial, "Factor50",
+                                                            new DateTime(2026, 8, 31), 0m);
+
+            Assert.AreEqual(1.5m, enAgosto, "un periodo de agosto no puede usar un factor de noviembre");
+        }
+
+        [TestMethod]
+        public void ParametroVigente_IgnoraLaVersionYaCerrada()
+        {
+            List<EntHeParametroFila> historial = new List<EntHeParametroFila>();
+            historial.Add(NuevoParametro("DiasMes", 30m, new DateTime(2026, 1, 1), new DateTime(2026, 6, 30)));
+
+            decimal despues = NegHeParametros.ValorAlCorte(historial, "DiasMes",
+                                                           new DateTime(2026, 8, 31), 99m);
+
+            Assert.AreEqual(99m, despues, "una version cerrada antes del corte no rige, y se cae al valor por omision");
+        }
+
+        [TestMethod]
+        public void ParametroVigente_SinNingunaVersion_UsaElValorPorOmision()
+        {
+            decimal r = NegHeParametros.ValorAlCorte(new List<EntHeParametroFila>(), "Factor100",
+                                                     new DateTime(2026, 8, 31), 2m);
+
+            Assert.AreEqual(2m, r);
+        }
+
+        [TestMethod]
+        public void ParametroVigente_DosVersionesQueEmpiezanElMismoDia_GanaLaUltimaCargada()
+        {
+            /* No deberia pasar -el procedimiento cierra la anterior antes de insertar-
+               pero si pasara, la decision tiene que ser estable y no depender del
+               orden en que la base devolvio las filas. */
+            List<EntHeParametroFila> historial = new List<EntHeParametroFila>();
+            historial.Add(NuevoParametro("Factor50", 1.5m, new DateTime(2026, 9, 1), null));
+            historial.Add(NuevoParametro("Factor50", 1.7m, new DateTime(2026, 9, 1), null));
+
+            decimal r = NegHeParametros.ValorAlCorte(historial, "Factor50",
+                                                     new DateTime(2026, 9, 30), 0m);
+
+            Assert.AreEqual(1.7m, r);
+        }
+
     }
 }

@@ -357,45 +357,65 @@ namespace CapaDato
         }
 
         /// <summary>
-        /// Los parametros vigentes hoy, tal cual estan en HE_Parametro.
+        /// El historial de HE_Parametro hasta una fecha: TODAS las filas cuya
+        /// FechaVigenciaDesde ya habia llegado al corte, sin resolver cual rige.
         ///
-        /// La tabla esta pensada para historial -UX_HE_Parametro_Clave la
-        /// indexa por (Clave, FechaVigenciaDesde DESC)-, asi que el filtro por
-        /// FechaVigenciaHasta IS NULL no basta para garantizar una sola fila
-        /// por clave. Si algun dia hubiera mas de una vigencia abierta para la
-        /// misma clave, se queda con la mas reciente que no sea futura, y no
-        /// con la que el lector visite al final.
+        /// Quien decide es NegHeParametros.ValorAlCorte, no el SQL. Es la misma
+        /// razon por la que Sp_RTA_HeInsumos devuelve el historial de sueldos
+        /// entero: la regla de desempate se prueba sin base de datos, y el
+        /// corte es el fin del PERIODO -no GETDATE()-, para que reabrir un
+        /// periodo de agosto en noviembre no lo recalcule con los factores de
+        /// noviembre.
+        ///
+        /// No se filtra por FechaVigenciaHasta aqui: una vigencia cerrada
+        /// DESPUES del corte seguia rigiendo en el corte, y descartarla en el
+        /// SQL la perderia.
+        ///
+        /// NO se lee IdParametro a proposito. En produccion la tabla todavia no
+        /// tiene esa columna -la crea el ALTER de la fase 5- y estos binarios
+        /// salen ANTES que ese script: pedirla aqui tumbaria el calculo entero
+        /// con "Invalid column name". El calculo no la necesita; quien si la
+        /// necesita es la pantalla de administracion, y su DAO se escribe
+        /// despues del ALTER.
         /// </summary>
-        public static Dictionary<string, decimal> LeerParametrosVigentes()
+        public static List<EntHeParametroFila> LeerHistorialParametros(DateTime corte)
         {
-            Dictionary<string, decimal> valores = new Dictionary<string, decimal>();
-            Dictionary<string, DateTime> vigenciaElegida = new Dictionary<string, DateTime>();
+            List<EntHeParametroFila> filas = new List<EntHeParametroFila>();
             DaoReporTareaAranda conexion = new DaoReporTareaAranda();
 
             using (SqlConnection cnx = conexion.conectar())
             using (SqlCommand cmd = new SqlCommand(
-                "SELECT Clave, Valor, FechaVigenciaDesde FROM dbo.HE_Parametro " +
-                "WHERE FechaVigenciaHasta IS NULL AND FechaVigenciaDesde <= GETDATE()", cnx))
+                "SELECT Clave, Valor, FechaVigenciaDesde, FechaVigenciaHasta, " +
+                "       Usu_Modificacion, Fec_Modificacion " +
+                "FROM dbo.HE_Parametro " +
+                "WHERE FechaVigenciaDesde <= @Corte " +
+                "ORDER BY Clave, FechaVigenciaDesde", cnx))
             {
                 cmd.CommandType = CommandType.Text;
+                cmd.Parameters.Add("@Corte", SqlDbType.Date).Value = corte.Date;
                 cnx.Open();
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {
                     while (dr.Read())
                     {
-                        string clave = Convert.ToString(dr["Clave"]).Trim();
-                        DateTime desde = Convert.ToDateTime(dr["FechaVigenciaDesde"]);
-
-                        if (vigenciaElegida.ContainsKey(clave) && vigenciaElegida[clave] >= desde) { continue; }
-
-                        valores[clave] = Convert.ToDecimal(dr["Valor"]);
-                        vigenciaElegida[clave] = desde;
+                        EntHeParametroFila f = new EntHeParametroFila();
+                        f.Clave = Texto(dr, "Clave");
+                        f.Valor = Convert.ToDecimal(dr["Valor"]);
+                        f.FechaVigenciaDesde = Convert.ToDateTime(dr["FechaVigenciaDesde"]);
+                        f.FechaVigenciaHasta = dr["FechaVigenciaHasta"] == DBNull.Value
+                                               ? (DateTime?)null
+                                               : Convert.ToDateTime(dr["FechaVigenciaHasta"]);
+                        f.Usu_Modificacion = Texto(dr, "Usu_Modificacion");
+                        f.Fec_Modificacion = dr["Fec_Modificacion"] == DBNull.Value
+                                             ? (DateTime?)null
+                                             : Convert.ToDateTime(dr["Fec_Modificacion"]);
+                        filas.Add(f);
                     }
                 }
             }
 
-            return valores;
+            return filas;
         }
 
         private static EntHePeriodo LeerPeriodo(SqlDataReader dr)

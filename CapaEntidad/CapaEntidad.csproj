@@ -129,6 +129,7 @@
     <Compile Include="EntHeFila.cs" />
     <Compile Include="EntHeInsumo.cs" />
     <Compile Include="EntHeParametros.cs" />
+    <Compile Include="EntHeParametroFila.cs" />
     <Compile Include="EntHePantalla.cs" />
     <Compile Include="EntHePeriodo.cs" />
     <Compile Include="EntHeResultado.cs" />

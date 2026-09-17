@@ -392,12 +392,16 @@ namespace CapaNegocio
             Dictionary<long, EntHeFila> yaEstan = new Dictionary<long, EntHeFila>();
             foreach (EntHeFila f in existente.Filas) { yaEstan[f.IdEmpleado] = f; }
 
-            EntHeParametros parametros = NegHeParametros.Vigentes();
-
             /* El corte es el ULTIMO dia del rango. Con el primero, un ajuste
                salarial que entra en vigencia a mitad de periodo quedaria fuera
                y la persona cobraria el periodo entero al sueldo anterior. */
             DateTime corte = fin;
+
+            /* Los parametros del PERIODO, no los de hoy: se piden al mismo
+               corte con el que se resuelve el sueldo. Un periodo de agosto
+               que se reabre en noviembre tiene que seguir calculando con los
+               factores de agosto. */
+            EntHeParametros parametros = NegHeParametros.Vigentes(corte);
 
             List<EntHeFila> colaboradores;
             Dictionary<long, List<EntHeSalario>> salarios;
@@ -574,7 +578,7 @@ namespace CapaNegocio
                 return respuesta;
             }
 
-            EntHeParametros p = parametros ?? NegHeParametros.Vigentes();
+            EntHeParametros p = parametros ?? NegHeParametros.Vigentes(pantalla.Periodo.FechaFin);
             pantalla.Factor50 = p.Factor50;
             pantalla.Factor100 = p.Factor100;
 
@@ -703,7 +707,7 @@ namespace CapaNegocio
 
             decimal salarioDelMaestro = NegHorasExtras.SalarioVigente(historial, corte);
             decimal salarioCongelado = fila.SalarioBaseSnapshot;
-            EntHeParametros parametros = NegHeParametros.Vigentes();
+            EntHeParametros parametros = NegHeParametros.Vigentes(corte);
 
             AplicarCalculo(fila, salarioDelMaestro, salarioCongelado, parametros);
 

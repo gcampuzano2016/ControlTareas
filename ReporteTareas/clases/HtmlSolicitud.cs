@@ -212,8 +212,8 @@ namespace PDF
 
         private static void SeccionHoras(StringBuilder h, EntSolicitud solicitud, EntDetallePermiso detalle)
         {
-            string desde = SoloHora(solicitud.FechaDesde);
-            string hasta = SoloHora(solicitud.FechaHasta);
+            string desde = FechaYHora(solicitud.FechaDesde);
+            string hasta = FechaYHora(solicitud.FechaHasta);
 
             /* Un teletrabajo de jornada completa no tiene horas que mostrar. Sin
                esto saldría la sección con tres renglones vacíos. */
@@ -579,16 +579,32 @@ namespace PDF
         }
 
         /// <summary>
-        /// La hora de un texto con fecha y hora. Devuelve vacío a medianoche: es lo
-        /// que llega cuando el permiso no tiene horario —un teletrabajo de jornada
-        /// completa— y ahí el renglón no debe salir.
+        /// Fecha y hora de un permiso, como "18/09/2026 15:30".
+        ///
+        /// Aca se usaba SoloHora, que devolvia "15:30" y descartaba el dia. El
+        /// procedimiento Sp_RTANotificarSolicitud ya entrega "dd/MM/yyyy HH:mm:ss"
+        /// para los permisos -la version que devolvia solo la hora quedo comentada
+        /// dentro del propio procedimiento-, asi que el dia SI estaba llegando y el
+        /// documento lo tiraba. El resultado era que quien leia el PDF veia la hora
+        /// del permiso y, como unica fecha, la de creacion de la solicitud en la
+        /// cabecera: no habia forma de saber que dia se ausentaba la persona.
+        ///
+        /// Sin hora devuelve solo la fecha, no cadena vacia: son los permisos de
+        /// jornada completa, y ahi el dia es justamente lo unico que hay que decir.
+        ///
+        /// El 01/01/1900 es el centinela que escribe DaoSolicitud cuando la fecha
+        /// viene vacia; se trata como ausencia para que no salga un renglon con una
+        /// fecha inventada.
         /// </summary>
-        private static string SoloHora(string texto)
+        private static string FechaYHora(string texto)
         {
             DateTime d;
-            if (!DateTime.TryParse(texto, out d)) { return ""; }
-            if (d.Hour == 0 && d.Minute == 0) { return ""; }
-            return d.ToString("HH:mm");
+            if (!DateTime.TryParse(texto, out d)) { return texto ?? ""; }
+            if (d.Year <= 1900) { return ""; }
+
+            return (d.Hour == 0 && d.Minute == 0)
+                ? d.ToString("dd/MM/yyyy")
+                : d.ToString("dd/MM/yyyy HH:mm");
         }
 
         /// <summary>Día siguiente a una fecha dd/MM/yyyy. Cadena vacía si no se entiende.</summary>

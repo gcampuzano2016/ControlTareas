@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=5" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=6" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -189,6 +189,13 @@
                             </div>
                             <div class="form-group col-lg-3" style="padding-top: 25px; text-align: right">
                                 <span id="lblGuardado" class="text-muted" style="display: none; margin-right: 10px"></span>
+                                <%-- Recalcular no es lo mismo que elegir el período en el desplegable:
+                                     aquello sólo lee lo guardado y esto vuelve a consultar las
+                                     aprobaciones. Sin este botón hay que teclear otra vez el rango en
+                                     «Abrir período», que nadie adivina y además se puede escribir mal. --%>
+                                <button type="button" class="btn btn-default" id="btnRecalcular" onclick="ConfirmarRecalcular()" style="display: none">
+                                    <i class="fa fa-refresh"></i> Traer aprobaciones nuevas
+                                </button>
                                 <button type="button" class="btn btn-default" id="btnCerrarPeriodo" onclick="ConfirmarCerrarPeriodo()" style="display: none">
                                     <i class="fa fa-lock"></i> Cerrar período
                                 </button>

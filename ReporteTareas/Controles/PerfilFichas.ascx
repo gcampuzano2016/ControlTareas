@@ -21,8 +21,15 @@
     dueno del perfil que se esta mirando: encendida sobre un perfil ajeno mostraria
     el equipo de quien mira con el nombre de otro en la cabecera. No es cosmetica,
     es el dato de una persona bajo la etiqueta de otra.
+
+    NO trae el envoltorio que despeja el menu lateral (el div cuyo id es
+    page-wrapper, sin el guion escrito aca a proposito para que un grep del
+    marcado real no lo cuente). Ese envoltorio lo pone cada pagina: es un id, no
+    una clase, asi que solo puede haber uno por pagina, y PerfilesPersonal.aspx
+    necesita que su buscador quede DENTRO del mismo y no al lado. Si el control
+    lo trajera, esa pantalla tendria dos, o el buscador se dibujaria debajo del
+    menu - que es lo que pasaba.
 --%>
-    <div id="page-wrapper" style="padding: 0px">
         <div class="row">
             <div class="col-lg-12" style="padding: 20px">
                 <div class="card card-primary">
@@ -514,4 +521,3 @@
             </div>
         </div>
         <!-- /.modal -->
-    </div>

@@ -14,6 +14,11 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
+    <%-- Un solo page-wrapper para TODA la pantalla: el buscador, la tabla y las
+         fichas. Es el id que despeja los 250px del menu lateral, y por ser id
+         solo puede haber uno. Si el buscador quedara fuera, se dibuja debajo
+         del menu - que es exactamente lo que pasaba antes de este envoltorio. --%>
+    <div id="page-wrapper" style="padding: 0px">
     <div class="row">
         <div class="col-lg-12" style="padding: 20px">
             <div class="card card-primary">
@@ -66,5 +71,6 @@
             Los cambios que guarde quedan registrados a su nombre.
         </div>
         <rta:PerfilFichas runat="server" ID="fichas" />
+    </div>
     </div>
 </asp:Content>

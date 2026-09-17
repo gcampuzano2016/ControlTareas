@@ -6,5 +6,9 @@
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    <rta:PerfilFichas runat="server" ID="fichas" />
+    <%-- El page-wrapper va aca y no dentro del control: es un id, y solo puede
+         haber uno por pagina. Es el que despeja los 250px del menu lateral. --%>
+    <div id="page-wrapper" style="padding: 0px">
+        <rta:PerfilFichas runat="server" ID="fichas" />
+    </div>
 </asp:Content>

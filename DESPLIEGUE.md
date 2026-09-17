@@ -88,7 +88,10 @@ servidor, reemplazando los archivos existentes.
 
 Qué debe quedar en el servidor después de copiar:
 
-- todo lo publicado (`bin\`, `Formulario\`, `js\`, `Web.config`, …)
+- todo lo publicado (`bin\`, `Controles\`, `Formulario\`, `js\`, `Web.config`, …)
+  — **`Controles\` es una carpeta nueva en la raíz del sitio**: si no viaja,
+  «Mi perfil» y «Perfiles del personal» mueren con un error de parser, porque
+  las dos registran `~/Controles/PerfilFichas.ascx`
 - `connections.config` y `appsettings.config`, **que ya estaban ahí y no se tocan**
 
 No hace falta reiniciar IIS: al reemplazar `Web.config` o el contenido de
@@ -284,17 +287,19 @@ mensaje te dice cuál es el script vigente.
 
 **La entrega 2 del Perfil del colaborador agrega la pantalla con la que Talento
 Humano consulta y corrige el perfil de cualquier colaborador, y trae dos
-scripts independientes entre sí** -no comparten nada, se pueden correr en
-cualquier orden uno respecto del otro-, pero los dos van, como siempre, antes
-que los binarios:
+scripts independientes entre sí** -no comparten nada-, pero **no van en el
+mismo momento**: uno antes de copiar los archivos y el otro después.
 
-1. `docs/sql/2026-09-17-perfil-personal-lista.sql` - crea
-   `Sp_RTA_PerfilPersonalLista`, el mismo SELECT de `Sp_RTA_PerfilEquipoLista`
-   sin el filtro por jefatura: el personal activo entero, para que Talento
-   Humano busque a cualquiera.
-2. `docs/sql/2026-09-17-perfil-personal-menu.sql` - registra
-   `PerfilesPersonal.aspx` en el menú, colgada del mismo grupo que
-   `RRHHEmpleados.aspx`, visible para los perfiles 14 y 18.
+1. `docs/sql/2026-09-17-perfil-personal-lista.sql` - **antes** de copiar, como
+   siempre. Crea `Sp_RTA_PerfilPersonalLista`, el mismo SELECT de
+   `Sp_RTA_PerfilEquipoLista` sin el filtro por jefatura: el personal activo
+   entero, para que Talento Humano busque a cualquiera.
+2. `docs/sql/2026-09-17-perfil-personal-menu.sql` - **después** de copiar los
+   archivos. Registra `PerfilesPersonal.aspx` en el menú, colgada del mismo
+   grupo que `RRHHEmpleados.aspx`, visible para los perfiles 14 y 18. Es el
+   único script de esta entrega que produce algo visible: corrido antes de los
+   binarios, les deja a los perfiles 14 y 18 una opción de menú que da 404
+   hasta que termines de copiar.
 
 > **Esta entrega exige que la entrega 1 ya esté desplegada, en la base y en los
 > binarios.** La pantalla nueva pide perfiles ajenos -de cualquier colaborador,
@@ -321,11 +326,11 @@ que los binarios:
 > **antes y después** de correr el script, y confirmar que no apareció
 > ninguna opción que antes no estaba.
 
-Esta entrega también sube `miPerfil.js` de `?v=7` a `?v=8`: el mismo archivo
+Esta entrega también sube `miPerfil.js` de `?v=7` a `?v=9`: el mismo archivo
 ahora sabe de quién es el perfil que muestra (vacío en "Mi perfil", fijado por
 el buscador de `PerfilesPersonal.aspx`) y por eso lo comparten las dos
 pantallas. Para "Mi perfil" el comportamiento no cambia. Además agrega
-`perfilesPersonal.js?v=1`. Verifica con Ctrl+F5 después de copiar los
+`perfilesPersonal.js?v=2`. Verifica con Ctrl+F5 después de copiar los
 binarios -ver sección 5-.
 
 ---

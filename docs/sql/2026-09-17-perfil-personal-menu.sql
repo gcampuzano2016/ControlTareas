@@ -227,13 +227,18 @@ WHERE NOT EXISTS
 );
 
 /* Si alguna de esas filas ya existia pero apagada (Estado='1'), la
-   encendemos: el objetivo es que los perfiles 14 y 18 vean la pantalla. */
+   encendemos: el objetivo es que los perfiles 14 y 18 vean la pantalla.
+
+   La comparacion contempla el NULL a proposito: "Estado <> '0'" NO alcanza una
+   fila con Estado en NULL -la comparacion da desconocido y la fila se salta-,
+   pero Sp_RTA_ConsultarMenuPerfilUsuario filtra "Estado = 0", que tampoco la
+   toma. Esa fila quedaria oculta sin que este script se entere. */
 UPDATE PM
 SET PM.Estado = '0'
 FROM dbo.PerfilMenu AS PM
 JOIN @Menus AS M ON M.id_Menu = PM.id_Menu
 JOIN @Perfiles AS P ON P.IdPerfil = PM.IdPerfil
-WHERE PM.Estado <> '0';
+WHERE ISNULL(PM.Estado, '') <> '0';
 
 PRINT 'PerfilMenu: visibilidad asegurada para los perfiles 14 y 18, en el grupo y en la hoja (Estado = 0).';
 

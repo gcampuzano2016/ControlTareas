@@ -21,14 +21,26 @@ var _perfil = null;
 var _codObjetivo = "";
 
 $(document).ready(function () {
+    /* "Perfiles del personal" declara PERFIL_SIN_CARGA_INICIAL en un <script>
+       inline antes de cargar este archivo. Alli no hay a quien mostrar hasta que
+       Talento Humano elija a una persona: esta carga traeria el perfil de quien
+       mira, encenderia su pestana "Mi equipo" -que nada vuelve a apagar- dentro
+       de las fichas de otro, y si su codigo estuviera repetido esconderia las
+       pestanas de toda la pagina sin que nada lo revierta.
+
+       En "Mi perfil" la bandera no existe, typeof la deja pasar y la pagina
+       carga exactamente como siempre. */
+    if (typeof PERFIL_SIN_CARGA_INICIAL !== "undefined" && PERFIL_SIN_CARGA_INICIAL) { return; }
+
     CargarPerfil();
 });
 
-/* De quien es el perfil que esta pantalla va a mostrar, y deja el enlace del
-   CV apuntando a esa persona.
+/* De quien es el perfil que esta pantalla va a mostrar. Deja el enlace del CV
+   apuntando a esa persona y reescribe los textos del control que estan escritos
+   en primera persona.
 
    Los cuatro caminos por los que el codigo del perfil sale al servidor.
-   El primero cubre las 16 acciones JSON de una sola vez; los otros tres NO
+   El primero cubre todas las acciones JSON de una sola vez; los otros tres NO
    pasan por PostPerfil y por eso hay que acordarse de ellos uno por uno:
      1. PostPerfil          -> lo agrega a parameters
      2. PedirArchivo        -> lo agrega al FormData (multipart)
@@ -48,6 +60,26 @@ function FijarPerfilObjetivo(codUsuario, nombre) {
             : "Descargar la hoja de vida de " + (nombre || "esta persona"));
     }
 
+    /* Los textos del control estan escritos en primera persona, porque el
+       control nacio para "Mi perfil". Con un objetivo fijado hablarian de la
+       persona equivocada, asi que se reescriben aqui -mismo mecanismo que el
+       enlace del CV- y se dejan como estan cuando no hay objetivo. */
+    var deQuien = nombre || "esta persona";
+
+    $("#tituloPerfil").text(_codObjetivo === ""
+        ? "Mi perfil"
+        : "Perfil de " + deQuien);
+
+    $("#txtTabEquipo").text(_codObjetivo === "" ? "Mi equipo" : "Equipo");
+
+    $("#txtSinFicha").text(_codObjetivo === ""
+        ? "Algunos datos administrados por Talento Humano todavía no están asociados a su usuario. Puede usar el resto del perfil con normalidad."
+        : "Algunos datos administrados por Talento Humano todavía no están asociados a este usuario. El resto del perfil se puede usar con normalidad.");
+
+    $("#txtNoIdentificado").text(_codObjetivo === ""
+        ? "No pudimos identificar su perfil de forma única: su código de usuario está repetido en el sistema. Escriba a Talento Humano para que lo corrijan."
+        : "No pudimos identificar este perfil de forma única: el código de usuario está repetido en el sistema. Hay que corregirlo en el catálogo de usuarios antes de poder verlo.");
+
     CargarPerfil();
 }
 
@@ -57,7 +89,12 @@ function PostPerfil(action, parameters, onSuccess) {
        propio perfil, donde va vacio. Un solo camino es mas facil de revisar que
        una excepcion por accion. */
     var p = parameters || {};
-    if (_codObjetivo !== "") { p.codUsuario = _codObjetivo; }
+
+    /* No se pisa una clave codUsuario que el llamador ya haya puesto: la accion
+       PerfilEquipo la usa para el SUBORDINADO, y con un objetivo fijado el
+       codigo del subordinado se perderia y viajaria el del objetivo. Las demas
+       llamadas no traen la clave y la reciben aqui. */
+    if (_codObjetivo !== "" && !p.hasOwnProperty("codUsuario")) { p.codUsuario = _codObjetivo; }
 
     var datos = JSON.stringify([{ "action": action, "parameters": p }]);
 

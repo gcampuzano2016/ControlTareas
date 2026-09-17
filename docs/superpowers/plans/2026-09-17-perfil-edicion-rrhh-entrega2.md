@@ -1401,61 +1401,6 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 
 ## Verificación manual después del despliegue
 
-Se corre **después** de desplegar. La de la entrega 1 (al final de su plan) sigue valiendo: **volver a correrla entera primero**, porque esta entrega toca `miPerfil.js`, que es el archivo del que depende «Mi perfil».
-
-> **Antes de empezar:** confirmar que el `ReporteTareas.dll` del IIS es el recién publicado, y que `PerfilesPersonal.aspx`, `PerfilFichas.ascx` y `perfilesPersonal.js` llegaron al servidor.
-
-### A. «Mi perfil» sigue igual para el usuario común
-
-Con un usuario **de perfil corriente**: cargar, guardar contacto, agregar y borrar un contacto de emergencia, subir y descargar un documento, descargar el CV, y —si es jefe— la pestaña **Equipo** sigue mostrando su equipo.
-
-El botón del CV tiene que seguir diciendo **«Descargar mi hoja de vida»**.
-
-### B. La pantalla nueva no existe para quien no debe
-
-1. Con un usuario corriente, **la opción no aparece en el menú**.
-2. Con ese mismo usuario, tecleando `PerfilesPersonal.aspx` en la barra de direcciones → **redirige a `Principal.aspx`**, no muestra la pantalla vacía.
-3. Con ese mismo usuario, desde la consola en `MiPerfil.aspx`:
-
-```javascript
-$.ajax({ type:"POST", url:"AdministrarPerfil.ashx",
-  data: JSON.stringify([{action:"ListaPersonal", parameters:{filtro:"ar"}}]),
-  contentType:"application/json; charset=utf-8", dataType:"json",
-  success:function(r){ console.log(r); } });
-```
-
-→ **rechazo**. Este es el caso que ni el menú ni la redirección protegen.
-
-### C. La pantalla nueva funciona para Talento Humano
-
-Con un usuario **de perfil 14**:
-
-1. La opción aparece en el menú, colgando del mismo grupo que «Empleados».
-2. Buscar con **un** carácter → avisa que hacen falta dos, y no lista nada.
-3. Buscar con dos o más → lista personal activo, ordenado por nombre.
-4. Abrir a una persona → se muestran sus fichas, con su nombre en el aviso de arriba.
-5. **La pestaña «Equipo» NO aparece**, ni siquiera si esa persona es jefe. Es lo más fácil de que se cuele.
-6. El botón del CV dice **«Descargar la hoja de vida de <nombre>»** y entrega el CV **de esa persona**.
-7. Guardar un cambio en su contacto, y comprobar en la base:
-
-```sql
-SELECT Cod_Usuario, TelefonoPersonal, Usu_Modificacion, Fec_Modificacion
-  FROM dbo.Perfil_ContactoPersonal
- WHERE Cod_Usuario = 'CODIGO_DE_LA_OTRA_PERSONA';
-```
-
-`Cod_Usuario` es el de **la otra persona** y `Usu_Modificacion` el del **usuario de perfil 14**.
-
-8. Subir un documento al perfil de esa persona y volver a descargarlo desde la misma pantalla.
-
-### D. Los cuatro códigos repetidos
-
-Buscarlos por nombre en el buscador: **no aparecen**. Es correcto y es lo que hay que avisarle a Talento Humano — esas personas necesitan que alguien les corrija el código en `R_Usuarios` antes de poder gestionarlas desde aquí.
-
----
-
-## Verificación manual después del despliegue
-
 Se corre **después** de desplegar. Como esta entrega toca `miPerfil.js`, que es el archivo
 del que depende «Mi perfil», **hay que volver a correr entera la lista de la entrega 1**
 (al final de su plan) antes de empezar con ésta.

@@ -13,9 +13,15 @@
    ============================================================================ */
 
 $(document).ready(function () {
-    /* miPerfil.js llama a CargarPerfil() al cargar la pagina, lo que aqui
-       mostraria el perfil de quien esta mirando antes de que elija a nadie. Las
-       fichas arrancan ocultas y no se muestran hasta que hay alguien elegido. */
+    /* El modal de avisos vive dentro del control de fichas, que en esta pantalla
+       arranca oculto. Bootstrap 3 solo lo reubica al body cuando el elemento no
+       tiene padre; aca lo tiene, asi que mostraria el velo gris sin el dialogo y
+       sin forma de cerrarlo. Se lo saca del panel una vez, al cargar. */
+    $("#modalMensajeInformativo").appendTo("body");
+
+    /* Las fichas arrancan ocultas y no se muestran hasta que hay alguien
+       elegido. La carga inicial de miPerfil.js no ocurre en esta pantalla: la
+       apaga PERFIL_SIN_CARGA_INICIAL, declarada en PerfilesPersonal.aspx. */
     $("#panelFichas").hide();
 
     $("#btnBuscarPersonal").on("click", BuscarPersonal);
@@ -80,6 +86,14 @@ function PintarListaPersonal(lista) {
 }
 
 function AbrirPerfilDe(codUsuario, nombre) {
+    /* Sin codigo no hay a quien abrir. FijarPerfilObjetivo("") dejaria el
+       objetivo vacio, y entonces la pantalla mostraria -y guardaria sobre- el
+       perfil de quien esta mirando, con el nombre de otra persona en el aviso. */
+    if ($.trim(codUsuario || "") === "") {
+        MostrarMensaje("Esa persona no tiene código de usuario y su perfil no se puede abrir.", "warning");
+        return;
+    }
+
     $("#personaElegida").text(nombre || codUsuario);
     $("#panelFichas").show();
 

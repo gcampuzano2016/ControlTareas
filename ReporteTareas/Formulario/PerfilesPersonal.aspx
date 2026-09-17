@@ -2,8 +2,15 @@
 <%@ Register Src="~/Controles/PerfilFichas.ascx" TagPrefix="rta" TagName="PerfilFichas" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/miPerfil.js?v=8" type="text/javascript"></script>
-    <script src="../js/perfilesPersonal.js?v=1" type="text/javascript"></script>
+    <script type="text/javascript">
+        /* Apaga la carga inicial de miPerfil.js. Aqui no hay a quien mostrar
+           hasta que Talento Humano elija a una persona: sin esto se cargaria el
+           perfil de quien mira dentro de las fichas de otro. En MiPerfil.aspx
+           esta bandera no existe y aquella pagina carga como siempre. */
+        var PERFIL_SIN_CARGA_INICIAL = true;
+    </script>
+    <script src="../js/miPerfil.js?v=9" type="text/javascript"></script>
+    <script src="../js/perfilesPersonal.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

@@ -20,7 +20,10 @@
             <div class="col-lg-12" style="padding: 20px">
                 <div class="card card-primary">
                     <div class="card-header" style="text-align: center">
-                        <h3>Mi perfil</h3>
+                        <!-- Los textos con id de este control estan escritos para el
+                             perfil propio; FijarPerfilObjetivo los reescribe cuando
+                             Talento Humano abre el de otra persona. -->
+                        <h3 id="tituloPerfil">Mi perfil</h3>
                     </div>
                 </div>
             </div>
@@ -74,8 +77,8 @@
                 <!-- Aviso para los 119 usuarios sin ficha de empleado enlazada. -->
                 <div id="perfilSinFicha" class="alert alert-warning" style="display: none; font-size: 12px">
                     <i class="fa fa-info-circle"></i>
-                    Algunos datos administrados por Talento Humano todavía no están
-                    asociados a su usuario. Puede usar el resto del perfil con normalidad.
+                    <span id="txtSinFicha">Algunos datos administrados por Talento Humano todavía no están
+                    asociados a su usuario. Puede usar el resto del perfil con normalidad.</span>
                 </div>
 
                 <!-- Caso distinto y mas grave: el codigo de usuario esta repetido en
@@ -84,8 +87,8 @@
                      a mostrarte los datos de otra persona. Afecta a 4 usuarios activos. -->
                 <div id="perfilNoIdentificado" class="alert alert-danger" style="display: none; font-size: 12px">
                     <i class="fa fa-exclamation-triangle"></i>
-                    No pudimos identificar su perfil de forma única: su código de usuario
-                    está repetido en el sistema. Escriba a Talento Humano para que lo corrijan.
+                    <span id="txtNoIdentificado">No pudimos identificar su perfil de forma única: su código de usuario
+                    está repetido en el sistema. Escriba a Talento Humano para que lo corrijan.</span>
                 </div>
             </div>
 
@@ -103,7 +106,7 @@
                          ninguna fila de menu, asi que no hay una lista de jefes
                          que mantener. Son 22 personas hoy. -->
                     <li id="liTabEquipo" style="display: none">
-                        <a href="#tabEquipo" data-toggle="tab"><i class="fa fa-sitemap"></i> Mi equipo</a>
+                        <a href="#tabEquipo" data-toggle="tab"><i class="fa fa-sitemap"></i> <span id="txtTabEquipo">Mi equipo</span></a>
                     </li>
                 </ul>
 

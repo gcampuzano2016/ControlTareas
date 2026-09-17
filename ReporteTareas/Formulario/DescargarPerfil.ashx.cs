@@ -15,8 +15,11 @@ namespace JsonJQueryNetPerfil
     /// IRequiresSessionState no es decorativo: sin el, context.Session es null en
     /// un IHttpHandler y no habria identidad con la que comprobar nada.
     ///
-    /// La identidad sale SIEMPRE de la sesion. El unico parametro que se acepta de
-    /// la query string es que documento se quiere; de quien es lo dice la base.
+    /// Quien pide sale SIEMPRE de la sesion. De quien es el perfil se puede pedir
+    /// en la query string -el parametro "u"-, pero quien puede usarlo lo decide
+    /// NegPerfilAcceso y no este handler. Que documento se quiere lo sigue
+    /// diciendo la query string, y de quien es ese documento lo sigue diciendo la
+    /// base: ObtenerDocumento cruza el documento con el codigo ya autorizado.
     /// </summary>
     public class DescargarPerfil : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
@@ -28,13 +31,23 @@ namespace JsonJQueryNetPerfil
                 return;
             }
 
-            string codUsuario = CodUsuarioSesion(context);
+            /* El unico parametro nuevo que se acepta es de QUIEN es el perfil, y
+               solo Talento Humano puede usarlo: la regla esta en NegPerfilAcceso.
+               Que documento se quiere lo sigue diciendo la query string, y de
+               quien es ese documento lo sigue diciendo la base. */
+            EntPerfilObjetivo objetivo =
+                PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoQuery(context));
 
-            if (codUsuario == "")
+            if (!objetivo.Permitido)
             {
-                NoDisponible(context, "No se pudo identificar al usuario de la sesión.");
+                /* Mismo texto que cuando el documento no existe, a proposito: uno
+                   distinto le confirmaria a quien esta probando codigos que acerto
+                   con uno. */
+                NoDisponible(context, "No se encontró ese documento.");
                 return;
             }
+
+            string codUsuario = objetivo.CodUsuario;
 
             if (context.Request.QueryString["cv"] == "1")
             {
@@ -89,11 +102,12 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Genera y entrega el CV de quien lo pide.
+        /// Genera y entrega el CV del perfil ya autorizado: el propio, o el de otra
+        /// persona cuando quien pide es Talento Humano.
         ///
-        /// SOLO el propio. No hay parametro que diga de quien es el CV, y no es un
-        /// descuido: una jefatura consulta el perfil de su equipo, no se descarga
-        /// sus hojas de vida.
+        /// Una jefatura NO llega aqui con el codigo de un subordinado: la pestana
+        /// Equipo consulta el perfil recortado por otro camino -PerfilEquipo- y
+        /// NegPerfilAcceso solo deja pasar un codigo ajeno a los perfiles de RRHH.
         /// </summary>
         private void EntregarCv(HttpContext context, string codUsuario)
         {
@@ -165,16 +179,6 @@ namespace JsonJQueryNetPerfil
                 .Trim();
 
             return limpio == "" ? "documento" : limpio;
-        }
-
-        /// <summary>De quien es esta descarga. Sale de la sesion, nunca del cliente.</summary>
-        private string CodUsuarioSesion(HttpContext context)
-        {
-            if (context.Session != null && context.Session["Cod_Usuario"] != null)
-            {
-                return context.Session["Cod_Usuario"].ToString().Trim();
-            }
-            return "";
         }
 
         /// <summary>

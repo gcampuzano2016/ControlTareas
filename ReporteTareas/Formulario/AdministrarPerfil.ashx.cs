@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Text;
 using System.Web;
@@ -15,9 +16,15 @@ namespace JsonJQueryNetPerfil
     /// en un IHttpHandler y no habria de donde sacar la identidad.
     ///
     /// La estructura viene de AdministrarHorarioUsuario.ashx, pero NO su manejo
-    /// de identidad. Aquel recibe codUsuario del cliente; aca eso seria que
-    /// cualquiera lea y sobrescriba el perfil de cualquiera. Se sigue el patron
-    /// de AdministrarUsuarios.ashx: la identidad sale de la sesion, siempre.
+    /// de identidad. Aquel recibe codUsuario del cliente y le cree; aca eso
+    /// seria que cualquiera lea y sobrescriba el perfil de cualquiera.
+    ///
+    /// Aca se separan dos preguntas. QUIEN actua sale siempre de la sesion y el
+    /// cliente no puede influir. DE QUIEN es el perfil sobre el que se actua se
+    /// puede pedir, pero la respuesta no la da este handler: la da
+    /// NegPerfilAcceso, que es donde vive la regla y donde estan las pruebas.
+    /// Cada sitio pregunta por PerfilIdentidad.Objetivo y mira Permitido antes
+    /// de tocar nada.
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
@@ -45,7 +52,7 @@ namespace JsonJQueryNetPerfil
                 if (Action == "CargarPerfil")
                 {
                     existAction = true;
-                    responseAction.Append(CargarPerfil(context));
+                    responseAction.Append(CargarPerfil(context, parametros[0]["parameters"]));
                 }
 
                 if (Action == "GuardarContacto")
@@ -123,7 +130,7 @@ namespace JsonJQueryNetPerfil
                 if (Action == "EliminarFoto")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarFoto(context));
+                    responseAction.Append(EliminarFoto(context, parametros[0]["parameters"]));
                 }
 
                 if (Action == "EliminarDocumento")
@@ -179,19 +186,26 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// El perfil de quien esta conectado. No recibe parametros a proposito:
-        /// no hay nada que el cliente pueda decir sobre de quien es este perfil.
+        /// El perfil de quien esta conectado, o el de otra persona si quien pide
+        /// es Talento Humano. El codigo pedido llega en el payload y lo evalua
+        /// NegPerfilAcceso; sin permiso no se llega a la base.
+        ///
+        /// Es lectura: no necesita saber quien es el autor del cambio porque no
+        /// hay cambio.
         /// </summary>
-        private string CargarPerfil(HttpContext context)
+        private string CargarPerfil(HttpContext context, dynamic campos)
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
 
-                if (codUsuario == "")
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
 
                 return ToJson(NegPerfil.CargarPerfil(codUsuario));
             }
@@ -214,11 +228,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 var diccionario = campos as System.Collections.Generic.IDictionary<string, object>;
                 EntPerfilContacto contacto = NegPerfilCampos.LeerContacto(diccionario);
@@ -229,7 +248,7 @@ namespace JsonJQueryNetPerfil
                     return responseMessage("0", error, "warning");
                 }
 
-                return ToJson(NegPerfil.GuardarContacto(codUsuario, contacto,
+                return ToJson(NegPerfil.GuardarContacto(codUsuario, codAutor, contacto,
                                                         context.Request.UserHostAddress));
             }
             catch (Exception ex)
@@ -252,11 +271,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilEmergencia contacto = new EntPerfilEmergencia
                 {
@@ -274,7 +298,7 @@ namespace JsonJQueryNetPerfil
                     return responseMessage("0", error, "warning");
                 }
 
-                return ToJson(NegPerfil.GuardarEmergencia(codUsuario, contacto,
+                return ToJson(NegPerfil.GuardarEmergencia(codUsuario, codAutor, contacto,
                                                           context.Request.UserHostAddress));
             }
             catch (Exception ex)
@@ -288,15 +312,20 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 int idContacto = Convert.ToInt32(Texto(campos, "idContacto", "0"));
 
-                return ToJson(NegPerfil.EliminarEmergencia(codUsuario, idContacto,
+                return ToJson(NegPerfil.EliminarEmergencia(codUsuario, codAutor, idContacto,
                                                            context.Request.UserHostAddress));
             }
             catch (Exception ex)
@@ -315,11 +344,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilEstudio estudio = new EntPerfilEstudio
                 {
@@ -333,7 +367,7 @@ namespace JsonJQueryNetPerfil
                 string error = NegPerfilCampos.ValidarEstudio(estudio);
                 if (error != "") { return responseMessage("0", error, "warning"); }
 
-                return ToJson(NegPerfil.GuardarEstudio(codUsuario, estudio, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.GuardarEstudio(codUsuario, codAutor, estudio, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -345,14 +379,19 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
 
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
                 int id = Convert.ToInt32(Texto(campos, "idEstudio", "0"));
-                return ToJson(NegPerfil.EliminarEstudio(codUsuario, id, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.EliminarEstudio(codUsuario, codAutor, id, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -364,11 +403,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilCertificacion cert = new EntPerfilCertificacion
                 {
@@ -381,7 +425,7 @@ namespace JsonJQueryNetPerfil
                 string error = NegPerfilCampos.ValidarCertificacion(cert);
                 if (error != "") { return responseMessage("0", error, "warning"); }
 
-                return ToJson(NegPerfil.GuardarCertificacion(codUsuario, cert, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.GuardarCertificacion(codUsuario, codAutor, cert, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -393,14 +437,19 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
 
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
                 int id = Convert.ToInt32(Texto(campos, "idCertificacion", "0"));
-                return ToJson(NegPerfil.EliminarCertificacion(codUsuario, id, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.EliminarCertificacion(codUsuario, codAutor, id, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -412,11 +461,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilExperiencia exp = new EntPerfilExperiencia
                 {
@@ -431,7 +485,7 @@ namespace JsonJQueryNetPerfil
                 string error = NegPerfilCampos.ValidarExperiencia(exp);
                 if (error != "") { return responseMessage("0", error, "warning"); }
 
-                return ToJson(NegPerfil.GuardarExperiencia(codUsuario, exp, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.GuardarExperiencia(codUsuario, codAutor, exp, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -443,14 +497,19 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
 
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
                 int id = Convert.ToInt32(Texto(campos, "idExperiencia", "0"));
-                return ToJson(NegPerfil.EliminarExperiencia(codUsuario, id, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.EliminarExperiencia(codUsuario, codAutor, id, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -462,11 +521,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilCargaFamiliar carga = new EntPerfilCargaFamiliar
                 {
@@ -479,7 +543,7 @@ namespace JsonJQueryNetPerfil
                 string error = NegPerfilCampos.ValidarCargaFamiliar(carga);
                 if (error != "") { return responseMessage("0", error, "warning"); }
 
-                return ToJson(NegPerfil.GuardarCargaFamiliar(codUsuario, carga, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.GuardarCargaFamiliar(codUsuario, codAutor, carga, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -491,14 +555,19 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
 
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
                 int id = Convert.ToInt32(Texto(campos, "idCargaFam", "0"));
-                return ToJson(NegPerfil.EliminarCargaFamiliar(codUsuario, id, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.EliminarCargaFamiliar(codUsuario, codAutor, id, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -518,11 +587,16 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 EntPerfilFoto foto = new EntPerfilFoto
                 {
@@ -533,7 +607,7 @@ namespace JsonJQueryNetPerfil
                 string error = NegPerfilCampos.ValidarFoto(foto);
                 if (error != "") { return responseMessage("0", error, "warning"); }
 
-                return ToJson(NegPerfil.GuardarFoto(codUsuario, foto, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.GuardarFoto(codUsuario, codAutor, foto, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -542,19 +616,25 @@ namespace JsonJQueryNetPerfil
         }
 
         /// <summary>
-        /// Quita la foto. No recibe parametros: solo se puede quitar la propia.
+        /// Quita la foto. Recibe el payload solo para saber de quien es el perfil;
+        /// quitar la de otra persona lo permite unicamente NegPerfilAcceso.
         /// </summary>
-        private string EliminarFoto(HttpContext context)
+        private string EliminarFoto(HttpContext context, dynamic campos)
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
 
-                return ToJson(NegPerfil.EliminarFoto(codUsuario, context.Request.UserHostAddress));
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
+                return ToJson(NegPerfil.EliminarFoto(codUsuario, codAutor, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -578,11 +658,19 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                /* Unica rama multipart del modulo: aca el codigo pedido no viene
+                   en un payload JSON sino en un campo del formulario. Cambia el
+                   extractor; la regla que lo evalua es la misma. */
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoFormulario(context));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 string origen = (context.Request.Form.Get("origen") ?? "").Trim().ToUpperInvariant();
 
@@ -659,7 +747,7 @@ namespace JsonJQueryNetPerfil
                     Ruta                = rutaApp
                 };
 
-                EntRespuesta respuesta = NegPerfil.GuardarDocumento(codUsuario, doc,
+                EntRespuesta respuesta = NegPerfil.GuardarDocumento(codUsuario, codAutor, doc,
                                                                     context.Request.UserHostAddress);
 
                 if (respuesta.estado != "1") { return ToJson(respuesta); }
@@ -681,7 +769,7 @@ namespace JsonJQueryNetPerfil
                        no ocurra. */
                     try
                     {
-                        NegPerfil.EliminarDocumento(codUsuario, doc.IdDocumento,
+                        NegPerfil.EliminarDocumento(codUsuario, codAutor, doc.IdDocumento,
                                                     context.Request.UserHostAddress);
                     }
                     catch
@@ -708,15 +796,20 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                string codUsuario = CodUsuarioSesion(context);
-                if (codUsuario == "")
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
                 {
-                    return responseMessage("0", "No se pudo identificar al usuario de la sesión.", "danger");
+                    return responseMessage("0", objetivo.Mensaje, "danger");
                 }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
 
                 int id = Convert.ToInt32(Texto(campos, "idDocumento", "0"));
 
-                return ToJson(NegPerfil.EliminarDocumento(codUsuario, id, context.Request.UserHostAddress));
+                return ToJson(NegPerfil.EliminarDocumento(codUsuario, codAutor, id, context.Request.UserHostAddress));
             }
             catch (Exception ex)
             {
@@ -818,7 +911,12 @@ namespace JsonJQueryNetPerfil
             return texto == "" ? omision : texto;
         }
 
-        /// <summary>De quien es este perfil. Sale de la sesion, nunca del cliente.</summary>
+        /// <summary>
+        /// Quien esta conectado. Lo usan SOLO ListaEquipo y PerfilEquipo, donde
+        /// ese codigo es el del JEFE y no el del dueno de un perfil: ahi no hay
+        /// nada que pedir ni permiso que evaluar. El resto del handler pregunta
+        /// por PerfilIdentidad, que si distingue autor de objetivo.
+        /// </summary>
         private string CodUsuarioSesion(HttpContext context)
         {
             if (context.Session != null && context.Session["Cod_Usuario"] != null)

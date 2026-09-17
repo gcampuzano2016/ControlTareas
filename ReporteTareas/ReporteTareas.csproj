@@ -1117,6 +1117,7 @@
     <Content Include="Formulario\PaginaError.aspx" />
     <Content Include="Formulario\MiPerfil.aspx" />
     <Content Include="Formulario\HorasExtras.aspx" />
+    <Content Include="Formulario\ParametrizacionHorasExtras.aspx" />
     <Content Include="Formulario\Perfiles.aspx" />
     <Content Include="Formulario\PruebaMenu.aspx" />
     <Content Include="Formulario\RegistroActividad.aspx" />
@@ -1167,6 +1168,7 @@
     <Content Include="js\jquery.blockUI.js" />
     <Content Include="js\miPerfil.js" />
     <Content Include="js\horasExtras.js" />
+    <Content Include="js\parametrosHorasExtras.js" />
     <Content Include="js\Perfiles.js" />
     <Content Include="js\Producto.js" />
     <Content Include="js\PruebaMenu.js" />
@@ -1312,6 +1314,7 @@
     <Content Include="Formulario\AdministrarPerfiles.ashx" />
     <Content Include="Formulario\AdministrarPerfil.ashx" />
     <Content Include="Formulario\AdministrarHorasExtras.ashx" />
+    <Content Include="Formulario\AdministrarParametrosHE.ashx" />
     <Content Include="Formulario\DescargarHorasExtras.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
@@ -1497,6 +1500,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarHorasExtras.ashx.cs">
       <DependentUpon>AdministrarHorasExtras.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarParametrosHE.ashx.cs">
+      <DependentUpon>AdministrarParametrosHE.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\DescargarHorasExtras.ashx.cs">
       <DependentUpon>DescargarHorasExtras.ashx</DependentUpon>
@@ -1774,6 +1780,13 @@
     </Compile>
     <Compile Include="Formulario\HorasExtras.aspx.designer.cs">
       <DependentUpon>HorasExtras.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionHorasExtras.aspx.cs">
+      <DependentUpon>ParametrizacionHorasExtras.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionHorasExtras.aspx.designer.cs">
+      <DependentUpon>ParametrizacionHorasExtras.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\Perfiles.aspx.cs">
       <DependentUpon>Perfiles.aspx</DependentUpon>

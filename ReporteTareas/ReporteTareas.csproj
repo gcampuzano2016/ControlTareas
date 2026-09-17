@@ -1117,6 +1117,7 @@
     <Content Include="Formulario\PaginaError.aspx" />
     <Content Include="Controles\PerfilFichas.ascx" />
     <Content Include="Formulario\MiPerfil.aspx" />
+    <Content Include="Formulario\PerfilesPersonal.aspx" />
     <Content Include="Formulario\HorasExtras.aspx" />
     <Content Include="Formulario\ParametrizacionHorasExtras.aspx" />
     <Content Include="Formulario\Perfiles.aspx" />
@@ -1775,6 +1776,13 @@
     </Compile>
     <Compile Include="Formulario\MiPerfil.aspx.designer.cs">
       <DependentUpon>MiPerfil.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\PerfilesPersonal.aspx.cs">
+      <DependentUpon>PerfilesPersonal.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\PerfilesPersonal.aspx.designer.cs">
+      <DependentUpon>PerfilesPersonal.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\HorasExtras.aspx.cs">
       <DependentUpon>HorasExtras.aspx</DependentUpon>

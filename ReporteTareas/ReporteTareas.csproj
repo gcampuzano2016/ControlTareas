@@ -1115,6 +1115,7 @@
     <Content Include="Formulario\ListaEmpleados.aspx" />
     <Content Include="Formulario\ObtenerNuevaListaTareas.ashx" />
     <Content Include="Formulario\PaginaError.aspx" />
+    <Content Include="Controles\PerfilFichas.ascx" />
     <Content Include="Formulario\MiPerfil.aspx" />
     <Content Include="Formulario\HorasExtras.aspx" />
     <Content Include="Formulario\ParametrizacionHorasExtras.aspx" />

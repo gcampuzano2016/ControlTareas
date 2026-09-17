@@ -1484,3 +1484,103 @@ Co-Authored-By: Claude Opus 5 (1M context) <noreply@anthropic.com>"
 Al terminar este plan, el sistema **ya es capaz** de que un perfil 14 o 18 lea y edite el perfil de otro, pero **no hay ninguna pantalla que lo haga**. Eso es intencional: la regla queda probada y desplegada antes de que exista nada que la ejercite.
 
 La entrega 2 construye encima: `PerfilFichas.ascx`, la pantalla nueva con su buscador, `Sp_RTA_PerfilPersonalLista`, el script de menú para los perfiles 14 y 18, y los tres retoques a `miPerfil.js`. Su plan se escribe cuando esta entrega esté desplegada y verificada.
+
+---
+
+## Verificación manual después del despliegue
+
+Nada de lo automatizado demuestra que la barrera funcione contra la base real: las
+pruebas unitarias cubren la regla, no que cada sitio la llame, y los dos scripts SQL
+nunca se ejecutaron antes de producción. Esta lista es esa demostración.
+
+Se corre **después** de desplegar, en este orden.
+
+> **Antes de empezar:** confirmar que el `ReporteTareas.dll` que está en el IIS es el
+> recién publicado. Si no, se está probando el binario viejo y todo pasa sin
+> significar nada.
+
+### A. El usuario común no nota ningún cambio
+
+Con un usuario **de perfil corriente** (ni 14 ni 18), en `MiPerfil.aspx`:
+
+1. El perfil carga completo, con todas sus pestañas.
+2. Guardar un cambio en **Contacto** → funciona.
+3. Agregar y borrar un **contacto de emergencia** → funciona.
+4. Subir un **documento** y volver a descargarlo → funciona.
+5. La pestaña **Equipo**, si es jefe, sigue mostrando su equipo y sólo su equipo.
+
+Si algo de esto cambió, la entrega falló en su requisito central.
+
+### B. La barrera existe, por los tres transportes
+
+Con ese mismo usuario corriente y la sesión abierta, desde la consola del navegador
+en `MiPerfil.aspx`. Los tres tienen que **rechazar**:
+
+```javascript
+// 1. Lectura
+$.ajax({ type:"POST", url:"AdministrarPerfil.ashx",
+  data: JSON.stringify([{action:"CargarPerfil", parameters:{codUsuario:"OTRO"}}]),
+  contentType:"application/json; charset=utf-8", dataType:"json",
+  success:function(r){ console.log(r); } });
+
+// 2. Escritura
+$.ajax({ type:"POST", url:"AdministrarPerfil.ashx",
+  data: JSON.stringify([{action:"GuardarEmergencia", parameters:{
+    codUsuario:"OTRO", idContacto:0, nombre:"Prueba", parentesco:"Prueba", telefono:"0999999999"}}]),
+  contentType:"application/json; charset=utf-8", dataType:"json",
+  success:function(r){ console.log(r); } });
+```
+
+3. **Multipart** — es el único transporte que ninguna pantalla ejercita sola: subir un
+   documento agregando `codUsuario` con el código de otra persona al `FormData`.
+4. **Descarga** — en la barra de direcciones:
+   `DescargarPerfil.ashx?doc=<id ajeno>&u=<codigo ajeno>` → *"No se encontró ese documento."*
+
+### C. La jefatura tampoco pasa
+
+**Este es el caso más informativo de todos** y por eso va aparte: una jefatura es el
+único perfil del sistema con una vía legítima para ver datos ajenos, así que es donde
+un error de la regla se disfrazaría de comportamiento razonable. Además, un comentario
+del propio código afirma que una jefatura no llega ahí con el código de un subordinado;
+esto es lo que comprueba esa afirmación.
+
+Con sesión de un **jefe que no es perfil 14 ni 18**, y el código de **su propio
+subordinado**: `CargarPerfil` por consola y `DescargarPerfil.ashx?cv=1&u=<subordinado>`.
+Los dos tienen que **rechazar**. La pestaña Equipo sigue funcionando: son cosas distintas.
+
+### D. Pedir el código propio se permite
+
+Con cualquier usuario, `CargarPerfil` pasando **su propio** `codUsuario` → devuelve su
+perfil, no un rechazo. Hay una rama dedicada a este caso y ninguna pantalla la ejercita.
+
+### E. Talento Humano sí puede, y queda registrado
+
+Con un usuario **de perfil 14**:
+
+1. `CargarPerfil` con el código de otra persona → devuelve **el perfil de esa persona**.
+2. `GuardarEmergencia` sobre esa otra persona, y después:
+
+```sql
+SELECT TOP 5 Cod_Usuario, Nombre, Usu_Modificacion, Fec_Modificacion
+  FROM dbo.Perfil_ContactoEmergencia
+ WHERE Cod_Usuario = 'CODIGO_DE_LA_OTRA_PERSONA'
+ ORDER BY IdContacto DESC;
+```
+
+`Cod_Usuario` tiene que ser **el de la otra persona** y `Usu_Modificacion` **el del
+usuario de perfil 14**. Si los dos son iguales, el autor no está llegando.
+
+3. Subir un documento al perfil de otro → se guarda **y** `Perfil_Documento.Usu_Modificacion`
+   queda con el código de quien lo subió. Es el único de los 16 sitios de escritura cuyo
+   autor no queda verificado por ningún otro paso.
+4. Guardar una carga familiar sobre otro, y comprobar en `Emp_CargaFamiliar` que
+   `Usu_Modificacion` trae el código del 14 y que `Estado` es `'1'` — **no** `'Activo'`.
+5. Descargar el documento y el CV de esa otra persona → los entrega.
+
+Borrar después las filas de prueba.
+
+### Lo que no se puede comprobar a mano
+
+El borrado de compensación de `SubirDocumento` —el que deshace la fila cuando falla
+guardar el archivo en disco— también pasa el autor, pero provocarlo exige un fallo de
+escritura en el servidor. Queda verificado por lectura, no por ejecución.

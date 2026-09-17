@@ -85,6 +85,7 @@
     <Compile Include="EntPerfilCabecera.cs" />
     <Compile Include="EntPerfilCompleto.cs" />
     <Compile Include="EntPerfilContacto.cs" />
+    <Compile Include="EntPerfilObjetivo.cs" />
     <Compile Include="EntPerfilEmergencia.cs" />
     <Compile Include="EntPerfilEstudio.cs" />
     <Compile Include="EntPerfilCertificacion.cs" />

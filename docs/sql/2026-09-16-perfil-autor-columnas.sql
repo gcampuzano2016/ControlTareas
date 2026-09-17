@@ -40,43 +40,42 @@ GO
 
 /* ------------------------------------------------ 1. Emp_CargaFamiliar --- */
 
-IF OBJECT_ID('dbo.Emp_CargaFamiliar','U') IS NULL
+/* La comprobacion de existencia de la tabla va DENTRO del mismo IF que la de
+   la columna, en un solo lote: un RETURN fuera de un procedimiento solo corta
+   el lote actual, no el resto del script, asi que no sirve para detenerlo. Si
+   la tabla no existe, este bloque no hace ningun ALTER TABLE y lo dice con un
+   PRINT de "omitido", sin prometer una detencion que no ocurre. */
+IF OBJECT_ID('dbo.Emp_CargaFamiliar','U') IS NOT NULL
 BEGIN
-    RAISERROR('dbo.Emp_CargaFamiliar no existe. Script detenido.', 16, 1);
-    RETURN;
+    IF NOT EXISTS (SELECT 1 FROM sys.columns
+                    WHERE object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
+                      AND name = 'Usu_Modificacion')
+    BEGIN
+        ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_Modificacion VARCHAR(50) NULL;
+        PRINT 'Emp_CargaFamiliar.Usu_Modificacion creada.';
+    END
+    ELSE PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
 END
-GO
-
-IF NOT EXISTS (SELECT 1 FROM sys.columns
-                WHERE object_id = OBJECT_ID('dbo.Emp_CargaFamiliar')
-                  AND name = 'Usu_Modificacion')
-BEGIN
-    ALTER TABLE dbo.Emp_CargaFamiliar ADD Usu_Modificacion VARCHAR(50) NULL;
-    PRINT 'Emp_CargaFamiliar.Usu_Modificacion creada.';
-END
-ELSE PRINT 'Emp_CargaFamiliar.Usu_Modificacion ya existia.';
+ELSE PRINT 'dbo.Emp_CargaFamiliar no existe. Omitido.';
 GO
 
 /* -------------------------------------------------------- 2. Empleados --- */
 
-IF OBJECT_ID('dbo.Empleados','U') IS NULL
-BEGIN
-    RAISERROR('dbo.Empleados no existe. Script detenido.', 16, 1);
-    RETURN;
-END
-GO
-
 /* Usu_ModificacionCod, no Usu_Modificacion: esa ya existe y es numeric(5).
    El sufijo Cod dice de que esta hecha -un Cod_Usuario- y evita que alguien
    la confunda con la vieja. */
-IF NOT EXISTS (SELECT 1 FROM sys.columns
-                WHERE object_id = OBJECT_ID('dbo.Empleados')
-                  AND name = 'Usu_ModificacionCod')
+IF OBJECT_ID('dbo.Empleados','U') IS NOT NULL
 BEGIN
-    ALTER TABLE dbo.Empleados ADD Usu_ModificacionCod VARCHAR(50) NULL;
-    PRINT 'Empleados.Usu_ModificacionCod creada.';
+    IF NOT EXISTS (SELECT 1 FROM sys.columns
+                    WHERE object_id = OBJECT_ID('dbo.Empleados')
+                      AND name = 'Usu_ModificacionCod')
+    BEGIN
+        ALTER TABLE dbo.Empleados ADD Usu_ModificacionCod VARCHAR(50) NULL;
+        PRINT 'Empleados.Usu_ModificacionCod creada.';
+    END
+    ELSE PRINT 'Empleados.Usu_ModificacionCod ya existia.';
 END
-ELSE PRINT 'Empleados.Usu_ModificacionCod ya existia.';
+ELSE PRINT 'dbo.Empleados no existe. Omitido.';
 GO
 
 PRINT '== Perfil: columnas de autor - fin ==';

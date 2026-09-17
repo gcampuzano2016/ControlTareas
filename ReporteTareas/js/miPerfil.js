@@ -2,20 +2,64 @@
    Pantalla: Mi perfil
    Handler : AdministrarPerfil.ashx
 
-   El Cod_Usuario no se manda nunca: el handler lo saca de la sesion. Si algun
-   dia hace falta ver el perfil de otra persona, es una accion distinta con su
-   propia validacion, no un parametro de estas.
+   Con _codObjetivo vacio (el caso de "Mi perfil") el Cod_Usuario no se manda
+   nunca: el handler lo saca de la sesion. Cuando Talento Humano abre el perfil
+   de otra persona (ver FijarPerfilObjetivo, mas abajo), _codObjetivo viaja en
+   cada llamada; NegPerfilAcceso en el servidor decide si se acepta.
    ============================================================================ */
 
 var _perfil = null;
+
+/* De quien es el perfil que esta pantalla esta mostrando.
+
+   Vacia en "Mi perfil": entonces no se manda nada y el servidor usa el de la
+   sesion, exactamente como antes de que esto existiera. La fija el buscador de
+   PerfilesPersonal.aspx al elegir a una persona.
+
+   Que este valor viaje NO significa que el servidor lo acepte: la regla que
+   decide eso es NegPerfilAcceso, y rechaza a quien no sea perfil 14 o 18. */
+var _codObjetivo = "";
 
 $(document).ready(function () {
     CargarPerfil();
 });
 
+/* De quien es el perfil que esta pantalla va a mostrar, y deja el enlace del
+   CV apuntando a esa persona.
+
+   Los cuatro caminos por los que el codigo del perfil sale al servidor.
+   El primero cubre las 16 acciones JSON de una sola vez; los otros tres NO
+   pasan por PostPerfil y por eso hay que acordarse de ellos uno por uno:
+     1. PostPerfil          -> lo agrega a parameters
+     2. PedirArchivo        -> lo agrega al FormData (multipart)
+     3. CeldaDocumentos     -> lo agrega a la URL de descarga del documento
+     4. el enlace del CV    -> se le reescribe el href, porque es marcado
+                               estatico y ningun codigo lo tocaba antes
+   Si aparece un quinto, va en esta lista. */
+function FijarPerfilObjetivo(codUsuario, nombre) {
+    _codObjetivo = codUsuario || "";
+
+    var enlace = $("#lnkHojaVida");
+    if (enlace.length) {
+        enlace.attr("href", "DescargarPerfil.ashx?cv=1" +
+                            (_codObjetivo === "" ? "" : "&u=" + encodeURIComponent(_codObjetivo)));
+        $("#txtHojaVida").text(_codObjetivo === ""
+            ? "Descargar mi hoja de vida"
+            : "Descargar la hoja de vida de " + (nombre || "esta persona"));
+    }
+
+    CargarPerfil();
+}
+
 /* Llama al handler con el formato [{action, parameters}] */
 function PostPerfil(action, parameters, onSuccess) {
-    var datos = JSON.stringify([{ "action": action, "parameters": parameters }]);
+    /* El codigo del perfil viaja en TODAS las llamadas, incluidas las del
+       propio perfil, donde va vacio. Un solo camino es mas facil de revisar que
+       una excepcion por accion. */
+    var p = parameters || {};
+    if (_codObjetivo !== "") { p.codUsuario = _codObjetivo; }
+
+    var datos = JSON.stringify([{ "action": action, "parameters": p }]);
 
     $.ajax({
         type: "POST",
@@ -565,7 +609,8 @@ function CeldaDocumentos(origen, idOrigen) {
         var $fila = $('<div style="margin-bottom:3px"></div>');
 
         var $enlace = $('<a target="_blank" style="font-size:11px"></a>')
-            .attr("href", "DescargarPerfil.ashx?doc=" + d.IdDocumento)
+            .attr("href", "DescargarPerfil.ashx?doc=" + d.IdDocumento +
+                          (_codObjetivo === "" ? "" : "&u=" + encodeURIComponent(_codObjetivo)))
             .attr("title", d.NombreArchivo)
             .text(d.NombreArchivo);
 
@@ -615,6 +660,9 @@ $(document).on("change", "#inDocumento", function () {
     datos.append("origen", origen);
     datos.append("idOrigen", idOrigen);
     datos.append("archivo", archivo);
+    /* Esta llamada no pasa por PostPerfil -es multipart-, asi que el codigo del
+       perfil se agrega a mano. El handler lo lee de Request.Form. */
+    if (_codObjetivo !== "") { datos.append("codUsuario", _codObjetivo); }
 
     /* Esta llamada no puede usar PostPerfil: aquella manda JSON y esto es
        multipart. processData y contentType en false son lo que hace que jQuery
@@ -649,6 +697,11 @@ function EliminarDocumento(idDocumento) {
    menu: si alguien tiene gente que le reporta, la ve. Son 22 personas hoy y
    el dia que cambie no hay nada que mantener. */
 function MostrarPestanaEquipo(esJefe) {
+    /* Nunca al mirar el perfil de otra persona. ListaEquipo y PerfilEquipo
+       toman al jefe de la SESION, asi que aqui se veria el equipo de quien mira
+       con el nombre de otro en la cabecera. No es cosmetica: es el dato de
+       otra persona bajo una etiqueta equivocada. */
+    if (_codObjetivo !== "") { return; }
     if (!esJefe) { return; }
 
     $("#liTabEquipo").show();

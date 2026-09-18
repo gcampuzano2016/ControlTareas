@@ -71,6 +71,18 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(GuardarContacto(context, parametrosAccion));
                 }
 
+                if (Action == "GuardarDatosPersonales")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarDatosPersonales(context, parametrosAccion));
+                }
+
+                if (Action == "ListarJefes")
+                {
+                    existAction = true;
+                    responseAction.Append(ListarJefes(context, parametrosAccion));
+                }
+
                 if (Action == "GuardarEmergencia")
                 {
                     existAction = true;
@@ -273,6 +285,98 @@ namespace JsonJQueryNetPerfil
             catch (Exception ex)
             {
                 return responseMessage("0", "Error al guardar el contacto. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Guarda los ocho campos de datos personales del perfil que indica
+        /// PerfilIdentidad.Objetivo, anotando como autor a PerfilIdentidad.Autor.
+        ///
+        /// Es la primera accion del modulo donde el objetivo y el autor casi
+        /// nunca son la misma persona: la usa Talento Humano sobre el perfil de
+        /// otro. La regla de quien puede hacerlo no esta aca sino en
+        /// NegPerfilAcceso, igual que en las otras dieciseis escrituras.
+        ///
+        /// Antes de validar se LEE el perfil guardado. No es un rodeo: un campo
+        /// solo se valida cuando cambio, y para saber si cambio hace falta saber
+        /// que hay. Sin esto, las tres personas cuya cedula guardada no pasa el
+        /// digito verificador no podrian guardar ningun campo.
+        /// </summary>
+        private string GuardarDatosPersonales(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
+                {
+                    return responseMessage("0", objetivo.Mensaje, "danger");
+                }
+
+                string codUsuario = objetivo.CodUsuario;
+                string codAutor   = PerfilIdentidad.Autor(context);
+
+                var diccionario = campos as System.Collections.Generic.IDictionary<string, object>;
+                EntPerfilDatosPersonales datos = NegPerfilCampos.LeerDatosPersonales(diccionario);
+
+                EntPerfilCompleto actual = NegPerfil.CargarPerfil(codUsuario);
+
+                /* PerfilEncontrado en falso es el Cod_Usuario repetido: la
+                   cabecera viene vacia y comparar contra ella daria por
+                   "cambiado" todo lo que llegue, con lo que la regla de validar
+                   solo lo que cambio dejaria de servir. El procedimiento tambien
+                   lo rechaza con -2, pero avisar aca evita una escritura inutil y
+                   da el mensaje correcto. */
+                if (!actual.PerfilEncontrado)
+                {
+                    return responseMessage("0",
+                        "No pudimos identificar ese perfil de forma única. Hay que corregir el código de usuario antes de editarlo.",
+                        "warning");
+                }
+
+                string error = NegPerfilCampos.ValidarDatosPersonales(datos, actual.Cabecera, codUsuario);
+                if (error != "")
+                {
+                    return responseMessage("0", error, "warning");
+                }
+
+                return ToJson(NegPerfil.GuardarDatosPersonales(codUsuario, codAutor, datos,
+                                                               context.Request.UserHostAddress));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al guardar los datos personales. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Los candidatos a jefe inmediato para el combo de la edicion.
+        ///
+        /// Pasa por la misma comprobacion de acceso que el resto aunque sea una
+        /// lectura: lo que devuelve es el catalogo completo de usuarios activos,
+        /// y quien no puede editar un perfil tampoco tiene por que poder
+        /// enumerarlos desde aca.
+        /// </summary>
+        private string ListarJefes(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
+                {
+                    return responseMessage("0", objetivo.Mensaje, "danger");
+                }
+
+                /* Se le pasa el objetivo para que el procedimiento lo excluya de
+                   la lista: nadie puede ser su propio jefe. */
+                return ToJson(NegPerfil.ListarJefes(objetivo.CodUsuario));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al cargar la lista de jefes. " + ex.Message, "danger");
             }
         }
 

@@ -385,3 +385,86 @@ servidor y reinicias el sitio. Eso es todo.
   — así fue como se filtraron las anteriores
 
 El `.gitignore` cubre el primer caso. El segundo depende de quien revisa.
+
+---
+
+## 8. Datos personales editables por Talento Humano
+
+Permite que los perfiles 14 y 18 editen los ocho campos de la pestaña «Datos
+personales» de cualquier colaborador, desde `PerfilesPersonal.aspx`.
+
+**Depende de la entrega 1** (`2026-09-16-perfil-autor-*.sql`). Si
+`Empleados.Usu_ModificacionCod` no existe, el script de procedimientos se detiene
+solo con un mensaje que lo dice.
+
+### 8.1 Base de datos
+
+**Ya aplicado en producción el 2026-09-18.** Queda escrito para reponer el
+entorno desde cero o para replicarlo en otro. El orden importa:
+
+1. `docs/sql/2026-09-17-datos-personales-columnas.sql`
+2. `docs/sql/2026-09-17-datos-personales-procedimientos.sql`
+
+El segundo vuelve a crear **`Sp_RTA_PerfilColaborador`**, que es el que lee el
+perfil en **las dos** pantallas. Si algo sale mal ahí, «Mi perfil» también se ve
+afectado. Los dos scripts son idempotentes y se pueden volver a correr.
+
+Comprobación después de correrlos:
+
+```sql
+SELECT nombre = name, creado = CONVERT(VARCHAR(20), modify_date, 120)
+  FROM sys.procedures
+ WHERE name IN ('Sp_RTA_PerfilGuardarDatosPersonales',
+                'Sp_RTA_PerfilJefesLista',
+                'Sp_RTA_PerfilColaborador');
+```
+
+### 8.2 Archivos a publicar
+
+Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
+
+| Archivo | Por qué |
+|---|---|
+| `Controles\PerfilFichas.ascx` | El formulario de edición |
+| `Formulario\PerfilesPersonal.aspx` | Enciende el formulario (`PERFIL_DATOS_EDITABLES`) |
+| `Formulario\MiPerfil.aspx` | **Sólo le cambia el `?v=`**, pero sin eso esa pantalla sigue sirviendo el JavaScript viejo desde la caché |
+| `js\miPerfil.js` | Pintar, llenar el combo de jefes y guardar |
+| `bin\ReporteTareas.dll` | El handler, con las dos acciones nuevas |
+| `bin\CapaEntidad.exe` | `EntPerfilDatosPersonales`, `EntPerfilJefe`, `CodJefeInmediato` |
+| `bin\CapaNegocio.exe` | `NegPerfilCedula` y las dos funciones de `NegPerfilCampos` |
+| `bin\CapaDato.exe` | `GuardarDatosPersonales` y `ListarJefes` |
+
+> **Son `.exe`, no `.dll`.** Las tres bibliotecas de capa de este proyecto se
+> compilan con `OutputType=Exe` y se publican como `CapaEntidad.exe`,
+> `CapaNegocio.exe` y `CapaDato.exe`. Buscar `CapaNegocio.dll` no encuentra nada y
+> lleva a publicar de menos.
+
+**Copiar archivo por archivo. Nunca `robocopy /MIR` ni ninguna copia que
+sincronice:** borra `connections.config` y `appsettings.config`, y el sitio no
+levanta.
+
+### 8.3 Antes de copiar: regenerar el paquete
+
+El repositorio versiona `obj/Release/Package/PackageTmp` a propósito, y **es fácil
+publicar desde un paquete viejo sin que nada dé error**. Se comprueba en un
+segundo:
+
+```bash
+grep -h "miPerfil.js?v=" ReporteTareas/Formulario/MiPerfil.aspx \
+     ReporteTareas/obj/Release/Package/PackageTmp/Formulario/MiPerfil.aspx
+```
+
+Los dos números tienen que coincidir. Si no, regenerar:
+
+```
+MSBuild.exe ReporteTareas\ReporteTareas.csproj /p:DeployOnBuild=true ^
+            /p:PublishProfile=FolderProfile /p:Configuration=Release
+```
+
+### 8.4 Avisarle a Talento Humano antes
+
+Cuando se guarda el perfil de alguien **sin ficha**, el procedimiento se la crea
+(o adopta una huérfana que tenga su misma cédula). Esa persona **empieza a
+aparecer en `RRHHEmpleados.aspx`**, que hoy no la lista. Son hasta 116 personas.
+
+Si nadie avisa, Talento Humano va a ver crecer esa lista sin saber por qué.

@@ -2402,9 +2402,13 @@ afectado.
   eso esa pantalla sigue sirviendo el JavaScript viejo desde la caché)
 - `js\miPerfil.js`
 - `bin\ReporteTareas.dll`
-- `bin\CapaEntidad.dll`
-- `bin\CapaNegocio.dll`
-- `bin\CapaDato.dll`
+- `bin\CapaEntidad.exe`
+- `bin\CapaNegocio.exe`
+- `bin\CapaDato.exe`
+
+> **Son `.exe`, no `.dll`.** Las tres bibliotecas de capa se compilan con
+> `OutputType=Exe`. Buscar `CapaNegocio.dll` no encuentra nada y lleva a publicar
+> de menos.
 
 **Copiar archivo por archivo. Nunca `robocopy /MIR` ni ninguna copia que
 sincronice:** borra `connections.config` y `appsettings.config`, y el sitio no

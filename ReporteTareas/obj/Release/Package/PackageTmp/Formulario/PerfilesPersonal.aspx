@@ -8,8 +8,14 @@
            perfil de quien mira dentro de las fichas de otro. En MiPerfil.aspx
            esta bandera no existe y aquella pagina carga como siempre. */
         var PERFIL_SIN_CARGA_INICIAL = true;
+
+        /* Enciende el formulario de edicion de "Datos personales". Es de ALCANCE,
+           no de seguridad: quien puede editar lo decide NegPerfilAcceso en el
+           servidor, y el handler lo vuelve a comprobar en cada llamada. Esto solo
+           evita que "Mi perfil" cambie para las 228 personas que la usan. */
+        var PERFIL_DATOS_EDITABLES = true;
     </script>
-    <script src="../js/miPerfil.js?v=9" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=10" type="text/javascript"></script>
     <script src="../js/perfilesPersonal.js?v=2" type="text/javascript"></script>
 </asp:Content>
 

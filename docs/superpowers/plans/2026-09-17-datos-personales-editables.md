@@ -261,8 +261,13 @@ print('comentarios balanceados:', s.count('/*') == s.count('*/'))
 "
 ```
 
-Esperado: `BOM: True`, `no-ascii tras BOM: ninguno`, `NOEXEC ON: 1`,
+Esperado: `BOM: True`, `no-ascii tras BOM: ninguno`, `NOEXEC ON: 2`,
 `NOEXEC OFF: 1`, `ALTER TABLE: 3`, `comentarios balanceados: True`.
+
+> `NOEXEC ON: 2` es correcto y no un descuido: una de las dos es la mención
+> dentro del comentario de la guarda. Ejecutable hay una sola. Comprobarlo con
+> `grep -n "SET NOEXEC" docs/sql/2026-09-17-datos-personales-columnas.sql`: la
+> que está dentro de `/* ... */` no cuenta.
 
 - [ ] **Step 3: Commit**
 

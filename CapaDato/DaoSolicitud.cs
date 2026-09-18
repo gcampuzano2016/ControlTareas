@@ -536,5 +536,40 @@ namespace CapaDato
 
             return Respuesta;
         }
+
+        /// <summary>
+        /// Deja constancia del intento de avisar por correo sobre una solicitud.
+        /// Resultado: ENVIADO | FALLIDO | SIN_CORREO, que decide NegCorreoSolicitud.
+        ///
+        /// Nunca lanza. La bitacora observa el envio; no puede tumbarlo, ni tumbar
+        /// la solicitud que ya quedo guardada.
+        /// </summary>
+        public static void RegistrarLogCorreo(EntLogCorreoSolicitud log)
+        {
+            if (log == null) { return; }
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_RegistrarLogCorreoSolicitud", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@IdVacaciones", SqlDbType.BigInt).Value = log.IdVacaciones;
+                    cmd.Parameters.Add("@TipoAviso", SqlDbType.VarChar, 30).Value = log.TipoAviso ?? string.Empty;
+                    cmd.Parameters.Add("@Destinatario", SqlDbType.VarChar, 400).Value = log.Destinatario ?? string.Empty;
+                    cmd.Parameters.Add("@Asunto", SqlDbType.VarChar, 200).Value = log.Asunto ?? string.Empty;
+                    cmd.Parameters.Add("@Resultado", SqlDbType.VarChar, 20).Value = log.Resultado ?? string.Empty;
+                    cmd.Parameters.Add("@Mensaje", SqlDbType.VarChar, 500).Value = log.Mensaje ?? string.Empty;
+                    cnx.Open();
+                    cmd.ExecuteNonQuery();
+                }
+            }
+            catch (Exception)
+            {
+            }
+        }
+
     }
 }

@@ -62,5 +62,15 @@ namespace CapaNegocio
             return DaoSolicitud.ListaArchivosSolicitudes(IdTarea);
         }
 
+
+        /// <summary>
+        /// Registra en la bitacora como salio un aviso por correo de la solicitud.
+        /// El renglon lo arma NegCorreoSolicitud; aca solo se guarda.
+        /// </summary>
+        public static void RegistrarLogCorreo(EntLogCorreoSolicitud log)
+        {
+            DaoSolicitud.RegistrarLogCorreo(log);
+        }
+
     }
 }

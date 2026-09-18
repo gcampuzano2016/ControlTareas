@@ -634,6 +634,7 @@ namespace ReporteTareas.Formulario
             bool respuestaEnvioCorreo = false;
             bool respuestaEnvioCorreoUsuario = false;
             //respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Autorización de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
+            envioCorreo.ParaSolicitud(Lista.IdVacaciones, "COLABORADOR_APROBADO");
             respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Vacaciones Aprobadas y Registradas", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
         }
         #endregion

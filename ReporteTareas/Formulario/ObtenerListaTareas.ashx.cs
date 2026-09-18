@@ -6499,10 +6499,12 @@ namespace JsonJQueryNetTareas
                     {
                         if (TipoProceso == 0)
                         {
+                            envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "PLANIFICACION_JEFE");
                             respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Planificación de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
                         }
                         else if (TipoProceso == 1)
                         {
+                            envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "PLANIFICACION_JEFE");
                             respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Solicitud de Planificación de Vacaciones  (Actualizar)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
                         }
                         respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Planificación de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuario.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuario.txt", Convert.ToInt32(IdSolicitud));
@@ -6610,13 +6612,17 @@ namespace JsonJQueryNetTareas
             bool respuestaEnvioCorreoUsuario = false;
             if (tipoSolicitud == "VACACIONES")
             {
+                envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "CANCELACION_JEFE");
                 respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Cancelacion de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudCancelado.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudCancelado.txt");
+                envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "CANCELACION_COLABORADOR");
                 respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Vacaciones (Cancelado)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuarioCancelado.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuarioCancelado.txt", Convert.ToInt32(IdSolicitud));
             }
             else if (tipoSolicitud == "PLANIFICAR VACACIONES")
             {
 
+                envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "CANCELACION_JEFE");
                 respuestaEnvioCorreo = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, "Cancelacion Planificación de Vacaciones", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudCancelado.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudCancelado.txt");
+                envioCorreo.ParaSolicitud(Convert.ToInt64(IdSolicitud), "CANCELACION_COLABORADOR");
                 respuestaEnvioCorreoUsuario = envioCorreo.EnvioCorreoSolicitudEmpleado(correoUsuario, "Copia Solicitud de Planificación de Vacaciones (Cancelado)", envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitudUsuarioCancelado.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitudUsuarioCancelado.txt", Convert.ToInt32(IdSolicitud));
             }
 

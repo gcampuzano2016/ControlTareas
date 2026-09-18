@@ -107,6 +107,7 @@
     <Compile Include="EntReporteGe.cs" />
     <Compile Include="EntSaldoPermisoMensual.cs" />
     <Compile Include="EntSolicitud.cs" />
+    <Compile Include="EntLogCorreoSolicitud.cs" />
     <Compile Include="EntTareaPrincipal.cs" />
     <Compile Include="EntItemValor.cs" />
     <Compile Include="EntArchivoTarea.cs" />

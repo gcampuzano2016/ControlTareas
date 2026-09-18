@@ -16,6 +16,73 @@ namespace CorreoHelper
     {
         public string ErrorProceso;
 
+        #region Bitacora de correos de solicitudes
+
+        /* De que solicitud es el proximo correo que se mande con este helper.
+           Se pone desde el llamador con ParaSolicitud() y se consume al
+           registrarlo, de un solo uso.
+
+           Es de un solo uso a proposito: si alguien reusa la misma instancia
+           para dos envios y se olvida de declarar el segundo, ese segundo no
+           queda registrado. Preferimos un renglon de menos antes que un renglon
+           con la etiqueta equivocada, que es peor que no tener bitacora.
+
+           Sin contexto no se registra nada, y por eso el codigo de verificacion
+           del login, que reusa EnvioCorreoSolicitudJefe, no ensucia la tabla. */
+        private long idSolicitudBitacora;
+        private string tipoAvisoBitacora;
+
+        /// <summary>
+        /// Declara que el proximo envio corresponde a esta solicitud, y con que
+        /// etiqueta debe quedar registrado. Devuelve el helper para poder
+        /// encadenarlo con la llamada de envio.
+        /// </summary>
+        public EnvioCorreoHelper ParaSolicitud(long idVacaciones, string tipoAviso)
+        {
+            idSolicitudBitacora = idVacaciones;
+            tipoAvisoBitacora = tipoAviso;
+            return this;
+        }
+
+        /// <summary>
+        /// La etiqueta que usa un metodo cuyo proposito no es ambiguo, siempre
+        /// que el llamador no haya declarado una.
+        /// </summary>
+        private void ContextoPorDefecto(long idVacaciones, string tipoAviso)
+        {
+            if (string.IsNullOrEmpty(tipoAvisoBitacora))
+            {
+                ParaSolicitud(idVacaciones, tipoAviso);
+            }
+        }
+
+        /// <summary>
+        /// Guarda como salio el envio, si habia contexto. Nunca lanza: la
+        /// bitacora observa el correo, no lo condiciona.
+        /// </summary>
+        private void RegistrarEnBitacora(string destinatarios, string asunto, bool enviado)
+        {
+            if (string.IsNullOrEmpty(tipoAvisoBitacora)) { return; }
+
+            long idVacaciones = idSolicitudBitacora;
+            string tipoAviso = tipoAvisoBitacora;
+
+            idSolicitudBitacora = 0;
+            tipoAvisoBitacora = null;
+
+            try
+            {
+                NegSolicitud.RegistrarLogCorreo(
+                    NegCorreoSolicitud.Clasificar(idVacaciones, tipoAviso, destinatarios,
+                                                  asunto, enviado, ErrorProceso));
+            }
+            catch (Exception)
+            {
+            }
+        }
+
+        #endregion
+
         #region EnvioCorreoEncuesta
         public bool EnvioCorreoEncuesta(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, Int32 Id_RegTareas)
         {
@@ -382,6 +449,8 @@ namespace CorreoHelper
 
             try
             {
+                ContextoPorDefecto(codigoSolicitud, "COPIA_COLABORADOR");
+
                 parametrosServidorCorreo.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
                 parametrosServidorCorreo.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
                 parametrosServidorCorreo.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
@@ -569,7 +638,18 @@ namespace CorreoHelper
         {
             try
             {
-                if (string.IsNullOrEmpty(correoRH)) { return false; }
+                /* Este metodo tiene un solo proposito, asi que se etiqueta solo.
+                   Si el llamador ya declaro otra cosa, manda el llamador. */
+                ContextoPorDefecto(codigoSolicitud, "TALENTO_HUMANO");
+
+                /* Sin correo se sale antes de enviar, de modo que el registro no
+                   puede quedar a cargo de EnviarCorreo: se anota aca. Es el caso
+                   que mas interesa, porque es el que hoy desaparece sin ruido. */
+                if (string.IsNullOrEmpty(correoRH))
+                {
+                    RegistrarEnBitacora(correoRH, asunto, false);
+                    return false;
+                }
 
                 string urlSitio = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE");
                 if (string.IsNullOrEmpty(urlSitio)) { urlSitio = ""; }
@@ -743,8 +823,14 @@ namespace CorreoHelper
         {
             try
             {
+                ContextoPorDefecto(codigoSolicitud, "COLABORADOR_APROBADO");
+
                 string correo = CorreoDelColaborador(codigoSolicitud);
-                if (string.IsNullOrEmpty(correo)) { return false; }
+                if (string.IsNullOrEmpty(correo))
+                {
+                    RegistrarEnBitacora(correo, correoTitulo, false);
+                    return false;
+                }
 
                 PDFs generador = new PDFs();
 
@@ -811,6 +897,8 @@ namespace CorreoHelper
         {
             try
             {
+                ContextoPorDefecto(codigoSolicitud, "SOLICITUD_JEFE");
+
                 PDFs generador = new PDFs();
                 string cuerpo = CuerpoDelDocumento(generador, codigoSolicitud,
                                                    BotonesDeAprobacion(listaCampos));
@@ -1351,12 +1439,137 @@ namespace CorreoHelper
                     {
                         mail.From = new MailAddress(emailFrom, emailFromName);
 
-                        foreach (string correoIndividual in (correosDestinatarios ?? string.Empty).Split(new Char[] { ';' }))
+                        foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
                         {
-                            if (correoIndividual.Trim() != "")
+                            mail.To.Add(correoIndividual);
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
+                        smtp.Credentials = new NetworkCredential(emailFrom, password);
+                        smtp.EnableSsl = enableSSL;
+                        smtp.Send(mail);
+                        Temp = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Temp = false;
+                        ErrorProceso = ex.Message.ToString().Trim();
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
+                    }
+                }
+            }
+
+            /* Un renglon en la bitacora, si el llamador declaro de que solicitud
+               es este correo. Si no lo declaro, esto no hace nada. */
+            RegistrarEnBitacora(correosDestinatarios, correoTitulo, Temp);
+
+            return Temp;
+        }
+
+        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
+        {
+            bool Temp = false;
+
+            string smtpAddress = parametrosServidorCorreo.smtpAddress;
+            string emailFrom = parametrosServidorCorreo.emailFrom;
+            string password = parametrosServidorCorreo.password;
+            string subject = correoTitulo;
+            string body = correoContenido;
+            int portNumber = parametrosServidorCorreo.portNumber;
+            bool enableSSL = parametrosServidorCorreo.enableSSL;
+            string emailFromName = "Registro de Poliza - Sistema de Tareas";
+
+            using (MailMessage mail = new MailMessage())
+            {
+                using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
+                {
+                    /* Todo el armado va DENTRO del try, igual que en EnviarCorreo.
+                       Estaba afuera: una direccion mal formada lanzaba
+                       FormatException que se escapaba del metodo, sin false para el
+                       llamador y sin rastro en ningun lado. */
+                    try
+                    {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
+                        {
+                            mail.To.Add(correoIndividual);
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
+                        foreach (string documentos in NegDestinatariosCorreo.Separar(RutaDocumento))
+                        {
+                            if (System.IO.File.Exists(documentos))
                             {
-                                mail.To.Add(correoIndividual.Trim());
+                                mail.Attachments.Add(new Attachment(documentos));
                             }
+                        }
+
+                        smtp.Credentials = new NetworkCredential(emailFrom, password);
+                        smtp.EnableSsl = enableSSL;
+                        smtp.Send(mail);
+                        Temp = true;
+                    }
+                    catch (Exception ex)
+                    {
+                        Temp = false;
+                        ErrorProceso = ex.Message.ToString().Trim();
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
+                    }
+                }
+            }
+
+
+            return Temp;
+        }
+
+        public bool EnviarCorreoForeCast(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaAdjunto, string emailFromName)
+        {
+            bool Temp = false;
+
+            string smtpAddress = parametrosServidorCorreo.smtpAddress;
+            string emailFrom = parametrosServidorCorreo.emailFrom;
+            string password = parametrosServidorCorreo.password;
+            string subject = correoTitulo;
+            string body = correoContenido;
+            int portNumber = parametrosServidorCorreo.portNumber;
+            bool enableSSL = parametrosServidorCorreo.enableSSL;
+            using (MailMessage mail = new MailMessage())
+            {
+                using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
+                {
+                    /* Todo el armado va DENTRO del try, igual que en EnviarCorreo.
+                       Estaba afuera: una direccion mal formada lanzaba
+                       FormatException que se escapaba del metodo, sin false para el
+                       llamador y sin rastro en ningun lado.
+
+                       Ojo: este metodo recibe RutaAdjunto y no la usa. El bloque
+                       que adjuntaba quedo comentado y ademas nombra una variable
+                       que no existe (RutaDocumento). Se deja igual: hacerlo
+                       adjuntar de nuevo es un cambio de comportamiento aparte. */
+                    try
+                    {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
+                        {
+                            mail.To.Add(correoIndividual);
                         }
 
                         if (mail.To.Count == 0)
@@ -1386,124 +1599,6 @@ namespace CorreoHelper
             return Temp;
         }
 
-        public bool EnviarCorreoPoliza(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
-        {
-            bool Temp = false;
-
-            string smtpAddress = parametrosServidorCorreo.smtpAddress;
-            string emailFrom = parametrosServidorCorreo.emailFrom;
-            string password = parametrosServidorCorreo.password;
-            string subject = correoTitulo;
-            string body = correoContenido;
-            int portNumber = parametrosServidorCorreo.portNumber;
-            bool enableSSL = parametrosServidorCorreo.enableSSL;
-            string emailFromName = "Registro de Poliza - Sistema de Tareas";
-
-            using (MailMessage mail = new MailMessage())
-            {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
-
-                foreach (string documentos in RutaDocumento.Split(new Char[] { ';' }))
-                {
-                    if (documentos != "")
-                    {
-                        if (System.IO.File.Exists(documentos))
-                        {
-                            mail.Attachments.Add(new Attachment(documentos));
-                        }
-                    }
-                }
-
-                using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
-                {
-                    try
-                    {
-                        smtp.Credentials = new NetworkCredential(emailFrom, password);
-                        smtp.EnableSsl = enableSSL;
-                        smtp.Send(mail);
-                        Temp = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Temp = false;
-                        ErrorProceso = ex.Message.ToString().Trim();
-                    }
-                }
-            }
-
-
-            return Temp;
-        }
-
-        public bool EnviarCorreoForeCast(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaAdjunto, string emailFromName)
-        {
-            bool Temp = false;
-
-            string smtpAddress = parametrosServidorCorreo.smtpAddress;
-            string emailFrom = parametrosServidorCorreo.emailFrom;
-            string password = parametrosServidorCorreo.password;
-            string subject = correoTitulo;
-            string body = correoContenido;
-            int portNumber = parametrosServidorCorreo.portNumber;
-            bool enableSSL = parametrosServidorCorreo.enableSSL;
-            using (MailMessage mail = new MailMessage())
-            {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
-
-                //foreach (string documentos in RutaDocumento.Split(new Char[] { ';' }))
-                //{
-                //    if (documentos != "")
-                //    {
-                //        if (System.IO.File.Exists(documentos))
-                //        {
-                //            mail.Attachments.Add(new Attachment(documentos));
-                //        }
-                //    }
-                //}
-
-                using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
-                {
-                    try
-                    {
-                        smtp.Credentials = new NetworkCredential(emailFrom, password);
-                        smtp.EnableSsl = enableSSL;
-                        smtp.Send(mail);
-                        Temp = true;
-                    }
-                    catch (Exception ex)
-                    {
-                        Temp = false;
-                        ErrorProceso = ex.Message.ToString().Trim();
-                    }
-                }
-            }
-
-
-            return Temp;
-        }
-
         public bool EnviarCorreoPermiso(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
         {
             bool Temp = false;
@@ -1519,34 +1614,41 @@ namespace CorreoHelper
 
             using (MailMessage mail = new MailMessage())
             {
-                mail.From = new MailAddress(emailFrom, emailFromName);
-
-                foreach (string correoIndividual in correosDestinatarios.Split(new Char[] { ';' }))
-                {
-                    if (correoIndividual != "")
-                    {
-                        mail.To.Add(correoIndividual);
-                    }
-                }
-                mail.Subject = subject;
-                mail.Body = body;
-                mail.IsBodyHtml = true;
-
-                foreach (string documentos in RutaDocumento.Split(new Char[] { ';' }))
-                {
-                    if (documentos != "")
-                    {
-                        if (System.IO.File.Exists(documentos))
-                        {
-                            mail.Attachments.Add(new Attachment(documentos));
-                        }
-                    }
-                }
-
                 using (SmtpClient smtp = new SmtpClient(smtpAddress, portNumber))
                 {
+                    /* Todo el armado va DENTRO del try, igual que en EnviarCorreo.
+                       Estaba afuera: una direccion mal formada hacia que mail.To.Add
+                       lanzara FormatException, la excepcion se escapaba del metodo y
+                       ni el llamador recibia false ni quedaba renglon en la bitacora.
+                       El arreglo de julio de 2026 solo habia tocado EnviarCorreo. */
                     try
                     {
+                        mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
+                        {
+                            mail.To.Add(correoIndividual);
+                        }
+
+                        if (mail.To.Count == 0)
+                        {
+                            throw new FormatException("No hay destinatarios validos en: '" + (correosDestinatarios ?? string.Empty) + "'.");
+                        }
+
+                        mail.Subject = subject;
+                        mail.Body = body;
+                        mail.IsBodyHtml = true;
+
+                        /* Separar() tolera la ruta nula, que antes era otra
+                           NullReferenceException esperando su turno. */
+                        foreach (string documentos in NegDestinatariosCorreo.Separar(RutaDocumento))
+                        {
+                            if (System.IO.File.Exists(documentos))
+                            {
+                                mail.Attachments.Add(new Attachment(documentos));
+                            }
+                        }
+
                         smtp.Credentials = new NetworkCredential(emailFrom, password);
                         smtp.EnableSsl = enableSSL;
                         smtp.Send(mail);
@@ -1556,10 +1658,14 @@ namespace CorreoHelper
                     {
                         Temp = false;
                         ErrorProceso = ex.Message.ToString().Trim();
+                        VerErrores("ErrorProceso: " + ErrorProceso + " | Destinatarios: " + (correosDestinatarios ?? string.Empty), "Log", "Detalle");
                     }
                 }
             }
 
+            /* Un renglon en la bitacora, si el llamador declaro de que solicitud
+               es este correo. Si no lo declaro, esto no hace nada. */
+            RegistrarEnBitacora(correosDestinatarios, correoTitulo, Temp);
 
             return Temp;
         }

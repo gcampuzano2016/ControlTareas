@@ -68,6 +68,43 @@ namespace CapaDato
         }
 
         /// <summary>
+        /// Cambia las fechas de un periodo que ya existe, por su IdPeriodo.
+        ///
+        /// Respuestas: 0 bien, -1 el rango esta al reves o viene vacio, -4 el
+        /// periodo no existe, -5 el rango nuevo se solapa con OTRO periodo, -6 el
+        /// periodo esta cerrado.
+        ///
+        /// No toca HE_Detalle: recalcular es trabajo de
+        /// NegHorasExtrasPantalla.EditarFechasPeriodo, que llama al AbrirPeriodo
+        /// que ya existe.
+        /// </summary>
+        public static int EditarFechasPeriodo(int idPeriodo, DateTime inicio, DateTime fin,
+                                              string usuario, string ip)
+        {
+            int resultado = -1;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeEditarFechasPeriodo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cmd.Parameters.Add("@FechaInicio", SqlDbType.Date).Value = inicio;
+                cmd.Parameters.Add("@FechaFin", SqlDbType.Date).Value = fin;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
+        /// <summary>
         /// La materia prima para armar un snapshot. Devuelve los colaboradores y,
         /// aparte, TODO su historial de sueldos sin resolver cual rige: eso lo
         /// decide NegHorasExtras.SalarioVigente, que a igual fecha da prioridad

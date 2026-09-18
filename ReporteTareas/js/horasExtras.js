@@ -317,6 +317,95 @@ function EjecutarRecalcular() {
            });
 }
 
+/* Corregir las fechas de un periodo que YA existe.
+
+   No se parece a "Abrir / actualizar": aquel manda un rango y el servidor busca
+   o crea el periodo de ESE rango. Este manda el IdPeriodo del periodo cargado y
+   le cambia las fechas, que es la unica forma de mover un rango sin abandonar el
+   periodo y sus correcciones. */
+function ConfirmarEditarFechas() {
+    if (!_idPeriodoActual) {
+        MostrarMensaje("Elija primero el período que quiere corregir.", "warning");
+        return;
+    }
+
+    var fechaInicio = $("#inFechaInicio").val();
+    var fechaFin = $("#inFechaFin").val();
+
+    if (!fechaInicio || !fechaFin) {
+        MostrarMensaje("Indique la fecha de inicio y la de fin.", "warning");
+        return;
+    }
+
+    /* Comparacion de cadenas y no de fechas: un input type="date" siempre
+       devuelve "yyyy-MM-dd", que ordena igual como texto que como fecha. Es la
+       misma comprobacion que hace AbrirPeriodoSeleccionado. */
+    if (fechaInicio > fechaFin) {
+        MostrarMensaje("La fecha de inicio no puede ser posterior a la de fin.", "warning");
+        return;
+    }
+
+    if (fechaInicio === _fechaInicioActual && fechaFin === _fechaFinActual) {
+        MostrarMensaje("Las fechas son las mismas que ya tiene el período.", "warning");
+        return;
+    }
+
+    /* Mismo criterio que recalcular: el guardado se hace fila por fila, y lo que
+       este en la grilla sin guardar se perderia cuando el servidor devuelva la
+       pantalla recalculada. */
+    if (HayCambiosSinGuardar()) {
+        MostrarMensaje("Guarde los cambios antes de corregir las fechas.", "warning");
+        return;
+    }
+
+    MostrarConfirmacion(
+        "El período pasará a ir del " + FechaLegible(fechaInicio) +
+        " al " + FechaLegible(fechaFin) + ". Se volverán a traer las horas " +
+        "aprobadas de ese rango y se recalcularán los sueldos al nuevo corte, " +
+        "así que los totales pueden cambiar. Las filas corregidas a mano no se tocan.",
+        EjecutarEditarFechas,
+        "Corregir las fechas del período",
+        "Sí, corregir"
+    );
+}
+
+/* "2026-08-14" -> "14/08/2026", para el texto de la confirmacion.
+
+   No reusa FormatoFecha a proposito: aquella recibe lo que manda el SERVIDOR y
+   pasa por new Date(valor). Aqui el valor viene del input type="date", y
+   new Date("2026-08-14") interpreta la cadena como UTC: leida en Ecuador
+   (UTC-5) devuelve el dia ANTERIOR. La confirmacion diria una fecha y se
+   guardaria otra, que es la peor forma de equivocarse en un aviso que existe
+   justamente para que la persona revise las fechas. Partir la cadena no puede
+   fallar asi. */
+function FechaLegible(iso) {
+    var p = String(iso).split("-");
+    return p.length === 3 ? p[2] + "/" + p[1] + "/" + p[0] : iso;
+}
+
+function EjecutarEditarFechas() {
+    $("#btnEditarFechas").prop("disabled", true);
+
+    PostHE("EditarFechasPeriodo",
+           {
+               idPeriodo: _idPeriodoActual,
+               fechaInicio: $("#inFechaInicio").val(),
+               fechaFin: $("#inFechaFin").val()
+           },
+           function (r) {
+               PintarPantalla(r.resultado);
+               $("#btnEditarFechas").prop("disabled", false);
+
+               /* El desplegable muestra la Descripcion, que se arma del rango:
+                  despues de corregir, la opcion cargada sigue diciendo las
+                  fechas viejas hasta que se vuelva a listar. */
+               CargarListaPeriodos(_idPeriodoActual);
+           },
+           function () {
+               $("#btnEditarFechas").prop("disabled", false);
+           });
+}
+
 function ConfirmarReabrirPeriodo() {
     if (!_idPeriodoActual) { return; }
 
@@ -382,6 +471,18 @@ function PintarPantalla(pantalla) {
     _fechaInicioActual = ISODesdeValor(pantalla.Periodo.FechaInicio);
     _fechaFinActual = ISODesdeValor(pantalla.Periodo.FechaFin);
 
+    /* Los dos campos se llenan con las fechas del periodo cargado. Sin esto,
+       "Corregir fechas" obligaria a teclear las DOS aunque solo cambie una, y un
+       error de tipeo en la que no se queria tocar moveria el periodo sin que
+       nadie lo note.
+
+       Efecto de lado, buscado: con un periodo cargado, "Abrir / actualizar" pasa
+       a reabrir ESE periodo en vez de lo que hubiera quedado tecleado de antes.
+       Es inofensivo -abrir el mismo rango es idempotente- y es lo que la mayoria
+       espera al apretarlo. */
+    $("#inFechaInicio").val(_fechaInicioActual || "");
+    $("#inFechaFin").val(_fechaFinActual || "");
+
     /* Habilitado desde la primera vez que se carga un periodo, y se queda asi
        para el resto de la sesion en esta pantalla -cambiar de periodo o de
        estado nunca lo vuelve a deshabilitar, porque siempre hay un periodo
@@ -427,6 +528,11 @@ function ActualizarEstadoPeriodo(periodo) {
        que quede rastro de por que. Si hace falta, primero se reabre -y eso si
        queda auditado-. */
     $("#btnRecalcular").toggle(periodo.EstaAbierto && !!_fechaInicioActual);
+
+    /* Corregir fechas, igual que recalcular, solo sobre un periodo Abierto. El
+       handler y el procedimiento lo vuelven a comprobar -el -6-: esto es cortesia
+       visual, no la barrera. */
+    $("#btnEditarFechas").toggle(periodo.EstaAbierto && !!_idPeriodoActual);
 
     ActualizarInfoCierre(periodo);
 }

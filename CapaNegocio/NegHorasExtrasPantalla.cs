@@ -261,6 +261,84 @@ namespace CapaNegocio
             return "No se pudo cerrar el periodo.";
         }
 
+        /// <summary>
+        /// Traduce el codigo del procedimiento de edicion de fechas a algo que
+        /// una persona pueda leer. Funcion pura y publica para poder probarla sin
+        /// base, igual que MensajeDeCierre.
+        /// </summary>
+        public static string MensajeDeEdicionDeFechas(int codigo)
+        {
+            if (codigo == -1) { return "La fecha de inicio no puede ser posterior a la de fin."; }
+            if (codigo == -4) { return "Ese período no existe."; }
+            if (codigo == -5) { return "El rango nuevo se cruza con otro período."; }
+
+            /* El unico de los cuatro que dice QUE HACER. Los otros se corrigen
+               tecleando otra fecha; este se corrige con otra accion -reabrir- que
+               esta en la misma pantalla y que nadie va a adivinar si el mensaje
+               solo dice que esta cerrado. */
+            if (codigo == -6)
+            {
+                return "Un período cerrado no cambia de fechas: ya se pagó con ese rango. "
+                     + "Si de verdad hay que corregirlo, reabra el período primero.";
+            }
+
+            return "No se pudieron cambiar las fechas del período.";
+        }
+
+        /// <summary>
+        /// Corrige las fechas de un periodo ya creado y lo deja recalculado.
+        ///
+        /// Son dos pasos y el segundo no es opcional: cambiar el rango cambia
+        /// QUE horas aprobadas le corresponden al periodo y, sobre todo, cambia
+        /// el corte con el que se resuelve el sueldo -el corte es el ultimo dia
+        /// del rango-. Dejar solo las fechas nuevas con las filas viejas daria un
+        /// periodo que dice una cosa en la cabecera y paga otra en el detalle.
+        ///
+        /// El recalculo es el AbrirPeriodo que ya existe, sin una linea nueva:
+        /// relee las aprobadas del rango, recalcula sueldos y valores hora al
+        /// nuevo corte, y respeta las filas corregidas a mano -las que tienen
+        /// HorasOrigen "Manual"-, que es lo mismo que hace el boton "Traer
+        /// aprobaciones nuevas".
+        ///
+        /// Que AbrirPeriodo se pueda llamar aqui sin crear un periodo duplicado
+        /// no es casualidad: Sp_RTA_HeCrearPeriodo busca por rango exacto, y
+        /// cuando llega ya se actualizaron las fechas, asi que encuentra ESTE
+        /// periodo y devuelve su mismo IdPeriodo.
+        ///
+        /// NO comprueba perfiles: eso es de la capa web, que es la unica que
+        /// conoce la sesion.
+        /// </summary>
+        public static EntRespuesta EditarFechasPeriodo(int idPeriodo, DateTime inicio, DateTime fin,
+                                                       string usuario, string ip)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            int codigo = DaoHorasExtras.EditarFechasPeriodo(idPeriodo, inicio, fin, usuario, ip);
+
+            if (codigo != 0)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = MensajeDeEdicionDeFechas(codigo);
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
+            EntRespuesta pantalla = AbrirPeriodo(inicio, fin, usuario, ip);
+
+            /* Si el recalculo trajo su propio aviso -filas que no se pudieron
+               guardar, sueldos congelados- se respeta: es mas especifico que
+               "fechas cambiadas" y viene de lo que acaba de pasar con las 62
+               filas. Solo se pone el mensaje de exito cuando no habia ninguno
+               que valiera mas. */
+            if (pantalla.estado == "1" && string.IsNullOrWhiteSpace(pantalla.mensaje))
+            {
+                pantalla.mensaje = "Fechas del período actualizadas y horas recalculadas.";
+                pantalla.tipoMensaje = "success";
+            }
+
+            return pantalla;
+        }
+
         /// <summary>Cierra el periodo y devuelve la pantalla ya en estado cerrado.</summary>
         public static EntRespuesta CerrarPeriodo(int idPeriodo, string usuario, string ip)
         {

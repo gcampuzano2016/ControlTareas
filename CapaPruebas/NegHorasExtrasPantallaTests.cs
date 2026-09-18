@@ -662,5 +662,69 @@ namespace CapaPruebas
             Assert.AreEqual(1.7m, r);
         }
 
+        /* ------------- corregir las fechas de un periodo ya creado ---------- */
+
+        /// <summary>
+        /// Cada codigo tiene que decir algo distinto, y las comparaciones van
+        /// todas contra todas y no solo entre vecinos: con solo los pares
+        /// adyacentes, cambiar el texto de uno por cualquier cosa que siguiera
+        /// siendo distinta del siguiente no rompe nada y ese texto queda sin
+        /// fijar. Es el mismo criterio que MensajeDeCierre.
+        /// </summary>
+        [TestMethod]
+        public void MensajeDeEdicionDeFechas_CadaCodigoDiceAlgoDistinto()
+        {
+            string alReves = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-1);
+            string noExiste = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-4);
+            string seCruza = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-5);
+            string cerrado = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-6);
+
+            Assert.AreNotEqual(alReves, noExiste);
+            Assert.AreNotEqual(alReves, seCruza);
+            Assert.AreNotEqual(alReves, cerrado);
+            Assert.AreNotEqual(noExiste, seCruza);
+            Assert.AreNotEqual(noExiste, cerrado);
+            Assert.AreNotEqual(seCruza, cerrado);
+        }
+
+        [TestMethod]
+        public void MensajeDeEdicionDeFechas_NingunoQuedaVacio()
+        {
+            foreach (int codigo in new[] { -1, -4, -5, -6, -99 })
+            {
+                string m = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(codigo);
+                Assert.IsFalse(string.IsNullOrWhiteSpace(m),
+                               "el codigo " + codigo + " se quedo sin mensaje");
+            }
+        }
+
+        /// <summary>
+        /// El -6 es el unico que tiene que decirle a la persona QUE HACER. Los
+        /// otros describen un error que se corrige tecleando otra fecha; este se
+        /// corrige con otra accion -reabrir- que esta en la misma pantalla y que
+        /// nadie va a adivinar si el mensaje solo dice "esta cerrado".
+        /// </summary>
+        [TestMethod]
+        public void MensajeDeEdicionDeFechas_PeriodoCerrado_DiceQueHayQueReabrir()
+        {
+            string cerrado = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-6);
+
+            StringAssert.Contains(cerrado.ToLowerInvariant(), "reabr");
+        }
+
+        /// <summary>
+        /// Un codigo que este metodo no conoce no puede devolver cadena vacia ni
+        /// reventar: la pantalla mostraria un cartel en blanco y quien lo vea no
+        /// sabria si guardo o no.
+        /// </summary>
+        [TestMethod]
+        public void MensajeDeEdicionDeFechas_CodigoDesconocido_DevuelveAlgoGenerico()
+        {
+            string m = NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-99);
+
+            Assert.IsFalse(string.IsNullOrWhiteSpace(m));
+            Assert.AreNotEqual(NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-5), m);
+        }
+
     }
 }

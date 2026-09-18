@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=6" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=7" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -158,9 +158,21 @@
                                 <label>Hasta</label>
                                 <input type="date" class="form-control" id="inFechaFin" />
                             </div>
-                            <div class="form-group col-lg-3" style="padding-top: 25px">
+                            <div class="form-group col-lg-4" style="padding-top: 25px">
                                 <button type="button" class="btn btn-default" id="btnAbrirPeriodo" onclick="AbrirPeriodoSeleccionado()">
                                     <i class="fa fa-folder-open"></i> Abrir / actualizar período
+                                </button>
+                                <%-- Corregir las fechas de un período que YA existe, sin crear otro.
+                                     Hasta ahora no había forma: «Abrir» busca el período por rango
+                                     exacto, así que con una fecha distinta intentaba crear uno nuevo
+                                     y chocaba con la validación de solapamiento contra el período
+                                     que se quería corregir.
+
+                                     Aparece sólo con un período abierto cargado. Uno cerrado ya se
+                                     pagó con ese rango; para corregirlo hay que reabrirlo primero,
+                                     que queda auditado. --%>
+                                <button type="button" class="btn btn-default" id="btnEditarFechas" onclick="ConfirmarEditarFechas()" style="display: none">
+                                    <i class="fa fa-calendar"></i> Corregir fechas
                                 </button>
                             </div>
                         </div>

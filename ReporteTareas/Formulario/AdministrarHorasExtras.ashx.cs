@@ -84,6 +84,7 @@ namespace JsonJQueryNetHorasExtras
 
                 if (accion == "ListarPeriodos") { existe = true; salida.Append(ListarPeriodos()); }
                 if (accion == "AbrirPeriodo")   { existe = true; salida.Append(AbrirPeriodo(context, parametros[0]["parameters"])); }
+                if (accion == "EditarFechasPeriodo") { existe = true; salida.Append(EditarFechasPeriodo(context, parametros[0]["parameters"])); }
                 if (accion == "CargarPeriodo")  { existe = true; salida.Append(CargarPeriodo(parametros[0]["parameters"])); }
                 if (accion == "GuardarFila")    { existe = true; salida.Append(GuardarFila(context, parametros[0]["parameters"])); }
                 if (accion == "CerrarPeriodo")  { existe = true; salida.Append(CerrarPeriodo(context, parametros[0]["parameters"])); }
@@ -161,6 +162,47 @@ namespace JsonJQueryNetHorasExtras
             catch (Exception ex)
             {
                 return Mensaje("0", "Error al abrir el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Corrige las fechas de un periodo ya creado y lo deja recalculado.
+        ///
+        /// No lleva comprobacion de perfil propia: ProcessRequest ya cierra el
+        /// handler entero a PerfilesAutorizados, y editar las fechas de un
+        /// periodo ABIERTO es del mismo orden que abrirlo. Reabrir es lo unico
+        /// que pide mas -solo el 18-, y este metodo no puede tocar un periodo
+        /// cerrado: el procedimiento lo rechaza con -6.
+        ///
+        /// Las fechas vacias se atajan aqui, igual que en AbrirPeriodo: el
+        /// procedimiento devolveria -1, pero ese codigo habla de un rango al
+        /// reves y no le dice a nadie que lo que falta es teclear las fechas.
+        /// </summary>
+        private string EditarFechasPeriodo(HttpContext context, dynamic p)
+        {
+            try
+            {
+                int idPeriodo = Entero(p["idPeriodo"]);
+                DateTime inicio = Fecha(p["fechaInicio"]);
+                DateTime fin = Fecha(p["fechaFin"]);
+
+                if (idPeriodo <= 0)
+                {
+                    return Mensaje("0", "Elija primero el período que quiere corregir.", "warning");
+                }
+
+                if (inicio == DateTime.MinValue || fin == DateTime.MinValue)
+                {
+                    return Mensaje("0", "Indique la fecha de inicio y la de fin del periodo.", "warning");
+                }
+
+                EntRespuesta r = NegHorasExtrasPantalla.EditarFechasPeriodo(
+                    idPeriodo, inicio, fin, Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al cambiar las fechas del periodo. " + ex.Message, "danger");
             }
         }
 

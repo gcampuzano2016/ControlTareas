@@ -166,9 +166,131 @@ function PintarCabecera(c) {
     // 143 de 231 no tienen horario asignado todavia: guion, no cadena vacia.
     $("#dpHorario").text(c.Horario || "–");
 
+    /* El horario tambien va en el panel de edicion, donde es de solo lectura:
+       tiene su propio modulo y 5 personas con mas de una asignacion activa. */
+    $("#dpHorarioEdicion").text(c.Horario || "–");
+
+    PintarDatosPersonalesEditables(c);
+
     if (!c.TieneFicha) {
         $("#perfilSinFicha").show();
     }
+}
+
+/* La bandera la declara "Perfiles del personal" en un <script> propio antes de
+   cargar este archivo. Es de ALCANCE, no de seguridad: quien puede editar lo
+   decide NegPerfilAcceso en el servidor y el handler lo comprueba en cada
+   llamada. Esto solo mantiene "Mi perfil" exactamente como estaba.
+
+   typeof y no una comparacion directa: en "Mi perfil" la variable no existe, y
+   leer una variable global no declarada lanza ReferenceError. */
+function DatosPersonalesEditables() {
+    return typeof PERFIL_DATOS_EDITABLES !== "undefined" && PERFIL_DATOS_EDITABLES;
+}
+
+function PintarDatosPersonalesEditables(c) {
+    if (!DatosPersonalesEditables()) { return; }
+
+    /* .val(x || "") y no .val(x): con null o undefined, jQuery devuelve el valor
+       actual en vez de vaciar el campo, y al abrir una segunda persona quedaria
+       el dato de la anterior. */
+    $("#edNombre").val(c.NombreCompleto || "");
+    $("#edCedula").val(c.Cedula || "");
+    $("#edFnac").val(c.FechaNacTexto || "");
+    $("#edCargo").val(c.Cargo || "");
+    $("#edArea").val(c.Area || "");
+    $("#edCiudad").val(c.Ciudad || "");
+    $("#edCorreo").val(c.CorreoNotificacion || "");
+
+    $("#panelDatosLectura").hide();
+    $("#panelDatosEdicion").show();
+    $("#etiquetaDatos")
+        .removeClass("label-default").addClass("label-info")
+        .html('<i class="fa fa-pencil"></i> Editable');
+
+    CargarJefes(c.CodJefeInmediato || "");
+}
+
+/* El combo se llena en CADA carga de perfil y no una sola vez: la lista excluye a
+   la persona que se esta editando, asi que cambia con cada persona que se abre. */
+function CargarJefes(codJefeActual) {
+    PostPerfil("ListarJefes", {}, function (respuesta) {
+        // Un objeto con "estado" es un EntRespuesta, es decir, un error.
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        var $combo = $("#edJefe").empty();
+        $combo.append($("<option></option>").attr("value", "").text("Sin jefe inmediato"));
+
+        /* .text(nombre) y no concatenacion de cadenas: el nombre viene de la base
+           y puede traer cualquier cosa. Armar el <option> pegando HTML seria
+           inyectar contenido ajeno en la pagina. */
+        var yaEsta = false;
+        $.each(respuesta || [], function (i, jefe) {
+            $combo.append($("<option></option>")
+                .attr("value", jefe.CodUsuario)
+                .text(jefe.Nombre));
+
+            if (jefe.CodUsuario === codJefeActual) { yaEsta = true; }
+        });
+
+        /* Si el jefe guardado no esta en la lista -esta inactivo, o su codigo esta
+           repetido- se agrega igual y se deja elegido. Perderlo en silencio
+           dejaria a esa persona sin aprobador la primera vez que alguien guarde
+           cualquier otro campo. */
+        if (codJefeActual !== "" && !yaEsta) {
+            $combo.append($("<option></option>")
+                .attr("value", codJefeActual)
+                .text(codJefeActual + " (inactivo o no listado)"));
+        }
+
+        $combo.val(codJefeActual);
+    });
+}
+
+function GuardarDatosPersonales() {
+    /* La comprobacion real esta en el servidor -el handler es alcanzable por HTTP
+       directo-, pero esta evita una peticion inutil cuando ya se sabe que el
+       codigo de usuario esta repetido: PerfilEncontrado en falso es exactamente
+       ese caso (ver CargarPerfil). */
+    if (_perfil && !_perfil.PerfilEncontrado) {
+        MostrarMensaje("No pudimos identificar ese perfil de forma única. Hay que corregir el código de usuario antes de editarlo.", "warning");
+        return;
+    }
+
+    var datos = {
+        nombre:             $("#edNombre").val(),
+        cedula:             $("#edCedula").val(),
+        fechaNacimiento:    $("#edFnac").val(),
+        cargo:              $("#edCargo").val(),
+        area:               $("#edArea").val(),
+        ciudad:             $("#edCiudad").val(),
+        codJefeInmediato:   $("#edJefe").val(),
+        correoNotificacion: $("#edCorreo").val()
+    };
+
+    /* Se deshabilita mientras viaja: son ocho campos que se escriben en dos
+       tablas y un doble clic mandaria dos guardados encima. */
+    var $boton = $("#btnGuardarDatosPersonales").prop("disabled", true);
+
+    PostPerfil("GuardarDatosPersonales", datos, function (respuesta) {
+        $boton.prop("disabled", false);
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+
+        /* Se recarga solo si guardo, y estado "1" incluye los guardados CON AVISO
+           -correo o cedula repetidos-, que si escribieron.
+
+           Hace falta recargar: lo que se acaba de escribir cambia lo que devuelve
+           la cabecera -la ficha puede haberse creado, y la precedencia entre
+           Empleados y R_Usuarios no es la misma para todos los campos-, asi que
+           dejar la pantalla con lo que se tecleo mostraria algo que no es lo que
+           quedo guardado. */
+        if (respuesta.estado === "1") {
+            CargarPerfil();
+        }
+    });
 }
 
 /* La foto y las iniciales son excluyentes: si hay foto, las iniciales sobran.

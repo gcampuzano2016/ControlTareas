@@ -633,5 +633,179 @@ namespace CapaNegocio
 
             return "";
         }
+
+        /* ------------------------------------------- datos personales ------ */
+
+        /* Los anchos son los de la columna MAS ANGOSTA de las dos tablas donde
+           cae cada campo, no los de la mas ancha: un valor que entra en
+           Empleados.Nombre nvarchar(350) pero no en R_Usuarios.Nom_Usuario
+           varchar(100) no deja el guardado a medias, lo hace fallar entero con
+           "String or binary data would be truncated". Medidos contra produccion
+           el 2026-09-17; estan campo por campo en la seccion 2 del diseno. */
+        private const int LargoMaximoNombre = 100;
+        private const int LargoMaximoCedula = 32;
+        private const int LargoMaximoCargo  = 128;
+        private const int LargoMaximoArea   = 128;
+        private const int LargoMaximoCiudad = 150;
+        private const int LargoMaximoCorreo = 100;
+
+        /// <summary>
+        /// Arma los datos personales editables a partir del payload, leyendo
+        /// solo las ocho claves que este codigo esta escrito para leer.
+        ///
+        /// La lista blanca es la forma de este codigo, no un arreglo que se
+        /// recorra: una clave como "estado" o "rolUsuario" no se cuela porque no
+        /// hay linea que la pida ni propiedad que la reciba. El horario no esta
+        /// a proposito: es de solo lectura y tiene su propio modulo.
+        /// </summary>
+        public static EntPerfilDatosPersonales LeerDatosPersonales(IDictionary<string, object> campos)
+        {
+            return new EntPerfilDatosPersonales
+            {
+                Nombre             = Texto(campos, "nombre"),
+                Cedula             = Texto(campos, "cedula"),
+                FechaNacimiento    = Texto(campos, "fechaNacimiento"),
+                Cargo              = Texto(campos, "cargo"),
+                Area               = Texto(campos, "area"),
+                Ciudad             = Texto(campos, "ciudad"),
+                CodJefeInmediato   = Texto(campos, "codJefeInmediato"),
+                CorreoNotificacion = Texto(campos, "correoNotificacion")
+            };
+        }
+
+        /// <summary>
+        /// Cadena vacia si los datos personales sirven; si no, el mensaje para el
+        /// usuario.
+        ///
+        /// Recibe la cabecera GUARDADA porque un campo solo se valida cuando
+        /// cambio. No es una comodidad: hay tres personas en produccion cuya
+        /// cedula no pasa el digito verificador -una de once digitos y dos con el
+        /// tercer digito en 9-, y validar siempre dejaria a esas tres sin poder
+        /// guardar NINGUN campo, trabadas por un valor que nadie estaba tocando.
+        /// Lo mismo vale para el correo.
+        ///
+        /// codUsuario es de quien es el perfil, y hace falta para la unica regla
+        /// que no se puede leer de los campos: que nadie sea su propio jefe.
+        /// </summary>
+        public static string ValidarDatosPersonales(EntPerfilDatosPersonales enviado,
+                                                    EntPerfilCabecera actual,
+                                                    string codUsuario)
+        {
+            if (enviado == null) { return "No se recibieron los datos personales."; }
+
+            /* Sin cabecera no hay contra que comparar, y validarlo todo seria
+               justo lo que traba a las tres personas de arriba. Se rechaza en vez
+               de adivinar. */
+            if (actual == null) { return "No se pudieron leer los datos actuales de la persona."; }
+
+            /* R_Usuarios.Nom_Usuario es NOT NULL: es el unico de los ocho que no
+               se puede dejar en blanco, y conviene decirlo con este mensaje y no
+               dejar que salga el de SQL Server. */
+            string nombre = (enviado.Nombre ?? "").Trim();
+            if (nombre == "") { return "El nombre es obligatorio."; }
+            if (nombre.Length > LargoMaximoNombre)
+            {
+                return "El nombre no puede pasar de " + LargoMaximoNombre + " caracteres.";
+            }
+
+            string cedula = (enviado.Cedula ?? "").Trim();
+            if (cedula.Length > LargoMaximoCedula)
+            {
+                return "La cédula no puede pasar de " + LargoMaximoCedula + " caracteres.";
+            }
+            if (Cambio(cedula, actual.Cedula) && cedula != "" && !NegPerfilCedula.EsValida(cedula))
+            {
+                return "La cédula no es válida: revise el número.";
+            }
+
+            string fecha = (enviado.FechaNacimiento ?? "").Trim();
+            if (fecha != "")
+            {
+                /* Mismo formato explicito y misma InvariantCulture que
+                   EdadDesdeTexto, y por la misma razon: en la base hay 129 fechas
+                   dd/MM/yyyy y 80 tienen el dia por encima de 12. Dejar que lo
+                   adivine la cultura del servidor rompe esas 80 sin dar error. */
+                DateTime nacimiento;
+                bool valida = DateTime.TryParseExact(fecha, FormatoFecha,
+                                                     CultureInfo.InvariantCulture,
+                                                     DateTimeStyles.None, out nacimiento);
+                if (!valida)
+                {
+                    return "La fecha de nacimiento tiene que estar en formato dd/mm/aaaa.";
+                }
+                if (nacimiento.Date > DateTime.Today)
+                {
+                    return "La fecha de nacimiento no puede ser futura.";
+                }
+            }
+
+            if ((enviado.Cargo ?? "").Trim().Length > LargoMaximoCargo)
+            {
+                return "El cargo no puede pasar de " + LargoMaximoCargo + " caracteres.";
+            }
+
+            if ((enviado.Area ?? "").Trim().Length > LargoMaximoArea)
+            {
+                return "El área no puede pasar de " + LargoMaximoArea + " caracteres.";
+            }
+
+            if ((enviado.Ciudad ?? "").Trim().Length > LargoMaximoCiudad)
+            {
+                return "La ciudad no puede pasar de " + LargoMaximoCiudad + " caracteres.";
+            }
+
+            /* Que el jefe exista y este activo lo comprueba el procedimiento, que
+               es el unico que puede mirar la base. Aca va lo que no necesita
+               mirarla: que no sea uno mismo. Se compara ignorando mayusculas
+               porque Cod_Usuario no distingue mayusculas en la base y "usr001"
+               dejaria a esa persona sin aprobador igual que "USR001". */
+            string jefe = (enviado.CodJefeInmediato ?? "").Trim();
+            if (jefe != "" && string.Equals(jefe, (codUsuario ?? "").Trim(),
+                                            StringComparison.OrdinalIgnoreCase))
+            {
+                return "Una persona no puede ser su propio jefe inmediato.";
+            }
+
+            string correo = (enviado.CorreoNotificacion ?? "").Trim();
+            if (correo.Length > LargoMaximoCorreo)
+            {
+                return "El correo no puede pasar de " + LargoMaximoCorreo + " caracteres.";
+            }
+            if (Cambio(correo, actual.CorreoNotificacion) && correo != ""
+                && !CorreoBienFormado(correo))
+            {
+                return "El correo de notificación no es válido.";
+            }
+
+            return "";
+        }
+
+        /// <summary>
+        /// true si el valor enviado difiere del guardado. Compara recortado y
+        /// tratando null como cadena vacia; distingue mayusculas, porque
+        /// cambiarle la capitalizacion a un correo SI es un cambio.
+        /// </summary>
+        private static bool Cambio(string enviado, string guardado)
+        {
+            return (enviado ?? "").Trim() != (guardado ?? "").Trim();
+        }
+
+        /// <summary>
+        /// Misma comprobacion que ValidarContacto le hace al correo personal:
+        /// algo antes de la arroba, algo despues, y un punto despues de la
+        /// arroba. El punto se busca desde despues de la arroba y no en el correo
+        /// completo, porque un punto solo en la parte local -"nombre.apellido@x"-
+        /// no alcanza.
+        /// </summary>
+        private static bool CorreoBienFormado(string correo)
+        {
+            int arroba = correo.IndexOf('@');
+
+            bool tieneAlgoAntes    = arroba > 0;
+            bool tieneAlgoDespues  = arroba >= 0 && arroba < correo.Length - 1;
+            bool tienePuntoDespues = arroba >= 0 && correo.IndexOf('.', arroba + 1) > arroba;
+
+            return tieneAlgoAntes && tieneAlgoDespues && tienePuntoDespues;
+        }
     }
 }

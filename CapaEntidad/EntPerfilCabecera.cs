@@ -31,6 +31,17 @@ namespace CapaEntidad
         public string JefeInmediato { get; set; } = "";
 
         /// <summary>
+        /// El Cod_Usuario del jefe, no su nombre. JefeInmediato guarda el nombre
+        /// y sirve para mostrar; este sirve para preseleccionar el combo de la
+        /// edicion y para comparar al validar.
+        ///
+        /// Sale de u.Cod_Jefe_Inm y no del LEFT JOIN, para que un jefe inactivo
+        /// -que no empareja en el join y deja JefeInmediato vacio- no se lea como
+        /// "no tiene jefe" y se pierda al guardar.
+        /// </summary>
+        public string CodJefeInmediato { get; set; } = "";
+
+        /// <summary>
         /// Nombre del horario vigente, o vacio para los 143 usuarios que no
         /// tienen ninguno asignado.
         /// </summary>

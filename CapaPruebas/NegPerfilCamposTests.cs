@@ -2,6 +2,7 @@ using CapaEntidad;
 using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Threading;
 
@@ -1137,6 +1138,344 @@ namespace CapaPruebas
         public void ValidarFiltroPersonal_NombreCompleto_SePermite()
         {
             Assert.AreEqual("", NegPerfilCampos.ValidarFiltroPersonal("Rodriguez"));
+        }
+
+        /* ------------------------------------------ datos personales ------- */
+
+        /// <summary>Los valores "ya guardados" contra los que se compara.</summary>
+        private static EntPerfilCabecera CabeceraGuardada()
+        {
+            return new EntPerfilCabecera
+            {
+                CodUsuario         = "USR001",
+                NombreCompleto     = "Nombre Guardado",
+                Cedula             = "1710034065",
+                FechaNacTexto      = "03/07/1985",
+                Cargo              = "Analista",
+                Area               = "Sistemas",
+                Ciudad             = "Quito",
+                CodJefeInmediato   = "USR002",
+                CorreoNotificacion = "guardado@dos.com.ec"
+            };
+        }
+
+        /// <summary>Exactamente lo que hay guardado: no cambio ningun campo.</summary>
+        private static EntPerfilDatosPersonales DatosSinCambios()
+        {
+            return new EntPerfilDatosPersonales
+            {
+                Nombre             = "Nombre Guardado",
+                Cedula             = "1710034065",
+                FechaNacimiento    = "03/07/1985",
+                Cargo              = "Analista",
+                Area               = "Sistemas",
+                Ciudad             = "Quito",
+                CodJefeInmediato   = "USR002",
+                CorreoNotificacion = "guardado@dos.com.ec"
+            };
+        }
+
+        [TestMethod]
+        public void LeerDatosPersonales_LeeLasOchoClaves()
+        {
+            var campos = new Dictionary<string, object>
+            {
+                { "nombre", " Ana Perez " },
+                { "cedula", " 1710034065 " },
+                { "fechaNacimiento", "03/07/1985" },
+                { "cargo", "Analista" },
+                { "area", "Sistemas" },
+                { "ciudad", "Quito" },
+                { "codJefeInmediato", "USR002" },
+                { "correoNotificacion", "ana@dos.com.ec" }
+            };
+
+            EntPerfilDatosPersonales d = NegPerfilCampos.LeerDatosPersonales(campos);
+
+            Assert.AreEqual("Ana Perez", d.Nombre);
+            Assert.AreEqual("1710034065", d.Cedula);
+            Assert.AreEqual("03/07/1985", d.FechaNacimiento);
+            Assert.AreEqual("Analista", d.Cargo);
+            Assert.AreEqual("Sistemas", d.Area);
+            Assert.AreEqual("Quito", d.Ciudad);
+            Assert.AreEqual("USR002", d.CodJefeInmediato);
+            Assert.AreEqual("ana@dos.com.ec", d.CorreoNotificacion);
+        }
+
+        /// <summary>
+        /// La lista blanca filtra CLAVES: una clave que no esta escrita en
+        /// LeerDatosPersonales no tiene propiedad donde aterrizar.
+        /// </summary>
+        [TestMethod]
+        public void LeerDatosPersonales_IgnoraClavesAjenas()
+        {
+            var campos = new Dictionary<string, object>
+            {
+                { "nombre", "Ana Perez" },
+                { "estado", "Inactivo" },
+                { "rolUsuario", "1" }
+            };
+
+            EntPerfilDatosPersonales d = NegPerfilCampos.LeerDatosPersonales(campos);
+
+            Assert.AreEqual("Ana Perez", d.Nombre);
+            Assert.AreEqual("", d.Cedula);
+            Assert.AreEqual("", d.CodJefeInmediato);
+        }
+
+        [TestMethod]
+        public void LeerDatosPersonales_ConNulo_DevuelveTodoVacio()
+        {
+            EntPerfilDatosPersonales d = NegPerfilCampos.LeerDatosPersonales(null);
+
+            Assert.AreEqual("", d.Nombre);
+            Assert.AreEqual("", d.CorreoNotificacion);
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConTodoIgualALoGuardado_NoSeQueja()
+        {
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                DatosSinCambios(), CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_SinNombre_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Nombre = "   ";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConNombreDeMasDe100_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Nombre = new string('A', 101);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConNombreDe100Exactos_NoSeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Nombre = new string('A', 100);
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        /// <summary>
+        /// El caso que motiva la regla de "solo si cambio": hay tres personas en
+        /// produccion cuya cedula guardada no pasa el digito verificador. Si se
+        /// validara siempre, no se les podria guardar ningun campo.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCedulaGuardadaInvalidaQueNoCambia_NoSeQueja()
+        {
+            var actual = CabeceraGuardada();
+            actual.Cedula = "17100340651";        // once digitos, como en produccion
+
+            var d = DatosSinCambios();
+            d.Cedula = "17100340651";             // la misma: no cambio
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(d, actual, "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCedulaNuevaInvalida_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Cedula = "1710034066";              // verificador equivocado
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCedulaVaciaQueNoCambia_NoSeQueja()
+        {
+            var actual = CabeceraGuardada();
+            actual.Cedula = "";
+
+            var d = DatosSinCambios();
+            d.Cedula = "";
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(d, actual, "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCedulaDeMasDe32_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Cedula = new string('1', 33);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConFechaDeNacimientoQueNoEsFecha_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.FechaNacimiento = "31/02/1985";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        /// <summary>
+        /// La cultura hostil de esta clase es en-US, donde "25/12/1985" no es una
+        /// fecha. Tiene que aceptarse igual: el formato va explicito.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDatosPersonales_ConDiaMayorQue12_NoSeQueja()
+        {
+            var d = DatosSinCambios();
+            d.FechaNacimiento = "25/12/1985";
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConFechaDeNacimientoVacia_NoSeQueja()
+        {
+            var d = DatosSinCambios();
+            d.FechaNacimiento = "";
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConFechaDeNacimientoFutura_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.FechaNacimiento = DateTime.Today.AddDays(1)
+                                    .ToString("dd/MM/yyyy", CultureInfo.InvariantCulture);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCorreoNuevoSinArroba_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.CorreoNotificacion = "ana.dos.com.ec";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCorreoGuardadoInvalidoQueNoCambia_NoSeQueja()
+        {
+            var actual = CabeceraGuardada();
+            actual.CorreoNotificacion = "sin-arroba";
+
+            var d = DatosSinCambios();
+            d.CorreoNotificacion = "sin-arroba";
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(d, actual, "USR001"));
+        }
+
+        /// <summary>
+        /// Nadie puede ser su propio jefe: quedaria sin quien le apruebe nada y
+        /// la consulta de equipo lo devolveria como subordinado de si mismo.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDatosPersonales_ConJefeIgualAUnoMismo_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.CodJefeInmediato = "USR001";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConJefeIgualAUnoMismoConEspacios_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.CodJefeInmediato = "  USR001  ";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "  USR001 "));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_SinJefe_NoSeQueja()
+        {
+            var d = DatosSinCambios();
+            d.CodJefeInmediato = "";
+
+            Assert.AreEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCargoDeMasDe128_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Cargo = new string('A', 129);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConAreaDeMasDe128_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Area = new string('A', 129);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCiudadDeMasDe150_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.Ciudad = new string('A', 151);
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConCorreoDeMasDe100_SeQueja()
+        {
+            var d = DatosSinCambios();
+            d.CorreoNotificacion = new string('a', 95) + "@dos.ec";
+
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                d, CabeceraGuardada(), "USR001"));
+        }
+
+        [TestMethod]
+        public void ValidarDatosPersonales_ConDatosNulos_SeQueja()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                null, CabeceraGuardada(), "USR001"));
+        }
+
+        /// <summary>
+        /// Sin cabecera no hay con que comparar, y validar contra nada seria
+        /// validarlo todo: justo lo que traba a las tres personas con cedula
+        /// vieja invalida. Se rechaza en vez de adivinar.
+        /// </summary>
+        [TestMethod]
+        public void ValidarDatosPersonales_SinCabeceraActual_SeQueja()
+        {
+            Assert.AreNotEqual("", NegPerfilCampos.ValidarDatosPersonales(
+                DatosSinCambios(), null, "USR001"));
         }
     }
 }

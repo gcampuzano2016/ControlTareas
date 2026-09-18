@@ -1353,9 +1353,14 @@ BEGIN
     /* --- Empleados: primero adoptar, despues crear ------------------------ */
     DECLARE @IdEmpleado BIGINT;
 
-    SELECT @IdEmpleado = IdEmpleado
+    /* TOP 1 con ORDER BY, igual que la adopcion de mas abajo. Hoy ningun
+       Cod_Usuario tiene dos fichas -verificado el 2026-09-17- pero no hay indice
+       unico que lo impida, y sin ORDER BY una segunda ficha se elegiria al azar
+       y el guardado iria a parar a una u otra sin que nadie se entere. */
+    SELECT TOP 1 @IdEmpleado = IdEmpleado
       FROM dbo.Empleados
-     WHERE Cod_Usuario = @Cod_Usuario;
+     WHERE Cod_Usuario = @Cod_Usuario
+     ORDER BY IdEmpleado;
 
     /* La adopcion. Empleados tiene 21 filas sin Cod_Usuario -fichas de gente
        real que nadie enlazo nunca- y 4 de ellas son de personas que esta

@@ -42,6 +42,27 @@ namespace CapaNegocio
             return DaoPerfil.GuardarContacto(codUsuario, codAutor, contacto, ip);
         }
 
+        /// <summary>
+        /// Guarda los ocho campos de datos personales. codAutor: ver
+        /// GuardarContacto.
+        ///
+        /// Quien valida es NegPerfilCampos.ValidarDatosPersonales, y lo llama el
+        /// handler, no esta fachada: necesita la cabecera guardada para saber que
+        /// campos cambiaron, y leerla otra vez aca seria una segunda ida a la
+        /// base para repetir una comprobacion que ya se hizo.
+        /// </summary>
+        public static EntRespuesta GuardarDatosPersonales(string codUsuario, string codAutor,
+                                                          EntPerfilDatosPersonales datos, string ip)
+        {
+            return DaoPerfil.GuardarDatosPersonales(codUsuario, codAutor, datos, ip);
+        }
+
+        /// <summary>Los candidatos a jefe inmediato, sin la persona misma.</summary>
+        public static List<EntPerfilJefe> ListarJefes(string codUsuario)
+        {
+            return DaoPerfil.ListarJefes(codUsuario);
+        }
+
         /// <summary>Alta o edicion de un contacto de emergencia. codAutor: ver GuardarContacto.</summary>
         public static EntRespuesta GuardarEmergencia(string codUsuario, string codAutor,
                                                      EntPerfilEmergencia c, string ip)

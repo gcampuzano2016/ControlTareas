@@ -51,6 +51,14 @@ namespace CapaDato
                         perfil.Cabecera.Ciudad             = Texto(dr, "Ciudad");
                         perfil.Cabecera.CorreoNotificacion = Texto(dr, "CorreoNotificacion");
                         perfil.Cabecera.JefeInmediato      = Texto(dr, "JefeInmediato");
+
+                        /* Solo en esta lectura y NO en la cabecera recortada de
+                           PerfilEquipo: aquella lee otro procedimiento, que no
+                           devuelve esta columna, y Texto() hace dr[columna], que
+                           con una columna ausente lanza IndexOutOfRangeException
+                           y tumbaria la pestana "Equipo" entera. */
+                        perfil.Cabecera.CodJefeInmediato   = Texto(dr, "CodJefeInmediato");
+
                         perfil.Cabecera.Horario            = Texto(dr, "Horario");
                         perfil.Cabecera.TieneFicha         = Texto(dr, "TieneFicha") == "1";
                         perfil.Cabecera.EsJefe             = Texto(dr, "EsJefe") == "1";
@@ -218,6 +226,117 @@ namespace CapaDato
             });
 
             return RespuestaDe(r, "Sus datos de contacto se guardaron correctamente.", "No se pudo guardar el contacto.");
+        }
+
+        /// <summary>
+        /// Guarda los ocho campos de datos personales en las DOS tablas y, si
+        /// hace falta, adopta o crea la ficha de Empleados.
+        ///
+        /// codUsuario es DE QUIEN es el perfil; codAutor es QUIEN lo esta
+        /// tocando. Esta es la primera escritura del modulo donde casi nunca son
+        /// la misma persona: la pantalla que la usa es la de Talento Humano.
+        ///
+        /// Respuestas del procedimiento: 0 guardado limpio; 1, 2 y 3 guardado CON
+        /// AVISO (correo repetido, cedula repetida, las dos); -2 Cod_Usuario
+        /// repetido; -3 el jefe elegido no existe, no esta activo o es la persona
+        /// misma. Los positivos guardaron; los negativos no.
+        /// </summary>
+        public static EntRespuesta GuardarDatosPersonales(string codUsuario, string codAutor,
+                                                          EntPerfilDatosPersonales datos, string ip)
+        {
+            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarDatosPersonales", cmd =>
+            {
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar,  50).Value = codUsuario;
+                cmd.Parameters.Add("@Nombre",      SqlDbType.VarChar, 100).Value = datos.Nombre;
+                cmd.Parameters.Add("@Cedula",      SqlDbType.VarChar,  32).Value = datos.Cedula;
+                cmd.Parameters.Add("@FechaNac",    SqlDbType.VarChar,  10).Value = datos.FechaNacimiento;
+                cmd.Parameters.Add("@Cargo",       SqlDbType.VarChar, 128).Value = datos.Cargo;
+                cmd.Parameters.Add("@Area",        SqlDbType.VarChar, 128).Value = datos.Area;
+                cmd.Parameters.Add("@Ciudad",      SqlDbType.VarChar, 150).Value = datos.Ciudad;
+                cmd.Parameters.Add("@CodJefeInm",  SqlDbType.VarChar, 100).Value = datos.CodJefeInmediato;
+                cmd.Parameters.Add("@Correo",      SqlDbType.VarChar, 100).Value = datos.CorreoNotificacion;
+                cmd.Parameters.Add("@Ip",          SqlDbType.VarChar,  64).Value = ip ?? "";
+                cmd.Parameters.Add("@Usu_Accion",  SqlDbType.VarChar,  50).Value = codAutor ?? "";
+            });
+
+            /* Un jefe que no existe no es "no se pudo guardar": es un dato
+               concreto que la persona tiene que corregir, y merece decirlo. */
+            if (r == -3)
+            {
+                return new EntRespuesta
+                {
+                    estado      = "0",
+                    mensaje     = "El jefe inmediato seleccionado ya no existe o está inactivo. Vuelva a elegirlo.",
+                    tipoMensaje = "warning"
+                };
+            }
+
+            /* 1, 2 y 3 son GUARDADO CON AVISO, no errores, y por eso van con
+               estado "1": la pantalla tiene que recargar el perfil igual que en un
+               guardado limpio. Se interceptan antes de RespuestaDe porque para
+               ella cualquier valor que no sea 0 ni -2 es un fracaso.
+
+               No se bloquea a proposito: el sistema ya convive con correos y
+               cedulas repetidos, y bloquear impediria corregir justamente esos
+               casos. Ver las secciones 4 y 5 del diseno. */
+            if (r >= 1 && r <= 3)
+            {
+                string aviso = "";
+
+                if ((r & 1) == 1)
+                {
+                    aviso += " Atención: ese correo ya lo tiene otro usuario activo, y las notificaciones y las firmas pueden atribuirse a la persona equivocada.";
+                }
+
+                if ((r & 2) == 2)
+                {
+                    aviso += " Atención: esa cédula ya la tiene otro usuario activo.";
+                }
+
+                return new EntRespuesta
+                {
+                    estado      = "1",
+                    mensaje     = "Los datos personales se guardaron correctamente." + aviso,
+                    tipoMensaje = "warning"
+                };
+            }
+
+            return RespuestaDe(r,
+                               "Los datos personales se guardaron correctamente.",
+                               "No se pudieron guardar los datos personales.");
+        }
+
+        /// <summary>
+        /// Los candidatos a jefe inmediato, sin la persona misma. Lista vacia si
+        /// el procedimiento no devuelve filas: la pantalla lo muestra como un
+        /// combo con una sola opcion, "Sin jefe inmediato".
+        /// </summary>
+        public static List<EntPerfilJefe> ListarJefes(string codUsuario)
+        {
+            List<EntPerfilJefe> jefes = new List<EntPerfilJefe>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_PerfilJefesLista", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@Cod_Usuario", SqlDbType.VarChar, 50).Value = codUsuario ?? "";
+
+                cnx.Open();
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        jefes.Add(new EntPerfilJefe
+                        {
+                            CodUsuario = Texto(dr, "CodUsuario"),
+                            Nombre     = Texto(dr, "Nombre")
+                        });
+                    }
+                }
+            }
+
+            return jefes;
         }
 
         /// <summary>

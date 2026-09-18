@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NegPerfilCamposTests.cs" />
+    <Compile Include="NegPerfilCedulaTests.cs" />
     <Compile Include="NegPerfilAccesoTests.cs" />
     <Compile Include="NegPerfilCvTests.cs" />
     <Compile Include="EntPerfilEquipoTests.cs" />

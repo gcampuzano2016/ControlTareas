@@ -35,16 +35,27 @@ namespace JsonJQueryNetHorasExtras
     public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
         /// <summary>
-        /// Talento Humano (14) y Super Admin (18): los mismos perfiles a los que el
-        /// menu les muestra la pantalla.
+        /// Supervisor Especialistas (2), Talento Humano (14) y Super Admin (18):
+        /// los mismos perfiles a los que el menu les muestra la pantalla.
+        ///
+        /// Esta lista NO es de solo lectura: quien esta aqui puede teclear horas,
+        /// guardar, cerrar un periodo y corregir sus fechas. Lo unico reservado
+        /// al 18 es reabrir un periodo cerrado (PerfilesQueReabren). Agregar un
+        /// perfil aqui es darle el modulo entero, no el permiso de mirarlo.
         ///
         /// internal, no private: DescargarHorasExtras.ashx.cs -mismo namespace,
         /// mismo proyecto de presentacion- reusa esta misma lista para su propia
-        /// comprobacion de perfil en vez de declarar la suya. Los dos handlers
+        /// comprobacion de perfil en vez de declarar la suya, y HorasExtras.aspx.cs
+        /// la lee en su Page_Load para redirigir a quien no este. Los tres
         /// protegen el mismo dato (el sueldo del periodo) con el mismo criterio;
         /// si este criterio cambia algun dia, cambia en un solo lugar.
+        ///
+        /// Quien agregue un perfil aqui tiene que acordarse de PerfilMenu: la
+        /// pantalla se abre por URL directa aunque el menu no la muestre, y al
+        /// reves, una fila de menu sin el perfil en esta lista dibuja una opcion
+        /// que al pulsarla redirige a Principal.aspx.
         /// </summary>
-        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
+        internal static readonly int[] PerfilesAutorizados = { 2, 14, 18 };
 
         /// <summary>
         /// Solo Super Admin (18) puede reabrir un periodo cerrado. Separacion de

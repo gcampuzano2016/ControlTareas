@@ -1560,18 +1560,27 @@ ninguna lectura actual se entera.
 - [ ] **Step 1: Traer el cuerpo vigente del procedimiento**
 
 `Sp_RTA_PerfilColaborador` **no se parchea**: se vuelve a crear entero, y el
-cuerpo tiene que ser el que está corriendo, no el que alguien recuerde. La fuente
-en el repositorio es `docs/sql/2026-09-14-perfil-colaborador.sql`.
+cuerpo tiene que ser el que está corriendo, no el que alguien recuerde.
+
+**Tres scripts del repositorio lo crean**, y sólo uno sirve:
 
 ```bash
-grep -n "CREATE PROCEDURE dbo.Sp_RTA_PerfilColaborador" docs/sql/2026-09-14-perfil-colaborador.sql
+grep -ln "CREATE PROCEDURE dbo.Sp_RTA_PerfilColaborador" docs/sql/*.sql
 ```
 
-Copiar desde esa línea hasta el `GO` que cierra el procedimiento.
+| Script | ¿Coincide con producción? |
+|---|---|
+| `2026-09-14-perfil-colaborador.sql` | **no** — 39 líneas de diferencia |
+| `2026-09-14-perfil-colaborador-fase2.sql` | **no** — 18 líneas de diferencia |
+| `2026-09-15-perfil-colaborador-fase3a.sql` | **sí, exactamente** |
 
-> **Si el repositorio tuviera más de una versión del procedimiento** —otro
-> script posterior que lo vuelva a crear—, usar **la del script más reciente por
-> fecha en el nombre**, y decir en el commit cuál se usó.
+Copiar de **`2026-09-15-perfil-colaborador-fase3a.sql`**, desde el
+`CREATE PROCEDURE` hasta el `GO` que lo cierra. Copiar de cualquiera de los otros
+dos revierte las fases posteriores en silencio.
+
+(Comprobado el 2026-09-17 contra la definición viva de la base. Si volviera a
+haber dudas, la fuente definitiva es `OBJECT_DEFINITION` sobre el procedimiento,
+no el repositorio.)
 
 - [ ] **Step 2: Agregar la sección 3 al script de la Task 4**
 

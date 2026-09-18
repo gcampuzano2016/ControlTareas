@@ -294,6 +294,202 @@ GO
 PRINT 'Sp_RTA_PerfilJefesLista actualizado.';
 GO
 
+/* ======================================== 3. la cabecera, con el codigo ===== */
+
+IF OBJECT_ID('dbo.Sp_RTA_PerfilColaborador','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_PerfilColaborador;
+GO
+
+/* Identico al que esta en produccion salvo UNA linea de datos:
+   CodJefeInmediato en el primer SELECT. Es aditivo -el Dao lee por nombre de
+   columna, no por posicion- asi que ni "Mi perfil" ni "Perfiles del personal"
+   se enteran del cambio.
+
+   Se vuelve a crear ENTERO y no se parchea: es un procedimiento de nueve
+   conjuntos de resultados que leen las dos pantallas, y un ALTER parcial de algo
+   asi es justo el tipo de cambio que se rompe sin avisar.
+
+   El cuerpo se copio de docs/sql/2026-09-15-perfil-colaborador-fase3a.sql, que
+   es el mas reciente de los tres scripts del repositorio que lo crean y el unico
+   que coincide EXACTAMENTE con lo que estaba corriendo en produccion el
+   2026-09-17 (los de la fase 1 y la fase 2 difieren en 39 y 18 lineas: son
+   versiones viejas, y copiar de ahi habria revertido las fases posteriores). */
+CREATE PROCEDURE dbo.Sp_RTA_PerfilColaborador
+    @Cod_Usuario VARCHAR(50)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    /* R_Usuarios no tiene indice unico sobre Cod_Usuario -su llave real es
+       Id_Usuario- y hay codigos repetidos entre usuarios activos (el caso
+       '0000' son dos personas distintas). Si se entregara CUALQUIERA de los
+       nueve result sets en ese caso, el contacto personal, los contactos de
+       emergencia y todo lo demas que cuelga de Cod_Usuario vendria mezclado
+       o seria de la otra persona -domicilio, telefono personal, a
+       quien llamar en una emergencia-, sin forma de saber de quien es cada
+       dato. Y aunque la pantalla oculte las pestanas cuando no hay perfil, el
+       JSON ya viajo al navegador: cerrar la puerta de la cabecera y dejar
+       las demas abiertas serviria de poco.
+
+       Por eso @CodigoRepetido se aplica en el WHERE de los nueve SELECT, no
+       solo en la cabecera: el criterio es "no se entrega nada", no "no se
+       entrega la cabecera". No hay un RETURN anticipado a proposito -el Dao
+       recorre los result sets por posicion y espera que los nueve siempre
+       vengan, aunque vacios; un RETURN rompe ese contrato.
+
+       Mismo criterio que CapaDato/DaoFirmaUsuario.cs (comentario del metodo
+       Obtener): ante un codigo repetido, se devuelve vacio en vez de
+       adivinar cual de las dos personas es -"la fila seria de dos personas
+       distintas"-. No se usa TOP 1 con ORDER BY: eso elegiria una fila fija,
+       y para '0000' esa fila fija seria siempre la de la persona equivocada
+       para la otra. Determinista y equivocado es peor que vacio, porque
+       nadie lo descubre. */
+    DECLARE @CodigoRepetido BIT = 0;
+
+    IF (SELECT COUNT(*) FROM dbo.R_Usuarios
+         WHERE Cod_Usuario = @Cod_Usuario AND ISNULL(EstadoUsuario,0) = 0) > 1
+        SET @CodigoRepetido = 1;
+
+    /* 1. cabecera */
+    SELECT  u.Cod_Usuario,
+            NombreCompleto  = ISNULL(NULLIF(LTRIM(RTRIM(e.Nombre)), ''), u.Nom_Usuario),
+            Cedula          = ISNULL(NULLIF(LTRIM(RTRIM(u.Cedula)), ''), e.Cedula),
+            FechaNacTexto   = LTRIM(RTRIM(ISNULL(e.Fecha_nacimiento, ''))),
+            Cargo           = ISNULL(NULLIF(LTRIM(RTRIM(e.PuestoTrabajo)), ''), u.Cargo),
+            Area            = ISNULL(NULLIF(LTRIM(RTRIM(e.AreaTrabajo)), ''), u.Departamento),
+            Ciudad          = e.Ciudad,
+            CorreoNotificacion = u.E_Mail,
+            JefeInmediato   = j.Nom_Usuario,
+
+            /* El codigo, ademas del nombre. JefeInmediato sirve para mostrar;
+               este sirve para preseleccionar el combo de la edicion de datos
+               personales y para comparar al validar.
+
+               Sale de u.Cod_Jefe_Inm y NO de j: si el jefe guardado esta
+               inactivo no empareja en el LEFT JOIN, j.Nom_Usuario queda NULL y
+               leer el codigo desde ahi lo daria por "sin jefe". Al guardar
+               cualquier otro campo, ese jefe se perderia y la persona quedaria
+               sin aprobador. */
+            CodJefeInmediato = LTRIM(RTRIM(ISNULL(u.Cod_Jefe_Inm, ''))),
+
+            /* El horario va como subconsulta y NO como LEFT JOIN: hay 5 usuarios
+               con mas de una asignacion activa a la vez, y un join los duplicaria.
+               La cabecera tiene que devolver exactamente una fila siempre, porque
+               el Dao hace un solo Read(): con un join, esas 5 personas verian un
+               horario elegido al azar y nadie se enteraria.
+
+               R_UsuarioHorarioLaboral.Id_Responsable guarda un Cod_Usuario, pese
+               al nombre. Solo 88 de 231 tienen horario asignado; el resto recibe
+               NULL y la pantalla muestra un guion. */
+            Horario = (SELECT TOP 1 h.Nombre
+                         FROM dbo.R_UsuarioHorarioLaboral uh
+                         JOIN dbo.R_HorarioLaboral h
+                              ON h.IdHorarioLaboral = uh.IdHorarioLaboral
+                        WHERE uh.Id_Responsable = u.Cod_Usuario
+                          AND uh.Activo = 1
+                        ORDER BY uh.FechaDesde DESC, uh.IdUsuarioHorario DESC),
+
+            TieneFicha      = CASE WHEN e.IdEmpleado IS NULL THEN 0 ELSE 1 END,
+            EsJefe          = CASE WHEN EXISTS (SELECT 1 FROM dbo.R_Usuarios s
+                                                 WHERE LTRIM(RTRIM(s.Cod_Jefe_Inm)) = LTRIM(RTRIM(u.Cod_Usuario))
+                                                   AND ISNULL(s.EstadoUsuario, 0) = 0)
+                                   THEN 1 ELSE 0 END
+      FROM  dbo.R_Usuarios u
+      LEFT JOIN dbo.Empleados  e ON e.Cod_Usuario = u.Cod_Usuario
+      LEFT JOIN dbo.R_Usuarios j ON LTRIM(RTRIM(j.Cod_Usuario)) = LTRIM(RTRIM(u.Cod_Jefe_Inm))
+     WHERE  u.Cod_Usuario = @Cod_Usuario
+       AND  @CodigoRepetido = 0;
+
+    /* 2. contacto personal (editable) */
+    SELECT  CorreoPersonal   = ISNULL(p.CorreoPersonal, ''),
+            TelefonoPersonal = ISNULL(p.TelefonoPersonal, ''),
+            Direccion        = ISNULL(p.Direccion, CAST(e.Direccion AS VARCHAR(400))),
+            EstadoCivil      = ISNULL(e.EstadoCivil, '')
+      FROM  dbo.R_Usuarios u
+      LEFT JOIN dbo.Perfil_ContactoPersonal p ON p.Cod_Usuario = u.Cod_Usuario
+      LEFT JOIN dbo.Empleados e ON e.Cod_Usuario = u.Cod_Usuario
+     WHERE  u.Cod_Usuario = @Cod_Usuario
+       AND  @CodigoRepetido = 0;
+
+    /* 3. contactos de emergencia */
+    SELECT IdContacto, Nombre, Parentesco, Telefono
+      FROM dbo.Perfil_ContactoEmergencia
+     WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY IdContacto;
+
+    /* 4. estudios (fase 2) */
+    SELECT IdEstudio, Nivel, Institucion, Titulo, AnioGraduacion
+      FROM dbo.Perfil_Estudio
+     WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY AnioGraduacion DESC, IdEstudio;
+
+    /* 5. certificaciones (fase 2) */
+    SELECT IdCertificacion, Nombre, Entidad, FechaObtencion
+      FROM dbo.Perfil_Certificacion
+     WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY FechaObtencion DESC, IdCertificacion;
+
+    /* 6. experiencia (fase 2) */
+    SELECT IdExperiencia, Empresa, Cargo, AnioDesde, AnioHasta, Funciones
+      FROM dbo.Perfil_Experiencia
+     WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY ISNULL(AnioHasta, 9999) DESC, AnioDesde DESC;
+
+    /* 7. documentos de respaldo (fase 3) */
+    SELECT IdDocumento, Origen, IdOrigen, NombreArchivo, NombreArchivoCodigo, Ruta
+      FROM dbo.Perfil_Documento
+     WHERE Cod_Usuario = @Cod_Usuario AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY IdDocumento;
+
+    /* 8. cargas familiares
+
+       Va al final y no junto a los otros datos personales a proposito: el Dao
+       recorre los result sets POR POSICION, asi que un contrato posicional se
+       amplia por el final. Insertarlo en medio desplazaria los conjuntos 4 a 7
+       y sus datos aterrizarian en la propiedad equivocada, sin ningun error.
+
+       El filtro es Estado = '1', igual que en las otras cinco tablas del
+       modulo, y no el vocabulario 'Activo'/'Inactivo' de RRHHEmpleados.aspx.
+       Da lo mismo para efectos de este SELECT: las filas que crea esa
+       pantalla tienen Cod_Usuario NULO -no lo conoce- y jamas pasan el
+       WHERE Cod_Usuario = @Cod_Usuario de aqui, sea cual sea el filtro de
+       Estado. Ver el comentario de Sp_RTA_PerfilGuardarCargaFamiliar para el
+       porque completo de usar '1'/'0' en esta tabla compartida. */
+    SELECT IdCargaFam,
+           Nombre,
+           Parentesco,
+           FechaNacTexto = CONVERT(VARCHAR(10), Fecha_nacimiento, 23)
+      FROM dbo.Emp_CargaFamiliar
+     WHERE Cod_Usuario = @Cod_Usuario
+       AND Estado = '1'
+       AND @CodigoRepetido = 0
+     ORDER BY Fecha_nacimiento DESC, IdCargaFam;
+
+    /* 9. foto de perfil
+
+       Va al final, como fue el 8 en su momento: el Dao recorre los result sets
+       POR POSICION y un contrato posicional se amplia por el final. Meterla en
+       la cabecera habria obligado a reescribir el SELECT del conjunto 1, que es
+       el que lleva el LEFT JOIN de los 119 sin ficha y el TRY_CONVERT con
+       estilo 103 del que depende la edad. Este SELECT deja aquel intacto.
+
+       Devuelve cero filas si la persona no subio foto: es el caso normal el
+       primer dia y el Dao lo trata como "sin foto", no como error. */
+    SELECT FotoBase64, FotoTipo
+      FROM dbo.Perfil_Foto
+     WHERE Cod_Usuario = @Cod_Usuario
+       AND @CodigoRepetido = 0;
+END
+GO
+
+PRINT 'Sp_RTA_PerfilColaborador actualizado.';
+GO
+
 SET NOEXEC OFF;
 GO
 

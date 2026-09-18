@@ -130,12 +130,15 @@
                         <div class="panel panel-default">
                             <div class="panel-heading">
                                 Información personal
-                                <span class="label label-default pull-right">
+                                <span class="label label-default pull-right" id="etiquetaDatos">
                                     <i class="fa fa-lock"></i> Gestionado por Talento Humano
                                 </span>
                             </div>
                             <div class="panel-body">
-                                <div class="row">
+
+                                <!-- Lo que ve todo el mundo. En "Mi perfil" es lo
+                                     unico que existe. -->
+                                <div class="row" id="panelDatosLectura">
                                     <div class="form-group col-lg-6"><label>Nombres completos</label>
                                         <p class="form-control-static" id="dpNombre">–</p></div>
                                     <div class="form-group col-lg-6"><label>Número de cédula</label>
@@ -155,6 +158,65 @@
                                     <div class="form-group col-lg-6"><label>Horario</label>
                                         <p class="form-control-static" id="dpHorario">–</p></div>
                                 </div>
+
+                                <!-- Lo enciende SOLO "Perfiles del personal", con la
+                                     variable PERFIL_DATOS_EDITABLES, y recien despues
+                                     de cargar el perfil. Nace oculto para que "Mi
+                                     perfil" no cambie en nada para las 228 personas
+                                     que la usan.
+
+                                     La bandera es de ALCANCE, no de seguridad: quien
+                                     puede editar lo decide NegPerfilAcceso en el
+                                     servidor y el handler lo comprueba en cada
+                                     llamada.
+
+                                     El horario NO es editable: sale de
+                                     R_UsuarioHorarioLaboral, tiene su propio modulo y
+                                     hay 5 personas con mas de una asignacion activa,
+                                     algo que un solo campo no puede representar. -->
+                                <div id="panelDatosEdicion" style="display: none">
+                                    <div class="row">
+                                        <div class="form-group col-lg-6"><label>Nombres completos</label>
+                                            <input type="text" class="form-control" id="edNombre" maxlength="100" /></div>
+                                        <div class="form-group col-lg-6"><label>Número de cédula</label>
+                                            <input type="text" class="form-control" id="edCedula" maxlength="32" /></div>
+                                        <div class="form-group col-lg-6"><label>Fecha de nacimiento</label>
+                                            <input type="text" class="form-control" id="edFnac" maxlength="10" placeholder="dd/mm/aaaa" /></div>
+                                        <div class="form-group col-lg-6"><label>Cargo</label>
+                                            <input type="text" class="form-control" id="edCargo" maxlength="128" /></div>
+                                        <div class="form-group col-lg-6"><label>Área</label>
+                                            <input type="text" class="form-control" id="edArea" maxlength="128" /></div>
+                                        <div class="form-group col-lg-6"><label>Jefe inmediato</label>
+                                            <select class="form-control" id="edJefe">
+                                                <option value="">Sin jefe inmediato</option>
+                                            </select></div>
+                                        <div class="form-group col-lg-6"><label>Ciudad</label>
+                                            <input type="text" class="form-control" id="edCiudad" maxlength="150" /></div>
+                                        <div class="form-group col-lg-6"><label>Correo de notificación</label>
+                                            <input type="email" class="form-control" id="edCorreo" maxlength="100" /></div>
+                                        <div class="form-group col-lg-6"><label>Horario</label>
+                                            <p class="form-control-static" id="dpHorarioEdicion">–</p>
+                                            <p class="text-muted">
+                                                El horario se asigna desde su propio módulo, no desde aquí.
+                                            </p></div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-lg-12">
+                                            <p class="text-muted">
+                                                El nombre, el cargo, el área y el correo se usan en todo el
+                                                sistema: en los listados, en las aprobaciones y en los correos
+                                                que se envían. El jefe inmediato decide quién aprueba las
+                                                vacaciones y los permisos de esta persona.
+                                            </p>
+                                            <button type="button" class="btn btn-primary"
+                                                    id="btnGuardarDatosPersonales"
+                                                    onclick="GuardarDatosPersonales()">
+                                                <i class="fa fa-save"></i> Guardar datos personales
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>

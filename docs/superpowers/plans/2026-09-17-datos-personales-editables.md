@@ -2160,7 +2160,26 @@ etiquetas que cargan `miPerfil.js`:
         var PERFIL_DATOS_EDITABLES = true;
 ```
 
-- [ ] **Step 3: Verificar el BOM y los `id`**
+- [ ] **Step 3: Subir el `?v=` de `miPerfil.js` en las DOS páginas**
+
+La Task 9 modifica `miPerfil.js`, y las dos páginas lo referencian con un
+número de versión que sirve de rompe-cachés. Sin subirlo, el navegador sigue
+sirviendo el archivo viejo y la pestaña no se vuelve editable —ya pasó en este
+sistema con un `?v=` que quedó atrás—.
+
+```bash
+grep -rn "miPerfil.js?v=" ReporteTareas/ --include=*.aspx
+```
+
+Subir el número **en las dos**, `PerfilesPersonal.aspx` y `MiPerfil.aspx`. La
+segunda no cambia de comportamiento —la bandera no existe ahí— pero se sirve el
+mismo archivo, y dejarla con el número viejo deja media aplicación con una
+versión y media con otra.
+
+**`MiPerfil.aspx` pasa a ser un archivo a publicar**, aunque su único cambio sea
+ese número.
+
+- [ ] **Step 4: Verificar el BOM y los `id`**
 
 ```bash
 python -c "
@@ -2177,10 +2196,10 @@ Esperado: `BOM: True` en los dos, `campos ed*: 8`, y **`page-wrapper: 0`** —es
 `div` se sacó del control en el commit `d09b5f6`, y volver a meterlo repite el
 error del buscador dibujado debajo del menú lateral.
 
-- [ ] **Step 4: Commit**
+- [ ] **Step 5: Commit**
 
 ```bash
-git add ReporteTareas/Controles/PerfilFichas.ascx ReporteTareas/Formulario/PerfilesPersonal.aspx
+git add ReporteTareas/Controles/PerfilFichas.ascx ReporteTareas/Formulario/PerfilesPersonal.aspx ReporteTareas/Formulario/MiPerfil.aspx
 git commit -m "feat(perfil): el formulario de datos personales, oculto salvo en la pantalla de Talento Humano"
 ```
 
@@ -2379,6 +2398,8 @@ afectado.
 
 - `Controles\PerfilFichas.ascx`
 - `Formulario\PerfilesPersonal.aspx`
+- `Formulario\MiPerfil.aspx` (sólo le cambia el `?v=` de `miPerfil.js`, pero sin
+  eso esa pantalla sigue sirviendo el JavaScript viejo desde la caché)
 - `js\miPerfil.js`
 - `bin\ReporteTareas.dll`
 - `bin\CapaEntidad.dll`

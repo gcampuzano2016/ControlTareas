@@ -1,4 +1,5 @@
-﻿using CapaEntidad;
+﻿using CapaDato;
+using CapaEntidad;
 using System.Collections.Generic;
 
 namespace CapaNegocio
@@ -17,6 +18,25 @@ namespace CapaNegocio
     {
         /// <summary>Etiqueta "Otras" de la porcion que agrupa la cola larga.</summary>
         private const string EtiquetaOtras = "Otras";
+
+        /// <summary>
+        /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a un
+        /// top 10 mas "Otras".
+        ///
+        /// El recorte se hace aca y no en SQL: la regla esta probada en
+        /// TopConOtras, y en SQL quedaria sin prueba y repartida en dos
+        /// lenguajes. Y aca y no en el handler, para que la capa web no tenga que
+        /// orquestar dos llamadas ni conocer el tope.
+        /// </summary>
+        public static EntDashboardAprobacion Cargar(string idUsuarioJefe, string fechaDesde, string fechaHasta)
+        {
+            EntDashboardAprobacion datos =
+                DaoDashboardAprobacion.Cargar(idUsuarioJefe, fechaDesde, fechaHasta);
+
+            datos.Empresas = TopConOtras(datos.Empresas, 10);
+
+            return datos;
+        }
 
         /// <summary>
         /// Minutos a horas con un decimal. Un decimal y no dos: son horas de

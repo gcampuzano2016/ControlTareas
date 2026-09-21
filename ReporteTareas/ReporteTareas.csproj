@@ -2560,10 +2560,6 @@
     <Folder Include="Models\" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CapaDato\CapaDato.csproj">
-      <Project>{65433848-a192-4c78-a511-59e085007b34}</Project>
-      <Name>CapaDato</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CapaEntidad\CapaEntidad.csproj">
       <Project>{74cb46fc-75cc-4c3a-be1c-6a16fda79638}</Project>
       <Name>CapaEntidad</Name>

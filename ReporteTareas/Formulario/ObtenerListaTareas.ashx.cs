@@ -1,5 +1,4 @@
-﻿using CapaDato;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using ClosedXML.Excel;
 using CorreoHelper;
@@ -1733,13 +1732,12 @@ namespace JsonJQueryNetTareas
                     IdUsuarioConsulta = idUsuario;
                 }
 
+                /* Por NegDashboardAprobacion y NO por DaoDashboardAprobacion: el
+                   proyecto web referencia CapaEntidad y CapaNegocio, nunca
+                   CapaDato, y ninguna de las mas de veinte acciones de este
+                   handler llama a un Dao directo. */
                 EntDashboardAprobacion datos =
-                    DaoDashboardAprobacion.Cargar(IdUsuarioConsulta, fechaDesde, fechaHasta);
-
-                /* El top se arma aca y no en SQL: la regla esta probada en
-                   NegDashboardAprobacion y en SQL quedaria sin prueba y repartida
-                   en dos lenguajes. */
-                datos.Empresas = NegDashboardAprobacion.TopConOtras(datos.Empresas, 10);
+                    NegDashboardAprobacion.Cargar(IdUsuarioConsulta, fechaDesde, fechaHasta);
 
                 return JsonConvert.SerializeObject(datos);
             }

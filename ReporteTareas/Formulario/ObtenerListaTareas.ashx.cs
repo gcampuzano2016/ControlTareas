@@ -1,4 +1,5 @@
-﻿using CapaEntidad;
+﻿using CapaDato;
+using CapaEntidad;
 using CapaNegocio;
 using ClosedXML.Excel;
 using CorreoHelper;
@@ -145,6 +146,12 @@ namespace JsonJQueryNetTareas
                 {
                     existAction = true;
                     responseAction.Append(ObtenerRecursosHorasDiarias(parameters));
+                }
+
+                if (Action == "DashboardAprobacion")
+                {
+                    existAction = true;
+                    responseAction.Append(ObtenerDashboardAprobacion(parameters));
                 }
 
                 if (Action == "ListaRecursosHorasDiariasAsistencia")
@@ -1691,6 +1698,55 @@ namespace JsonJQueryNetTareas
             return JsonConvert.SerializeObject(respuesta.resultadoTabla);
 
 
+        }
+
+        /// <summary>
+        /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a un
+        /// top 10 mas "Otras".
+        ///
+        /// La resolucion de quien consulta es la MISMA que ObtenerRecursosHorasDiarias,
+        /// copiada a proposito: si el dashboard mirara a otra gente que la tabla de
+        /// la misma pantalla, los numeros no cuadrarian y nadie sabria cual creer.
+        /// </summary>
+        public string ObtenerDashboardAprobacion(dynamic parameters)
+        {
+            SeguridadHelper seguridad = new SeguridadHelper();
+
+            string idUsuario = parameters["usuario"].ToString();
+            string fechaDesde = parameters["fechaDesde"].ToString();
+            string fechaHasta = parameters["fechaHasta"].ToString();
+            string session = parameters["session"].ToString();
+
+            string IdUsuarioConsulta = "";
+
+            try
+            {
+                string IdUsuarioSession = seguridad.Desencripta(session.ToString());
+                bool usuarioEsJefe = NegUsuario.RTA_ConsultaUsuarioEsJefe(IdUsuarioSession);
+
+                if (usuarioEsJefe)
+                {
+                    IdUsuarioConsulta = Convert.ToInt32(idUsuario) > 0 ? idUsuario : IdUsuarioSession;
+                }
+                else
+                {
+                    IdUsuarioConsulta = idUsuario;
+                }
+
+                EntDashboardAprobacion datos =
+                    DaoDashboardAprobacion.Cargar(IdUsuarioConsulta, fechaDesde, fechaHasta);
+
+                /* El top se arma aca y no en SQL: la regla esta probada en
+                   NegDashboardAprobacion y en SQL quedaria sin prueba y repartida
+                   en dos lenguajes. */
+                datos.Empresas = NegDashboardAprobacion.TopConOtras(datos.Empresas, 10);
+
+                return JsonConvert.SerializeObject(datos);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al obtener el dashboard. " + ex.Message.ToString(), "danger", "");
+            }
         }
 
         public string ObtenerRecursosHorasDiariasActividad(dynamic parameters)

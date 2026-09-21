@@ -146,7 +146,7 @@
                                     <div class="panel panel-danger">
                                         <div class="panel-body">
                                             <div style="font-size: 22px" id="dashMasViejo">–</div>
-                                            <div class="text-muted">Lo más viejo sin aprobar</div>
+                                            <div class="text-muted">Lo más viejo sin aprobar (a hoy)</div>
                                         </div>
                                     </div>
                                 </div>

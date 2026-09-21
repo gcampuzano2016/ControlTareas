@@ -1,7 +1,12 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ParametrizacionUsuarios.aspx.cs" Inherits="ReporteTareas.Formulario.ParametrizacionUsuarios" ResponseEncoding="utf-8" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/parametrizacionUsuarios.js?v=5" type="text/javascript"></script>
+    <script type="text/javascript">
+        /* Enciende el control de cambio de perfil. Es de ALCANCE, no de
+           seguridad: AdministrarUsuarios.ashx lo comprueba en cada llamada. */
+        var PUEDE_CAMBIAR_PERFIL = <%= PuedeCambiarPerfil ? "true" : "false" %>;
+    </script>
+    <script src="../js/parametrizacionUsuarios.js?v=6" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -19,7 +24,7 @@
         <div class="col-lg-12" style="padding: 0px">
             <div class="panel panel-default">
                 <div class="panel-heading">
-                    Datos de los usuarios registrados. El código, el login, el perfil y el estado no se editan desde aquí.
+                    Datos de los usuarios registrados. El código y el login no se editan desde aquí. El perfil solo lo cambia Super Admin, y nadie el suyo propio.
                     <div style="display: none">
                         <asp:TextBox ID="txtUsuario" runat="server" CssClass="form-control" Enabled="False" Visible="true" />
                         <asp:TextBox ID="txtLoginUsuario" runat="server" CssClass="form-control" Enabled="False" Visible="true" />
@@ -63,6 +68,20 @@
                                     <div class="form-group col-lg-2">
                                         <label>Perfil:</label>
                                         <input type="text" class="form-control" id="txtPerfilSel" disabled />
+                                    </div>
+                                    <%-- Solo lo enciende PUEDE_CAMBIAR_PERFIL, y solo para Super Admin.
+                                         El campo de arriba se queda: muestra el perfil ACTUAL aunque no
+                                         este en el catalogo -hay 4 valores en uso que no lo estan- y sin
+                                         el, esas personas se verian como si no tuvieran perfil. --%>
+                                    <div class="form-group col-lg-3" id="grupoCambiarPerfil" style="display: none">
+                                        <label>Cambiar perfil a:</label>
+                                        <div class="input-group">
+                                            <select class="form-control" id="cboPerfilNuevo"></select>
+                                            <span class="input-group-btn">
+                                                <button type="button" class="btn btn-warning" id="btnCambiarPerfil"
+                                                        onclick="ConfirmarCambiarPerfil()">Cambiar</button>
+                                            </span>
+                                        </div>
                                     </div>
                                     <div class="form-group col-lg-2">
                                         <label>Estado:</label>
@@ -157,6 +176,23 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                         <button id="btnConfirmarEstado" onclick="ConfirmarCambioEstado()" type="button" class="btn btn-warning">Inactivar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de cambio de perfil -->
+        <div class="modal fade" id="modalConfirmarPerfil" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Confirmar cambio de perfil</h4>
+                    </div>
+                    <div class="modal-body" id="MensajeConfirmarPerfil"></div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button id="btnConfirmarPerfil" onclick="EjecutarCambiarPerfil()" type="button" class="btn btn-warning">Cambiar perfil</button>
                     </div>
                 </div>
             </div>

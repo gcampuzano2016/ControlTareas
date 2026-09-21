@@ -36,5 +36,22 @@ namespace ReporteTareas.Formulario
                 }
             }
         }
+
+        /// <summary>
+        /// Solo Super Admin (18) ve el control para cambiar el perfil de otro
+        /// usuario.
+        ///
+        /// La barrera de verdad esta en AdministrarUsuarios.ashx.cs, que lo
+        /// vuelve a comprobar en las dos acciones: esto es cortesia para quien
+        /// no puede, no una barrera para quien no debe.
+        /// </summary>
+        protected bool PuedeCambiarPerfil
+        {
+            get
+            {
+                int idPerfil;
+                return int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil) && idPerfil == 18;
+            }
+        }
     }
 }

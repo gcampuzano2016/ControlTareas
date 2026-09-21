@@ -187,6 +187,48 @@ namespace CapaDato
             return respuesta;
         }
 
+        /// <summary>
+        /// Cambia el perfil de un usuario ya creado.
+        ///
+        /// Procedimiento aparte de Sp_RTA_ActualizarUsuario a proposito: aquel
+        /// escribe once campos inofensivos y lo puede llamar cualquiera con
+        /// sesion; el perfil es el que da acceso a todo y entra por su propia
+        /// via, con la guarda de perfil 18 en el handler.
+        ///
+        /// Convencion de esta pantalla: Respuestas = 1 es exito, y el texto lo
+        /// arma el procedimiento. LeerRespuesta traduce las dos cosas.
+        /// </summary>
+        public static EntRespuesta CambiarPerfil(decimal idUsuario, long idPerfil, string usuarioRegistro)
+        {
+            EntRespuesta respuesta = NuevaRespuesta();
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_CambiarPerfilUsuario", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@Id_Usuario", SqlDbType.Decimal).Value = idUsuario;
+                    cmd.Parameters.Add("@Id_Perfil", SqlDbType.BigInt).Value = idPerfil;
+                    cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 50).Value = usuarioRegistro ?? "SISTEMA";
+
+                    cnx.Open();
+                    LeerRespuesta(cmd, respuesta);
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.resultado = "0";
+                respuesta.tipoMensaje = "danger";
+                respuesta.mensaje = "Ocurrió un error al cambiar el perfil del usuario. Detalle: " + ex.Message;
+            }
+
+            return respuesta;
+        }
+
         private static EntRespuesta NuevaRespuesta()
         {
             return new EntRespuesta()

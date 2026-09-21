@@ -50,6 +50,18 @@ namespace JsonJQueryNetUsuarios
                     responseAction.Append(ListarDepartamentos());
                 }
 
+                if (Action == "ListarPerfiles")
+                {
+                    existAction = true;
+                    responseAction.Append(ListarPerfiles(context));
+                }
+
+                if (Action == "CambiarPerfilUsuario")
+                {
+                    existAction = true;
+                    responseAction.Append(CambiarPerfilUsuario(context, parameters));
+                }
+
                 if (Action == "GuardarUsuario")
                 {
                     existAction = true;
@@ -233,6 +245,104 @@ namespace JsonJQueryNetUsuarios
         {
             if (string.IsNullOrEmpty(correo)) { return true; }
             return Regex.IsMatch(correo, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+        }
+
+        /// <summary>
+        /// Solo Super Admin (18) puede cambiar el perfil de un usuario.
+        ///
+        /// Esta es la UNICA comprobacion de perfil del handler, y no es un
+        /// descuido que las demas acciones no la tengan: lo que aquellas
+        /// escriben son once campos de contacto, y el perfil es el que da
+        /// acceso a todo. Sin esta lista, cualquiera de los usuarios con sesion
+        /// podria ponerse el 18 con una peticion directa a este handler.
+        /// </summary>
+        private static readonly int[] PerfilesQueCambianPerfil = { 18 };
+
+        private static bool EsSuperAdmin(HttpContext context)
+        {
+            int idPerfil;
+            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
+            return Array.IndexOf(PerfilesQueCambianPerfil, idPerfil) >= 0;
+        }
+
+        /// <summary>
+        /// Los perfiles que se pueden elegir, para el desplegable.
+        ///
+        /// Sale de Perfiles -via Sp_RTA_ListarPerfiles- y no de R_Perfil: en
+        /// esta base conviven los dos catalogos y no dicen lo mismo. Manda
+        /// Perfiles porque es contra el que une Sp_RTA_ListarUsuariosAdmin, o
+        /// sea el nombre que esta misma pantalla ya muestra en la grilla; usar
+        /// el otro haria que la columna y el desplegable se contradigan.
+        ///
+        /// Detras de la misma guarda que el cambio: a quien no puede cambiar
+        /// perfiles no le hace falta el catalogo.
+        /// </summary>
+        private string ListarPerfiles(HttpContext context)
+        {
+            if (!EsSuperAdmin(context))
+            {
+                return responseMessage("0", "Su perfil no puede cambiar el perfil de otros usuarios.", "warning");
+            }
+
+            try
+            {
+                return ToJson(NegMenuPerfil.ListarPerfiles());
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrió un error al cargar los perfiles. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Cambia el perfil de un usuario ya creado.
+        ///
+        /// Tres barreras, y ninguna sobra: el perfil 18 aqui, que nadie se
+        /// cambie a si mismo -aqui, donde vive la sesion, y otra vez en el
+        /// procedimiento, que es llamable desde SSMS-, y que el perfil elegido
+        /// exista, que solo la base puede saber.
+        /// </summary>
+        private string CambiarPerfilUsuario(HttpContext context, dynamic campos)
+        {
+            if (!EsSuperAdmin(context))
+            {
+                return responseMessage("0", "Su perfil no puede cambiar el perfil de otros usuarios.", "warning");
+            }
+
+            try
+            {
+                decimal idUsuario = Numero(campos, "idUsuario");
+                if (idUsuario <= 0)
+                {
+                    return responseMessage("0", "Debe seleccionar un usuario.", "warning");
+                }
+
+                decimal idPerfil = Numero(campos, "idPerfil");
+                if (idPerfil <= 0)
+                {
+                    return responseMessage("0", "Debe elegir el perfil nuevo.", "warning");
+                }
+
+                /* Se corta aqui y no solo en el procedimiento para dar el mensaje
+                   correcto: alla la comparacion es por Cod_Usuario y aqui por
+                   Id_Usuario, que es lo que la pantalla manda. Las dos tienen que
+                   estar; esta evita el viaje y aquella cubre a quien llame al
+                   procedimiento por fuera de la aplicacion. */
+                if (NegUsuarioAdmin.EsSuPropioUsuario(idUsuario, context.Session["Id_Usuario"]))
+                {
+                    return responseMessage("0",
+                        "No puede cambiar su propio perfil. Pídaselo a otro administrador.", "warning");
+                }
+
+                EntRespuesta respuesta = NegUsuarioAdmin.CambiarPerfil(
+                    idUsuario, Convert.ToInt64(idPerfil), UsuarioSesion(context));
+
+                return ToJson(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrió un error al cambiar el perfil. " + ex.Message, "danger");
+            }
         }
 
         /// <summary>Quién hace el cambio sale de la sesión, nunca del cliente.</summary>

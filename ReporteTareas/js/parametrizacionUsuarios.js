@@ -10,6 +10,7 @@ var _departamentos = [];
 
 $(document).ready(function () {
     CargarDepartamentos();
+    CargarPerfiles();
     BuscarUsuarios();
 });
 
@@ -160,6 +161,8 @@ function SeleccionarUsuario(indice) {
         .text(visible ? "Inactivar usuario" : "Activar usuario")
         .removeClass("btn-warning btn-info")
         .addClass(visible ? "btn-warning" : "btn-info");
+
+    PrepararCambioDePerfil(u);
 
     $("#panelDetalle").show();
 }
@@ -321,4 +324,103 @@ function MostrarMensaje(mensaje, tipo) {
 function Escapar(texto) {
     if (texto == null) { return ""; }
     return $("<div>").text(texto).html();
+}
+
+/* ------------------------------------------------- cambio de perfil ----- */
+
+/* Los perfiles del catalogo, para el desplegable. Se cargan una sola vez: a
+   diferencia de otros combos de esta pantalla, la lista no depende del usuario
+   elegido. */
+var _perfiles = [];
+
+/* typeof y no una comparacion directa: si el .aspx no declarara la variable
+   -por ejemplo al servirse una version vieja desde la cache-, leer una global
+   no declarada lanza ReferenceError y se cae el resto del archivo. */
+function PuedeCambiarPerfil() {
+    return typeof PUEDE_CAMBIAR_PERFIL !== "undefined" && PUEDE_CAMBIAR_PERFIL;
+}
+
+function CargarPerfiles() {
+    if (!PuedeCambiarPerfil()) { return; }
+
+    PostUsuario("ListarPerfiles", {}, function (respuesta) {
+        // Un objeto con "estado" es un EntRespuesta, es decir, un error.
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        _perfiles = respuesta || [];
+
+        var $combo = $("#cboPerfilNuevo").empty();
+        $.each(_perfiles, function (i, p) {
+            /* .text(nombre) y no concatenacion: el nombre viene de la base. */
+            $combo.append($("<option></option>").attr("value", p.Id_Perfil).text(p.Nombre));
+        });
+    });
+}
+
+/* Se llama al final de SeleccionarUsuario. Deja elegido en el combo el perfil
+   que la persona tiene HOY, para que cambiarlo sea un solo gesto y para que se
+   vea de que se parte. */
+function PrepararCambioDePerfil(u) {
+    if (!PuedeCambiarPerfil()) { return; }
+
+    $("#grupoCambiarPerfil").show();
+    $("#cboPerfilNuevo").val(u.Id_Perfil);
+}
+
+function ConfirmarCambiarPerfil() {
+    var idUsuario = $("#txtIdUsuarioSel").val();
+    if (idUsuario == null || idUsuario === "") {
+        MostrarMensaje("Debe seleccionar un usuario.", "warning");
+        return;
+    }
+
+    var idPerfilNuevo = $("#cboPerfilNuevo").val();
+    if (!idPerfilNuevo) {
+        MostrarMensaje("Debe elegir el perfil nuevo.", "warning");
+        return;
+    }
+
+    var nombre = $("#txtNombre").val();
+    var perfilActual = $("#txtPerfilSel").val();
+    var perfilNuevo = $("#cboPerfilNuevo option:selected").text();
+
+    var aviso = "";
+    aviso += "<p>Cambiar el perfil de <strong>" + Escapar(nombre) + "</strong></p>";
+    aviso += "<p>De <strong>" + Escapar(perfilActual) + "</strong> a <strong>" + Escapar(perfilNuevo) + "</strong>.</p>";
+    aviso += "<p>Cambia a qué pantallas entra y qué puede hacer en ellas. " +
+             "Lo verá <strong>al volver a iniciar sesión</strong>, no de inmediato.</p>";
+    aviso += "<p class='text-muted'>Queda registrado en el historial de cambios de esta persona.</p>";
+
+    $("#MensajeConfirmarPerfil").html(aviso);
+    $("#modalConfirmarPerfil").modal("show");
+}
+
+function EjecutarCambiarPerfil() {
+    var idUsuario = $("#txtIdUsuarioSel").val();
+    var idPerfil = $("#cboPerfilNuevo").val();
+
+    $("#btnConfirmarPerfil").prop("disabled", true);
+
+    PostUsuario("CambiarPerfilUsuario", { "idUsuario": idUsuario, "idPerfil": idPerfil }, function (respuesta) {
+        $("#btnConfirmarPerfil").prop("disabled", false);
+        $("#modalConfirmarPerfil").modal("hide");
+
+        if (respuesta == null) {
+            MostrarMensaje("No se recibió respuesta del servidor.", "danger");
+            return;
+        }
+
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+
+        /* Se recarga la lista para que la columna de perfil y el campo de la
+           ficha dejen de decir el valor viejo. BuscarUsuarios oculta el panel
+           de detalle, asi que el usuario queda deseleccionado: es deliberado,
+           obliga a volver a abrirlo y ver el perfil nuevo escrito. */
+        if (respuesta.estado == "1") {
+            BuscarUsuarios();
+        }
+    });
 }

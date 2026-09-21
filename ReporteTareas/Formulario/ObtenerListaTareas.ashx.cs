@@ -1703,9 +1703,11 @@ namespace JsonJQueryNetTareas
         /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a un
         /// top 10 mas "Otras".
         ///
-        /// La resolucion de quien consulta es la MISMA que ObtenerRecursosHorasDiarias,
-        /// copiada a proposito: si el dashboard mirara a otra gente que la tabla de
-        /// la misma pantalla, los numeros no cuadrarian y nadie sabria cual creer.
+        /// Un jefe ve a quien elija en el combo, y quien no es jefe se ve solo a si
+        /// mismo -el usuario de la sesion-, igual que ObtenerRecursosHorasDiariasActividad
+        /// y que ObtenerListaTareasGeneradasPorRevisar. Las tres acciones alimentan la
+        /// misma pantalla: si no resolvieran igual a quien consultar, los numeros no
+        /// cuadrarian entre si y nadie sabria cual creer.
         /// </summary>
         public string ObtenerDashboardAprobacion(dynamic parameters)
         {
@@ -1729,7 +1731,18 @@ namespace JsonJQueryNetTareas
                 }
                 else
                 {
-                    IdUsuarioConsulta = idUsuario;
+                    /* El usuario de la SESION y no el que manda el navegador. El
+                       combo de arriba es un <select> del cliente: quien no es jefe
+                       puede escribir cualquier Cod_Usuario y recibiria el dashboard
+                       de esa persona, con las horas y los nombres de todo su equipo
+                       si el codigo es el de un jefe.
+
+                       Es el mismo criterio de ObtenerRecursosHorasDiariasActividad y
+                       de ObtenerListaTareasGeneradasPorRevisar, que es la accion que
+                       alimenta la tarjeta de tareas no ejecutadas de ESTE mismo
+                       dashboard: si las dos no resolvieran igual a quien consultar,
+                       los graficos hablarian de una persona y la tarjeta de otra. */
+                    IdUsuarioConsulta = IdUsuarioSession;
                 }
 
                 /* Por NegDashboardAprobacion y NO por DaoDashboardAprobacion: el

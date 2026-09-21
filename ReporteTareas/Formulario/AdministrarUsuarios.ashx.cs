@@ -26,6 +26,10 @@ namespace JsonJQueryNetUsuarios
             {
                 responseAction.Append(responseMessage("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
+            else if (!EstaEn(context, PerfilesQueAdministranUsuarios))
+            {
+                responseAction.Append(responseMessage("0", "No tiene permisos para esta pantalla.", "danger"));
+            }
             else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
                 var inputStream = new System.IO.StreamReader(context.Request.InputStream);
@@ -248,21 +252,44 @@ namespace JsonJQueryNetUsuarios
         }
 
         /// <summary>
-        /// Solo Super Admin (18) puede cambiar el perfil de un usuario.
+        /// Quien puede entrar a la pantalla de administracion de usuarios:
+        /// Talento Humano (14), Super Admin (18) y Servicios4 (19).
         ///
-        /// Esta es la UNICA comprobacion de perfil del handler, y no es un
-        /// descuido que las demas acciones no la tengan: lo que aquellas
-        /// escriben son once campos de contacto, y el perfil es el que da
-        /// acceso a todo. Sin esta lista, cualquiera de los usuarios con sesion
-        /// podria ponerse el 18 con una peticion directa a este handler.
+        /// Son exactamente los tres que el menu ya autoriza -la opcion 20077 y
+        /// su grupo padre 20042, las dos en Estado '0'-, asi que nadie que hoy
+        /// use la pantalla se queda afuera.
+        ///
+        /// Se comprueba UNA vez en ProcessRequest y no accion por accion: asi
+        /// una accion nueva queda cubierta por omision en vez de quedar abierta
+        /// por omision, que es como estuvieron estas cinco hasta hoy.
+        ///
+        /// OJO con el acoplamiento: los perfiles 1, 2 y 3 tienen fila en
+        /// PerfilMenu con Estado '1' -registrados pero ocultos-. Si alguien los
+        /// pone en '0' para "habilitarlos" sin tocar esta lista, veran la opcion
+        /// y la pantalla los rechazara. El menu y el codigo son dos fuentes que
+        /// hay que mover juntas.
+        /// </summary>
+        private static readonly int[] PerfilesQueAdministranUsuarios = { 14, 18, 19 };
+
+        /// <summary>
+        /// Y de esos, solo Super Admin (18) cambia el perfil de otro usuario.
+        ///
+        /// Mas estrecha que la de arriba y encima de ella: entrar a la pantalla
+        /// no alcanza. El perfil es el que da acceso a todo, y sin esta segunda
+        /// lista un 14 o un 19 podria ponerse el 18 con una peticion directa.
         /// </summary>
         private static readonly int[] PerfilesQueCambianPerfil = { 18 };
 
-        private static bool EsSuperAdmin(HttpContext context)
+        private static bool EstaEn(HttpContext context, int[] perfiles)
         {
             int idPerfil;
             if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(PerfilesQueCambianPerfil, idPerfil) >= 0;
+            return Array.IndexOf(perfiles, idPerfil) >= 0;
+        }
+
+        private static bool EsSuperAdmin(HttpContext context)
+        {
+            return EstaEn(context, PerfilesQueCambianPerfil);
         }
 
         /// <summary>

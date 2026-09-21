@@ -1,6 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="AprobacionTareasJefatura.aspx.cs" Inherits="ReporteTareas.Formulario.AprobacionTareasJefatura" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/aprobacionTareasJefatura.js?v=1" type="text/javascript"></script>
+    <script src="../js/aprobacionTareasJefatura.js?v=2" type="text/javascript"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>

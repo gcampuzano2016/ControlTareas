@@ -101,8 +101,14 @@ namespace CapaNegocio
             {
                 datos.Demora.TextoDemoraPromedio =
                     TextoDemoraPromedio(datos.Demora.DiasPromedio, datos.Demora.AprobadasConFecha);
+                /* datos.Totales puede venir nulo -el resto del metodo lo
+                   comprueba-, y en ese caso no hay con que distinguir el cero
+                   bueno del cero por ausencia: se toma 1 para caer en la rama
+                   de siempre y no inventar un "sin pendientes" que no consta. */
+                int pendientes = (datos.Totales != null) ? datos.Totales.PersonasDiaPend : 1;
+
                 datos.Demora.TextoMasViejoPendiente =
-                    TextoDemora(datos.Demora.DiasMasViejoPendiente);
+                    TextoMasViejo(datos.Demora.DiasMasViejoPendiente, pendientes);
             }
         }
 
@@ -189,6 +195,27 @@ namespace CapaNegocio
         /// registro existe en datos viejos, y mostrar "-3 dias" haria que quien
         /// lo vea desconfie de todo el tablero por un caso que no importa.
         /// </summary>
+        /// <summary>
+        /// Lo mismo que TextoDemora para la tarjeta de "lo mas viejo sin
+        /// aprobar", pero distinguiendo el cero bueno del cero por ausencia.
+        ///
+        /// El procedimiento calcula DiasMasViejoPendiente como un DATEDIFF
+        /// contra MIN(Fecha) de lo pendiente, envuelto en ISNULL(..., 0). Sin
+        /// nada pendiente el MIN es NULL y la tarjeta terminaba diciendo "hoy",
+        /// que se lee como "hay algo esperando desde hoy" cuando en realidad no
+        /// hay nada esperando. Es el mismo defecto de lectura que TextoDemoraPromedio
+        /// resuelve en la tarjeta de al lado.
+        ///
+        /// Se usa PersonasDiaPend y no los dias: cuenta las combinaciones
+        /// responsable-dia en estado pendiente, asi que cero significa que no
+        /// hay ni una fila pendiente en el rango.
+        /// </summary>
+        public static string TextoMasViejo(decimal dias, int personasDiaPend)
+        {
+            if (personasDiaPend <= 0) { return "sin pendientes"; }
+            return TextoDemora(dias);
+        }
+
         public static string TextoDemora(decimal dias)
         {
             /* Se redondea ANTES de decidir, no despues. El texto se arma con

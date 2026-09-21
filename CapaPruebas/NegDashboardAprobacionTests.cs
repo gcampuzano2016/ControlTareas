@@ -232,6 +232,32 @@ namespace CapaPruebas
         }
 
         /// <summary>
+        /// Sin nada pendiente, la tarjeta no puede decir "hoy": el cero viene del
+        /// ISNULL del procedimiento, no de que algo espere desde esta manana.
+        /// </summary>
+        [TestMethod]
+        public void TextoMasViejo_SinPendientes_NoDiceHoy()
+        {
+            Assert.AreEqual("sin pendientes", NegDashboardAprobacion.TextoMasViejo(0m, 0));
+        }
+
+        /// <summary>
+        /// Con pendientes y cero dias si corresponde "hoy": lo mas viejo sin
+        /// aprobar se cargo en el dia.
+        /// </summary>
+        [TestMethod]
+        public void TextoMasViejo_ConPendientesYCeroDias_DiceHoy()
+        {
+            Assert.AreEqual("hoy", NegDashboardAprobacion.TextoMasViejo(0m, 4));
+        }
+
+        [TestMethod]
+        public void TextoMasViejo_ConPendientes_DiceLosDias()
+        {
+            Assert.AreEqual("49 días", NegDashboardAprobacion.TextoMasViejo(49m, 4));
+        }
+
+        /// <summary>
         /// 1,04 no es igual a 1, pero "0.#" lo imprime como "1": sin redondear
         /// antes de decidir, el texto sale "1 dias". El procedimiento ya devuelve
         /// el promedio redondeado, asi que hoy no pasa; se prueba porque el

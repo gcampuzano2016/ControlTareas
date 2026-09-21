@@ -212,6 +212,18 @@ function DashFechaCorta(valor) {
 }
 
 function PintarPorPersona(responsables) {
+    /* Antes de crear el grafico, no despues: la envoltura tiene que tener su
+       altura final cuando Chart.js mida el contenedor.
+
+       El panel mide 320px y scrollea. Si la envoltura tambien midiera 320, el
+       overflow no se dispararia nunca y las 51 barras del caso real entrarian a
+       ~6px cada una: ilegibles, y sin lugar para el asterisco de quien no llego
+       a la jornada. 22px por persona mas 60 de ejes y leyenda. */
+    var envoltura = document.getElementById("envolturaPorPersona");
+    if (envoltura) {
+        envoltura.style.height = Math.max(260, responsables.length * 22 + 60) + "px";
+    }
+
     var ctx = DashPreparar("graficoPorPersona", responsables.length > 0);
     if (!ctx) { return; }
 

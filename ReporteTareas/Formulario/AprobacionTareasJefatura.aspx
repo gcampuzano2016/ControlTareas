@@ -6,7 +6,7 @@
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
     <script src="../js/jquery.blockUI.js" type="text/javascript"></script>
     <script src="../js/chart.umd.js" type="text/javascript"></script>
-    <script src="../js/dashboardAprobacion.js?v=3" type="text/javascript"></script>
+    <script src="../js/dashboardAprobacion.js?v=4" type="text/javascript"></script>
    
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -195,7 +195,14 @@
                                             <small class="text-muted">&mdash; el asterisco marca a quien tuvo días que no llegaron a 8 h; el detalle, en el globo del gráfico</small>
                                         </div>
                                         <div class="panel-body" style="height: 320px; overflow-y: auto">
-                                            <canvas id="graficoPorPersona"></canvas>
+                                            <%-- La envoltura es la que crece, no el panel: Chart.js con
+                                                 responsive ajusta el canvas a su contenedor, asi que
+                                                 dandole altura al canvas no pasa nada. El panel se queda
+                                                 en 320px y scrollea; la envoltura la estira el JS segun
+                                                 cuanta gente haya. --%>
+                                            <div id="envolturaPorPersona">
+                                                <canvas id="graficoPorPersona"></canvas>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

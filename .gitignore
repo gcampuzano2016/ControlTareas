@@ -85,3 +85,6 @@ ReporteTareas/descargas/*
 !ReporteTareas/descargas/perfil/
 ReporteTareas/descargas/perfil/*
 !ReporteTareas/descargas/perfil/web.config
+
+# Andamiaje de las sesiones con subagentes: ledger, briefs y paquetes de revision.
+.superpowers/

@@ -162,7 +162,10 @@ git commit -m "build: Chart.js 4.5.1 como archivo local"
 **Files:**
 - Create: `CapaNegocio/NegDashboardAprobacion.cs`
 - Create: `CapaPruebas/NegDashboardAprobacionTests.cs`
-- Modify: `CapaNegocio/CapaNegocio.csproj`, `CapaPruebas/CapaPruebas.csproj`
+- Create: `CapaEntidad/EntDashboardAprobacion.cs` (sólo `EntDashboardEmpresa`; la
+  Task 4 le agrega las demás clases)
+- Modify: `CapaNegocio/CapaNegocio.csproj`, `CapaPruebas/CapaPruebas.csproj`,
+  `CapaEntidad/CapaEntidad.csproj`
 
 **Interfaces:**
 - Consumes: `CapaEntidad.EntDashboardEmpresa` — **la define la Task 4**. Para que

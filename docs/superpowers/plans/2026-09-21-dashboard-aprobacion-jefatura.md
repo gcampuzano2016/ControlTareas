@@ -1814,6 +1814,10 @@ aspx = io.open('ReporteTareas/Formulario/AprobacionTareasJefatura.aspx', encodin
 otro = io.open('ReporteTareas/js/aprobacionTareasJefatura.js', encoding='utf-8').read()
 ids = set(re.findall(r'id=\"([^\"]+)\"', aspx))
 sel = set(re.findall(r'\\\$\(\"#([A-Za-z][\\w]*)\"\)', js))
+# Los ClientID que ASP.NET genera en runtime para un control de servidor
+# -por ejemplo ContentPlaceHolder1_txtUsuario, de <asp:TextBox ID="txtUsuario"
+# runat="server">- NO aparecen como id="..." en el fuente. No son un faltante.
+sel = set(x for x in sel if not x.startswith('ContentPlaceHolder'))
 faltan = sorted(s for s in sel if s not in ids)
 print('selectores sin id en el aspx:', faltan or 'ninguno')
 canv = set(re.findall(r'getElementById\(\"(\w+)\"\)', js))

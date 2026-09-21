@@ -66,25 +66,34 @@ function DashMensaje(texto) {
     $m.text(texto).show();
 }
 
-/* Minutos a horas con un decimal. Es la MISMA regla que
-   NegDashboardAprobacion.HorasDecimales; se repite aca solo para las etiquetas
-   que se arman en el navegador, y por eso redondea igual. */
-function DashHoras(minutos) {
-    if (!minutos || minutos < 0) { return 0; }
-    return Math.round((minutos / 60) * 10) / 10;
+/* Solo formato, NO conversion. Las horas y los textos de demora llegan ya
+   resueltos desde NegDashboardAprobacion, que es la unica fuente de la regla.
+   Cuando estaba escrita tambien aca las dos copias daban numeros distintos para
+   el mismo dato: 75 minutos eran 1,2 horas en C# y 1,3 en JavaScript.
+
+   Lo unico que queda del lado del navegador es el separador decimal: JavaScript
+   serializa siempre con punto y el resto de la pantalla esta en espanol. Las
+   series de los graficos NO pasan por aca, van como numero. */
+function DashNumero(valor) {
+    if (valor === null || typeof valor === "undefined") { return "0"; }
+    return String(valor).replace(".", ",");
 }
 
 function PintarDashboard(d) {
     var t = d.Totales || {};
 
-    $("#dashHorasAprobadas").text(DashHoras(t.MinutosAprobados) + " h");
-    $("#dashHorasPendientes").text(DashHoras(t.MinutosPendientes) + " h");
-    $("#dashHorasOtros").text(DashHoras(t.MinutosOtros) + " h");
-    $("#dashPersonasDia").text((t.PersonasDiaAprob || 0) + (t.PersonasDiaPend || 0));
+    $("#dashHorasAprobadas").text(DashNumero(t.HorasAprobadas) + " h");
+    $("#dashHorasPendientes").text(DashNumero(t.HorasPendientes) + " h");
+    $("#dashHorasOtros").text(DashNumero(t.HorasOtros) + " h");
+
+    /* PersonasDiaTotal y no la suma de los dos parciales: un dia con tareas
+       aprobadas Y pendientes esta en los dos conjuntos, asi que sumarlos contaba
+       a esa persona dos veces. El total lo cuenta el procedimiento aparte. */
+    $("#dashPersonasDia").text(t.PersonasDiaTotal || 0);
 
     var dem = d.Demora || {};
-    $("#dashDemoraPromedio").text(DashTextoDemora(dem.DiasPromedio));
-    $("#dashMasViejo").text(DashTextoDemora(dem.DiasMasViejoPendiente));
+    $("#dashDemoraPromedio").text(dem.TextoDemoraPromedio || "sin datos");
+    $("#dashMasViejo").text(dem.TextoMasViejoPendiente || "hoy");
 
     PintarEvolucion(d.Semanas || []);
     PintarPorPersona(d.Responsables || []);
@@ -134,13 +143,6 @@ function IrANoEjecutadas() {
     BtnConsulta();
 }
 
-/* Misma regla que NegDashboardAprobacion.TextoDemora. */
-function DashTextoDemora(dias) {
-    if (!dias || dias <= 0) { return "hoy"; }
-    if (dias === 1) { return "1 día"; }
-    return dias + " días";
-}
-
 /* Destruye el grafico anterior de ese canvas, si lo hay, y dice "sin datos"
    cuando la serie viene vacia. Un canvas en blanco y un canvas que no se dibujo
    se ven igual. */
@@ -177,8 +179,8 @@ function PintarEvolucion(semanas) {
            parte la cadena ISO cuando se puede, y si no se cae a Date. Mostrar
            dd/MM alcanza: el anio ya esta en el filtro de arriba. */
         etiquetas.push(DashFechaCorta(s.Semana));
-        aprobadas.push(DashHoras(s.MinutosAprobados));
-        pendientes.push(DashHoras(s.MinutosPendientes));
+        aprobadas.push(s.HorasAprobadas || 0);
+        pendientes.push(s.HorasPendientes || 0);
     });
 
     _graficos["graficoEvolucion"] = new Chart(ctx, {
@@ -216,13 +218,25 @@ function PintarPorPersona(responsables) {
     var nombres = [];
     var aprobadas = [];
     var pendientes = [];
+    var bajoJornada = [];
 
     $.each(responsables, function (i, r) {
-        /* El nombre entra como dato de Chart.js, que lo dibuja en un canvas: no
-           hay HTML donde inyectar nada. */
-        nombres.push(r.Nombre);
-        aprobadas.push(DashHoras(r.MinutosAprobados));
-        pendientes.push(DashHoras(r.MinutosPendientes));
+        var dias = r.DiasBajoJornada || 0;
+
+        /* El nombre entra como dato de Chart.js, que lo dibuja en un canvas:
+           no hay HTML donde inyectar nada.
+
+           Los dias que no llegaron a 8 h NO van como tercera serie: el eje de
+           este grafico son horas, y una barra de dias al lado de dos de horas es
+           justo la mezcla de unidades que el resto del tablero evita. Se marcan
+           en la etiqueta -asterisco, y el nombre en rojo- y el numero exacto
+           sale en el tooltip, que es donde alguien lo va a buscar. El asterisco
+           ademas no depende del color. */
+        nombres.push(dias > 0 ? r.Nombre + " *" : r.Nombre);
+        bajoJornada.push(dias);
+
+        aprobadas.push(r.HorasAprobadas || 0);
+        pendientes.push(r.HorasPendientes || 0);
     });
 
     _graficos["graficoPorPersona"] = new Chart(ctx, {
@@ -237,14 +251,48 @@ function PintarPorPersona(responsables) {
         options: {
             indexAxis: "y",
             responsive: true, maintainAspectRatio: false,
+            plugins: {
+                tooltip: {
+                    callbacks: {
+                        footer: function (items) {
+                            if (!items || items.length === 0) { return ""; }
+
+                            var dias = bajoJornada[items[0].dataIndex] || 0;
+                            if (dias <= 0) { return ""; }
+
+                            return dias === 1
+                                ? "1 día no llegó a 8 h"
+                                : dias + " días no llegaron a 8 h";
+                        }
+                    }
+                }
+            },
             scales: { x: { stacked: true, beginAtZero: true, title: { display: true, text: "Horas" } },
-                      y: { stacked: true } }
+                      y: { stacked: true,
+                           ticks: {
+                               color: function (ctx) {
+                                   /* ctx.index no viene en todas las llamadas; sin
+                                      indice cae en el color por defecto. */
+                                   return (ctx && bajoJornada[ctx.index] > 0) ? DASH_ROJO : "#666666";
+                               }
+                           } } }
         }
     });
 }
 
 function PintarDemora(dem) {
     var hayDatos = (dem && (dem.AprobadasConFecha || 0) > 0);
+
+    /* El aviso va ANTES de la salida temprana. El peor caso es justamente que
+       TODAS las aprobadas vengan sin fecha: ahi no hay grafico que dibujar, y si
+       el aviso quedara despues del return el usuario veria "Sin datos en el
+       rango" -que se lee igual que "no hubo aprobaciones"- sin que nada le diga
+       que el dato existe y esta incompleto. */
+    if (dem && (dem.AprobadasSinFecha || 0) > 0) {
+        DashMensaje("Atención: " + dem.AprobadasSinFecha +
+                    " tarea(s) aprobadas no tienen fecha de aprobación y quedan fuera del cálculo de demora.");
+    }
+
     var ctx = DashPreparar("graficoDemora", hayDatos);
     if (!ctx) { return; }
 
@@ -264,13 +312,6 @@ function PintarDemora(dem) {
             scales: { y: { beginAtZero: true, title: { display: true, text: "Días" } } }
         }
     });
-
-    /* Si hay aprobadas sin fecha, el promedio se calcula sobre menos filas de las
-       que el usuario cree. Se dice, en vez de dejar un numero que parece completo. */
-    if ((dem.AprobadasSinFecha || 0) > 0) {
-        DashMensaje("Atención: " + dem.AprobadasSinFecha +
-                    " tarea(s) aprobadas no tienen fecha de aprobación y quedan fuera del cálculo de demora.");
-    }
 }
 
 function PintarPorEmpresa(empresas) {
@@ -282,7 +323,7 @@ function PintarPorEmpresa(empresas) {
 
     $.each(empresas, function (i, e) {
         nombres.push(e.Empresa);
-        horas.push(DashHoras(e.Minutos));
+        horas.push(e.Horas || 0);
     });
 
     _graficos["graficoPorEmpresa"] = new Chart(ctx, {

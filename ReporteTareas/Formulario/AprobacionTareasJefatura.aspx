@@ -6,7 +6,7 @@
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
     <script src="../js/jquery.blockUI.js" type="text/javascript"></script>
     <script src="../js/chart.umd.js" type="text/javascript"></script>
-    <script src="../js/dashboardAprobacion.js?v=1" type="text/javascript"></script>
+    <script src="../js/dashboardAprobacion.js?v=2" type="text/javascript"></script>
    
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -191,7 +191,9 @@
                             <div class="row">
                                 <div class="col-lg-8">
                                     <div class="panel panel-default">
-                                        <div class="panel-heading">Horas por persona</div>
+                                        <div class="panel-heading">Horas por persona
+                                            <small class="text-muted">&mdash; el asterisco marca a quien tuvo días que no llegaron a 8 h; el detalle, en el globo del gráfico</small>
+                                        </div>
                                         <div class="panel-body" style="height: 320px; overflow-y: auto">
                                             <canvas id="graficoPorPersona"></canvas>
                                         </div>

@@ -806,16 +806,21 @@ cuerpo = raw[3:] if raw[:3]==b'\xef\xbb\xbf' else raw
 s = raw.decode('utf-8')
 codigo = re.sub(r'/\*.*?\*/', '', s, flags=re.S)
 print('BOM            :', raw[:3]==b'\xef\xbb\xbf')
+print('CRLF / LF sueltos:', raw.count(b'\r\n'), '/', raw.count(b'\n')-raw.count(b'\r\n'))
 print('no-ascii       :', sorted(set(b for b in bytearray(cuerpo) if b>127)) or 'ninguno')
 print('CREATE/DROP    :', s.count('CREATE PROCEDURE'), '/', s.count('DROP PROCEDURE'))
-print('SELECT finales :', len(re.findall(r'^    SELECT', codigo, re.M)))
 print('temporal       :', codigo.count('CREATE TABLE #Base'), '/', codigo.count('DROP TABLE #Base'))
 print('comentarios    :', s.count('/*') == s.count('*/'))
 "
 ```
 
-Esperado: `BOM: True`, `no-ascii: ninguno`, `CREATE/DROP: 1 / 1`,
-`temporal: 1 / 1`, `comentarios: True`.
+Esperado: `BOM: True`, **`CRLF / LF sueltos: <n> / 0`**, `no-ascii: ninguno`,
+`CREATE/DROP: 1 / 1`, `temporal: 1 / 1`, `comentarios: True`.
+
+El `LF sueltos: 0` faltaba en la primera versión de este paso, y por eso el archivo
+salió con 196 LF sin que nada lo detectara: la restricción global exigía CRLF y la
+comprobación miraba el BOM pero no los finales. **Una restricción sin comprobación
+que la cubra es una restricción que se incumple en silencio.**
 
 **Sobre el conteo de `SELECT`: no lo hagas por indentación.** Una versión anterior
 de este paso contaba líneas que empezaran con exactamente cuatro espacios y

@@ -2,7 +2,8 @@
    Perfil del colaborador: Usu_Modificacion pasa a guardar al AUTOR
    ReporTarea  |  2026-09-16
 
-   PENDIENTE DE EJECUTAR. Paso 2 de la entrega 1. Requiere haber corrido antes
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21). Paso 2 de la
+   entrega 1. Requiere haber corrido antes
    docs/sql/2026-09-16-perfil-autor-columnas.sql.
 
    ----------------------------------------------------------------------------

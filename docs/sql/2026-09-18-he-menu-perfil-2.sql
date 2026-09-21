@@ -2,10 +2,10 @@
    Horas extras: mostrarle la pantalla al perfil 2
    ReporTarea  |  2026-09-18
 
-   PENDIENTE DE EJECUTAR.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
 
    ----------------------------------------------------------------------------
-   Da de alta al perfil 2 -Supervisor Especialistas, 6 usuarios activos- en las
+   Da de alta al perfil 2 -Servicios2 en dbo.Perfiles, 6 usuarios activos- en las
    dos filas de menu que hacen falta para que "Horas Extras" se dibuje:
 
      20082  la opcion "Horas Extras"      (Href = HorasExtras.aspx)

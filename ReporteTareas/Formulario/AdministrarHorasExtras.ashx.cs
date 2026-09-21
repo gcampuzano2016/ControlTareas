@@ -35,7 +35,7 @@ namespace JsonJQueryNetHorasExtras
     public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
         /// <summary>
-        /// Supervisor Especialistas (2), Talento Humano (14) y Super Admin (18):
+        /// Servicios2 (2), Talento Humano (14) y Super Admin (18):
         /// los mismos perfiles a los que el menu les muestra la pantalla.
         ///
         /// Esta lista NO es de solo lectura: quien esta aqui puede teclear horas,

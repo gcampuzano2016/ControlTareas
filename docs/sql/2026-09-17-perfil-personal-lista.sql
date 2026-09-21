@@ -2,8 +2,8 @@
    Perfil del colaborador: el listado de personal para Talento Humano
    ReporTarea  |  2026-09-17
 
-   PENDIENTE DE EJECUTAR. Es el paso 1 de la entrega 2; el orden completo esta
-   en DESPLIEGUE.md.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21). Es el paso 1 de la
+   entrega 2; el orden completo esta en DESPLIEGUE.md.
 
    ----------------------------------------------------------------------------
    Que hace y por que

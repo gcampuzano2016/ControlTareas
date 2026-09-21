@@ -2,7 +2,8 @@
    Datos personales editables: donde anotar quien cambio que, y cuando
    ReporTarea  |  2026-09-17
 
-   PENDIENTE DE EJECUTAR. Es el paso 1; el orden completo esta en
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21). Es el paso 1; el
+   orden completo esta en
    docs/superpowers/specs/2026-09-17-datos-personales-editables-design.md.
 
    ----------------------------------------------------------------------------

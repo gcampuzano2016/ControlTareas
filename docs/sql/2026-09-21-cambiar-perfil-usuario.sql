@@ -2,7 +2,7 @@
    Usuarios: cambiar el perfil de un usuario ya creado
    ReporTarea  |  2026-09-21
 
-   PENDIENTE DE EJECUTAR.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
 
    ----------------------------------------------------------------------------
    Hasta hoy el perfil no se editaba desde ninguna pantalla:

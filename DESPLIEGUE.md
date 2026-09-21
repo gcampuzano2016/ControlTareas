@@ -479,6 +479,9 @@ de fechas que ya usa la pantalla.
 
 ### 9.1 Base de datos
 
+**Ya aplicado en producción el 2026-09-21.** Queda escrito para reponer el
+entorno desde cero o para replicarlo en otro.
+
 `docs/sql/2026-09-21-dashboard-aprobacion.sql` — crea
 `Sp_RTA_DashboardAprobacionJefatura`. Es idempotente (`DROP`+`CREATE`) y **no
 toca ninguna tabla: sólo lee**, agregando en un `#Base` temporal el mismo

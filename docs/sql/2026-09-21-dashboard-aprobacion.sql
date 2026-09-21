@@ -2,7 +2,7 @@
    Dashboard de aprobacion para jefatura: los cinco conjuntos
    ReporTarea  |  2026-09-21
 
-   PENDIENTE DE EJECUTAR.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
 
    ---------------------------------------------------------------------------
 

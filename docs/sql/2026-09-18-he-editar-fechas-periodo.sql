@@ -2,7 +2,7 @@
    Horas extras: corregir las fechas de un periodo ya creado
    ReporTarea  |  2026-09-18
 
-   PENDIENTE DE EJECUTAR.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
 
    ----------------------------------------------------------------------------
    Que problema resuelve

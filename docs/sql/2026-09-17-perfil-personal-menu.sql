@@ -2,7 +2,9 @@
    Perfil del personal: la pantalla entra al menu
    ReporTarea  |  2026-09-17
 
-   PENDIENTE DE EJECUTAR. Independiente de docs/sql/2026-09-17-perfil-personal-
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
+
+   Independiente de docs/sql/2026-09-17-perfil-personal-
    lista.sql (el procedimiento del listado): los dos scripts no comparten nada
    y se pueden correr en cualquier orden entre si. Este es el unico script de
    esta entrega que toca el menu.

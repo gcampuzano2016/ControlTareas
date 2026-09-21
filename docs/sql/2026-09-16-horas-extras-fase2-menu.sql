@@ -2,7 +2,9 @@
    Horas Extras: la pantalla entra al menu
    ReporTarea  |  2026-09-16
 
-   PENDIENTE DE EJECUTAR. El usuario lo corre en produccion, en este orden:
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
+
+   Se corrio en produccion en este orden:
      1) 2026-09-16-horas-extras-cargo.sql               (crea la columna Cargo)
      2) carga-generada/carga-horas-extras.sql (regenerada) (la llena para los 64)
      3) 2026-09-16-horas-extras-fase2.sql                (los cinco procedimientos)

@@ -2,7 +2,7 @@
    Datos personales editables: el guardado
    ReporTarea  |  2026-09-17
 
-   PENDIENTE DE EJECUTAR. Corre DESPUES de
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21). Corre DESPUES de
    docs/sql/2026-09-17-datos-personales-columnas.sql.
 
    ----------------------------------------------------------------------------

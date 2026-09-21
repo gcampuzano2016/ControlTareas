@@ -2,8 +2,9 @@
    Perfil del colaborador: donde anotar QUIEN hizo el cambio
    ReporTarea  |  2026-09-16
 
-   PENDIENTE DE EJECUTAR. Es el paso 1 de la entrega 1; el orden completo esta
-   en docs/superpowers/specs/2026-09-16-perfil-edicion-rrhh-design.md.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21). Es el paso 1 de la
+   entrega 1; el orden completo esta en
+   docs/superpowers/specs/2026-09-16-perfil-edicion-rrhh-design.md.
 
    ----------------------------------------------------------------------------
    Que hace y por que

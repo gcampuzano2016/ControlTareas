@@ -104,11 +104,15 @@ tar -xzf chart.js-4.5.1.tgz package/dist/chart.umd.js
 cp package/dist/chart.umd.js "C:/respaldodisco/Desarrollo/PRY_Sistema ReporteTareas/ReporteTareas/js/chart.umd.js"
 ```
 
-Se usa **`chart.umd.js`** y no `chart.js` ni `chart.umd.min.js`: la compilación UMD
-es la única que expone `Chart` como variable global, que es lo que necesita una
-página sin empaquetador. La versión sin minificar se elige a propósito — 208 KB
-contra 130 KB, en una red interna, a cambio de que un error en la consola señale
-una línea legible.
+Se usa **`chart.umd.js`** y no `chart.js`: la compilación UMD es la única que
+expone `Chart` como variable global, que es lo que necesita una página sin
+empaquetador.
+
+Tampoco `chart.umd.min.js`, pero **no por tamaño**: medidos, los dos pesan 203 KB.
+`chart.umd.js` es la distribución que la documentación de Chart.js indica para una
+etiqueta `<script>`, y con archivos del mismo peso no hay nada que ganar del otro
+lado. Ojo con una suposición fácil: `chart.umd.js` **ya viene minificado** —una
+sola línea de casi 200.000 caracteres—, así que no esperes poder leerlo.
 
 - [ ] **Step 2: Comprobar que es el archivo correcto y que se basta solo**
 

@@ -815,11 +815,19 @@ print('comentarios    :', s.count('/*') == s.count('*/'))
 ```
 
 Esperado: `BOM: True`, `no-ascii: ninguno`, `CREATE/DROP: 1 / 1`,
-**`SELECT finales: 5`**, `temporal: 1 / 1`, `comentarios: True`.
+`temporal: 1 / 1`, `comentarios: True`.
 
-El `SELECT finales: 5` es la comprobación que importa: la Task 5 lee exactamente
-cinco conjuntos en ese orden, y uno de más o de menos rompe el mapeo sin dar error
-de compilación.
+**Sobre el conteo de `SELECT`: no lo hagas por indentación.** Una versión anterior
+de este paso contaba líneas que empezaran con exactamente cuatro espacios y
+`SELECT`, y esperaba 5. Eso mide el formato, no la estructura: el `SELECT` del
+`INSERT INTO #Base` también va a cuatro espacios, así que con el código correcto
+el conteo da 6. Quien se encuentre con esa diferencia corre el riesgo de
+re-indentar hasta que el número cuadre, que es acomodar el código a la
+comprobación en vez de al revés.
+
+Lo que de verdad importa —que el procedimiento devuelva **cinco** conjuntos, en
+ese orden, porque la Task 4 los lee por posición— no se puede saber leyendo el
+archivo: **se comprueba ejecutándolo**, y eso ocurre en el Step 4.
 
 - [ ] **Step 3: Commit**
 
@@ -827,6 +835,27 @@ de compilación.
 git add docs/sql/2026-09-21-dashboard-aprobacion.sql
 git commit -m "feat(tareas): el procedimiento del dashboard, cinco conjuntos ya agregados"
 ```
+
+- [ ] **Step 4: Que una persona lo corra y cuente los conjuntos**
+
+**Este paso NO lo hace un subagente.** Quien tenga acceso a la base corre el
+script y despues ejecuta el procedimiento con un jefe y un rango reales,
+contando los conjuntos que devuelve:
+
+```powershell
+$c = $cn.CreateCommand(); $c.CommandText = "Sp_RTA_DashboardAprobacionJefatura"
+$c.CommandType = [System.Data.CommandType]::StoredProcedure
+[void]$c.Parameters.AddWithValue("@IdUsuarioJefe", "1171")
+[void]$c.Parameters.AddWithValue("@FechaInicio", "01-03-2026")
+[void]$c.Parameters.AddWithValue("@FechaFin", "31-03-2026")
+$r = $c.ExecuteReader(); $n = 0
+do { $n++ } while ($r.NextResult())
+"conjuntos devueltos: $n"
+$r.Close()
+```
+
+Esperado: **`conjuntos devueltos: 5`**. Es la única comprobación que mide lo que
+la Task 4 necesita, y el archivo en disco no puede darla.
 
 ---
 

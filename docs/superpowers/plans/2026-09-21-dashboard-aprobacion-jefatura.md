@@ -29,6 +29,19 @@ de VS2019, sin NuGet), `vstest.console.exe`.
   y no trae `fileEncoding`; sin BOM salen con caracteres rotos en producción.
 - **Todo archivo nuevo se agrega a su `.csproj`**, incluidos los `.js`, que van como
   `<Content Include="..." />`. Un archivo que no está listado no se publica.
+- **Los finales de línea NO son uniformes en este repositorio.** Medidos el
+  2026-09-21, todos los archivos que este plan toca llevan BOM, pero:
+
+  | Archivo | Finales |
+  |---|---|
+  | **`ReporteTareas/ReporteTareas.csproj`** | **LF** (el único) |
+  | `CapaNegocio.csproj`, `CapaEntidad.csproj`, `CapaDato.csproj`, `CapaPruebas.csproj` | CRLF |
+  | `AprobacionTareasJefatura.aspx`, `aprobacionTareasJefatura.js`, `ObtenerListaTareas.ashx.cs` | CRLF |
+
+  **Preservá lo que cada archivo ya tiene; no lo uniformes.** `core.autocrlf` está
+  en `true` y no hay `.gitattributes`, así que «normalizar»
+  `ReporteTareas.csproj` a CRLF produce un diff de 2.625 líneas que entierra el
+  cambio real. Comprobalo antes de escribir, no lo supongas.
 - **Compilar con el MSBuild de VS2019:**
   `C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe`
 - **Correr las pruebas con:**

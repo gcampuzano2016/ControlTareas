@@ -271,9 +271,20 @@ function PintarPorPersona(responsables) {
                       y: { stacked: true,
                            ticks: {
                                color: function (ctx) {
-                                   /* ctx.index no viene en todas las llamadas; sin
-                                      indice cae en el color por defecto. */
-                                   return (ctx && bajoJornada[ctx.index] > 0) ? DASH_ROJO : "#666666";
+                                   /* ctx.tick.value y NO ctx.index. Chart.js arma el
+                                      contexto con getContext(t) sobre this.ticks, que
+                                      para entonces ya paso por el auto-skip: ctx.index
+                                      es la posicion en el arreglo RECORTADO, no la del
+                                      responsable. Con 51 personas en un panel de 320 px
+                                      sobreviven unas 13 etiquetas, asi que el rojo caia
+                                      sobre la persona equivocada. En una escala de
+                                      categoria el tick se construye como {value: i},
+                                      donde i SI es el indice de la etiqueta.
+
+                                      El asterisco del nombre nunca fallo: viaja dentro
+                                      de la cadena, no depende del indice. */
+                                   var i = (ctx && ctx.tick) ? ctx.tick.value : -1;
+                                   return (bajoJornada[i] > 0) ? DASH_ROJO : "#666666";
                                }
                            } } }
         }

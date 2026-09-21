@@ -6,7 +6,7 @@
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
     <script src="../js/jquery.blockUI.js" type="text/javascript"></script>
     <script src="../js/chart.umd.js" type="text/javascript"></script>
-    <script src="../js/dashboardAprobacion.js?v=2" type="text/javascript"></script>
+    <script src="../js/dashboardAprobacion.js?v=3" type="text/javascript"></script>
    
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

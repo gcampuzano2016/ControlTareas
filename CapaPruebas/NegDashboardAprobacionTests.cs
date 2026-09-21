@@ -221,7 +221,7 @@ namespace CapaPruebas
         /// <summary>
         /// El promedio llega con un decimal desde que el procedimiento dejo de
         /// truncar. Se escribe con coma y no con punto: lo lee una persona en
-        /// español. Y no lo decide la cultura del hilo: el separador se pone a
+        /// espaniol. Y no lo decide la cultura del hilo: el separador se pone a
         /// mano para que el texto sea el mismo desde la web -donde Web.config
         /// fija es-ES- y desde aca o desde cualquier otro llamador.
         /// </summary>
@@ -229,6 +229,29 @@ namespace CapaPruebas
         public void TextoDemora_ConDecimal_UsaComaYNoPunto()
         {
             Assert.AreEqual("1,9 días", NegDashboardAprobacion.TextoDemora(1.9m));
+        }
+
+        /// <summary>
+        /// 1,04 no es igual a 1, pero "0.#" lo imprime como "1": sin redondear
+        /// antes de decidir, el texto sale "1 dias". El procedimiento ya devuelve
+        /// el promedio redondeado, asi que hoy no pasa; se prueba porque el
+        /// metodo es publico y no puede depender de quien lo llame.
+        /// </summary>
+        [TestMethod]
+        public void TextoDemora_ConDecimalQueRedondeaAUno_DiceSingular()
+        {
+            Assert.AreEqual("1 día", NegDashboardAprobacion.TextoDemora(1.04m));
+        }
+
+        /// <summary>
+        /// El espejo del anterior por abajo: 0,04 se imprime "0" y diria
+        /// "0 dias", que no es ni correcto ni lo que el resto del tablero usa
+        /// para "sin demora".
+        /// </summary>
+        [TestMethod]
+        public void TextoDemora_ConDecimalQueRedondeaACero_DiceHoy()
+        {
+            Assert.AreEqual("hoy", NegDashboardAprobacion.TextoDemora(0.04m));
         }
 
         [TestMethod]

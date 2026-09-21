@@ -1,5 +1,6 @@
 ﻿using CapaDato;
 using CapaEntidad;
+using System;
 using System.Collections.Generic;
 using System.Globalization;
 
@@ -190,6 +191,14 @@ namespace CapaNegocio
         /// </summary>
         public static string TextoDemora(decimal dias)
         {
+            /* Se redondea ANTES de decidir, no despues. El texto se arma con
+               "0.#", que ya redondea a un decimal: sin esto, 1,04 no entra por
+               la rama del singular -no es igual a 1- pero se imprime "1", y
+               sale "1 días"; y 0,04 sale "0 días" en vez de "hoy". Hoy el
+               procedimiento ya devuelve un decimal redondeado, asi que no
+               ocurre, pero el metodo es publico y no puede confiar en eso. */
+            dias = Math.Round(dias, 1, MidpointRounding.AwayFromZero);
+
             if (dias <= 0m) { return "hoy"; }
             if (dias == 1m) { return "1 día"; }
 

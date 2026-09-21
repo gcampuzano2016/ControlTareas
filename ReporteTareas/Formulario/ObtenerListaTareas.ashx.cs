@@ -1704,10 +1704,14 @@ namespace JsonJQueryNetTareas
         /// top 10 mas "Otras".
         ///
         /// Un jefe ve a quien elija en el combo, y quien no es jefe se ve solo a si
-        /// mismo -el usuario de la sesion-, igual que ObtenerRecursosHorasDiariasActividad
-        /// y que ObtenerListaTareasGeneradasPorRevisar. Las tres acciones alimentan la
-        /// misma pantalla: si no resolvieran igual a quien consultar, los numeros no
-        /// cuadrarian entre si y nadie sabria cual creer.
+        /// mismo -el usuario de la sesion-. Es exactamente lo que hace
+        /// ObtenerListaTareasGeneradasPorRevisar, que alimenta la tarjeta de tareas
+        /// no ejecutadas de ESTA misma pantalla: si las dos no resolvieran igual a
+        /// quien consultar, los graficos hablarian de una persona y la tarjeta de
+        /// otra.
+        ///
+        /// ObtenerRecursosHorasDiariasActividad coincide solo en la mitad: usa
+        /// SIEMPRE el usuario de la sesion, tambien cuando quien pide es jefe.
         /// </summary>
         public string ObtenerDashboardAprobacion(dynamic parameters)
         {

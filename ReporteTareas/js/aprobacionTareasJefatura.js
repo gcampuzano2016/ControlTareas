@@ -720,13 +720,22 @@ function BtnConsulta() {
         ObtenerListaRecursosHorasDiarias();
         document.getElementById("Pagina1").style.display = "block";
         document.getElementById("Pagina2").style.display = "none";
+        document.getElementById("Pagina3").style.display = "none";
     }
     else if( $("#cmbEstados").val() == "3" ){
         document.getElementById("Pagina1").style.display = "none";
         document.getElementById("Pagina2").style.display = "block";
+        document.getElementById("Pagina3").style.display = "none";
         tipoGeneral = 0;
         idregistroGeneral = 0;
         ObtenerListaTareasHorasExtras(0, 0);
+    }
+    else if ($("#cmbEstados").val() == "4") {
+        $("#divMensajes").html("");
+        document.getElementById("Pagina1").style.display = "none";
+        document.getElementById("Pagina2").style.display = "none";
+        document.getElementById("Pagina3").style.display = "block";
+        CargarDashboardAprobacion();
     }
 }
 
@@ -737,7 +746,7 @@ function BtnDescarga() {
 
 function BuscarEstado() {
 
-    if ($("#cmbEstados").val() == "1" || $("#cmbEstados").val() == "2") {
+    if ($("#cmbEstados").val() == "1" || $("#cmbEstados").val() == "2" || $("#cmbEstados").val() == "4") {
         document.getElementById("btnDescarga").style.display = "none";
     }
     else if ($("#cmbEstados").val() == "3") {

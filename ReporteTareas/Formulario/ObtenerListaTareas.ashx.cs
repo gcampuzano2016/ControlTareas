@@ -30,8 +30,29 @@ namespace JsonJQueryNetTareas
 
         public void ProcessRequest(HttpContext context)
         {
-            //context.Response.ContentEncoding = System.Text.Encoding.UTF8;
-            //context.Response.ContentType = "application/json; charset=utf-8";
+            /* La codificacion de la respuesta, para TODAS las acciones.
+
+               Al final de este metodo la cabecera declara "utf-8" con
+               Response.Charset, pero Charset solo cambia la etiqueta: los bytes
+               salian con lo que fija Web.config -responseEncoding="windows-1252"-.
+               El navegador decodificaba como utf-8 lo que no lo era, y cada tilde
+               o enie se convertia en el caracter de reemplazo: "9,2 dias" llegaba
+               al dashboard como "9,2 d?as", y lo mismo les pasaba a las
+               descripciones y a los nombres de la tabla de tareas.
+
+               Una decena de acciones repetia esta misma linea aca abajo, cada una
+               por su cuenta y despues de que alguien viera el defecto en su
+               pantalla. Se deja una sola vez y arriba, para que una accion nueva
+               no nazca rota: quien la escribe no tiene por que saber que la
+               cabecera y los bytes se fijan en dos lugares distintos. Las que ya
+               la tienen quedan como estan; repetirla no hace dano.
+
+               Alcanza a todas porque todas responden igual: arman una cadena JSON
+               que se escribe con el unico Response.Write del final. En este
+               handler no hay ni un BinaryWrite ni un WriteFile, ni ninguna accion
+               que corte la respuesta antes; las descargas devuelven la ruta del
+               archivo dentro del JSON, no el archivo. */
+            context.Response.ContentEncoding = System.Text.Encoding.UTF8;
             dynamic parametros;
             StringBuilder responseAction = new StringBuilder();
             if (context.Request.ContentType.Contains("json"))

@@ -1152,6 +1152,7 @@
     <Content Include="Img\imagesCorreo\Welcome_Thread.png" />
     <Content Include="Img\Vacaciones Aprobadas.jpg" />
     <Content Include="Img\Vacaciones Negadas.jpg" />
+    <Content Include="js\chart.umd.js" />
     <Content Include="js\costeo.js" />
     <Content Include="js\DepartamentoMedico.js" />
     <Content Include="js\DetallePedido.js" />

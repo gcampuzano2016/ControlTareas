@@ -468,3 +468,62 @@ Cuando se guarda el perfil de alguien **sin ficha**, el procedimiento se la crea
 aparecer en `RRHHEmpleados.aspx`**, que hoy no la lista. Son hasta 116 personas.
 
 Si nadie avisa, Talento Humano va a ver crecer esa lista sin saber por qué.
+
+---
+
+## 9. Dashboard de aprobación para jefatura
+
+Agrega una tercera vista a `AprobacionTareasJefatura.aspx` (junto a PENDIENTE y
+APROBADAS): seis tarjetas y cuatro gráficos con Chart.js, para el mismo rango
+de fechas que ya usa la pantalla.
+
+### 9.1 Base de datos
+
+`docs/sql/2026-09-21-dashboard-aprobacion.sql` — crea
+`Sp_RTA_DashboardAprobacionJefatura`. Es idempotente (`DROP`+`CREATE`) y **no
+toca ninguna tabla: sólo lee**, agregando en un `#Base` temporal el mismo
+parseo de `Det_Tiempo` que ya usa `Sp_RTAListaHorasRecursosPorJefatura` para la
+tabla de APROBADAS. Por eso el dashboard y la tabla tienen que coincidir en
+horas para el mismo rango: comparten la misma cuenta.
+
+### 9.2 Archivos a publicar
+
+- `Formulario\AprobacionTareasJefatura.aspx`
+- `js\aprobacionTareasJefatura.js`
+- `js\dashboardAprobacion.js` **(nuevo)**
+- `js\chart.umd.js` **(nuevo, 208 KB)**
+- `bin\ReporteTareas.dll`
+- `bin\CapaEntidad.exe`
+- `bin\CapaNegocio.exe`
+- `bin\CapaDato.exe`
+
+> **Los tres de capa son `.exe`, no `.dll`.** Igual que en la entrega de la
+> sección 8: `CapaEntidad.exe`, `CapaNegocio.exe` y `CapaDato.exe` se compilan
+> con `OutputType=Exe`. Buscar los `.dll` de esos tres no encuentra nada y lleva
+> a publicar de menos.
+
+**Copiar archivo por archivo. Nunca `robocopy /MIR` ni ninguna copia que
+sincronice:** borra `connections.config` y `appsettings.config`, y el sitio no
+levanta.
+
+Antes de copiar, regenerar el paquete y comprobar que los dos `.js` nuevos
+viajaron (es fácil publicar desde un paquete viejo sin que nada dé error):
+
+```
+MSBuild.exe ReporteTareas\ReporteTareas.csproj /p:DeployOnBuild=true ^
+            /p:PublishProfile=FolderProfile /p:Configuration=Release
+
+dir ReporteTareas\obj\Release\Package\PackageTmp\js\chart.umd.js
+dir ReporteTareas\obj\Release\Package\PackageTmp\js\dashboardAprobacion.js
+```
+
+Si alguno de los dos no aparece en `PackageTmp\js\`, no siguió el `.csproj` y
+el dashboard va a salir en blanco sin ningún error de compilación que lo avise.
+
+### 9.3 Si el dashboard sale en blanco
+
+Lo primero a mirar es si `js/chart.umd.js` llegó al servidor. La pantalla lo
+avisa con un mensaje, pero si no aparece ni el mensaje, es que tampoco llegó
+`dashboardAprobacion.js`. En ambos casos la causa más probable es que el
+paquete que se copió al servidor era uno viejo, regenerado antes de que estos
+dos archivos existieran.

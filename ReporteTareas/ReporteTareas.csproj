@@ -1397,6 +1397,7 @@
     <Content Include="js\reporteAnual.js" />
     <Content Include="js\reporteCumplimientoDiario.js" />
     <Content Include="js\aprobacionTareasJefatura.js" />
+    <Content Include="js\dashboardAprobacion.js" />
     <Content Include="js\reporteGastos.js" />
     <Content Include="js\ReportesGPF.js" />
     <Content Include="js\reporteTareas.js" />

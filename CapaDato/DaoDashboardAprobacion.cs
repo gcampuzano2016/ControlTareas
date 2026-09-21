@@ -37,6 +37,7 @@ namespace CapaDato
                         d.Totales.MinutosAprobados  = Entero(dr, "MinutosAprobados");
                         d.Totales.MinutosPendientes = Entero(dr, "MinutosPendientes");
                         d.Totales.MinutosOtros      = Entero(dr, "MinutosOtros");
+                        d.Totales.PersonasDiaTotal  = Entero(dr, "PersonasDiaTotal");
                         d.Totales.PersonasDiaAprob  = Entero(dr, "PersonasDiaAprob");
                         d.Totales.PersonasDiaPend   = Entero(dr, "PersonasDiaPend");
                         d.Totales.Responsables      = Entero(dr, "Responsables");
@@ -75,7 +76,7 @@ namespace CapaDato
                     /* 4. demora */
                     if (dr.NextResult() && dr.Read())
                     {
-                        d.Demora.DiasPromedio          = Entero(dr, "DiasPromedio");
+                        d.Demora.DiasPromedio          = Decimales(dr, "DiasPromedio");
                         d.Demora.DiasMaximo            = Entero(dr, "DiasMaximo");
                         d.Demora.AprobadasConFecha     = Entero(dr, "AprobadasConFecha");
                         d.Demora.AprobadasSinFecha     = Entero(dr, "AprobadasSinFecha");
@@ -103,6 +104,14 @@ namespace CapaDato
         private static int Entero(SqlDataReader dr, string columna)
         {
             return dr[columna] == DBNull.Value ? 0 : Convert.ToInt32(dr[columna]);
+        }
+
+        /* DiasPromedio viene como DECIMAL: el procedimiento promedia en decimal
+           porque AVG sobre INT trunca. Leerlo con Entero lo volveria a truncar
+           aca y el arreglo del procedimiento no se notaria. */
+        private static decimal Decimales(SqlDataReader dr, string columna)
+        {
+            return dr[columna] == DBNull.Value ? 0m : Convert.ToDecimal(dr[columna]);
         }
 
         private static string Texto(SqlDataReader dr, string columna)

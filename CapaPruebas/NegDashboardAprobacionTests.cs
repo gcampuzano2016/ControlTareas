@@ -8,8 +8,15 @@ using System.Threading;
 namespace CapaPruebas
 {
     /// <summary>
-    /// Lo unico del dashboard que se puede probar sin base: las tres
-    /// conversiones que ocurren entre el dato agregado y lo que se dibuja.
+    /// Lo unico del dashboard que se puede probar sin base: las conversiones
+    /// que ocurren entre el dato agregado y lo que se dibuja.
+    ///
+    /// Desde la ronda de correcciones estas conversiones son las que de verdad
+    /// corren en produccion: NegDashboardAprobacion.Cargar las aplica sobre la
+    /// entidad y el navegador ya no convierte nada. Antes habia una segunda
+    /// copia en dashboardAprobacion.js, esta suite probaba la de C# y la
+    /// pantalla usaba la de JavaScript, que para 75 minutos daba 1,3 donde
+    /// esta da 1,2.
     /// </summary>
     [TestClass]
     public class NegDashboardAprobacionTests
@@ -71,6 +78,19 @@ namespace CapaPruebas
         public void HorasDecimales_DeNegativo_DaCero()
         {
             Assert.AreEqual(0m, NegDashboardAprobacion.HorasDecimales(-30));
+        }
+
+        /// <summary>
+        /// El punto medio: 75 minutos son 1,25 horas exactas. Math.Round de .NET
+        /// redondea al par y da 1,2; la copia que vivia en JavaScript redondeaba
+        /// medio hacia arriba y daba 1,3. Ahora hay una sola regla, y esta
+        /// prueba la fija: si alguien vuelve a escribirla en otro lado, tiene
+        /// que dar esto.
+        /// </summary>
+        [TestMethod]
+        public void HorasDecimales_EnElPuntoMedio_RedondeaAlPar()
+        {
+            Assert.AreEqual(1.2m, NegDashboardAprobacion.HorasDecimales(75));
         }
 
         /* ----------------------------------------------- top con otras ----- */
@@ -196,6 +216,54 @@ namespace CapaPruebas
                Existe en datos viejos y no es un error que valga la pena gritar:
                se lee como "sin demora". */
             Assert.AreEqual("hoy", NegDashboardAprobacion.TextoDemora(-3));
+        }
+
+        /// <summary>
+        /// El promedio llega con un decimal desde que el procedimiento dejo de
+        /// truncar. Se escribe con coma y no con punto: lo lee una persona en
+        /// español, y la cultura del hilo -es-ES en estas pruebas- no puede
+        /// decidirlo, porque la del servidor no esta fijada en Web.config.
+        /// </summary>
+        [TestMethod]
+        public void TextoDemora_ConDecimal_UsaComaYNoPunto()
+        {
+            Assert.AreEqual("1,9 días", NegDashboardAprobacion.TextoDemora(1.9m));
+        }
+
+        [TestMethod]
+        public void TextoDemora_DeUnoConDecimalEnCero_NoDicePluralRaro()
+        {
+            Assert.AreEqual("1 día", NegDashboardAprobacion.TextoDemora(1.0m));
+        }
+
+        /* ---------------------------------------- texto demora promedio ---- */
+
+        /// <summary>
+        /// Sin ninguna aprobada con fecha no hay promedio. El procedimiento
+        /// devuelve cero y cero se escribe "hoy": la tarjeta mostraria el mejor
+        /// resultado posible justo en el peor caso de calidad del dato.
+        /// </summary>
+        [TestMethod]
+        public void TextoDemoraPromedio_SinAprobadasConFecha_NoDiceHoy()
+        {
+            Assert.AreEqual("sin datos", NegDashboardAprobacion.TextoDemoraPromedio(0m, 0));
+        }
+
+        [TestMethod]
+        public void TextoDemoraPromedio_ConAprobadasConFecha_DiceElPromedio()
+        {
+            Assert.AreEqual("2,5 días", NegDashboardAprobacion.TextoDemoraPromedio(2.5m, 40));
+        }
+
+        /// <summary>
+        /// Con aprobadas con fecha y promedio cero, "hoy" SI es la respuesta
+        /// correcta: se aprobo el mismo dia. Lo que distingue un caso del otro
+        /// es AprobadasConFecha, no el promedio.
+        /// </summary>
+        [TestMethod]
+        public void TextoDemoraPromedio_ConAprobadasYPromedioCero_DiceHoy()
+        {
+            Assert.AreEqual("hoy", NegDashboardAprobacion.TextoDemoraPromedio(0m, 12));
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CapaDato;
 using CapaEntidad;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace CapaNegocio
 {
@@ -13,15 +14,25 @@ namespace CapaNegocio
     /// C# seria una segunda fuente de verdad para la misma regla; el dia que una
     /// cambie y la otra no, el grafico y la tabla de la misma pantalla diran
     /// cifras distintas y no habra forma de saber cual miente.
+    ///
+    /// Por lo mismo, la conversion de minutos a horas y el texto de la demora
+    /// viven ACA y en ningun otro lado. Estuvieron un tiempo tambien en
+    /// dashboardAprobacion.js, y las dos copias ya daban numeros distintos: 75
+    /// minutos eran 1,2 horas en C# -Math.Round redondea al par- y 1,3 en
+    /// JavaScript. Cargar deja los valores ya convertidos en la entidad y el
+    /// navegador solo los pinta.
     /// </summary>
     public static class NegDashboardAprobacion
     {
         /// <summary>Etiqueta "Otras" de la porcion que agrupa la cola larga.</summary>
         private const string EtiquetaOtras = "Otras";
 
+        /// <summary>Lo que dice la tarjeta de demora cuando no hay con que calcularla.</summary>
+        private const string SinDato = "sin datos";
+
         /// <summary>
         /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a un
-        /// top 10 mas "Otras".
+        /// top 10 mas "Otras" y con las horas y los textos ya resueltos.
         ///
         /// El recorte se hace aca y no en SQL: la regla esta probada en
         /// TopConOtras, y en SQL quedaria sin prueba y repartida en dos
@@ -35,7 +46,63 @@ namespace CapaNegocio
 
             datos.Empresas = TopConOtras(datos.Empresas, 10);
 
+            Convertir(datos);
+
             return datos;
+        }
+
+        /// <summary>
+        /// Deja en la entidad lo que la pantalla muestra: las horas y los dos
+        /// textos de demora.
+        ///
+        /// Va DESPUES de TopConOtras a proposito: la porcion "Otras" se arma
+        /// sumando minutos, y convertir antes obligaria a sumar horas ya
+        /// redondeadas, que no da lo mismo que redondear la suma.
+        /// </summary>
+        private static void Convertir(EntDashboardAprobacion datos)
+        {
+            if (datos == null) { return; }
+
+            if (datos.Totales != null)
+            {
+                datos.Totales.HorasAprobadas  = HorasDecimales(datos.Totales.MinutosAprobados);
+                datos.Totales.HorasPendientes = HorasDecimales(datos.Totales.MinutosPendientes);
+                datos.Totales.HorasOtros      = HorasDecimales(datos.Totales.MinutosOtros);
+            }
+
+            if (datos.Semanas != null)
+            {
+                foreach (EntDashboardSemana s in datos.Semanas)
+                {
+                    s.HorasAprobadas  = HorasDecimales(s.MinutosAprobados);
+                    s.HorasPendientes = HorasDecimales(s.MinutosPendientes);
+                }
+            }
+
+            if (datos.Responsables != null)
+            {
+                foreach (EntDashboardResponsable r in datos.Responsables)
+                {
+                    r.HorasAprobadas  = HorasDecimales(r.MinutosAprobados);
+                    r.HorasPendientes = HorasDecimales(r.MinutosPendientes);
+                }
+            }
+
+            if (datos.Empresas != null)
+            {
+                foreach (EntDashboardEmpresa e in datos.Empresas)
+                {
+                    e.Horas = HorasDecimales(e.Minutos);
+                }
+            }
+
+            if (datos.Demora != null)
+            {
+                datos.Demora.TextoDemoraPromedio =
+                    TextoDemoraPromedio(datos.Demora.DiasPromedio, datos.Demora.AprobadasConFecha);
+                datos.Demora.TextoMasViejoPendiente =
+                    TextoDemora(datos.Demora.DiasMasViejoPendiente);
+            }
         }
 
         /// <summary>
@@ -94,18 +161,45 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// El promedio de demora, en texto.
+        ///
+        /// Con <paramref name="aprobadasConFecha"/> en cero el promedio no
+        /// existe: no hay ninguna tarea aprobada con fecha sobre la cual
+        /// calcularlo. El procedimiento devuelve cero en ese caso, y cero se
+        /// escribe "hoy": el peor dato posible se presentaria como el mejor
+        /// resultado posible. Por eso hay que mirar las dos cifras juntas y no
+        /// solo el promedio.
+        /// </summary>
+        public static string TextoDemoraPromedio(decimal dias, int aprobadasConFecha)
+        {
+            if (aprobadasConFecha <= 0) { return SinDato; }
+
+            return TextoDemora(dias);
+        }
+
+        /// <summary>
         /// Los dias de demora, en texto. "hoy", "1 dia", "N dias".
+        ///
+        /// Recibe decimal y no entero porque el promedio llega con un decimal:
+        /// redondearlo aca para escribirlo devolveria el sesgo a la baja que el
+        /// procedimiento acaba de sacar.
         ///
         /// Los negativos se leen como "hoy": una aprobacion fechada antes del
         /// registro existe en datos viejos, y mostrar "-3 dias" haria que quien
         /// lo vea desconfie de todo el tablero por un caso que no importa.
         /// </summary>
-        public static string TextoDemora(int dias)
+        public static string TextoDemora(decimal dias)
         {
-            if (dias <= 0) { return "hoy"; }
-            if (dias == 1) { return "1 día"; }
+            if (dias <= 0m) { return "hoy"; }
+            if (dias == 1m) { return "1 día"; }
 
-            return dias.ToString(System.Globalization.CultureInfo.InvariantCulture) + " días";
+            /* El separador decimal se escribe a mano en vez de dejarselo a la
+               cultura del hilo: la del servidor no esta fijada en Web.config, asi
+               que el mismo numero saldria "1.9" o "1,9" segun la maquina. Lo lee
+               una persona en espaniol: coma siempre. */
+            string numero = dias.ToString("0.#", CultureInfo.InvariantCulture).Replace('.', ',');
+
+            return numero + " días";
         }
     }
 }

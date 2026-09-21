@@ -3,15 +3,18 @@
     /// <summary>
     /// Una empresa y los minutos que se le dedicaron en el rango.
     ///
-    /// Minutos y no horas: la conversion a horas decimales es para la etiqueta
-    /// del grafico y la hace NegDashboardAprobacion.HorasDecimales. Guardar aqui
-    /// un decimal obligaria a redondear antes de sumar, y las sumas de valores ya
-    /// redondeados no dan lo mismo que el redondeo de la suma.
+    /// Vienen los minutos Y las horas: los minutos son el dato que se suma
+    /// -sumar valores ya redondeados no da lo mismo que redondear la suma- y
+    /// Horas es la conversion final, la que el navegador pinta sin volver a
+    /// tocarla. La llena NegDashboardAprobacion.Cargar, despues de agrupar.
     /// </summary>
     public class EntDashboardEmpresa
     {
         public string Empresa { get; set; } = "";
         public int Minutos { get; set; }
+
+        /// <summary>Los mismos minutos en horas, con un decimal.</summary>
+        public decimal Horas { get; set; }
     }
 
     /// <summary>Las cifras de las tarjetas de arriba.</summary>
@@ -27,6 +30,23 @@
         /// </summary>
         public int MinutosOtros { get; set; }
 
+        /// <summary>
+        /// Los mismos minutos ya convertidos a horas. Convierte el servidor y no
+        /// el navegador: con la regla escrita en los dos lados, las dos copias
+        /// daban numeros distintos para el mismo dato (75 minutos: 1,2 en C# por
+        /// el redondeo bancario, 1,3 en JavaScript).
+        /// </summary>
+        public decimal HorasAprobadas { get; set; }
+        public decimal HorasPendientes { get; set; }
+        public decimal HorasOtros { get; set; }
+
+        /// <summary>
+        /// Personas-dia del rango, sin filtrar por estado. Es el unico total
+        /// valido: los dos parciales de abajo se solapan -un dia con tareas
+        /// aprobadas y pendientes cae en los dos- y sumarlos cuenta de mas.
+        /// </summary>
+        public int PersonasDiaTotal { get; set; }
+
         public int PersonasDiaAprob { get; set; }
         public int PersonasDiaPend { get; set; }
         public int Responsables { get; set; }
@@ -38,6 +58,10 @@
         public System.DateTime Semana { get; set; }
         public int MinutosAprobados { get; set; }
         public int MinutosPendientes { get; set; }
+
+        /// <summary>Los mismos minutos en horas. Ver EntDashboardTotales.</summary>
+        public decimal HorasAprobadas { get; set; }
+        public decimal HorasPendientes { get; set; }
     }
 
     /// <summary>Una barra del grafico por persona.</summary>
@@ -46,6 +70,11 @@
         public string Nombre { get; set; } = "";
         public int MinutosAprobados { get; set; }
         public int MinutosPendientes { get; set; }
+
+        /// <summary>Los mismos minutos en horas. Ver EntDashboardTotales.</summary>
+        public decimal HorasAprobadas { get; set; }
+        public decimal HorasPendientes { get; set; }
+
         public int PersonasDia { get; set; }
 
         /// <summary>Dias del rango en que esa persona no llego a 8 horas.</summary>
@@ -58,11 +87,28 @@
     /// </summary>
     public class EntDashboardDemora
     {
-        public int DiasPromedio { get; set; }
+        /// <summary>
+        /// Promedio de dias entre el registro y la aprobacion. Decimal y no
+        /// entero: el AVG entero del procedimiento truncaba, y el tablero decia
+        /// siempre que se tarda menos de lo que se tarda.
+        /// </summary>
+        public decimal DiasPromedio { get; set; }
+
         public int DiasMaximo { get; set; }
         public int AprobadasConFecha { get; set; }
         public int AprobadasSinFecha { get; set; }
         public int DiasMasViejoPendiente { get; set; }
+
+        /// <summary>
+        /// DiasPromedio en texto, con el caso sin datos ya resuelto. Con
+        /// AprobadasConFecha en cero no hay con que calcular el promedio, y la
+        /// tarjeta no puede decir "hoy": se leeria como el mejor resultado
+        /// posible justo cuando el dato es el peor.
+        /// </summary>
+        public string TextoDemoraPromedio { get; set; } = "";
+
+        /// <summary>DiasMasViejoPendiente en texto.</summary>
+        public string TextoMasViejoPendiente { get; set; } = "";
     }
 
     /// <summary>Los cinco bloques, tal como viajan al navegador.</summary>

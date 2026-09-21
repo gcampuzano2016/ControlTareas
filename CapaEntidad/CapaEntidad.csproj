@@ -52,6 +52,7 @@
     <Compile Include="EntCosteoServicio.cs" />
     <Compile Include="EntCuentaContable.cs" />
     <Compile Include="EntCuotaAnual.cs" />
+    <Compile Include="EntDashboardAprobacion.cs" />
     <Compile Include="EntDatosMed.cs" />
     <Compile Include="EntDetalleInventario.cs" />
     <Compile Include="EntEgresoInventario.cs" />

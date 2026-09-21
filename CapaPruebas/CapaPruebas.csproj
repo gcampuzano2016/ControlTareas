@@ -57,6 +57,7 @@
     <Compile Include="NegHeParametroPantallaTests.cs" />
     <Compile Include="NegHeExportacionTests.cs" />
     <Compile Include="NegCorreoSolicitudTests.cs" />
+    <Compile Include="NegDashboardAprobacionTests.cs" />
     <Compile Include="NegDestinatariosCorreoTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

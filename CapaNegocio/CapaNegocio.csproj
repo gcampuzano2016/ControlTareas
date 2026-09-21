@@ -182,6 +182,7 @@
     <Compile Include="NegCosteoServicio.cs" />
     <Compile Include="NegCuentaContable.cs" />
     <Compile Include="NegCuotaAnual.cs" />
+    <Compile Include="NegDashboardAprobacion.cs" />
     <Compile Include="NegEgresoInventario.cs" />
     <Compile Include="NegEmpleado.cs" />
     <Compile Include="NegDetallePermiso.cs" />

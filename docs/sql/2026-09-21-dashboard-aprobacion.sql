@@ -2,7 +2,11 @@
    Dashboard de aprobacion para jefatura: los cinco conjuntos
    ReporTarea  |  2026-09-21
 
-   YA APLICADO EN PRODUCCION (verificado el 2026-09-21).
+   HAY QUE VOLVER A CORRERLO. La version que hoy esta en produccion es la
+   ANTERIOR -aplicada el 2026-09-21, antes de la ronda de correcciones- y no
+   devuelve PersonasDiaTotal ni el promedio de demora con decimal. Con la
+   version vieja en la base, el dashboard se rompe al leer esas dos columnas.
+   Correr este script ANTES de copiar los binarios.
 
    ---------------------------------------------------------------------------
 
@@ -99,6 +103,11 @@ BEGIN
        Personas-dia con COUNT(DISTINCT responsable + fecha): una persona que
        cargo seis tareas el martes es UNA persona-dia, no seis.
 
+       PersonasDiaTotal es el mismo COUNT(DISTINCT ...) pero SIN filtrar por
+       estado. Los dos parciales de abajo se solapan -un dia con tareas
+       aprobadas y pendientes cae en los dos- asi que sumarlos cuenta de mas;
+       el total hay que contarlo aparte y es esta columna.
+
        Los estados 5 y 7 van juntos en "Otros". Son 592 filas que hoy no aparecen
        en ninguna pantalla y no estan en el catalogo; no se les inventa un nombre,
        pero esconderlas haria que el total de las tarjetas no cuadre con el rango,
@@ -107,6 +116,7 @@ BEGIN
         MinutosAprobados   = ISNULL(SUM(CASE WHEN Estado = 2 THEN Minutos END), 0),
         MinutosPendientes  = ISNULL(SUM(CASE WHEN Estado = 1 THEN Minutos END), 0),
         MinutosOtros       = ISNULL(SUM(CASE WHEN Estado NOT IN (1,2) THEN Minutos END), 0),
+        PersonasDiaTotal   = ISNULL(COUNT(DISTINCT Id_Responsable + '|' + CONVERT(VARCHAR(10), Fecha, 112)), 0),
         PersonasDiaAprob   = ISNULL(COUNT(DISTINCT CASE WHEN Estado = 2 THEN Id_Responsable + '|' + CONVERT(VARCHAR(10), Fecha, 112) END), 0),
         PersonasDiaPend    = ISNULL(COUNT(DISTINCT CASE WHEN Estado = 1 THEN Id_Responsable + '|' + CONVERT(VARCHAR(10), Fecha, 112) END), 0),
         Responsables       = ISNULL(COUNT(DISTINCT Id_Responsable), 0)
@@ -148,8 +158,14 @@ BEGIN
        tiene. DiasMasViejoPendiente mira lo que sigue en estado 1 y responde la
        pregunta que un promedio no puede: hace cuanto que lo mas viejo espera. */
     SELECT
-        DiasPromedio = ISNULL(AVG(CASE WHEN Estado = 2 AND FechaAprob IS NOT NULL
-                                       THEN DATEDIFF(DAY, Fecha, CONVERT(DATE, FechaAprob)) END), 0),
+        /* DECIMAL y no INT: AVG sobre INT en T-SQL TRUNCA, no redondea, y una
+           demora media real de 1,9 dias se reportaba como 1. El sesgo era
+           sistematico y siempre a la baja: el tablero decia que se tarda menos
+           de lo que se tarda. Un decimal alcanza; el segundo es ruido.
+           DiasMaximo sigue siendo entero a proposito: es un DATEDIFF suelto,
+           no un promedio, y no tiene nada que redondear. */
+        DiasPromedio = ISNULL(ROUND(AVG(CAST(CASE WHEN Estado = 2 AND FechaAprob IS NOT NULL
+                                                  THEN DATEDIFF(DAY, Fecha, CONVERT(DATE, FechaAprob)) END AS DECIMAL(9,2))), 1), 0),
         DiasMaximo   = ISNULL(MAX(CASE WHEN Estado = 2 AND FechaAprob IS NOT NULL
                                        THEN DATEDIFF(DAY, Fecha, CONVERT(DATE, FechaAprob)) END), 0),
         AprobadasConFecha = ISNULL(SUM(CASE WHEN Estado = 2 AND FechaAprob IS NOT NULL THEN 1 ELSE 0 END), 0),

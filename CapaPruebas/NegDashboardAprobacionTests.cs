@@ -221,8 +221,9 @@ namespace CapaPruebas
         /// <summary>
         /// El promedio llega con un decimal desde que el procedimiento dejo de
         /// truncar. Se escribe con coma y no con punto: lo lee una persona en
-        /// español, y la cultura del hilo -es-ES en estas pruebas- no puede
-        /// decidirlo, porque la del servidor no esta fijada en Web.config.
+        /// español. Y no lo decide la cultura del hilo: el separador se pone a
+        /// mano para que el texto sea el mismo desde la web -donde Web.config
+        /// fija es-ES- y desde aca o desde cualquier otro llamador.
         /// </summary>
         [TestMethod]
         public void TextoDemora_ConDecimal_UsaComaYNoPunto()

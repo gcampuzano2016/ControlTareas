@@ -193,10 +193,14 @@ namespace CapaNegocio
             if (dias <= 0m) { return "hoy"; }
             if (dias == 1m) { return "1 día"; }
 
-            /* El separador decimal se escribe a mano en vez de dejarselo a la
-               cultura del hilo: la del servidor no esta fijada en Web.config, asi
-               que el mismo numero saldria "1.9" o "1,9" segun la maquina. Lo lee
-               una persona en espaniol: coma siempre. */
+            /* El numero se arma con InvariantCulture y la coma se pone a mano,
+               en vez de dejarle el separador a la cultura del hilo. Web.config
+               fija es-ES para la aplicacion web y hoy daria la coma igual, pero
+               este metodo tambien corre desde las pruebas y desde cualquier cosa
+               que no sea la web, donde la cultura es la de la maquina: el mismo
+               numero saldria "1.9" o "1,9" segun donde se lo llame. Lo lee una
+               persona en espaniol: coma siempre, y sin depender de un ajuste que
+               vive tres capas mas arriba. */
             string numero = dias.ToString("0.#", CultureInfo.InvariantCulture).Replace('.', ',');
 
             return numero + " días";

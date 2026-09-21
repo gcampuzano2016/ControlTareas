@@ -2,11 +2,10 @@
    Dashboard de aprobacion para jefatura: los cinco conjuntos
    ReporTarea  |  2026-09-21
 
-   HAY QUE VOLVER A CORRERLO. La version que hoy esta en produccion es la
-   ANTERIOR -aplicada el 2026-09-21, antes de la ronda de correcciones- y no
-   devuelve PersonasDiaTotal ni el promedio de demora con decimal. Con la
-   version vieja en la base, el dashboard se rompe al leer esas dos columnas.
-   Correr este script ANTES de copiar los binarios.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-21, despues de la ronda
+   de correcciones). Se corrio la version corregida y se comprobo contra la
+   base: cinco conjuntos, PersonasDiaTotal presente y DiasPromedio decimal
+   -13.200000 en la muestra- con DiasMaximo todavia entero.
 
    ---------------------------------------------------------------------------
 

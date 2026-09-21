@@ -479,12 +479,14 @@ de fechas que ya usa la pantalla.
 
 ### 9.1 Base de datos
 
-> **Pendiente: hay que volver a correr el script.** La versión aplicada en
-> producción el 2026-09-21 es la **anterior** a la ronda de correcciones: no
-> devuelve `PersonasDiaTotal` (personas-día sin doble conteo) ni `DiasPromedio`
-> con decimal. Con esa versión en la base, los binarios nuevos fallan al leer
-> esas dos columnas y el dashboard sale con el mensaje de error del handler.
-> **El script va antes que los binarios**, como en el resto de la sección 4.
+**Ya aplicado en producción el 2026-09-21**, en su versión corregida (la que
+devuelve `PersonasDiaTotal` y `DiasPromedio` con decimal). Queda escrito para
+reponer el entorno desde cero o para replicarlo en otro.
+
+> **Los binarios de esta sección necesitan esta versión del procedimiento.** Si
+> alguna vez se repone la base con la versión anterior, el dashboard falla al
+> leer esas dos columnas. El script va antes que los binarios, como en la
+> sección 4.
 
 `docs/sql/2026-09-21-dashboard-aprobacion.sql` — crea
 `Sp_RTA_DashboardAprobacionJefatura`. Es idempotente (`DROP`+`CREATE`) y **no

@@ -1104,7 +1104,31 @@ git commit -m "feat(tareas): entidades y lectura de los cinco conjuntos del dash
 - Modify: `ReporteTareas/Formulario/ObtenerListaTareas.ashx.cs`
 
 **Interfaces:**
-- Consumes: `DaoDashboardAprobacion.Cargar`, `NegDashboardAprobacion.TopConOtras`.
+- Consumes: `NegDashboardAprobacion.Cargar(string, string, string)`, **no**
+  `DaoDashboardAprobacion` — el proyecto web no referencia `CapaDato` y no debe
+  empezar a hacerlo. Si esa fachada no existe todavía, esta tarea la agrega a
+  `CapaNegocio/NegDashboardAprobacion.cs`:
+
+  ```csharp
+          /// <summary>
+          /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a
+          /// un top 10 mas "Otras".
+          ///
+          /// El recorte se hace aca y no en SQL: la regla esta probada en
+          /// TopConOtras, y en SQL quedaria sin prueba y repartida en dos
+          /// lenguajes. Y se hace aca y no en el handler para que la capa web no
+          /// tenga que orquestar dos llamadas ni conocer el tope.
+          /// </summary>
+          public static EntDashboardAprobacion Cargar(string idUsuarioJefe, string fechaDesde, string fechaHasta)
+          {
+              EntDashboardAprobacion datos =
+                  DaoDashboardAprobacion.Cargar(idUsuarioJefe, fechaDesde, fechaHasta);
+
+              datos.Empresas = TopConOtras(datos.Empresas, 10);
+
+              return datos;
+          }
+  ```
 - Produces: la acción `"DashboardAprobacion"`, que devuelve el JSON de un
   `EntDashboardAprobacion` con las empresas ya reducidas a top 10 + «Otras».
   La Task 7 la consume.
@@ -1168,13 +1192,15 @@ Después de `ObtenerRecursosHorasDiarias`:
                     IdUsuarioConsulta = idUsuario;
                 }
 
+                /* Por NegDashboardAprobacion y NO por DaoDashboardAprobacion: el
+                   proyecto web referencia CapaEntidad y CapaNegocio, nunca
+                   CapaDato, y ninguna de las mas de veinte acciones de este
+                   handler llama a un Dao directo. Saltarse la capa obliga a
+                   agregar una referencia de proyecto nueva y trae ~380 avisos
+                   CS0436, porque SeguridadHelper esta duplicado byte a byte en
+                   CapaDato y en este proyecto. */
                 EntDashboardAprobacion datos =
-                    DaoDashboardAprobacion.Cargar(IdUsuarioConsulta, fechaDesde, fechaHasta);
-
-                /* El top se arma aca y no en SQL: la regla esta probada en
-                   NegDashboardAprobacion y en SQL quedaria sin prueba y repartida
-                   en dos lenguajes. */
-                datos.Empresas = NegDashboardAprobacion.TopConOtras(datos.Empresas, 10);
+                    NegDashboardAprobacion.Cargar(IdUsuarioConsulta, fechaDesde, fechaHasta);
 
                 return JsonConvert.SerializeObject(datos);
             }

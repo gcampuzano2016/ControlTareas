@@ -1439,6 +1439,16 @@ namespace CorreoHelper
                     {
                         mail.From = new MailAddress(emailFrom, emailFromName);
 
+                        /* Sin esto el cuerpo sale en us-ascii y cada tilde se
+                           convierte en un signo de interrogacion: "Se registr? su
+                           entrada". No es un problema de la plantilla ni de la base:
+                           MailMessage.BodyEncoding viene en null y .NET cae a ASCII.
+                           El asunto no lo necesita -eso si lo resuelve solo, con
+                           =?utf-8?B?...?=- pero se declara igual para que los dos
+                           digan lo mismo. */
+                        mail.BodyEncoding = System.Text.Encoding.UTF8;
+                        mail.SubjectEncoding = System.Text.Encoding.UTF8;
+
                         foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
                         {
                             mail.To.Add(correoIndividual);
@@ -1498,6 +1508,16 @@ namespace CorreoHelper
                     try
                     {
                         mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        /* Sin esto el cuerpo sale en us-ascii y cada tilde se
+                           convierte en un signo de interrogacion: "Se registr? su
+                           entrada". No es un problema de la plantilla ni de la base:
+                           MailMessage.BodyEncoding viene en null y .NET cae a ASCII.
+                           El asunto no lo necesita -eso si lo resuelve solo, con
+                           =?utf-8?B?...?=- pero se declara igual para que los dos
+                           digan lo mismo. */
+                        mail.BodyEncoding = System.Text.Encoding.UTF8;
+                        mail.SubjectEncoding = System.Text.Encoding.UTF8;
 
                         foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
                         {
@@ -1567,6 +1587,16 @@ namespace CorreoHelper
                     {
                         mail.From = new MailAddress(emailFrom, emailFromName);
 
+                        /* Sin esto el cuerpo sale en us-ascii y cada tilde se
+                           convierte en un signo de interrogacion: "Se registr? su
+                           entrada". No es un problema de la plantilla ni de la base:
+                           MailMessage.BodyEncoding viene en null y .NET cae a ASCII.
+                           El asunto no lo necesita -eso si lo resuelve solo, con
+                           =?utf-8?B?...?=- pero se declara igual para que los dos
+                           digan lo mismo. */
+                        mail.BodyEncoding = System.Text.Encoding.UTF8;
+                        mail.SubjectEncoding = System.Text.Encoding.UTF8;
+
                         foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
                         {
                             mail.To.Add(correoIndividual);
@@ -1624,6 +1654,16 @@ namespace CorreoHelper
                     try
                     {
                         mail.From = new MailAddress(emailFrom, emailFromName);
+
+                        /* Sin esto el cuerpo sale en us-ascii y cada tilde se
+                           convierte en un signo de interrogacion: "Se registr? su
+                           entrada". No es un problema de la plantilla ni de la base:
+                           MailMessage.BodyEncoding viene en null y .NET cae a ASCII.
+                           El asunto no lo necesita -eso si lo resuelve solo, con
+                           =?utf-8?B?...?=- pero se declara igual para que los dos
+                           digan lo mismo. */
+                        mail.BodyEncoding = System.Text.Encoding.UTF8;
+                        mail.SubjectEncoding = System.Text.Encoding.UTF8;
 
                         foreach (string correoIndividual in NegDestinatariosCorreo.Separar(correosDestinatarios))
                         {

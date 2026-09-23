@@ -352,5 +352,103 @@ namespace CapaPruebas
             Assert.IsNotNull(r);
             Assert.AreEqual(0, r.Count);
         }
+
+        /* ------------------------------------------------------ pivote ----- */
+
+        private static List<EntDashboardPersonaEmpresa> Cruce(params string[] datos)
+        {
+            /* Cada terna es persona, empresa, minutos. */
+            var lista = new List<EntDashboardPersonaEmpresa>();
+            for (int i = 0; i < datos.Length; i += 3)
+            {
+                lista.Add(new EntDashboardPersonaEmpresa
+                {
+                    Id_Responsable = datos[i],
+                    Nombre = datos[i],
+                    Empresa = datos[i + 1],
+                    Minutos = int.Parse(datos[i + 2], CultureInfo.InvariantCulture)
+                });
+            }
+            return lista;
+        }
+
+        [TestMethod]
+        public void Pivote_ColocaCadaValorEnSuCelda()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "A", "60", "ANA", "B", "30", "LUIS", "A", "120"), 8);
+
+            Assert.AreEqual(2, t.Columnas.Count);
+            Assert.AreEqual("A", t.Columnas[0], "la columna con mas minutos va primero");
+            Assert.AreEqual("B", t.Columnas[1]);
+
+            Assert.AreEqual("LUIS", t.Filas[0].Nombre, "las filas van por total descendente");
+            Assert.AreEqual(120, t.Filas[0].Minutos[0]);
+            Assert.AreEqual(0, t.Filas[0].Minutos[1], "celda sin dato es cero, no un hueco");
+
+            Assert.AreEqual("ANA", t.Filas[1].Nombre);
+            Assert.AreEqual(60, t.Filas[1].Minutos[0]);
+            Assert.AreEqual(30, t.Filas[1].Minutos[1]);
+        }
+
+        [TestMethod]
+        public void Pivote_TotalesPorFilaYPorColumnaCuadran()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "A", "60", "ANA", "B", "30", "LUIS", "A", "120"), 8);
+
+            Assert.AreEqual(120, t.Filas[0].MinutosTotal);
+            Assert.AreEqual(90, t.Filas[1].MinutosTotal);
+
+            Assert.AreEqual(180, t.Totales.Minutos[0], "columna A");
+            Assert.AreEqual(30, t.Totales.Minutos[1], "columna B");
+            Assert.AreEqual(210, t.Totales.MinutosTotal);
+        }
+
+        [TestMethod]
+        public void Pivote_ConMasClientesQueColumnas_ElSobranteVaAOtras()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "A", "100", "ANA", "B", "50", "ANA", "C", "20", "ANA", "D", "5"), 2);
+
+            Assert.AreEqual(3, t.Columnas.Count);
+            Assert.AreEqual("Otras", t.Columnas[2]);
+            Assert.AreEqual(25, t.Filas[0].Minutos[2], "20 + 5");
+            Assert.AreEqual(175, t.Filas[0].MinutosTotal, "el total general no cambia por recortar");
+        }
+
+        [TestMethod]
+        public void Pivote_EmpresaVaciaSeAgrupaBajoLaEtiquetaDelSql()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "", "40", "ANA", "A", "10"), 8);
+
+            Assert.IsTrue(t.Columnas.Contains("(sin empresa)"));
+            Assert.AreEqual(50, t.Filas[0].MinutosTotal, "no se descarta: seguiria sin cuadrar con la tarjeta");
+        }
+
+        [TestMethod]
+        public void Pivote_ConvierteAHorasDespuesDeSumar()
+        {
+            /* Tres tramos de 5 minutos son 15 minutos: 0,25 h, que HorasDecimales
+               redondea al par y deja en 0,2. Convertir cada tramo antes de sumar daria
+               0,1 + 0,1 + 0,1 = 0,3. Por eso la conversion va al final. */
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "A", "5", "ANA", "A", "5", "ANA", "A", "5"), 8);
+
+            Assert.AreEqual(15, t.Filas[0].Minutos[0]);
+            Assert.AreEqual(0.2m, t.Filas[0].Horas[0]);
+            Assert.AreEqual(0.2m, t.Filas[0].HorasTotal);
+        }
+
+        [TestMethod]
+        public void Pivote_ConListaNula_DevuelveTablaVacia()
+        {
+            var t = NegDashboardAprobacion.Pivote(null, 8);
+
+            Assert.IsNotNull(t);
+            Assert.AreEqual(0, t.Columnas.Count);
+            Assert.AreEqual(0, t.Filas.Count);
+        }
     }
 }

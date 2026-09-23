@@ -28,6 +28,8 @@ namespace CapaNegocio
         /// <summary>Etiqueta "Otras" de la porcion que agrupa la cola larga.</summary>
         private const string EtiquetaOtras = "Otras";
 
+        public const string EtiquetaSinEmpresa = "(sin empresa)";
+
         /// <summary>Lo que dice la tarjeta de demora cuando no hay con que calcularla.</summary>
         private const string SinDato = "sin datos";
 
@@ -49,6 +51,10 @@ namespace CapaNegocio
                mostraba un numero que no correspondia a ninguna de las dos
                tarjetas de arriba. */
             datos.Empresas = TopConOtras(SoloAprobadas(datos.Empresas), 10);
+
+            /* Ocho columnas y no diez: aqui cada columna compite con el ancho de
+               la pantalla, no con la leyenda de un grafico. */
+            datos.TablaClientes = Pivote(datos.PersonaEmpresa, 8);
 
             Convertir(datos);
 
@@ -194,6 +200,120 @@ namespace CapaNegocio
             });
 
             return resultado;
+        }
+
+        /// <summary>
+        /// La tabla persona x cliente: una fila por persona, una columna por
+        /// cliente, mas "Otras" cuando hay mas clientes que columnas.
+        ///
+        /// Las columnas se eligen por minutos totales, no por cuantas personas
+        /// las tocaron: la tabla responde "en que se fue el tiempo".
+        ///
+        /// Se convierte a horas DESPUES de sumar, igual que en Convertir:
+        /// sumar horas ya redondeadas no da lo mismo que redondear la suma.
+        /// </summary>
+        public static EntDashboardTablaClientes Pivote(List<EntDashboardPersonaEmpresa> filas, int columnas)
+        {
+            EntDashboardTablaClientes tabla = new EntDashboardTablaClientes();
+            if (filas == null || filas.Count == 0) { return tabla; }
+
+            /* 1. Totales por empresa, para elegir las columnas. */
+            Dictionary<string, int> porEmpresa = new Dictionary<string, int>();
+            foreach (EntDashboardPersonaEmpresa f in filas)
+            {
+                string empresa = NombreEmpresa(f.Empresa);
+                if (!porEmpresa.ContainsKey(empresa)) { porEmpresa[empresa] = 0; }
+                porEmpresa[empresa] += f.Minutos;
+            }
+
+            List<KeyValuePair<string, int>> ordenadas = new List<KeyValuePair<string, int>>(porEmpresa);
+            ordenadas.Sort((a, b) => b.Value.CompareTo(a.Value));
+
+            Dictionary<string, int> indice = new Dictionary<string, int>();
+            bool hayOtras = columnas > 0 && ordenadas.Count > columnas;
+
+            for (int i = 0; i < ordenadas.Count; i++)
+            {
+                if (!hayOtras || i < columnas)
+                {
+                    indice[ordenadas[i].Key] = tabla.Columnas.Count;
+                    tabla.Columnas.Add(ordenadas[i].Key);
+                }
+            }
+
+            int columnaOtras = -1;
+            if (hayOtras)
+            {
+                columnaOtras = tabla.Columnas.Count;
+                tabla.Columnas.Add(EtiquetaOtras);
+            }
+
+            /* 2. Una fila por persona. */
+            Dictionary<string, EntDashboardFilaCliente> porPersona =
+                new Dictionary<string, EntDashboardFilaCliente>();
+
+            foreach (EntDashboardPersonaEmpresa f in filas)
+            {
+                string clave = f.Id_Responsable ?? "";
+                if (!porPersona.ContainsKey(clave))
+                {
+                    porPersona[clave] = FilaVacia(f.Nombre, tabla.Columnas.Count);
+                }
+
+                string empresa = NombreEmpresa(f.Empresa);
+                int destino = indice.ContainsKey(empresa) ? indice[empresa] : columnaOtras;
+                if (destino < 0) { continue; }
+
+                porPersona[clave].Minutos[destino] += f.Minutos;
+                porPersona[clave].MinutosTotal += f.Minutos;
+            }
+
+            tabla.Filas = new List<EntDashboardFilaCliente>(porPersona.Values);
+            tabla.Filas.Sort((a, b) => b.MinutosTotal.CompareTo(a.MinutosTotal));
+
+            /* 3. Totales y conversion, al final. */
+            tabla.Totales = FilaVacia("Total", tabla.Columnas.Count);
+
+            foreach (EntDashboardFilaCliente fila in tabla.Filas)
+            {
+                for (int c = 0; c < tabla.Columnas.Count; c++)
+                {
+                    tabla.Totales.Minutos[c] += fila.Minutos[c];
+                    fila.Horas[c] = HorasDecimales(fila.Minutos[c]);
+                }
+                tabla.Totales.MinutosTotal += fila.MinutosTotal;
+                fila.HorasTotal = HorasDecimales(fila.MinutosTotal);
+            }
+
+            for (int c = 0; c < tabla.Columnas.Count; c++)
+            {
+                tabla.Totales.Horas[c] = HorasDecimales(tabla.Totales.Minutos[c]);
+            }
+            tabla.Totales.HorasTotal = HorasDecimales(tabla.Totales.MinutosTotal);
+
+            return tabla;
+        }
+
+        private static EntDashboardFilaCliente FilaVacia(string nombre, int columnas)
+        {
+            EntDashboardFilaCliente fila = new EntDashboardFilaCliente { Nombre = nombre ?? "" };
+            for (int i = 0; i < columnas; i++)
+            {
+                fila.Minutos.Add(0);
+                fila.Horas.Add(0m);
+            }
+            return fila;
+        }
+
+        /// <summary>
+        /// El nombre visible del cliente. La empresa vacia se agrupa y no se
+        /// descarta: descartarla dejaria la tabla sin cuadrar con la tarjeta de
+        /// horas aprobadas.
+        /// </summary>
+        private static string NombreEmpresa(string empresa)
+        {
+            string limpio = (empresa ?? "").Trim();
+            return limpio.Length == 0 ? EtiquetaSinEmpresa : limpio;
         }
 
         /// <summary>

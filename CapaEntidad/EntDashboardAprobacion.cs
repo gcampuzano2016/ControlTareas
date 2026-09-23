@@ -120,6 +120,42 @@
         public string TextoMasViejoPendiente { get; set; } = "";
     }
 
+    /// <summary>
+    /// Una celda del cruce: cuanto tiempo aprobado puso una persona en un
+    /// cliente. Viene del sexto conjunto del procedimiento, sin recortar.
+    /// </summary>
+    public class EntDashboardPersonaEmpresa
+    {
+        public string Id_Responsable { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Empresa { get; set; } = "";
+        public int Minutos { get; set; }
+    }
+
+    /// <summary>
+    /// Una fila de la tabla. Minutos y Horas tienen una posicion por columna,
+    /// en el mismo orden que EntDashboardTablaClientes.Columnas.
+    /// </summary>
+    public class EntDashboardFilaCliente
+    {
+        public string Nombre { get; set; } = "";
+        public System.Collections.Generic.List<int> Minutos { get; set; }
+            = new System.Collections.Generic.List<int>();
+        public System.Collections.Generic.List<decimal> Horas { get; set; }
+            = new System.Collections.Generic.List<decimal>();
+        public int MinutosTotal { get; set; }
+        public decimal HorasTotal { get; set; }
+    }
+
+    public class EntDashboardTablaClientes
+    {
+        public System.Collections.Generic.List<string> Columnas { get; set; }
+            = new System.Collections.Generic.List<string>();
+        public System.Collections.Generic.List<EntDashboardFilaCliente> Filas { get; set; }
+            = new System.Collections.Generic.List<EntDashboardFilaCliente>();
+        public EntDashboardFilaCliente Totales { get; set; } = new EntDashboardFilaCliente();
+    }
+
     /// <summary>Los cinco bloques, tal como viajan al navegador.</summary>
     public class EntDashboardAprobacion
     {
@@ -131,5 +167,10 @@
         public EntDashboardDemora Demora { get; set; } = new EntDashboardDemora();
         public System.Collections.Generic.List<EntDashboardEmpresa> Empresas { get; set; }
             = new System.Collections.Generic.List<EntDashboardEmpresa>();
+
+        public System.Collections.Generic.List<EntDashboardPersonaEmpresa> PersonaEmpresa { get; set; }
+            = new System.Collections.Generic.List<EntDashboardPersonaEmpresa>();
+
+        public EntDashboardTablaClientes TablaClientes { get; set; } = new EntDashboardTablaClientes();
     }
 }

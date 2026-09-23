@@ -548,11 +548,19 @@ devuelve.
 
 ### 10.2 Archivos a publicar
 
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
 - `Formulario\AprobacionTareasJefatura.aspx` (sube a `dashboardAprobacion.js?v=5`)
 - `js\dashboardAprobacion.js`
-- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
 
 Los tres de capa son `.exe`, no `.dll`.
+
+**Los binarios van primero.** Con la pantalla y el `.js` nuevos pero los binarios
+viejos, el JSON que arma el handler no trae `TablaClientes` — el DAO viejo no lo
+llena — y llega `undefined` al navegador. La función que dibuja la tabla cae en su
+rama de vacío y muestra «Sin horas aprobadas en el rango» sobre un rango que sí las
+tiene: un mensaje tranquilizador y falso. El orden inverso es inocuo: binarios
+nuevos con pantalla vieja simplemente no dibujan la tabla nueva, sin mentir sobre
+los datos.
 
 ### 10.3 Avisar antes de publicar
 

@@ -2,7 +2,12 @@
    Dashboard de aprobacion: horas aprobadas por empresa y cruce persona x cliente
    ReporTarea  |  2026-09-23
 
-   PENDIENTE DE EJECUTAR.
+   YA APLICADO EN PRODUCCION (verificado el 2026-09-23). Se corrio contra
+   192.168.11.14/ReporTarea, sin ningun Msg de error, y se comprobo con
+   EXEC dbo.Sp_RTA_DashboardAprobacionJefatura: devuelve seis conjuntos y el
+   MinutosAprobados del conjunto 1 cuadra con la suma de MinutosAprobados del
+   conjunto 6 (103960 = 103960 en la muestra usada). Se repitio la comprobacion
+   despues de la ronda de correccion y dio lo mismo.
 
    Recrea Sp_RTA_DashboardAprobacionJefatura con dos cambios:
 
@@ -16,6 +21,16 @@
 
    Los dos salen de #Base, que ya trae Estado y Empresa: la consulta que la
    llena no cambia. Por eso los numeros cuadran con la tabla de APROBADAS.
+
+   El procedimiento entero devuelve TODO ya agregado. El navegador dibuja, no
+   suma: traer miles de filas para que el JavaScript las recorra seria lento y,
+   peor, pondria el calculo de horas en un segundo lugar distinto del que usa
+   la tabla de la misma pantalla.
+
+   El parseo de Det_Tiempo es el de Sp_RTAListaHorasRecursosPorJefatura, copiado:
+   SUBSTRING(...,1,2)*60 + SUBSTRING(...,4,2). Descarta los segundos y se deja
+   asi A PROPOSITO. Si el grafico sumara los segundos y la tabla no, dirian
+   cifras distintas sobre el mismo dato.
 
    Idempotente: DROP y CREATE. No toca ninguna tabla: solo lee.
    ============================================================================ */

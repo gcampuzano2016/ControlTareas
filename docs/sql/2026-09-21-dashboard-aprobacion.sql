@@ -2,6 +2,13 @@
    Dashboard de aprobacion para jefatura: los cinco conjuntos
    ReporTarea  |  2026-09-21
 
+   REEMPLAZADO por docs/sql/2026-09-23-dashboard-horas-por-cliente.sql, que es
+   la definicion vigente del procedimiento (agrega MinutosAprobados por empresa
+   y el conjunto 6 de persona x cliente). NO VOLVER A CORRER ESTE SCRIPT: si se
+   corre, el procedimiento vuelve a devolver cinco conjuntos y la tabla nueva
+   de la pantalla (TablaClientes, la que cruza persona y cliente) queda vacia
+   SIN NINGUN ERROR, porque el DAO tolera la ausencia del sexto conjunto.
+
    YA APLICADO EN PRODUCCION (verificado el 2026-09-21, despues de la ronda
    de correcciones). Se corrio la version corregida y se comprobo contra la
    base: cinco conjuntos, PersonasDiaTotal presente y DiasPromedio decimal

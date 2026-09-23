@@ -34,7 +34,7 @@ namespace CapaNegocio
         private const string SinDato = "sin datos";
 
         /// <summary>
-        /// Los cinco conjuntos del dashboard, con las empresas ya reducidas a un
+        /// Los siete conjuntos del dashboard, con las empresas ya reducidas a un
         /// top 10 mas "Otras" y con las horas y los textos ya resueltos.
         ///
         /// El recorte se hace aca y no en SQL: la regla esta probada en
@@ -141,8 +141,9 @@ namespace CapaNegocio
         ///
         /// Existe para no cambiarle el criterio a TopConOtras, que ordena y
         /// agrupa por Minutos y tiene pruebas que dependen de eso. Devuelve
-        /// copias: las entidades originales viajan al JSON de la pantalla y
-        /// pisarlas cambiaria lo que ve el navegador.
+        /// copias porque una funcion que recibe una lista no debe mutar lo
+        /// que le dan: la lista que entra aca es la misma que trae datos.Empresas,
+        /// y quien la paso puede seguir usandola despues de este llamado.
         /// </summary>
         public static List<EntDashboardEmpresa> SoloAprobadas(List<EntDashboardEmpresa> lista)
         {

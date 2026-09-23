@@ -156,7 +156,7 @@
         public EntDashboardFilaCliente Totales { get; set; } = new EntDashboardFilaCliente();
     }
 
-    /// <summary>Los cinco bloques, tal como viajan al navegador.</summary>
+    /// <summary>Los siete bloques, tal como viajan al navegador.</summary>
     public class EntDashboardAprobacion
     {
         public EntDashboardTotales Totales { get; set; } = new EntDashboardTotales();

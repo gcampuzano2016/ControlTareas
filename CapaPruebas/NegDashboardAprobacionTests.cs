@@ -417,13 +417,70 @@ namespace CapaPruebas
             Assert.AreEqual(175, t.Filas[0].MinutosTotal, "el total general no cambia por recortar");
         }
 
+        /// <summary>
+        /// El camino que la prueba anterior no ejercia: una persona cuyas
+        /// empresas caen TODAS fuera del tope, no solo alguna. Su fila entera
+        /// sale de columnaOtras, y el total general sigue sin perder minutos.
+        /// </summary>
+        [TestMethod]
+        public void Pivote_PersonaConTodasSusEmpresasFueraDelTope_SumaCompletaEnOtras()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("LUIS", "A", "100", "ANA", "B", "30", "ANA", "C", "20"), 1);
+
+            Assert.AreEqual(2, t.Columnas.Count);
+            Assert.AreEqual("Otras", t.Columnas[1]);
+
+            var filaAna = t.Filas.Find(f => f.Nombre == "ANA");
+            Assert.IsNotNull(filaAna);
+            Assert.AreEqual(0, filaAna.Minutos[0], "ANA nunca toco la empresa que quedo como columna");
+            Assert.AreEqual(50, filaAna.Minutos[1], "30 + 20, todo cae en Otras");
+            Assert.AreEqual(50, filaAna.MinutosTotal);
+
+            Assert.AreEqual(150, t.Totales.MinutosTotal, "el total general no cambia por recortar");
+        }
+
+        /// <summary>
+        /// Con tope <= 0 no hay con que recortar: se devuelven todas las
+        /// empresas como columnas, sin "Otras". Es la misma convencion que
+        /// TopConOtras (ver su comentario) y no pierde ni un minuto.
+        /// </summary>
+        [TestMethod]
+        public void Pivote_ConTopeCeroONegativo_DevuelveTodasLasEmpresasComoColumnas()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "A", "10", "ANA", "B", "9", "ANA", "C", "8"), 0);
+
+            Assert.AreEqual(3, t.Columnas.Count);
+            Assert.IsFalse(t.Columnas.Contains("Otras"));
+        }
+
+        /// <summary>
+        /// Dictionary no garantiza el orden de enumeracion y List.Sort es
+        /// inestable: sin desempate por nombre, dos empresas empatadas justo en
+        /// el corte podian cambiar de lado -cual es columna y cual cae en
+        /// "Otras"- entre una corrida y la siguiente, con los mismos datos.
+        /// </summary>
+        [TestMethod]
+        public void Pivote_ConEmpresasEmpatadas_DesempataPorNombreAscendente()
+        {
+            var t = NegDashboardAprobacion.Pivote(
+                Cruce("ANA", "B", "50", "ANA", "A", "50"), 1);
+
+            Assert.AreEqual(2, t.Columnas.Count);
+            Assert.AreEqual("A", t.Columnas[0], "empate en minutos: gana el nombre ascendente, no el orden de llegada");
+            Assert.AreEqual("Otras", t.Columnas[1]);
+        }
+
         [TestMethod]
         public void Pivote_EmpresaVaciaSeAgrupaBajoLaEtiquetaDelSql()
         {
             var t = NegDashboardAprobacion.Pivote(
                 Cruce("ANA", "", "40", "ANA", "A", "10"), 8);
 
-            Assert.IsTrue(t.Columnas.Contains("(sin empresa)"));
+            int col = t.Columnas.IndexOf("(sin empresa)");
+            Assert.IsTrue(col >= 0, "la etiqueta del SQL debe existir como columna");
+            Assert.AreEqual(40, t.Filas[0].Minutos[col], "los 40 minutos sin empresa caen en su propia celda");
             Assert.AreEqual(50, t.Filas[0].MinutosTotal, "no se descarta: seguiria sin cuadrar con la tarjeta");
         }
 
@@ -439,6 +496,7 @@ namespace CapaPruebas
             Assert.AreEqual(15, t.Filas[0].Minutos[0]);
             Assert.AreEqual(0.2m, t.Filas[0].Horas[0]);
             Assert.AreEqual(0.2m, t.Filas[0].HorasTotal);
+            Assert.AreEqual(0.2m, t.Totales.Horas[0], "es lo primero que se mira en la tabla");
         }
 
         [TestMethod]

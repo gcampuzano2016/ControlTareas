@@ -226,10 +226,23 @@ namespace CapaNegocio
                 porEmpresa[empresa] += f.Minutos;
             }
 
+            /* Minutos descendente y, en empate, nombre ascendente. Dictionary no
+               garantiza el orden de enumeracion y List.Sort es inestable: sin este
+               desempate, dos empresas empatadas justo en el corte podian cambiar
+               de lado -cual es columna y cual cae en "Otras"- entre una corrida y
+               la siguiente, con los mismos datos. */
             List<KeyValuePair<string, int>> ordenadas = new List<KeyValuePair<string, int>>(porEmpresa);
-            ordenadas.Sort((a, b) => b.Value.CompareTo(a.Value));
+            ordenadas.Sort((a, b) =>
+            {
+                int porMinutos = b.Value.CompareTo(a.Value);
+                return porMinutos != 0 ? porMinutos : string.CompareOrdinal(a.Key, b.Key);
+            });
 
             Dictionary<string, int> indice = new Dictionary<string, int>();
+
+            /* Igual que TopConOtras: con un tope que no acota (columnas <= 0) se
+               devuelven todas las empresas como columnas, sin agrupar nada en
+               "Otras". No es un error ni pierde minutos, es la misma convencion. */
             bool hayOtras = columnas > 0 && ordenadas.Count > columnas;
 
             for (int i = 0; i < ordenadas.Count; i++)
@@ -268,8 +281,14 @@ namespace CapaNegocio
                 porPersona[clave].MinutosTotal += f.Minutos;
             }
 
+            /* Mismo desempate que en las columnas: total descendente y, en
+               empate, nombre ascendente. */
             tabla.Filas = new List<EntDashboardFilaCliente>(porPersona.Values);
-            tabla.Filas.Sort((a, b) => b.MinutosTotal.CompareTo(a.MinutosTotal));
+            tabla.Filas.Sort((a, b) =>
+            {
+                int porTotal = b.MinutosTotal.CompareTo(a.MinutosTotal);
+                return porTotal != 0 ? porTotal : string.CompareOrdinal(a.Nombre, b.Nombre);
+            });
 
             /* 3. Totales y conversion, al final. */
             tabla.Totales = FilaVacia("Total", tabla.Columnas.Count);

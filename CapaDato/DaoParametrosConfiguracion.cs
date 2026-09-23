@@ -27,7 +27,18 @@ namespace CapaDato
                 objParametroConfiguracion = new EntParametrosConfiguracion();
                 dr.Read();
 
-                objParametroConfiguracion.Valor = dr["Valor"].ToString();
+                /* Se recorta al leer. Un parametro de configuracion no tiene espacios ni
+                   saltos de linea significativos al principio ni al final, y en cambio
+                   llegan solos: una clave pegada desde un correo trae un CR+LF invisible
+                   detras. Paso de verdad -la clave de controldetareas@dos.com.ec quedo
+                   guardada como 8 caracteres + CR + LF- y dejo sin correo a todo el
+                   sistema, sin un solo mensaje que lo delatara: SmtpClient envia la clave
+                   con el salto pegado y Office 365 responde 535, igual que ante una clave
+                   equivocada.
+
+                   Aqui y no en quien llama: son 166 llamadas repartidas por todo el
+                   sistema y ninguna tiene por que saber esto. */
+                objParametroConfiguracion.Valor = dr["Valor"].ToString().Trim();
 
                 //resultado = dr["Respuesta"].ToString();
             }
@@ -65,7 +76,19 @@ namespace CapaDato
                 objParametroConfiguracion = new EntParametrosConfiguracion();
                 dr.Read();
 
-                valor = dr["Valor"].ToString();
+                /* Se recorta al leer. Un parametro de configuracion no tiene espacios ni
+                   saltos de linea significativos al principio ni al final, y en cambio
+                   llegan solos: una clave pegada desde un correo trae un CR+LF invisible
+                   detras. Paso de verdad -la clave de controldetareas@dos.com.ec quedo
+                   guardada como 8 caracteres + CR + LF- y dejo sin correo a todo el
+                   sistema, sin un solo mensaje que lo delatara: SmtpClient envia la clave
+                   con el salto pegado y Office 365 responde 535, igual que ante una clave
+                   equivocada.
+
+                   El otro lector de esta misma clase -el que devuelve la lista de un
+                   grupo- NO recorta a proposito: alimenta el mantenimiento de
+                   parametros, y ahi conviene ver lo que esta guardado tal cual. */
+                valor = dr["Valor"].ToString().Trim();
 
                 //resultado = dr["Respuesta"].ToString();
             }

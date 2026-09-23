@@ -536,3 +536,26 @@ avisa con un mensaje, pero si no aparece ni el mensaje, es que tampoco llegó
 `dashboardAprobacion.js`. En ambos casos la causa más probable es que el
 paquete que se copió al servidor era uno viejo, regenerado antes de que estos
 dos archivos existieran.
+
+## 10. Horas por persona y cliente en el dashboard
+
+### 10.1 Base de datos
+
+`docs/sql/2026-09-23-dashboard-horas-por-cliente.sql` — recrea
+`Sp_RTA_DashboardAprobacionJefatura`. Idempotente, y no toca ninguna tabla: solo lee.
+Va **antes** de los binarios: el DAO nuevo lee un conjunto que el procedimiento viejo no
+devuelve.
+
+### 10.2 Archivos a publicar
+
+- `Formulario\AprobacionTareasJefatura.aspx` (sube a `dashboardAprobacion.js?v=5`)
+- `js\dashboardAprobacion.js`
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
+
+Los tres de capa son `.exe`, no `.dll`.
+
+### 10.3 Avisar antes de publicar
+
+**El gráfico "Horas por empresa" va a mostrar números más bajos.** Hasta esta entrega
+sumaba todos los estados; ahora muestra solo lo aprobado, como las tarjetas de arriba. No
+es una pérdida de datos, es la corrección — pero la jefatura ya está mirando ese gráfico.

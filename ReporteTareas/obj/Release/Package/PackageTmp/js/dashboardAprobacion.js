@@ -99,6 +99,7 @@ function PintarDashboard(d) {
     PintarPorPersona(d.Responsables || []);
     PintarDemora(dem);
     PintarPorEmpresa(d.Empresas || []);
+    PintarTablaClientes(d.TablaClientes || {});
 
     CargarNoEjecutadas();
 }
@@ -360,4 +361,53 @@ function PintarPorEmpresa(empresas) {
             plugins: { legend: { position: "right", labels: { boxWidth: 12, font: { size: 10 } } } }
         }
     });
+}
+
+/* La tabla persona x cliente. Se arma con texto y no con una libreria: son
+   nueve columnas y treinta filas, y DataTables en esta pantalla no se carga. */
+function PintarTablaClientes(tabla) {
+    var $tabla = $("#dashTablaClientes");
+    var $vacia = $("#dashTablaClientesVacia");
+    var columnas = tabla.Columnas || [];
+    var filas = tabla.Filas || [];
+
+    if (columnas.length === 0 || filas.length === 0) {
+        $tabla.empty().hide();
+        $vacia.show();
+        return;
+    }
+
+    $vacia.hide();
+    $tabla.show();
+
+    var html = "<thead><tr><th>Persona</th>";
+    $.each(columnas, function (i, c) {
+        html += "<th style='text-align:right'>" + DashEscapar(c) + "</th>";
+    });
+    html += "<th style='text-align:right'>Total</th></tr></thead><tbody>";
+
+    $.each(filas, function (i, f) {
+        html += "<tr><td>" + DashEscapar(f.Nombre) + "</td>";
+        $.each(f.Horas, function (j, h) {
+            html += "<td style='text-align:right'>" + DashNumero(h) + "</td>";
+        });
+        html += "<td style='text-align:right'><b>" + DashNumero(f.HorasTotal) + "</b></td></tr>";
+    });
+
+    html += "</tbody>";
+
+    var t = tabla.Totales || {};
+    html += "<tfoot><tr><th>Total</th>";
+    $.each(t.Horas || [], function (j, h) {
+        html += "<th style='text-align:right'>" + DashNumero(h) + "</th>";
+    });
+    html += "<th style='text-align:right'>" + DashNumero(t.HorasTotal || 0) + "</th></tr></tfoot>";
+
+    $tabla.html(html);
+}
+
+/* Los nombres de cliente y de persona vienen de la base y se insertan como
+   HTML. Sin esto, un nombre con < o & rompe la tabla. */
+function DashEscapar(texto) {
+    return $("<div>").text(texto == null ? "" : texto).html();
 }

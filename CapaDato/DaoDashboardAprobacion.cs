@@ -6,12 +6,12 @@ using System.Data.SqlClient;
 namespace CapaDato
 {
     /// <summary>
-    /// Lee los cinco conjuntos del dashboard en UNA sola ida a la base.
+    /// Lee los seis conjuntos del dashboard en UNA sola ida a la base.
     ///
     /// El orden de los NextResult() es el mismo en que el procedimiento declara
     /// los SELECT, y no hay forma de que el compilador lo verifique: si alguien
     /// agrega un conjunto en el medio, esta clase lee el equivocado sin dar
-    /// error. Por eso el script tiene una comprobacion que cuenta los cinco.
+    /// error. Por eso el script tiene una comprobacion que cuenta los seis.
     /// </summary>
     public class DaoDashboardAprobacion
     {

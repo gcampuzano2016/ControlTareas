@@ -63,8 +63,8 @@ BEGIN
     SET @VeTodo = CASE WHEN @IdUsuarioJefe IN ('1314','1171','222692','1655906')
                        THEN 1 ELSE 0 END;
 
-    /* Tabla temporal y no CTE: los cinco conjuntos la recorren, y con un CTE se
-       recalcularia cinco veces. */
+    /* Tabla temporal y no CTE: los seis conjuntos la recorren, y con un CTE se
+       recalcularia seis veces. */
     CREATE TABLE #Base
     (
         Id_Responsable VARCHAR(50),
@@ -223,7 +223,7 @@ GO
 SELECT nombre = name, creado = CONVERT(VARCHAR(20), modify_date, 120)
   FROM sys.procedures WHERE name = 'Sp_RTA_DashboardAprobacionJefatura';
 
-   2) Que devuelva cinco conjuntos y que los totales cuadren con la pantalla.
+   2) Que devuelva seis conjuntos y que los totales cuadren con la pantalla.
       Usar un jefe y un rango reales, los mismos que se elijan en la pantalla:
 
 EXEC dbo.Sp_RTA_DashboardAprobacionJefatura '1171', '01-03-2026', '31-03-2026';

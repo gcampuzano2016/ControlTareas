@@ -6,7 +6,7 @@
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
     <script src="../js/jquery.blockUI.js" type="text/javascript"></script>
     <script src="../js/chart.umd.js" type="text/javascript"></script>
-    <script src="../js/dashboardAprobacion.js?v=4" type="text/javascript"></script>
+    <script src="../js/dashboardAprobacion.js?v=5" type="text/javascript"></script>
    
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -180,9 +180,23 @@
                                 </div>
                                 <div class="col-lg-4">
                                     <div class="panel panel-default">
-                                        <div class="panel-heading">Horas por empresa</div>
+                                        <div class="panel-heading">Horas aprobadas por empresa</div>
                                         <div class="panel-body" style="height: 260px">
                                             <canvas id="graficoPorEmpresa"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Horas aprobadas por persona y cliente</div>
+                                        <div class="panel-body" style="overflow-x: auto">
+                                            <div id="dashTablaClientesVacia" class="text-muted" style="display: none">
+                                                Sin horas aprobadas en el rango.
+                                            </div>
+                                            <table id="dashTablaClientes" class="table table-condensed table-striped" style="font-size: 12px"></table>
                                         </div>
                                     </div>
                                 </div>

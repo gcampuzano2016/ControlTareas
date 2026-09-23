@@ -290,7 +290,7 @@ git commit -m "fix(dashboard): el grafico de empresas muestra lo aprobado, no la
   - `EntDashboardTablaClientes { List<string> Columnas, List<EntDashboardFilaCliente> Filas, EntDashboardFilaCliente Totales }`
   - `EntDashboardAprobacion.PersonaEmpresa` (lista) y `EntDashboardAprobacion.TablaClientes`
   - `NegDashboardAprobacion.Pivote(List<EntDashboardPersonaEmpresa> filas, int columnas) → EntDashboardTablaClientes`
-  - `NegDashboardAprobacion.EtiquetaSinCliente` = `"(sin cliente)"`
+  - `NegDashboardAprobacion.EtiquetaSinEmpresa` = `"(sin empresa)"` — **la misma etiqueta que ya emite el SQL**, ver la nota abajo
 
 - [ ] **Paso 1: Escribir las pruebas que fallan**
 
@@ -360,12 +360,12 @@ public void Pivote_ConMasClientesQueColumnas_ElSobranteVaAOtras()
 }
 
 [TestMethod]
-public void Pivote_EmpresaVaciaSeAgrupaEnSinCliente()
+public void Pivote_EmpresaVaciaSeAgrupaBajoLaEtiquetaDelSql()
 {
     var t = NegDashboardAprobacion.Pivote(
         Cruce("ANA", "", "40", "ANA", "A", "10"), 8);
 
-    Assert.IsTrue(t.Columnas.Contains("(sin cliente)"));
+    Assert.IsTrue(t.Columnas.Contains("(sin empresa)"));
     Assert.AreEqual(50, t.Filas[0].MinutosTotal, "no se descarta: seguiria sin cuadrar con la tarjeta");
 }
 
@@ -460,7 +460,7 @@ Y dentro de `EntDashboardAprobacion`, junto a `Empresas`:
 En `CapaNegocio/NegDashboardAprobacion.cs`, debajo de `TopConOtras`. La constante va junto a `EtiquetaOtras`:
 
 ```csharp
-        public const string EtiquetaSinCliente = "(sin cliente)";
+        public const string EtiquetaSinEmpresa = "(sin empresa)";
 ```
 
 ```csharp
@@ -575,7 +575,7 @@ En `CapaNegocio/NegDashboardAprobacion.cs`, debajo de `TopConOtras`. La constant
         private static string NombreEmpresa(string empresa)
         {
             string limpio = (empresa ?? "").Trim();
-            return limpio.Length == 0 ? EtiquetaSinCliente : limpio;
+            return limpio.Length == 0 ? EtiquetaSinEmpresa : limpio;
         }
 ```
 

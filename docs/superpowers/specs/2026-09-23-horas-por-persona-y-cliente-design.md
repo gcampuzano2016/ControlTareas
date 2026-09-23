@@ -154,7 +154,7 @@ Total           60,0       29,5       2,0      4,5     96,0
 - **Rango sin horas aprobadas:** la tabla dice «sin horas aprobadas en el rango», no queda
   vacía. Un cuerpo en blanco y un error se ven igual.
 - **Empresa vacía:** las tareas sin `Nom_Empresa` (18 de cada 4.000) se agrupan bajo
-  `(sin cliente)`. No se descartan: si se descartaran, la suma de la tabla dejaría de
+  `(sin empresa)`. No se descartan: si se descartaran, la suma de la tabla dejaría de
   coincidir con la tarjeta de horas aprobadas, y esa diferencia haría dudar de las dos.
 - **Una persona sin horas aprobadas** no aparece como fila. La tabla es del tiempo
   aprobado, no del equipo.
@@ -169,7 +169,7 @@ En `CapaPruebas/NegDashboardAprobacionTests.cs`, escritas antes del código:
 - Los totales por fila y por columna cuadran con la suma de las celdas.
 - Con más clientes que columnas, el sobrante cae entero en «Otras» —ni se pierde ni se
   duplica— y el total general no cambia.
-- Una empresa vacía o nula se agrupa bajo `(sin cliente)` y sigue sumando.
+- Una empresa vacía o nula se agrupa bajo `(sin empresa)` y sigue sumando.
 - Las filas salen ordenadas por total descendente.
 
 La lectura del sexto conjunto en `CapaDato` no se prueba automáticamente: necesita base. Se

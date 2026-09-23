@@ -1,4 +1,4 @@
-var tipoGeneral = 0;
+﻿var tipoGeneral = 0;
 var idregistroGeneral = 0;
 var os = "";
 var bandera = 0;

@@ -1,4 +1,4 @@
-/* ============================================================================
+﻿/* ============================================================================
    Feriados y saldo en las solicitudes de vacaciones.
 
    Hasta agosto de 2026 el colaborador escribía a mano cuántos feriados caían

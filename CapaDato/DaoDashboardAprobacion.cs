@@ -91,7 +91,28 @@ namespace CapaDato
                             d.Empresas.Add(new EntDashboardEmpresa
                             {
                                 Empresa = Texto(dr, "Empresa"),
-                                Minutos = Entero(dr, "Minutos")
+                                Minutos = Entero(dr, "Minutos"),
+                                MinutosAprobados = Entero(dr, "MinutosAprobados")
+                            });
+                        }
+                    }
+
+                    /* 6. persona x cliente.
+
+                       Si el procedimiento todavia es el viejo, NextResult()
+                       devuelve false y la lista queda vacia: la pantalla dice
+                       "sin horas aprobadas" en vez de fallar. Ese es el sentido
+                       seguro de la ventana entre el script y los binarios. */
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            d.PersonaEmpresa.Add(new EntDashboardPersonaEmpresa
+                            {
+                                Id_Responsable = Texto(dr, "Id_Responsable"),
+                                Nombre = Texto(dr, "Nombre"),
+                                Empresa = Texto(dr, "Empresa"),
+                                Minutos = Entero(dr, "MinutosAprobados")
                             });
                         }
                     }

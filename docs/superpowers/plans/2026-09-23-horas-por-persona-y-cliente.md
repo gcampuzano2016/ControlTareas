@@ -140,7 +140,7 @@ git commit -m "feat(dashboard): el procedimiento devuelve aprobadas por empresa 
 
 **Interfaces:**
 - Consume: `EntDashboardEmpresa.Minutos` (ya existe).
-- Produce: `EntDashboardEmpresa.MinutosAprobados` (int), `EntDashboardEmpresa.HorasAprobadas` (decimal) y `NegDashboardAprobacion.SoloAprobadas(List<EntDashboardEmpresa>) → List<EntDashboardEmpresa>`.
+- Produce: `EntDashboardEmpresa.MinutosAprobados` (int) y `NegDashboardAprobacion.SoloAprobadas(List<EntDashboardEmpresa>) → List<EntDashboardEmpresa>`. El gráfico sigue leyendo `Horas`, que `Convertir` ya calcula desde `Minutos`.
 
 > **Por qué así y no tocando `TopConOtras`:** esa función ordena y agrupa por `Minutos`, y tiene cinco pruebas que dependen de eso. En vez de cambiarle el criterio, se le entrega una lista donde `Minutos` **ya es** lo aprobado. `TopConOtras` queda intacta y sus pruebas siguen verdes.
 
@@ -200,10 +200,12 @@ En `CapaEntidad/EntDashboardAprobacion.cs`, dentro de `EntDashboardEmpresa`, deb
 ```csharp
         /* Lo aprobado, aparte del total. El grafico muestra esto; Minutos se
            conserva porque el DAO viejo lo lee durante la ventana entre el
-           script y los binarios. */
-        public int MinutosAprobados { get; set; }
+           script y los binarios.
 
-        public decimal HorasAprobadas { get; set; }
+           No hay HorasAprobadas a proposito: Convertir hace
+           e.Horas = HorasDecimales(e.Minutos), y despues de SoloAprobadas ese
+           Minutos ya es lo aprobado. Un campo mas viajaria siempre en cero. */
+        public int MinutosAprobados { get; set; }
 ```
 
 - [ ] **Paso 4: Escribir `SoloAprobadas`**

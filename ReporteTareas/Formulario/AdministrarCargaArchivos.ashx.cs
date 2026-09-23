@@ -24,6 +24,14 @@ namespace JsonJQueryNetAdministrarCargaArchivos
         
         public void ProcessRequest(HttpContext context)
         {
+            /* Los bytes de la respuesta se escriben con la codificacion que fija
+               Web.config -windows-1252-, mientras la cabecera declara utf-8:
+               Response.Charset solo cambia la etiqueta, no como se codifica. Con esa
+               mezcla, cada tilde o enie de los mensajes y de los textos que vienen de
+               la base llegaba rota al navegador. Mismo arreglo que en
+               ObtenerListaTareas.ashx.cs. */
+            context.Response.ContentEncoding = System.Text.Encoding.UTF8;
+
             dynamic parametros;
             StringBuilder responseAction = new StringBuilder();
 

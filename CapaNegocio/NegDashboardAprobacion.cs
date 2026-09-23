@@ -45,7 +45,10 @@ namespace CapaNegocio
             EntDashboardAprobacion datos =
                 DaoDashboardAprobacion.Cargar(idUsuarioJefe, fechaDesde, fechaHasta);
 
-            datos.Empresas = TopConOtras(datos.Empresas, 10);
+            /* Solo aprobadas: hasta hoy este grafico sumaba todos los estados y
+               mostraba un numero que no correspondia a ninguna de las dos
+               tarjetas de arriba. */
+            datos.Empresas = TopConOtras(SoloAprobadas(datos.Empresas), 10);
 
             Convertir(datos);
 
@@ -125,6 +128,32 @@ namespace CapaNegocio
             if (minutos <= 0) { return 0m; }
 
             return System.Math.Round(minutos / 60m, 1);
+        }
+
+        /// <summary>
+        /// La misma lista, con lo aprobado puesto en Minutos.
+        ///
+        /// Existe para no cambiarle el criterio a TopConOtras, que ordena y
+        /// agrupa por Minutos y tiene pruebas que dependen de eso. Devuelve
+        /// copias: las entidades originales viajan al JSON de la pantalla y
+        /// pisarlas cambiaria lo que ve el navegador.
+        /// </summary>
+        public static List<EntDashboardEmpresa> SoloAprobadas(List<EntDashboardEmpresa> lista)
+        {
+            List<EntDashboardEmpresa> resultado = new List<EntDashboardEmpresa>();
+            if (lista == null) { return resultado; }
+
+            foreach (EntDashboardEmpresa e in lista)
+            {
+                resultado.Add(new EntDashboardEmpresa
+                {
+                    Empresa = e.Empresa,
+                    Minutos = e.MinutosAprobados,
+                    MinutosAprobados = e.MinutosAprobados
+                });
+            }
+
+            return resultado;
         }
 
         /// <summary>

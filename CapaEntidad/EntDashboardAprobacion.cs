@@ -13,6 +13,15 @@
         public string Empresa { get; set; } = "";
         public int Minutos { get; set; }
 
+        /* Lo aprobado, aparte del total. El grafico muestra esto; Minutos se
+           conserva porque el DAO viejo lo lee durante la ventana entre el
+           script y los binarios.
+
+           No hay HorasAprobadas a proposito: Convertir hace
+           e.Horas = HorasDecimales(e.Minutos), y despues de SoloAprobadas ese
+           Minutos ya es lo aprobado. Un campo mas viajaria siempre en cero. */
+        public int MinutosAprobados { get; set; }
+
         /// <summary>Los mismos minutos en horas, con un decimal.</summary>
         public decimal Horas { get; set; }
     }

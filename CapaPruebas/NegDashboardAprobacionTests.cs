@@ -315,5 +315,42 @@ namespace CapaPruebas
         {
             Assert.AreEqual("hoy", NegDashboardAprobacion.TextoDemoraPromedio(0m, 12));
         }
+
+        /* ---------------------------------------- solo aprobadas ---- */
+
+        [TestMethod]
+        public void SoloAprobadas_PasaLoAprobadoComoMinutos()
+        {
+            var lista = new List<EntDashboardEmpresa>
+            {
+                new EntDashboardEmpresa { Empresa = "A", Minutos = 100, MinutosAprobados = 60 }
+            };
+
+            var r = NegDashboardAprobacion.SoloAprobadas(lista);
+
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual("A", r[0].Empresa);
+            Assert.AreEqual(60, r[0].Minutos);
+        }
+
+        [TestMethod]
+        public void SoloAprobadas_NoModificaLaListaOriginal()
+        {
+            var original = new EntDashboardEmpresa { Empresa = "A", Minutos = 100, MinutosAprobados = 60 };
+            var lista = new List<EntDashboardEmpresa> { original };
+
+            NegDashboardAprobacion.SoloAprobadas(lista);
+
+            Assert.AreEqual(100, original.Minutos, "la entidad original viaja al JSON: no se pisa");
+        }
+
+        [TestMethod]
+        public void SoloAprobadas_ConListaNula_DevuelveVacia()
+        {
+            var r = NegDashboardAprobacion.SoloAprobadas(null);
+
+            Assert.IsNotNull(r);
+            Assert.AreEqual(0, r.Count);
+        }
     }
 }

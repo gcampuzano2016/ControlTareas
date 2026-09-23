@@ -55,6 +55,30 @@ namespace CapaDato
 
                 using (SqlDataReader dr = cmd.ExecuteReader())
                 {
+                    /* EsPropio se lee solo si el procedimiento la trae.
+
+                       La columna la agrega 2026-09-07-catalogo-de-horarios.sql. Donde ese
+                       script no corrio, el procedimiento devuelve las diez columnas de
+                       siempre y el indexador del lector tira IndexOutOfRangeException con
+                       el nombre de la columna como unico mensaje: la pantalla decia
+                       "Error al cargar los usuarios. EsPropio" y no listaba a nadie.
+                       Paso en produccion entre el 07-09 y el 22-09-2026.
+
+                       Sin la columna se asume 0 -horario compartido-, que es como se
+                       comportaba la pantalla antes de que existiera el horario propio:
+                       el combo de perfiles en vez del editor individual. Asi funciona en
+                       las dos bases, con el script y sin el, y el dia que el script
+                       corra la funcion aparece sola, sin volver a tocar el binario. */
+                    bool traeEsPropio = false;
+                    for (int i = 0; i < dr.FieldCount; i++)
+                    {
+                        if (string.Equals(dr.GetName(i), "EsPropio", StringComparison.OrdinalIgnoreCase))
+                        {
+                            traeEsPropio = true;
+                            break;
+                        }
+                    }
+
                     while (dr.Read())
                     {
                         lista.Add(new EntUsuarioHorario()
@@ -69,7 +93,7 @@ namespace CapaDato
                             NombreHorario = dr["NombreHorario"].ToString(),
                             EsPredeterminado = Convert.ToInt32(dr["EsPredeterminado"].ToString()),
                             FechaDesde = dr["FechaDesde"].ToString(),
-                            EsPropio = Convert.ToInt32(dr["EsPropio"].ToString())
+                            EsPropio = traeEsPropio ? Convert.ToInt32(dr["EsPropio"].ToString()) : 0
                         });
                     }
                 }

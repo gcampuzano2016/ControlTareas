@@ -59,6 +59,7 @@
     <Compile Include="NegCorreoSolicitudTests.cs" />
     <Compile Include="NegDashboardAprobacionTests.cs" />
     <Compile Include="NegDestinatariosCorreoTests.cs" />
+    <Compile Include="NegReenvioSolicitudTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

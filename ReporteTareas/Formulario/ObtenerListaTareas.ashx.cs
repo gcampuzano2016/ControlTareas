@@ -812,6 +812,12 @@ namespace JsonJQueryNetTareas
                     responseAction.Append(ActualizarSolicitudBase(parameters));
                 }
 
+                if (Action == "ReenviarCorreoSolicitud")
+                {
+                    existAction = true;
+                    responseAction.Append(ReenviarCorreoSolicitud(parameters));
+                }
+
                 if (Action == "RegistrarEvento")
                 {
                     existAction = true;
@@ -6371,47 +6377,7 @@ namespace JsonJQueryNetTareas
                     string urlAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado1;
                     string urlRechazarAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado2;
                     // Llenado de listado de parámetros a ser reemplazados en el contenido del correo electrónico.
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE PERMISO" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta1", Valor = "Fecha:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto1", Valor = Lista.FechaRegistro });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta11", Valor = "Cédula:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto11", Valor = Lista.Cedula });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Colaborador:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto2", Valor = Lista.Colaborador });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta21", Valor = "Departamento:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto21", Valor = Lista.Departamento });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Jefe Inmedianto:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto3", Valor = Lista.JefeInmediato });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta4", Valor = "Actividad a Realizar:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto4", Valor = Lista.Actividad });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto22", Valor = "Horas de Permiso" });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta23", Valor = "Desde:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto23", Valor = Lista.FechaDesde });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta25", Valor = "Hasta:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto25", Valor = Lista.FechaHasta });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta26", Valor = "Total de Horas:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto26", Valor = Lista.Horas });
-
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta27", Valor = "Cargo a vacaciones:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto27", Valor = Lista.StrCargoVacaciones });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta28", Valor = "Observación:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto28", Valor = Lista.Observacion });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton1", Valor = "Aprobar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton1", Valor = urlAprobacion });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton2", Valor = "Rechazar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton2", Valor = urlRechazarAprobacion });
+                    listaCamposCorreo = NegCamposCorreoSolicitud.Permiso(Lista, urlAprobacion, urlRechazarAprobacion);
 
                     bool respuestaEnvioCorreo = false;
                     bool respuestaEnvioCorreoUsuario = false;
@@ -6528,50 +6494,7 @@ namespace JsonJQueryNetTareas
                     string urlAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado1;
                     string urlRechazarAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + valorIncritado2;
                     // Llenado de listado de parámetros a ser reemplazados en el contenido del correo electrónico.
-                    if (tipoSolicitud == 2)
-                    {
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE VACACIONES" });
-                    }
-                    else if (tipoSolicitud == 3)
-                    {
-                        listaCamposCorreo.Add(new EntItemValor() { Item = "tituloNotificacion", Valor = "SOLICITUD DE PLANIFICACIÓN DE VACACIONES" });
-                    }
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta1", Valor = "Fecha:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto1", Valor = Lista.FechaRegistro });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta11", Valor = "Cédula:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto11", Valor = Lista.Cedula });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta2", Valor = "Colaborador:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto2", Valor = Lista.Colaborador });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta21", Valor = "Departamento:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto21", Valor = Lista.Departamento });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta3", Valor = "Jefe Inmedianto:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto3", Valor = Lista.JefeInmediato });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta4", Valor = "Reemplazo:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto4", Valor = Lista.Remplazo });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto22", Valor = "Dias de Vacaciones" });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta23", Valor = "Desde:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto23", Valor = Lista.FechaDesde });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta25", Valor = "Hasta:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto25", Valor = Lista.FechaHasta });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta26", Valor = "Días Solicitados:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto26", Valor = Lista.TotalDias.ToString() });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiqueta27", Valor = "Saldo de días:" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "texto27", Valor = Lista.SaldoDias.ToString() });
-
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton1", Valor = "Aprobar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton1", Valor = urlAprobacion });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "etiquetaBoton2", Valor = "Rechazar" });
-                    listaCamposCorreo.Add(new EntItemValor() { Item = "urlBoton2", Valor = urlRechazarAprobacion });
+                    listaCamposCorreo = NegCamposCorreoSolicitud.Vacaciones(Lista, tipoSolicitud, urlAprobacion, urlRechazarAprobacion);
 
                     bool respuestaEnvioCorreo = false;
                     bool respuestaEnvioCorreoUsuario = false;
@@ -6719,6 +6642,81 @@ namespace JsonJQueryNetTareas
             }
 
             return respuestaProceso;
+        }
+
+        /// <summary>
+        /// Vuelve a mandarle al jefe el correo de aprobacion de una solicitud que
+        /// sigue POR APROBAR. Para cuando el envio del guardado fallo y el jefe
+        /// nunca se entero.
+        ///
+        /// Arma el mismo correo que el guardado (NegCamposCorreoSolicitud, misma
+        /// plantilla y mismos enlaces) y queda en la bitacora como REENVIO_JEFE,
+        /// para distinguirlo del envio original.
+        /// </summary>
+        public string ReenviarCorreoSolicitud(dynamic campos)
+        {
+            try
+            {
+                SeguridadHelper seguridad = new SeguridadHelper();
+                string IdUsuarioSession = seguridad.Desencripta(campos["session"]);
+                int IdSolicitud = Convert.ToInt32(campos["IdVacaciones"]);
+
+                EntSolicitud Lista = NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, IdSolicitud);
+
+                string motivo = NegReenvioSolicitud.MotivoParaNoReenviar(Lista, IdUsuarioSession);
+                if (motivo != null)
+                {
+                    return responseMessage("0", motivo, "warning", "");
+                }
+
+                string correoJefeInmediato = NegUsuario.RTA_CorreoJefeInmediato(IdUsuarioSession);
+                if (string.IsNullOrWhiteSpace(correoJefeInmediato))
+                {
+                    return responseMessage("0", "Su jefe inmediato no tiene un correo registrado. Comuníquese con el administrador del sistema.", "warning", "");
+                }
+
+                EnvioCorreoHelper envioCorreo = new EnvioCorreoHelper();
+
+                // Los mismos enlaces de aprobar y rechazar que arma el guardado.
+                string marca = NegReenvioSolicitud.MarcaDelEnlace(Lista.IdTipoSolicitud);
+                string valorEncritar1 = Lista.IdVacaciones.ToString() + ";" + Lista.IdVacaciones.ToString() + ";" + "SA" + ";" + Lista.Cod_Usuario.Trim() + ";" + marca;
+                string valorEncritar2 = Lista.IdVacaciones.ToString() + ";" + Lista.IdVacaciones.ToString() + ";" + "SR" + ";" + Lista.Cod_Usuario.Trim() + ";" + marca;
+                string urlSiteAprobacion = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("URL_SITE_APROBACIONES");
+                string urlAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + envioCorreo.Encrypt(valorEncritar1, "3m1l10100", "3m1l10100");
+                string urlRechazarAprobacion = urlSiteAprobacion + "/Formulario/RespuestaAprobacion.aspx?idValor=" + envioCorreo.Encrypt(valorEncritar2, "3m1l10100", "3m1l10100");
+
+                string asunto = NegReenvioSolicitud.Asunto(Lista.IdTipoSolicitud);
+                bool enviado;
+                envioCorreo.ParaSolicitud(IdSolicitud, "REENVIO_JEFE");
+
+                if (Lista.IdTipoSolicitud == 1)
+                {
+                    List<EntItemValor> listaCamposCorreo = NegCamposCorreoSolicitud.Permiso(Lista, urlAprobacion, urlRechazarAprobacion);
+                    enviado = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, asunto, envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionPermiso.txt"), listaCamposCorreo, "contenidoCorreoNotificacionPermiso.txt", IdSolicitud);
+                }
+                else if (Lista.IdTipoSolicitud == 3)
+                {
+                    // La planificacion va sin documento, igual que en el guardado.
+                    List<EntItemValor> listaCamposCorreo = NegCamposCorreoSolicitud.Vacaciones(Lista, Lista.IdTipoSolicitud, urlAprobacion, urlRechazarAprobacion);
+                    enviado = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, asunto, envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt");
+                }
+                else
+                {
+                    List<EntItemValor> listaCamposCorreo = NegCamposCorreoSolicitud.Vacaciones(Lista, Lista.IdTipoSolicitud, urlAprobacion, urlRechazarAprobacion);
+                    enviado = envioCorreo.EnvioCorreoSolicitudJefe(correoJefeInmediato, asunto, envioCorreo.EstructuraContenidoCorreoSolicitud("contenidoCorreoNotificacionSolicitud.txt"), listaCamposCorreo, "contenidoCorreoNotificacionSolicitud.txt", IdSolicitud);
+                }
+
+                if (!enviado)
+                {
+                    return responseMessage("0", "No se pudo enviar el correo. Intente más tarde o comuníquese con el administrador del sistema.", "danger", "");
+                }
+
+                return responseMessage("1", "Se reenvió la solicitud a " + correoJefeInmediato + ".", "success", "");
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrio un error al reenviar el correo. " + ex.Message.ToString(), "danger", "");
+            }
         }
 
         public string ConsultaBiometria(dynamic campos)

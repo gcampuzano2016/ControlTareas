@@ -7,7 +7,7 @@
 
     <script src="../js/padFirma.js?v=3" type="text/javascript"></script>
     <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
-    <script src="../js/Convenio.js?v=45" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=47" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -16,6 +16,44 @@
     <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />
     <script src="../bower_components/sweetalert/js/sweetalert.min.js"></script>
     <script src="../bower_components/sweetalert/js/sweetalert.init.js"></script>
+
+    <%-- La tabla de la consulta de solicitudes (Convenio.js, RecorreJSONTableSelect).
+         DataTables llega desde Master.Master solo con su JS, sin hoja de estilos:
+         lo minimo que necesita (flechas de orden, buscador, paginacion) va aca.
+         Queda en la pagina y no en dos-tema.css para no obligar a republicar el
+         Master ni a cambiar su ?v= por una sola pantalla. --%>
+    <style>
+        .tabla-solicitudes > thead > tr > th,
+        .tabla-solicitudes > tbody > tr > td { padding: 9px 12px; white-space: nowrap; }
+        .tabla-solicitudes > tbody > tr > td:first-child { font-weight: normal; }
+        .tabla-solicitudes .acciones-solicitud .btn { margin-right: 3px; }
+        .tabla-solicitudes .acciones-solicitud .btn:last-child { margin-right: 0; }
+        .tabla-solicitudes .texto-recortado { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+
+        .tabla-solicitudes > thead > tr > th.sorting,
+        .tabla-solicitudes > thead > tr > th.sorting_asc,
+        .tabla-solicitudes > thead > tr > th.sorting_desc { cursor: pointer; position: relative; padding-right: 24px; }
+        .tabla-solicitudes > thead > tr > th.sorting:after,
+        .tabla-solicitudes > thead > tr > th.sorting_asc:after,
+        .tabla-solicitudes > thead > tr > th.sorting_desc:after { font-family: FontAwesome; position: absolute; right: 9px; }
+        .tabla-solicitudes > thead > tr > th.sorting:after { content: "\f0dc"; opacity: .25; }
+        .tabla-solicitudes > thead > tr > th.sorting_asc:after { content: "\f0de"; opacity: .8; }
+        .tabla-solicitudes > thead > tr > th.sorting_desc:after { content: "\f0dd"; opacity: .8; }
+
+        /* Las filas de Bootstrap traen margin -15px esperando un contenedor con
+           padding, pero #datosTablaPrincipal lo tiene en 0 inline: sin esto el
+           selector y el buscador quedan cortados a los costados. */
+        #tablaSolicitudes_wrapper { overflow: visible; }
+        #table-datosTablaPrincipal > .row,
+        #tablaSolicitudes_wrapper > .row { margin-left: 0; margin-right: 0; }
+        #tablaSolicitudes_wrapper .tabla-solicitudes-scroll { overflow-x: auto; margin: 6px 0; }
+        #tablaSolicitudes_wrapper .dataTables_length select { width: auto; height: auto; padding: 4px 8px; display: inline-block; margin: 0 4px; }
+        #tablaSolicitudes_wrapper .dataTables_filter { text-align: right; }
+        #tablaSolicitudes_wrapper .dataTables_filter input { width: 220px; display: inline-block; margin-left: 6px; }
+        #tablaSolicitudes_wrapper .dataTables_info { padding-top: 14px; color: var(--crm-tinta-suave); }
+        #tablaSolicitudes_wrapper .dataTables_paginate { text-align: right; }
+        #tablaSolicitudes_wrapper .pagination { margin: 8px 0; }
+    </style>
 
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -484,7 +522,7 @@
                                                                 </div>
                                                             </div>
                                                             <!-- /.panel-heading -->
-                                                            <div class="panel-body" style="height: 400px; overflow-y: auto; overflow-x: auto;">
+                                                            <div class="panel-body">
                                                                 <div id="table-datosTablaPrincipal" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
                                                                     <div class="row">
                                                                         <div class="col-sm-12" id='datosTablaPrincipal' style="padding: 0px">

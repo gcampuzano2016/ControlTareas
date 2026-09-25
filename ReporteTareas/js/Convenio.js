@@ -210,8 +210,14 @@ function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
     }
 
     if (tipoControl == "tableSelect") {
-        contenido = RecorreJSONTableSelect(json, boton);
-        $(div).html(contenido);
+        DestruirTablaSolicitudes();
+        $(div).html(RecorreJSONTableSelect(json, boton));
+        InicializarTablaSolicitudes();
+        /* CargarPagina escribe en el div lo que devuelve esta funcion. Si
+           devolviera el HTML, volveria a pintar la tabla encima de la que
+           DataTables acaba de armar. Con undefined, .html() no toca nada: es lo
+           mismo que ya hace la rama "select". */
+        return undefined;
     }
 
     if (tipoControl == "tableSelectPantalla") {
@@ -245,6 +251,44 @@ function AprobarSolicitud(idvacaciones, estadoSolicitud, Descripcion) {
         StrTipoSolicitud = Descripcion;
         $("#modalCargarProceso").modal('show');
     }
+}
+
+/* Vuelve a mandarle al jefe el correo de aprobacion, para cuando el envio del
+   guardado fallo. closeOnConfirm en false para que el resultado reemplace a la
+   confirmacion: con true, sweetAlert cierra tambien el aviso que se abre en el
+   callback. */
+function ReenviarCorreoSolicitud(idvacaciones) {
+    swal({
+        title: "¿Reenviar correo?",
+        text: "Se volverá a enviar a su jefe inmediato el correo de aprobación de la solicitud " + idvacaciones + ".",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Reenviar",
+        cancelButtonText: "Cancelar",
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true
+    }, function () {
+        var parametros = { "session": $("#ContentPlaceHolder1_txtUsuario").val(), "IdVacaciones": idvacaciones };
+        $.ajax({
+            type: "POST",
+            url: "ObtenerListaTareas.ashx",
+            data: JSON.stringify([{ "action": "ReenviarCorreoSolicitud", "parameters": parametros }]),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (respuesta) {
+                if (respuesta.estado == "1") {
+                    MensajeCorrecto(respuesta.mensaje);
+                } else if (respuesta.tipoMensaje == "warning") {
+                    alerta2(respuesta.mensaje);
+                } else {
+                    MensajeIncorrecto(respuesta.mensaje);
+                }
+            },
+            error: function () {
+                MensajeIncorrecto("No se pudo contactar al servidor para reenviar el correo, vuelva a intentarlo en unos segundos.");
+            }
+        });
+    });
 }
 
 function EditarSolicitud(idvacaciones, tipoVacacion) {
@@ -349,55 +393,51 @@ function ActualizarSolicitudProceso(tipo) {
 
 }
 
+/* La consulta de solicitudes del colaborador.
+
+   Se quitaron cedula, colaborador, departamento y jefe: la consulta solo trae
+   las solicitudes propias, asi que eran la misma informacion repetida en cada
+   fila. Siguen en el detalle y en el Descargar XLS.
+
+   La tabla la ordena, pagina y filtra DataTables (InicializarTablaSolicitudes),
+   que carga Master.Master para todas las pantallas. */
 function RecorreJSONTableSelect(json, idSeleccionado) {
     var info = "";
-    //
-    // Despliegue de titulos de cabecera
-    //
-    var thInicial = "<th class='' tabindex='0' aria-controls='dataTables - Datos' rowspan='1' colspan='1' aria-label='Engine version: activate to sort column ascending' style='width: 147px;'>";
-    var thFinal = "</th>";
-    info = info + "<table width='100%' class='table table-striped table-bordered table-hover dataTable no-footer dtr-inline' role='grid' aria-describedby='dataTables-example_info' style='width: 100%;'>";
-    info = info + "<thead><tr role='row'>";
-    info = info + thInicial + "--ACCIONES--" + thFinal;
-    info = info + thInicial + "ESTADO SOLICITUD" + thFinal;
-    info = info + thInicial + "CODIGO" + thFinal;
-    info = info + thInicial + "TIPO SOLICITUD" + thFinal;
-    info = info + thInicial + "FECHA REGISTRO" + thFinal;
-    info = info + thInicial + "CEDULA" + thFinal;
-    info = info + thInicial + "COLABORADOR" + thFinal;
-    info = info + thInicial + "DEPARTAMENTO" + thFinal;
-    info = info + thInicial + "JEFE INMEDIATO" + thFinal;
-    info = info + thInicial + "FECHA DESDE" + thFinal;
-    info = info + thInicial + "FECHA HASTA" + thFinal;
-    info = info + thInicial + "HORAS" + thFinal;
-    info = info + thInicial + "ACTIVIDAD" + thFinal;
-    info = info + thInicial + "DIAS" + thFinal;
-    info = info + thInicial + "FERIADO" + thFinal;
-    info = info + thInicial + "TOTAL DIAS" + thFinal;
-    info = info + thInicial + "SALDO DIAS" + thFinal;
-    info = info + thInicial + "MOTIVO RECHAZO" + thFinal;
+    info = info + "<table id='tablaSolicitudes' class='table table-hover tabla-solicitudes' style='width: 100%;'>";
+    info = info + "<thead><tr>";
+    info = info + "<th>Acciones</th>";
+    info = info + "<th>Estado</th>";
+    info = info + "<th>Código</th>";
+    info = info + "<th>Tipo</th>";
+    info = info + "<th>Fecha registro</th>";
+    info = info + "<th>Desde</th>";
+    info = info + "<th>Hasta</th>";
+    info = info + "<th>Horas</th>";
+    info = info + "<th>Actividad</th>";
+    info = info + "<th>Días</th>";
+    info = info + "<th>Feriado</th>";
+    info = info + "<th>Total días</th>";
+    info = info + "<th>Saldo días</th>";
+    info = info + "<th>Motivo rechazo</th>";
     info = info + "</tr></thead>";
 
     info = info + "<tbody>";
-    var totalValor1 = 0;
-    var totalValor2 = 0;
-    var totalValor3 = 0;
-    var esImpar = true;
     $.each(json, function (i, item) {
 
-        info = info + "<tr class='gradeA odd' role = 'row' id='tr-" + item.IdPedido + "'>";
+        info = info + "<tr>";
 
-        info = info + "<td class='sorting_1' style='text-align:center'>";
-        info = info + "<button type='button' value='Actualizar' title='Imprimir Solicitud' class='btn btn-btn-editClientes btn-xs' onclick='VerListadoArchivosVacaciones(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");' ><i class='fa fa-print' aria-hidden='true'></i></button>";
-        info = info + "&nbsp;|&nbsp;";
-        info = info + "<button type='button' value='Actualizar' title='Anular solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.EstadoSolicitud + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-tasks' aria-hidden='true'></i></button>";
-        info = info + "&nbsp;|&nbsp;";
-        info = info + "<button type='button' value='Actualizar' title='Editar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='EditarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>";
-        info = info + "&nbsp;|&nbsp;";
-        info = info + "<button type='button' value='Actualizar' title='Cambiar estado de Planificación a Vacaciones' class='btn btn-btn-editClientes btn-xs' onclick='CambiarEstado(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-cubes' aria-hidden='true'></i></button>";
-        info = info + "&nbsp;|&nbsp;";
+        info = info + "<td class='acciones-solicitud'>";
+        info = info + "<button type='button' title='Imprimir Solicitud' class='btn btn-btn-editClientes btn-xs' onclick='VerListadoArchivosVacaciones(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");' ><i class='fa fa-print' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Anular solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.EstadoSolicitud + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-tasks' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Editar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='EditarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Cambiar estado de Planificación a Vacaciones' class='btn btn-btn-editClientes btn-xs' onclick='CambiarEstado(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-cubes' aria-hidden='true'></i></button>";
+        /* Solo mientras el jefe no decide: despues el enlace de aprobar ya no
+           sirve. El servidor lo vuelve a comprobar, esto solo evita ofrecerlo. */
+        if (item.EstadoSolicitud == "POR APROBAR") {
+            info = info + "<button type='button' title='Reenviar correo al jefe' class='btn btn-btn-editClientes btn-xs' onclick='ReenviarCorreoSolicitud(\"" + item.IdVacaciones + "\");' ><i class='fa fa-envelope-o' aria-hidden='true'></i></button>";
+        }
         if (item.conteoArchivosAdjuntos != '0') {
-            info = info + "<button type=\"button\" class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
+            info = info + "<button type='button' title='Archivos adjuntos' class='btn btn-info btn-xs' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
         }
 
         /* El boton de descarga del PDF firmado queda oculto por pedido del
@@ -406,37 +446,101 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
            devolver este bloque y nada mas.
 
         if (item.EstadoSolicitud == "PROCESADO") {
-            info = info + "&nbsp;|&nbsp;";
             info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
         }
         */
 
         info = info + "</td>";
-        info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";
-        info = info + "<td class='sorting_1'>" + item.IdVacaciones + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Descripcion + "</td>";
-        info = info + "<td class='sorting_1'>" + item.FechaRegistro + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Cedula + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Colaborador + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Departamento + "</td>";
-        info = info + "<td class='sorting_1'>" + item.JefeInmediato + "</td>";
-
-        info = info + "<td class='sorting_1'>" + item.FechaDesde + "</td>";
-        info = info + "<td class='sorting_1'>" + item.FechaHasta + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Horas + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Actividad + "</td>";
-        info = info + "<td class='sorting_1'>" + item.TotalDias.toFixed(2) + "</td>";
-        info = info + "<td class='sorting_1'>" + item.Feriado.toFixed(2) + "</td>";
-        info = info + "<td class='sorting_1'>" + format_two_digits((item.Feriado + item.TotalDias).toFixed(2)) + "</td>";
-        info = info + "<td class='sorting_1'>" + item.SaldoDias + "</td>";
-        info = info + "<td class='sorting_1'>" + item.MotivoAnulacion + "</td>";
-
+        info = info + "<td><span class='label " + ClaseEstadoSolicitud(item.EstadoSolicitud) + "'>" + EscaparHtml(item.EstadoSolicitud) + "</span></td>";
+        info = info + "<td>" + item.IdVacaciones + "</td>";
+        info = info + "<td>" + EscaparHtml(item.Descripcion) + "</td>";
+        info = info + CeldaFecha(item.FechaRegistro);
+        info = info + CeldaFecha(item.FechaDesde);
+        info = info + CeldaFecha(item.FechaHasta);
+        info = info + "<td>" + EscaparHtml(item.Horas) + "</td>";
+        info = info + CeldaTextoLargo(item.Actividad);
+        info = info + "<td class='text-right'>" + item.TotalDias.toFixed(2) + "</td>";
+        info = info + "<td class='text-right'>" + item.Feriado.toFixed(2) + "</td>";
+        info = info + "<td class='text-right'>" + format_two_digits((item.Feriado + item.TotalDias).toFixed(2)) + "</td>";
+        info = info + "<td class='text-right'>" + item.SaldoDias + "</td>";
+        info = info + CeldaTextoLargo(item.MotivoAnulacion);
+        info = info + "</tr>";
     });
 
     info = info + "</tbody>";
     info = info + "</table>";
 
     return info;
+}
+
+/* Color del estado con las pildoras del tema (dos-tema.css): ambar mientras
+   espera, verde si se concedio, rojo si no sigue. */
+function ClaseEstadoSolicitud(estado) {
+    var e = $.trim(estado || "").toUpperCase();
+    if (e == "POR APROBAR") { return "label-warning"; }
+    if (e == "APROBADO" || e == "PROCESADO") { return "label-success"; }
+    if (e.indexOf("RECHAZADO") == 0 || e == "ANULAR" || e == "ANULADO") { return "label-danger"; }
+    return "label-default";
+}
+
+function EscaparHtml(texto) {
+    return $("<div>").text(texto == null ? "" : String(texto)).html();
+}
+
+/* Las fechas llegan como "dd/MM/yyyy" (a veces con hora): ordenadas como texto,
+   el 01/10/2026 quedaria antes que el 14/04/2022. data-order le da a DataTables
+   una clave aaaammdd que si ordena bien. */
+function CeldaFecha(fecha) {
+    var texto = fecha == null ? "" : String(fecha);
+    var partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)$/.exec($.trim(texto));
+    var orden = partes ? partes[3] + ("0" + partes[2]).slice(-2) + ("0" + partes[1]).slice(-2) + partes[4] : texto;
+    return "<td data-order='" + EscaparHtml(orden) + "' class='text-nowrap'>" + EscaparHtml(texto) + "</td>";
+}
+
+/* Actividad y motivo pueden ser largos: una sola linea con puntos suspensivos,
+   y el texto completo al pasar el mouse. */
+function CeldaTextoLargo(texto) {
+    var t = EscaparHtml(texto);
+    return "<td><div class='texto-recortado' title='" + t.replace(/'/g, "&#39;") + "'>" + t + "</div></td>";
+}
+
+/* La tabla se vuelve a pintar entera en cada consulta (y despues de anular o
+   editar), asi que la instancia anterior se destruye antes de reemplazarla:
+   si no, DataTables sigue guardando la configuracion de una tabla que ya no
+   esta en la pagina. */
+function DestruirTablaSolicitudes() {
+    var tabla = $("#tablaSolicitudes");
+    if (tabla.length && $.fn.DataTable && $.fn.DataTable.isDataTable(tabla)) {
+        tabla.DataTable().destroy();
+    }
+}
+
+function InicializarTablaSolicitudes() {
+    var tabla = $("#tablaSolicitudes");
+    if (!tabla.length || !$.fn.DataTable) { return; }
+    tabla.DataTable({
+        order: [[2, "desc"]],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        autoWidth: false,
+        /* El layout de Bootstrap de siempre, pero con la tabla sola dentro de su
+           propio scroll horizontal: asi el buscador y la paginacion no se
+           desplazan con ella cuando no entra a lo ancho. */
+        dom: "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
+             "<'tabla-solicitudes-scroll'tr>" +
+             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        columnDefs: [{ targets: 0, orderable: false, searchable: false }],
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ solicitudes",
+            info: "Solicitudes _START_ a _END_ de _TOTAL_",
+            infoEmpty: "Sin solicitudes",
+            infoFiltered: "(filtradas de _MAX_)",
+            zeroRecords: "Ninguna solicitud coincide con la búsqueda",
+            emptyTable: "No hay solicitudes en el rango consultado",
+            paginate: { first: "Primera", last: "Última", next: "Siguiente", previous: "Anterior" }
+        }
+    });
 }
 
 function RecorreJSONTableSelectSaldos(json, idSeleccionado) {

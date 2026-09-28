@@ -215,6 +215,7 @@
     <Compile Include="NegPerfilCedula.cs" />
     <Compile Include="NegPerfilCv.cs" />
     <Compile Include="NegHeExportacion.cs" />
+    <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeParametros.cs" />
     <Compile Include="NegHeParametroPantalla.cs" />
     <Compile Include="NegHorasExtras.cs" />

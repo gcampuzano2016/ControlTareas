@@ -140,6 +140,9 @@
     <Compile Include="EntHePeriodo.cs" />
     <Compile Include="EntHeResultado.cs" />
     <Compile Include="EntHeSalario.cs" />
+    <Compile Include="EntHeFueraDeHorario.cs" />
+    <Compile Include="EntHeIntervaloPagado.cs" />
+    <Compile Include="EntHeSegmentoFuera.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

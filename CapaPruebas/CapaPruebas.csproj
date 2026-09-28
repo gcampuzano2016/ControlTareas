@@ -57,6 +57,7 @@
     <Compile Include="NegHorasExtrasPantallaTests.cs" />
     <Compile Include="NegHeParametroPantallaTests.cs" />
     <Compile Include="NegHeExportacionTests.cs" />
+    <Compile Include="NegHeFueraDeHorarioTests.cs" />
     <Compile Include="NegCorreoSolicitudTests.cs" />
     <Compile Include="NegDashboardAprobacionTests.cs" />
     <Compile Include="NegCalificacionForeCastTests.cs" />

@@ -644,3 +644,55 @@ Los tres de capa son `.exe`, no `.dll`, y van **juntos** con el `.dll`: el 18-09
 Basta con reponer los binarios y los dos archivos de la pantalla que había antes. El
 procedimiento `Sp_RTA_HeFueraDeHorario` puede quedar en la base: es de solo lectura y los
 binarios anteriores no lo llaman.
+
+## 13. Horas Extras: personas fuera del módulo, completar datos y ajustes de sueldo
+
+Tres cambios en la pantalla de Horas Extras:
+
+- **Recuadro amarillo:** muestra a los empleados activos que tienen horas en el período pero **no
+  están en el módulo**. Van sin montos, porque no tienen sueldo cargado. También salen en el
+  aviso de cierre y en la hoja nueva del Excel, «No están en el módulo».
+- **«Completar datos»:** los perfiles 14 y 18 pueden agregar a esa persona al módulo, con
+  empresa, cargo, jornada y sueldo.
+- **Ajuste de sueldo:** el ícono junto a cada nombre registra un ajuste. Agrega una fila al
+  historial y **nunca** borra ni modifica un sueldo.
+
+### 13.1 Base de datos
+
+`docs/sql/2026-09-28-horas-extras-fuera-del-modulo.sql` crea tres procedimientos:
+
+- `Sp_RTA_HeFueraDelModulo`: solo lectura.
+- `Sp_RTA_HeAgregarColaborador`: inserta, o reactiva, la persona en el maestro y le carga un
+  sueldo 'Rol'.
+- `Sp_RTA_HeAgregarAjusteSalario`: inserta un sueldo 'Ajuste'.
+
+El script va **antes** de los binarios. Su verificación no escribe nada: solo prueba los códigos
+de rechazo. Imprime `OK` o `VEREDICTO: FALLO`.
+
+### 13.2 Archivos a publicar
+
+Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe` y `bin\CapaDato.exe`,
+  **los cuatro juntos**;
+- `Formulario\HorasExtras.aspx`, que pasa a `horasExtras.js?v=9`;
+- `js\horasExtras.js`.
+
+### 13.3 Verificar después de publicar
+
+1. En el período 16-08 / 15-09-2026 aparece el recuadro con 2 personas: una con 11,00 h
+   aprobadas al 100% y otra con 2,98 h sin aprobar.
+2. Con un perfil 14 o 18, el recuadro muestra «Completar datos» y la grilla muestra el ícono de
+   ajuste. Con el perfil 2, no aparece ninguno de los dos.
+3. El Excel trae cuatro hojas.
+
+### 13.4 Cargar los datos que faltan
+
+Los datos los confirma **RRHH**. Se cargan desde la pantalla, no con un script, así cada fila
+queda con el usuario que la cargó. Si el período está abierto, al guardar se recalcula solo.
+
+### 13.5 Volver atrás
+
+Basta con reponer los binarios y los dos archivos de la pantalla anteriores. Los procedimientos
+pueden quedar en la base. Lo que ya se haya guardado desde la pantalla son filas normales del
+maestro y del historial de sueldos, y siguen valiendo con los binarios anteriores.

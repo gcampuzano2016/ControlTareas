@@ -619,7 +619,20 @@ function ConstruirFila(fila) {
     if (Number(fila.ValorHoraOrdinaria) === 0) { $fila.addClass("he-fila-error"); }
     if (Number(fila.TotalHoras) > 0) { $fila.addClass("he-fila-con-horas"); }
 
-    $fila.append($("<td></td>").text(fila.NombreSnapshot || "–"));
+    var $nombre = $("<td></td>").text(fila.NombreSnapshot || "–");
+
+    /* Ajuste de sueldo: solo perfiles 14 y 18 (el handler lo vuelve a comprobar).
+       El botón es solo un ícono, sin texto, para que .text() de la celda siga
+       siendo el nombre: NombreDeFila y el título del detalle lo leen así. */
+    if (typeof HE_PUEDE_EDITAR_MAESTRO !== "undefined" && HE_PUEDE_EDITAR_MAESTRO) {
+        $nombre.append(" ").append(
+            $('<button type="button" class="btn btn-link btn-xs" title="Registrar ajuste de sueldo"><i class="fa fa-usd"></i></button>')
+                .on("click", function () {
+                    AbrirAjusteSalario(fila.IdEmpleado, fila.NombreSnapshot || "", fila.SalarioBaseSnapshot);
+                }));
+    }
+
+    $fila.append($nombre);
     $fila.append($("<td></td>").text(fila.CargoSnapshot || "–"));
     $fila.append($('<td class="text-center"></td>').text(fila.JornadaHorasDiaSnapshot));
 
@@ -1152,6 +1165,121 @@ function PintarFueraDeHorario() {
     } else {
         $("#pieFueraSinAprobar, #pieFueraRechazado").text("");
     }
+
+    PintarFueraDelModulo();
+}
+
+/* ------------------------------------------ personas fuera del módulo -- */
+
+/* Empleados activos con horas en el período que NO están en el módulo: no
+   tienen sueldo cargado, así que no se les puede calcular el pago. Se muestran
+   para que nadie cierre el período sin saberlo. Todo con .text(). */
+function PintarFueraDelModulo() {
+    var lista = (_estadoFuera === "ok" && _fueraDeHorario && _fueraDeHorario.FueraDelModulo) || [];
+    var $recuadro = $("#recuadroFueraDelModulo");
+    var $cuerpo = $("#cuerpoFueraDelModulo").empty();
+
+    if (lista.length === 0) { $recuadro.hide(); return; }
+
+    $("#tituloFueraDelModulo").text(lista.length === 1
+        ? "1 persona con horas registradas no está en el módulo de Horas Extras."
+        : lista.length + " personas con horas registradas no están en el módulo de Horas Extras.");
+    $("#motivoFueraDelModulo").text(lista[0].Motivo);
+
+    $.each(lista, function (i, p) {
+        var $accion = $("<td></td>");
+        if (typeof HE_PUEDE_EDITAR_MAESTRO !== "undefined" && HE_PUEDE_EDITAR_MAESTRO) {
+            $accion.append($('<button type="button" class="btn btn-warning btn-xs"></button>')
+                .text("Completar datos")
+                .on("click", function () { AbrirCompletarDatos(p); }));
+        }
+
+        $cuerpo.append($("<tr></tr>")
+            .append($("<td></td>").text(p.Nombre))
+            .append($("<td></td>").text(p.Cargo))
+            .append($('<td class="text-right"></td>').text(FormatoDosDecimales(p.HorasAprobadas50)))
+            .append($('<td class="text-right"></td>').text(FormatoDosDecimales(p.HorasAprobadas100)))
+            .append($('<td class="text-right"></td>').text(FormatoDosDecimales(p.HorasSinAprobar)))
+            .append($('<td class="text-right"></td>').text(FormatoDosDecimales(p.HorasRechazado)))
+            .append($accion));
+    });
+
+    $recuadro.show();
+}
+
+/* Las empresas que ya existen en el módulo, tomadas de la grilla. Así nadie
+   escribe una quinta variante de «DOS S.A.». */
+function EmpresasDeLaGrilla() {
+    var vistas = {};
+    var lista = [];
+    $("#cuerpoHE tr[data-empresa]").each(function () {
+        var e = $(this).attr("data-empresa");
+        if (e && !vistas[e]) { vistas[e] = true; lista.push(e); }
+    });
+    return lista.sort();
+}
+
+function AbrirCompletarDatos(persona) {
+    $("#tituloCompletarDatos").text("Completar datos — " + persona.Nombre);
+
+    var $empresa = $("#cdEmpresa").empty();
+    $.each(EmpresasDeLaGrilla(), function (i, e) { $empresa.append($("<option></option>").val(e).text(e)); });
+
+    $("#cdCargo").val(persona.Cargo || "");
+    $("#cdJornada").val("8");
+    $("#cdAplicaHE").prop("checked", true);
+    $("#cdMonto").val("");
+    $("#cdVigencia").val(_fechaInicioActual || "");
+
+    $("#btnGuardarCompletarDatos").prop("disabled", false).off("click").on("click", function () {
+        var $boton = $(this).prop("disabled", true);   // un doble clic no inserta dos veces
+
+        PostHE("AgregarColaborador", {
+            idPeriodo: _idPeriodoActual,
+            idEmpleado: persona.IdEmpleado,
+            empresa: $("#cdEmpresa").val(),
+            cargo: $("#cdCargo").val(),
+            jornada: $("#cdJornada").val(),
+            aplicaHE: $("#cdAplicaHE").is(":checked"),
+            monto: $("#cdMonto").val(),
+            vigencia: $("#cdVigencia").val()
+        }, function (r) {
+            $("#modalCompletarDatos").modal("hide");
+            if (r.resultado && r.resultado.Periodo) { PintarPantalla(r.resultado); }
+        }, function () {
+            $boton.prop("disabled", false);
+        });
+    });
+
+    $("#modalCompletarDatos").modal("show");
+}
+
+function AbrirAjusteSalario(idEmpleado, nombre, salarioActual) {
+    $("#tituloAjusteSalario").text("Registrar ajuste de sueldo — " + nombre);
+    $("#textoAjusteSalario").text("Sueldo usado en este período: USD " + FormatoDosDecimales(salarioActual) +
+        ". El ajuste se agrega al historial; el sueldo anterior no se borra.");
+    $("#ajMonto").val("");
+    $("#ajVigencia").val(_fechaInicioActual || "");
+    $("#ajObservacion").val("");
+
+    $("#btnGuardarAjusteSalario").prop("disabled", false).off("click").on("click", function () {
+        var $boton = $(this).prop("disabled", true);   // un doble clic no inserta dos veces
+
+        PostHE("AgregarAjusteSalario", {
+            idPeriodo: _idPeriodoActual,
+            idEmpleado: idEmpleado,
+            monto: $("#ajMonto").val(),
+            vigencia: $("#ajVigencia").val(),
+            observacion: $("#ajObservacion").val()
+        }, function (r) {
+            $("#modalAjusteSalario").modal("hide");
+            if (r.resultado && r.resultado.Periodo) { PintarPantalla(r.resultado); }
+        }, function () {
+            $boton.prop("disabled", false);
+        });
+    });
+
+    $("#modalAjusteSalario").modal("show");
 }
 
 /* Con cero, un guion; con horas, un enlace que abre el detalle de la persona. */
@@ -1204,14 +1332,21 @@ function TextoAvisoFueraDeHorario() {
     }
 
     var r = _resumenFuera;
-    if (r.personasSin === 0 && r.personasRech === 0) {
-        return "No hay tiempo fuera de horario sin aprobar ni rechazado en este período.";
+    var texto = (r.personasSin === 0 && r.personasRech === 0)
+        ? "No hay tiempo fuera de horario sin aprobar ni rechazado en este período."
+        : "Hay " + r.personasSin + " colaborador(es) con " +
+          FormatoDosDecimales(r.minutosSin / 60) + " h fuera de horario sin aprobar y " +
+          r.personasRech + " con " + FormatoDosDecimales(r.minutosRech / 60) +
+          " h rechazadas. Esas horas no están incluidas en el pago.";
+
+    var fuera = _fueraDeHorario.FueraDelModulo || [];
+    if (fuera.length > 0) {
+        texto += " Además, " + fuera.length + " persona(s) con " +
+                 FormatoDosDecimales(_fueraDeHorario.TotalHorasAprobadasFueraDelModulo) +
+                 " h aprobadas no están en el módulo y no se les pagarán hasta completar sus datos.";
     }
 
-    return "Hay " + r.personasSin + " colaborador(es) con " +
-           FormatoDosDecimales(r.minutosSin / 60) + " h fuera de horario sin aprobar y " +
-           r.personasRech + " con " + FormatoDosDecimales(r.minutosRech / 60) +
-           " h rechazadas. Esas horas no están incluidas en el pago.";
+    return texto;
 }
 
 /* --------------------------------------------------------- guardar todo -- */

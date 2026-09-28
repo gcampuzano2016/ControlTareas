@@ -167,5 +167,245 @@ namespace CapaPruebas
             Assert.IsFalse(NegCalificacionForeCast.EsAvanzada("PIPELINE", 20m));
             Assert.IsFalse(NegCalificacionForeCast.EsAvanzada(null, null));
         }
+
+        /* ---------------- Evaluar ---------------- */
+
+        /// <summary>
+        /// Una oportunidad "sana": calificada hoy con todo en maximo, cierre en 30
+        /// dias, modificada hoy, con contacto y monto. No dispara ninguna alerta.
+        /// </summary>
+        private static EntCalificacionForeCast Sana()
+        {
+            return new EntCalificacionForeCast
+            {
+                IdForeCast = 1,
+                IdCliente = 1,
+                Cliente = "Cliente A",
+                Prioridad = "PIPELINE",
+                SegmentodeMercado = "Alto",
+                TipoEmpresa = "PRIVADO",
+                PVPEstimado = 100000m,
+                UtilidadBrutaEstimada = 20000m,
+                IdNegocio = 5,
+                Porcentaje = 40m,
+                FechaCierre = Hoy.AddDays(30),
+                FechaModificacion = Hoy,
+                Contacto = "Contacto A",
+                ContactosCuenta = 2,
+                FechasCierreDistintas = 1,
+                GanadosCliente = 3,
+                Calificacion = new EntCalificacionRespuesta
+                {
+                    IdForeCast = 1, Presupuesto = 20, Autoridad = 20, Necesidad = 20,
+                    DecisorCargo = "Decisor, Gerente", PropuestaEnviada = true,
+                    AccionComprometida = "Reunion de cierre", FechaAccion = Hoy.AddDays(3),
+                    Usuario = "u1", FechaRegistro = Hoy
+                }
+            };
+        }
+
+        private static EntCalificacionForeCast Evaluada(EntCalificacionForeCast o)
+        {
+            NegCalificacionForeCast.Evaluar(o, Tasas(), Hoy);
+            return o;
+        }
+
+        [TestMethod]
+        public void Evaluar_Sana_PuntajeCompletoYSinAlertas()
+        {
+            EntCalificacionForeCast o = Evaluada(Sana());
+
+            Assert.AreEqual(100, o.Puntaje);           // 20+20+20+15+15+10
+            Assert.AreEqual("Caliente", o.Estado);
+            Assert.IsFalse(o.SinCalificar);
+            Assert.AreEqual(40000m, o.MontoPonderado);
+            Assert.AreEqual(0, o.Alertas.Count);
+            Assert.AreEqual(0, o.Faltantes.Count);
+            Assert.AreEqual("Avanzar a la siguiente etapa", o.AccionSugerida);
+        }
+
+        [TestMethod]
+        public void Evaluar_FechasEnTextoInvariante()
+        {
+            EntCalificacionForeCast o = Evaluada(Sana());
+            Assert.AreEqual("28/10/2026", o.FechaCierreTexto);
+            Assert.AreEqual("28/09/2026", o.UltimaActividadTexto);
+            Assert.AreEqual("28/09/2026", o.FechaCalificacionTexto);
+            Assert.AreEqual("01/10/2026", o.FechaAccionTexto);
+        }
+
+        [TestMethod]
+        public void Evaluar_SinCalificar_CeroEnLosTresYMarcada()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.Calificacion = null;
+            Evaluada(o);
+
+            Assert.IsTrue(o.SinCalificar);
+            Assert.AreEqual(0, o.Presupuesto + o.Autoridad + o.Necesidad);
+            Assert.AreEqual(40, o.Puntaje);            // 15+15+10
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(o, NegCalificacionForeCast.AlertaCalificacionPendiente));
+            CollectionAssert.Contains(o.Faltantes, "Calificación");
+            CollectionAssert.Contains(o.Faltantes, "Decisor con cargo");
+            Assert.AreEqual("Calificar la oportunidad", o.AccionSugerida);
+        }
+
+        [TestMethod]
+        public void Alerta1_SinActividad()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.FechaModificacion = Hoy.AddDays(-31);
+            o.Calificacion.FechaRegistro = Hoy.AddDays(-31);
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(Evaluada(o), NegCalificacionForeCast.AlertaSinActividad));
+
+            EntCalificacionForeCast p = Sana();
+            p.FechaModificacion = Hoy.AddDays(-30);
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaSinActividad));
+        }
+
+        [TestMethod]
+        public void Alerta2_CierreVencido()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.FechaCierre = Hoy.AddDays(-1);
+            Evaluada(o);
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(o, NegCalificacionForeCast.AlertaCierreVencido));
+            Assert.AreEqual("Actualizar la fecha de cierre con el cliente", o.AccionSugerida);
+
+            EntCalificacionForeCast p = Sana();
+            p.FechaCierre = Hoy;
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaCierreVencido));
+        }
+
+        [TestMethod]
+        public void Alerta3_MontoSinDefinirEnAvanzada()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.PVPEstimado = 0m;
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(Evaluada(o), NegCalificacionForeCast.AlertaMontoSinDefinir));
+
+            EntCalificacionForeCast p = Sana();
+            p.PVPEstimado = null; p.Porcentaje = 20m;   // no avanzada
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaMontoSinDefinir));
+        }
+
+        [TestMethod]
+        public void Alerta4_AvanzadaSinPropuesta()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.Calificacion.PropuestaEnviada = false;
+            Evaluada(o);
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(o, NegCalificacionForeCast.AlertaSinPropuesta));
+            Assert.AreEqual("Enviar la propuesta", o.AccionSugerida);
+
+            EntCalificacionForeCast p = Sana();
+            p.Calificacion.PropuestaEnviada = false; p.Porcentaje = 20m;  // no avanzada
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaSinPropuesta));
+        }
+
+        [TestMethod]
+        public void Alerta5_SinDecisor()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.ContactosCuenta = 1; o.Calificacion.Autoridad = 12;
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(Evaluada(o), NegCalificacionForeCast.AlertaSinDecisor));
+
+            EntCalificacionForeCast p = Sana();
+            p.ContactosCuenta = 1;   // Autoridad 20: hay decisor
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaSinDecisor));
+        }
+
+        [TestMethod]
+        public void Alerta6_CierreCambiado()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.FechasCierreDistintas = 3;
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(Evaluada(o), NegCalificacionForeCast.AlertaCierreCambiado));
+
+            EntCalificacionForeCast p = Sana();
+            p.FechasCierreDistintas = 2;
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaCierreCambiado));
+        }
+
+        [TestMethod]
+        public void Alerta7_CalificacionDesactualizada()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.Calificacion.FechaRegistro = Hoy.AddDays(-31);
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(Evaluada(o), NegCalificacionForeCast.AlertaCalificacionPendiente));
+
+            EntCalificacionForeCast p = Sana();
+            p.Calificacion.FechaRegistro = Hoy.AddDays(-30);
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaCalificacionPendiente));
+        }
+
+        [TestMethod]
+        public void Alerta8_Inconsistente_TienePrioridadEnLaAccion()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.IdNegocio = NegCalificacionForeCast.IdNegocioPerdida;
+            o.FechaCierre = Hoy.AddDays(-5);          // tambien vencida
+            Evaluada(o);
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(o, NegCalificacionForeCast.AlertaInconsistente));
+            Assert.AreEqual("Cerrar o corregir la etapa: el código indica perdida o descartada", o.AccionSugerida);
+        }
+
+        [TestMethod]
+        public void Accion_CriterioMasDebil_EmpateGanaPresupuesto()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.Calificacion.Presupuesto = 12; o.Calificacion.Autoridad = 12; o.Calificacion.Necesidad = 14;
+            o.ContactosCuenta = 3;
+            Assert.AreEqual("Confirmar el presupuesto con el cliente", Evaluada(o).AccionSugerida);
+
+            EntCalificacionForeCast p = Sana();
+            p.Calificacion.Autoridad = 5; p.ContactosCuenta = 3;
+            Assert.AreEqual("Identificar y reunirse con el decisor", Evaluada(p).AccionSugerida);
+
+            EntCalificacionForeCast q = Sana();
+            q.Calificacion.Necesidad = 6;
+            Assert.AreEqual("Validar la necesidad y la fecha del requerimiento", Evaluada(q).AccionSugerida);
+        }
+
+        [TestMethod]
+        public void Accion_SinActividad_CuandoLoDemasEstaBien()
+        {
+            EntCalificacionForeCast p = Sana();
+            p.FechaModificacion = Hoy.AddDays(-40);
+            p.Calificacion.FechaRegistro = Hoy.AddDays(-31);
+            Evaluada(p);
+            // Tiene las alertas 1 y 7. La 7 no esta en la precedencia de la accion
+            // y los tres criterios estan en 20: gana "sin actividad".
+            Assert.IsTrue(NegCalificacionForeCast.TieneAlerta(p, NegCalificacionForeCast.AlertaSinActividad));
+            Assert.AreEqual("Retomar contacto con el cliente", p.AccionSugerida);
+        }
+
+        [TestMethod]
+        public void UltimaActividad_LaCalificacionCuentaComoActividad()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.FechaModificacion = Hoy.AddDays(-40);
+            o.Calificacion.FechaRegistro = Hoy.AddDays(-29);
+            Evaluada(o);
+            Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(o, NegCalificacionForeCast.AlertaSinActividad));
+            Assert.AreEqual(10, o.Actividad);
+        }
+
+        [TestMethod]
+        public void Faltantes_SinContactoSinFechaSinUtilidad_NoFalla()
+        {
+            EntCalificacionForeCast o = Sana();
+            o.Contacto = " "; o.LiderProyectoCliente = null;
+            o.FechaCierre = null; o.UtilidadBrutaEstimada = null;
+            o.PVPEstimado = null; o.Porcentaje = null;
+            Evaluada(o);
+
+            CollectionAssert.Contains(o.Faltantes, "Contacto");
+            CollectionAssert.Contains(o.Faltantes, "Fecha de cierre");
+            CollectionAssert.Contains(o.Faltantes, "Utilidad bruta estimada");
+            Assert.AreEqual(0, o.Tiempo);
+            Assert.AreEqual(0m, o.MontoPonderado);
+            Assert.AreEqual("", o.FechaCierreTexto);
+        }
     }
 }

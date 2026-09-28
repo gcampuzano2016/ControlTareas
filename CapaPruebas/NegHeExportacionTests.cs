@@ -360,7 +360,7 @@ namespace CapaPruebas
 
             using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
             {
-                Assert.AreEqual(3, paquete.Workbook.Worksheets.Count, "El archivo deberia tener tres hojas: detalle, pagos y fuera de horario.");
+                Assert.AreEqual(4, paquete.Workbook.Worksheets.Count, "El archivo deberia tener cuatro hojas: detalle, pagos, fuera de horario y fuera del modulo.");
 
                 ExcelWorksheet hojaPagos = paquete.Workbook.Worksheets[1];
                 Assert.IsTrue(
@@ -447,7 +447,7 @@ namespace CapaPruebas
 
             using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
             {
-                Assert.AreEqual(3, paquete.Workbook.Worksheets.Count);
+                Assert.AreEqual(4, paquete.Workbook.Worksheets.Count);
 
                 ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
                 StringAssert.StartsWith(
@@ -512,6 +512,60 @@ namespace CapaPruebas
                 Assert.IsTrue(filaTotales > 0, "No se encontro la fila TOTALES.");
                 Assert.AreEqual(0m, Convert.ToDecimal(detalle.Cells[filaTotales, NegHeExportacion.ColumnaFueraSinAprobar].Value));
                 Assert.AreEqual(0m, Convert.ToDecimal(detalle.Cells[filaTotales, NegHeExportacion.ColumnaFueraRechazado].Value));
+            }
+        }
+
+        [TestMethod]
+        public void Construir_FueraDelModulo_HojaConLaPersona()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fuera = FueraDeEjemplo(4242);
+            fuera.FueraDelModulo.Add(new EntHeFueraDelModuloPersona
+            {
+                IdEmpleado = 777,
+                Nombre = "PERSONA FUERA DEL MODULO",
+                Cargo = "CARGO DE PRUEBA",
+                MinutosAprobados100 = 660,
+                MinutosSinAprobar50 = 30
+            });
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDelModulo];
+                Assert.IsNotNull(hoja);
+
+                int fila = NegHeExportacion.FueraPrimeraFilaDeDatos;
+                Assert.AreEqual(777L, Convert.ToInt64(hoja.Cells[fila, 1].Value));
+                Assert.AreEqual("PERSONA FUERA DEL MODULO", Convert.ToString(hoja.Cells[fila, 2].Value));
+                Assert.AreEqual(11.00m, Convert.ToDecimal(hoja.Cells[fila, 5].Value), "Aprobadas 100%.");
+                Assert.AreEqual(0.50m, Convert.ToDecimal(hoja.Cells[fila, 6].Value), "Sin aprobar.");
+                StringAssert.Contains(Convert.ToString(hoja.Cells[fila, 8].Value), "faltan sus datos de RRHH");
+            }
+        }
+
+        [TestMethod]
+        public void Construir_FueraDelModuloVacio_LoDice()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, FueraDeEjemplo(4242))))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDelModulo];
+                StringAssert.StartsWith(Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value),
+                                        "No hay personas");
+            }
+        }
+
+        [TestMethod]
+        public void Construir_FueraDelModuloSinCalculo_DiceQueNoSePudo()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDelModulo];
+                StringAssert.StartsWith(Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value),
+                                        "No se pudo calcular");
             }
         }
     }

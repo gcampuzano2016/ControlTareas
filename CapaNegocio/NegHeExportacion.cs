@@ -36,6 +36,9 @@ namespace CapaNegocio
 
         public const string NombreHojaFueraDeHorario = "Fuera de horario";
 
+        /// <summary>Empleados activos con horas que no estan en el modulo: horas y motivo, sin montos.</summary>
+        public const string NombreHojaFueraDelModulo = "No están en el módulo";
+
         /// <summary>Informativas, solo en la hoja de detalle: van DESPUES de la ultima columna comun para no mover ninguna.</summary>
         public const int ColumnaFueraSinAprobar = 24;
         public const int ColumnaFueraRechazado = 25;
@@ -202,6 +205,7 @@ namespace CapaNegocio
                 AjustarColumnas(hojaPagos);
 
                 EscribirHojaFueraDeHorario(paquete, pantalla, fuera);
+                EscribirHojaFueraDelModulo(paquete, pantalla, fuera);
 
                 return paquete.GetAsByteArray();
             }
@@ -673,6 +677,65 @@ namespace CapaNegocio
             for (int c = 1; c <= FueraUltimaColumna; c++) { hoja.Column(c).Width = 14; }
             hoja.Column(2).Width = 30;
             hoja.Column(10).Width = 45;
+        }
+
+        /// <summary>
+        /// Quien tiene horas en el periodo y no esta en el modulo. Sin montos: no
+        /// hay sueldo cargado. Esta hoja existe para que ese caso no se pierda en
+        /// silencio hasta que alguien compare con otro reporte.
+        /// </summary>
+        private static void EscribirHojaFueraDelModulo(ExcelPackage paquete, EntHePantalla pantalla, EntHeFueraDeHorario fuera)
+        {
+            ExcelWorksheet hoja = paquete.Workbook.Worksheets.Add(NombreHojaFueraDelModulo);
+
+            hoja.Cells[1, 1].Value = "Personas con horas registradas que no están en el módulo - Período " + TextoPeriodo(pantalla.Periodo);
+            hoja.Cells[1, 1].Style.Font.Bold = true;
+            hoja.Cells[2, 1].Value = "Sin sus datos de RRHH (empresa, jornada y sueldo) no se les puede calcular el pago. Estas horas NO están en los totales.";
+            hoja.Cells[2, 1].Style.Font.Italic = true;
+
+            string[] encabezados =
+            {
+                "ID Empleado", "Nombre", "Cargo", "Aprobadas 50% (h)", "Aprobadas 100% (h)",
+                "Fuera de horario sin aprobar (h)", "Rechazado (h)", "Motivo"
+            };
+            for (int i = 0; i < encabezados.Length; i++)
+            {
+                hoja.Cells[FueraFilaDeEncabezados, i + 1].Value = encabezados[i];
+                hoja.Cells[FueraFilaDeEncabezados, i + 1].Style.Font.Bold = true;
+            }
+
+            if (!HayCalculo(fuera))
+            {
+                string motivo = fuera == null || string.IsNullOrEmpty(fuera.Error) ? "no se consultó." : fuera.Error;
+                hoja.Cells[FueraPrimeraFilaDeDatos, 1].Value = "No se pudo calcular quién no está en el módulo: " + motivo;
+                return;
+            }
+
+            if (fuera.FueraDelModulo.Count == 0)
+            {
+                hoja.Cells[FueraPrimeraFilaDeDatos, 1].Value = "No hay personas con horas en el período que falten en el módulo.";
+                return;
+            }
+
+            int fila = FueraPrimeraFilaDeDatos;
+            foreach (EntHeFueraDelModuloPersona p in fuera.FueraDelModulo)
+            {
+                hoja.Cells[fila, 1].Value = p.IdEmpleado;
+                hoja.Cells[fila, 1].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 2].Value = p.Nombre;
+                hoja.Cells[fila, 3].Value = p.Cargo;
+                HorasEnCelda(hoja.Cells[fila, 4], p.HorasAprobadas50);
+                HorasEnCelda(hoja.Cells[fila, 5], p.HorasAprobadas100);
+                HorasEnCelda(hoja.Cells[fila, 6], p.HorasSinAprobar);
+                HorasEnCelda(hoja.Cells[fila, 7], p.HorasRechazado);
+                hoja.Cells[fila, 8].Value = p.Motivo;
+                fila++;
+            }
+
+            for (int c = 1; c <= 8; c++) { hoja.Column(c).Width = 16; }
+            hoja.Column(2).Width = 32;
+            hoja.Column(3).Width = 26;
+            hoja.Column(8).Width = 70;
         }
 
         private static int LineaDeTotal(ExcelWorksheet hoja, int fila, string etiqueta, int minutos)

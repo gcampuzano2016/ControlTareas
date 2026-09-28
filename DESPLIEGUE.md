@@ -691,7 +691,16 @@ Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
 Los datos los confirma **RRHH**. Se cargan desde la pantalla, no con un script, así cada fila
 queda con el usuario que la cargó. Si el período está abierto, al guardar se recalcula solo.
 
-### 13.5 Volver atrás
+### 13.5 No volver a correr la carga de la plantilla
+
+`docs/sql/carga-generada/carga-horas-extras.sql` hace MERGE sobre `HE_ColaboradorParametro` con
+los datos de la plantilla. Si se vuelve a correr, puede **pisar la jornada y la empresa**
+cargadas desde la pantalla y **desactivar de nuevo** a quien se reactivó, porque gana el
+`Estado` de la plantilla. Después de usar «Completar datos», esa carga ya no se corre. Si hace
+falta volver a cargar la plantilla, antes hay que incluir en ella a las personas agregadas desde
+la pantalla.
+
+### 13.6 Volver atrás
 
 Basta con reponer los binarios y los dos archivos de la pantalla anteriores. Los procedimientos
 pueden quedar en la base. Lo que ya se haya guardado desde la pantalla son filas normales del

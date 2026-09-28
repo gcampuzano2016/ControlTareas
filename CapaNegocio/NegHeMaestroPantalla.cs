@@ -21,6 +21,14 @@ namespace CapaNegocio
         public const int JornadaMaxima = 12;
 
         /// <summary>
+        /// Tope de plausibilidad de un sueldo mensual. El mas alto del modulo hoy es
+        /// 3.000: un monto por encima de esto es casi seguro un error de dedo, y un
+        /// sueldo multiplicado por 100 se recalcula al instante en el pago. El
+        /// procedimiento tiene el mismo tope.
+        /// </summary>
+        public const decimal MontoMaximo = 20000m;
+
+        /// <summary>
         /// Lee el sueldo tal como lo escribe una persona. Acepta coma o punto como
         /// separador decimal, y separador de miles cuando hay los dos ("1.850,50",
         /// "1,850.50") o cuando el mismo se repite ("1.250.000").
@@ -43,16 +51,23 @@ namespace CapaNegocio
 
             if (puntos > 0 && comas > 0)
             {
-                // El ultimo que aparece es el decimal; el otro, de miles.
+                // El ultimo que aparece es el decimal y va una sola vez; el otro es de
+                // miles y tiene que estar bien agrupado: "1.850,50" si, "1.85,50" no.
                 char dec = t.LastIndexOf('.') > t.LastIndexOf(',') ? '.' : ',';
                 char miles = dec == '.' ? ',' : '.';
                 if (Contar(t, dec) > 1) { return false; }
-                normal = t.Replace(miles.ToString(), "").Replace(dec, '.');
+
+                string entera = t.Substring(0, t.IndexOf(dec));
+                string decimales = t.Substring(t.IndexOf(dec) + 1);
+                if (!GruposDeMilesValidos(entera.Split(miles))) { return false; }
+
+                normal = entera.Replace(miles.ToString(), "") + "." + decimales;
             }
             else if (puntos + comas > 1)
             {
-                // Un mismo separador repetido solo puede ser de miles.
-                normal = t.Replace(".", "").Replace(",", "");
+                // Un mismo separador repetido ("1.850.50", "1.250.000") o es un error
+                // de dedo o es un monto de millones: ninguno es un sueldo que cargar.
+                return false;
             }
             else if (puntos + comas == 1)
             {
@@ -68,10 +83,22 @@ namespace CapaNegocio
 
             decimal valor;
             if (!decimal.TryParse(normal, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out valor)) { return false; }
-            if (valor <= 0m) { return false; }
+            if (valor <= 0m || valor > MontoMaximo) { return false; }
             if (decimal.Round(valor, 2) != valor) { return false; }
 
             monto = valor;
+            return true;
+        }
+
+        /// <summary>El primer grupo de 1 a 3 digitos y los siguientes de exactamente 3.</summary>
+        private static bool GruposDeMilesValidos(string[] grupos)
+        {
+            if (grupos.Length == 0 || grupos[0].Length < 1 || grupos[0].Length > 3) { return false; }
+            for (int i = 0; i < grupos.Length; i++)
+            {
+                foreach (char c in grupos[i]) { if (c < '0' || c > '9') { return false; } }
+                if (i > 0 && grupos[i].Length != 3) { return false; }
+            }
             return true;
         }
 
@@ -105,9 +132,11 @@ namespace CapaNegocio
             switch (codigo)
             {
                 case 0: return "Datos guardados.";
+                case 1: return "Datos guardados. La persona estaba desactivada en el módulo y se reactivó; sus datos anteriores quedaron en la observación del sueldo.";
                 case -1: return "No se guardó: la persona no es un empleado activo.";
                 case -2: return "No se guardó: la persona ya está en el módulo. Para cambiar su sueldo use «Registrar ajuste de sueldo».";
                 case -3: return "No se guardó: revise los datos (empresa, jornada, sueldo y fecha).";
+                case -4: return "No se guardó: esta persona ya tiene en su historial un sueldo con fecha igual o posterior, que taparía a este. Use una fecha posterior.";
                 default: return "No se pudieron guardar los datos. Intente nuevamente.";
             }
         }
@@ -120,6 +149,7 @@ namespace CapaNegocio
                 case -1: return "No se guardó: la persona no está en el módulo de Horas Extras. Use «Completar datos».";
                 case -2: return "No se guardó: ya hay un ajuste de sueldo con la misma fecha. Use otra fecha.";
                 case -3: return "No se guardó: revise el sueldo y la fecha.";
+                case -4: return "No se guardó: ya hay un sueldo con fecha posterior en el historial, así que este ajuste no regiría. Use una fecha posterior.";
                 default: return "No se pudo guardar el ajuste. Intente nuevamente.";
             }
         }
@@ -154,7 +184,7 @@ namespace CapaNegocio
             decimal monto;
             if (!LeerMonto(montoTexto, out monto))
             {
-                return Rechazo("El sueldo no se entiende. Escríbalo sin separador de miles, por ejemplo 1850 o 1850,50.");
+                return Rechazo(TextoMontoInvalido());
             }
 
             string error = ValidarColaborador(empresa, jornada, monto, vigencia);
@@ -162,9 +192,9 @@ namespace CapaNegocio
 
             int codigo = DaoHorasExtras.AgregarColaborador(idEmpleado, empresa.Trim(), cargo, jornada, aplicaHE,
                                                            monto, vigencia, usuario, ip);
-            if (codigo != 0) { return Rechazo(MensajeColaborador(codigo)); }
+            if (codigo != 0 && codigo != 1) { return Rechazo(MensajeColaborador(codigo)); }
 
-            return Refrescar(idPeriodo, vigencia, MensajeColaborador(0), usuario, ip);
+            return Refrescar(idPeriodo, vigencia, MensajeColaborador(codigo), usuario, ip);
         }
 
         public static EntRespuesta AgregarAjusteSalario(int idPeriodo, long idEmpleado, string montoTexto, DateTime vigencia,
@@ -173,7 +203,7 @@ namespace CapaNegocio
             decimal monto;
             if (!LeerMonto(montoTexto, out monto))
             {
-                return Rechazo("El sueldo no se entiende. Escríbalo sin separador de miles, por ejemplo 1850 o 1850,50.");
+                return Rechazo(TextoMontoInvalido());
             }
 
             string error = ValidarAjuste(monto, vigencia);
@@ -185,34 +215,79 @@ namespace CapaNegocio
             return Refrescar(idPeriodo, vigencia, MensajeAjuste(0), usuario, ip);
         }
 
+        private static string TextoMontoInvalido()
+        {
+            return "El sueldo no se entiende o no es válido. Escríbalo sin separador de miles, por ejemplo 1850 o 1850,50 "
+                 + "(máximo " + MontoMaximo.ToString("#,##0", CultureInfo.InvariantCulture) + ").";
+        }
+
         /// <summary>
         /// Despues de guardar: si el periodo esta abierto se recalcula (la misma
         /// accion idempotente de «Recalcular»), y si no, solo se vuelve a cargar.
-        /// En los dos casos la respuesta trae la pantalla para repintar.
+        ///
+        /// Lo guardado YA esta en la base. Si el recalculo falla -por error o por
+        /// excepcion-, la respuesta sigue siendo "guardado" con un aviso: si dijera
+        /// error, la persona reintentaria y chocaria con "ya esta en el modulo".
         /// </summary>
         private static EntRespuesta Refrescar(int idPeriodo, DateTime vigencia, string guardado, string usuario, string ip)
         {
-            EntHePantalla existente = DaoHorasExtras.CargarPeriodo(idPeriodo);
-            EntHePeriodo periodo = existente.Periodo;
+            EntHePeriodo periodo = null;
+            EntRespuesta refresco = null;
+
+            try
+            {
+                periodo = DaoHorasExtras.CargarPeriodo(idPeriodo).Periodo;
+                if (periodo != null)
+                {
+                    refresco = periodo.EstaAbierto
+                        ? NegHorasExtrasPantalla.AbrirPeriodo(periodo.FechaInicio, periodo.FechaFin, usuario, ip)
+                        : NegHorasExtrasPantalla.CargarPantalla(idPeriodo);
+                }
+            }
+            catch (Exception)
+            {
+                refresco = null;
+            }
+
+            return CombinarTrasGuardar(guardado, periodo, vigencia, refresco);
+        }
+
+        /// <summary>
+        /// La respuesta despues de un guardado que YA ocurrio. Siempre estado "1":
+        /// lo que puede fallar aqui es el recalculo, no el guardado, y el mensaje
+        /// dice cual de los dos paso.
+        /// </summary>
+        public static EntRespuesta CombinarTrasGuardar(string guardado, EntHePeriodo periodo, DateTime vigencia, EntRespuesta refresco)
+        {
+            EntRespuesta r = new EntRespuesta();
+            r.estado = "1";
 
             if (periodo == null)
             {
-                EntRespuesta sinPeriodo = new EntRespuesta();
-                sinPeriodo.estado = "1";
-                sinPeriodo.mensaje = guardado;
-                sinPeriodo.tipoMensaje = "success";
-                return sinPeriodo;
+                r.mensaje = guardado;
+                r.tipoMensaje = "success";
+                return r;
             }
 
-            EntRespuesta r = periodo.EstaAbierto
-                ? NegHorasExtrasPantalla.AbrirPeriodo(periodo.FechaInicio, periodo.FechaFin, usuario, ip)
-                : NegHorasExtrasPantalla.CargarPantalla(idPeriodo);
+            bool refrescoOk = refresco != null && refresco.estado == "1";
+            string fecha = vigencia > periodo.FechaFin
+                ? " Atención: el sueldo rige desde el " + vigencia.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture)
+                  + ", después del fin del período, así que no aplica a este período."
+                : "";
 
-            string aviso = MensajeTrasGuardar(true, periodo.EstaAbierto, vigencia, periodo.FechaFin);
-            string extra = r.estado == "1" && r.tipoMensaje == "warning" && !string.IsNullOrEmpty(r.mensaje) ? " " + r.mensaje : "";
+            if (!refrescoOk)
+            {
+                r.mensaje = guardado + (periodo.EstaAbierto
+                    ? " Pero no se pudo recalcular el período: pulse «Recalcular»."
+                    : " No se pudo volver a cargar la pantalla: seleccione el período nuevamente.") + fecha;
+                r.tipoMensaje = "warning";
+                return r;
+            }
 
-            r.mensaje = guardado + " " + aviso + extra;
-            r.tipoMensaje = vigencia > periodo.FechaFin || extra != "" || r.estado != "1" ? "warning" : "success";
+            r.resultado = refresco.resultado;
+            string extra = refresco.tipoMensaje == "warning" && !string.IsNullOrEmpty(refresco.mensaje) ? " " + refresco.mensaje : "";
+            r.mensaje = guardado + " " + MensajeTrasGuardar(true, periodo.EstaAbierto, vigencia, periodo.FechaFin) + extra;
+            r.tipoMensaje = fecha != "" || extra != "" ? "warning" : "success";
             return r;
         }
 

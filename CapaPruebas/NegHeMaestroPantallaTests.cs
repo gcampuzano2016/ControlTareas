@@ -1,3 +1,4 @@
+using CapaEntidad;
 using CapaNegocio;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
@@ -40,7 +41,25 @@ namespace CapaPruebas
         {
             Assert.AreEqual(1850.50m, Monto("1.850,50"));
             Assert.AreEqual(1850.50m, Monto("1,850.50"));
-            Assert.AreEqual(1250000m, Monto("1.250.000"));
+            Assert.AreEqual(12500m, Monto("12.500,00"));
+        }
+
+        [TestMethod]
+        public void LeerMonto_SeparadorDeMilesMalPuesto_SeRechaza()
+        {
+            // Errores de dedo que antes se guardaban como un sueldo 100 veces mayor.
+            Rechaza("1.850.50");
+            Rechaza("1,850,50");
+            Rechaza("1.85,50");
+            Rechaza("18.50,00");
+            Rechaza("1.250.000");
+        }
+
+        [TestMethod]
+        public void LeerMonto_SobreElTope_SeRechaza()
+        {
+            Assert.AreEqual(NegHeMaestroPantalla.MontoMaximo, Monto(NegHeMaestroPantalla.MontoMaximo.ToString(System.Globalization.CultureInfo.InvariantCulture)));
+            Rechaza("25000");
         }
 
         [TestMethod]
@@ -122,6 +141,73 @@ namespace CapaPruebas
             StringAssert.Contains(NegHeMaestroPantalla.MensajeColaborador(-2), "ajuste");
             StringAssert.Contains(NegHeMaestroPantalla.MensajeAjuste(-1), "módulo");
             StringAssert.Contains(NegHeMaestroPantalla.MensajeAjuste(-2), "misma fecha");
+        }
+
+        private static EntHePeriodo Periodo(string estado)
+        {
+            EntHePeriodo p = new EntHePeriodo();
+            p.IdPeriodo = 3;
+            p.FechaInicio = new DateTime(2026, 8, 16);
+            p.FechaFin = new DateTime(2026, 9, 15);
+            p.EstadoPeriodo = estado;
+            return p;
+        }
+
+        private static EntRespuesta Ok()
+        {
+            EntRespuesta r = new EntRespuesta();
+            r.estado = "1";
+            r.mensaje = "";
+            r.tipoMensaje = "success";
+            r.resultado = new EntHePantalla();
+            return r;
+        }
+
+        [TestMethod]
+        public void CombinarTrasGuardar_RecalculoQueNoRespondio_SigueSiendoGuardado()
+        {
+            // Lo guardado ya esta en la base: la respuesta NO puede decir error, o se reintenta y choca.
+            EntRespuesta r = NegHeMaestroPantalla.CombinarTrasGuardar("Datos guardados.", Periodo("Abierto"),
+                                                                        new DateTime(2026, 9, 1), null);
+            Assert.AreEqual("1", r.estado);
+            Assert.AreEqual("warning", r.tipoMensaje);
+            StringAssert.Contains(r.mensaje, "no se pudo recalcular");
+            Assert.IsFalse(r.mensaje.Contains("se recalculó"), "No puede afirmar que se recalculo.");
+        }
+
+        [TestMethod]
+        public void CombinarTrasGuardar_RecalculoConEstadoCero_SigueSiendoGuardado()
+        {
+            EntRespuesta fallo = new EntRespuesta { estado = "0", mensaje = "timeout", tipoMensaje = "danger" };
+            EntRespuesta r = NegHeMaestroPantalla.CombinarTrasGuardar("Datos guardados.", Periodo("Abierto"),
+                                                                        new DateTime(2026, 9, 1), fallo);
+            Assert.AreEqual("1", r.estado);
+            StringAssert.Contains(r.mensaje, "no se pudo recalcular");
+        }
+
+        [TestMethod]
+        public void CombinarTrasGuardar_Abierto_Recalculado()
+        {
+            EntRespuesta r = NegHeMaestroPantalla.CombinarTrasGuardar("Datos guardados.", Periodo("Abierto"),
+                                                                        new DateTime(2026, 9, 1), Ok());
+            Assert.AreEqual("success", r.tipoMensaje);
+            StringAssert.Contains(r.mensaje, "se recalculó");
+        }
+
+        [TestMethod]
+        public void CombinarTrasGuardar_Cerrado_NoSeToca()
+        {
+            EntRespuesta r = NegHeMaestroPantalla.CombinarTrasGuardar("Datos guardados.", Periodo("Cerrado"),
+                                                                        new DateTime(2026, 9, 1), Ok());
+            StringAssert.Contains(r.mensaje, "cerrado");
+        }
+
+        [TestMethod]
+        public void Mensajes_ReactivadoYTapado()
+        {
+            StringAssert.Contains(NegHeMaestroPantalla.MensajeColaborador(1), "reactiv");
+            StringAssert.Contains(NegHeMaestroPantalla.MensajeColaborador(-4), "posterior");
+            StringAssert.Contains(NegHeMaestroPantalla.MensajeAjuste(-4), "posterior");
         }
     }
 }

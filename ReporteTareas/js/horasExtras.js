@@ -1222,7 +1222,9 @@ function EmpresasDeLaGrilla() {
 function AbrirCompletarDatos(persona) {
     $("#tituloCompletarDatos").text("Completar datos — " + persona.Nombre);
 
-    var $empresa = $("#cdEmpresa").empty();
+    /* Sin preselección: elegir la empresa es obligatorio, y la primera en orden
+       alfabético no tiene por qué ser la de esta persona. */
+    var $empresa = $("#cdEmpresa").empty().append($("<option></option>").val("").text("— Seleccione —"));
     $.each(EmpresasDeLaGrilla(), function (i, e) { $empresa.append($("<option></option>").val(e).text(e)); });
 
     $("#cdCargo").val(persona.Cargo || "");

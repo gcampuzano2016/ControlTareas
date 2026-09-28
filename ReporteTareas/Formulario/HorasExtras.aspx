@@ -5,8 +5,10 @@
         /* Solo para mostrar u ocultar el boton de reabrir. La barrera real
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
+        /* Solo para mostrar los botones de completar datos y de ajuste de sueldo. */
+        var HE_PUEDE_EDITAR_MAESTRO = <%= PuedeEditarMaestro ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=8" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=9" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -270,6 +272,29 @@
                         </button>
                     </div>
                     <div class="panel-body">
+                        <!-- Personas con horas en el período que NO están en el módulo. Solo se
+                             muestra si hay alguien. Sin montos: no tienen sueldo cargado. Lo
+                             llena PintarFueraDelModulo en horasExtras.js, siempre con .text(). -->
+                        <div class="alert alert-warning" id="recuadroFueraDelModulo" style="display: none">
+                            <strong id="tituloFueraDelModulo"></strong>
+                            <div id="motivoFueraDelModulo"></div>
+                            <div class="table-responsive" style="margin-top: 8px">
+                                <table class="table table-condensed table-bordered" style="background: #fff; margin-bottom: 0">
+                                    <thead>
+                                        <tr>
+                                            <th>Colaborador</th>
+                                            <th>Cargo</th>
+                                            <th>Aprobadas 50% (h)</th>
+                                            <th>Aprobadas 100% (h)</th>
+                                            <th>Fuera de horario sin aprobar (h)</th>
+                                            <th>Rechazado (h)</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cuerpoFueraDelModulo"></tbody>
+                                </table>
+                            </div>
+                        </div>
                         <div class="table-responsive">
                             <table class="table table-bordered table-hover" id="tablaHE">
                                 <thead>
@@ -411,6 +436,83 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal -->
+
+        <!-- Completar los datos de una persona que no está en el módulo. Solo perfiles
+             14 y 18 (el handler lo vuelve a comprobar). -->
+        <div class="modal fade" id="modalCompletarDatos" tabindex="-1" role="dialog" aria-labelledby="tituloCompletarDatos" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="tituloCompletarDatos">Completar datos</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted">La persona entra al módulo con estos datos. El sueldo se agrega al historial; no reemplaza ningún otro.</p>
+                        <div class="form-group">
+                            <label for="cdEmpresa">Empresa</label>
+                            <select class="form-control" id="cdEmpresa"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="cdCargo">Cargo</label>
+                            <input type="text" class="form-control" id="cdCargo" maxlength="200" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cdJornada">Jornada (horas por día)</label>
+                            <input type="number" class="form-control" id="cdJornada" min="1" max="12" value="8" />
+                        </div>
+                        <div class="checkbox">
+                            <label><input type="checkbox" id="cdAplicaHE" checked="checked" /> Aplica horas extras</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="cdMonto">Sueldo (USD)</label>
+                            <input type="text" class="form-control" id="cdMonto" maxlength="20" placeholder="Ej.: 1850 o 1850,50" />
+                        </div>
+                        <div class="form-group">
+                            <label for="cdVigencia">Rige desde</label>
+                            <input type="date" class="form-control" id="cdVigencia" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarCompletarDatos">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal -->
+
+        <!-- Registrar un ajuste de sueldo de alguien que ya está en el módulo. Agrega una
+             fila al historial: nunca borra ni modifica la anterior. -->
+        <div class="modal fade" id="modalAjusteSalario" tabindex="-1" role="dialog" aria-labelledby="tituloAjusteSalario" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="tituloAjusteSalario">Registrar ajuste de sueldo</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted" id="textoAjusteSalario"></p>
+                        <div class="form-group">
+                            <label for="ajMonto">Sueldo nuevo (USD)</label>
+                            <input type="text" class="form-control" id="ajMonto" maxlength="20" placeholder="Ej.: 1650 o 1650,50" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ajVigencia">Rige desde</label>
+                            <input type="date" class="form-control" id="ajVigencia" />
+                        </div>
+                        <div class="form-group">
+                            <label for="ajObservacion">Observación</label>
+                            <input type="text" class="form-control" id="ajObservacion" maxlength="400" placeholder="Motivo del ajuste" />
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarAjusteSalario">Guardar</button>
                     </div>
                 </div>
             </div>

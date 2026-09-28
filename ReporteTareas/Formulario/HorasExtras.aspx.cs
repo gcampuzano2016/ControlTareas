@@ -56,5 +56,19 @@ namespace ReporteTareas.Formulario
                 return int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil) && idPerfil == 18;
             }
         }
+
+        /// <summary>
+        /// Solo para MOSTRAR los botones de completar datos y de ajuste de sueldo.
+        /// La lista vive en el handler, que es tambien la barrera de verdad.
+        /// </summary>
+        protected bool PuedeEditarMaestro
+        {
+            get
+            {
+                int idPerfil;
+                return int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil)
+                       && Array.IndexOf(JsonJQueryNetHorasExtras.AdministrarHorasExtras.PerfilesQueEditanMaestro, idPerfil) >= 0;
+            }
+        }
     }
 }

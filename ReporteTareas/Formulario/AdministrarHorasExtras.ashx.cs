@@ -70,6 +70,18 @@ namespace JsonJQueryNetHorasExtras
         /// </summary>
         private static readonly int[] PerfilesQueReabren = { 18 };
 
+        /// <summary>
+        /// Talento Humano (14) y Super Admin (18): los unicos que pueden agregar una
+        /// persona al modulo con su sueldo, o registrarle un ajuste de sueldo. Es el
+        /// dato mas delicado del modulo; el perfil 2 ve la pantalla pero no carga
+        /// sueldos.
+        ///
+        /// internal: HorasExtras.aspx.cs la lee para decidir si MUESTRA los botones.
+        /// Esa es cortesia; la barrera de verdad es la comprobacion de las dos
+        /// acciones de este handler.
+        /// </summary>
+        internal static readonly int[] PerfilesQueEditanMaestro = { 14, 18 };
+
         public void ProcessRequest(HttpContext context)
         {
             /* Los bytes de la respuesta se escriben con la codificacion que fija
@@ -109,6 +121,8 @@ namespace JsonJQueryNetHorasExtras
                 if (accion == "CerrarPeriodo")  { existe = true; salida.Append(CerrarPeriodo(context, parametros[0]["parameters"])); }
                 if (accion == "ReabrirPeriodo") { existe = true; salida.Append(ReabrirPeriodo(context, parametros[0]["parameters"])); }
                 if (accion == "CargarFueraDeHorario") { existe = true; salida.Append(CargarFueraDeHorario(parametros[0]["parameters"])); }
+                if (accion == "AgregarColaborador") { existe = true; salida.Append(AgregarColaborador(context, parametros[0]["parameters"])); }
+                if (accion == "AgregarAjusteSalario") { existe = true; salida.Append(AgregarAjusteSalario(context, parametros[0]["parameters"])); }
 
                 if (!existe) { salida.Append(Mensaje("0", "La acción solicitada no existe.", "danger")); }
             }
@@ -316,6 +330,71 @@ namespace JsonJQueryNetHorasExtras
             {
                 return Mensaje("0", "Error al reabrir el periodo. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Agrega al modulo a una persona que tiene horas y no estaba, con su sueldo.
+        /// El monto llega como TEXTO a proposito: NegHeMaestroPantalla.LeerMonto
+        /// entiende coma y punto y rechaza lo ambiguo, en vez de que Decimal() lo
+        /// convierta en cero en silencio.
+        /// </summary>
+        private string AgregarColaborador(HttpContext context, dynamic p)
+        {
+            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            {
+                return Mensaje("0", "Su perfil no puede cargar datos ni sueldos del módulo.", "warning");
+            }
+
+            try
+            {
+                EntRespuesta r = NegHeMaestroPantalla.AgregarColaborador(
+                    Entero(p["idPeriodo"]),
+                    EnteroLargo(p["idEmpleado"]),
+                    Convert.ToString(p["empresa"]),
+                    Convert.ToString(p["cargo"]),
+                    Entero(p["jornada"]),
+                    Booleano(p["aplicaHE"]),
+                    Convert.ToString(p["monto"]),
+                    Fecha(p["vigencia"]),
+                    Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al guardar los datos. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>Agrega una fila de ajuste al historial de sueldos. Nunca pisa la anterior.</summary>
+        private string AgregarAjusteSalario(HttpContext context, dynamic p)
+        {
+            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            {
+                return Mensaje("0", "Su perfil no puede cargar datos ni sueldos del módulo.", "warning");
+            }
+
+            try
+            {
+                EntRespuesta r = NegHeMaestroPantalla.AgregarAjusteSalario(
+                    Entero(p["idPeriodo"]),
+                    EnteroLargo(p["idEmpleado"]),
+                    Convert.ToString(p["monto"]),
+                    Fecha(p["vigencia"]),
+                    Convert.ToString(p["observacion"]),
+                    Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al guardar el ajuste de sueldo. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>true solo si llega true o "true"; cualquier otra cosa es false.</summary>
+        private static bool Booleano(object v)
+        {
+            bool b;
+            return v is bool ? (bool)v : bool.TryParse(Convert.ToString(v), out b) && b;
         }
 
         private static bool EstaEn(HttpContext context, int[] perfiles)

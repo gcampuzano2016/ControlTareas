@@ -408,5 +408,128 @@ namespace CapaPruebas
             Assert.AreEqual(0m, o.MontoPonderado);
             Assert.AreEqual("", o.FechaCierreTexto);
         }
+
+        /* ---------------- Armar ---------------- */
+
+        private static EntDatosCalificacion Datos()
+        {
+            EntCalificacionForeCast caliente = Sana();                 // 100, pond 40.000
+
+            EntCalificacionForeCast tibiaGrande = Sana();
+            tibiaGrande.IdForeCast = 2; tibiaGrande.PVPEstimado = 500000m;          // pond 200.000
+            tibiaGrande.Calificacion.Presupuesto = 5; tibiaGrande.Calificacion.Autoridad = 5;
+            tibiaGrande.Calificacion.Necesidad = 6;                                   // 16+15+15+10 = 56
+            tibiaGrande.Sucursal = "SUR"; tibiaGrande.GerentedeCuenta = "G2";
+
+            EntCalificacionForeCast fria = Sana();
+            fria.IdForeCast = 3; fria.Calificacion = null;
+            fria.FechaModificacion = Hoy.AddDays(-90);                                // alerta 1
+            fria.FechaCierre = Hoy.AddDays(-10);                                      // alerta 2
+
+            EntCalificacionForeCast friaSinRiesgo = Sana();
+            friaSinRiesgo.IdForeCast = 4; friaSinRiesgo.Calificacion = null;          // 40, sin alertas 1/2/8
+
+            caliente.Sucursal = fria.Sucursal = friaSinRiesgo.Sucursal = "NORTE";
+            caliente.GerentedeCuenta = fria.GerentedeCuenta = friaSinRiesgo.GerentedeCuenta = "G1";
+
+            return new EntDatosCalificacion
+            {
+                Oportunidades = new List<EntCalificacionForeCast> { fria, friaSinRiesgo, tibiaGrande, caliente },
+                Tasas = Tasas()
+            };
+        }
+
+        [TestMethod]
+        public void Armar_OrdenaIndicadoresTopYRiesgo()
+        {
+            EntPantallaCalificacion p = NegCalificacionForeCast.Armar(Datos(), new EntFiltroCalificacion(), Hoy);
+
+            CollectionAssert.AreEqual(new long[] { 1, 2, 4, 3 }, IdsDe(p));   // por puntaje desc
+            Assert.AreEqual(4, p.Total);
+            Assert.AreEqual(1, p.Calientes);
+            Assert.AreEqual(1, p.Tibias);
+            Assert.AreEqual(2, p.Frias);
+            Assert.AreEqual(2, p.SinCalificar);
+            Assert.AreEqual(50.0m, p.PorcentajeSinCalificar);
+            Assert.AreEqual(800000m, p.MontoTotal);
+            CollectionAssert.AreEqual(new long[] { 2, 1 }, p.Top5);            // por ponderado desc
+            CollectionAssert.AreEqual(new long[] { 3 }, p.EnRiesgo);
+            CollectionAssert.AreEqual(new[] { "G1", "G2" }, p.Gerentes);
+        }
+
+        [TestMethod]
+        public void Armar_Filtros_NoCambianLosCombos()
+        {
+            EntPantallaCalificacion p = NegCalificacionForeCast.Armar(
+                Datos(), new EntFiltroCalificacion { Sucursal = " sur " }, Hoy);
+            CollectionAssert.AreEqual(new long[] { 2 }, IdsDe(p));
+            CollectionAssert.AreEqual(new[] { "NORTE", "SUR" }, p.Sucursales);
+
+            EntPantallaCalificacion q = NegCalificacionForeCast.Armar(
+                Datos(), new EntFiltroCalificacion { Estado = "Sin calificar" }, Hoy);
+            CollectionAssert.AreEqual(new long[] { 4, 3 }, IdsDe(q));
+
+            EntPantallaCalificacion r = NegCalificacionForeCast.Armar(
+                Datos(), new EntFiltroCalificacion { Estado = "Fría" }, Hoy);
+            Assert.AreEqual(2, r.Total);
+        }
+
+        [TestMethod]
+        public void Armar_Vacio_NoDivideEntreCero()
+        {
+            EntPantallaCalificacion p = NegCalificacionForeCast.Armar(new EntDatosCalificacion(), null, Hoy);
+            Assert.AreEqual(0, p.Total);
+            Assert.AreEqual(0m, p.PorcentajeSinCalificar);
+        }
+
+        [TestMethod]
+        public void Json_ConPuntoDecimalEnCulturaEsES()
+        {
+            EntPantallaCalificacion p = new EntPantallaCalificacion { MontoPonderado = 1234.5m, PorcentajeSinCalificar = 33.3m };
+            string json = new System.Web.Script.Serialization.JavaScriptSerializer().Serialize(p);
+            StringAssert.Contains(json, "\"MontoPonderado\":1234.5");
+            StringAssert.Contains(json, "\"PorcentajeSinCalificar\":33.3");
+            Assert.IsFalse(json.Contains("1234,5"));
+        }
+
+        private static long[] IdsDe(EntPantallaCalificacion p)
+        {
+            List<long> ids = new List<long>();
+            foreach (EntCalificacionForeCast o in p.Oportunidades) { ids.Add(o.IdForeCast); }
+            return ids.ToArray();
+        }
+
+        /* ---------------- Validacion ---------------- */
+
+        private static EntCalificacionRespuesta Respuesta()
+        {
+            return new EntCalificacionRespuesta { IdForeCast = 7, Presupuesto = 12, Autoridad = 5, Necesidad = 14 };
+        }
+
+        [TestMethod]
+        public void ValidarRespuesta_AceptaSoloLosPuntosDelModal()
+        {
+            Assert.AreEqual("", NegCalificacionForeCast.ValidarRespuesta(Respuesta()));
+
+            EntCalificacionRespuesta a = Respuesta(); a.Presupuesto = 7;
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(a));
+            EntCalificacionRespuesta b = Respuesta(); b.Necesidad = 12;   // 12 es de Presupuesto, no de Necesidad
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(b));
+            EntCalificacionRespuesta c = Respuesta(); c.IdForeCast = 0;
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(c));
+            EntCalificacionRespuesta d = Respuesta(); d.DecisorCargo = new string('x', 151);
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(d));
+            EntCalificacionRespuesta e = Respuesta(); e.AccionComprometida = new string('x', 301);
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(e));
+            Assert.AreNotEqual("", NegCalificacionForeCast.ValidarRespuesta(null));
+        }
+
+        [TestMethod]
+        public void ValidarGuardado_RechazaUnaOportunidadQueElUsuarioNoVe()
+        {
+            Assert.AreEqual("", NegCalificacionForeCast.ValidarGuardado(Respuesta(), new long[] { 5, 7 }));
+            Assert.AreEqual("No tiene acceso a esa oportunidad.",
+                NegCalificacionForeCast.ValidarGuardado(Respuesta(), new long[] { 5, 6 }));
+        }
     }
 }

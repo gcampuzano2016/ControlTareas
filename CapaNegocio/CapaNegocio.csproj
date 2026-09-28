@@ -185,6 +185,7 @@
     <Compile Include="NegDashboardAprobacion.cs" />
     <Compile Include="NegCalificacionForeCast.cs" />
     <Compile Include="NegCalificacionForeCast.Evaluacion.cs" />
+    <Compile Include="NegCalificacionForeCast.Pantalla.cs" />
     <Compile Include="NegEgresoInventario.cs" />
     <Compile Include="NegEmpleado.cs" />
     <Compile Include="NegDetallePermiso.cs" />

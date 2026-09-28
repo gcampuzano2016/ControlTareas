@@ -108,6 +108,7 @@ namespace JsonJQueryNetHorasExtras
                 if (accion == "GuardarFila")    { existe = true; salida.Append(GuardarFila(context, parametros[0]["parameters"])); }
                 if (accion == "CerrarPeriodo")  { existe = true; salida.Append(CerrarPeriodo(context, parametros[0]["parameters"])); }
                 if (accion == "ReabrirPeriodo") { existe = true; salida.Append(ReabrirPeriodo(context, parametros[0]["parameters"])); }
+                if (accion == "CargarFueraDeHorario") { existe = true; salida.Append(CargarFueraDeHorario(parametros[0]["parameters"])); }
 
                 if (!existe) { salida.Append(Mensaje("0", "La acción solicitada no existe.", "danger")); }
             }
@@ -236,6 +237,28 @@ namespace JsonJQueryNetHorasExtras
             catch (Exception ex)
             {
                 return Mensaje("0", "Error al cargar el periodo. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// El tiempo fuera de horario del periodo. Se pide aparte de CargarPeriodo,
+        /// despues de dibujar la grilla: es informativo, y si tarda o falla la
+        /// pantalla tiene que seguir funcionando igual que antes.
+        ///
+        /// La actividad trae tildes desde la base. ProcessRequest ya fija
+        /// ContentEncoding UTF-8 para todo el handler, asi que no hace falta
+        /// repetirlo aqui.
+        /// </summary>
+        private string CargarFueraDeHorario(dynamic p)
+        {
+            try
+            {
+                EntRespuesta r = NegHorasExtrasPantalla.CargarFueraDeHorario(Entero(p["idPeriodo"]));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al calcular el tiempo fuera de horario. " + ex.Message, "danger");
             }
         }
 

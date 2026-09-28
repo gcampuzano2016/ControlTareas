@@ -541,17 +541,26 @@ namespace CapaNegocio
 
             if (HayCalculo(fuera))
             {
+                // El total suma SOLO a quienes estan en la grilla: alguien activo en el
+                // maestro pero no sembrado en el periodo sale en la hoja "Fuera de
+                // horario", y si entrara aqui el total no cuadraria con la columna.
+                int minutosSin = 0, minutosRech = 0;
                 int fila = PrimeraFilaDeDatos;
                 foreach (EntHeFila f in filas)
                 {
                     EntHeFueraDeHorarioPersona p = fuera.DePersona(f.IdEmpleado);
                     HorasEnCelda(hoja.Cells[fila, ColumnaFueraSinAprobar], p != null ? p.HorasSinAprobar : 0m);
                     HorasEnCelda(hoja.Cells[fila, ColumnaFueraRechazado], p != null ? p.HorasRechazado : 0m);
+                    if (p != null)
+                    {
+                        minutosSin += p.MinutosSinAprobar50 + p.MinutosSinAprobar100;
+                        minutosRech += p.MinutosRechazado50 + p.MinutosRechazado100;
+                    }
                     fila++;
                 }
 
-                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraSinAprobar], fuera.TotalHorasSinAprobar);
-                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraRechazado], fuera.TotalHorasRechazado);
+                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraSinAprobar], EntHeFueraDeHorarioPersona.Horas(minutosSin));
+                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraRechazado], EntHeFueraDeHorarioPersona.Horas(minutosRech));
                 hoja.Cells[filaDeTotales + 1, ColumnaFueraSinAprobar].Style.Font.Bold = true;
                 hoja.Cells[filaDeTotales + 1, ColumnaFueraRechazado].Style.Font.Bold = true;
             }

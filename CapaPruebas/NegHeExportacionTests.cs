@@ -490,5 +490,29 @@ namespace CapaPruebas
                     "La persona de la grilla no tiene nada fuera de horario.");
             }
         }
+
+        [TestMethod]
+        public void Construir_TotalesDelDetalle_SoloSumanLaGrilla()
+        {
+            // Alguien activo en el maestro pero no sembrado en el periodo: aparece en
+            // la tercera hoja, pero el TOTAL de la columna tiene que cuadrar con la
+            // suma de la columna, o nadie puede conciliarlo.
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, FueraDeEjemplo(9999))))
+            {
+                ExcelWorksheet detalle = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDetalle];
+
+                int filaTotales = -1;
+                for (int f = NegHeExportacion.PrimeraFilaDeDatos; f <= NegHeExportacion.PrimeraFilaDeDatos + 5; f++)
+                {
+                    if (Convert.ToString(detalle.Cells[f, 1].Value) == "TOTALES") { filaTotales = f; }
+                }
+
+                Assert.IsTrue(filaTotales > 0, "No se encontro la fila TOTALES.");
+                Assert.AreEqual(0m, Convert.ToDecimal(detalle.Cells[filaTotales, NegHeExportacion.ColumnaFueraSinAprobar].Value));
+                Assert.AreEqual(0m, Convert.ToDecimal(detalle.Cells[filaTotales, NegHeExportacion.ColumnaFueraRechazado].Value));
+            }
+        }
     }
 }

@@ -638,3 +638,9 @@ Los tres de capa son `.exe`, no `.dll`, y van **juntos** con el `.dll`: el 18-09
 2. Un enlace abre el detalle con fecha, tramo, parte fuera de horario, tipo y estado.
 3. «Cerrar período» muestra la línea con las cifras y deja cerrar.
 4. El Excel trae tres hojas. La de «Pagos» **no** tiene las columnas nuevas.
+
+### 12.4 Volver atrás
+
+Basta con reponer los binarios y los dos archivos de la pantalla que había antes. El
+procedimiento `Sp_RTA_HeFueraDeHorario` puede quedar en la base: es de solo lectura y los
+binarios anteriores no lo llaman.

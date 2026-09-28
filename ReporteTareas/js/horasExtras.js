@@ -1083,6 +1083,11 @@ var _fueraDeHorario = null;
 var _idPeriodoFuera = null;
 var _estadoFuera = "sin-datos";   // "cargando" | "ok" | "error"
 
+/* Totales de lo que SE VE en la grilla. El servidor puede traer a alguien activo
+   en el maestro que no está sembrado en el período; si entrara aquí, el pie y el
+   aviso de cierre contarían a una persona que nadie puede ver ni abrir. */
+var _resumenFuera = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0 };
+
 function CargarFueraDeHorario() {
     var idPeriodo = _idPeriodoActual;
     if (!idPeriodo) { return; }
@@ -1113,6 +1118,8 @@ function PintarFueraDeHorario() {
         $.each(_fueraDeHorario.Personas || [], function (i, p) { porEmpleado[String(p.IdEmpleado)] = p; });
     }
 
+    var resumen = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0 };
+
     $("#cuerpoHE tr[data-empleado]").each(function () {
         var $fila = $(this);
         var idEmpleado = $fila.attr("data-empleado");
@@ -1125,11 +1132,23 @@ function PintarFueraDeHorario() {
         var p = porEmpleado[idEmpleado];
         $sin.append(EnlaceFuera(p ? p.HorasSinAprobar : 0, idEmpleado));
         $rech.append(EnlaceFuera(p ? p.HorasRechazado : 0, idEmpleado));
+
+        if (p) {
+            var sin = p.MinutosSinAprobar50 + p.MinutosSinAprobar100;
+            var rech = p.MinutosRechazado50 + p.MinutosRechazado100;
+            resumen.minutosSin += sin;
+            resumen.minutosRech += rech;
+            if (sin > 0) { resumen.personasSin++; }
+            if (rech > 0) { resumen.personasRech++; }
+        }
     });
 
+    _resumenFuera = resumen;
+
     if (_estadoFuera === "ok") {
-        $("#pieFueraSinAprobar").text(FormatoDosDecimales(_fueraDeHorario.TotalHorasSinAprobar));
-        $("#pieFueraRechazado").text(FormatoDosDecimales(_fueraDeHorario.TotalHorasRechazado));
+        /* Se suman minutos y se pasa a horas una sola vez, igual que el servidor. */
+        $("#pieFueraSinAprobar").text(FormatoDosDecimales(resumen.minutosSin / 60));
+        $("#pieFueraRechazado").text(FormatoDosDecimales(resumen.minutosRech / 60));
     } else {
         $("#pieFueraSinAprobar, #pieFueraRechazado").text("");
     }
@@ -1184,14 +1203,14 @@ function TextoAvisoFueraDeHorario() {
         return "No se pudo verificar el tiempo fuera de horario.";
     }
 
-    var f = _fueraDeHorario;
-    if (f.PersonasConSinAprobar === 0 && f.PersonasConRechazado === 0) {
+    var r = _resumenFuera;
+    if (r.personasSin === 0 && r.personasRech === 0) {
         return "No hay tiempo fuera de horario sin aprobar ni rechazado en este período.";
     }
 
-    return "Hay " + f.PersonasConSinAprobar + " colaborador(es) con " +
-           FormatoDosDecimales(f.TotalHorasSinAprobar) + " h fuera de horario sin aprobar y " +
-           f.PersonasConRechazado + " con " + FormatoDosDecimales(f.TotalHorasRechazado) +
+    return "Hay " + r.personasSin + " colaborador(es) con " +
+           FormatoDosDecimales(r.minutosSin / 60) + " h fuera de horario sin aprobar y " +
+           r.personasRech + " con " + FormatoDosDecimales(r.minutosRech / 60) +
            " h rechazadas. Esas horas no están incluidas en el pago.";
 }
 

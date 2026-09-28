@@ -260,6 +260,7 @@ namespace CapaPruebas
 
             EntCalificacionForeCast p = Sana();
             p.FechaModificacion = Hoy.AddDays(-30);
+            p.Calificacion.FechaRegistro = Hoy.AddDays(-30);
             Assert.IsFalse(NegCalificacionForeCast.TieneAlerta(Evaluada(p), NegCalificacionForeCast.AlertaSinActividad));
         }
 

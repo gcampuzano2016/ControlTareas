@@ -348,6 +348,144 @@ namespace CapaDato
             }
         }
 
+        /// <summary>
+        /// Los tres conjuntos de Sp_RTA_HeFueraDelModulo: las personas activas que no
+        /// estan en el modulo y tienen horas, sus segmentos fuera de horario y sus
+        /// tramos aprobados. Mismo criterio que LeerFueraDeHorario: no se transforma
+        /// nada aqui.
+        /// </summary>
+        public static void LeerFueraDelModulo(DateTime inicio, DateTime fin,
+                                              out List<EntHeFueraDelModuloPersona> personas,
+                                              out List<EntHeSegmentoFuera> segmentos,
+                                              out List<EntHeIntervaloPagado> pagados)
+        {
+            personas = new List<EntHeFueraDelModuloPersona>();
+            segmentos = new List<EntHeSegmentoFuera>();
+            pagados = new List<EntHeIntervaloPagado>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeFueraDelModulo", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@FechaInicio", SqlDbType.Date).Value = inicio;
+                cmd.Parameters.Add("@FechaFin", SqlDbType.Date).Value = fin;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        EntHeFueraDelModuloPersona p = new EntHeFueraDelModuloPersona();
+                        p.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                        p.Nombre = Convert.ToString(dr["Nombre"]);
+                        p.Cargo = Convert.ToString(dr["Cargo"]);
+                        personas.Add(p);
+                    }
+
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            EntHeSegmentoFuera s = new EntHeSegmentoFuera();
+                            s.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                            s.IdRegDetTareas = Convert.ToInt64(dr["IdRegDetTareas"]);
+                            s.TramoInicio = Convert.ToDateTime(dr["TramoInicio"]);
+                            s.TramoFin = Convert.ToDateTime(dr["TramoFin"]);
+                            s.SegmentoInicio = Convert.ToDateTime(dr["SegmentoInicio"]);
+                            s.SegmentoFin = Convert.ToDateTime(dr["SegmentoFin"]);
+                            s.TipoHora = Convert.ToInt32(dr["TipoHora"]);
+                            s.EstadoTramo = Convert.ToInt32(dr["EstadoTramo"]);
+                            s.TipoRegistrado = Convert.ToInt32(dr["TipoRegistrado"]);
+                            s.Actividad = Convert.ToString(dr["Actividad"]);
+                            segmentos.Add(s);
+                        }
+                    }
+
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            EntHeIntervaloPagado p = new EntHeIntervaloPagado();
+                            p.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                            p.Inicio = Convert.ToDateTime(dr["Inicio"]);
+                            p.Fin = Convert.ToDateTime(dr["Fin"]);
+                            p.TipoRegistrado = Convert.ToInt32(dr["TipoRegistrado"]);
+                            pagados.Add(p);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Agrega (o reactiva) una persona al maestro con su sueldo 'Rol'. Devuelve
+        /// el codigo del procedimiento: 0 bien, -1 no es empleado activo, -2 ya esta
+        /// en el maestro, -3 datos invalidos.
+        /// </summary>
+        public static int AgregarColaborador(long idEmpleado, string empresa, string cargo, int jornada,
+                                             bool aplicaHE, decimal monto, DateTime vigencia,
+                                             string usuario, string ip)
+        {
+            int resultado = -9;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeAgregarColaborador", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdEmpleado", SqlDbType.BigInt).Value = idEmpleado;
+                cmd.Parameters.Add("@Empresa", SqlDbType.VarChar, 120).Value = empresa ?? "";
+                cmd.Parameters.Add("@Cargo", SqlDbType.VarChar, 200).Value = cargo ?? "";
+                cmd.Parameters.Add("@JornadaHorasDia", SqlDbType.Int).Value = jornada;
+                cmd.Parameters.Add("@AplicaHE", SqlDbType.Bit).Value = aplicaHE;
+                AddDecimalParam(cmd, "@Monto", monto, 18, 2);
+                cmd.Parameters.Add("@FechaVigenciaDesde", SqlDbType.Date).Value = vigencia;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
+        /// <summary>
+        /// Agrega una fila 'Ajuste' al historial de sueldos. Nunca actualiza. Devuelve
+        /// 0 bien, -1 no esta en el maestro, -2 ya hay un ajuste con esa fecha, -3
+        /// monto o fecha invalidos.
+        /// </summary>
+        public static int AgregarAjusteSalario(long idEmpleado, decimal monto, DateTime vigencia,
+                                               string observacion, string usuario, string ip)
+        {
+            int resultado = -9;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeAgregarAjusteSalario", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdEmpleado", SqlDbType.BigInt).Value = idEmpleado;
+                AddDecimalParam(cmd, "@Monto", monto, 18, 2);
+                cmd.Parameters.Add("@FechaVigenciaDesde", SqlDbType.Date).Value = vigencia;
+                cmd.Parameters.Add("@Observacion", SqlDbType.VarChar, 400).Value = observacion ?? "";
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
+                }
+            }
+
+            return resultado;
+        }
+
         public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar, string horasOrigen)
         {
             int resultado = -1;

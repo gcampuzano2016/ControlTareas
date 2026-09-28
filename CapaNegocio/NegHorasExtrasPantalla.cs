@@ -689,7 +689,19 @@ namespace CapaNegocio
                 List<EntHeIntervaloPagado> pagados;
                 DaoHorasExtras.LeerFueraDeHorario(periodo.FechaInicio, periodo.FechaFin, out segmentos, out pagados);
 
-                return NegHeFueraDeHorario.Calcular(segmentos, pagados);
+                EntHeFueraDeHorario resultado = NegHeFueraDeHorario.Calcular(segmentos, pagados);
+
+                /* Quien tiene horas y no esta en el modulo. Va en el mismo try: si
+                   esto falla, el resultado entero dice "no se pudo calcular" en vez
+                   de callar a esas personas. */
+                List<EntHeFueraDelModuloPersona> personas;
+                List<EntHeSegmentoFuera> segmentosFuera;
+                List<EntHeIntervaloPagado> pagadosFuera;
+                DaoHorasExtras.LeerFueraDelModulo(periodo.FechaInicio, periodo.FechaFin,
+                                                  out personas, out segmentosFuera, out pagadosFuera);
+                resultado.FueraDelModulo = NegHeFueraDeHorario.ResumirFueraDelModulo(personas, segmentosFuera, pagadosFuera);
+
+                return resultado;
             }
             catch (Exception ex)
             {

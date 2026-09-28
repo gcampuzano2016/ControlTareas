@@ -1132,6 +1132,7 @@
     <Content Include="Formulario\ReporteHorarioLaboral.aspx" />
     <Content Include="Formulario\ParametrizacionHorario.aspx" />
     <Content Include="Formulario\ParametrizacionHorarioUsuario.aspx" />
+    <Content Include="Formulario\CalificacionForeCast.aspx" />
     <Content Include="Formulario\ParametrizacionVentanaAprobacion.aspx" />
     <Content Include="Formulario\ParametrizacionPerfilInicio.aspx" />
     <Content Include="Formulario\ParametrizacionMenuPerfil.aspx" />
@@ -1420,6 +1421,7 @@
     <Content Include="js\editorDiasHorario.js" />
     <Content Include="js\parametrizacionHorario.js" />
     <Content Include="js\parametrizacionHorarioUsuario.js" />
+    <Content Include="js\CalificacionForeCast.js" />
     <Content Include="js\parametrizacionVentanaAprobacion.js" />
     <Content Include="js\parametrizacionPerfilInicio.js" />
     <Content Include="js\parametrizacionMenuPerfil.js" />
@@ -1990,6 +1992,13 @@
     </Compile>
     <Compile Include="Formulario\ParametrizacionHorarioUsuario.aspx.designer.cs">
       <DependentUpon>ParametrizacionHorarioUsuario.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CalificacionForeCast.aspx.cs">
+      <DependentUpon>CalificacionForeCast.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CalificacionForeCast.aspx.designer.cs">
+      <DependentUpon>CalificacionForeCast.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ParametrizacionVentanaAprobacion.aspx.cs">
       <DependentUpon>ParametrizacionVentanaAprobacion.aspx</DependentUpon>

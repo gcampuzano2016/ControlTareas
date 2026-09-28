@@ -6,7 +6,7 @@
            esta en AdministrarHorasExtras.ashx.cs. */
         var HE_PUEDE_REABRIR = <%= PuedeReabrir ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=7" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=8" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -288,6 +288,11 @@
                                         <th class="he-col-derivada" style="display: none">Total 100%</th>
                                         <th>Total horas</th>
                                         <th>Total HE (USD)</th>
+                                        <!-- Informativas: tiempo registrado fuera del horario de la
+                                             persona que NO entra en el pago. Las llena
+                                             CargarFueraDeHorario después de dibujar la grilla. -->
+                                        <th title="Tiempo fuera de horario sin solicitar, pendiente de aprobación o aprobado sin tipo. No se paga.">Fuera de horario sin aprobar (h)</th>
+                                        <th title="Tiempo fuera de horario que la jefatura rechazó. No se paga.">Rechazado (h)</th>
                                         <th>Observación</th>
                                         <!-- Columna nueva de la fase 4, al final de las que ya
                                              había: dice si las horas las sembró el sistema desde
@@ -297,7 +302,7 @@
                                 </thead>
                                 <tbody id="cuerpoHE">
                                     <tr>
-                                        <td colspan="16" class="text-center text-muted">
+                                        <td colspan="18" class="text-center text-muted">
                                             Seleccione o abra un período para comenzar.
                                         </td>
                                     </tr>
@@ -315,6 +320,8 @@
                                         <td class="he-col-derivada" id="piePago100" style="display: none">USD 0.00</td>
                                         <td id="pieTotalHoras">0.00</td>
                                         <td id="pieTotalHE">USD 0.00</td>
+                                        <td id="pieFueraSinAprobar"></td>
+                                        <td id="pieFueraRechazado"></td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -365,6 +372,45 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
                         <button type="button" class="btn btn-primary" id="btnConfirmarPegado">Sí, aplicar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal -->
+
+        <!-- Detalle del tiempo fuera de horario de un colaborador. Solo lectura:
+             sirve para saber QUÉ tramos pedirle a la persona que solicite, o cuáles
+             rechazó la jefatura. Lo llena MostrarDetalleFuera en horasExtras.js,
+             siempre con .text(): la actividad es texto libre de la persona. -->
+        <div class="modal fade" id="modalFueraDeHorario" tabindex="-1" role="dialog" aria-labelledby="tituloFueraDeHorario" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title" id="tituloFueraDeHorario">Tiempo fuera de horario</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p class="text-muted">Información para revisión: estas horas NO están incluidas en los totales a pagar.</p>
+                        <div class="table-responsive">
+                            <table class="table table-condensed table-bordered">
+                                <thead>
+                                    <tr>
+                                        <th>Fecha</th>
+                                        <th>Tramo registrado</th>
+                                        <th>Fuera de horario</th>
+                                        <th>Min.</th>
+                                        <th>Tipo</th>
+                                        <th>Estado</th>
+                                        <th>Actividad</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpoFueraDeHorario"></tbody>
+                            </table>
+                        </div>
+                        <p id="pieFueraDeHorario"></p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
                     </div>
                 </div>
             </div>

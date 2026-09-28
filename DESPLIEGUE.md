@@ -567,3 +567,34 @@ los datos.
 **El gráfico "Horas por empresa" va a mostrar números más bajos.** Hasta esta entrega
 sumaba todos los estados; ahora muestra solo lo aprobado, como las tarjetas de arriba. No
 es una pérdida de datos, es la corrección — pero la jefatura ya está mirando ese gráfico.
+
+## 11. Calificación de oportunidades del Forecast
+
+### 11.1 Base de datos
+
+`docs/sql/2026-09-28-calificacion-forecast.sql`: crea la tabla `ForeCastCalificacion`, los
+procedimientos `Sp_RTAListaCalificacionForeCast` y `Sp_RTAInsertaCalificacionForeCast`, y la
+opción de menú bajo *Forecacst*, para los mismos perfiles que ven *Registro ForeCast*.
+Idempotente. **No toca `ForeCast`.** Va **antes** de los binarios.
+
+Verificar con `docs/sql/2026-09-28-calificacion-forecast-verificacion.sql`, que no deja datos.
+
+> **Si se cambia `Sp_RTAListaForeCast`:** `Sp_RTAListaCalificacionForeCast` replica sus
+> 40 columnas en una tabla temporal (`INSERT … EXEC`). Si se le agrega una columna, hay que
+> agregarla también en `#Visibles`, o la pantalla de calificación deja de cargar.
+
+### 11.2 Archivos a publicar
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
+- `Formulario\CalificacionForeCast.aspx`
+- `Formulario\AdministrarCalificacionForeCast.ashx`
+- `Formulario\DescargarCalificacionForeCast.ashx`
+- `js\CalificacionForeCast.js`
+
+Los tres de capa son `.exe`, no `.dll`.
+
+### 11.3 Verificar después de publicar
+
+1. Con un usuario que tenga filtro de sucursal, el número de «Abiertas» coincide con lo que ve en *Registro ForeCast*.
+2. Calificar una oportunidad y comprobar que la fila cambia de puntaje.
+3. Descargar el Excel.

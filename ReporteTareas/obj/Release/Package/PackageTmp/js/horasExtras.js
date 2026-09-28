@@ -256,8 +256,12 @@ function ConfirmarCerrarPeriodo() {
         return;
     }
 
+    var $contenido = $("<div></div>")
+        .append($("<p></p>").text("El período dejará de admitir cambios: nadie podrá guardar horas ni observaciones hasta que se reabra."))
+        .append($("<p></p>").text(TextoAvisoFueraDeHorario()));
+
     MostrarConfirmacion(
-        "El período dejará de admitir cambios: nadie podrá guardar horas ni observaciones hasta que se reabra.",
+        $contenido,
         EjecutarCerrarPeriodo,
         "Cerrar período",
         "Sí, cerrar período"
@@ -499,6 +503,7 @@ function PintarPantalla(pantalla) {
     ActualizarEstadoPeriodo(pantalla.Periodo);
     ActualizarFiltroEmpresa(pantalla.Filas);
     PintarGrilla(pantalla);
+    CargarFueraDeHorario();
 }
 
 function ActualizarEstadoPeriodo(periodo) {
@@ -558,7 +563,7 @@ function PintarGrilla(pantalla) {
     var $cuerpo = $("#cuerpoHE").empty();
 
     if (!pantalla.Filas || pantalla.Filas.length === 0) {
-        $cuerpo.append('<tr><td colspan="16" class="text-center text-muted">' +
+        $cuerpo.append('<tr><td colspan="18" class="text-center text-muted">' +
                        'Este período no tiene colaboradores.</td></tr>');
     } else {
         $.each(pantalla.Filas, function (i, fila) {
@@ -646,6 +651,10 @@ function ConstruirFila(fila) {
 
     $fila.append($('<td class="text-right he-total-horas"></td>').text(FormatoDosDecimales(fila.TotalHoras)));
     $fila.append($('<td class="text-right he-total-he"></td>').text(FormatoDosDecimales(fila.TotalHE)));
+
+    /* Informativas: las llena PintarFueraDeHorario cuando llega la respuesta. */
+    $fila.append($('<td class="text-right he-fuera-sin"></td>').text("…"));
+    $fila.append($('<td class="text-right he-fuera-rech"></td>').text("…"));
 
     var $obs = $('<input type="text" class="form-control input-sm he-observacion" maxlength="400" />')
         .val(fila.Observacion || "")
@@ -1059,6 +1068,131 @@ function ActualizarTotales(horas50, pago50, horas100, pago100, totalHoras, total
     $("#tabPago100, #piePago100").text("USD " + FormatoDosDecimales(pago100));
     $("#tabTotalHoras, #pieTotalHoras").text(FormatoDosDecimales(totalHoras));
     $("#tabTotalPagar, #pieTotalHE").text("USD " + FormatoDosDecimales(totalHE));
+}
+
+/* ------------------------------------------------------ fuera de horario -- */
+
+/* Tiempo registrado fuera del horario de cada persona que NO entra en el pago:
+   sin solicitar, pendiente o aprobado sin tipo («sin aprobar»), y lo que la
+   jefatura rechazó. Es información para que Nómina decida antes de cerrar;
+   nada de esto cambia un monto.
+
+   Se pide aparte de la grilla, y si falla la grilla sigue igual: las dos
+   columnas dicen «no disponible» y nada más. */
+var _fueraDeHorario = null;
+var _idPeriodoFuera = null;
+var _estadoFuera = "sin-datos";   // "cargando" | "ok" | "error"
+
+function CargarFueraDeHorario() {
+    var idPeriodo = _idPeriodoActual;
+    if (!idPeriodo) { return; }
+
+    _idPeriodoFuera = idPeriodo;
+    _fueraDeHorario = null;
+    _estadoFuera = "cargando";
+    PintarFueraDeHorario();
+
+    /* suprimirMensaje: un fallo aquí no merece un modal encima de la grilla,
+       que sí cargó bien. Se dice en las propias columnas. */
+    PostHE("CargarFueraDeHorario", { idPeriodo: idPeriodo }, function (r) {
+        /* Si entretanto se eligió otro período, esta respuesta ya no es de él. */
+        if (idPeriodo !== _idPeriodoActual) { return; }
+        _fueraDeHorario = r.resultado;
+        _estadoFuera = (r.resultado && r.resultado.Calculado) ? "ok" : "error";
+        PintarFueraDeHorario();
+    }, function () {
+        if (idPeriodo !== _idPeriodoActual) { return; }
+        _estadoFuera = "error";
+        PintarFueraDeHorario();
+    }, true);
+}
+
+function PintarFueraDeHorario() {
+    var porEmpleado = {};
+    if (_estadoFuera === "ok") {
+        $.each(_fueraDeHorario.Personas || [], function (i, p) { porEmpleado[String(p.IdEmpleado)] = p; });
+    }
+
+    $("#cuerpoHE tr[data-empleado]").each(function () {
+        var $fila = $(this);
+        var idEmpleado = $fila.attr("data-empleado");
+        var $sin = $fila.find(".he-fuera-sin").empty();
+        var $rech = $fila.find(".he-fuera-rech").empty();
+
+        if (_estadoFuera === "cargando") { $sin.text("…"); $rech.text("…"); return; }
+        if (_estadoFuera !== "ok") { $sin.text("no disponible"); $rech.text("no disponible"); return; }
+
+        var p = porEmpleado[idEmpleado];
+        $sin.append(EnlaceFuera(p ? p.HorasSinAprobar : 0, idEmpleado));
+        $rech.append(EnlaceFuera(p ? p.HorasRechazado : 0, idEmpleado));
+    });
+
+    if (_estadoFuera === "ok") {
+        $("#pieFueraSinAprobar").text(FormatoDosDecimales(_fueraDeHorario.TotalHorasSinAprobar));
+        $("#pieFueraRechazado").text(FormatoDosDecimales(_fueraDeHorario.TotalHorasRechazado));
+    } else {
+        $("#pieFueraSinAprobar, #pieFueraRechazado").text("");
+    }
+}
+
+/* Con cero, un guion; con horas, un enlace que abre el detalle de la persona. */
+function EnlaceFuera(horas, idEmpleado) {
+    if (!Number(horas)) { return $('<span class="text-muted"></span>').text("—"); }
+
+    return $('<a href="javascript:void(0)"></a>')
+        .text(FormatoDosDecimales(horas))
+        .on("click", function () { MostrarDetalleFuera(idEmpleado); });
+}
+
+function MostrarDetalleFuera(idEmpleado) {
+    if (_estadoFuera !== "ok") { return; }
+
+    var nombre = $("#cuerpoHE tr[data-empleado='" + idEmpleado + "'] td:first").text();
+    $("#tituloFueraDeHorario").text("Tiempo fuera de horario — " + nombre);
+
+    var $cuerpo = $("#cuerpoFueraDeHorario").empty();
+    $.each(_fueraDeHorario.Detalle || [], function (i, d) {
+        if (String(d.IdEmpleado) !== String(idEmpleado)) { return; }
+
+        /* Todo con .text(): la actividad es texto libre y nunca se interpreta como HTML. */
+        $cuerpo.append($("<tr></tr>")
+            .append($("<td></td>").text(d.Fecha))
+            .append($("<td></td>").text(d.TramoTexto))
+            .append($("<td></td>").text(d.FueraTexto))
+            .append($('<td class="text-right"></td>').text(d.Minutos))
+            .append($("<td></td>").text(d.TipoTexto))
+            .append($("<td></td>").text(d.EstadoTexto))
+            .append($("<td></td>").text(d.Actividad)));
+    });
+
+    var p = null;
+    $.each(_fueraDeHorario.Personas || [], function (i, x) { if (String(x.IdEmpleado) === String(idEmpleado)) { p = x; } });
+
+    $("#pieFueraDeHorario").text(p
+        ? "Sin aprobar: 50% " + FormatoDosDecimales(p.MinutosSinAprobar50 / 60) + " h · 100% " +
+          FormatoDosDecimales(p.MinutosSinAprobar100 / 60) + " h. Rechazado: 50% " +
+          FormatoDosDecimales(p.MinutosRechazado50 / 60) + " h · 100% " +
+          FormatoDosDecimales(p.MinutosRechazado100 / 60) + " h."
+        : "");
+
+    $("#modalFueraDeHorario").modal("show");
+}
+
+/* La línea que se agrega a la confirmación de cierre. Nunca bloquea: informa. */
+function TextoAvisoFueraDeHorario() {
+    if (_estadoFuera !== "ok" || _idPeriodoFuera !== _idPeriodoActual) {
+        return "No se pudo verificar el tiempo fuera de horario.";
+    }
+
+    var f = _fueraDeHorario;
+    if (f.PersonasConSinAprobar === 0 && f.PersonasConRechazado === 0) {
+        return "No hay tiempo fuera de horario sin aprobar ni rechazado en este período.";
+    }
+
+    return "Hay " + f.PersonasConSinAprobar + " colaborador(es) con " +
+           FormatoDosDecimales(f.TotalHorasSinAprobar) + " h fuera de horario sin aprobar y " +
+           f.PersonasConRechazado + " con " + FormatoDosDecimales(f.TotalHorasRechazado) +
+           " h rechazadas. Esas horas no están incluidas en el pago.";
 }
 
 /* --------------------------------------------------------- guardar todo -- */

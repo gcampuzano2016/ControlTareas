@@ -601,3 +601,40 @@ Los tres de capa son `.exe`, no `.dll`.
    `docs/sql/2026-09-28-calificacion-forecast-verificacion.sql`.
 2. Calificar una oportunidad y comprobar que la fila cambia de puntaje.
 3. Descargar el Excel.
+
+## 12. Horas Extras: tiempo fuera de horario
+
+Columnas informativas en la pantalla y en el Excel: tiempo registrado fuera del horario de
+cada persona que **no** se paga, separado en «sin aprobar» y «rechazado». **No cambia ningún
+monto** ni toca ninguna tabla.
+
+### 12.1 Base de datos
+
+`docs/sql/2026-09-28-horas-extras-fuera-de-horario.sql`: crea `Sp_RTA_HeFueraDeHorario`, que es
+de solo lectura. Va **antes** de los binarios; sin ellos nadie lo llama. El bloque final
+imprime `OK` o `VEREDICTO: FALLO`.
+
+`docs/sql/referencia/FN_RTA_ClasificarTramosHorario.sql` es **solo referencia: no se ejecuta.**
+
+### 12.2 Archivos a publicar
+
+Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
+- `Formulario\HorasExtras.aspx` (pasa a `horasExtras.js?v=8`)
+- `js\horasExtras.js`
+
+Los tres de capa son `.exe`, no `.dll`, y van **juntos** con el `.dll`: el 18-09 se publicó el
+`.dll` solo y dejó de salir todo correo.
+
+> **Estos binarios llevan todo lo que haya commiteado en la rama**, no solo este cambio. Antes
+> de copiar, confirmar que lo demás que viaja con ellos (por ejemplo, la sección 11) ya se
+> puede publicar.
+
+### 12.3 Verificar después de publicar
+
+1. En Horas Extras, el período 16-08 / 15-09-2026 muestra las dos columnas con valores (no «…»
+   ni «no disponible»).
+2. Un enlace abre el detalle con fecha, tramo, parte fuera de horario, tipo y estado.
+3. «Cerrar período» muestra la línea con las cifras y deja cerrar.
+4. El Excel trae tres hojas. La de «Pagos» **no** tiene las columnas nuevas.

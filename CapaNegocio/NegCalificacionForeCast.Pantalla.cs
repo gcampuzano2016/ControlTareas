@@ -14,6 +14,13 @@ namespace CapaNegocio
 
         public static EntPantallaCalificacion Cargar(string idUsuario, EntFiltroCalificacion filtro)
         {
+            // '' significa "sin filtro" para Sp_RTAListaForeCast: nunca se puede
+            // llamar al Dao con una sesion vacia o en blanco.
+            if (string.IsNullOrWhiteSpace(idUsuario))
+            {
+                throw new ArgumentException("Sesión no válida. Vuelva a iniciar sesión.");
+            }
+
             EntDatosCalificacion datos = DaoCalificacionForeCast.Cargar(idUsuario);
             return Armar(datos, filtro, DateTime.Today);
         }
@@ -127,6 +134,13 @@ namespace CapaNegocio
 
         public static EntRespuesta Guardar(EntCalificacionRespuesta r, string idUsuario)
         {
+            // Mismo motivo que en Cargar: '' es "sin filtro" para el Dao, nunca una
+            // sesion valida.
+            if (string.IsNullOrWhiteSpace(idUsuario))
+            {
+                return new EntRespuesta { estado = "0", mensaje = "Sesión no válida. Vuelva a iniciar sesión.", tipoMensaje = "warning" };
+            }
+
             EntDatosCalificacion visibles = DaoCalificacionForeCast.Cargar(idUsuario);
             string error = ValidarGuardado(r, visibles.Oportunidades.Select(o => o.IdForeCast));
             if (error != "")

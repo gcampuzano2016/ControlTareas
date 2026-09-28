@@ -1,6 +1,7 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
 using System;
+using System.Collections.Specialized;
 using System.Web;
 
 namespace JsonJQueryNetCalificacionForeCast
@@ -26,13 +27,23 @@ namespace JsonJQueryNetCalificacionForeCast
             }
 
             string idUsuario = Convert.ToString(context.Session["Cod_Usuario"]).Trim();
+            if (string.IsNullOrWhiteSpace(idUsuario))
+            {
+                NoDisponible(context, "Su sesión expiró. Vuelva a iniciar sesión.", 401);
+                return;
+            }
+
+            // Web.config fija requestEncoding en windows-1252, pero el JS arma esta
+            // URL con $.param, que codifica en UTF-8: sin este parseo explicito los
+            // filtros con tildes (gerente, sucursal, etc.) llegarian mal decodificados.
+            NameValueCollection query = HttpUtility.ParseQueryString(context.Request.Url.Query, System.Text.Encoding.UTF8);
             EntFiltroCalificacion filtro = new EntFiltroCalificacion
             {
-                GerentedeCuenta = Param(context, "gerente"),
-                Sucursal = Param(context, "sucursal"),
-                Prioridad = Param(context, "etapa"),
-                Estado = Param(context, "estado"),
-                Marca = Param(context, "marca")
+                GerentedeCuenta = Param(query, "gerente"),
+                Sucursal = Param(query, "sucursal"),
+                Prioridad = Param(query, "etapa"),
+                Estado = Param(query, "estado"),
+                Marca = Param(query, "marca")
             };
 
             byte[] archivo;
@@ -58,9 +69,9 @@ namespace JsonJQueryNetCalificacionForeCast
             context.Response.End();
         }
 
-        private static string Param(HttpContext context, string nombre)
+        private static string Param(NameValueCollection query, string nombre)
         {
-            return (context.Request.QueryString[nombre] ?? "").Trim();
+            return (query[nombre] ?? "").Trim();
         }
 
         private static void NoDisponible(HttpContext context, string mensaje, int statusCode)

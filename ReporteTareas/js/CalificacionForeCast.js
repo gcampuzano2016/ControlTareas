@@ -39,7 +39,10 @@ function Llamar(action, parameters, alTerminar) {
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (r) { alTerminar(r); },
-        error: function () { swal("Error", "No se pudo comunicar con el servidor.", "error"); }
+        error: function () {
+            $('#btnGuardar').prop('disabled', false);   // si fallo Guardar, no debe quedar bloqueado
+            swal("Error", "No se pudo comunicar con el servidor.", "error");
+        }
     });
 }
 
@@ -166,6 +169,7 @@ function AbrirModal(id) {
     var o = Buscar(id);
     if (!o) { return; }
     var c = o.Calificacion;
+    $('#btnGuardar').prop('disabled', false);   // por si quedo deshabilitado tras un error anterior
     $('#hidIdForeCast').val(id);
     $('#lblOportunidad').text(o.Cliente + ' – ' + o.DetalleProyecto);
     $('#cboPresupuesto').val(c ? String(c.Presupuesto) : '');

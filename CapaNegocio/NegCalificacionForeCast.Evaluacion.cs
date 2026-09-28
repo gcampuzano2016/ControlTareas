@@ -32,6 +32,9 @@ namespace CapaNegocio
             o.Autoridad = c == null ? 0 : c.Autoridad;
             o.Necesidad = c == null ? 0 : c.Necesidad;
 
+            // o.FechaCierre nunca trae el centinela 1900-01-01: el SP y el DAO ya lo
+            // convierten a NULL antes de llegar aqui, asi que no hace falta repetir
+            // la regla en esta capa.
             o.Tiempo = PuntosTiempo(o.FechaCierre, hoy);
             o.UltimaActividad = UltimaActividad(o.FechaModificacion, c == null ? (DateTime?)null : c.FechaRegistro);
             o.Actividad = PuntosActividad(o.UltimaActividad, hoy);

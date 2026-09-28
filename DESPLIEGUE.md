@@ -595,6 +595,9 @@ Los tres de capa son `.exe`, no `.dll`.
 
 ### 11.3 Verificar después de publicar
 
-1. Con un usuario que tenga filtro de sucursal, el número de «Abiertas» coincide con lo que ve en *Registro ForeCast*.
+1. Con un usuario que tenga filtro de sucursal, el número de «Abiertas» coincide con lo que ve en
+   *Registro ForeCast* filtrado a las etapas LEAD, PIPELINE, UPSIDE y FORECAST (esa pantalla lista
+   todas las etapas por defecto), o con el número esperado que imprime la sección 3 de
+   `docs/sql/2026-09-28-calificacion-forecast-verificacion.sql`.
 2. Calificar una oportunidad y comprobar que la fila cambia de puntaje.
 3. Descargar el Excel.

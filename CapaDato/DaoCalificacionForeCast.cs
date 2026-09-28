@@ -45,7 +45,7 @@ namespace CapaDato
                             IdNegocio             = EnteroNulo(dr, "IdNegocio"),
                             Porcentaje            = DecimalNulo(dr, "Porcentaje"),
                             DescripcionNegocio    = Texto(dr, "DescripcionNegocio"),
-                            FechaCierre           = FechaNula(dr, "FechaCierre"),
+                            FechaCierre           = SinCentinela(FechaNula(dr, "FechaCierre")),
                             FechaModificacion     = FechaNula(dr, "FechaModificacion"),
                             Contacto              = Texto(dr, "Contacto"),
                             LiderProyectoCliente  = Texto(dr, "LiderProyectoCliente"),
@@ -155,6 +155,17 @@ namespace CapaDato
         {
             object v = dr[columna];
             return v == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(v);
+        }
+
+        /// <summary>
+        /// Defensa en profundidad para FechaCierre: el SP ya devuelve NULL para el
+        /// centinela 1900-01-01, pero si alguien vuelve a exponer la columna cruda
+        /// esto evita tratarla como una fecha real. FechaNula se mantiene generica
+        /// para las demas columnas de fecha.
+        /// </summary>
+        private static DateTime? SinCentinela(DateTime? fecha)
+        {
+            return fecha.HasValue && fecha.Value.Year <= 1900 ? null : fecha;
         }
     }
 }

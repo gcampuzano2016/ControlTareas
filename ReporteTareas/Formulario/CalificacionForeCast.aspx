@@ -11,7 +11,7 @@
         .cf-sin { font-size: 11px; color: #a94442; display: block; }
         .cf-detalle td { vertical-align: top; }
     </style>
-    <script src="../js/CalificacionForeCast.js?v=1" type="text/javascript"></script>
+    <script src="../js/CalificacionForeCast.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">

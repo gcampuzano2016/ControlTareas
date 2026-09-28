@@ -118,14 +118,18 @@ BEGIN
         f.IdNegocio,
         TRY_CONVERT(DECIMAL(5,2), NULLIF(LTRIM(RTRIM(p.Porcentaje)), '')) AS Porcentaje,
         p.Descripcion                      AS DescripcionNegocio,
-        f.FechaFacturacionProyecto         AS FechaCierre,
+        /* 1900-01-01 es el centinela de "sin fecha" (ver ForeCastHistorico): no es
+           una fecha de cierre real, asi que se reporta como NULL. */
+        CASE WHEN f.FechaFacturacionProyecto < '19010101' THEN NULL
+             ELSE f.FechaFacturacionProyecto END              AS FechaCierre,
         f.FechaCobro                       AS FechaModificacion,
         f.Contacto,
         f.LiderProyectoCliente,
         f.Observaciones,
         (SELECT COUNT(DISTINCT h.FechaFacturacionProyecto)
            FROM dbo.ForeCastHistorico h
-          WHERE h.IdForeCast = f.IdForeCast)                        AS FechasCierreDistintas,
+          WHERE h.IdForeCast = f.IdForeCast
+            AND h.FechaFacturacionProyecto >= '19010101')          AS FechasCierreDistintas,
         (SELECT COUNT(*)
            FROM dbo.ForeCast g
           WHERE g.IdCliente = f.IdCliente
@@ -133,10 +137,10 @@ BEGIN
             AND g.Prioridad = 'GANADO')                              AS GanadosCliente,
         (SELECT COUNT(DISTINCT x.Nombre)
            FROM (SELECT NULLIF(LTRIM(RTRIM(c.Contacto)), '') AS Nombre
-                   FROM dbo.ForeCast c WHERE c.IdCliente = f.IdCliente
+                   FROM dbo.ForeCast c WHERE c.IdCliente = f.IdCliente AND c.Estado = 1
                  UNION ALL
                  SELECT NULLIF(LTRIM(RTRIM(c.LiderProyectoCliente)), '')
-                   FROM dbo.ForeCast c WHERE c.IdCliente = f.IdCliente) x) AS ContactosCuenta,
+                   FROM dbo.ForeCast c WHERE c.IdCliente = f.IdCliente AND c.Estado = 1) x) AS ContactosCuenta,
         k.Presupuesto,
         k.Autoridad,
         k.Necesidad,
@@ -153,7 +157,8 @@ BEGIN
                    FROM dbo.ForeCastCalificacion q
                   WHERE q.IdForeCast = f.IdForeCast
                   ORDER BY q.FechaRegistro DESC, q.IdCalificacion DESC) k
-    WHERE f.Prioridad IN ('LEAD','PIPELINE','UPSIDE','FORECAST');
+    WHERE f.Estado = 1
+      AND f.Prioridad IN ('LEAD','PIPELINE','UPSIDE','FORECAST');
 
     /* Resultado 2: tasas de exito de los ultimos 36 meses (FechaCobro es la
        ultima modificacion; en un cierre coincide con la fecha del cierre). */

@@ -66,6 +66,11 @@ namespace JsonJQueryNetCalificacionForeCast
             try
             {
                 string idUsuario = Usuario(campos);
+                if (string.IsNullOrWhiteSpace(idUsuario))
+                {
+                    return responseMessage("0", "Sesión no válida. Vuelva a iniciar sesión.", "warning");
+                }
+
                 EntFiltroCalificacion filtro = new EntFiltroCalificacion
                 {
                     GerentedeCuenta = Campo(campos, "gerente"),
@@ -89,6 +94,10 @@ namespace JsonJQueryNetCalificacionForeCast
             try
             {
                 string idUsuario = Usuario(campos);
+                if (string.IsNullOrWhiteSpace(idUsuario))
+                {
+                    return responseMessage("0", "Sesión no válida. Vuelva a iniciar sesión.", "warning");
+                }
 
                 int presupuesto, autoridad, necesidad;
                 long idForeCast;

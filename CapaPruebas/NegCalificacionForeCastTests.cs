@@ -531,5 +531,44 @@ namespace CapaPruebas
             Assert.AreEqual("No tiene acceso a esa oportunidad.",
                 NegCalificacionForeCast.ValidarGuardado(Respuesta(), new long[] { 5, 6 }));
         }
+
+        /* ---------------- Sesion vacia (M1): no debe tocar la base de datos ---------------- */
+
+        [TestMethod]
+        public void Cargar_SesionVacia_LanzaSinTocarLaBaseDeDatos()
+        {
+            // '' es "sin filtro" para Sp_RTAListaForeCast, nunca una sesion valida.
+            // El rechazo debe ocurrir antes de llamar al Dao (que si toca la BD).
+            AssertLanzaSesionInvalida(() => NegCalificacionForeCast.Cargar("", new EntFiltroCalificacion()));
+            AssertLanzaSesionInvalida(() => NegCalificacionForeCast.Cargar("   ", new EntFiltroCalificacion()));
+            AssertLanzaSesionInvalida(() => NegCalificacionForeCast.Cargar(null, new EntFiltroCalificacion()));
+        }
+
+        private static void AssertLanzaSesionInvalida(Action accion)
+        {
+            try
+            {
+                accion();
+                Assert.Fail("Se esperaba ArgumentException.");
+            }
+            catch (ArgumentException)
+            {
+                // esperado
+            }
+        }
+
+        [TestMethod]
+        public void Guardar_SesionVacia_RechazaSinTocarLaBaseDeDatos()
+        {
+            EntRespuesta r1 = NegCalificacionForeCast.Guardar(Respuesta(), "");
+            Assert.AreEqual("0", r1.estado);
+            Assert.AreEqual("Sesión no válida. Vuelva a iniciar sesión.", r1.mensaje);
+
+            EntRespuesta r2 = NegCalificacionForeCast.Guardar(Respuesta(), "   ");
+            Assert.AreEqual("0", r2.estado);
+
+            EntRespuesta r3 = NegCalificacionForeCast.Guardar(Respuesta(), null);
+            Assert.AreEqual("0", r3.estado);
+        }
     }
 }

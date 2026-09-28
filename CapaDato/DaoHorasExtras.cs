@@ -293,6 +293,61 @@ namespace CapaDato
             return resultado;
         }
 
+        /// <summary>
+        /// Los dos conjuntos de Sp_RTA_HeFueraDeHorario: los segmentos fuera de
+        /// horario de los tramos no pagados, y los intervalos pagados. No los
+        /// cruza: restar y unir es de NegHeFueraDeHorario, y CapaDato no puede
+        /// llamar a CapaNegocio.
+        /// </summary>
+        public static void LeerFueraDeHorario(DateTime inicio, DateTime fin,
+                                              out List<EntHeSegmentoFuera> segmentos,
+                                              out List<EntHeIntervaloPagado> pagados)
+        {
+            segmentos = new List<EntHeSegmentoFuera>();
+            pagados = new List<EntHeIntervaloPagado>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeFueraDeHorario", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@FechaInicio", SqlDbType.Date).Value = inicio;
+                cmd.Parameters.Add("@FechaFin", SqlDbType.Date).Value = fin;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        EntHeSegmentoFuera s = new EntHeSegmentoFuera();
+                        s.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                        s.IdRegDetTareas = Convert.ToInt64(dr["IdRegDetTareas"]);
+                        s.TramoInicio = Convert.ToDateTime(dr["TramoInicio"]);
+                        s.TramoFin = Convert.ToDateTime(dr["TramoFin"]);
+                        s.SegmentoInicio = Convert.ToDateTime(dr["SegmentoInicio"]);
+                        s.SegmentoFin = Convert.ToDateTime(dr["SegmentoFin"]);
+                        s.TipoHora = Convert.ToInt32(dr["TipoHora"]);
+                        s.EstadoTramo = Convert.ToInt32(dr["EstadoTramo"]);
+                        s.TipoRegistrado = Convert.ToInt32(dr["TipoRegistrado"]);
+                        s.Actividad = Convert.ToString(dr["Actividad"]);
+                        segmentos.Add(s);
+                    }
+
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            EntHeIntervaloPagado p = new EntHeIntervaloPagado();
+                            p.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                            p.Inicio = Convert.ToDateTime(dr["Inicio"]);
+                            p.Fin = Convert.ToDateTime(dr["Fin"]);
+                            pagados.Add(p);
+                        }
+                    }
+                }
+            }
+        }
+
         public static int GuardarFila(int idPeriodo, EntHeFila f, string usuario, string ip, bool auditar, string horasOrigen)
         {
             int resultado = -1;

@@ -670,6 +670,57 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// El tiempo fuera de horario del rango del periodo, ya depurado.
+        ///
+        /// NUNCA lanza. La pantalla y el Excel lo tratan como dato informativo: si
+        /// falla, lo que se paga tiene que seguir mostrandose y descargandose, y el
+        /// fallo se dice con Calculado = false en vez de parecer "no hay nada".
+        /// </summary>
+        public static EntHeFueraDeHorario CalcularFueraDeHorario(EntHePeriodo periodo)
+        {
+            try
+            {
+                if (periodo == null)
+                {
+                    return new EntHeFueraDeHorario { Calculado = false, Error = "El periodo no existe." };
+                }
+
+                List<EntHeSegmentoFuera> segmentos;
+                List<EntHeIntervaloPagado> pagados;
+                DaoHorasExtras.LeerFueraDeHorario(periodo.FechaInicio, periodo.FechaFin, out segmentos, out pagados);
+
+                return NegHeFueraDeHorario.Calcular(segmentos, pagados);
+            }
+            catch (Exception ex)
+            {
+                return new EntHeFueraDeHorario { Calculado = false, Error = ex.Message };
+            }
+        }
+
+        /// <summary>
+        /// Lo que pide la pantalla despues de dibujar la grilla. Se calcula cada vez,
+        /// tambien en un periodo cerrado: muestra el estado ACTUAL de los tramos, que
+        /// es lo que dice si alguien regularizo algo despues del cierre.
+        /// </summary>
+        public static EntRespuesta CargarFueraDeHorario(int idPeriodo)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+            EntHePantalla existente = DaoHorasExtras.CargarPeriodo(idPeriodo);
+
+            if (existente.Periodo == null)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "El periodo no existe.";
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
+
+            respuesta.estado = "1";
+            respuesta.resultado = CalcularFueraDeHorario(existente.Periodo);
+            return respuesta;
+        }
+
+        /// <summary>
         /// Guarda las horas de una fila.
         ///
         /// NO recibe ningun total del cliente y no usaria uno aunque se lo

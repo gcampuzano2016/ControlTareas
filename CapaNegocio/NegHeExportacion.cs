@@ -34,6 +34,17 @@ namespace CapaNegocio
         /// <summary>Columna del valor hora ordinario: la usan las pruebas para comprobar el formato de 6 decimales.</summary>
         public const int ColumnaValorHoraOrdinaria = 11;
 
+        public const string NombreHojaFueraDeHorario = "Fuera de horario";
+
+        /// <summary>Informativas, solo en la hoja de detalle: van DESPUES de la ultima columna comun para no mover ninguna.</summary>
+        public const int ColumnaFueraSinAprobar = 24;
+        public const int ColumnaFueraRechazado = 25;
+
+        /// <summary>Primera fila de datos de la hoja "Fuera de horario" (encabezados en la 4).</summary>
+        public const int FueraPrimeraFilaDeDatos = 5;
+        private const int FueraFilaDeEncabezados = 4;
+        private const int FueraUltimaColumna = 11;
+
         private const int FilaDeCierre = 2;
         private const int FilaDeGeneracion = 3;
         private const int FilaDeResumen = 4;
@@ -123,6 +134,16 @@ namespace CapaNegocio
         /// </summary>
         public static byte[] Construir(EntHePantalla pantalla)
         {
+            return Construir(pantalla, null);
+        }
+
+        /// <summary>
+        /// fuera = null o Calculado = false: el archivo sale igual, con las dos
+        /// columnas informativas vacias y la hoja "Fuera de horario" con el motivo.
+        /// Lo que se paga no puede quedar bloqueado por un dato informativo.
+        /// </summary>
+        public static byte[] Construir(EntHePantalla pantalla, EntHeFueraDeHorario fuera)
+        {
             if (pantalla == null)
             {
                 throw new ArgumentNullException(nameof(pantalla));
@@ -157,6 +178,7 @@ namespace CapaNegocio
                 EscribirTotalesFila(hojaDetalle, proximaFilaDetalle + 1, totalesServidor);
                 ConfigurarVista(hojaDetalle, proximaFilaDetalle - 1);
                 AjustarColumnas(hojaDetalle);
+                EscribirColumnasFueraDeHorario(hojaDetalle, pantalla.Filas, fuera, proximaFilaDetalle);
 
                 List<EntHeFila> filasConPago = new List<EntHeFila>();
                 foreach (EntHeFila f in pantalla.Filas)
@@ -178,6 +200,8 @@ namespace CapaNegocio
                 EscribirTotalesFila(hojaPagos, proximaFilaPagos + 1, SumarFilas(filasConPago));
                 ConfigurarVista(hojaPagos, proximaFilaPagos - 1);
                 AjustarColumnas(hojaPagos);
+
+                EscribirHojaFueraDeHorario(paquete, pantalla, fuera);
 
                 return paquete.GetAsByteArray();
             }
@@ -497,6 +521,160 @@ namespace CapaNegocio
             {
                 hoja.Cells[fila, c].Style.Font.Bold = true;
             }
+        }
+
+        private static bool HayCalculo(EntHeFueraDeHorario fuera)
+        {
+            return fuera != null && fuera.Calculado;
+        }
+
+        /// <summary>
+        /// Las dos columnas informativas de la hoja de detalle, en el mismo orden
+        /// de filas que EscribirFilasEnHoja. Sin calculo quedan vacias: un cero
+        /// diria "no hay nada", que no es lo que se sabe.
+        /// </summary>
+        private static void EscribirColumnasFueraDeHorario(ExcelWorksheet hoja, IList<EntHeFila> filas,
+                                                           EntHeFueraDeHorario fuera, int filaDeTotales)
+        {
+            EncabezadoFuera(hoja.Cells[FilaDeEncabezados, ColumnaFueraSinAprobar], "Fuera de horario sin aprobar (h)");
+            EncabezadoFuera(hoja.Cells[FilaDeEncabezados, ColumnaFueraRechazado], "Rechazado (h)");
+
+            if (HayCalculo(fuera))
+            {
+                int fila = PrimeraFilaDeDatos;
+                foreach (EntHeFila f in filas)
+                {
+                    EntHeFueraDeHorarioPersona p = fuera.DePersona(f.IdEmpleado);
+                    HorasEnCelda(hoja.Cells[fila, ColumnaFueraSinAprobar], p != null ? p.HorasSinAprobar : 0m);
+                    HorasEnCelda(hoja.Cells[fila, ColumnaFueraRechazado], p != null ? p.HorasRechazado : 0m);
+                    fila++;
+                }
+
+                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraSinAprobar], fuera.TotalHorasSinAprobar);
+                HorasEnCelda(hoja.Cells[filaDeTotales + 1, ColumnaFueraRechazado], fuera.TotalHorasRechazado);
+                hoja.Cells[filaDeTotales + 1, ColumnaFueraSinAprobar].Style.Font.Bold = true;
+                hoja.Cells[filaDeTotales + 1, ColumnaFueraRechazado].Style.Font.Bold = true;
+            }
+
+            hoja.Column(ColumnaFueraSinAprobar).Width = 18;
+            hoja.Column(ColumnaFueraRechazado).Width = 14;
+
+            // El autofiltro comun cubre 1..23; en el detalle se extiende a las dos nuevas.
+            int ultima = filas.Count > 0 ? PrimeraFilaDeDatos + filas.Count - 1 : FilaDeEncabezados;
+            hoja.Cells[FilaDeEncabezados, 1, ultima, ColumnaFueraRechazado].AutoFilter = true;
+        }
+
+        private static void EncabezadoFuera(ExcelRange celda, string texto)
+        {
+            celda.Value = texto;
+            celda.Style.Font.Bold = true;
+        }
+
+        private static void HorasEnCelda(ExcelRange celda, decimal horas)
+        {
+            celda.Value = horas;
+            celda.Style.Numberformat.Format = FormatoHoras;
+        }
+
+        /// <summary>
+        /// Una fila por cada pedazo que suma, de todas las personas, ordenada por
+        /// nombre y fecha. El nombre sale de la grilla del periodo; si la persona
+        /// no esta en ella, queda vacio en vez de fallar.
+        /// </summary>
+        private static void EscribirHojaFueraDeHorario(ExcelPackage paquete, EntHePantalla pantalla, EntHeFueraDeHorario fuera)
+        {
+            ExcelWorksheet hoja = paquete.Workbook.Worksheets.Add(NombreHojaFueraDeHorario);
+
+            hoja.Cells[1, 1].Value = "Tiempo registrado fuera de horario - Período " + TextoPeriodo(pantalla.Periodo);
+            hoja.Cells[1, 1].Style.Font.Bold = true;
+            hoja.Cells[2, 1].Value = "Información para revisión: estas horas NO están incluidas en los totales a pagar.";
+            hoja.Cells[2, 1].Style.Font.Italic = true;
+
+            string[] encabezados =
+            {
+                "ID Empleado", "Nombre", "Fecha", "Tramo registrado", "Fuera de horario",
+                "Minutos", "Horas", "Tipo", "Estado", "Actividad", "Id tramo"
+            };
+            for (int i = 0; i < encabezados.Length; i++)
+            {
+                hoja.Cells[FueraFilaDeEncabezados, i + 1].Value = encabezados[i];
+                hoja.Cells[FueraFilaDeEncabezados, i + 1].Style.Font.Bold = true;
+            }
+
+            if (!HayCalculo(fuera))
+            {
+                string motivo = fuera == null || string.IsNullOrEmpty(fuera.Error) ? "no se consultó." : fuera.Error;
+                hoja.Cells[FueraPrimeraFilaDeDatos, 1].Value = "No se pudo calcular el tiempo fuera de horario: " + motivo;
+                return;
+            }
+
+            Dictionary<long, string> nombres = new Dictionary<long, string>();
+            foreach (EntHeFila f in pantalla.Filas) { nombres[f.IdEmpleado] = f.NombreSnapshot ?? ""; }
+
+            List<EntHeFueraDeHorarioDetalle> detalle = new List<EntHeFueraDeHorarioDetalle>(fuera.Detalle);
+            detalle.Sort((a, b) =>
+            {
+                string na = nombres.ContainsKey(a.IdEmpleado) ? nombres[a.IdEmpleado] : "";
+                string nb = nombres.ContainsKey(b.IdEmpleado) ? nombres[b.IdEmpleado] : "";
+                int c = string.Compare(na, nb, StringComparison.OrdinalIgnoreCase);
+                if (c != 0) { return c; }
+                c = a.IdEmpleado.CompareTo(b.IdEmpleado);
+                return c != 0 ? c : a.Inicio.CompareTo(b.Inicio);
+            });
+
+            int fila = FueraPrimeraFilaDeDatos;
+            foreach (EntHeFueraDeHorarioDetalle d in detalle)
+            {
+                hoja.Cells[fila, 1].Value = d.IdEmpleado;
+                hoja.Cells[fila, 1].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 2].Value = nombres.ContainsKey(d.IdEmpleado) ? nombres[d.IdEmpleado] : "";
+                hoja.Cells[fila, 3].Value = d.Fecha;
+                hoja.Cells[fila, 4].Value = d.TramoTexto;
+                hoja.Cells[fila, 5].Value = d.FueraTexto;
+                hoja.Cells[fila, 6].Value = d.Minutos;
+                hoja.Cells[fila, 6].Style.Numberformat.Format = FormatoEntero;
+                HorasEnCelda(hoja.Cells[fila, 7], d.Horas);
+                hoja.Cells[fila, 8].Value = d.TipoTexto;
+                hoja.Cells[fila, 9].Value = d.EstadoTexto;
+                hoja.Cells[fila, 10].Value = d.Actividad;
+                hoja.Cells[fila, 11].Value = d.IdRegDetTareas;
+                hoja.Cells[fila, 11].Style.Numberformat.Format = FormatoEntero;
+                fila++;
+            }
+
+            // Totales por categoria y tipo, sumados en minutos y redondeados una vez.
+            int sin50 = 0, sin100 = 0, rech50 = 0, rech100 = 0;
+            foreach (EntHeFueraDeHorarioPersona p in fuera.Personas)
+            {
+                sin50 += p.MinutosSinAprobar50; sin100 += p.MinutosSinAprobar100;
+                rech50 += p.MinutosRechazado50; rech100 += p.MinutosRechazado100;
+            }
+
+            fila++;
+            fila = LineaDeTotal(hoja, fila, "Total sin aprobar 50%", sin50);
+            fila = LineaDeTotal(hoja, fila, "Total sin aprobar 100%", sin100);
+            fila = LineaDeTotal(hoja, fila, "Total rechazado 50%", rech50);
+            LineaDeTotal(hoja, fila, "Total rechazado 100%", rech100);
+
+            hoja.View.FreezePanes(FueraPrimeraFilaDeDatos, 1);
+            if (detalle.Count > 0)
+            {
+                hoja.Cells[FueraFilaDeEncabezados, 1, FueraPrimeraFilaDeDatos + detalle.Count - 1, FueraUltimaColumna].AutoFilter = true;
+            }
+            for (int c = 1; c <= FueraUltimaColumna; c++) { hoja.Column(c).Width = 14; }
+            hoja.Column(2).Width = 30;
+            hoja.Column(10).Width = 45;
+        }
+
+        private static int LineaDeTotal(ExcelWorksheet hoja, int fila, string etiqueta, int minutos)
+        {
+            hoja.Cells[fila, 5].Value = etiqueta;
+            hoja.Cells[fila, 5].Style.Font.Bold = true;
+            hoja.Cells[fila, 6].Value = minutos;
+            hoja.Cells[fila, 6].Style.Numberformat.Format = FormatoEntero;
+            HorasEnCelda(hoja.Cells[fila, 7], EntHeFueraDeHorarioPersona.Horas(minutos));
+            hoja.Cells[fila, 7].Style.Font.Bold = true;
+            return fila + 1;
         }
 
         /// <summary>

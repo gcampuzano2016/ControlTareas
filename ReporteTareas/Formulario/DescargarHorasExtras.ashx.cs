@@ -81,7 +81,10 @@ namespace JsonJQueryNetHorasExtras
                    no hay descarga. */
                 NegHorasExtrasPantalla.RegistrarDescarga(idPeriodo, Usuario(context), Ip(context));
 
-                archivo = NegHeExportacion.Construir(pantalla);
+                /* Informativo: CalcularFueraDeHorario nunca lanza. Si falla, el
+                   archivo sale igual y la tercera hoja dice por que. */
+                EntHeFueraDeHorario fuera = NegHorasExtrasPantalla.CalcularFueraDeHorario(pantalla.Periodo);
+                archivo = NegHeExportacion.Construir(pantalla, fuera);
             }
             catch (Exception ex)
             {

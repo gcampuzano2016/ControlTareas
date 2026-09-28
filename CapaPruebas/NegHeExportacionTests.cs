@@ -360,7 +360,7 @@ namespace CapaPruebas
 
             using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
             {
-                Assert.AreEqual(2, paquete.Workbook.Worksheets.Count, "El archivo deberia tener dos hojas: detalle y pagos.");
+                Assert.AreEqual(3, paquete.Workbook.Worksheets.Count, "El archivo deberia tener tres hojas: detalle, pagos y fuera de horario.");
 
                 ExcelWorksheet hojaPagos = paquete.Workbook.Worksheets[1];
                 Assert.IsTrue(
@@ -370,6 +370,124 @@ namespace CapaPruebas
                     FilaContiene(hojaPagos, NegHeExportacion.PrimeraFilaDeDatos, "PERSONA SIN PAGO")
                         || FilaContiene(hojaPagos, NegHeExportacion.PrimeraFilaDeDatos + 1, "PERSONA SIN PAGO"),
                     "La hoja de pagos no deberia incluir filas con total en cero.");
+            }
+        }
+
+        private static EntHeFueraDeHorario FueraDeEjemplo(long idEmpleado)
+        {
+            EntHeFueraDeHorario f = new EntHeFueraDeHorario();
+            f.Calculado = true;
+            f.Personas.Add(new EntHeFueraDeHorarioPersona
+            {
+                IdEmpleado = idEmpleado,
+                MinutosSinAprobar50 = 60,
+                MinutosRechazado100 = 30
+            });
+            f.Detalle.Add(new EntHeFueraDeHorarioDetalle
+            {
+                IdEmpleado = idEmpleado,
+                IdRegDetTareas = 555,
+                TramoInicio = new DateTime(2026, 8, 18, 8, 0, 0),
+                TramoFin = new DateTime(2026, 8, 18, 9, 0, 0),
+                Inicio = new DateTime(2026, 8, 18, 8, 0, 0),
+                Fin = new DateTime(2026, 8, 18, 9, 0, 0),
+                Minutos = 60,
+                TipoHora = 1,
+                Categoria = NegHeFueraDeHorario.CategoriaSinAprobar,
+                EstadoTexto = "Sin solicitar",
+                Actividad = "ACTIVIDAD DE PRUEBA"
+            });
+            return f;
+        }
+
+        [TestMethod]
+        public void Construir_ConFueraDeHorario_ColumnasSoloEnElDetalle()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, FueraDeEjemplo(4242))))
+            {
+                ExcelWorksheet detalle = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDetalle];
+                ExcelWorksheet pagos = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaPagos];
+
+                Assert.AreEqual("Fuera de horario sin aprobar (h)",
+                    Convert.ToString(detalle.Cells[6, NegHeExportacion.ColumnaFueraSinAprobar].Value));
+                Assert.AreEqual(1.00m,
+                    Convert.ToDecimal(detalle.Cells[NegHeExportacion.PrimeraFilaDeDatos, NegHeExportacion.ColumnaFueraSinAprobar].Value));
+                Assert.AreEqual(0.50m,
+                    Convert.ToDecimal(detalle.Cells[NegHeExportacion.PrimeraFilaDeDatos, NegHeExportacion.ColumnaFueraRechazado].Value));
+
+                Assert.IsNull(pagos.Cells[6, NegHeExportacion.ColumnaFueraSinAprobar].Value,
+                    "La hoja de pagos no lleva las columnas informativas: podrian sumarse al rol por error.");
+            }
+        }
+
+        [TestMethod]
+        public void Construir_ConFueraDeHorario_HojaConElDetalle()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, FueraDeEjemplo(4242))))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
+                Assert.IsNotNull(hoja);
+
+                int fila = NegHeExportacion.FueraPrimeraFilaDeDatos;
+                Assert.AreEqual("PERSONA DE PRUEBA", Convert.ToString(hoja.Cells[fila, 2].Value));
+                Assert.AreEqual("08:00 - 09:00", Convert.ToString(hoja.Cells[fila, 5].Value));
+                Assert.AreEqual("Sin solicitar", Convert.ToString(hoja.Cells[fila, 9].Value));
+                Assert.AreEqual(555L, Convert.ToInt64(hoja.Cells[fila, 11].Value));
+            }
+        }
+
+        [TestMethod]
+        public void Construir_SinCalculo_HojaConMensaje()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
+            {
+                Assert.AreEqual(3, paquete.Workbook.Worksheets.Count);
+
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
+                StringAssert.StartsWith(
+                    Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value),
+                    "No se pudo calcular el tiempo fuera de horario");
+
+                ExcelWorksheet detalle = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDetalle];
+                Assert.IsNull(detalle.Cells[NegHeExportacion.PrimeraFilaDeDatos, NegHeExportacion.ColumnaFueraSinAprobar].Value,
+                    "Sin calculo las columnas quedan vacias, no en cero: cero diria que no hay nada.");
+            }
+        }
+
+        [TestMethod]
+        public void Construir_CalculoConError_DiceElMotivo()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fallido = new EntHeFueraDeHorario { Calculado = false, Error = "timeout" };
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fallido)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
+                StringAssert.Contains(Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value), "timeout");
+            }
+        }
+
+        [TestMethod]
+        public void Construir_PersonaFueraDeLaGrilla_NoFalla()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, FueraDeEjemplo(9999))))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
+                Assert.AreEqual(9999L, Convert.ToInt64(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value));
+                Assert.AreEqual("", Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 2].Value ?? ""));
+
+                ExcelWorksheet detalle = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDetalle];
+                Assert.AreEqual(0m,
+                    Convert.ToDecimal(detalle.Cells[NegHeExportacion.PrimeraFilaDeDatos, NegHeExportacion.ColumnaFueraSinAprobar].Value),
+                    "La persona de la grilla no tiene nada fuera de horario.");
             }
         }
     }

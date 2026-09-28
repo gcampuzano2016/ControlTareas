@@ -139,6 +139,12 @@ GO
          quedaria tapado (a igual fecha un 'Ajuste' gana a un 'Rol', y una fecha
          posterior gana siempre), asi que no se guarda algo que no regiria.
 
+   Las salidas tempranas hacen COMMIT y no ROLLBACK: en ese punto no se
+   escribio nada, asi que el efecto es el mismo (solo suelta los bloqueos), y
+   un ROLLBACK dentro de INSERT ... EXEC da el error 3915 -lo que rompio la
+   primera ejecucion de la verificacion de este script el 2026-09-28-. El
+   ROLLBACK queda solo en el CATCH, ante un error de verdad.
+
    Todas las comprobaciones que dependen de la base van DENTRO de la
    transaccion y con UPDLOCK + HOLDLOCK: dos pedidos simultaneos (doble clic,
    dos pestanas, dos personas de RRHH) ya no pueden pasar los dos el EXISTS. El
@@ -176,7 +182,7 @@ BEGIN
 
         IF NOT EXISTS (SELECT 1 FROM dbo.Empleados WHERE IdEmpleado = @IdEmpleado AND Estado = 'Activo')
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -1 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -1 AS Respuestas; RETURN;
         END
 
         DECLARE @Estado CHAR(1) = NULL, @Antes VARCHAR(400) = NULL;
@@ -196,14 +202,14 @@ BEGIN
 
         IF @Estado = '1'
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -2 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -2 AS Respuestas; RETURN;
         END
 
         IF EXISTS (SELECT 1 FROM dbo.HE_Salario WITH (UPDLOCK, HOLDLOCK)
                     WHERE IdEmpleado = @IdEmpleado AND Estado = '1'
                       AND FechaVigenciaDesde >= @FechaVigenciaDesde)
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -4 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -4 AS Respuestas; RETURN;
         END
 
         IF @Estado IS NOT NULL
@@ -295,21 +301,21 @@ BEGIN
         IF NOT EXISTS (SELECT 1 FROM dbo.HE_ColaboradorParametro WITH (UPDLOCK, HOLDLOCK)
                         WHERE IdEmpleado = @IdEmpleado AND Estado = '1')
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -1 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -1 AS Respuestas; RETURN;
         END
 
         IF EXISTS (SELECT 1 FROM dbo.HE_Salario WITH (UPDLOCK, HOLDLOCK)
                     WHERE IdEmpleado = @IdEmpleado AND Estado = '1'
                       AND Origen = 'Ajuste' AND FechaVigenciaDesde = @FechaVigenciaDesde)
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -2 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -2 AS Respuestas; RETURN;
         END
 
         IF EXISTS (SELECT 1 FROM dbo.HE_Salario WITH (UPDLOCK, HOLDLOCK)
                     WHERE IdEmpleado = @IdEmpleado AND Estado = '1'
                       AND FechaVigenciaDesde > @FechaVigenciaDesde)
         BEGIN
-            ROLLBACK TRANSACTION; SELECT -4 AS Respuestas; RETURN;
+            COMMIT TRANSACTION; SELECT -4 AS Respuestas; RETURN;
         END
 
         INSERT INTO dbo.HE_Salario

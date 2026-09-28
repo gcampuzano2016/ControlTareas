@@ -1310,6 +1310,8 @@
     <Content Include="Formulario\AdministrarTarea.ashx" />
     <Content Include="Formulario\AdministrarHorarioLaboral.ashx" />
     <Content Include="Formulario\AdministrarHorarioUsuario.ashx" />
+    <Content Include="Formulario\AdministrarCalificacionForeCast.ashx" />
+    <Content Include="Formulario\DescargarCalificacionForeCast.ashx" />
     <Content Include="Formulario\AdministrarVentanaAprobacion.ashx" />
     <Content Include="Formulario\AdministrarPerfilInicio.ashx" />
     <Content Include="Formulario\AdministrarMenuPerfil.ashx" />
@@ -1479,6 +1481,12 @@
     </Compile>
     <Compile Include="Formulario\AdministrarHorarioUsuario.ashx.cs">
       <DependentUpon>AdministrarHorarioUsuario.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarCalificacionForeCast.ashx.cs">
+      <DependentUpon>AdministrarCalificacionForeCast.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarCalificacionForeCast.ashx.cs">
+      <DependentUpon>DescargarCalificacionForeCast.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarVentanaAprobacion.ashx.cs">
       <DependentUpon>AdministrarVentanaAprobacion.ashx</DependentUpon>

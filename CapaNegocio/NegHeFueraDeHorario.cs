@@ -96,6 +96,66 @@ namespace CapaNegocio
             return resultado;
         }
 
+        /// <summary>
+        /// Las personas con horas que NO estan en el modulo: lo aprobado por tipo, y
+        /// lo fuera de horario sin aprobar y rechazado con la misma cuenta de
+        /// Calcular. Sin montos: no hay sueldo con que calcularlos.
+        ///
+        /// Lo aprobado se une por minutos, igual que todo lo demas: dos tramos
+        /// aprobados que se pisan cuentan una vez, y si uno es 100% y otro 50% en el
+        /// mismo minuto, gana el 100%.
+        /// </summary>
+        public static List<EntHeFueraDelModuloPersona> ResumirFueraDelModulo(IList<EntHeFueraDelModuloPersona> personas,
+                                                                            IList<EntHeSegmentoFuera> segmentos,
+                                                                            IList<EntHeIntervaloPagado> pagados)
+        {
+            List<EntHeFueraDelModuloPersona> resultado = new List<EntHeFueraDelModuloPersona>();
+            if (personas == null) { return resultado; }
+
+            IList<EntHeIntervaloPagado> yaPagados = pagados ?? new List<EntHeIntervaloPagado>();
+            EntHeFueraDeHorario fuera = Calcular(segmentos, yaPagados);
+
+            foreach (EntHeFueraDelModuloPersona entrada in personas)
+            {
+                EntHeFueraDelModuloPersona p = new EntHeFueraDelModuloPersona();
+                p.IdEmpleado = entrada.IdEmpleado;
+                p.Nombre = entrada.Nombre ?? "";
+                p.Cargo = entrada.Cargo ?? "";
+
+                HashSet<long> cien = new HashSet<long>();
+                HashSet<long> cincuenta = new HashSet<long>();
+                foreach (EntHeIntervaloPagado x in yaPagados.Where(y => y.IdEmpleado == entrada.IdEmpleado))
+                {
+                    HashSet<long> destino = x.TipoRegistrado == 2 ? cien : cincuenta;
+                    for (long m = Minuto(x.Inicio); m < Minuto(x.Fin); m++) { destino.Add(m); }
+                }
+                cincuenta.ExceptWith(cien);
+
+                p.MinutosAprobados100 = cien.Count;
+                p.MinutosAprobados50 = cincuenta.Count;
+
+                EntHeFueraDeHorarioPersona f = fuera.DePersona(entrada.IdEmpleado);
+                if (f != null)
+                {
+                    p.MinutosSinAprobar50 = f.MinutosSinAprobar50;
+                    p.MinutosSinAprobar100 = f.MinutosSinAprobar100;
+                    p.MinutosRechazado50 = f.MinutosRechazado50;
+                    p.MinutosRechazado100 = f.MinutosRechazado100;
+                }
+
+                if (p.MinutosAprobados50 + p.MinutosAprobados100 + p.MinutosSinAprobar50 + p.MinutosSinAprobar100
+                    + p.MinutosRechazado50 + p.MinutosRechazado100 > 0)
+                {
+                    resultado.Add(p);
+                }
+            }
+
+            return resultado
+                .OrderBy(p => p.Nombre, StringComparer.OrdinalIgnoreCase)
+                .ThenBy(p => p.IdEmpleado)
+                .ToList();
+        }
+
         /// <summary>Aprobado con tipo 50% o 100%: ya esta en lo que se paga.</summary>
         private static bool EstaPagado(EntHeSegmentoFuera s)
         {

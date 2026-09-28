@@ -20,6 +20,24 @@ namespace CapaEntidad
         public List<EntHeFueraDeHorarioPersona> Personas { get; set; } = new List<EntHeFueraDeHorarioPersona>();
         public List<EntHeFueraDeHorarioDetalle> Detalle { get; set; } = new List<EntHeFueraDeHorarioDetalle>();
 
+        /// <summary>
+        /// Empleados activos con horas en el periodo que NO estan en el modulo. No
+        /// tienen sueldo cargado, asi que aqui no hay montos: solo horas y el motivo.
+        /// </summary>
+        public List<EntHeFueraDelModuloPersona> FueraDelModulo { get; set; } = new List<EntHeFueraDelModuloPersona>();
+
+        public int PersonasFueraDelModulo { get { return FueraDelModulo.Count; } }
+
+        public decimal TotalHorasAprobadasFueraDelModulo
+        {
+            get
+            {
+                int minutos = 0;
+                foreach (EntHeFueraDelModuloPersona p in FueraDelModulo) { minutos += p.MinutosAprobados50 + p.MinutosAprobados100; }
+                return EntHeFueraDeHorarioPersona.Horas(minutos);
+            }
+        }
+
         public decimal TotalHorasSinAprobar
         {
             get
@@ -84,6 +102,32 @@ namespace CapaEntidad
         {
             return Math.Round(minutos / 60m, 2, MidpointRounding.AwayFromZero);
         }
+    }
+
+    /// <summary>
+    /// Una persona con horas en el periodo que no esta en el modulo. El motivo es
+    /// siempre el mismo y se dice siempre: sin sus datos de RRHH no hay con que
+    /// calcular el pago.
+    /// </summary>
+    public class EntHeFueraDelModuloPersona
+    {
+        public const string MotivoTexto = "No está en el módulo de Horas Extras: faltan sus datos de RRHH, no se puede calcular el pago.";
+
+        public long IdEmpleado { get; set; }
+        public string Nombre { get; set; } = "";
+        public string Cargo { get; set; } = "";
+        public int MinutosAprobados50 { get; set; }
+        public int MinutosAprobados100 { get; set; }
+        public int MinutosSinAprobar50 { get; set; }
+        public int MinutosSinAprobar100 { get; set; }
+        public int MinutosRechazado50 { get; set; }
+        public int MinutosRechazado100 { get; set; }
+
+        public decimal HorasAprobadas50 { get { return EntHeFueraDeHorarioPersona.Horas(MinutosAprobados50); } }
+        public decimal HorasAprobadas100 { get { return EntHeFueraDeHorarioPersona.Horas(MinutosAprobados100); } }
+        public decimal HorasSinAprobar { get { return EntHeFueraDeHorarioPersona.Horas(MinutosSinAprobar50 + MinutosSinAprobar100); } }
+        public decimal HorasRechazado { get { return EntHeFueraDeHorarioPersona.Horas(MinutosRechazado50 + MinutosRechazado100); } }
+        public string Motivo { get { return MotivoTexto; } }
     }
 
     public class EntHeFueraDeHorarioDetalle

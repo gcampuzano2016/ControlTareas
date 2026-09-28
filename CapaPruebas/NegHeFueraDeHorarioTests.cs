@@ -262,5 +262,114 @@ namespace CapaPruebas
             Assert.AreEqual(2, r.Personas.Count);
             Assert.AreEqual(Persona, r.Personas[0].IdEmpleado);
         }
+
+        // ------------------------------------------- personas fuera del modulo --
+
+        private static EntHeFueraDelModuloPersona PersonaModulo(long id, string nombre)
+        {
+            return new EntHeFueraDelModuloPersona { IdEmpleado = id, Nombre = nombre, Cargo = "CARGO DE PRUEBA" };
+        }
+
+        private static EntHeIntervaloPagado PagadoTipo(long empleado, string inicio, string fin, int tipo)
+        {
+            return new EntHeIntervaloPagado { IdEmpleado = empleado, Inicio = H(inicio), Fin = H(fin), TipoRegistrado = tipo };
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_AprobadasAlCien_SeSuman()
+        {
+            // El caso de alguien con horas ya aprobadas por su jefe que no esta en el modulo.
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "PERSONA A") },
+                new List<EntHeSegmentoFuera>(),
+                new List<EntHeIntervaloPagado>
+                {
+                    PagadoTipo(Persona, "2026-08-22 22:00", "2026-08-22 23:59", 2),
+                    PagadoTipo(Persona, "2026-08-23 00:00", "2026-08-23 08:30", 2)
+                });
+
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual(119 + 510, r[0].MinutosAprobados100);
+            Assert.AreEqual(0, r[0].MinutosAprobados50);
+            Assert.AreEqual("CARGO DE PRUEBA", r[0].Cargo);
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_AprobadasSuperpuestas_CuentanUnaVez()
+        {
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "PERSONA A") },
+                null,
+                new List<EntHeIntervaloPagado>
+                {
+                    PagadoTipo(Persona, "2026-08-18 18:00", "2026-08-18 19:00", 1),
+                    PagadoTipo(Persona, "2026-08-18 18:30", "2026-08-18 19:30", 1)
+                });
+
+            Assert.AreEqual(90, r[0].MinutosAprobados50);
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_AprobadoCienGanaACincuenta()
+        {
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "PERSONA A") },
+                null,
+                new List<EntHeIntervaloPagado>
+                {
+                    PagadoTipo(Persona, "2026-08-18 18:00", "2026-08-18 19:00", 1),
+                    PagadoTipo(Persona, "2026-08-18 18:30", "2026-08-18 19:00", 2)
+                });
+
+            Assert.AreEqual(30, r[0].MinutosAprobados50);
+            Assert.AreEqual(30, r[0].MinutosAprobados100);
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_SinAprobarYRechazado()
+        {
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "PERSONA A") },
+                new List<EntHeSegmentoFuera>
+                {
+                    Seg(1, Persona, "2026-08-17 07:30", "2026-08-17 08:30", 1, 0),
+                    Seg(2, Persona, "2026-08-17 05:28", "2026-08-17 05:42", 2, 0),
+                    Seg(3, Persona, "2026-08-18 18:00", "2026-08-18 18:20", 1, 3)
+                },
+                null);
+
+            Assert.AreEqual(60, r[0].MinutosSinAprobar50);
+            Assert.AreEqual(14, r[0].MinutosSinAprobar100);
+            Assert.AreEqual(20, r[0].MinutosRechazado50);
+            Assert.AreEqual(1.23m, r[0].HorasSinAprobar);
+            StringAssert.Contains(r[0].Motivo, "faltan sus datos de RRHH");
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_PersonaSinNada_NoAparece()
+        {
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "PERSONA A") }, null, null);
+
+            Assert.AreEqual(0, r.Count);
+        }
+
+        [TestMethod]
+        public void FueraDelModulo_NulosYOrdenPorNombre()
+        {
+            Assert.AreEqual(0, NegHeFueraDeHorario.ResumirFueraDelModulo(null, null, null).Count);
+
+            List<EntHeFueraDelModuloPersona> r = NegHeFueraDeHorario.ResumirFueraDelModulo(
+                new List<EntHeFueraDelModuloPersona> { PersonaModulo(Persona, "ZETA"), PersonaModulo(OtraPersona, "ALFA") },
+                null,
+                new List<EntHeIntervaloPagado>
+                {
+                    PagadoTipo(Persona, "2026-08-18 18:00", "2026-08-18 19:00", 1),
+                    PagadoTipo(OtraPersona, "2026-08-18 18:00", "2026-08-18 19:00", 1)
+                });
+
+            Assert.AreEqual("ALFA", r[0].Nombre);
+            Assert.AreEqual("ZETA", r[1].Nombre);
+        }
     }
 }

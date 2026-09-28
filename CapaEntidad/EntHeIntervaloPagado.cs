@@ -12,5 +12,11 @@ namespace CapaEntidad
         public long IdEmpleado { get; set; }
         public DateTime Inicio { get; set; }
         public DateTime Fin { get; set; }
+
+        /// <summary>
+        /// 1 = 50%, 2 = 100%. Solo lo usa el resumen de personas fuera del modulo,
+        /// que tiene que separar lo aprobado por tipo; para descontar da igual.
+        /// </summary>
+        public int TipoRegistrado { get; set; }
     }
 }

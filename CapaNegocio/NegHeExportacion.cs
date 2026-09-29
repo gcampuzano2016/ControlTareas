@@ -785,7 +785,7 @@ namespace CapaNegocio
             {
                 hoja.Cells[ConciliacionFilaAviso, 1].Value = string.Format(
                     CultureInfo.InvariantCulture,
-                    "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. Recalcule el período antes de usar este archivo.",
+                    "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. Pulse «Traer aprobaciones nuevas» en la pantalla antes de usar este archivo.",
                     fuera.FilasDesactualizadas);
                 hoja.Cells[ConciliacionFilaAviso, 1].Style.Font.Bold = true;
             }

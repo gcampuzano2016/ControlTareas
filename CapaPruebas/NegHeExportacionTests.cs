@@ -659,8 +659,13 @@ namespace CapaPruebas
                 StringAssert.Contains(estado, "Desactualizada");
                 StringAssert.Contains(estado, "Traer aprobaciones nuevas");
 
+                // El aviso tiene que nombrar el boton real de la pantalla -«Traer
+                // aprobaciones nuevas»-, no un «Recalcular» que no existe como boton
+                // (ver ReporteTareas/Formulario/HorasExtras.aspx, btnRecalcular).
                 string aviso = Convert.ToString(hoja.Cells[3, 1].Value ?? "");
                 StringAssert.Contains(aviso, "1", "El aviso deberia decir cuantas filas estan desactualizadas.");
+                StringAssert.Contains(aviso, "Traer aprobaciones nuevas",
+                    "El aviso deberia nombrar el boton real de la pantalla.");
             }
         }
 
@@ -733,6 +738,39 @@ namespace CapaPruebas
                 StringAssert.StartsWith(
                     Convert.ToString(decisiones.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 1].Value),
                     "No se pudo calcular las decisiones");
+            }
+        }
+
+        /// <summary>
+        /// Calculado = true pero sin nadie que conciliar ni ningun candidato: un
+        /// periodo recien abierto sin nadie sembrado. Las dos hojas tienen que
+        /// existir con sus encabezados, la fila TOTALES en cero -no el mensaje de
+        /// "no se pudo calcular", que es para Calculado = false-, y sin lanzar.
+        /// </summary>
+        [TestMethod]
+        public void Construir_CalculadoSinConciliacionNiCandidatos_HojasEnCeroSinExcepcion()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fuera = new EntHeFueraDeHorario { Calculado = true };
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet conciliacion = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaConciliacion];
+                Assert.IsNotNull(conciliacion);
+
+                int filaTotales = -1;
+                for (int f = NegHeExportacion.ConciliacionPrimeraFilaDeDatos; f <= NegHeExportacion.ConciliacionPrimeraFilaDeDatos + 5; f++)
+                {
+                    if (Convert.ToString(conciliacion.Cells[f, 1].Value) == "TOTALES") { filaTotales = f; }
+                }
+                Assert.IsTrue(filaTotales > 0, "No se encontro la fila TOTALES.");
+                Assert.AreEqual(0m, Convert.ToDecimal(conciliacion.Cells[filaTotales, 9].Value ?? 0m), "Total a pagar en cero.");
+                Assert.AreEqual(0m, Convert.ToDecimal(conciliacion.Cells[filaTotales, 10].Value ?? 0m), "Total incluyendo no incluido en cero.");
+
+                ExcelWorksheet decisiones = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDecisiones];
+                Assert.IsNotNull(decisiones);
+                Assert.IsNull(decisiones.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 1].Value,
+                    "Sin candidatos no deberia haber ninguna fila de datos.");
             }
         }
     }

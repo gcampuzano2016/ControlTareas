@@ -14,9 +14,10 @@ namespace JsonJQueryNetHorasExtras
     /// IRequiresSessionState no es decorativo: sin el, context.Session es null en
     /// un IHttpHandler y no habria identidad con la que sellar quien guardo que.
     ///
-    /// Ninguna accion acepta un total del cliente. Las horas si vienen de ahi
-    /// -son lo que el usuario digita-, pero el dinero lo recalcula el servidor y
-    /// devuelve lo suyo.
+    /// Ninguna accion acepta un total del cliente. Desde la decision por tramo
+    /// tampoco las horas: GuardarFila las sigue recibiendo, pero Negocio las
+    /// ignora y las saca de los tramos incluidos (GuardarDecisiones es lo que
+    /// cambia que se paga). El dinero lo recalcula siempre el servidor.
     ///
     /// ListarPeriodos entra por NegHorasExtrasPantalla y no por DaoHorasExtras
     /// directo: toda la casa entra por CapaNegocio, y ademas CapaDato no esta
@@ -123,6 +124,7 @@ namespace JsonJQueryNetHorasExtras
                 if (accion == "CargarFueraDeHorario") { existe = true; salida.Append(CargarFueraDeHorario(parametros[0]["parameters"])); }
                 if (accion == "AgregarColaborador") { existe = true; salida.Append(AgregarColaborador(context, parametros[0]["parameters"])); }
                 if (accion == "AgregarAjusteSalario") { existe = true; salida.Append(AgregarAjusteSalario(context, parametros[0]["parameters"])); }
+                if (accion == "GuardarDecisiones") { existe = true; salida.Append(GuardarDecisiones(context, parametros[0]["parameters"])); }
 
                 if (!existe) { salida.Append(Mensaje("0", "La acción solicitada no existe.", "danger")); }
             }
@@ -388,6 +390,121 @@ namespace JsonJQueryNetHorasExtras
             {
                 return Mensaje("0", "Error al guardar el ajuste de sueldo. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Las decisiones de Nomina sobre los tramos de UNA persona, desde la ventana
+        /// de detalle. Solo 14 y 18: decidir que tramo se paga es decidir cuanto se
+        /// paga, y el perfil 2 ve la ventana pero no la cambia. Se comprueba aqui
+        /// porque NegHeDecisionesPantalla no conoce la sesion.
+        ///
+        /// Todo el lote se lee ANTES de llamar a Negocio y basta un cambio ilegible
+        /// para no guardar nada: guardar la mitad dejaria a la persona con un pago
+        /// que nadie pidio. En particular, unos minutos que no se entienden NO pasan a
+        /// null: null es "el segmento completo", o sea mas dinero del que alguien
+        /// quiso poner.
+        /// </summary>
+        private string GuardarDecisiones(HttpContext context, dynamic p)
+        {
+            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            {
+                return Mensaje("0", "Su perfil no puede decidir qué tramos se pagan.", "warning");
+            }
+
+            try
+            {
+                string error;
+                System.Collections.Generic.List<EntHeCambioDecision> cambios = LeerCambios((object)p["cambios"], out error);
+                if (error != null) { return Mensaje("0", error, "warning"); }
+
+                EntRespuesta r = NegHeDecisionesPantalla.Guardar(
+                    Entero(p["idPeriodo"]),
+                    EnteroLargo(p["idEmpleado"]),
+                    cambios,
+                    Usuario(context), Ip(context));
+                return new JavaScriptSerializer().Serialize(r);
+            }
+            catch (Exception ex)
+            {
+                return Mensaje("0", "Error al guardar las decisiones. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// JavaScriptSerializer, deserializando a object, entrega un arreglo JSON como
+        /// object[] (o ArrayList, segun la version) y cada objeto como
+        /// Dictionary&lt;string, object&gt;. Se recorre como IEnumerable e
+        /// IDictionary para no depender de cual de las dos llegue.
+        ///
+        /// segmentoInicio viaja en EntHeCandidato.FormatoClave y se lee con
+        /// ParseExact e InvariantCulture: es la clave del segmento, y un Parse con la
+        /// cultura del servidor podria confundir dia y mes y apuntar a otro segmento.
+        /// </summary>
+        private static System.Collections.Generic.List<EntHeCambioDecision> LeerCambios(object crudo, out string error)
+        {
+            error = null;
+            var lista = new System.Collections.Generic.List<EntHeCambioDecision>();
+
+            System.Collections.IEnumerable elementos = crudo as System.Collections.IEnumerable;
+            if (crudo == null || crudo is string || elementos == null)
+            {
+                error = "No hay decisiones que guardar.";
+                return lista;
+            }
+
+            foreach (object elemento in elementos)
+            {
+                var d = elemento as System.Collections.Generic.IDictionary<string, object>;
+                if (d == null)
+                {
+                    error = "Llegó una decisión con un formato que no se entiende. No se guardó nada.";
+                    return lista;
+                }
+
+                DateTime segmento;
+                if (!DateTime.TryParseExact(Convert.ToString(Valor(d, "segmentoInicio")) ?? "",
+                                            EntHeCandidato.FormatoClave,
+                                            System.Globalization.CultureInfo.InvariantCulture,
+                                            System.Globalization.DateTimeStyles.None, out segmento))
+                {
+                    error = "Hay un tramo con una fecha que no se entiende. No se guardó nada: vuelva a abrir el detalle.";
+                    return lista;
+                }
+
+                int? minutos = null;
+                string textoMinutos = (Convert.ToString(Valor(d, "minutos")) ?? "").Trim();
+                if (textoMinutos != "")
+                {
+                    int m;
+                    if (!int.TryParse(textoMinutos, System.Globalization.NumberStyles.None,
+                                      System.Globalization.CultureInfo.InvariantCulture, out m))
+                    {
+                        error = "Hay minutos que no son un número entero. No se guardó nada.";
+                        return lista;
+                    }
+                    minutos = m;
+                }
+
+                lista.Add(new EntHeCambioDecision
+                {
+                    IdRegDetTareas = EnteroLargo(Valor(d, "idTramo")),
+                    SegmentoInicio = segmento,
+                    Incluir = Booleano(Valor(d, "incluir")),
+                    TipoHora = Entero(Valor(d, "tipoHora")),
+                    MinutosIncluidos = minutos,
+                    Motivo = Convert.ToString(Valor(d, "motivo")) ?? ""
+                });
+            }
+
+            if (lista.Count == 0) { error = "No hay decisiones que guardar."; }
+            return lista;
+        }
+
+        /// <summary>Una clave que falta vale null, en vez de la KeyNotFoundException del indexador.</summary>
+        private static object Valor(System.Collections.Generic.IDictionary<string, object> d, string clave)
+        {
+            object v;
+            return d.TryGetValue(clave, out v) ? v : null;
         }
 
         /// <summary>true solo si llega true o "true"; cualquier otra cosa es false.</summary>

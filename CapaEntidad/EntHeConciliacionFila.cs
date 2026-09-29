@@ -36,8 +36,18 @@ namespace CapaEntidad
         public decimal UsdNoAprobadoIncluido { get; set; }
         public decimal UsdExcluido { get; set; }
 
-        /// <summary>El TotalHE de la fila.</summary>
+        /// <summary>El TotalHE de la fila: lo que se pagaria hoy.</summary>
         public decimal TotalAPagar { get; set; }
+
+        /// <summary>
+        /// El TotalHE guardado no coincide con lo que pagan los minutos incluidos
+        /// HOY: alguien decidio o aprobo algo y el periodo no se recalculo (por
+        /// ejemplo, fallo el recalculo despues de guardar decisiones). La pantalla
+        /// tiene que pedir «Recalcular» antes de cerrar. En ese caso lo no aprobado
+        /// incluido se valora por su grupo y no por diferencia, que podria dar
+        /// negativo.
+        /// </summary>
+        public bool Desactualizada { get; set; }
 
         public decimal HorasAprobadoIncluido { get { return Horas(MinutosAprobadoIncluido); } }
         public decimal HorasNoAprobadoIncluido { get { return Horas(MinutosNoAprobadoIncluido); } }

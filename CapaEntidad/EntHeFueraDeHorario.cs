@@ -38,6 +38,21 @@ namespace CapaEntidad
         /// <summary>Una fila por persona del periodo: que se paga, que no, y el total a pagar.</summary>
         public List<EntHeConciliacionFila> Conciliacion { get; set; } = new List<EntHeConciliacionFila>();
 
+        /// <summary>
+        /// Cuantas filas de la conciliacion estan desactualizadas (su TotalHE no es
+        /// lo que pagan los minutos incluidos hoy). Distinto de 0: hay que pulsar
+        /// «Recalcular» antes de cerrar.
+        /// </summary>
+        public int FilasDesactualizadas
+        {
+            get
+            {
+                int n = 0;
+                foreach (EntHeConciliacionFila c in Conciliacion) { if (c != null && c.Desactualizada) { n++; } }
+                return n;
+            }
+        }
+
         /// <summary>Los candidatos de una persona, para su ventana de detalle.</summary>
         public List<EntHeCandidato> CandidatosDe(long idEmpleado)
         {

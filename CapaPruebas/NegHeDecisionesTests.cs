@@ -743,6 +743,53 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void Conciliar_TotalHEDesactualizado_MarcaYNoDaNegativo()
+        {
+            // Lo incluido hoy paga 20,00 (120 al 50% + 30 al 100%), pero la fila dice
+            // 5,00: se guardaron decisiones y el recalculo no llego a correr. La
+            // diferencia daria -10,00 de no aprobado; en vez de eso se marca la fila.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 5.00m),
+                Pieza(98, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),
+                Pieza(99, "2026-08-21 19:00", "2026-08-21 19:30", 2, 0, true));
+
+            Assert.IsTrue(r.Desactualizada);
+            Assert.AreEqual(15.00m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(5.00m, r.UsdNoAprobadoIncluido, "Por grupo, nunca negativo.");
+            Assert.AreEqual(5.00m, r.TotalAPagar, "Lo que se pagaria hoy: el TotalHE de la fila.");
+
+            EntHeFueraDeHorario f = new EntHeFueraDeHorario();
+            f.Conciliacion.Add(r);
+            f.Conciliacion.Add(new EntHeConciliacionFila());
+            Assert.AreEqual(1, f.FilasDesactualizadas);
+        }
+
+        [TestMethod]
+        public void Conciliar_TotalHEAlDia_NoMarca()
+        {
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 20.00m),
+                Pieza(100, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),
+                Pieza(101, "2026-08-21 19:00", "2026-08-21 19:30", 2, 0, true));
+
+            Assert.IsFalse(r.Desactualizada);
+            Assert.AreEqual(5.00m, r.UsdNoAprobadoIncluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_AprobadosQueSePisan_CienGanaEnAprobado()
+        {
+            // Dos aprobados incluidos: 18:00-20:00 al 50% y 19:00-20:00 al 100%. La hora
+            // compartida se valora al 100%: 60 x 7,50 + 60 x 10,00 = 17,50.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 17.50m),
+                Pieza(102, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),
+                Pieza(103, "2026-08-20 19:00", "2026-08-20 20:00", 2, 2, true));
+
+            Assert.AreEqual(120, r.MinutosAprobadoIncluido);
+            Assert.AreEqual(17.50m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(0m, r.UsdNoAprobadoIncluido);
+            Assert.IsFalse(r.Desactualizada);
+        }
+
+        [TestMethod]
         public void ValidarLectura_SinElPeriodo_Lanza()
         {
             // Sin el periodo en el tercer conjunto, Resolver no incluye nada y la

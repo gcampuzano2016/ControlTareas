@@ -386,16 +386,30 @@ namespace CapaNegocio
             r.MinutosExcluido = excluido50 + excluido100;
             r.UsdAprobadoIncluido = Usd(aprobado50, aprobado100, fila);
 
-            /* Lo no aprobado incluido se obtiene por diferencia y no redondeando su
-               propio grupo. El pago real redondea por TIPO (Total50 y Total100), y
-               aqui se agrupa por aprobado / no aprobado: redondear cada grupo por
-               su lado puede separarse 0,01 o 0,02 del TotalHE, y la conciliacion
-               existe justamente para cuadrar al centavo. Si no hay nada incluido
-               se deja en 0 (y la diferencia con TotalAPagar, si la hubiera,
-               queda a la vista). */
-            r.UsdNoAprobadoIncluido = aprobado50 + aprobado100 + noAprobado50 + noAprobado100 > 0
-                ? r.TotalAPagar - r.UsdAprobadoIncluido
-                : 0m;
+            /* Si el TotalHE guardado es lo que pagan HOY los minutos incluidos. Se
+               recalcula con la misma regla que el pago (minutos exactos por tipo,
+               cada tipo redondeado a centavos). Si no coincide, la fila quedo
+               vieja: se decidio o aprobo algo y el periodo no se recalculo (por
+               ejemplo, fallo el recalculo despues de guardar decisiones). */
+            int incluido50 = aprobado50 + noAprobado50;
+            int incluido100 = aprobado100 + noAprobado100;
+            decimal pagoHoy = Usd(incluido50, 0, fila) + Usd(0, incluido100, fila);
+            r.Desactualizada = pagoHoy != r.TotalAPagar;
+
+            /* Al dia: lo no aprobado incluido se obtiene por diferencia y no
+               redondeando su propio grupo. El pago redondea por TIPO (Total50 y
+               Total100) y aqui se agrupa por aprobado / no aprobado: redondear
+               cada grupo por su lado puede separarse 0,01 o 0,02 del TotalHE, y la
+               conciliacion existe para cuadrar al centavo.
+
+               Desactualizada: la diferencia contra un TotalHE viejo podria dar
+               negativo, asi que se valora el grupo por su cuenta y la fila queda
+               marcada; TotalAPagar sigue siendo el TotalHE, que es lo que se
+               pagaria hoy. No se recorta a cero en silencio: la marca es la que
+               avisa que hay que recalcular. */
+            r.UsdNoAprobadoIncluido = r.Desactualizada
+                ? Usd(noAprobado50, noAprobado100, fila)
+                : r.TotalAPagar - r.UsdAprobadoIncluido;
             r.UsdExcluido = Usd(excluido50, excluido100, fila);
         }
 

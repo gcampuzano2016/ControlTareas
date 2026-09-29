@@ -278,7 +278,7 @@ namespace CapaNegocio
                 EntHeFila fila;
                 if (!porPersona.TryGetValue(c.IdEmpleado, out fila)) { c.ValorUsd = 0m; continue; }
 
-                decimal valorHora = c.TipoElegido == 2 ? fila.ValorHora100 : fila.ValorHora50;
+                decimal valorHora = ValorHora(fila, c.TipoElegido);
                 c.ValorUsd = Math.Round(c.MinutosMostrados * valorHora / 60m, 2, MidpointRounding.AwayFromZero);
             }
         }
@@ -385,14 +385,51 @@ namespace CapaNegocio
             r.MinutosNoAprobadoIncluido = noAprobado50 + noAprobado100;
             r.MinutosExcluido = excluido50 + excluido100;
             r.UsdAprobadoIncluido = Usd(aprobado50, aprobado100, fila);
-            r.UsdNoAprobadoIncluido = Usd(noAprobado50, noAprobado100, fila);
+
+            /* Lo no aprobado incluido se obtiene por diferencia y no redondeando su
+               propio grupo. El pago real redondea por TIPO (Total50 y Total100), y
+               aqui se agrupa por aprobado / no aprobado: redondear cada grupo por
+               su lado puede separarse 0,01 o 0,02 del TotalHE, y la conciliacion
+               existe justamente para cuadrar al centavo. Si no hay nada incluido
+               se deja en 0 (y la diferencia con TotalAPagar, si la hubiera,
+               queda a la vista). */
+            r.UsdNoAprobadoIncluido = aprobado50 + aprobado100 + noAprobado50 + noAprobado100 > 0
+                ? r.TotalAPagar - r.UsdAprobadoIncluido
+                : 0m;
             r.UsdExcluido = Usd(excluido50, excluido100, fila);
         }
 
         private static decimal Usd(int minutos50, int minutos100, EntHeFila fila)
         {
-            decimal monto = (minutos50 * fila.ValorHora50 + minutos100 * fila.ValorHora100) / 60m;
+            decimal monto = (minutos50 * ValorHora(fila, 1) + minutos100 * ValorHora(fila, 2)) / 60m;
             return Math.Round(monto, 2, MidpointRounding.AwayFromZero);
+        }
+
+        /// <summary>
+        /// Lanza si la lectura de Sp_RTA_HeTramosCandidatos llego incompleta: sin el
+        /// periodo pedido en el tercer conjunto no hay dueno, Resolver no incluye
+        /// nada por omision y la siembra pagaria 0 a todos sin un solo error. El DAO
+        /// tolera conjuntos que faltan (no lanza), asi que el corte tiene que estar
+        /// aqui, antes de que alguien siembre con eso.
+        /// </summary>
+        public static void ValidarLectura(int idPeriodo, IList<EntHeRangoPeriodo> periodos)
+        {
+            if (periodos == null || !periodos.Any(p => p != null && p.IdPeriodo == idPeriodo))
+            {
+                throw new InvalidOperationException(
+                    "La lectura de los tramos del período " + idPeriodo + " llegó incompleta (falta el período).");
+            }
+        }
+
+        /// <summary>
+        /// El valor hora con el que se valora un minuto. 0 si la persona no aplica a
+        /// horas extras: su pago es 0 aunque la fila tenga valor hora calculado, y
+        /// mostrarle USD seria anunciar un pago que no existe.
+        /// </summary>
+        private static decimal ValorHora(EntHeFila fila, int tipo)
+        {
+            if (fila == null || !fila.AplicaHESnapshot) { return 0m; }
+            return tipo == 2 ? fila.ValorHora100 : fila.ValorHora50;
         }
 
         private static Dictionary<long, EntHeFila> PorPersona(IList<EntHeFila> filas)

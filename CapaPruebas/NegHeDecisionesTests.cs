@@ -556,7 +556,8 @@ namespace CapaPruebas
                 NombreSnapshot = nombre,
                 ValorHora50 = valor50,
                 ValorHora100 = valor100,
-                TotalHE = totalHE
+                TotalHE = totalHE,
+                AplicaHESnapshot = true
             };
         }
 
@@ -570,7 +571,8 @@ namespace CapaPruebas
         [TestMethod]
         public void Conciliar_SeparaAprobadoNoAprobadoYExcluido()
         {
-            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+            // TotalHE 20,00 = lo que pagan 120 min al 50% (15,00) + 30 al 100% (5,00).
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 20.00m),
                 Pieza(61, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),   // aprobado incluido: 120 al 50%
                 Pieza(62, "2026-08-21 19:00", "2026-08-21 19:30", 2, 0, true),   // no aprobado incluido: 30 al 100%
                 Pieza(63, "2026-08-22 20:00", "2026-08-22 21:30", 1, 3, false),  // excluido: 90 al 50%
@@ -675,12 +677,19 @@ namespace CapaPruebas
         [TestMethod]
         public void Conciliar_CienGanaAlCincuentaEnElMismoMinuto()
         {
-            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+            // Incluido: los USD no aprobados salen por diferencia con TotalHE, asi que
+            // el "gana el 100%" en USD se comprueba en lo excluido, que si se valora
+            // minuto a minuto.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 17.50m),
                 Pieza(74, "2026-08-20 18:00", "2026-08-20 20:00", 1, 0, true),
-                Pieza(75, "2026-08-20 19:00", "2026-08-20 20:00", 2, 0, true));
+                Pieza(75, "2026-08-20 19:00", "2026-08-20 20:00", 2, 0, true),
+                Pieza(96, "2026-08-22 18:00", "2026-08-22 20:00", 1, 0, false),
+                Pieza(97, "2026-08-22 19:00", "2026-08-22 20:00", 2, 0, false));
 
             Assert.AreEqual(120, r.MinutosNoAprobadoIncluido);
-            Assert.AreEqual(17.50m, r.UsdNoAprobadoIncluido, "60 al 50% (7,50) + 60 al 100% (10,00).");
+            Assert.AreEqual(17.50m, r.UsdNoAprobadoIncluido);
+            Assert.AreEqual(120, r.MinutosExcluido);
+            Assert.AreEqual(17.50m, r.UsdExcluido, "60 al 50% (7,50) + 60 al 100% (10,00).");
         }
 
         [TestMethod]
@@ -688,6 +697,71 @@ namespace CapaPruebas
         {
             Assert.AreEqual(0, NegHeDecisiones.Conciliar(null, null).Count);
             Assert.AreEqual(1, NegHeDecisiones.Conciliar(null, new List<EntHeFila> { Fila(Persona, "PERSONA A") }).Count);
+        }
+
+        [TestMethod]
+        public void Conciliar_NoAplicaHE_UsdEnCero()
+        {
+            // Quien no aplica cobra 0: mostrarle USD seria prometer un pago que no hay.
+            // Los minutos se muestran igual: el tiempo existio.
+            EntHeFila fila = Fila(Persona, "PERSONA A");
+            fila.AplicaHESnapshot = false;
+            EntHeCandidato incluido = Pieza(90, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true);
+            EntHeCandidato excluido = Pieza(91, "2026-08-21 19:00", "2026-08-21 20:00", 2, 0, false);
+
+            EntHeConciliacionFila r = Conciliar1(fila, incluido, excluido);
+            NegHeDecisiones.Valorar(new List<EntHeCandidato> { incluido, excluido }, new List<EntHeFila> { fila });
+
+            Assert.AreEqual(120, r.MinutosAprobadoIncluido);
+            Assert.AreEqual(60, r.MinutosExcluido);
+            Assert.AreEqual(0m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(0m, r.UsdNoAprobadoIncluido);
+            Assert.AreEqual(0m, r.UsdExcluido);
+            Assert.AreEqual(0m, incluido.ValorUsd);
+            Assert.AreEqual(0m, excluido.ValorUsd);
+        }
+
+        [TestMethod]
+        public void Conciliar_IncluidoSumaExactoElTotalAPagar()
+        {
+            // Valor hora 7,53 / 10,07. Aprobado: 10 min al 50% (1,255) + 10 min al
+            // 100% (1,6783) = 2,9333 -> 2,93. No aprobado: 10 al 50% + 10 al 100%
+            // -> 2,93 tambien. Suma por grupos: 5,86. El pago real redondea por
+            // tipo: Total50 = 20/60*7,53 = 2,51; Total100 = 20/60*10,07 = 3,3567
+            // -> 3,36; TotalHE = 5,87. La fila tiene que cuadrar con 5,87.
+            EntHeFila fila = Fila(Persona, "PERSONA A", 5.87m, 7.53m, 10.07m);
+
+            EntHeConciliacionFila r = Conciliar1(fila,
+                Pieza(92, "2026-08-20 18:00", "2026-08-20 18:10", 1, 2, true),
+                Pieza(93, "2026-08-20 19:00", "2026-08-20 19:10", 2, 2, true),
+                Pieza(94, "2026-08-21 18:00", "2026-08-21 18:10", 1, 0, true),
+                Pieza(95, "2026-08-21 19:00", "2026-08-21 19:10", 2, 0, true));
+
+            Assert.AreEqual(2.93m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(r.TotalAPagar, r.UsdAprobadoIncluido + r.UsdNoAprobadoIncluido);
+            Assert.AreEqual(2.94m, r.UsdNoAprobadoIncluido);
+        }
+
+        [TestMethod]
+        public void ValidarLectura_SinElPeriodo_Lanza()
+        {
+            // Sin el periodo en el tercer conjunto, Resolver no incluye nada y la
+            // siembra pagaria 0 a todos sin un solo error.
+            NegHeDecisiones.ValidarLectura(Este, Periodos());
+
+            try
+            {
+                NegHeDecisiones.ValidarLectura(Este, new List<EntHeRangoPeriodo> { Periodo(Anterior, "2026-07-15", "2026-08-13") });
+                Assert.Fail("Tenia que lanzar.");
+            }
+            catch (InvalidOperationException) { }
+
+            try
+            {
+                NegHeDecisiones.ValidarLectura(Este, null);
+                Assert.Fail("Tenia que lanzar.");
+            }
+            catch (InvalidOperationException) { }
         }
 
         // ================================================= Valorar ==========

@@ -457,6 +457,7 @@ namespace CapaNegocio
             List<EntHeDecision> decisiones;
             List<EntHeRangoPeriodo> periodos;
             DaoHorasExtras.LeerCandidatos(idPeriodo, out candidatos, out decisiones, out periodos);
+            NegHeDecisiones.ValidarLectura(idPeriodo, periodos);
 
             resueltos = NegHeDecisiones.Resolver(idPeriodo, candidatos, decisiones, periodos);
             return SiembraDesdeMinutos(NegHeDecisiones.Minutos(resueltos));
@@ -786,6 +787,7 @@ namespace CapaNegocio
                 List<EntHeDecision> decisiones;
                 List<EntHeRangoPeriodo> periodos;
                 DaoHorasExtras.LeerCandidatos(periodo.IdPeriodo, out candidatos, out decisiones, out periodos);
+                NegHeDecisiones.ValidarLectura(periodo.IdPeriodo, periodos);
                 List<EntHeCandidato> resueltos = NegHeDecisiones.Resolver(periodo.IdPeriodo, candidatos, decisiones, periodos);
 
                 List<EntHeSegmentoFuera> segmentos;
@@ -909,9 +911,11 @@ namespace CapaNegocio
         ///
         /// Las horas ya no vienen del cliente: horas50 y horas100 se reciben para
         /// no cambiar la firma que usa el handler, pero se ignoran. La fila se
-        /// recalcula desde las decisiones por tramo, asi que guardar una
-        /// observacion nunca cambia las horas ni los centavos respecto de la
-        /// ultima apertura.
+        /// recalcula desde las decisiones por tramo VIGENTES al guardar: si desde la
+        /// ultima apertura se aprobo o se decidio algo, guardar la observacion
+        /// trae ese cambio a la fila (igual que lo haria «Recalcular»). Lo que no
+        /// hace es cambiar los centavos por el solo hecho de guardar: el calculo
+        /// es el mismo camino que AbrirPeriodo.
         ///
         /// NO recibe ningun total del cliente y no usaria uno aunque se lo
         /// mandaran: relee el snapshot de la base, recalcula, guarda sus propios
@@ -962,7 +966,9 @@ namespace CapaNegocio
                una persona aqui es la observacion.
 
                Las horas y los minutos se vuelven a calcular desde las decisiones
-               con el mismo camino que AbrirPeriodo. Tomar las Horas50 guardadas
+               VIGENTES, con el mismo camino que AbrirPeriodo: si desde la ultima
+               apertura se aprobo o se decidio algo, entra en esta fila al guardar
+               (las demas filas lo reciben al pulsar «Recalcular»). Tomar las Horas50 guardadas
                no sirve: HE_Detalle no tiene minutos, y recalcular desde horas
                redondeadas cambiaria los centavos con solo guardar una nota. Si
                la lectura falla no se guarda nada: guardar sin minutos haria justo

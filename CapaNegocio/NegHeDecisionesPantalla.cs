@@ -40,6 +40,7 @@ namespace CapaNegocio
             List<EntHeDecision> decisiones;
             List<EntHeRangoPeriodo> periodos;
             DaoHorasExtras.LeerCandidatos(idPeriodo, out candidatos, out decisiones, out periodos);
+            NegHeDecisiones.ValidarLectura(idPeriodo, periodos);
             List<EntHeCandidato> resueltos = NegHeDecisiones.Resolver(idPeriodo, candidatos, decisiones, periodos);
 
             string error = NegHeDecisiones.Validar(resueltos, idEmpleado, cambios);

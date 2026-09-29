@@ -143,6 +143,10 @@
     <Compile Include="EntHeFueraDeHorario.cs" />
     <Compile Include="EntHeIntervaloPagado.cs" />
     <Compile Include="EntHeSegmentoFuera.cs" />
+    <Compile Include="EntHeCandidato.cs" />
+    <Compile Include="EntHeDecision.cs" />
+    <Compile Include="EntHeRangoPeriodo.cs" />
+    <Compile Include="EntHeCambioDecision.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

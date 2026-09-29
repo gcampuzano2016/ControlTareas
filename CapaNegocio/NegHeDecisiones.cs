@@ -393,7 +393,20 @@ namespace CapaNegocio
                ejemplo, fallo el recalculo despues de guardar decisiones). */
             int incluido50 = aprobado50 + noAprobado50;
             int incluido100 = aprobado100 + noAprobado100;
-            decimal pagoHoy = Usd(incluido50, 0, fila) + Usd(0, incluido100, fila);
+
+            /* Ruling del controlador tras la validacion de aceptacion: el pago
+               por minutos redondea UNA sola vez por persona (ver
+               NegHorasExtras.Calcular), no un tipo y despues el otro. Antes
+               de esta correccion, pagoHoy llamaba a Usd() dos veces -una por
+               tipo- y sumaba los dos redondeos, que es justo la regla vieja
+               que el pago ya no usa. Con eso, cualquier fila cuyo redondeo
+               por tipo cayera un centavo distinto del redondeo unico se
+               marcaba Desactualizada sin estarlo -el 100% de las filas con
+               fracciones de centavo, en el peor caso-. Usd() ya redondea una
+               sola vez cuando se le pasan los dos tipos juntos -asi la llama
+               el resto de este metodo, para UsdAprobadoIncluido y
+               UsdExcluido-: aqui bastaba con no ser la excepcion. */
+            decimal pagoHoy = Usd(incluido50, incluido100, fila);
             r.Desactualizada = pagoHoy != r.TotalAPagar;
 
             /* Al dia: lo no aprobado incluido se obtiene por diferencia y no

@@ -220,11 +220,40 @@ namespace CapaNegocio
             /* Del valor SIN recortar, no de r.ValorHora50. Esa es la diferencia
                entre "no se redondea durante la cadena" y redondear dos veces.
                horas50/horas100 ya son minutos/60 sin redondear cuando hay
-               minutos (o insumo.Horas50/Horas100 tal cual cuando no los hay),
-               asi que esta linea es la misma cuenta de siempre. */
-            r.Total50  = Monto(horas50  * hora50,  parametros);
-            r.Total100 = Monto(horas100 * hora100, parametros);
-            r.TotalHE  = r.Total50 + r.Total100;
+               minutos (o insumo.Horas50/Horas100 tal cual cuando no los hay). */
+            decimal exacto50 = horas50 * hora50;
+            decimal exacto100 = horas100 * hora100;
+
+            if (usaMinutos)
+            {
+                /* Ruling del controlador tras la validacion de aceptacion: el
+                   analisis manual de Nomina redondea UNA sola vez por
+                   persona, no un tramo y despues el otro. Sumar dos
+                   redondeos separados puede quedar un centavo lejos del
+                   analisis manual -ver Calcular_ConMinutos_RedondeaUnaVezPorPersona,
+                   265.83 contra los 265.84 que darian dos redondeos-, y ese
+                   centavo es justo lo que Nomina va a comparar a mano.
+
+                   Por eso TotalHE sale de redondear la suma EXACTA una sola
+                   vez, Total50 sale de redondear su propio exacto -es el
+                   numero que se muestra en esa columna-, y Total100 se
+                   obtiene por diferencia (TotalHE - Total50) en vez de
+                   redondear su propio exacto: asi las dos columnas de la
+                   pantalla siempre suman, centavo a centavo, el total ya
+                   redondeado, sin un tercer numero suelto que no cuadre. */
+                r.TotalHE = Monto(exacto50 + exacto100, parametros);
+                r.Total50 = Monto(exacto50, parametros);
+                r.Total100 = r.TotalHE - r.Total50;
+            }
+            else
+            {
+                /* Sin minutos, exactamente como antes de esta correccion: cada
+                   tramo redondea su propio exacto y TotalHE es la suma de los
+                   dos ya redondeados. */
+                r.Total50 = Monto(exacto50, parametros);
+                r.Total100 = Monto(exacto100, parametros);
+                r.TotalHE = r.Total50 + r.Total100;
+            }
 
             return r;
         }

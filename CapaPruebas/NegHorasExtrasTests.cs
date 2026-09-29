@@ -462,5 +462,57 @@ namespace CapaPruebas
             Assert.AreEqual(24.17m, r.TotalHE);
             Assert.AreEqual(2.83m, r.TotalHoras);
         }
+
+        /// <summary>
+        /// Ruling del controlador tras la validacion de aceptacion: el analisis
+        /// manual de Nomina redondea UNA sola vez por persona, no una vez por
+        /// tramo. Con sueldo 1500, jornada 8 (divisor 240): horaOrdinaria = 6.25,
+        /// hora50 = 9.375, hora100 = 12.5.
+        ///
+        /// 60 minutos al 50% son 1 hora exacta: exacto50 = 1 * 9.375 = 9.375.
+        /// 1231 minutos al 100% son 20.51666... horas: exacto100 =
+        /// 20.51666... * 12.5 = 256.458333...
+        ///
+        /// Sumando los EXACTOS antes de redondear: 9.375 + 256.458333... =
+        /// 265.833333..., que redondeado UNA vez da 265.83.
+        ///
+        /// Si se redondeara cada tramo por separado y se sumara -la regla
+        /// vieja-: Total50 = Monto(9.375) = 9.38, Total100 =
+        /// Monto(256.458333...) = 256.46 (el tercer decimal es 8, sube), y la
+        /// suma daria 265.84 -un centavo de mas, y distinto del analisis
+        /// manual-. Por eso Total100 no se calcula redondeando su propio
+        /// exacto: sale por diferencia (TotalHE - Total50), para que las dos
+        /// columnas sumen siempre exactamente el total ya redondeado.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_RedondeaUnaVezPorPersona()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1500m, 8, 0m, 0m, minutos50: 60, minutos100: 1231), Par());
+
+            Assert.AreEqual(265.83m, r.TotalHE, "No 265.84: ese seria redondear cada tramo por separado.");
+            Assert.AreEqual(9.38m, r.Total50);
+            Assert.AreEqual(256.45m, r.Total100);
+        }
+
+        /// <summary>
+        /// Total50 + Total100 tiene que dar EXACTAMENTE TotalHE, siempre, con
+        /// minutos que no sean multiplos limpios de 60 en ninguno de los dos
+        /// tramos -es la garantia que motiva la regla de "un solo redondeo por
+        /// persona": las columnas que ve Nomina en pantalla tienen que sumar el
+        /// total que se paga, centavo a centavo, sin que quede una diferencia
+        /// de redondeo escondida en ninguna fila.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_TotalesSumanTotalHE()
+        {
+            EntHeResultado r1 = NegHorasExtras.Calcular(
+                Insumo(1500m, 8, 0m, 0m, minutos50: 60, minutos100: 1231), Par());
+            Assert.AreEqual(r1.TotalHE, r1.Total50 + r1.Total100);
+
+            EntHeResultado r2 = NegHorasExtras.Calcular(
+                Insumo(973m, 4, 0m, 0m, minutos50: 37, minutos100: 193), Par());
+            Assert.AreEqual(r2.TotalHE, r2.Total50 + r2.Total100);
+        }
     }
 }

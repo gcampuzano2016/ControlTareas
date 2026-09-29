@@ -774,6 +774,36 @@ namespace CapaPruebas
             Assert.AreEqual(5.00m, r.UsdNoAprobadoIncluido);
         }
 
+        /// <summary>
+        /// Ruling del controlador tras la validacion de aceptacion: pagoHoy tiene
+        /// que redondear UNA sola vez por persona, igual que el pago real (ver
+        /// NegHorasExtras.Calcular). Valor hora 7,53 al 50% y 10,07 al 100%; 10
+        /// minutos aprobados al 50% y 10 no aprobados al 100%.
+        ///
+        /// Exacto: 10*7,53/60 + 10*10,07/60 = 1,255 + 1,678333... = 2,933333...
+        /// -> redondeando UNA vez: 2,93. Ese 2,93 es el TotalHE que el pago real
+        /// producira para estos mismos minutos, y es lo que se le pone a la fila.
+        ///
+        /// Antes de esta correccion, pagoHoy redondeaba cada tipo por separado y
+        /// sumaba: round(1,255) + round(1,678333...) = 1,26 + 1,68 = 2,94 -un
+        /// centavo distinto de 2,93-, y la fila se marcaria Desactualizada sin
+        /// estarlo: el pago real, con esos mismos minutos, tambien da 2,93.
+        /// </summary>
+        [TestMethod]
+        public void Conciliar_PagoHoy_SeRedondeaUnaVezComoElPagoReal_NoSeMarcaDesactualizada()
+        {
+            EntHeFila fila = Fila(Persona, "PERSONA A", 2.93m, 7.53m, 10.07m);
+
+            EntHeConciliacionFila r = Conciliar1(fila,
+                Pieza(104, "2026-08-20 18:00", "2026-08-20 18:10", 1, 2, true),
+                Pieza(105, "2026-08-21 19:00", "2026-08-21 19:10", 2, 0, true));
+
+            Assert.IsFalse(r.Desactualizada, "1,26 + 1,68 = 2,94 (redondeo por tipo) no es 2,93 (redondeo unico), "
+                + "pero el pago real tambien da 2,93: no deberia marcarse.");
+            Assert.AreEqual(1.26m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(1.67m, r.UsdNoAprobadoIncluido, "Por diferencia con TotalAPagar, no por su propio redondeo.");
+        }
+
         [TestMethod]
         public void Conciliar_AprobadosQueSePisan_CienGanaEnAprobado()
         {

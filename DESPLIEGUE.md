@@ -762,6 +762,13 @@ Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
    de nuevo** esa observación después de publicar, porque hasta entonces siguen con el pago que
    ya tenían.
 
+   **Qué hacer si el conteo es mayor que 0:** después de publicar, abrir cada una de esas filas
+   en la pantalla y **guardar su observación** (puede ser la misma que ya tiene). Al guardar, la
+   fila deja de ser `'Manual'` y se recalcula desde las decisiones. Hasta entonces se ven como
+   **«Desactualizada»**, y «Traer aprobaciones nuevas» no las arregla (no reescribe filas
+   `'Manual'`); mientras sigan desactualizadas, el período **no se deja cerrar** (ver 14.4).
+   Al 29-09-2026 el conteo era 0 en los dos períodos abiertos.
+
 2. **Corregir en la pantalla los sueldos cruzados de las dos personas que se cargaron el 28-09
    desde «Completar datos»**, con la opción **«Registrar ajuste de sueldo»** (el ícono junto al
    nombre), usando la misma fecha de vigencia con la que se cargaron. Sin este paso, el período
@@ -774,7 +781,13 @@ Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
      publicar — no es un error, es el cálculo más preciso;
    - la **columna 100%** de la grilla y del Excel sale **por diferencia** (`Total − 50%`), así
      que puede diferir en **1 centavo** de su valor exacto en algunas filas; el **total por
-     persona** siempre es el exacto.
+     persona** siempre es el exacto;
+   - además de los centavos, el pago por minutos **une los tramos aprobados que se pisan**: un
+     minuto que está en dos tramos aprobados de la misma persona se paga una sola vez (antes se
+     pagaba dos veces). Al 29-09-2026 esto afecta a **1 par de tramos, 6 minutos**, en los
+     períodos abiertos;
+   - **antes de cerrar un período, pulse «Traer aprobaciones nuevas»; el sistema no deja cerrar
+     con filas desactualizadas** (ni cuando no pudo verificarlo: en ese caso, intentar de nuevo).
 
 ### 14.4 Verificar después de publicar
 
@@ -784,7 +797,14 @@ Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
    clics («¿Es la persona correcta?» → «Sí, guardar»). Al guardar, la grilla se recalcula sola.
 3. El Excel trae **6 hojas**, incluidas «Conciliación» y «Decisiones».
 4. Cuando corresponde, aparece el aviso de filas desactualizadas y nombra el botón real,
-   **«Traer aprobaciones nuevas»** (nunca «Recalcular»).
+   **«Traer aprobaciones nuevas»** (nunca «Recalcular»). Con el período **cerrado**, la pantalla
+   y la hoja «Conciliación» del Excel dicen en cambio **«reabra el período para actualizarlo»**
+   (el botón no aparece en un período cerrado).
+5. **Antes de cerrar un período, pulse «Traer aprobaciones nuevas»; el sistema no deja cerrar
+   con filas desactualizadas.** Si alguna quedó desactualizada, «Cerrar período» responde «Hay N
+   fila(s) desactualizada(s) respecto de las decisiones: pulse «Traer aprobaciones nuevas» antes
+   de cerrar.» y el período sigue abierto. Si la verificación misma falla, responde «No se pudo
+   verificar que el período esté al día; no se cerró. Intente de nuevo.»
 
 ### 14.5 Cargar las decisiones del análisis manual
 
@@ -802,3 +822,31 @@ nuevos pueden quedar en la base, sin uso. `Sp_RTA_HeHorasAprobadas` no se tocó,
 vieja vuelve a funcionar exactamente como antes. Las decisiones que ya se hayan guardado desde la
 pantalla nueva quedan en `HE_TramoDecision`, pero sin ningún efecto mientras corran los binarios
 anteriores.
+
+**Efecto en el dinero — avisar a Nómina si se vuelve atrás:**
+
+- con los binarios anteriores, **recalcular un período ABIERTO** («Traer aprobaciones nuevas» o
+  editar fechas) **vuelve a pagar solo las horas aprobadas**: las exclusiones y las inclusiones
+  del análisis manual (lo decidido tramo por tramo) **dejan de aplicarse** en ese período. Los
+  períodos cerrados no cambian;
+- **cada guardado de una fila con los binarios anteriores la marca `'Manual'`**. Si después se
+  vuelve a publicar la versión nueva, esas filas **ignoran las decisiones** hasta que alguien
+  **guarde de nuevo su observación** (ver 14.3, paso 1): antes de re-publicar, contarlas con la
+  misma consulta.
+
+### 14.7 Limitaciones conocidas
+
+- **Un tramo que cambia de aprobación después de cerrado su período.** El pago doble se decide
+  por tramo: a lo sumo un período lo retiene. Un período dueño que cerró pagando un tramo
+  aprobado **sin decisión explícita** (por omisión) lo retiene solo mientras el tramo siga
+  aprobado. Si después la jefatura cambia la aprobación (por ejemplo, lo pasa a rechazado), el
+  sistema ya no puede saber que ese período lo pagó —no guarda una foto del pago por tramo— y
+  otro período podría incluirlo. **Remedio:** reabrir el período cerrado y recalcularlo, o no
+  incluir ese tramo en otro período. Un período cerrado que lo incluyó **por decisión** sí lo
+  sigue reteniendo aunque el tramo cambie.
+- **Volver a incluir un borde que el período trajo antes de que existiera su dueño.** Si un
+  período incluyó un tramo de sus 7 días de borde cuando el período dueño todavía no existía, lo
+  sigue pagando cuando el dueño se crea (el dueño lo ve «incluido en» el primero). Ese primer
+  período puede **dejarlo afuera** (y entonces lo paga el dueño), pero **no volver a guardarlo
+  incluido** —por ejemplo, para cambiarle el tipo o los minutos—: sin su propia decisión, el
+  tramo le correspondería al dueño.

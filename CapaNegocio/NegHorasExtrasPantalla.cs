@@ -83,6 +83,14 @@ namespace CapaNegocio
             insumo.Horas50 = fila.Horas50;
             insumo.Horas100 = fila.Horas100;
 
+            /* Decision por tramo (tarea 3): si la fila trae minutos exactos
+               -no persistidos, recalculados en cada siembra-, viajan al
+               insumo y mandan sobre Horas50/Horas100 dentro de Calcular. Si
+               la fila no los trae (todo lo que no pasa por la pantalla de
+               tramos todavia), quedan null y el calculo no cambia. */
+            insumo.Minutos50 = fila.Minutos50;
+            insumo.Minutos100 = fila.Minutos100;
+
             EntHeResultado r = NegHorasExtras.Calcular(insumo, parametros);
 
             fila.Divisor = r.Divisor;

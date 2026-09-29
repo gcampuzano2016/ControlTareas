@@ -36,6 +36,16 @@ namespace CapaEntidad
         public decimal Horas50 { get; set; }
         public decimal Horas100 { get; set; }
 
+        /// <summary>
+        /// Minutos exactos por tramo (decision por tramo, tarea 3). NO se
+        /// persisten en HE_Detalle: se recalculan desde las decisiones de la
+        /// pantalla de tramos en cada siembra, igual que DivisorManual no se
+        /// guarda porque ya quedo aplicado dentro de Divisor. Viajan solo
+        /// hasta AplicarCalculo, que los pasa al insumo.
+        /// </summary>
+        public int? Minutos50 { get; set; }
+        public int? Minutos100 { get; set; }
+
         public decimal Total50 { get; set; }
         public decimal Total100 { get; set; }
         public decimal TotalHoras { get; set; }

@@ -129,12 +129,25 @@ namespace CapaNegocio
 
             r.Divisor = Divisor(insumo, parametros);
 
+            /* Decision por tramo (tarea 3): si vienen minutos exactos, mandan
+               sobre las horas del insumo. minutos/60 SIN redondear -la misma
+               regla de "no se redondea durante la cadena" que ya rige para
+               horaOrdinaria y hora50/hora100 mas abajo-. Cada tramo decide
+               por su cuenta: si solo llegan minutos de un tramo, el otro
+               sigue tomando su hora del insumo tal cual, sin pasar por
+               minutos. Si ninguno de los dos llega, horas50/horas100 quedan
+               identicos a insumo.Horas50/Horas100 y el resto del metodo se
+               comporta exactamente igual que antes de esta tarea. */
+            bool usaMinutos = insumo.Minutos50.HasValue || insumo.Minutos100.HasValue;
+            decimal horas50 = insumo.Minutos50.HasValue ? insumo.Minutos50.Value / 60m : insumo.Horas50;
+            decimal horas100 = insumo.Minutos100.HasValue ? insumo.Minutos100.Value / 60m : insumo.Horas100;
+
             /* Horas negativas no son credito: son dato malo que bloquea el
                cierre de periodo. Se valida primero, antes de cualquier otro
                error, porque TotalHoras debe ser cero si hay horas negativas
                incluso si hay otros problemas (salario cero, divisor cero).
                Un numero negativo en pantalla es lo peor que puede pasar. */
-            if (insumo.Horas50 < 0m || insumo.Horas100 < 0m)
+            if (horas50 < 0m || horas100 < 0m)
             {
                 r.TieneAdvertencia = true;
                 r.ValorHoraOrdinaria = 0m;
@@ -152,7 +165,7 @@ namespace CapaNegocio
                 r.ValorHoraOrdinaria = 0m;
                 r.ValorHora50 = 0m;
                 r.ValorHora100 = 0m;
-                r.TotalHoras = insumo.Horas50 + insumo.Horas100;
+                r.TotalHoras = horas50 + horas100;
                 return r;
             }
 
@@ -176,7 +189,15 @@ namespace CapaNegocio
             r.ValorHora50        = Math.Round(hora50,        DecimalesValorHora, MidpointRounding.AwayFromZero);
             r.ValorHora100       = Math.Round(hora100,       DecimalesValorHora, MidpointRounding.AwayFromZero);
 
-            r.TotalHoras = insumo.Horas50 + insumo.Horas100;
+            /* TotalHoras SI se redondea cuando hay minutos: es lo que se
+               muestra en la columna de horas, y 100 minutos no se ven en
+               pantalla como "1.6666666666666666666666666667" horas. Sin
+               minutos, sigue sin redondear -exactamente como antes de esta
+               tarea-, porque insumo.Horas50/Horas100 ya vienen con los
+               decimales que alguien digito o que trajo la siembra. */
+            r.TotalHoras = usaMinutos
+                ? Math.Round(horas50 + horas100, 2, MidpointRounding.AwayFromZero)
+                : horas50 + horas100;
 
             /* Quien no aplica no cobra, aunque lleguen horas. La pantalla no
                deberia permitir cargarlas, pero el calculo no confia en la
@@ -190,9 +211,12 @@ namespace CapaNegocio
             }
 
             /* Del valor SIN recortar, no de r.ValorHora50. Esa es la diferencia
-               entre "no se redondea durante la cadena" y redondear dos veces. */
-            r.Total50  = Monto(insumo.Horas50  * hora50,  parametros);
-            r.Total100 = Monto(insumo.Horas100 * hora100, parametros);
+               entre "no se redondea durante la cadena" y redondear dos veces.
+               horas50/horas100 ya son minutos/60 sin redondear cuando hay
+               minutos (o insumo.Horas50/Horas100 tal cual cuando no los hay),
+               asi que esta linea es la misma cuenta de siempre. */
+            r.Total50  = Monto(horas50  * hora50,  parametros);
+            r.Total100 = Monto(horas100 * hora100, parametros);
             r.TotalHE  = r.Total50 + r.Total100;
 
             return r;

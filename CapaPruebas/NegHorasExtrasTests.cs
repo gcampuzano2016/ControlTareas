@@ -33,7 +33,8 @@ namespace CapaPruebas
         }
 
         private static EntHeInsumo Insumo(decimal salario, int jornada, decimal h50, decimal h100,
-                                          bool aplica = true, int? divisorManual = null)
+                                          bool aplica = true, int? divisorManual = null,
+                                          int? minutos50 = null, int? minutos100 = null)
         {
             return new EntHeInsumo
             {
@@ -42,7 +43,9 @@ namespace CapaPruebas
                 DivisorManual = divisorManual,
                 AplicaHE = aplica,
                 Horas50 = h50,
-                Horas100 = h100
+                Horas100 = h100,
+                Minutos50 = minutos50,
+                Minutos100 = minutos100
             };
         }
 
@@ -329,6 +332,81 @@ namespace CapaPruebas
         {
             EntHeResultado r = NegHorasExtras.Calcular(Insumo(0m, 8, -5m, 0m), Par());
 
+            Assert.AreEqual(0.00m, r.TotalHoras);
+            Assert.IsTrue(r.TieneAdvertencia);
+        }
+
+        /* ------------------------------- pago por minutos (tarea 3) ------ */
+
+        /// <summary>
+        /// Cuando llegan minutos, la cadena de multiplicacion usa
+        /// minutos/60 SIN redondear -igual que hoy hace con Horas100-. Con
+        /// sueldo 1850, jornada 8 (divisor 240) y factor 100% en 2.0:
+        /// horaOrdinaria = 1850/240 = 7.708333... ; hora100 = 15.416666...
+        /// 660 minutos son 11 horas exactas, y 11 * 15.416666... = 169.58333...,
+        /// que redondeado alejandose del cero a 2 decimales da 169.58.
+        ///
+        /// El nombre dice "no redondea antes de multiplicar": si alguien
+        /// redondeara horaOrdinaria u hora100 a 6 decimales antes de esta
+        /// multiplicacion, el resultado cambiaria de centavos, igual que en
+        /// Redondeo_SoloAlFinal_NoDuranteLaCadena.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_NoRedondeaAntesDeMultiplicar()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1850m, 8, 0m, 0m, minutos100: 660), Par());
+
+            Assert.AreEqual(169.58m, r.Total100);
+        }
+
+        /// <summary>
+        /// TotalHoras SI se redondea a 2 decimales cuando vienen minutos,
+        /// aunque los totales en dinero se calculen sin redondear. 100
+        /// minutos al 50% son 1.6666...horas, que en la columna de horas se
+        /// muestran como 1.67 -no 1.6666...-.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_HorasMostradasRedondeadas()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1200m, 8, 0m, 0m, minutos50: 100), Par());
+
+            Assert.AreEqual(1.67m, r.TotalHoras);
+        }
+
+        /// <summary>
+        /// Sin minutos (el caso de hoy, y el de toda fila que todavia no usa
+        /// decision por tramo), el comportamiento es identico al de antes de
+        /// esta tarea: mismos totales que Caso3, con TotalHoras SIN redondear
+        /// -12m exacto, que aqui coincide con 12.00 porque no hay fraccion-.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_SinMinutos_IgualQueAntes()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(Insumo(600m, 8, 8m, 4m), Par());
+
+            Assert.AreEqual(2.50m, r.ValorHoraOrdinaria);
+            Assert.AreEqual(30.00m, r.Total50);
+            Assert.AreEqual(20.00m, r.Total100);
+            Assert.AreEqual(50.00m, r.TotalHE);
+            Assert.AreEqual(12m, r.TotalHoras);
+        }
+
+        /// <summary>
+        /// Minutos negativos son el mismo dato malo que horas negativas hoy:
+        /// -300 minutos son -5 horas, y el bloqueo (advertencia, totales en
+        /// cero) tiene que dispararse igual que en Caso9.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutosNegativos_Advertencia()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1200m, 8, 0m, 0m, minutos50: -300), Par());
+
+            Assert.AreEqual(0.00m, r.Total50);
+            Assert.AreEqual(0.00m, r.Total100);
+            Assert.AreEqual(0.00m, r.TotalHE);
             Assert.AreEqual(0.00m, r.TotalHoras);
             Assert.IsTrue(r.TieneAdvertencia);
         }

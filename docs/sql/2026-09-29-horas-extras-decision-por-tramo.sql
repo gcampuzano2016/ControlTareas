@@ -237,13 +237,17 @@ GO
      -1  el periodo no existe o no esta 'Abierto'
      -2  un segmento con i = 1 ya esta incluido en OTRO periodo: por una
          decision vigente con Incluir = 1, o porque ese otro periodo es su
-         dueno, el tramo esta aprobado y alli nadie lo excluyo
+         dueno, el tramo esta aprobado y alli nadie lo excluyo. Un periodo
+         'Anulado' no cuenta para nada: ni es dueno, ni sus decisiones
+         incluyen (no se paga, asi que no puede provocar un pago doble)
      -3  datos invalidos: tipo fuera de 1 o 2, i fuera de 0 o 1, minutos que
          no son un numero entre 1 y lo que queda del tramo desde el segmento,
          falta el motivo, motivo de mas de 400, el mismo segmento dos veces en
          el lote, lote vacio o usuario vacio
      -4  el tramo no existe, empieza fuera de la ventana del periodo
-         (FechaInicio - 7 a FechaFin + 7) o el segmento no cae dentro del tramo
+         (FechaInicio - 7 a FechaFin + 7), el segmento no cae dentro del
+         tramo, o el tramo esta aprobado y s no es su inicio (un aprobado tiene
+         UN solo segmento, el tramo completo: otro s esquivaria la regla (b))
 
    Orden: primero -1; despues, sobre el lote entero, -4, -3 y -2, en ese
    orden. Todo o nada: si un solo elemento falla, no se inserta ninguno.
@@ -376,7 +380,8 @@ BEGIN
             COMMIT TRANSACTION; SELECT -3 AS Respuestas; RETURN;
         END
 
-        /* -4: tramo inexistente, fuera de la ventana, o segmento fuera del tramo. */
+        /* -4: tramo inexistente, fuera de la ventana, segmento fuera del tramo,
+              o un aprobado con un segmento que no es el tramo completo. */
         IF EXISTS (SELECT 1 FROM #Lote
                     WHERE Id_RegDetTareas IS NULL
                        OR SegmentoInicio IS NULL
@@ -385,7 +390,8 @@ BEGIN
                        OR TramoInicio <  DATEADD(DAY, -7, @Ini)
                        OR TramoInicio >= DATEADD(DAY,  8, @Fin)
                        OR SegmentoInicio <  TramoInicio
-                       OR SegmentoInicio >= TramoFin)
+                       OR SegmentoInicio >= TramoFin
+                       OR (Aprobado = 1 AND SegmentoInicio <> TramoInicio))
         BEGIN
             COMMIT TRANSACTION; SELECT -4 AS Respuestas; RETURN;
         END
@@ -410,7 +416,9 @@ BEGIN
         /* -2: el pago doble. Las decisiones vigentes del MISMO segmento en
            TODOS los periodos, leidas con UPDLOCK + HOLDLOCK: el rango de esa
            clave queda tomado hasta el COMMIT, asi que otro guardado del mismo
-           segmento espera y, al entrar, ya ve lo que este inserto. */
+           segmento espera y, al entrar, ya ve lo que este inserto. Las
+           decisiones de un periodo 'Anulado' se dejan afuera: ese periodo no
+           paga, asi que su Incluir = 1 no bloquea a nadie. */
         INSERT INTO #Vigente (IdPeriodo, Id_RegDetTareas, SegmentoInicio, Incluir)
         SELECT v.IdPeriodo, v.Id_RegDetTareas, v.SegmentoInicio, v.Incluir
           FROM (SELECT d.IdPeriodo, d.Id_RegDetTareas, d.SegmentoInicio, d.Incluir,
@@ -418,7 +426,10 @@ BEGIN
                                                   ORDER BY d.IdDecision DESC)
                   FROM dbo.HE_TramoDecision d WITH (UPDLOCK, HOLDLOCK)
                   JOIN #Lote l ON l.Id_RegDetTareas = d.Id_RegDetTareas
-                              AND l.SegmentoInicio  = d.SegmentoInicio) v
+                              AND l.SegmentoInicio  = d.SegmentoInicio
+                 WHERE NOT EXISTS (SELECT 1 FROM dbo.HE_Periodo pa
+                                    WHERE pa.IdPeriodo = d.IdPeriodo
+                                      AND pa.EstadoPeriodo = 'Anulado')) v
          WHERE v.Orden = 1;
 
         IF EXISTS (SELECT 1
@@ -431,12 +442,14 @@ BEGIN
                                       AND v.SegmentoInicio  = l.SegmentoInicio
                                       AND v.IdPeriodo      <> @IdPeriodo
                                       AND v.Incluir         = 1)
-                           /* (b) otro periodo es el dueno de un tramo aprobado,
-                                  lo incluye por omision y nadie lo excluyo alli */
+                           /* (b) otro periodo, no anulado, es el dueno de un
+                                  tramo aprobado, lo incluye por omision y nadie
+                                  lo excluyo alli */
                         OR (l.Aprobado = 1
                             AND l.SegmentoInicio = l.TramoInicio
                             AND EXISTS (SELECT 1 FROM dbo.HE_Periodo p
                                          WHERE p.IdPeriodo <> @IdPeriodo
+                                           AND p.EstadoPeriodo <> 'Anulado'
                                            AND l.TramoInicio >= p.FechaInicio
                                            AND l.TramoInicio <  DATEADD(DAY, 1, p.FechaFin)
                                            AND NOT EXISTS (SELECT 1 FROM #Vigente v

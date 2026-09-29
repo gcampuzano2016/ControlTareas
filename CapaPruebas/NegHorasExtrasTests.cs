@@ -514,5 +514,45 @@ namespace CapaPruebas
                 Insumo(973m, 4, 0m, 0m, minutos50: 37, minutos100: 193), Par());
             Assert.AreEqual(r2.TotalHE, r2.Total50 + r2.Total100);
         }
+
+        /// <summary>
+        /// Round de revision de Task 3b: Total100 sale por diferencia
+        /// (TotalHE - Total50), no de redondear su propio exacto -ver el
+        /// comentario en Calcular-. Esta prueba fija a proposito el caso mas
+        /// exigente para esa resta: que Total50 se lleve el maximo posible de
+        /// centavos (un exacto justo en el limite de redondeo) mientras el
+        /// otro tramo aporta poco.
+        ///
+        /// Sueldo 1200, jornada 8 (divisor 240): horaOrdinaria = 5.00,
+        /// hora50 = 7.50, hora100 = 10.00.
+        ///
+        /// 1 minuto al 50% = 1/60 horas; exacto50 = (1/60)*7.50 = 0.125
+        /// -EXACTO en el limite de redondeo: el tercer decimal es 5, y
+        /// alejandose del cero sube-. Total50 = Monto(0.125) = 0.13: se
+        /// llevo un centavo mas del que su propio exacto tenia.
+        ///
+        /// 1 minuto al 100% = 1/60 horas; exacto100 = (1/60)*10.00 =
+        /// 0.16666..., deliberadamente chico frente a ese centavo de mas.
+        /// Suma exacta = 0.29166... -> TotalHE = 0.29. Total100 = 0.29 - 0.13
+        /// = 0.16: no negativo, y las dos columnas siguen sumando el total.
+        ///
+        /// Matematicamente esto no puede fallar -Monto() es monotona no
+        /// decreciente, asi que Total50 nunca puede superar a TotalHE-, pero
+        /// es la clase de prueba barata que deja el invariante escrito en vez
+        /// de confiar en el argumento a mano.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_Total100NuncaNegativo()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1200m, 8, 0m, 0m, minutos50: 1, minutos100: 1), Par());
+
+            Assert.IsTrue(r.Total100 >= 0m,
+                "Total50 redondeado hacia arriba no puede llevarse mas centavos de los que hay en TotalHE.");
+            Assert.AreEqual(r.TotalHE, r.Total50 + r.Total100);
+            Assert.AreEqual(0.13m, r.Total50);
+            Assert.AreEqual(0.16m, r.Total100);
+            Assert.AreEqual(0.29m, r.TotalHE);
+        }
     }
 }

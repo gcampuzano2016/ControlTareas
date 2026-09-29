@@ -387,33 +387,34 @@ namespace CapaNegocio
             r.UsdAprobadoIncluido = Usd(aprobado50, aprobado100, fila);
 
             /* Si el TotalHE guardado es lo que pagan HOY los minutos incluidos. Se
-               recalcula con la misma regla que el pago (minutos exactos por tipo,
-               cada tipo redondeado a centavos). Si no coincide, la fila quedo
-               vieja: se decidio o aprobo algo y el periodo no se recalculo (por
-               ejemplo, fallo el recalculo despues de guardar decisiones). */
+               recalcula con la misma regla que el pago: minutos exactos por tipo,
+               con UN SOLO redondeo sobre la suma de los dos tipos -no un
+               redondeo por tipo que despues se suma- (ver
+               NegHorasExtras.Calcular, donde TotalHE = Monto(exacto50 +
+               exacto100)). Si no coincide, la fila quedo vieja: se decidio o
+               aprobo algo y el periodo no se recalculo (por ejemplo, fallo el
+               recalculo despues de guardar decisiones).
+
+               Antes redondeaba por tipo y sumaba los dos redondeos: eso era la
+               regla vieja del pago, y marcaba Desactualizada a cualquier fila
+               cuyo redondeo por tipo cayera un centavo distinto del redondeo
+               unico, aunque el pago real fuera identico al TotalHE guardado.
+               Usd() ya hace ese redondeo unico cuando se le pasan los dos tipos
+               juntos -asi la llaman UsdAprobadoIncluido y UsdExcluido, mas
+               abajo-, asi que aqui basta con no ser la excepcion. */
             int incluido50 = aprobado50 + noAprobado50;
             int incluido100 = aprobado100 + noAprobado100;
-
-            /* Ruling del controlador tras la validacion de aceptacion: el pago
-               por minutos redondea UNA sola vez por persona (ver
-               NegHorasExtras.Calcular), no un tipo y despues el otro. Antes
-               de esta correccion, pagoHoy llamaba a Usd() dos veces -una por
-               tipo- y sumaba los dos redondeos, que es justo la regla vieja
-               que el pago ya no usa. Con eso, cualquier fila cuyo redondeo
-               por tipo cayera un centavo distinto del redondeo unico se
-               marcaba Desactualizada sin estarlo -el 100% de las filas con
-               fracciones de centavo, en el peor caso-. Usd() ya redondea una
-               sola vez cuando se le pasan los dos tipos juntos -asi la llama
-               el resto de este metodo, para UsdAprobadoIncluido y
-               UsdExcluido-: aqui bastaba con no ser la excepcion. */
             decimal pagoHoy = Usd(incluido50, incluido100, fila);
             r.Desactualizada = pagoHoy != r.TotalAPagar;
 
             /* Al dia: lo no aprobado incluido se obtiene por diferencia y no
-               redondeando su propio grupo. El pago redondea por TIPO (Total50 y
-               Total100) y aqui se agrupa por aprobado / no aprobado: redondear
-               cada grupo por su lado puede separarse 0,01 o 0,02 del TotalHE, y la
-               conciliacion existe para cuadrar al centavo.
+               redondeando su propio grupo. El pago redondea UNA sola vez por
+               persona -TotalHE = Monto(exacto50 + exacto100); Total100 sale por
+               diferencia (TotalHE - Total50), no de redondear su propio exacto,
+               ver NegHorasExtras.Calcular- y aqui se agrupa por aprobado / no
+               aprobado: redondear cada grupo por su lado puede separarse 0,01 o
+               0,02 del TotalHE, y la conciliacion existe para cuadrar al
+               centavo.
 
                Desactualizada: la diferencia contra un TotalHE viejo podria dar
                negativo, asi que se valora el grupo por su cuenta y la fila queda

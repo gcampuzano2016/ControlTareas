@@ -39,6 +39,12 @@ namespace CapaNegocio
         /// <summary>Empleados activos con horas que no estan en el modulo: horas y motivo, sin montos.</summary>
         public const string NombreHojaFueraDelModulo = "No están en el módulo";
 
+        /// <summary>Una fila por persona: aprobado, no aprobado y excluido, en minutos y en USD, y el total a pagar.</summary>
+        public const string NombreHojaConciliacion = "Conciliación";
+
+        /// <summary>Una fila por cada segmento candidato ya resuelto: la decision vigente y quien la tomo.</summary>
+        public const string NombreHojaDecisiones = "Decisiones";
+
         /// <summary>Informativas, solo en la hoja de detalle: van DESPUES de la ultima columna comun para no mover ninguna.</summary>
         public const int ColumnaFueraSinAprobar = 24;
         public const int ColumnaFueraRechazado = 25;
@@ -47,6 +53,24 @@ namespace CapaNegocio
         public const int FueraPrimeraFilaDeDatos = 5;
         private const int FueraFilaDeEncabezados = 4;
         private const int FueraUltimaColumna = 11;
+
+        /// <summary>
+        /// "Conciliacion" y "Decisiones" comparten la misma disposicion de filas que
+        /// "Fuera de horario": titulo, nota, una fila libre para un aviso opcional y
+        /// encabezados en la 4. Asi el aviso de filas desactualizadas no mueve nada
+        /// cuando no hace falta.
+        /// </summary>
+        private const int ConciliacionFilaAviso = 3;
+        private const int ConciliacionFilaDeEncabezados = 4;
+        public const int ConciliacionPrimeraFilaDeDatos = 5;
+        private const int ConciliacionUltimaColumna = 11;
+
+        private const int DecisionesFilaDeEncabezados = 4;
+        public const int DecisionesPrimeraFilaDeDatos = 5;
+        private const int DecisionesUltimaColumna = 17;
+
+        /// <summary>El texto de la columna Estado cuando el TotalHE de la fila no coincide con lo que pagan sus minutos incluidos hoy.</summary>
+        public const string TextoConciliacionDesactualizada = "Desactualizada: pulse «Traer aprobaciones nuevas»";
 
         private const int FilaDeCierre = 2;
         private const int FilaDeGeneracion = 3;
@@ -206,6 +230,8 @@ namespace CapaNegocio
 
                 EscribirHojaFueraDeHorario(paquete, pantalla, fuera);
                 EscribirHojaFueraDelModulo(paquete, pantalla, fuera);
+                EscribirHojaConciliacion(paquete, pantalla, fuera);
+                EscribirHojaDecisiones(paquete, pantalla, fuera);
 
                 return paquete.GetAsByteArray();
             }
@@ -736,6 +762,227 @@ namespace CapaNegocio
             hoja.Column(2).Width = 32;
             hoja.Column(3).Width = 26;
             hoja.Column(8).Width = 70;
+        }
+
+        /// <summary>
+        /// Una fila por persona del periodo: cuanto de su tiempo candidato se paga
+        /// (aprobado y no aprobado incluidos), cuanto queda excluido y el total a
+        /// pagar, en minutos y en USD. Es la hoja que Nomina usa para cuadrar el
+        /// sistema contra su analisis manual, columna por columna.
+        /// </summary>
+        private static void EscribirHojaConciliacion(ExcelPackage paquete, EntHePantalla pantalla, EntHeFueraDeHorario fuera)
+        {
+            ExcelWorksheet hoja = paquete.Workbook.Worksheets.Add(NombreHojaConciliacion);
+
+            hoja.Cells[1, 1].Value = "Conciliación - Período " + TextoPeriodo(pantalla.Periodo);
+            hoja.Cells[1, 1].Style.Font.Bold = true;
+            hoja.Cells[2, 1].Value = "Una fila por persona: lo aprobado que se paga, lo que se incluyó sin estar aprobado, lo que quedó excluido y el total a pagar.";
+            hoja.Cells[2, 1].Style.Font.Italic = true;
+
+            // La fila 3 queda en blanco salvo que haya filas desactualizadas: asi el
+            // encabezado no se mueve de la fila 4 tenga o no aviso que mostrar.
+            if (HayCalculo(fuera) && fuera.FilasDesactualizadas > 0)
+            {
+                hoja.Cells[ConciliacionFilaAviso, 1].Value = string.Format(
+                    CultureInfo.InvariantCulture,
+                    "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. Recalcule el período antes de usar este archivo.",
+                    fuera.FilasDesactualizadas);
+                hoja.Cells[ConciliacionFilaAviso, 1].Style.Font.Bold = true;
+            }
+
+            string[] encabezados =
+            {
+                "ID Empleado", "Nombre", "Min. aprobado incluido", "USD aprobado incluido",
+                "Min. no aprobado incluido", "USD no aprobado incluido", "Min. excluido", "USD excluido",
+                "Total a pagar (USD)", "Total incluyendo no incluido (USD)", "Estado"
+            };
+            for (int i = 0; i < encabezados.Length; i++)
+            {
+                hoja.Cells[ConciliacionFilaDeEncabezados, i + 1].Value = encabezados[i];
+                hoja.Cells[ConciliacionFilaDeEncabezados, i + 1].Style.Font.Bold = true;
+            }
+
+            if (!HayCalculo(fuera))
+            {
+                string motivo = fuera == null || string.IsNullOrEmpty(fuera.Error) ? "no se consultó." : fuera.Error;
+                hoja.Cells[ConciliacionPrimeraFilaDeDatos, 1].Value = "No se pudo calcular la conciliación: " + motivo;
+                return;
+            }
+
+            int fila = ConciliacionPrimeraFilaDeDatos;
+            int totalMinAprobado = 0, totalMinNoAprobado = 0, totalMinExcluido = 0;
+            decimal totalUsdAprobado = 0m, totalUsdNoAprobado = 0m, totalUsdExcluido = 0m, totalAPagar = 0m, totalConExcluido = 0m;
+
+            foreach (EntHeConciliacionFila c in fuera.Conciliacion)
+            {
+                hoja.Cells[fila, 1].Value = c.IdEmpleado;
+                hoja.Cells[fila, 1].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 2].Value = c.Nombre;
+
+                hoja.Cells[fila, 3].Value = c.MinutosAprobadoIncluido;
+                hoja.Cells[fila, 3].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 4].Value = c.UsdAprobadoIncluido;
+                hoja.Cells[fila, 4].Style.Numberformat.Format = FormatoMoneda;
+
+                hoja.Cells[fila, 5].Value = c.MinutosNoAprobadoIncluido;
+                hoja.Cells[fila, 5].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 6].Value = c.UsdNoAprobadoIncluido;
+                hoja.Cells[fila, 6].Style.Numberformat.Format = FormatoMoneda;
+
+                hoja.Cells[fila, 7].Value = c.MinutosExcluido;
+                hoja.Cells[fila, 7].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 8].Value = c.UsdExcluido;
+                hoja.Cells[fila, 8].Style.Numberformat.Format = FormatoMoneda;
+
+                hoja.Cells[fila, 9].Value = c.TotalAPagar;
+                hoja.Cells[fila, 9].Style.Numberformat.Format = FormatoMoneda;
+                hoja.Cells[fila, 10].Value = c.TotalConExcluido;
+                hoja.Cells[fila, 10].Style.Numberformat.Format = FormatoMoneda;
+
+                hoja.Cells[fila, 11].Value = c.Desactualizada ? TextoConciliacionDesactualizada : "";
+
+                totalMinAprobado += c.MinutosAprobadoIncluido;
+                totalMinNoAprobado += c.MinutosNoAprobadoIncluido;
+                totalMinExcluido += c.MinutosExcluido;
+                totalUsdAprobado += c.UsdAprobadoIncluido;
+                totalUsdNoAprobado += c.UsdNoAprobadoIncluido;
+                totalUsdExcluido += c.UsdExcluido;
+                totalAPagar += c.TotalAPagar;
+                totalConExcluido += c.TotalConExcluido;
+
+                fila++;
+            }
+
+            int filaTotales = fila;
+            hoja.Cells[filaTotales, 1].Value = "TOTALES";
+            hoja.Cells[filaTotales, 3].Value = totalMinAprobado;
+            hoja.Cells[filaTotales, 3].Style.Numberformat.Format = FormatoEntero;
+            hoja.Cells[filaTotales, 4].Value = totalUsdAprobado;
+            hoja.Cells[filaTotales, 4].Style.Numberformat.Format = FormatoMoneda;
+            hoja.Cells[filaTotales, 5].Value = totalMinNoAprobado;
+            hoja.Cells[filaTotales, 5].Style.Numberformat.Format = FormatoEntero;
+            hoja.Cells[filaTotales, 6].Value = totalUsdNoAprobado;
+            hoja.Cells[filaTotales, 6].Style.Numberformat.Format = FormatoMoneda;
+            hoja.Cells[filaTotales, 7].Value = totalMinExcluido;
+            hoja.Cells[filaTotales, 7].Style.Numberformat.Format = FormatoEntero;
+            hoja.Cells[filaTotales, 8].Value = totalUsdExcluido;
+            hoja.Cells[filaTotales, 8].Style.Numberformat.Format = FormatoMoneda;
+            hoja.Cells[filaTotales, 9].Value = totalAPagar;
+            hoja.Cells[filaTotales, 9].Style.Numberformat.Format = FormatoMoneda;
+            hoja.Cells[filaTotales, 10].Value = totalConExcluido;
+            hoja.Cells[filaTotales, 10].Style.Numberformat.Format = FormatoMoneda;
+            for (int c2 = 1; c2 <= ConciliacionUltimaColumna; c2++)
+            {
+                hoja.Cells[filaTotales, c2].Style.Font.Bold = true;
+            }
+
+            hoja.View.FreezePanes(ConciliacionPrimeraFilaDeDatos, 1);
+            if (fuera.Conciliacion.Count > 0)
+            {
+                hoja.Cells[ConciliacionFilaDeEncabezados, 1, filaTotales - 1, ConciliacionUltimaColumna].AutoFilter = true;
+            }
+            for (int c2 = 1; c2 <= ConciliacionUltimaColumna; c2++) { hoja.Column(c2).Width = 16; }
+            hoja.Column(2).Width = 30;
+            hoja.Column(11).Width = 40;
+        }
+
+        /// <summary>
+        /// Una fila por cada segmento candidato ya resuelto: incluido o no, con que
+        /// tipo, cuantos minutos y quien lo decidio. Es el rastro que la Parte 1 de
+        /// la especificacion pide para cada decision de Nomina, tramo por tramo.
+        /// </summary>
+        private static void EscribirHojaDecisiones(ExcelPackage paquete, EntHePantalla pantalla, EntHeFueraDeHorario fuera)
+        {
+            ExcelWorksheet hoja = paquete.Workbook.Worksheets.Add(NombreHojaDecisiones);
+
+            hoja.Cells[1, 1].Value = "Decisiones - Período " + TextoPeriodo(pantalla.Periodo);
+            hoja.Cells[1, 1].Style.Font.Bold = true;
+            hoja.Cells[2, 1].Value = "Una fila por cada segmento candidato: si se incluye, con que tipo y cuantos minutos, y quien y cuando lo decidio.";
+            hoja.Cells[2, 1].Style.Font.Italic = true;
+
+            string[] encabezados =
+            {
+                "ID Empleado", "Nombre", "Fecha", "Tramo", "Parte", "Grupo", "Dentro del período",
+                "Incluir", "Tipo", "Minutos segmento", "Minutos incluidos", "Motivo", "Bloqueado",
+                "Decidido por", "Decidido el", "USD", "Id tramo"
+            };
+            for (int i = 0; i < encabezados.Length; i++)
+            {
+                hoja.Cells[DecisionesFilaDeEncabezados, i + 1].Value = encabezados[i];
+                hoja.Cells[DecisionesFilaDeEncabezados, i + 1].Style.Font.Bold = true;
+            }
+
+            if (!HayCalculo(fuera))
+            {
+                string motivo = fuera == null || string.IsNullOrEmpty(fuera.Error) ? "no se consultó." : fuera.Error;
+                hoja.Cells[DecisionesPrimeraFilaDeDatos, 1].Value = "No se pudo calcular las decisiones: " + motivo;
+                return;
+            }
+
+            Dictionary<long, string> nombres = new Dictionary<long, string>();
+            foreach (EntHeFila f in pantalla.Filas) { nombres[f.IdEmpleado] = f.NombreSnapshot ?? ""; }
+
+            List<EntHeCandidato> candidatos = new List<EntHeCandidato>(fuera.Candidatos);
+            candidatos.Sort((a, b) =>
+            {
+                string na = nombres.ContainsKey(a.IdEmpleado) ? nombres[a.IdEmpleado] : "";
+                string nb = nombres.ContainsKey(b.IdEmpleado) ? nombres[b.IdEmpleado] : "";
+                int c = string.Compare(na, nb, StringComparison.OrdinalIgnoreCase);
+                if (c != 0) { return c; }
+                c = a.IdEmpleado.CompareTo(b.IdEmpleado);
+                if (c != 0) { return c; }
+                return a.SegmentoInicio.CompareTo(b.SegmentoInicio);
+            });
+
+            int fila = DecisionesPrimeraFilaDeDatos;
+            foreach (EntHeCandidato c in candidatos)
+            {
+                hoja.Cells[fila, 1].Value = c.IdEmpleado;
+                hoja.Cells[fila, 1].Style.Numberformat.Format = FormatoEntero;
+                hoja.Cells[fila, 2].Value = nombres.ContainsKey(c.IdEmpleado) ? nombres[c.IdEmpleado] : "";
+                hoja.Cells[fila, 3].Value = c.Fecha;
+                hoja.Cells[fila, 4].Value = c.TramoTexto;
+                hoja.Cells[fila, 5].Value = c.ParteTexto;
+                hoja.Cells[fila, 6].Value = c.Grupo;
+                hoja.Cells[fila, 7].Value = c.DentroDelPeriodo ? "Sí" : "No";
+                hoja.Cells[fila, 8].Value = c.Incluir ? "Sí" : "No";
+                hoja.Cells[fila, 9].Value = c.TipoElegidoTexto;
+
+                hoja.Cells[fila, 10].Value = c.MinutosSegmento;
+                hoja.Cells[fila, 10].Style.Numberformat.Format = FormatoEntero;
+
+                if (c.MinutosIncluidos.HasValue)
+                {
+                    hoja.Cells[fila, 11].Value = c.MinutosIncluidos.Value;
+                    hoja.Cells[fila, 11].Style.Numberformat.Format = FormatoEntero;
+                }
+
+                hoja.Cells[fila, 12].Value = c.Motivo ?? "";
+                hoja.Cells[fila, 13].Value = c.BloqueadoPor ?? "";
+                hoja.Cells[fila, 14].Value = c.DecididoPor ?? "";
+                if (c.DecididoEl.HasValue)
+                {
+                    hoja.Cells[fila, 15].Value = c.DecididoEl.Value;
+                    hoja.Cells[fila, 15].Style.Numberformat.Format = "dd/mm/yyyy hh:mm";
+                }
+
+                hoja.Cells[fila, 16].Value = c.ValorUsd;
+                hoja.Cells[fila, 16].Style.Numberformat.Format = FormatoMoneda;
+
+                hoja.Cells[fila, 17].Value = c.IdRegDetTareas;
+                hoja.Cells[fila, 17].Style.Numberformat.Format = FormatoEntero;
+
+                fila++;
+            }
+
+            hoja.View.FreezePanes(DecisionesPrimeraFilaDeDatos, 1);
+            if (candidatos.Count > 0)
+            {
+                hoja.Cells[DecisionesFilaDeEncabezados, 1, fila - 1, DecisionesUltimaColumna].AutoFilter = true;
+            }
+            for (int c2 = 1; c2 <= DecisionesUltimaColumna; c2++) { hoja.Column(c2).Width = 14; }
+            hoja.Column(2).Width = 30;
+            hoja.Column(12).Width = 40;
         }
 
         private static int LineaDeTotal(ExcelWorksheet hoja, int fila, string etiqueta, int minutos)

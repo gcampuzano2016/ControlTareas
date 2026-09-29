@@ -360,7 +360,7 @@ namespace CapaPruebas
 
             using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
             {
-                Assert.AreEqual(4, paquete.Workbook.Worksheets.Count, "El archivo deberia tener cuatro hojas: detalle, pagos, fuera de horario y fuera del modulo.");
+                Assert.AreEqual(6, paquete.Workbook.Worksheets.Count, "El archivo deberia tener seis hojas: detalle, pagos, fuera de horario, fuera del modulo, conciliacion y decisiones.");
 
                 ExcelWorksheet hojaPagos = paquete.Workbook.Worksheets[1];
                 Assert.IsTrue(
@@ -396,6 +396,38 @@ namespace CapaPruebas
                 Categoria = NegHeFueraDeHorario.CategoriaSinAprobar,
                 EstadoTexto = "Sin solicitar",
                 Actividad = "ACTIVIDAD DE PRUEBA"
+            });
+
+            // Una fila de conciliacion y un candidato para la misma persona: las
+            // pruebas de las hojas "Conciliación" y "Decisiones" parten de aqui y
+            // agregan lo que les falta (otra persona, Desactualizada, etc).
+            f.Conciliacion.Add(new EntHeConciliacionFila
+            {
+                IdEmpleado = idEmpleado,
+                MinutosAprobadoIncluido = 60,
+                MinutosNoAprobadoIncluido = 30,
+                MinutosExcluido = 15,
+                UsdAprobadoIncluido = 10m,
+                UsdNoAprobadoIncluido = 5m,
+                UsdExcluido = 2.5m,
+                TotalAPagar = 15m
+            });
+            f.Candidatos.Add(new EntHeCandidato
+            {
+                IdEmpleado = idEmpleado,
+                IdRegDetTareas = 555,
+                TramoInicio = new DateTime(2026, 8, 18, 8, 0, 0),
+                TramoFin = new DateTime(2026, 8, 18, 9, 0, 0),
+                SegmentoInicio = new DateTime(2026, 8, 18, 8, 0, 0),
+                SegmentoFin = new DateTime(2026, 8, 18, 9, 0, 0),
+                TipoHora = 1,
+                EstadoTramo = 0,
+                TipoRegistrado = 0,
+                Actividad = "ACTIVIDAD DE PRUEBA",
+                DentroDelPeriodo = true,
+                Incluir = true,
+                TipoElegido = 1,
+                ValorUsd = 7.5m
             });
             return f;
         }
@@ -447,7 +479,7 @@ namespace CapaPruebas
 
             using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
             {
-                Assert.AreEqual(4, paquete.Workbook.Worksheets.Count);
+                Assert.AreEqual(6, paquete.Workbook.Worksheets.Count);
 
                 ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDeHorario];
                 StringAssert.StartsWith(
@@ -566,6 +598,141 @@ namespace CapaPruebas
                 ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaFueraDelModulo];
                 StringAssert.StartsWith(Convert.ToString(hoja.Cells[NegHeExportacion.FueraPrimeraFilaDeDatos, 1].Value),
                                         "No se pudo calcular");
+            }
+        }
+
+        /// <summary>
+        /// El total de la fila TOTALES no es una suma nueva inventada por la hoja:
+        /// tiene que coincidir con la suma de TotalAPagar (el TotalHE real de cada
+        /// persona) que ya trae la conciliacion, aunque haya mas de una fila.
+        /// </summary>
+        [TestMethod]
+        public void Construir_Conciliacion_TotalIgualSumaDeTotalHE()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fuera = FueraDeEjemplo(4242);
+            fuera.Conciliacion.Add(new EntHeConciliacionFila
+            {
+                IdEmpleado = 9999,
+                Nombre = "OTRA PERSONA",
+                MinutosAprobadoIncluido = 120,
+                UsdAprobadoIncluido = 20m,
+                TotalAPagar = 20m
+            });
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaConciliacion];
+
+                decimal sumaEsperada = 0m;
+                foreach (EntHeConciliacionFila c in fuera.Conciliacion) { sumaEsperada += c.TotalAPagar; }
+
+                int filaTotales = -1;
+                for (int f = NegHeExportacion.ConciliacionPrimeraFilaDeDatos; f <= NegHeExportacion.ConciliacionPrimeraFilaDeDatos + 10; f++)
+                {
+                    if (Convert.ToString(hoja.Cells[f, 1].Value) == "TOTALES") { filaTotales = f; }
+                }
+
+                Assert.IsTrue(filaTotales > 0, "No se encontro la fila TOTALES.");
+                Assert.AreEqual(sumaEsperada, Convert.ToDecimal(hoja.Cells[filaTotales, 9].Value),
+                    "El TOTALES de 'Total a pagar (USD)' deberia ser la suma de TotalAPagar de cada fila.");
+            }
+        }
+
+        /// <summary>
+        /// Una fila cuyo TotalHE no coincide con lo que pagan sus minutos incluidos
+        /// hoy queda marcada en la columna Estado, y el aviso aparece debajo del
+        /// titulo: Nomina no debe usar este archivo sin recalcular antes.
+        /// </summary>
+        [TestMethod]
+        public void Construir_Conciliacion_MarcaDesactualizada()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fuera = FueraDeEjemplo(4242);
+            fuera.Conciliacion[0].Desactualizada = true;
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaConciliacion];
+
+                string estado = Convert.ToString(hoja.Cells[NegHeExportacion.ConciliacionPrimeraFilaDeDatos, 11].Value);
+                StringAssert.Contains(estado, "Desactualizada");
+                StringAssert.Contains(estado, "Traer aprobaciones nuevas");
+
+                string aviso = Convert.ToString(hoja.Cells[3, 1].Value ?? "");
+                StringAssert.Contains(aviso, "1", "El aviso deberia decir cuantas filas estan desactualizadas.");
+            }
+        }
+
+        /// <summary>
+        /// Cada segmento candidato -aprobado o no, incluido o no- es una fila propia
+        /// en "Decisiones", ordenada por nombre y luego por fecha. Quien no esta en
+        /// la grilla (nombres.ContainsKey en false) sale con el nombre vacio, no
+        /// falla.
+        /// </summary>
+        [TestMethod]
+        public void Construir_Decisiones_UnaFilaPorCandidato()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+            EntHeFueraDeHorario fuera = FueraDeEjemplo(4242);
+            fuera.Candidatos.Add(new EntHeCandidato
+            {
+                IdEmpleado = 9999,
+                IdRegDetTareas = 777,
+                TramoInicio = new DateTime(2026, 8, 20, 7, 0, 0),
+                TramoFin = new DateTime(2026, 8, 20, 8, 0, 0),
+                SegmentoInicio = new DateTime(2026, 8, 20, 7, 0, 0),
+                SegmentoFin = new DateTime(2026, 8, 20, 8, 0, 0),
+                TipoHora = 2,
+                EstadoTramo = 3,
+                TipoRegistrado = 0,
+                DentroDelPeriodo = true,
+                Incluir = false,
+                TipoElegido = 2,
+                ValorUsd = 0m
+            });
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDecisiones];
+
+                // Orden por nombre: 9999 no esta en la grilla ("" ordena antes que
+                // "PERSONA DE PRUEBA"), asi que va primero.
+                Assert.AreEqual(9999L, Convert.ToInt64(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 1].Value));
+                Assert.AreEqual("", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 2].Value ?? ""));
+                Assert.AreEqual("Rechazado", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 6].Value));
+                Assert.AreEqual("No", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 8].Value));
+                Assert.AreEqual(777L, Convert.ToInt64(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 17].Value));
+
+                Assert.AreEqual(4242L, Convert.ToInt64(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos + 1, 1].Value));
+                Assert.AreEqual("PERSONA DE PRUEBA", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos + 1, 2].Value));
+                Assert.AreEqual("Sí", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos + 1, 8].Value));
+                Assert.AreEqual("50%", Convert.ToString(hoja.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos + 1, 9].Value));
+            }
+        }
+
+        /// <summary>
+        /// Sin calculo (fuera null o Calculado=false) las dos hojas nuevas existen
+        /// igual, con el mismo patron de mensaje que las demas hojas informativas.
+        /// </summary>
+        [TestMethod]
+        public void Construir_SinCalculo_ConciliacionYDecisionesConMensaje()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Abierto");
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla)))
+            {
+                Assert.AreEqual(6, paquete.Workbook.Worksheets.Count);
+
+                ExcelWorksheet conciliacion = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaConciliacion];
+                StringAssert.StartsWith(
+                    Convert.ToString(conciliacion.Cells[NegHeExportacion.ConciliacionPrimeraFilaDeDatos, 1].Value),
+                    "No se pudo calcular la conciliación");
+
+                ExcelWorksheet decisiones = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaDecisiones];
+                StringAssert.StartsWith(
+                    Convert.ToString(decisiones.Cells[NegHeExportacion.DecisionesPrimeraFilaDeDatos, 1].Value),
+                    "No se pudo calcular las decisiones");
             }
         }
     }

@@ -217,6 +217,7 @@
     <Compile Include="NegHeExportacion.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />
+    <Compile Include="NegHeDecisionesPantalla.cs" />
     <Compile Include="NegHeMaestroPantalla.cs" />
     <Compile Include="NegHeParametros.cs" />
     <Compile Include="NegHeParametroPantalla.cs" />

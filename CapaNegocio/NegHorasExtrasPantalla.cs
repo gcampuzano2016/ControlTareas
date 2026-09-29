@@ -177,14 +177,26 @@ namespace CapaNegocio
 
             if (esManual)
             {
+                /* Rama heredada: desde la decision por tramo la grilla ya no
+                   acepta horas tecleadas, asi que no nacen filas Manual nuevas (al
+                   2026-09-29 no hay ninguna). Se conserva para no pisar en
+                   silencio una que existiera; sus minutos quedan null y paga por
+                   horas, como antes. */
                 fila.Horas50 = anterior.Horas50;
                 fila.Horas100 = anterior.Horas100;
+                fila.Minutos50 = null;
+                fila.Minutos100 = null;
                 fila.HorasOrigen = "Manual";
                 return;
             }
 
             fila.Horas50 = aprobadas != null ? aprobadas.Horas50 : 0m;
             fila.Horas100 = aprobadas != null ? aprobadas.Horas100 : 0m;
+
+            /* Los minutos exactos de la siembra: son la base del pago (Calcular no
+               multiplica las horas redondeadas cuando hay minutos). */
+            fila.Minutos50 = aprobadas != null ? aprobadas.Minutos50 : null;
+            fila.Minutos100 = aprobadas != null ? aprobadas.Minutos100 : null;
             fila.HorasOrigen = "Tareas";
         }
 
@@ -431,6 +443,54 @@ namespace CapaNegocio
         }
 
         /// <summary>
+        /// Los candidatos del periodo ya resueltos y, por persona, la fila de
+        /// siembra con sus minutos. Un solo camino para AbrirPeriodo y GuardarHoras:
+        /// si cada uno resolviera por su cuenta, guardar una observacion podria
+        /// dejar la fila con otros minutos que la ultima apertura.
+        ///
+        /// Lanza si la base falla: cada llamador decide que hacer, y los dos cortan
+        /// antes de escribir.
+        /// </summary>
+        private static Dictionary<long, EntHeFila> LeerSiembra(int idPeriodo, out List<EntHeCandidato> resueltos)
+        {
+            List<EntHeCandidato> candidatos;
+            List<EntHeDecision> decisiones;
+            List<EntHeRangoPeriodo> periodos;
+            DaoHorasExtras.LeerCandidatos(idPeriodo, out candidatos, out decisiones, out periodos);
+
+            resueltos = NegHeDecisiones.Resolver(idPeriodo, candidatos, decisiones, periodos);
+            return SiembraDesdeMinutos(NegHeDecisiones.Minutos(resueltos));
+        }
+
+        /// <summary>
+        /// Pasa los minutos por persona ([0] al 50%, [1] al 100%) a filas de
+        /// siembra. Los minutos son la base del pago; las horas, redondeadas a 2
+        /// decimales, son solo para mostrar (y es lo que guarda HE_Detalle, que no
+        /// tiene columnas de minutos).
+        /// </summary>
+        public static Dictionary<long, EntHeFila> SiembraDesdeMinutos(Dictionary<long, int[]> minutos)
+        {
+            Dictionary<long, EntHeFila> resultado = new Dictionary<long, EntHeFila>();
+            if (minutos == null) { return resultado; }
+
+            foreach (KeyValuePair<long, int[]> par in minutos)
+            {
+                int m50 = par.Value != null && par.Value.Length > 0 ? par.Value[0] : 0;
+                int m100 = par.Value != null && par.Value.Length > 1 ? par.Value[1] : 0;
+
+                EntHeFila f = new EntHeFila();
+                f.IdEmpleado = par.Key;
+                f.Minutos50 = m50;
+                f.Minutos100 = m100;
+                f.Horas50 = Math.Round(m50 / 60m, 2, MidpointRounding.AwayFromZero);
+                f.Horas100 = Math.Round(m100 / 60m, 2, MidpointRounding.AwayFromZero);
+                resultado[par.Key] = f;
+            }
+
+            return resultado;
+        }
+
+        /// <summary>
         /// Abre un periodo -un rango de fechas, ya no un mes calendario-: lo
         /// crea si no existe y le arma el snapshot, una fila por colaborador
         /// activo, con las horas extras ya aprobadas del rango sembradas.
@@ -493,11 +553,35 @@ namespace CapaNegocio
             Dictionary<long, List<EntHeSalario>> salarios;
             DaoHorasExtras.LeerInsumos(corte, out colaboradores, out salarios);
 
-            /* Las horas ya aprobadas del rango, una sola lectura para las 62
-               filas. Solo trae a quien tiene alguna: el que no esta en el
-               diccionario no registro ninguna, y ResolverHoras lo traduce a
-               cero. */
-            Dictionary<long, EntHeFila> aprobadas = DaoHorasExtras.LeerHorasAprobadas(inicio, fin);
+            /* Lo que se paga sale de las decisiones por tramo, una sola lectura
+               para las 62 filas: los candidatos del periodo, resueltos con la
+               decision vigente o el valor por omision (que incluye justo lo que
+               antes traia Sp_RTA_HeHorasAprobadas, asi que sin decisiones el pago
+               solo cambia en centavos por el calculo por minutos). Solo trae a
+               quien tiene algo incluido: el que no esta en el diccionario queda
+               en cero en ResolverHoras.
+
+               Sp_RTA_HeHorasAprobadas y DaoHorasExtras.LeerHorasAprobadas quedan
+               sin uso pero NO se borran: reponer los binarios anteriores es la
+               vuelta atras, y necesitan ese procedimiento.
+
+               Si la lectura falla, se corta AQUI, antes de escribir nada. Seguir
+               con un diccionario vacio sembraria cero horas en las 62 filas y
+               borraria el pago del periodo en silencio. */
+            Dictionary<long, EntHeFila> aprobadas;
+            try
+            {
+                List<EntHeCandidato> resueltos;
+                aprobadas = LeerSiembra(idPeriodo, out resueltos);
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "No se pudieron leer los tramos del período, así que no se recalculó nada: "
+                                  + "el período quedó como estaba. " + ex.Message;
+                respuesta.tipoMensaje = "danger";
+                return respuesta;
+            }
 
             /* GuardarFila puede fallar fila por fila -por ejemplo si alguien
                cierra el periodo a mitad del bucle-. No se detalla cual: basta
@@ -693,11 +777,30 @@ namespace CapaNegocio
                     return new EntHeFueraDeHorario { Calculado = false, Error = "El periodo no existe." };
                 }
 
+                /* Desde la decision por tramo, «sin aprobar» y «rechazado» son lo
+                   NO INCLUIDO en el pago, y eso lo dicen las decisiones, no el
+                   estado del tramo. Por eso se arma desde los candidatos y ya no
+                   desde Sp_RTA_HeFueraDeHorario: si Nomina incluyo un tramo
+                   rechazado, dejaria de aparecer como rechazado sin pagar. */
+                List<EntHeCandidato> candidatos;
+                List<EntHeDecision> decisiones;
+                List<EntHeRangoPeriodo> periodos;
+                DaoHorasExtras.LeerCandidatos(periodo.IdPeriodo, out candidatos, out decisiones, out periodos);
+                List<EntHeCandidato> resueltos = NegHeDecisiones.Resolver(periodo.IdPeriodo, candidatos, decisiones, periodos);
+
                 List<EntHeSegmentoFuera> segmentos;
                 List<EntHeIntervaloPagado> pagados;
-                DaoHorasExtras.LeerFueraDeHorario(periodo.FechaInicio, periodo.FechaFin, out segmentos, out pagados);
+                ArmarNoIncluido(resueltos, out segmentos, out pagados);
 
                 EntHeFueraDeHorario resultado = NegHeFueraDeHorario.Calcular(segmentos, pagados);
+
+                /* El valor de cada segmento y la conciliacion usan el valor hora
+                   que ya tiene la fila del periodo: es el mismo con el que se
+                   calculo el pago. */
+                List<EntHeFila> filas = DaoHorasExtras.CargarPeriodo(periodo.IdPeriodo).Filas;
+                NegHeDecisiones.Valorar(resueltos, filas);
+                resultado.Candidatos = resueltos;
+                resultado.Conciliacion = NegHeDecisiones.Conciliar(resueltos, filas);
 
                 /* Quien tiene horas y no esta en el modulo. Va en el mismo try: si
                    esto falla, el resultado entero dice "no se pudo calcular" en vez
@@ -714,6 +817,67 @@ namespace CapaNegocio
             catch (Exception ex)
             {
                 return new EntHeFueraDeHorario { Calculado = false, Error = ex.Message };
+            }
+        }
+
+        /// <summary>
+        /// Traduce los candidatos resueltos a la entrada de NegHeFueraDeHorario.Calcular:
+        ///   - lo INCLUIDO (sus primeros MinutosEfectivos) va como intervalo pagado,
+        ///     para que un minuto que ya se paga no aparezca ademas como no incluido;
+        ///   - lo NO incluido de un tramo no aprobado va como segmento, con el tipo
+        ///     elegido: el segmento entero si no se incluyo, o lo que sobra de uno
+        ///     reducido.
+        ///
+        /// Quedan afuera, a proposito:
+        ///   - lo bloqueado: ya lo paga otro periodo, no es "no incluido" de este;
+        ///   - lo aprobado sin incluir: el cuadro de fuera de horario nunca mostro
+        ///     tramos aprobados, y NegHeFueraDeHorario los descarta por estado. Ese
+        ///     tiempo aparece en la conciliacion, como excluido;
+        ///   - lo no incluido de los 7 dias de borde: es tiempo del periodo vecino,
+        ///     y mostrarlo aqui lo contaria en los dos (el cuadro viejo tambien
+        ///     miraba solo el rango del periodo).
+        /// </summary>
+        public static void ArmarNoIncluido(IList<EntHeCandidato> resueltos,
+                                           out List<EntHeSegmentoFuera> segmentos,
+                                           out List<EntHeIntervaloPagado> pagados)
+        {
+            segmentos = new List<EntHeSegmentoFuera>();
+            pagados = new List<EntHeIntervaloPagado>();
+            if (resueltos == null) { return; }
+
+            foreach (EntHeCandidato c in resueltos)
+            {
+                if (c == null || c.Bloqueado) { continue; }
+
+                int efectivos = c.MinutosEfectivos;
+                if (efectivos > 0)
+                {
+                    pagados.Add(new EntHeIntervaloPagado
+                    {
+                        IdEmpleado = c.IdEmpleado,
+                        Inicio = c.SegmentoInicio,
+                        Fin = c.SegmentoInicio.AddMinutes(efectivos),
+                        TipoRegistrado = c.TipoElegido
+                    });
+                }
+
+                if (c.EsAprobado) { continue; }
+                if (!c.Incluir && !c.DentroDelPeriodo) { continue; }
+                if (efectivos >= c.MinutosSegmento) { continue; }
+
+                segmentos.Add(new EntHeSegmentoFuera
+                {
+                    IdEmpleado = c.IdEmpleado,
+                    IdRegDetTareas = c.IdRegDetTareas,
+                    TramoInicio = c.TramoInicio,
+                    TramoFin = c.TramoFin,
+                    SegmentoInicio = c.SegmentoInicio.AddMinutes(efectivos),
+                    SegmentoFin = c.SegmentoFin,
+                    TipoHora = c.TipoElegido,
+                    EstadoTramo = c.EstadoTramo,
+                    TipoRegistrado = c.TipoRegistrado,
+                    Actividad = c.Actividad ?? ""
+                });
             }
         }
 
@@ -741,7 +905,13 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Guarda las horas de una fila.
+        /// Guarda la observacion de una fila y la deja recalculada.
+        ///
+        /// Las horas ya no vienen del cliente: horas50 y horas100 se reciben para
+        /// no cambiar la firma que usa el handler, pero se ignoran. La fila se
+        /// recalcula desde las decisiones por tramo, asi que guardar una
+        /// observacion nunca cambia las horas ni los centavos respecto de la
+        /// ultima apertura.
         ///
         /// NO recibe ningun total del cliente y no usaria uno aunque se lo
         /// mandaran: relee el snapshot de la base, recalcula, guarda sus propios
@@ -786,28 +956,31 @@ namespace CapaNegocio
                 return respuesta;
             }
 
-            /* Tope del lado del servidor: nunca confiar solo en el cliente.
-               Un dedazo de 10000 horas pasaria el parseo y el calculo si nadie
-               lo detiene aqui. No es como las horas negativas -que se marcan y
-               se pagan en cero porque son dato corrupto-: esto es un error de
-               captura que hay que devolver para que lo corrijan. */
-            if (ExcedeTopePorCelda(horas50) || ExcedeTopePorCelda(horas100))
-            {
-                respuesta.estado = "0";
-                respuesta.mensaje = "Las horas de una celda no pueden superar " + TopeHorasPorCelda.ToString("0") + ".";
-                respuesta.tipoMensaje = "warning";
-                return respuesta;
-            }
+            /* Desde la decision por tramo las horas salen SOLO de los tramos: las
+               que manda el cliente (horas50 / horas100) se ignoran, aunque la
+               firma se conserva para no romper al handler. Lo unico que escribe
+               una persona aqui es la observacion.
 
-            fila.Horas50 = horas50;
-            fila.Horas100 = horas100;
+               Las horas y los minutos se vuelven a calcular desde las decisiones
+               con el mismo camino que AbrirPeriodo. Tomar las Horas50 guardadas
+               no sirve: HE_Detalle no tiene minutos, y recalcular desde horas
+               redondeadas cambiaria los centavos con solo guardar una nota. Si
+               la lectura falla no se guarda nada: guardar sin minutos haria justo
+               eso. */
+            List<EntHeCandidato> resueltos;
+            Dictionary<long, EntHeFila> sembradas = LeerSiembra(idPeriodo, out resueltos);
+            EntHeFila sembrada = sembradas.ContainsKey(idEmpleado) ? sembradas[idEmpleado] : null;
+
+            fila.Horas50 = sembrada != null ? sembrada.Horas50 : 0m;
+            fila.Horas100 = sembrada != null ? sembrada.Horas100 : 0m;
+            fila.Minutos50 = sembrada != null ? sembrada.Minutos50 : null;
+            fila.Minutos100 = sembrada != null ? sembrada.Minutos100 : null;
             fila.Observacion = observacion ?? "";
 
-            /* Aqui hay una persona escribiendo, asi que la fila pasa a ser
-               Manual. Es lo unico que hace que su correccion sobreviva a la
-               proxima apertura: ResolverHoras respeta lo manual y vuelve a
-               sembrar todo lo demas desde las horas aprobadas. */
-            fila.HorasOrigen = "Manual";
+            /* "Tareas" y no "Manual": nadie tecleo horas. Una fila Manual heredada
+               tambien pasa a Tareas al guardarla, porque sus horas se acaban de
+               recalcular desde los tramos. */
+            fila.HorasOrigen = "Tareas";
 
             /* El 6.6 funcional manda revalidar la elegibilidad y el sueldo contra
                la base al guardar, porque pudieron cambiar desde que se cargo la

@@ -263,6 +263,10 @@ namespace CapaDato
         /// Las horas extras aprobadas en el rango, agregadas por colaborador. Devuelve
         /// solo a quien tiene alguna: el que no aparece es que no registro ninguna, y
         /// quien llama lo traduce a cero.
+        ///
+        /// SIN USO desde la decision por tramo (la siembra lee LeerCandidatos). Se
+        /// deja a proposito: es la vuelta atras si se reponen los binarios
+        /// anteriores, junto con Sp_RTA_HeHorasAprobadas, que tampoco se borra.
         /// </summary>
         public static Dictionary<long, EntHeFila> LeerHorasAprobadas(DateTime inicio, DateTime fin)
         {
@@ -287,6 +291,122 @@ namespace CapaDato
                         f.Horas100 = Convert.ToDecimal(dr["Horas100"]);
                         resultado[f.IdEmpleado] = f;
                     }
+                }
+            }
+
+            return resultado;
+        }
+
+        /// <summary>
+        /// Los tres conjuntos de Sp_RTA_HeTramosCandidatos: los segmentos que Nomina
+        /// puede incluir en el periodo, las decisiones vigentes sobre esos tramos (de
+        /// cualquier periodo) y todos los periodos. No resuelve nada: que queda
+        /// incluido, el pago doble y los minutos son de NegHeDecisiones, y CapaDato no
+        /// puede llamar a CapaNegocio.
+        ///
+        /// Las columnas que el procedimiento ya protege con ISNULL (TipoRegistrado,
+        /// Actividad) se leen igual con resguardo: una columna nula que se cuele no
+        /// tiene que tumbar la siembra de las 62 filas.
+        /// </summary>
+        public static void LeerCandidatos(int idPeriodo,
+                                          out List<EntHeCandidato> candidatos,
+                                          out List<EntHeDecision> decisiones,
+                                          out List<EntHeRangoPeriodo> periodos)
+        {
+            candidatos = new List<EntHeCandidato>();
+            decisiones = new List<EntHeDecision>();
+            periodos = new List<EntHeRangoPeriodo>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeTramosCandidatos", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        EntHeCandidato c = new EntHeCandidato();
+                        c.IdEmpleado = Convert.ToInt64(dr["IdEmpleado"]);
+                        c.IdRegDetTareas = Convert.ToInt64(dr["IdRegDetTareas"]);
+                        c.TramoInicio = Convert.ToDateTime(dr["TramoInicio"]);
+                        c.TramoFin = Convert.ToDateTime(dr["TramoFin"]);
+                        c.SegmentoInicio = Convert.ToDateTime(dr["SegmentoInicio"]);
+                        c.SegmentoFin = Convert.ToDateTime(dr["SegmentoFin"]);
+                        c.TipoHora = Convert.ToInt32(dr["TipoHora"]);
+                        c.EstadoTramo = Convert.ToInt32(dr["EstadoTramo"]);
+                        c.TipoRegistrado = dr["TipoRegistrado"] == DBNull.Value ? 0 : Convert.ToInt32(dr["TipoRegistrado"]);
+                        c.Actividad = dr["Actividad"] == DBNull.Value ? "" : Convert.ToString(dr["Actividad"]);
+                        c.DentroDelPeriodo = dr["DentroDelPeriodo"] != DBNull.Value && Convert.ToBoolean(dr["DentroDelPeriodo"]);
+                        candidatos.Add(c);
+                    }
+
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            EntHeDecision d = new EntHeDecision();
+                            d.IdDecision = Convert.ToInt32(dr["IdDecision"]);
+                            d.IdPeriodo = Convert.ToInt32(dr["IdPeriodo"]);
+                            d.IdRegDetTareas = Convert.ToInt64(dr["IdRegDetTareas"]);
+                            d.SegmentoInicio = Convert.ToDateTime(dr["SegmentoInicio"]);
+                            d.Incluir = Convert.ToBoolean(dr["Incluir"]);
+                            d.TipoHora = Convert.ToInt32(dr["TipoHora"]);
+                            d.MinutosIncluidos = dr["MinutosIncluidos"] == DBNull.Value
+                                                 ? (int?)null : Convert.ToInt32(dr["MinutosIncluidos"]);
+                            d.Motivo = Texto(dr, "Motivo");
+                            d.Usuario = Texto(dr, "Usuario");
+                            d.Fecha = dr["Fecha"] == DBNull.Value ? (DateTime?)null : Convert.ToDateTime(dr["Fecha"]);
+                            decisiones.Add(d);
+                        }
+                    }
+
+                    if (dr.NextResult())
+                    {
+                        while (dr.Read())
+                        {
+                            EntHeRangoPeriodo p = new EntHeRangoPeriodo();
+                            p.IdPeriodo = Convert.ToInt32(dr["IdPeriodo"]);
+                            p.FechaInicio = Convert.ToDateTime(dr["FechaInicio"]);
+                            p.FechaFin = Convert.ToDateTime(dr["FechaFin"]);
+                            p.EstadoPeriodo = Texto(dr, "EstadoPeriodo");
+                            periodos.Add(p);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// Inserta un lote de decisiones con Sp_RTA_HeGuardarDecisiones, todo o nada.
+        /// El XML lo arma NegHeDecisionesPantalla.ArmarXml:
+        ///   &lt;ds&gt;&lt;d t="IdRegDetTareas" s="yyyy-MM-ddTHH:mm:ss" i="0|1" h="1|2" m="" r="motivo"/&gt;&lt;/ds&gt;
+        ///
+        /// Respuestas: 0 guardado, -1 el periodo no existe o no esta abierto, -2 pago
+        /// doble, -3 datos invalidos, -4 el tramo no es candidato. -9 si el
+        /// procedimiento no devolvio ninguna fila (no deberia pasar).
+        /// </summary>
+        public static int GuardarDecisiones(int idPeriodo, string xml, string usuario, string ip)
+        {
+            int resultado = -9;
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_HeGuardarDecisiones", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPeriodo", SqlDbType.Int).Value = idPeriodo;
+                cmd.Parameters.Add("@Decisiones", SqlDbType.Xml).Value = xml ?? "";
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario ?? "";
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 64).Value = ip ?? "";
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (dr.Read()) { resultado = Convert.ToInt32(dr["Respuestas"]); }
                 }
             }
 

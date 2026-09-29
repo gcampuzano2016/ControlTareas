@@ -333,6 +333,96 @@ namespace CapaPruebas
             Assert.AreEqual("revisar con el jefe", fila.Observacion);
         }
 
+        /// <summary>
+        /// La siembra desde las decisiones trae minutos exactos: tienen que llegar a
+        /// la fila, o el pago volveria a multiplicar horas redondeadas.
+        /// </summary>
+        [TestMethod]
+        public void LaSiembraCopiaLosMinutos()
+        {
+            EntHeFila fila = new EntHeFila();
+            EntHeFila sembrada = new EntHeFila();
+            sembrada.Minutos50 = 100;
+            sembrada.Minutos100 = 70;
+            sembrada.Horas50 = 1.67m;
+            sembrada.Horas100 = 1.17m;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, null, sembrada);
+
+            Assert.AreEqual(100, fila.Minutos50);
+            Assert.AreEqual(70, fila.Minutos100);
+            Assert.AreEqual(1.67m, fila.Horas50);
+            Assert.AreEqual("Tareas", fila.HorasOrigen);
+        }
+
+        [TestMethod]
+        public void SiembraDesdeMinutos_HorasRedondeadasYMinutosExactos()
+        {
+            Dictionary<long, EntHeFila> s = NegHorasExtrasPantalla.SiembraDesdeMinutos(
+                new Dictionary<long, int[]> { { 7, new[] { 100, 1 } } });
+
+            Assert.AreEqual(1, s.Count);
+            Assert.AreEqual(100, s[7].Minutos50);
+            Assert.AreEqual(1, s[7].Minutos100);
+            Assert.AreEqual(1.67m, s[7].Horas50);
+            Assert.AreEqual(0.02m, s[7].Horas100, "1/60 = 0,01666... sube a 0,02.");
+            Assert.AreEqual(0, NegHorasExtrasPantalla.SiembraDesdeMinutos(null).Count);
+        }
+
+        private static EntHeCandidato Resuelto(long tramo, int estado, int tipoRegistrado, bool incluir, int? minutos = null,
+                                               bool dentro = true, bool bloqueado = false)
+        {
+            DateTime ini = new DateTime(2026, 8, 20, 19, 0, 0);
+            return new EntHeCandidato
+            {
+                IdEmpleado = 9, IdRegDetTareas = tramo,
+                TramoInicio = ini, TramoFin = ini.AddHours(1),
+                SegmentoInicio = ini, SegmentoFin = ini.AddHours(1),
+                TipoHora = 1, TipoElegido = 2, EstadoTramo = estado, TipoRegistrado = tipoRegistrado,
+                Incluir = incluir, MinutosIncluidos = minutos, DentroDelPeriodo = dentro, Bloqueado = bloqueado,
+                Actividad = "ACT"
+            };
+        }
+
+        [TestMethod]
+        public void ArmarNoIncluido_IncluidoEsPagado_NoIncluidoEsSegmento()
+        {
+            List<EntHeSegmentoFuera> seg;
+            List<EntHeIntervaloPagado> pag;
+            NegHorasExtrasPantalla.ArmarNoIncluido(new List<EntHeCandidato>
+            {
+                Resuelto(1, 2, 1, true),                       // aprobado incluido: pagado entero
+                Resuelto(2, 3, 0, false),                      // rechazado sin incluir: no incluido, con el tipo elegido
+                Resuelto(3, 0, 0, true, 20),                   // reducido: 20 pagados, 40 no incluidos
+                Resuelto(4, 0, 0, false, null, false),         // borde sin incluir: nada
+                Resuelto(5, 0, 0, false, null, true, true),    // bloqueado: nada
+                Resuelto(6, 2, 1, false)                       // aprobado excluido: no va al cuadro
+            }, out seg, out pag);
+
+            Assert.AreEqual(2, pag.Count);
+            Assert.AreEqual(60, (int)(pag[0].Fin - pag[0].Inicio).TotalMinutes);
+            Assert.AreEqual(20, (int)(pag[1].Fin - pag[1].Inicio).TotalMinutes);
+
+            Assert.AreEqual(2, seg.Count);
+            Assert.AreEqual(2, seg[0].IdRegDetTareas);
+            Assert.AreEqual(2, seg[0].TipoHora, "Manda el tipo elegido, no el del horario.");
+            Assert.AreEqual(3, seg[0].EstadoTramo);
+            Assert.AreEqual(3, seg[1].IdRegDetTareas);
+            Assert.AreEqual(new DateTime(2026, 8, 20, 19, 20, 0), seg[1].SegmentoInicio);
+        }
+
+        [TestMethod]
+        public void SinSiembraLosMinutosQuedanNulos()
+        {
+            EntHeFila fila = new EntHeFila();
+            fila.Minutos50 = 5;
+
+            NegHorasExtrasPantalla.ResolverHoras(fila, null, null);
+
+            Assert.IsNull(fila.Minutos50);
+            Assert.IsNull(fila.Minutos100);
+        }
+
         [TestMethod]
         public void SumarTotales_SumaLosTotalesYaRedondeados()
         {

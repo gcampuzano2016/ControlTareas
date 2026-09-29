@@ -528,5 +528,240 @@ namespace CapaPruebas
             Assert.IsNotNull(error);
             StringAssert.Contains(error, "21/08/2026 19:00");
         }
+
+        // ================================================= Conciliar ========
+
+        /// <summary>
+        /// Un segmento ya resuelto, dentro del periodo salvo que se diga otra cosa.
+        /// estado 2 con tipo registrado = aprobado; cualquier otro, no aprobado.
+        /// </summary>
+        private static EntHeCandidato Pieza(long idTramo, string inicio, string fin, int tipo, int estado, bool incluir,
+                                            long empleado = Persona, bool dentro = true, bool bloqueado = false)
+        {
+            EntHeCandidato c = Cand(idTramo, inicio, fin, tipo, estado, estado == 2 ? tipo : 0, empleado);
+            c.Incluir = incluir;
+            c.TipoElegido = tipo;
+            c.DentroDelPeriodo = dentro;
+            c.Bloqueado = bloqueado;
+            return c;
+        }
+
+        /// <summary>Valor hora inventado: 7,50 al 50% y 10,00 al 100%.</summary>
+        private static EntHeFila Fila(long empleado, string nombre, decimal totalHE = 0m,
+                                      decimal valor50 = 7.5m, decimal valor100 = 10m)
+        {
+            return new EntHeFila
+            {
+                IdEmpleado = empleado,
+                NombreSnapshot = nombre,
+                ValorHora50 = valor50,
+                ValorHora100 = valor100,
+                TotalHE = totalHE
+            };
+        }
+
+        private static EntHeConciliacionFila Conciliar1(EntHeFila fila, params EntHeCandidato[] resueltos)
+        {
+            List<EntHeConciliacionFila> r = NegHeDecisiones.Conciliar(resueltos.ToList(), new List<EntHeFila> { fila });
+            Assert.AreEqual(1, r.Count);
+            return r[0];
+        }
+
+        [TestMethod]
+        public void Conciliar_SeparaAprobadoNoAprobadoYExcluido()
+        {
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+                Pieza(61, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),   // aprobado incluido: 120 al 50%
+                Pieza(62, "2026-08-21 19:00", "2026-08-21 19:30", 2, 0, true),   // no aprobado incluido: 30 al 100%
+                Pieza(63, "2026-08-22 20:00", "2026-08-22 21:30", 1, 3, false),  // excluido: 90 al 50%
+                Pieza(64, "2026-08-23 20:00", "2026-08-23 21:00", 1, 0, false, bloqueado: true));
+
+            Assert.AreEqual(120, r.MinutosAprobadoIncluido);
+            Assert.AreEqual(30, r.MinutosNoAprobadoIncluido);
+            Assert.AreEqual(90, r.MinutosExcluido, "Lo bloqueado lo paga otro periodo: no es excluido aqui.");
+            Assert.AreEqual(15.00m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(5.00m, r.UsdNoAprobadoIncluido);
+            Assert.AreEqual(11.25m, r.UsdExcluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_TotalAPagarEsTotalHE()
+        {
+            // El total a pagar es el de la fila, no una suma nueva: la conciliacion
+            // explica el pago, no lo recalcula.
+            List<EntHeConciliacionFila> r = NegHeDecisiones.Conciliar(
+                new List<EntHeCandidato> { Pieza(65, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true) },
+                new List<EntHeFila> { Fila(Persona, "PERSONA A", 123.45m), Fila(OtraPersona, "PERSONA B", 7.01m) });
+
+            Assert.AreEqual(2, r.Count);
+            Assert.AreEqual(Persona, r[0].IdEmpleado);
+            Assert.AreEqual("PERSONA A", r[0].Nombre);
+            Assert.AreEqual(123.45m, r[0].TotalAPagar);
+            Assert.AreEqual(OtraPersona, r[1].IdEmpleado);
+            Assert.AreEqual(7.01m, r[1].TotalAPagar);
+        }
+
+        [TestMethod]
+        public void Conciliar_PersonaSinCandidatos_Ceros()
+        {
+            EntHeConciliacionFila r = Conciliar1(Fila(OtraPersona, "PERSONA B", 0m),
+                Pieza(66, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true));
+
+            Assert.AreEqual(OtraPersona, r.IdEmpleado);
+            Assert.AreEqual(0, r.MinutosAprobadoIncluido);
+            Assert.AreEqual(0, r.MinutosNoAprobadoIncluido);
+            Assert.AreEqual(0, r.MinutosExcluido);
+            Assert.AreEqual(0m, r.UsdAprobadoIncluido);
+            Assert.AreEqual(0m, r.UsdNoAprobadoIncluido);
+            Assert.AreEqual(0m, r.UsdExcluido);
+            Assert.AreEqual(0m, r.TotalAPagar);
+        }
+
+        [TestMethod]
+        public void Conciliar_MinutoIncluidoNoCuentaComoExcluido()
+        {
+            // 18:00-20:00 incluido; 19:00-21:00 excluido al 100%: solo 20:00-21:00
+            // queda afuera. La hora compartida ya se paga.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+                Pieza(67, "2026-08-20 18:00", "2026-08-20 20:00", 1, 2, true),
+                Pieza(68, "2026-08-20 19:00", "2026-08-20 21:00", 2, 0, false));
+
+            Assert.AreEqual(120, r.MinutosAprobadoIncluido);
+            Assert.AreEqual(60, r.MinutosExcluido);
+            Assert.AreEqual(10.00m, r.UsdExcluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_IncluidoReducido_ElRestoEsExcluido()
+        {
+            // Se pagan los primeros 30 de 60 minutos: los otros 30 no se pagan, y
+            // eso es exactamente lo que Nomina decidio dejar afuera.
+            EntHeCandidato reducido = Pieza(69, "2026-08-20 19:00", "2026-08-20 20:00", 1, 0, true);
+            reducido.MinutosIncluidos = 30;
+
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"), reducido);
+
+            Assert.AreEqual(30, r.MinutosNoAprobadoIncluido);
+            Assert.AreEqual(30, r.MinutosExcluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_FueraDelPeriodoSinIncluir_NoCuentaComoExcluido()
+        {
+            // Los 7 dias de borde son del periodo vecino: si no se incluyen aqui, su
+            // tiempo no es "no incluido" de este periodo, o se contaria en los dos.
+            // Incluido, en cambio, si suma.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+                Pieza(70, "2026-09-16 19:00", "2026-09-16 20:00", 1, 0, false, dentro: false),
+                Pieza(71, "2026-09-17 19:00", "2026-09-17 20:00", 1, 0, true, dentro: false));
+
+            Assert.AreEqual(0, r.MinutosExcluido);
+            Assert.AreEqual(60, r.MinutosNoAprobadoIncluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_UsdSeRedondeaUnaVezPorPersona()
+        {
+            // 10 minutos a 7,53 = 1,255 cada uno. Redondeando cada pieza: 1,26 + 1,26
+            // = 2,52; redondeando una vez la suma: 2,51. Manda el segundo.
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A", 0m, 7.53m, 10m),
+                Pieza(72, "2026-08-20 19:00", "2026-08-20 19:10", 1, 0, false),
+                Pieza(73, "2026-08-21 19:00", "2026-08-21 19:10", 1, 0, false));
+
+            Assert.AreEqual(20, r.MinutosExcluido);
+            Assert.AreEqual(2.51m, r.UsdExcluido);
+        }
+
+        [TestMethod]
+        public void Conciliar_CienGanaAlCincuentaEnElMismoMinuto()
+        {
+            EntHeConciliacionFila r = Conciliar1(Fila(Persona, "PERSONA A"),
+                Pieza(74, "2026-08-20 18:00", "2026-08-20 20:00", 1, 0, true),
+                Pieza(75, "2026-08-20 19:00", "2026-08-20 20:00", 2, 0, true));
+
+            Assert.AreEqual(120, r.MinutosNoAprobadoIncluido);
+            Assert.AreEqual(17.50m, r.UsdNoAprobadoIncluido, "60 al 50% (7,50) + 60 al 100% (10,00).");
+        }
+
+        [TestMethod]
+        public void Conciliar_ListasNulas_SinFilas()
+        {
+            Assert.AreEqual(0, NegHeDecisiones.Conciliar(null, null).Count);
+            Assert.AreEqual(1, NegHeDecisiones.Conciliar(null, new List<EntHeFila> { Fila(Persona, "PERSONA A") }).Count);
+        }
+
+        // ================================================= Valorar ==========
+
+        [TestMethod]
+        public void Valorar_IncluidoUsaMinutosEfectivos_ExcluidoUsaElSegmento()
+        {
+            EntHeCandidato reducido = Pieza(76, "2026-08-20 19:00", "2026-08-20 20:00", 2, 0, true);
+            reducido.MinutosIncluidos = 45;
+            EntHeCandidato excluido = Pieza(77, "2026-08-21 19:00", "2026-08-21 20:30", 1, 0, false);
+            EntHeCandidato ajeno = Pieza(78, "2026-08-21 19:00", "2026-08-21 20:00", 1, 0, false, OtraPersona);
+
+            NegHeDecisiones.Valorar(new List<EntHeCandidato> { reducido, excluido, ajeno },
+                                    new List<EntHeFila> { Fila(Persona, "PERSONA A") });
+
+            Assert.AreEqual(7.50m, reducido.ValorUsd, "45 minutos al 100% (10,00).");
+            Assert.AreEqual(11.25m, excluido.ValorUsd, "90 minutos al 50% (7,50).");
+            Assert.AreEqual(0m, ajeno.ValorUsd, "Sin fila no hay valor hora.");
+        }
+
+        // ================================================= Textos ===========
+
+        [TestMethod]
+        public void Candidato_ClaveSegmentoYTextos()
+        {
+            EntHeCandidato c = Cand(79, "2026-08-20 18:00", "2026-08-20 21:15", 1, 0);
+            c.SegmentoInicio = H("2026-08-20 19:05");
+
+            Assert.AreEqual("2026-08-20T19:05:00", c.ClaveSegmento);
+            Assert.AreEqual("20/08/2026", c.Fecha);
+            Assert.AreEqual("18:00 - 21:15", c.TramoTexto);
+            Assert.AreEqual("19:05 - 21:15", c.ParteTexto);
+        }
+
+        // ================================================= Pantalla =========
+
+        [TestMethod]
+        public void MensajeDecisiones_TraduceCadaCodigo()
+        {
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(0), "guardadas");
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(-1), "abierto");
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(-2), "otro per");
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(-3), "inválid");
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(-4), "candidato");
+            StringAssert.Contains(NegHeDecisionesPantalla.MensajeDecisiones(-99), "No se pudieron guardar");
+        }
+
+        [TestMethod]
+        public void ArmarXml_UnElementoPorCambio()
+        {
+            string xml = NegHeDecisionesPantalla.ArmarXml(new List<EntHeCambioDecision>
+            {
+                new EntHeCambioDecision { IdRegDetTareas = 80, SegmentoInicio = H("2026-08-20 19:05"), Incluir = true,
+                                          TipoHora = 2, MinutosIncluidos = 45, Motivo = "  a <b> & \"c\"  " },
+                new EntHeCambioDecision { IdRegDetTareas = 81, SegmentoInicio = H("2026-08-21 18:00"), Incluir = false,
+                                          TipoHora = 1, MinutosIncluidos = null, Motivo = null }
+            });
+
+            System.Xml.Linq.XElement raiz = System.Xml.Linq.XElement.Parse(xml);
+            Assert.AreEqual("ds", raiz.Name.LocalName);
+            List<System.Xml.Linq.XElement> d = raiz.Elements("d").ToList();
+            Assert.AreEqual(2, d.Count);
+
+            Assert.AreEqual("80", (string)d[0].Attribute("t"));
+            Assert.AreEqual("2026-08-20T19:05:00", (string)d[0].Attribute("s"));
+            Assert.AreEqual("1", (string)d[0].Attribute("i"));
+            Assert.AreEqual("2", (string)d[0].Attribute("h"));
+            Assert.AreEqual("45", (string)d[0].Attribute("m"));
+            Assert.AreEqual("a <b> & \"c\"", (string)d[0].Attribute("r"));
+
+            Assert.AreEqual("0", (string)d[1].Attribute("i"));
+            Assert.AreEqual("1", (string)d[1].Attribute("h"));
+            Assert.AreEqual("", (string)d[1].Attribute("m"), "Sin minutos va vacio: el segmento completo.");
+            Assert.AreEqual("", (string)d[1].Attribute("r"));
+        }
     }
 }

@@ -28,6 +28,24 @@ namespace CapaEntidad
 
         public int PersonasFueraDelModulo { get { return FueraDelModulo.Count; } }
 
+        /// <summary>
+        /// Todos los segmentos candidatos del periodo ya resueltos (decision vigente,
+        /// valor por omision y bloqueo), con su ValorUsd. Alimenta la ventana de
+        /// detalle de cada persona y la hoja «Decisiones» del Excel.
+        /// </summary>
+        public List<EntHeCandidato> Candidatos { get; set; } = new List<EntHeCandidato>();
+
+        /// <summary>Una fila por persona del periodo: que se paga, que no, y el total a pagar.</summary>
+        public List<EntHeConciliacionFila> Conciliacion { get; set; } = new List<EntHeConciliacionFila>();
+
+        /// <summary>Los candidatos de una persona, para su ventana de detalle.</summary>
+        public List<EntHeCandidato> CandidatosDe(long idEmpleado)
+        {
+            List<EntHeCandidato> lista = new List<EntHeCandidato>();
+            foreach (EntHeCandidato c in Candidatos) { if (c.IdEmpleado == idEmpleado) { lista.Add(c); } }
+            return lista;
+        }
+
         public decimal TotalHorasAprobadasFueraDelModulo
         {
             get

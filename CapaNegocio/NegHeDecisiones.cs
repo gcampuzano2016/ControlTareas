@@ -258,6 +258,154 @@ namespace CapaNegocio
             return null;
         }
 
+        /// <summary>
+        /// Pone en cada candidato su ValorUsd: los minutos que muestra la ventana
+        /// (MinutosMostrados) por el valor hora de la fila de la persona segun el
+        /// tipo elegido, redondeado a centavos. Sin fila no hay valor hora, y el
+        /// valor queda en 0: no se inventa un monto para quien no esta en el periodo.
+        ///
+        /// Modifica los candidatos que recibe: se llama sobre la salida de Resolver,
+        /// que ya son copias.
+        /// </summary>
+        public static void Valorar(IList<EntHeCandidato> resueltos, IList<EntHeFila> filas)
+        {
+            if (resueltos == null) { return; }
+            Dictionary<long, EntHeFila> porPersona = PorPersona(filas);
+
+            foreach (EntHeCandidato c in resueltos)
+            {
+                if (c == null) { continue; }
+                EntHeFila fila;
+                if (!porPersona.TryGetValue(c.IdEmpleado, out fila)) { c.ValorUsd = 0m; continue; }
+
+                decimal valorHora = c.TipoElegido == 2 ? fila.ValorHora100 : fila.ValorHora50;
+                c.ValorUsd = Math.Round(c.MinutosMostrados * valorHora / 60m, 2, MidpointRounding.AwayFromZero);
+            }
+        }
+
+        /// <summary>
+        /// La conciliacion por persona: una fila por cada fila del periodo, en el
+        /// mismo orden, con lo incluido aprobado, lo incluido no aprobado, lo
+        /// excluido y el total a pagar.
+        ///
+        /// Todo se cuenta por minuto, igual que Minutos: un minuto incluido cuenta
+        /// una vez, al 100% si algun segmento incluido lo tiene al 100%, y como
+        /// "aprobado" si algun segmento incluido que lo cubre es un tramo aprobado.
+        /// Asi lo aprobado mas lo no aprobado incluido es exactamente lo que paga la
+        /// fila.
+        ///
+        /// Excluido es lo que se podria pagar y no se paga:
+        ///   - un segmento sin incluir, o lo que sobra de uno reducido;
+        ///   - nunca un bloqueado: ese lo paga otro periodo;
+        ///   - nunca un minuto que ya paga otro segmento incluido;
+        ///   - de los 7 dias de borde, solo lo que sobra de un segmento que Nomina
+        ///     trajo; un borde sin incluir es tiempo del periodo vecino, y contarlo
+        ///     aqui lo haria aparecer como "no incluido" en los dos periodos.
+        ///
+        /// Los USD de cada columna se redondean UNA vez sobre la persona, no por
+        /// segmento: redondear cada pedazo y sumar descuadra centavos.
+        /// </summary>
+        public static List<EntHeConciliacionFila> Conciliar(IList<EntHeCandidato> resueltos, IList<EntHeFila> filas)
+        {
+            List<EntHeConciliacionFila> resultado = new List<EntHeConciliacionFila>();
+            if (filas == null) { return resultado; }
+
+            Dictionary<long, List<EntHeCandidato>> piezasPorPersona = (resueltos ?? new List<EntHeCandidato>())
+                .Where(c => c != null)
+                .GroupBy(c => c.IdEmpleado)
+                .ToDictionary(g => g.Key, g => g.ToList());
+
+            foreach (EntHeFila fila in filas)
+            {
+                if (fila == null) { continue; }
+
+                EntHeConciliacionFila r = new EntHeConciliacionFila();
+                r.IdEmpleado = fila.IdEmpleado;
+                r.Nombre = fila.NombreSnapshot ?? "";
+                r.TotalAPagar = fila.TotalHE;
+
+                List<EntHeCandidato> piezas;
+                if (piezasPorPersona.TryGetValue(fila.IdEmpleado, out piezas))
+                {
+                    Conciliar(r, piezas, fila);
+                }
+
+                resultado.Add(r);
+            }
+
+            return resultado;
+        }
+
+        /// <summary>Cuenta los minutos de una persona y los pasa a USD con el valor hora de su fila.</summary>
+        private static void Conciliar(EntHeConciliacionFila r, List<EntHeCandidato> piezas, EntHeFila fila)
+        {
+            // Minuto incluido -> [tipo, 1 si es aprobado]. Gana el 100% y gana el aprobado.
+            Dictionary<long, int[]> incluidos = new Dictionary<long, int[]>();
+            foreach (EntHeCandidato c in piezas.Where(k => k.Incluir && k.MinutosEfectivos > 0))
+            {
+                long desde = EntHeCandidato.Minuto(c.SegmentoInicio);
+                long hasta = desde + c.MinutosEfectivos;
+                for (long m = desde; m < hasta; m++)
+                {
+                    int[] v;
+                    if (!incluidos.TryGetValue(m, out v)) { v = new int[] { 0, 0 }; incluidos[m] = v; }
+                    if (c.TipoElegido == 2) { v[0] = 2; } else if (v[0] == 0) { v[0] = 1; }
+                    if (c.EsAprobado) { v[1] = 1; }
+                }
+            }
+
+            // Minuto excluido -> tipo. Lo que ya se paga no entra.
+            Dictionary<long, int> excluidos = new Dictionary<long, int>();
+            foreach (EntHeCandidato c in piezas.Where(k => !k.Bloqueado && (k.DentroDelPeriodo || k.Incluir)))
+            {
+                long inicio = EntHeCandidato.Minuto(c.SegmentoInicio);
+                long desde = inicio + c.MinutosEfectivos;
+                long hasta = inicio + c.MinutosSegmento;
+                for (long m = desde; m < hasta; m++)
+                {
+                    if (incluidos.ContainsKey(m)) { continue; }
+                    int tipo;
+                    excluidos.TryGetValue(m, out tipo);
+                    if (c.TipoElegido == 2 || tipo == 0) { excluidos[m] = c.TipoElegido == 2 ? 2 : 1; }
+                }
+            }
+
+            int aprobado50 = 0, aprobado100 = 0, noAprobado50 = 0, noAprobado100 = 0, excluido50 = 0, excluido100 = 0;
+            foreach (int[] v in incluidos.Values)
+            {
+                if (v[1] == 1) { if (v[0] == 2) { aprobado100++; } else { aprobado50++; } }
+                else { if (v[0] == 2) { noAprobado100++; } else { noAprobado50++; } }
+            }
+            foreach (int tipo in excluidos.Values)
+            {
+                if (tipo == 2) { excluido100++; } else { excluido50++; }
+            }
+
+            r.MinutosAprobadoIncluido = aprobado50 + aprobado100;
+            r.MinutosNoAprobadoIncluido = noAprobado50 + noAprobado100;
+            r.MinutosExcluido = excluido50 + excluido100;
+            r.UsdAprobadoIncluido = Usd(aprobado50, aprobado100, fila);
+            r.UsdNoAprobadoIncluido = Usd(noAprobado50, noAprobado100, fila);
+            r.UsdExcluido = Usd(excluido50, excluido100, fila);
+        }
+
+        private static decimal Usd(int minutos50, int minutos100, EntHeFila fila)
+        {
+            decimal monto = (minutos50 * fila.ValorHora50 + minutos100 * fila.ValorHora100) / 60m;
+            return Math.Round(monto, 2, MidpointRounding.AwayFromZero);
+        }
+
+        private static Dictionary<long, EntHeFila> PorPersona(IList<EntHeFila> filas)
+        {
+            Dictionary<long, EntHeFila> d = new Dictionary<long, EntHeFila>();
+            if (filas == null) { return d; }
+            foreach (EntHeFila f in filas)
+            {
+                if (f != null && !d.ContainsKey(f.IdEmpleado)) { d[f.IdEmpleado] = f; }
+            }
+            return d;
+        }
+
         private static Tuple<long, DateTime> Clave(long idRegDetTareas, DateTime segmentoInicio)
         {
             return Tuple.Create(idRegDetTareas, segmentoInicio);

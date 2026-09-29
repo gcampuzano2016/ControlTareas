@@ -121,6 +121,48 @@ namespace CapaEntidad
             }
         }
 
+        /// <summary>
+        /// Lo que vale en USD el tiempo que se muestra (MinutosMostrados), con el
+        /// valor hora de la fila de la persona segun TipoElegido. 0 si la persona no
+        /// tiene fila. Lo llena NegHeDecisiones.Valorar; Resolver no lo copia.
+        /// </summary>
+        public decimal ValorUsd { get; set; }
+
+        /// <summary>
+        /// Los minutos que la ventana muestra: los que se pagan si esta incluido, o
+        /// el segmento completo si no (es lo que se pagaria al incluirlo).
+        /// </summary>
+        public int MinutosMostrados
+        {
+            get { return Incluir ? MinutosEfectivos : MinutosSegmento; }
+        }
+
+        /// <summary>
+        /// La clave del segmento como viaja a la pantalla y vuelve: el handler la lee
+        /// con ParseExact en este mismo formato, y es el del atributo s del XML de
+        /// Sp_RTA_HeGuardarDecisiones (estilo 126). No lleva milisegundos: los tramos
+        /// se registran al minuto (verificado en la base al 2026-09-29).
+        /// </summary>
+        public string ClaveSegmento
+        {
+            get { return SegmentoInicio.ToString(FormatoClave, CultureInfo.InvariantCulture); }
+        }
+
+        public const string FormatoClave = "yyyy-MM-ddTHH:mm:ss";
+
+        // Textos ya armados: JavaScriptSerializer entrega las fechas como \/Date(n)\/,
+        // y la pantalla y el Excel los muestran igual.
+        public string Fecha { get { return SegmentoInicio.ToString("dd/MM/yyyy", CultureInfo.InvariantCulture); } }
+        public string TramoTexto { get { return Rango(TramoInicio, TramoFin); } }
+        public string ParteTexto { get { return Rango(SegmentoInicio, SegmentoFin); } }
+        public string TipoElegidoTexto { get { return TipoElegido == 2 ? "100%" : "50%"; } }
+        public string TipoHoraTexto { get { return TipoHora == 2 ? "100%" : "50%"; } }
+
+        private static string Rango(DateTime desde, DateTime hasta)
+        {
+            return desde.ToString("HH:mm", CultureInfo.InvariantCulture) + " - " + hasta.ToString("HH:mm", CultureInfo.InvariantCulture);
+        }
+
         /// <summary>El segmento como lo lee Nomina en un mensaje: dd/MM/yyyy HH:mm - HH:mm.</summary>
         public string SegmentoTexto
         {

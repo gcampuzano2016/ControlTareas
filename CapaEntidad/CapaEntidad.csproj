@@ -144,6 +144,7 @@
     <Compile Include="EntHeIntervaloPagado.cs" />
     <Compile Include="EntHeSegmentoFuera.cs" />
     <Compile Include="EntHeCandidato.cs" />
+    <Compile Include="EntHeConciliacionFila.cs" />
     <Compile Include="EntHeDecision.cs" />
     <Compile Include="EntHeRangoPeriodo.cs" />
     <Compile Include="EntHeCambioDecision.cs" />

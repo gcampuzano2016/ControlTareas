@@ -8,7 +8,7 @@
         /* Solo para mostrar los botones de completar datos y de ajuste de sueldo. */
         var HE_PUEDE_EDITAR_MAESTRO = <%= PuedeEditarMaestro ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=10" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=11" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -272,6 +272,10 @@
                         </button>
                     </div>
                     <div class="panel-body">
+                        <!-- Filas cuyo Total HE ya no es lo que pagan los tramos incluidos hoy
+                             (alguien decidió o aprobó algo y el período no se recalculó). Lo
+                             llena PintarFueraDeHorario; cerrar así pagaría otra cosa. -->
+                        <div class="alert alert-warning" id="avisoDesactualizadas" style="display: none"></div>
                         <!-- Personas con horas en el período que NO están en el módulo. Solo se
                              muestra si hay alguien. Sin montos: no tienen sueldo cargado. Lo
                              llena PintarFueraDelModulo en horasExtras.js, siempre con .text(). -->
@@ -313,11 +317,14 @@
                                         <th class="he-col-derivada" style="display: none">Total 100%</th>
                                         <th>Total horas</th>
                                         <th>Total HE (USD)</th>
-                                        <!-- Informativas: tiempo registrado fuera del horario de la
-                                             persona que NO entra en el pago. Las llena
+                                        <!-- Tiempo candidato de la persona que Nómina NO incluyó en el
+                                             pago, en horas y en USD. Desde la decisión por tramo ya no es
+                                             «lo que no se paga porque no está aprobado»: es «lo que no se
+                                             incluyó», y se decide en el detalle. Las llena
                                              CargarFueraDeHorario después de dibujar la grilla. -->
-                                        <th title="Tiempo fuera de horario sin solicitar, pendiente de aprobación o aprobado sin tipo. No se paga.">Fuera de horario sin aprobar (h)</th>
-                                        <th title="Tiempo fuera de horario que la jefatura rechazó. No se paga.">Rechazado (h)</th>
+                                        <th title="Tiempo fuera de horario sin solicitar, pendiente o aprobado sin tipo que no se incluyó en el pago.">No incluido: sin aprobar (h · USD)</th>
+                                        <th title="Tiempo fuera de horario que la jefatura rechazó y que no se incluyó en el pago.">No incluido: rechazado (h · USD)</th>
+                                        <th title="Lo que se pagaría si se incluyera también todo lo no incluido del período (incluye lo aprobado que se excluyó y lo que sobra de un tramo reducido).">Total incluyendo no incluido (USD)</th>
                                         <th>Observación</th>
                                         <!-- Columna nueva de la fase 4, al final de las que ya
                                              había: dice si las horas las sembró el sistema desde
@@ -327,7 +334,7 @@
                                 </thead>
                                 <tbody id="cuerpoHE">
                                     <tr>
-                                        <td colspan="18" class="text-center text-muted">
+                                        <td colspan="19" class="text-center text-muted">
                                             Seleccione o abra un período para comenzar.
                                         </td>
                                     </tr>
@@ -347,6 +354,7 @@
                                         <td id="pieTotalHE">USD 0.00</td>
                                         <td id="pieFueraSinAprobar"></td>
                                         <td id="pieFueraRechazado"></td>
+                                        <td id="pieTotalConExcluido"></td>
                                         <td></td>
                                         <td></td>
                                     </tr>
@@ -403,39 +411,49 @@
         </div>
         <!-- /.modal -->
 
-        <!-- Detalle del tiempo fuera de horario de un colaborador. Solo lectura:
-             sirve para saber QUÉ tramos pedirle a la persona que solicite, o cuáles
-             rechazó la jefatura. Lo llena MostrarDetalleFuera en horasExtras.js,
-             siempre con .text(): la actividad es texto libre de la persona. -->
+        <!-- Detalle de los tramos candidatos de un colaborador, y la decisión de
+             Nómina sobre cada uno: si se incluye en el pago, a qué tipo, cuántos
+             minutos (solo para reducir) y por qué. Lo llena MostrarDetalleFuera en
+             horasExtras.js, siempre con .text() y .val(): la actividad y el motivo
+             son texto libre. Los controles salen deshabilitados para el perfil 2,
+             con el período cerrado y en un tramo que ya paga otro período; el
+             handler y el procedimiento lo vuelven a comprobar. -->
         <div class="modal fade" id="modalFueraDeHorario" tabindex="-1" role="dialog" aria-labelledby="tituloFueraDeHorario" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
+            <div class="modal-dialog modal-lg" style="width: 95%; max-width: 1300px">
                 <div class="modal-content">
                     <div class="modal-header">
                         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-                        <h4 class="modal-title" id="tituloFueraDeHorario">Tiempo fuera de horario</h4>
+                        <h4 class="modal-title" id="tituloFueraDeHorario">Tramos y decisiones</h4>
                     </div>
                     <div class="modal-body">
-                        <p class="text-muted">Información para revisión: estas horas NO están incluidas en los totales a pagar.</p>
+                        <p class="text-muted">Marque «Incluir» para pagar un tramo en este período. Los minutos solo sirven para reducir (vacío = el tramo completo). El motivo es obligatorio al reducir minutos o al incluir un tramo que no está aprobado. El USD es lo que vale el tramo con el valor hora de la persona.</p>
+                        <p class="text-warning" id="leyendaDecisiones" style="display: none; font-weight: 600"></p>
                         <div class="table-responsive">
                             <table class="table table-condensed table-bordered">
                                 <thead>
                                     <tr>
                                         <th>Fecha</th>
                                         <th>Tramo registrado</th>
-                                        <th>Fuera de horario</th>
+                                        <th>Parte</th>
                                         <th>Min.</th>
-                                        <th>Tipo</th>
+                                        <th>USD</th>
                                         <th>Estado</th>
-                                        <th>Actividad</th>
+                                        <th>Incluir</th>
+                                        <th>Tipo</th>
+                                        <th>Minutos a pagar</th>
+                                        <th>Motivo</th>
                                     </tr>
                                 </thead>
                                 <tbody id="cuerpoFueraDeHorario"></tbody>
                             </table>
                         </div>
                         <p id="pieFueraDeHorario"></p>
+                        <!-- Confirmación antes de guardar: el nombre y cuántos tramos cambian a la vista. -->
+                        <div class="alert alert-danger" id="fdConfirmacion" style="display: none"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button type="button" class="btn btn-primary" id="btnGuardarDecisiones" style="display: none">Guardar decisiones</button>
                     </div>
                 </div>
             </div>

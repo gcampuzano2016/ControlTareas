@@ -3,8 +3,9 @@
    Handler : AdministrarHorasExtras.ashx
 
    El Cod_Usuario no se manda nunca: el handler lo saca de la sesion. Las
-   horas que digita la persona si viajan; el dinero lo calcula y lo devuelve
-   siempre el servidor.
+   horas ya no se digitan: salen de los tramos que Nomina incluye en la ventana
+   de detalle (GuardarDecisiones). El dinero lo calcula y lo devuelve siempre
+   el servidor.
    ============================================================================ */
 
 var _idPeriodoActual = null;
@@ -563,7 +564,7 @@ function PintarGrilla(pantalla) {
     var $cuerpo = $("#cuerpoHE").empty();
 
     if (!pantalla.Filas || pantalla.Filas.length === 0) {
-        $cuerpo.append('<tr><td colspan="18" class="text-center text-muted">' +
+        $cuerpo.append('<tr><td colspan="19" class="text-center text-muted">' +
                        'Este período no tiene colaboradores.</td></tr>');
     } else {
         $.each(pantalla.Filas, function (i, fila) {
@@ -594,7 +595,14 @@ function PintarGrilla(pantalla) {
 function ConstruirFila(fila) {
     var aplicaHE = !!fila.AplicaHESnapshot;
     var motivo = fila.MotivoNoAplica || "";
-    var horasDeshabilitadas = !_periodoAbierto || !aplicaHE;
+    /* Las horas ya no se teclean: salen de los tramos que Nomina incluye en la
+       ventana de detalle, y el servidor ignora las que manda GuardarFila. Las
+       celdas quedan deshabilitadas SIEMPRE -no solo readonly-: un input
+       readonly sigue recibiendo foco y el evento paste, y el pegado desde Excel
+       (AplicarPegado) repartiria valores que nadie va a guardar. Deshabilitadas,
+       .val() sigue funcionando para los totales y para GuardarFila. */
+    var horasDeshabilitadas = true;
+    var tituloHoras = "Las horas salen de los tramos incluidos: se deciden en el detalle de la persona.";
 
     var $fila = $("<tr></tr>")
         .attr("data-empleado", fila.IdEmpleado)
@@ -602,7 +610,13 @@ function ConstruirFila(fila) {
         .attr("data-buscable", ((fila.NombreSnapshot || "") + " " + (fila.CedulaSnapshot || "") + " " +
                                 (fila.CargoSnapshot || "")).toLowerCase())
         .data("salario", fila.SalarioBaseSnapshot)
-        .data("divisor", fila.Divisor);
+        .data("divisor", fila.Divisor)
+        /* Para valorar en la ventana de detalle lo que cambia al decidir, con el
+           mismo valor hora que usa el servidor (y 0 si no aplica HE, igual que
+           NegHeDecisiones.ValorHora). */
+        .data("nombre", fila.NombreSnapshot || "")
+        .data("vh50", aplicaHE ? Number(fila.ValorHora50) || 0 : 0)
+        .data("vh100", aplicaHE ? Number(fila.ValorHora100) || 0 : 0);
 
     /* AplicaHESnapshot falso y AplicaHESnapshot verdadero con motivo NO son el
        mismo caso: el segundo son personas que SI cobran horas extras. La
@@ -632,6 +646,14 @@ function ConstruirFila(fila) {
                 }));
     }
 
+    /* El detalle de tramos se abre desde aqui para TODOS: los enlaces de las
+       columnas «no incluido» solo aparecen si hay algo sin incluir, y Nomina
+       tambien necesita ver (o excluir) lo aprobado de quien tiene cero ahi.
+       Solo ícono, por la misma razón que el de arriba. */
+    $nombre.append(" ").append(
+        $('<button type="button" class="btn btn-link btn-xs" title="Ver tramos y decidir qué se paga"><i class="fa fa-list"></i></button>')
+            .on("click", function () { MostrarDetalleFuera(fila.IdEmpleado); }));
+
     $fila.append($nombre);
     $fila.append($("<td></td>").text(fila.CargoSnapshot || "–"));
     $fila.append($('<td class="text-center"></td>').text(fila.JornadaHorasDiaSnapshot));
@@ -646,6 +668,7 @@ function ConstruirFila(fila) {
 
     var $horas50 = $('<input type="text" class="form-control input-sm he-horas50" maxlength="6" />')
         .val(FormatoDosDecimales(fila.Horas50))
+        .attr("title", tituloHoras)
         .prop("disabled", horasDeshabilitadas);
     $fila.append($("<td></td>").append($horas50));
 
@@ -655,6 +678,7 @@ function ConstruirFila(fila) {
 
     var $horas100 = $('<input type="text" class="form-control input-sm he-horas100" maxlength="6" />')
         .val(FormatoDosDecimales(fila.Horas100))
+        .attr("title", tituloHoras)
         .prop("disabled", horasDeshabilitadas);
     $fila.append($("<td></td>").append($horas100));
 
@@ -668,6 +692,7 @@ function ConstruirFila(fila) {
     /* Informativas: las llena PintarFueraDeHorario cuando llega la respuesta. */
     $fila.append($('<td class="text-right he-fuera-sin"></td>').text("…"));
     $fila.append($('<td class="text-right he-fuera-rech"></td>').text("…"));
+    $fila.append($('<td class="text-right he-total-con-excluido"></td>').text("…"));
 
     var $obs = $('<input type="text" class="form-control input-sm he-observacion" maxlength="400" />')
         .val(fila.Observacion || "")
@@ -1099,7 +1124,7 @@ var _estadoFuera = "sin-datos";   // "cargando" | "ok" | "error"
 /* Totales de lo que SE VE en la grilla. El servidor puede traer a alguien activo
    en el maestro que no está sembrado en el período; si entrara aquí, el pie y el
    aviso de cierre contarían a una persona que nadie puede ver ni abrir. */
-var _resumenFuera = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0 };
+var _resumenFuera = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0, usdSin: 0, usdRech: 0, totalConExcluido: 0 };
 
 function CargarFueraDeHorario() {
     var idPeriodo = _idPeriodoActual;
@@ -1125,48 +1150,145 @@ function CargarFueraDeHorario() {
     }, true);
 }
 
+/* Las columnas «no incluido» y «Total incluyendo no incluido».
+
+   De donde sale cada numero (decision de la Task 5, a proposito):
+   - Las HORAS de «sin aprobar» y «rechazado» son las de Personas, que arma el
+     servidor (ArmarNoIncluido + NegHeFueraDeHorario): ya descuenta por minuto lo
+     que paga otro segmento incluido y deja fuera lo bloqueado y los 7 dias de
+     borde. Sumar los candidatos aqui contaria dos veces un minuto que se pisa.
+   - Los USD de esas dos columnas se valoran aqui con los mismos minutos por tipo
+     (50/100) y el valor hora de la fila, redondeando UNA vez por celda, igual
+     que NegHeDecisiones.Usd. El servidor no manda ese USD partido en sin
+     aprobar / rechazado: Conciliacion lo trae junto (UsdExcluido).
+   - «Total incluyendo no incluido» es Conciliacion.TotalConExcluido, tal cual
+     lo calcula el servidor (TotalHE + UsdExcluido). Puede ser mayor que Total HE
+     + las dos columnas: UsdExcluido cuenta ademas lo APROBADO que Nomina excluyo
+     y lo que sobra de un tramo reducido, que no son ni «sin aprobar» ni
+     «rechazado». Recalcularlo aqui con otra regla haria que la pantalla y el
+     Excel no cuadren. */
 function PintarFueraDeHorario() {
     var porEmpleado = {};
+    var conciliacion = {};
     if (_estadoFuera === "ok") {
         $.each(_fueraDeHorario.Personas || [], function (i, p) { porEmpleado[String(p.IdEmpleado)] = p; });
+        $.each(_fueraDeHorario.Conciliacion || [], function (i, c) { conciliacion[String(c.IdEmpleado)] = c; });
     }
 
-    var resumen = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0 };
+    var resumen = { personasSin: 0, personasRech: 0, minutosSin: 0, minutosRech: 0, usdSin: 0, usdRech: 0, totalConExcluido: 0 };
 
     $("#cuerpoHE tr[data-empleado]").each(function () {
         var $fila = $(this);
         var idEmpleado = $fila.attr("data-empleado");
         var $sin = $fila.find(".he-fuera-sin").empty();
         var $rech = $fila.find(".he-fuera-rech").empty();
+        var $con = $fila.find(".he-total-con-excluido").empty();
 
-        if (_estadoFuera === "cargando") { $sin.text("…"); $rech.text("…"); return; }
-        if (_estadoFuera !== "ok") { $sin.text("no disponible"); $rech.text("no disponible"); return; }
+        if (_estadoFuera === "cargando") { $sin.text("…"); $rech.text("…"); $con.text("…"); return; }
+        if (_estadoFuera !== "ok") { $sin.text("no disponible"); $rech.text("no disponible"); $con.text("no disponible"); return; }
 
         var p = porEmpleado[idEmpleado];
-        $sin.append(EnlaceFuera(p ? p.HorasSinAprobar : 0, idEmpleado));
-        $rech.append(EnlaceFuera(p ? p.HorasRechazado : 0, idEmpleado));
+        var vh50 = Number($fila.data("vh50")) || 0;
+        var vh100 = Number($fila.data("vh100")) || 0;
 
-        if (p) {
-            var sin = p.MinutosSinAprobar50 + p.MinutosSinAprobar100;
-            var rech = p.MinutosRechazado50 + p.MinutosRechazado100;
-            resumen.minutosSin += sin;
-            resumen.minutosRech += rech;
-            if (sin > 0) { resumen.personasSin++; }
-            if (rech > 0) { resumen.personasRech++; }
+        var sin50 = p ? p.MinutosSinAprobar50 : 0, sin100 = p ? p.MinutosSinAprobar100 : 0;
+        var rech50 = p ? p.MinutosRechazado50 : 0, rech100 = p ? p.MinutosRechazado100 : 0;
+        var usdSin = UsdDeMinutos(sin50, sin100, vh50, vh100);
+        var usdRech = UsdDeMinutos(rech50, rech100, vh50, vh100);
+
+        $sin.append(EnlaceFuera(sin50 + sin100, usdSin, idEmpleado));
+        $rech.append(EnlaceFuera(rech50 + rech100, usdRech, idEmpleado));
+
+        /* Sin fila de conciliacion (no deberia pasar: hay una por fila del
+           periodo) se cae en el Total HE de la grilla, que es lo que se paga. */
+        var c = conciliacion[idEmpleado];
+        var totalCon = c ? Number(c.TotalConExcluido) : NumeroDe($fila.find(".he-total-he").text());
+        $con.text(FormatoDosDecimales(totalCon)).toggleClass("text-warning", !!(c && c.Desactualizada));
+
+        /* El desglose va en el title de la celda: sin el, Total HE + las dos
+           columnas no suma la columna nueva y nada explica la diferencia. Esa
+           diferencia es lo aprobado que Nomina excluyo y lo que sobra de un tramo
+           reducido, que el servidor cuenta en UsdExcluido y no es ni «sin
+           aprobar» ni «rechazado». Sale por resta de montos ya redondeados, asi
+           que un -0.01 de redondeo se muestra como 0.00: nunca negativo. */
+        if (c) {
+            var otros = RedondearDos(Number(c.UsdExcluido) - usdSin - usdRech);
+            if (otros < 0) { otros = 0; }
+            var titulo = "Total HE " + FormatoDosDecimales(c.TotalAPagar) +
+                         " + sin aprobar " + FormatoDosDecimales(usdSin) +
+                         " + rechazado " + FormatoDosDecimales(usdRech) +
+                         " + otros no incluidos (aprobado excluido o sobrante de reducciones) " +
+                         FormatoDosDecimales(otros) + ".";
+            if (c.Desactualizada) { titulo += " " + TextoFilaDesactualizada(); }
+            $con.attr("title", titulo);
+        } else {
+            $con.removeAttr("title");
         }
+
+        resumen.minutosSin += sin50 + sin100;
+        resumen.minutosRech += rech50 + rech100;
+        resumen.usdSin += usdSin;
+        resumen.usdRech += usdRech;
+        resumen.totalConExcluido += totalCon;
+        if (sin50 + sin100 > 0) { resumen.personasSin++; }
+        if (rech50 + rech100 > 0) { resumen.personasRech++; }
     });
 
     _resumenFuera = resumen;
 
     if (_estadoFuera === "ok") {
-        /* Se suman minutos y se pasa a horas una sola vez, igual que el servidor. */
-        $("#pieFueraSinAprobar").text(FormatoDosDecimales(resumen.minutosSin / 60));
-        $("#pieFueraRechazado").text(FormatoDosDecimales(resumen.minutosRech / 60));
+        /* Se suman minutos y se pasa a horas una sola vez, igual que el servidor;
+           los USD son la suma de las celdas, ya redondeadas, como el resto del pie. */
+        $("#pieFueraSinAprobar").text(TextoHorasUsd(resumen.minutosSin, resumen.usdSin));
+        $("#pieFueraRechazado").text(TextoHorasUsd(resumen.minutosRech, resumen.usdRech));
+        $("#pieTotalConExcluido").text("USD " + FormatoDosDecimales(resumen.totalConExcluido));
     } else {
-        $("#pieFueraSinAprobar, #pieFueraRechazado").text("");
+        $("#pieFueraSinAprobar, #pieFueraRechazado, #pieTotalConExcluido").text("");
     }
 
+    PintarAvisoDesactualizadas();
     PintarFueraDelModulo();
+}
+
+/* Minutos por tipo a USD, redondeado una sola vez: la misma cuenta que
+   NegHeDecisiones.Usd. El valor hora ya viene en 0 si la persona no aplica HE. */
+function UsdDeMinutos(minutos50, minutos100, vh50, vh100) {
+    return RedondearDos((minutos50 * vh50 + minutos100 * vh100) / 60);
+}
+
+function TextoHorasUsd(minutos, usd) {
+    return FormatoDosDecimales(minutos / 60) + " h · USD " + FormatoDosDecimales(usd);
+}
+
+/* La frase del aviso de filas desactualizadas. null si no hay ninguna o si no
+   se pudo calcular (ese caso ya lo dice TextoAvisoFueraDeHorario). */
+function TextoFilasDesactualizadas() {
+    if (_estadoFuera !== "ok" || !_fueraDeHorario) { return null; }
+    var n = Number(_fueraDeHorario.FilasDesactualizadas) || 0;
+    if (n <= 0) { return null; }
+    return "Hay " + n + " fila(s) desactualizadas respecto de las decisiones: " + AccionParaActualizar() + ".";
+}
+
+/* Que hacer con una fila desactualizada. El boton que recalcula es «Traer
+   aprobaciones nuevas», y solo aparece con el periodo abierto: con el periodo
+   cerrado, pedir que se pulse seria mandar a buscar un boton que no esta. */
+function AccionParaActualizar() {
+    return _periodoAbierto
+        ? "pulse «Traer aprobaciones nuevas»"
+        : "reabra el período para actualizarlo";
+}
+
+function TextoFilaDesactualizada() {
+    return "Fila desactualizada respecto de las decisiones: " + AccionParaActualizar() + ".";
+}
+
+/* Un Total HE que ya no es lo que pagan los tramos incluidos hoy -alguien decidio
+   o aprobo algo y el recalculo no corrio- es un pago equivocado a punto de
+   cerrarse. Se dice arriba de la grilla, no escondido en un pie. */
+function PintarAvisoDesactualizadas() {
+    var texto = TextoFilasDesactualizadas();
+    var $aviso = $("#avisoDesactualizadas");
+    if (texto) { $aviso.text(texto).show(); } else { $aviso.hide().empty(); }
 }
 
 /* ------------------------------------------ personas fuera del módulo -- */
@@ -1306,47 +1428,321 @@ function AbrirAjusteSalario(idEmpleado, nombre, salarioActual) {
     $("#modalAjusteSalario").modal("show");
 }
 
-/* Con cero, un guion; con horas, un enlace que abre el detalle de la persona. */
-function EnlaceFuera(horas, idEmpleado) {
-    if (!Number(horas)) { return $('<span class="text-muted"></span>').text("—"); }
+/* Con cero, un guion; con tiempo, un enlace «h · USD» que abre el detalle. */
+function EnlaceFuera(minutos, usd, idEmpleado) {
+    if (!Number(minutos)) { return $('<span class="text-muted"></span>').text("—"); }
 
     return $('<a href="javascript:void(0)"></a>')
-        .text(FormatoDosDecimales(horas))
+        .text(TextoHorasUsd(minutos, usd))
         .on("click", function () { MostrarDetalleFuera(idEmpleado); });
 }
 
+/* El orden de los grupos en la ventana: primero lo que ya se paga por omision,
+   despues lo que Nomina tendria que decidir incluir. Un grupo que el servidor
+   mande y no este aqui se pinta al final, para no perder ningun tramo. */
+var GRUPOS_DETALLE = ["Aprobado", "Sin solicitar", "Pendiente", "Aprobado sin tipo", "Rechazado"];
+
+/* La ventana de detalle de UNA persona: sus tramos candidatos, agrupados, con la
+   decision vigente de cada uno y los controles para cambiarla.
+
+   Se pinta desde _fueraDeHorario.Candidatos, que ya viene resuelto por el
+   servidor (decision vigente, valor por omision, bloqueo por otro periodo y
+   USD). Se guarda en cada fila el valor inicial de sus controles: al guardar
+   solo viajan los tramos que cambiaron, porque cada decision queda registrada
+   con usuario y fecha, y reenviar las que nadie toco llenaria el historial de
+   decisiones que no se tomaron. */
 function MostrarDetalleFuera(idEmpleado) {
-    if (_estadoFuera !== "ok") { return; }
+    if (_estadoFuera === "cargando") {
+        MostrarMensaje("Todavía se están calculando los tramos del período. Intente en unos segundos.", "info");
+        return;
+    }
+    if (_estadoFuera !== "ok" || !_fueraDeHorario || _idPeriodoFuera !== _idPeriodoActual) {
+        MostrarMensaje("No se pudieron calcular los tramos del período: " +
+                       ((_fueraDeHorario && _fueraDeHorario.Error) || "vuelva a seleccionar el período."), "warning");
+        return;
+    }
 
-    var nombre = $("#cuerpoHE tr[data-empleado='" + idEmpleado + "'] td:first").text();
-    $("#tituloFueraDeHorario").text("Tiempo fuera de horario — " + nombre);
+    var $filaGrilla = $("#cuerpoHE tr[data-empleado='" + idEmpleado + "']");
+    var nombre = $.trim($filaGrilla.data("nombre") || NombreDeFila($filaGrilla));
+    var vh50 = Number($filaGrilla.data("vh50")) || 0;
+    var vh100 = Number($filaGrilla.data("vh100")) || 0;
 
-    var $cuerpo = $("#cuerpoFueraDeHorario").empty();
-    $.each(_fueraDeHorario.Detalle || [], function (i, d) {
-        if (String(d.IdEmpleado) !== String(idEmpleado)) { return; }
+    /* Deshabilitado es cortesia: el handler rechaza al perfil 2 y el
+       procedimiento, un periodo cerrado o un tramo que ya paga otro periodo. */
+    var puedeEditar = typeof HE_PUEDE_EDITAR_MAESTRO !== "undefined" && HE_PUEDE_EDITAR_MAESTRO;
+    var editable = puedeEditar && _periodoAbierto;
 
-        /* Todo con .text(): la actividad es texto libre y nunca se interpreta como HTML. */
-        $cuerpo.append($("<tr></tr>")
-            .append($("<td></td>").text(d.Fecha))
-            .append($("<td></td>").text(d.TramoTexto))
-            .append($("<td></td>").text(d.FueraTexto))
-            .append($('<td class="text-right"></td>').text(d.Minutos))
-            .append($("<td></td>").text(d.TipoTexto))
-            .append($("<td></td>").text(d.EstadoTexto))
-            .append($("<td></td>").text(d.Actividad)));
+    $("#tituloFueraDeHorario").text("Tramos y decisiones — " + nombre);
+
+    var $leyenda = $("#leyendaDecisiones");
+    if (!_periodoAbierto) { $leyenda.text("Período cerrado: no admite decisiones.").show(); }
+    else if (!puedeEditar) { $leyenda.text("Solo lectura: su perfil puede ver los tramos pero no decidir qué se paga.").show(); }
+    else { $leyenda.hide().empty(); }
+
+    var candidatos = [];
+    $.each(_fueraDeHorario.Candidatos || [], function (i, c) {
+        if (String(c.IdEmpleado) === String(idEmpleado)) { candidatos.push(c); }
     });
 
-    var p = null;
-    $.each(_fueraDeHorario.Personas || [], function (i, x) { if (String(x.IdEmpleado) === String(idEmpleado)) { p = x; } });
+    /* ClaveSegmento es "yyyy-MM-ddTHH:mm:ss": como texto ordena igual que como
+       fecha, y asi no hay que interpretar el \/Date()\/ de JavaScriptSerializer. */
+    candidatos.sort(function (a, b) {
+        return a.ClaveSegmento < b.ClaveSegmento ? -1 : a.ClaveSegmento > b.ClaveSegmento ? 1 : 0;
+    });
 
-    $("#pieFueraDeHorario").text(p
-        ? "Sin aprobar: 50% " + FormatoDosDecimales(p.MinutosSinAprobar50 / 60) + " h · 100% " +
-          FormatoDosDecimales(p.MinutosSinAprobar100 / 60) + " h. Rechazado: 50% " +
-          FormatoDosDecimales(p.MinutosRechazado50 / 60) + " h · 100% " +
-          FormatoDosDecimales(p.MinutosRechazado100 / 60) + " h."
-        : "");
+    var porGrupo = {};
+    var orden = GRUPOS_DETALLE.slice(0);
+    $.each(candidatos, function (i, c) {
+        var g = c.Grupo || "Sin solicitar";
+        if (!porGrupo[g]) { porGrupo[g] = []; if ($.inArray(g, orden) === -1) { orden.push(g); } }
+        porGrupo[g].push(c);
+    });
 
-    $("#modalFueraDeHorario").modal("show");
+    var $cuerpo = $("#cuerpoFueraDeHorario").empty();
+
+    if (candidatos.length === 0) {
+        $cuerpo.append($('<tr><td colspan="10" class="text-center text-muted"></td></tr>')
+            .find("td").text("Esta persona no tiene tramos candidatos en este período.").end());
+    }
+
+    $.each(orden, function (i, g) {
+        var lista = porGrupo[g];
+        if (!lista || lista.length === 0) { return; }
+
+        $cuerpo.append($('<tr class="active"></tr>')
+            .append($('<td colspan="10" style="font-weight: 600"></td>').text(g + " (" + lista.length + ")")));
+
+        $.each(lista, function (j, c) {
+            $cuerpo.append(FilaCandidato(c, editable, vh50, vh100));
+        });
+    });
+
+    PintarPieDetalle(idEmpleado);
+
+    var $modal = $("#modalFueraDeHorario");
+    var $boton = $("#btnGuardarDecisiones").data("textoInicial", "Guardar decisiones");
+    var $aviso = $("#fdConfirmacion");
+
+    /* Sin nada que se pueda cambiar, el boton ni aparece: un «Guardar» que
+       siempre responde «no hay cambios» solo confunde. */
+    var hayEditables = false;
+    $.each(candidatos, function (i, c) { if (!c.Bloqueado) { hayEditables = true; } });
+    $boton.toggle(editable && hayEditables);
+
+    /* Despues de pintar los controles: PrepararConfirmacion engancha el
+       reinicio a los input/select que existen en este momento. */
+    PrepararConfirmacion($modal, $boton, $aviso);
+
+    $boton.off("click").on("click", function () {
+        GuardarDecisionesDetalle(idEmpleado, nombre, $boton, $aviso);
+    });
+
+    $modal.modal("show");
+}
+
+/* Una fila de la ventana de detalle. Todo con .text() y .val(): la actividad,
+   el motivo y el «bloqueado por» son texto libre o vienen de la base. */
+function FilaCandidato(c, editable, vh50, vh100) {
+    var bloqueado = !!c.Bloqueado;
+    var habilitado = editable && !bloqueado;
+    var minutosSegmento = Number(c.MinutosSegmento) || 0;
+    var minutosIniciales = (c.MinutosIncluidos === null || c.MinutosIncluidos === undefined) ? "" : String(c.MinutosIncluidos);
+
+    var $tr = $("<tr></tr>")
+        .attr("data-tramo", c.IdRegDetTareas)
+        .attr("data-segmento", c.ClaveSegmento)
+        .data("minutosSegmento", minutosSegmento)
+        .data("vh50", vh50)
+        .data("vh100", vh100);
+    if (c.Actividad) { $tr.attr("title", c.Actividad); }
+
+    var $fecha = $("<td></td>").text(c.Fecha);
+    if (!c.DentroDelPeriodo) {
+        $fecha.append("<br />").append($('<span class="label label-default"></span>').text("Fuera del período"));
+    }
+    $tr.append($fecha);
+    $tr.append($("<td></td>").text(c.TramoTexto));
+    $tr.append($("<td></td>").text(c.ParteTexto));
+    $tr.append($('<td class="text-right"></td>').text(minutosSegmento));
+    $tr.append($('<td class="text-right fd-usd"></td>').text(FormatoDosDecimales(c.ValorUsd)));
+
+    var $estado = $("<td></td>").text(c.Grupo || "");
+    if (bloqueado) {
+        $estado.append("<br />").append($('<small class="text-danger"></small>').text(c.BloqueadoPor || "incluido en otro período"));
+    } else if (c.DecididoPor) {
+        /* Quien decidio y cuando: una decision de Nomina no es anonima. */
+        $estado.append("<br />").append($('<small class="text-muted"></small>')
+            .text("Decidió " + c.DecididoPor + (c.DecididoEl ? " el " + FormatoFechaHora(c.DecididoEl) : "")));
+    }
+    $tr.append($estado);
+
+    var $incluir = $('<input type="checkbox" class="fd-incluir" />')
+        .prop("checked", !!c.Incluir)
+        .prop("disabled", !habilitado);
+    $tr.append($('<td class="text-center"></td>').append($incluir));
+
+    var $tipo = $('<select class="form-control input-sm fd-tipo"></select>')
+        .append($("<option></option>").val("1").text("50%"))
+        .append($("<option></option>").val("2").text("100%"))
+        .val(String(c.TipoElegido === 2 ? 2 : 1))
+        .prop("disabled", !habilitado);
+    /* Si Nomina cambio el tipo que dio el horario o la jefatura, se dice cual era. */
+    if (c.TipoElegido !== c.TipoHora) { $tipo.attr("title", "Tipo original: " + (c.TipoHoraTexto || "")); }
+    $tr.append($("<td></td>").append($tipo));
+
+    /* type="text" y no "number": con basura («30m», «1e», «-») un input
+       number devuelve .val() == "", que aqui significa «el segmento completo»,
+       o sea pagar MAS sin que nadie lo haya pedido. Como texto, lo escrito
+       llega tal cual y la regex de EstadoFilaCandidato lo rechaza. */
+    var $minutos = $('<input type="text" inputmode="numeric" class="form-control input-sm fd-minutos" maxlength="6" />')
+        .attr("title", "Vacío = el tramo completo (" + minutosSegmento + " min). Solo para reducir.")
+        .attr("placeholder", String(minutosSegmento))
+        .val(minutosIniciales)
+        .prop("disabled", !habilitado);
+    $tr.append($('<td style="min-width: 90px"></td>').append($minutos));
+
+    var $motivo = $('<input type="text" class="form-control input-sm fd-motivo" maxlength="400" />')
+        .val(c.Motivo || "")
+        .prop("disabled", !habilitado);
+    $tr.append($('<td style="min-width: 180px"></td>').append($motivo));
+
+    /* La foto inicial, normalizada igual que lo que se enviaria: asi «cambio»
+       significa lo mismo al abrir que al guardar. */
+    $tr.data("inicial", EstadoFilaCandidato($tr));
+
+    return $tr;
+}
+
+/* Lo que la fila enviaria hoy. Unos minutos iguales al segmento completo se
+   envian vacios: es lo mismo -el segmento completo- y asi no exigen un motivo
+   de reduccion que nadie hizo. */
+function EstadoFilaCandidato($tr) {
+    var minutosSegmento = Number($tr.data("minutosSegmento")) || 0;
+    var minutos = $.trim(String($tr.find(".fd-minutos").val() || ""));
+    /* Solo se normaliza un entero limpio: Number("1e2") tambien da 100. */
+    if (/^\d+$/.test(minutos) && Number(minutos) === minutosSegmento) { minutos = ""; }
+
+    return {
+        idTramo: $tr.attr("data-tramo"),
+        segmentoInicio: $tr.attr("data-segmento"),
+        incluir: $tr.find(".fd-incluir").is(":checked"),
+        tipoHora: parseInt($tr.find(".fd-tipo").val(), 10) === 2 ? 2 : 1,
+        minutos: minutos,
+        motivo: $.trim(String($tr.find(".fd-motivo").val() || ""))
+    };
+}
+
+function EstadoCambio(a, b) {
+    return a.incluir !== b.incluir || a.tipoHora !== b.tipoHora ||
+           a.minutos !== b.minutos || a.motivo !== b.motivo;
+}
+
+/* El USD de la fila se revalora al tocar sus controles, con la misma regla que
+   EntHeCandidato.MinutosMostrados: si se incluye, lo que se paga; si no, el
+   segmento completo (lo que costaria incluirlo). Es vista previa: lo que manda
+   es lo que devuelve el servidor al guardar. */
+$(document).on("input change", "#cuerpoFueraDeHorario .fd-incluir, #cuerpoFueraDeHorario .fd-tipo, #cuerpoFueraDeHorario .fd-minutos", function () {
+    var $tr = $(this).closest("tr");
+    var e = EstadoFilaCandidato($tr);
+    var minutosSegmento = Number($tr.data("minutosSegmento")) || 0;
+    var minutos = minutosSegmento;
+    if (e.incluir && e.minutos !== "") {
+        /* Minutos ilegibles: no se valora nada. Mostrar el segmento completo
+           haria creer que eso es lo que se va a pagar. */
+        if (!/^\d+$/.test(e.minutos)) { $tr.find(".fd-usd").text("—"); return; }
+        minutos = Math.min(Number(e.minutos), minutosSegmento);
+    }
+    var vh = e.tipoHora === 2 ? Number($tr.data("vh100")) || 0 : Number($tr.data("vh50")) || 0;
+    $tr.find(".fd-usd").text(FormatoDosDecimales(RedondearDos(minutos * vh / 60)));
+});
+
+/* El resumen de la persona, de la conciliacion del servidor: que se paga
+   (aprobado y no aprobado incluido), que no, y el total. */
+function PintarPieDetalle(idEmpleado) {
+    var c = null;
+    $.each(_fueraDeHorario.Conciliacion || [], function (i, x) { if (String(x.IdEmpleado) === String(idEmpleado)) { c = x; } });
+
+    var $pie = $("#pieFueraDeHorario").empty();
+    if (!c) { return; }
+
+    $pie.text("Incluido: aprobado " + TextoHorasUsd(c.MinutosAprobadoIncluido, c.UsdAprobadoIncluido) +
+              "; no aprobado " + TextoHorasUsd(c.MinutosNoAprobadoIncluido, c.UsdNoAprobadoIncluido) +
+              ". No incluido: " + TextoHorasUsd(c.MinutosExcluido, c.UsdExcluido) +
+              ". Total a pagar: USD " + FormatoDosDecimales(c.TotalAPagar) +
+              " (con lo no incluido: USD " + FormatoDosDecimales(c.TotalConExcluido) + ").");
+
+    if (c.Desactualizada) {
+        $pie.append($("<br />")).append($('<span class="text-warning"></span>')
+            .text("Esta fila está desactualizada respecto de las decisiones: " + AccionParaActualizar() + "."));
+    }
+}
+
+/* Guardar en dos clics, como completar datos y el ajuste de sueldo: el primero
+   muestra a quien y cuantos tramos cambian; el segundo guarda. Cualquier cambio
+   en un control vuelve al primer paso (PrepararConfirmacion), asi lo
+   confirmado es siempre lo que se ve. */
+function GuardarDecisionesDetalle(idEmpleado, nombre, $boton, $aviso) {
+    var cambios = [];
+    var minutosInvalidos = false;
+
+    $("#cuerpoFueraDeHorario tr[data-tramo]").each(function () {
+        var $tr = $(this);
+        var actual = EstadoFilaCandidato($tr);
+        if (!EstadoCambio(actual, $tr.data("inicial"))) { return; }
+        if (actual.minutos !== "" && !/^\d+$/.test(actual.minutos)) { minutosInvalidos = true; }
+        cambios.push(actual);
+    });
+
+    if (cambios.length === 0) {
+        $aviso.text("No cambió ningún tramo: no hay nada que guardar.").show();
+        return;
+    }
+
+    /* Letras, decimales o signos en los minutos: no se guarda nada. El
+       servidor tambien lo rechaza, pero aqui se dice sin gastar una ida. */
+    if (minutosInvalidos) {
+        $aviso.text("Hay minutos que no son un número entero: corríjalos, o déjelos vacíos para pagar el tramo completo. No se guardó nada.").show();
+        return;
+    }
+
+    /* Guardar recalcula el periodo y repinta la grilla: lo que haya sin
+       guardar en ella (observaciones) se perderia sin aviso. */
+    if (HayCambiosSinGuardar()) {
+        $aviso.text("Hay cambios sin guardar en la grilla. Guárdelos o descártelos antes de guardar decisiones: al guardar se recalcula el período y la grilla se vuelve a pintar.").show();
+        return;
+    }
+
+    if (!$boton.data("confirmado")) {
+        $aviso.empty()
+            .append(document.createTextNode("Vas a cambiar la decisión de " + cambios.length + " tramo(s) de "))
+            .append($("<strong></strong>").text(nombre || "–"))
+            .append(document.createTextNode(". Se recalculará el pago del período. "))
+            .append($("<strong></strong>").text("¿Es la persona correcta?"))
+            .append(document.createTextNode(" Si es así, pulse «Sí, guardar»."))
+            .show();
+        $boton.data("confirmado", true).text("Sí, guardar");
+        return;
+    }
+
+    $boton.prop("disabled", true);   // un doble clic no guarda dos veces
+
+    PostHE("GuardarDecisiones", {
+        idPeriodo: _idPeriodoActual,
+        idEmpleado: idEmpleado,
+        cambios: cambios
+    }, function (r) {
+        $("#modalFueraDeHorario").modal("hide");
+        if (r.resultado && r.resultado.Periodo) {
+            PintarPantalla(r.resultado);
+        } else {
+            /* Las decisiones SI se guardaron pero el recalculo fallo (el mensaje
+               pide «Traer aprobaciones nuevas»). Los candidatos igual cambiaron: se vuelven a
+               pedir para que la ventana no muestre lo de antes. */
+            CargarFueraDeHorario();
+        }
+    }, function () {
+        ReiniciarConfirmacion($boton, $aviso);
+    });
 }
 
 /* ------------------------------------------ confirmar antes de guardar -- */
@@ -1360,9 +1756,12 @@ function PrepararConfirmacion($modal, $boton, $aviso) {
           .on("input.confirmar change.confirmar", function () { ReiniciarConfirmacion($boton, $aviso); });
 }
 
+/* El texto del primer paso se toma de data("textoInicial") si quien abre el
+   formulario lo fijo (la ventana de decisiones dice «Guardar decisiones»); los
+   dos formularios de sueldo no lo fijan y siguen diciendo «Guardar». */
 function ReiniciarConfirmacion($boton, $aviso) {
     $aviso.hide().empty();
-    $boton.data("confirmado", false).prop("disabled", false).text("Guardar");
+    $boton.data("confirmado", false).prop("disabled", false).text($boton.data("textoInicial") || "Guardar");
 }
 
 /* Arma el aviso con el nombre en negrita, el sueldo y la fecha. Todo con
@@ -1390,11 +1789,16 @@ function TextoAvisoFueraDeHorario() {
 
     var r = _resumenFuera;
     var texto = (r.personasSin === 0 && r.personasRech === 0)
-        ? "No hay tiempo fuera de horario sin aprobar ni rechazado en este período."
+        ? "No hay tiempo sin aprobar ni rechazado fuera del pago en este período."
         : "Hay " + r.personasSin + " colaborador(es) con " +
-          FormatoDosDecimales(r.minutosSin / 60) + " h fuera de horario sin aprobar y " +
-          r.personasRech + " con " + FormatoDosDecimales(r.minutosRech / 60) +
-          " h rechazadas. Esas horas no están incluidas en el pago.";
+          TextoHorasUsd(r.minutosSin, r.usdSin) + " fuera de horario sin aprobar y " +
+          r.personasRech + " con " + TextoHorasUsd(r.minutosRech, r.usdRech) +
+          " rechazadas. Esas horas no están incluidas en el pago.";
+
+    /* Cerrar con filas desactualizadas cierra un pago que no es el de las
+       decisiones: el aviso de cierre lo repite, aunque no lo impide. */
+    var desactualizadas = TextoFilasDesactualizadas();
+    if (desactualizadas) { texto += " " + desactualizadas; }
 
     var fuera = _fueraDeHorario.FueraDelModulo || [];
     if (fuera.length > 0) {

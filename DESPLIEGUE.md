@@ -705,3 +705,100 @@ la pantalla.
 Basta con reponer los binarios y los dos archivos de la pantalla anteriores. Los procedimientos
 pueden quedar en la base. Lo que ya se haya guardado desde la pantalla son filas normales del
 maestro y del historial de sueldos, y siguen valiendo con los binarios anteriores.
+
+## 14. Horas Extras: decisión por tramo y pago por minutos
+
+Nómina deja de depender de una regla automática para decidir qué tiempo fuera de horario se
+paga: ahora **decide tramo por tramo**, desde la pantalla, y esa decisión queda registrada con
+usuario y fecha. El pago pasa de calcularse con horas a **minutos exactos**, redondeando el
+dinero una sola vez por persona.
+
+### 14.1 Base de datos
+
+`docs/sql/2026-09-29-horas-extras-decision-por-tramo.sql` crea:
+
+- `HE_TramoDecision`: tabla nueva, **solo se inserta** en ella. Cambiar una decisión es insertar
+  otra fila; nunca se actualiza ni se borra, así que la tabla es su propio historial.
+- `Sp_RTA_HeTramosCandidatos`: solo lectura. Devuelve los tramos que Nómina puede incluir en un
+  período, las decisiones vigentes sobre ellos y los períodos.
+- `Sp_RTA_HeGuardarDecisiones`: inserta un lote de decisiones, todo o nada, con protección contra
+  el pago doble entre períodos.
+
+**Ningún procedimiento existente se recrea.** En particular, `Sp_RTA_HeHorasAprobadas` (la
+siembra) no se toca.
+
+El script va **antes** que los binarios, como siempre. Su verificación no escribe nada: prueba
+los códigos de rechazo con lotes que se rechazan antes de insertar, y cuenta las filas antes y
+después. Imprime `OK` o `VEREDICTO: FALLO`.
+
+### 14.2 Archivos a publicar
+
+Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe` y `bin\CapaDato.exe`,
+  **los cuatro juntos**;
+- `Formulario\HorasExtras.aspx`, que pasa a `horasExtras.js?v=11`;
+- `js\horasExtras.js`.
+
+**Copiar archivo por archivo. Nunca `robocopy /MIR` ni ninguna copia que sincronice:** borra
+`connections.config` y `appsettings.config`, y el sitio no levanta.
+
+### 14.3 ANTES de publicar
+
+1. **Contar las filas `HorasOrigen = 'Manual'` en los períodos abiertos:**
+
+   ```sql
+   SELECT p.IdPeriodo, COUNT(*) AS Filas
+     FROM dbo.HE_Detalle d
+     JOIN dbo.HE_Periodo p ON p.IdPeriodo = d.IdPeriodo
+    WHERE p.EstadoPeriodo = 'Abierto'
+      AND d.HorasOrigen = 'Manual'
+    GROUP BY p.IdPeriodo;
+   ```
+
+   Con los binarios de hoy, **cada guardado desde la pantalla marca la fila como `'Manual'`**
+   (es el lado seguro: una fila `'Manual'` no se vuelve a sembrar sola). Si la consulta devuelve
+   filas, avisar: esas filas **no toman las nuevas decisiones por tramo hasta que alguien guarde
+   de nuevo** esa observación después de publicar, porque hasta entonces siguen con el pago que
+   ya tenían.
+
+2. **Corregir en la pantalla los sueldos cruzados de las dos personas que se cargaron el 28-09
+   desde «Completar datos»**, con la opción **«Registrar ajuste de sueldo»** (el ícono junto al
+   nombre), usando la misma fecha de vigencia con la que se cargaron. Sin este paso, el período
+   16-08/15-09 sigue pagando a esas dos personas con el sueldo de la otra.
+
+3. **Avisar a Nómina**, antes de que alguien abra el período:
+   - el pago pasa a calcularse con **minutos exactos** y **un solo redondeo por persona** (en
+     vez de horas a dos decimales redondeadas por tramo);
+   - eso **cambia centavos en muchas filas la primera vez que se recalcula** un período tras
+     publicar — no es un error, es el cálculo más preciso;
+   - la **columna 100%** de la grilla y del Excel sale **por diferencia** (`Total − 50%`), así
+     que puede diferir en **1 centavo** de su valor exacto en algunas filas; el **total por
+     persona** siempre es el exacto.
+
+### 14.4 Verificar después de publicar
+
+1. Abrir el período 16-08 / 15-09-2026, abrir el detalle de una persona con tramos fuera de
+   horario: se ven los tramos con su valor en USD.
+2. Cambiar una casilla (incluir/excluir, tipo o minutos) y guardar: pide confirmación en dos
+   clics («¿Es la persona correcta?» → «Sí, guardar»). Al guardar, la grilla se recalcula sola.
+3. El Excel trae **6 hojas**, incluidas «Conciliación» y «Decisiones».
+4. Cuando corresponde, aparece el aviso de filas desactualizadas y nombra el botón real,
+   **«Traer aprobaciones nuevas»** (nunca «Recalcular»).
+
+### 14.5 Cargar las decisiones del análisis manual
+
+No hay script de carga: las decisiones de Nómina para el período 16-08/15-09 se registran **desde
+la pantalla**, tramo por tramo, igual que cualquier otra decisión. La validación en memoria
+(fuera del repositorio, en `Actualizacion/`) confirmó que aplicando esas decisiones sobre los
+datos reales, sin escribir en la base, el total cuadra **39/39 personas** y da **6.241,14** en
+total, igual que el análisis manual.
+
+### 14.6 Volver atrás
+
+Basta con reponer los binarios y los dos archivos anteriores de la pantalla (`HorasExtras.aspx`
+en su `?v=` previo y `horasExtras.js`). La tabla `HE_TramoDecision` y los dos procedimientos
+nuevos pueden quedar en la base, sin uso. `Sp_RTA_HeHorasAprobadas` no se tocó, así que la siembra
+vieja vuelve a funcionar exactamente como antes. Las decisiones que ya se hayan guardado desde la
+pantalla nueva quedan en `HE_TramoDecision`, pero sin ningún efecto mientras corran los binarios
+anteriores.

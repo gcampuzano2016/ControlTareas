@@ -1233,8 +1233,20 @@ function AbrirCompletarDatos(persona) {
     $("#cdMonto").val("");
     $("#cdVigencia").val(_fechaInicioActual || "");
 
-    $("#btnGuardarCompletarDatos").prop("disabled", false).off("click").on("click", function () {
-        var $boton = $(this).prop("disabled", true);   // un doble clic no inserta dos veces
+    PrepararConfirmacion($("#modalCompletarDatos"), $("#btnGuardarCompletarDatos"), $("#cdConfirmacion"));
+
+    $("#btnGuardarCompletarDatos").off("click").on("click", function () {
+        var $boton = $(this);
+
+        /* Primer clic: mostrar a quién y cuánto. Segundo clic: guardar. Así un
+           sueldo no termina en la fila de al lado sin que nadie lo note. */
+        if (!$boton.data("confirmado")) {
+            PedirConfirmacion($boton, $("#cdConfirmacion"), "Vas a agregar al módulo a ",
+                              persona.Nombre, $("#cdMonto").val(), $("#cdVigencia").val());
+            return;
+        }
+
+        $boton.prop("disabled", true);   // un doble clic no inserta dos veces
 
         PostHE("AgregarColaborador", {
             idPeriodo: _idPeriodoActual,
@@ -1249,7 +1261,7 @@ function AbrirCompletarDatos(persona) {
             $("#modalCompletarDatos").modal("hide");
             if (r.resultado && r.resultado.Periodo) { PintarPantalla(r.resultado); }
         }, function () {
-            $boton.prop("disabled", false);
+            ReiniciarConfirmacion($boton, $("#cdConfirmacion"));
         });
     });
 
@@ -1264,8 +1276,18 @@ function AbrirAjusteSalario(idEmpleado, nombre, salarioActual) {
     $("#ajVigencia").val(_fechaInicioActual || "");
     $("#ajObservacion").val("");
 
-    $("#btnGuardarAjusteSalario").prop("disabled", false).off("click").on("click", function () {
-        var $boton = $(this).prop("disabled", true);   // un doble clic no inserta dos veces
+    PrepararConfirmacion($("#modalAjusteSalario"), $("#btnGuardarAjusteSalario"), $("#ajConfirmacion"));
+
+    $("#btnGuardarAjusteSalario").off("click").on("click", function () {
+        var $boton = $(this);
+
+        if (!$boton.data("confirmado")) {
+            PedirConfirmacion($boton, $("#ajConfirmacion"), "Vas a registrar un ajuste de sueldo a ",
+                              nombre, $("#ajMonto").val(), $("#ajVigencia").val());
+            return;
+        }
+
+        $boton.prop("disabled", true);   // un doble clic no inserta dos veces
 
         PostHE("AgregarAjusteSalario", {
             idPeriodo: _idPeriodoActual,
@@ -1277,7 +1299,7 @@ function AbrirAjusteSalario(idEmpleado, nombre, salarioActual) {
             $("#modalAjusteSalario").modal("hide");
             if (r.resultado && r.resultado.Periodo) { PintarPantalla(r.resultado); }
         }, function () {
-            $boton.prop("disabled", false);
+            ReiniciarConfirmacion($boton, $("#ajConfirmacion"));
         });
     });
 
@@ -1325,6 +1347,39 @@ function MostrarDetalleFuera(idEmpleado) {
         : "");
 
     $("#modalFueraDeHorario").modal("show");
+}
+
+/* ------------------------------------------ confirmar antes de guardar -- */
+
+/* Deja el formulario en su primer paso: botón «Guardar», sin aviso. Cualquier
+   cambio en un campo vuelve a este paso, para que lo confirmado sea siempre lo
+   que se ve en pantalla. */
+function PrepararConfirmacion($modal, $boton, $aviso) {
+    ReiniciarConfirmacion($boton, $aviso);
+    $modal.find("input, select").off("input.confirmar change.confirmar")
+          .on("input.confirmar change.confirmar", function () { ReiniciarConfirmacion($boton, $aviso); });
+}
+
+function ReiniciarConfirmacion($boton, $aviso) {
+    $aviso.hide().empty();
+    $boton.data("confirmado", false).prop("disabled", false).text("Guardar");
+}
+
+/* Arma el aviso con el nombre en negrita, el sueldo y la fecha. Todo con
+   .text(): el nombre viene de la base. */
+function PedirConfirmacion($boton, $aviso, inicio, nombre, monto, vigencia) {
+    var fecha = vigencia ? FechaLegible(vigencia) : "(sin fecha)";
+
+    $aviso.empty()
+        .append(document.createTextNode(inicio))
+        .append($("<strong></strong>").text(nombre || "–"))
+        .append(document.createTextNode(" con un sueldo de USD " + ($.trim(monto) || "(vacío)") +
+                                        ", vigente desde el " + fecha + ". "))
+        .append($("<strong></strong>").text("¿Es la persona correcta?"))
+        .append(document.createTextNode(" Si es así, pulse «Sí, guardar»."))
+        .show();
+
+    $boton.data("confirmado", true).text("Sí, guardar");
 }
 
 /* La línea que se agrega a la confirmación de cierre. Nunca bloquea: informa. */

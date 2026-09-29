@@ -8,7 +8,7 @@
         /* Solo para mostrar los botones de completar datos y de ajuste de sueldo. */
         var HE_PUEDE_EDITAR_MAESTRO = <%= PuedeEditarMaestro ? "true" : "false" %>;
     </script>
-    <script src="../js/horasExtras.js?v=9" type="text/javascript"></script>
+    <script src="../js/horasExtras.js?v=10" type="text/javascript"></script>
     <style type="text/css">
         /* Estilos propios de esta pantalla. No tocan .table: dos-tema.css ya
            define tipografía y tamaños de las tablas del sistema. */
@@ -476,6 +476,8 @@
                             <label for="cdVigencia">Rige desde</label>
                             <input type="date" class="form-control" id="cdVigencia" />
                         </div>
+                        <!-- Confirmación antes de guardar: nombre, sueldo y fecha a la vista. -->
+                        <div class="alert alert-danger" id="cdConfirmacion" style="display: none"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
@@ -509,6 +511,8 @@
                             <label for="ajObservacion">Observación</label>
                             <input type="text" class="form-control" id="ajObservacion" maxlength="400" placeholder="Motivo del ajuste" />
                         </div>
+                        <!-- Confirmación antes de guardar: nombre, sueldo y fecha a la vista. -->
+                        <div class="alert alert-danger" id="ajConfirmacion" style="display: none"></div>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>

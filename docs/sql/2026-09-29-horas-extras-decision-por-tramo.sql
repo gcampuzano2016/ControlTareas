@@ -81,9 +81,10 @@ BEGIN
     CREATE INDEX IX_HE_TramoDecision_Clave
         ON dbo.HE_TramoDecision (IdPeriodo, Id_RegDetTareas, SegmentoInicio, IdDecision DESC);
 
-    /* El pago doble mira el MISMO segmento en TODOS los periodos: sin este
-       indice seria un recorrido completo, y el HOLDLOCK bloquearia la tabla
-       entera en vez del rango de ese segmento. */
+    /* El pago doble mira el MISMO tramo (todos sus segmentos) en TODOS los
+       periodos, buscando por el prefijo Id_RegDetTareas: sin este indice
+       seria un recorrido completo, y el HOLDLOCK bloquearia la tabla entera en
+       vez del rango de ese tramo. */
     CREATE INDEX IX_HE_TramoDecision_Segmento
         ON dbo.HE_TramoDecision (Id_RegDetTareas, SegmentoInicio);
 END
@@ -235,11 +236,31 @@ GO
    Respuestas (una sola fila):
       0  guardado: TODO el lote
      -1  el periodo no existe o no esta 'Abierto'
-     -2  un segmento con i = 1 ya esta incluido en OTRO periodo: por una
-         decision vigente con Incluir = 1, o porque ese otro periodo es su
-         dueno, el tramo esta aprobado y alli nadie lo excluyo. Un periodo
+     -2  el pago doble: un elemento con i = 1 sobre un tramo cuyo TITULAR,
+         calculado SIN las decisiones de este periodo, existe y es otro
+         periodo. El titular es por TRAMO (Id_RegDetTareas), no por clave de
+         segmento, y es a lo sumo uno:
+           1. explicito: un periodo cuya decision vigente sobre ALGUN
+              segmento del tramo dice Incluir = 1, si esa clave es un
+              segmento ACTUAL del tramo o si el periodo esta 'Cerrado' (ya
+              lo pago). Un periodo abierto con una clave vieja -el tramo
+              cambio de estado- no retiene: en su proximo recalculo esa clave
+              no esta entre los candidatos y no la paga;
+           2. si no, por omision: el dueno (el primer periodo, por
+              FechaInicio, cuyo rango contiene el dia del tramo) si el tramo
+              esta aprobado y alli nadie excluyo el tramo completo;
+           3. si no, nadie.
+         Asi, si el dueno ya lo paga por omision, otro periodo no se lo puede
+         quitar; y un periodo que trajo un borde antes de que existiera su
+         dueno lo sigue reteniendo cuando el dueno se crea. Un periodo
          'Anulado' no cuenta para nada: ni es dueno, ni sus decisiones
-         incluyen (no se paga, asi que no puede provocar un pago doble)
+         retienen ni excluyen (no se paga, asi que no puede provocar un pago
+         doble). Es el espejo de NegHeDecisiones.Titular en CapaNegocio.
+
+         Limitacion conocida: si el estado de aprobacion de un tramo cambia
+         DESPUES de que su dueno cerro pagandolo por omision, aqui ya no se
+         sabe que se pago (no hay una foto del pago por tramo). El remedio es
+         reabrir ese periodo y recalcularlo (DESPLIEGUE.md, seccion 14)
      -3  datos invalidos: tipo fuera de 1 o 2, i fuera de 0 o 1, minutos que
          no son un numero entre 1 y lo que queda del tramo desde el segmento,
          falta el motivo, motivo de mas de 400, el mismo segmento dos veces en
@@ -247,7 +268,8 @@ GO
      -4  el tramo no existe, empieza fuera de la ventana del periodo
          (FechaInicio - 7 a FechaFin + 7), el segmento no cae dentro del
          tramo, o el tramo esta aprobado y s no es su inicio (un aprobado tiene
-         UN solo segmento, el tramo completo: otro s esquivaria la regla (b))
+         UN solo segmento, el tramo completo: otro s seria una clave que no
+         existe y ensuciaria la regla del titular)
 
    Orden: primero -1; despues, sobre el lote entero, -4, -3 y -2, en ese
    orden. Todo o nada: si un solo elemento falla, no se inserta ninguno.
@@ -259,7 +281,7 @@ GO
 
    Todo lo que depende de la base va DENTRO de la transaccion: el periodo con
    UPDLOCK + HOLDLOCK (no se puede cerrar a mitad de un guardado) y las
-   decisiones del mismo segmento en todos los periodos, tambien con UPDLOCK +
+   decisiones de los mismos tramos en todos los periodos, tambien con UPDLOCK +
    HOLDLOCK (dos pedidos simultaneos desde dos periodos no pueden pasar los dos
    la regla del pago doble).
 
@@ -326,16 +348,17 @@ BEGIN
        2019) no se puede decidir sin ambiguedad: queda sin tramo y da -4. */
     CREATE TABLE #Tramo
     (
-        Id_RegDetTareas BIGINT   NOT NULL PRIMARY KEY,
-        Filas           INT      NOT NULL,
-        Inicio          DATETIME NULL,
+        Id_RegDetTareas BIGINT      NOT NULL PRIMARY KEY,
+        Filas           INT         NOT NULL,
+        Id_Responsable  VARCHAR(20) NULL,
+        Inicio          DATETIME    NULL,
         Fin             DATETIME NULL,
         Estado          INT      NULL,
         Tipo            INT      NULL
     );
 
-    INSERT INTO #Tramo (Id_RegDetTareas, Filas, Inicio, Fin, Estado, Tipo)
-    SELECT CAST(d.Id_RegDetTareas AS BIGINT), COUNT(*),
+    INSERT INTO #Tramo (Id_RegDetTareas, Filas, Id_Responsable, Inicio, Fin, Estado, Tipo)
+    SELECT CAST(d.Id_RegDetTareas AS BIGINT), COUNT(*), MIN(d.Id_Responsable),
            MIN(d.Det_Fch_RegDetalleIni), MIN(d.Det_Fch_RegDetalleFin),
            MIN(CAST(d.Det_Horas_Extras_Estado AS INT)),
            MIN(CAST(ISNULL(d.Det_Horas_Extras_Tipo, 0) AS INT))
@@ -352,11 +375,37 @@ BEGIN
 
     CREATE TABLE #Vigente
     (
+        IdDecision      INT      NOT NULL,
         IdPeriodo       INT      NOT NULL,
         Id_RegDetTareas BIGINT   NOT NULL,
         SegmentoInicio  DATETIME NOT NULL,
         Incluir         BIT      NOT NULL
     );
+
+    /* Los segmentos ACTUALES de cada tramo del lote: las mismas claves que hoy
+       devuelve Sp_RTA_HeTramosCandidatos (el tramo completo si esta aprobado;
+       si no, sus segmentos fuera de horario). Una decision sobre otra clave es
+       de cuando el tramo tenia otro estado. Se calcula UNA vez por tramo del
+       lote, no por elemento: son pocos tramos por guardado. */
+    CREATE TABLE #SegmentoActual
+    (
+        Id_RegDetTareas BIGINT   NOT NULL,
+        SegmentoInicio  DATETIME NOT NULL
+    );
+
+    INSERT INTO #SegmentoActual (Id_RegDetTareas, SegmentoInicio)
+    SELECT t.Id_RegDetTareas, t.Inicio
+      FROM #Tramo t
+     WHERE t.Filas = 1 AND t.Inicio IS NOT NULL
+       AND t.Estado = 2 AND t.Tipo IN (1, 2);
+
+    INSERT INTO #SegmentoActual (Id_RegDetTareas, SegmentoInicio)
+    SELECT t.Id_RegDetTareas, s.TramoInicio
+      FROM #Tramo t
+     CROSS APPLY dbo.FN_RTA_ClasificarTramosHorario(t.Id_Responsable, t.Inicio, t.Fin) s
+     WHERE t.Filas = 1 AND t.Inicio IS NOT NULL AND t.Fin IS NOT NULL
+       AND NOT (t.Estado = 2 AND t.Tipo IN (1, 2))
+       AND s.TipoHora IN (1, 2);
 
     BEGIN TRY
         BEGIN TRANSACTION;
@@ -413,51 +462,67 @@ BEGIN
             COMMIT TRANSACTION; SELECT -3 AS Respuestas; RETURN;
         END
 
-        /* -2: el pago doble. Las decisiones vigentes del MISMO segmento en
-           TODOS los periodos, leidas con UPDLOCK + HOLDLOCK: el rango de esa
-           clave queda tomado hasta el COMMIT, asi que otro guardado del mismo
-           segmento espera y, al entrar, ya ve lo que este inserto. Las
-           decisiones de un periodo 'Anulado' se dejan afuera: ese periodo no
-           paga, asi que su Incluir = 1 no bloquea a nadie. */
-        INSERT INTO #Vigente (IdPeriodo, Id_RegDetTareas, SegmentoInicio, Incluir)
-        SELECT v.IdPeriodo, v.Id_RegDetTareas, v.SegmentoInicio, v.Incluir
-          FROM (SELECT d.IdPeriodo, d.Id_RegDetTareas, d.SegmentoInicio, d.Incluir,
+        /* -2: el pago doble, por TRAMO. Las decisiones vigentes de TODOS los
+           segmentos de los tramos del lote, en TODOS los periodos, leidas con
+           UPDLOCK + HOLDLOCK por Id_RegDetTareas (el prefijo de
+           IX_HE_TramoDecision_Segmento): el rango de esos tramos queda tomado
+           hasta el COMMIT, asi que otro guardado de los mismos tramos espera y,
+           al entrar, ya ve lo que este inserto. Las decisiones de un periodo
+           'Anulado' se dejan afuera: ese periodo no paga, asi que no retiene
+           ni excluye. Se leen tambien las de ESTE periodo (tambien tienen que
+           quedar bloqueadas), pero la regla no las cuenta: el lote que se
+           guarda es lo que este periodo decide ahora. */
+        INSERT INTO #Vigente (IdDecision, IdPeriodo, Id_RegDetTareas, SegmentoInicio, Incluir)
+        SELECT v.IdDecision, v.IdPeriodo, v.Id_RegDetTareas, v.SegmentoInicio, v.Incluir
+          FROM (SELECT d.IdDecision, d.IdPeriodo, d.Id_RegDetTareas, d.SegmentoInicio, d.Incluir,
                        Orden = ROW_NUMBER() OVER (PARTITION BY d.IdPeriodo, d.Id_RegDetTareas, d.SegmentoInicio
                                                   ORDER BY d.IdDecision DESC)
                   FROM dbo.HE_TramoDecision d WITH (UPDLOCK, HOLDLOCK)
-                  JOIN #Lote l ON l.Id_RegDetTareas = d.Id_RegDetTareas
-                              AND l.SegmentoInicio  = d.SegmentoInicio
-                 WHERE NOT EXISTS (SELECT 1 FROM dbo.HE_Periodo pa
+                 WHERE d.Id_RegDetTareas IN (SELECT l.Id_RegDetTareas FROM #Lote l)
+                   AND NOT EXISTS (SELECT 1 FROM dbo.HE_Periodo pa
                                     WHERE pa.IdPeriodo = d.IdPeriodo
                                       AND pa.EstadoPeriodo = 'Anulado')) v
          WHERE v.Orden = 1;
 
+        /* Se rechaza si algun tramo con un elemento i = 1 tiene, SIN contar las
+           decisiones de este periodo, un titular que no es este periodo:
+             1. explicito: otro periodo lo incluye en una clave actual del
+                tramo, o esta 'Cerrado' (ya lo pago, aunque la clave sea vieja);
+             2. si no hay explicito, por omision: el tramo esta aprobado y su
+                dueno es OTRO periodo, que no excluyo el tramo completo.
+           Con 1 no hace falta saber CUAL es el titular (el de IdDecision mas
+           bajo, en CapaNegocio): cualquiera de ellos es otro periodo. */
         IF EXISTS (SELECT 1
-                     FROM #Lote l
-                    WHERE l.Incluir = 1
-                      AND (
-                           /* (a) otro periodo lo tiene incluido por decision */
-                           EXISTS (SELECT 1 FROM #Vigente v
-                                    WHERE v.Id_RegDetTareas = l.Id_RegDetTareas
-                                      AND v.SegmentoInicio  = l.SegmentoInicio
-                                      AND v.IdPeriodo      <> @IdPeriodo
-                                      AND v.Incluir         = 1)
-                           /* (b) otro periodo, no anulado, es el dueno de un
-                                  tramo aprobado, lo incluye por omision y nadie
-                                  lo excluyo alli */
-                        OR (l.Aprobado = 1
-                            AND l.SegmentoInicio = l.TramoInicio
-                            AND EXISTS (SELECT 1 FROM dbo.HE_Periodo p
-                                         WHERE p.IdPeriodo <> @IdPeriodo
-                                           AND p.EstadoPeriodo <> 'Anulado'
-                                           AND l.TramoInicio >= p.FechaInicio
-                                           AND l.TramoInicio <  DATEADD(DAY, 1, p.FechaFin)
-                                           AND NOT EXISTS (SELECT 1 FROM #Vigente v
-                                                            WHERE v.IdPeriodo       = p.IdPeriodo
-                                                              AND v.Id_RegDetTareas = l.Id_RegDetTareas
-                                                              AND v.SegmentoInicio  = l.SegmentoInicio
-                                                              AND v.Incluir         = 0)))
-                          ))
+                     FROM (SELECT DISTINCT Id_RegDetTareas, TramoInicio, Aprobado
+                             FROM #Lote
+                            WHERE Incluir = 1) l
+                    WHERE
+                          /* 1. titular explicito en otro periodo */
+                          EXISTS (SELECT 1 FROM #Vigente v
+                                   WHERE v.Id_RegDetTareas = l.Id_RegDetTareas
+                                     AND v.IdPeriodo      <> @IdPeriodo
+                                     AND v.Incluir         = 1
+                                     AND (EXISTS (SELECT 1 FROM #SegmentoActual sa
+                                                   WHERE sa.Id_RegDetTareas = v.Id_RegDetTareas
+                                                     AND sa.SegmentoInicio  = v.SegmentoInicio)
+                                          OR EXISTS (SELECT 1 FROM dbo.HE_Periodo pc
+                                                      WHERE pc.IdPeriodo     = v.IdPeriodo
+                                                        AND pc.EstadoPeriodo = 'Cerrado')))
+                       /* 2. sin explicito: titular por omision en otro periodo */
+                       OR (l.Aprobado = 1
+                           AND EXISTS (SELECT 1
+                                         FROM (SELECT TOP (1) p.IdPeriodo
+                                                 FROM dbo.HE_Periodo p
+                                                WHERE p.EstadoPeriodo <> 'Anulado'
+                                                  AND l.TramoInicio >= p.FechaInicio
+                                                  AND l.TramoInicio <  DATEADD(DAY, 1, p.FechaFin)
+                                                ORDER BY p.FechaInicio, p.IdPeriodo) duenio
+                                        WHERE duenio.IdPeriodo <> @IdPeriodo
+                                          AND NOT EXISTS (SELECT 1 FROM #Vigente v
+                                                           WHERE v.IdPeriodo       = duenio.IdPeriodo
+                                                             AND v.Id_RegDetTareas = l.Id_RegDetTareas
+                                                             AND v.SegmentoInicio  = l.TramoInicio
+                                                             AND v.Incluir         = 0))))
         BEGIN
             COMMIT TRANSACTION; SELECT -2 AS Respuestas; RETURN;
         END

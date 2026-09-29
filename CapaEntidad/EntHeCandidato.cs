@@ -65,6 +65,17 @@ namespace CapaEntidad
         /// <summary>"incluido en el periodo dd/MM/yyyy - dd/MM/yyyy", o vacio si no esta bloqueado.</summary>
         public string BloqueadoPor { get; set; } = "";
 
+        /// <summary>
+        /// Si no esta vacio, guardar Incluir = 1 sobre este segmento se rechaza: sin
+        /// contar las decisiones de ESTE periodo, el tramo lo retiene el periodo que
+        /// se nombra (misma leyenda que BloqueadoPor). Es la regla -2 de
+        /// Sp_RTA_HeGuardarDecisiones. Puede estar lleno sin que el segmento este
+        /// bloqueado: este periodo retiene el tramo por una decision suya (trajo un
+        /// borde antes de que existiera su dueno), y puede dejarlo afuera, pero no
+        /// volver a incluirlo.
+        /// </summary>
+        public string IncluirRechazadoPor { get; set; } = "";
+
         // ------------------------------------------- calculados ---------------
 
         /// <summary>Aprobado con tipo: la misma regla que usa el procedimiento para decidir el segmento unico.</summary>

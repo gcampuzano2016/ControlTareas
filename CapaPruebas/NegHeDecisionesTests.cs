@@ -215,7 +215,11 @@ namespace CapaPruebas
             Assert.IsFalse(sinDecision.Incluir);
             Assert.AreEqual("incluido en el periodo 15/07/2026 - 13/08/2026", sinDecision.BloqueadoPor);
 
-            EntHeCandidato conDecision = Resolver1(c, Dec(30, Este, c, true, 1));
+            // Si ademas el anterior lo incluyo por decision, esa decision gana a la
+            // de este periodo (la de IdDecision mas bajo): sigue bloqueado aqui.
+            // (Una decision de este periodo SOLA ganaria a la omision del dueno:
+            // ver Resolver_AprobadoDespuesDeIncluirseEnOtroPeriodo_NoDobleNiCero.)
+            EntHeCandidato conDecision = Resolver1(c, Dec(29, Anterior, c, true, 1), Dec(30, Este, c, true, 1));
             Assert.IsTrue(conDecision.Bloqueado);
             Assert.IsFalse(conDecision.Incluir, "Un bloqueado nunca queda incluido.");
             Assert.AreEqual(0, conDecision.MinutosEfectivos);
@@ -323,6 +327,183 @@ namespace CapaPruebas
             Assert.AreNotSame(c, r[0]);
         }
 
+        // ============================================ el titular del tramo ==
+        //
+        // El pago doble se decide por TRAMO: a lo sumo un periodo lo retiene (su
+        // titular) y todos los demas lo ven bloqueado. Ver NegHeDecisiones.Titular.
+
+        /// <summary>El periodo siguiente al que se decide, que todavia "no existia" cuando se incluyo el borde.</summary>
+        private const int Siguiente = 5;
+
+        private static EntHeRangoPeriodo PeriodoSiguiente()
+        {
+            return Periodo(Siguiente, "2026-09-16", "2026-10-15");
+        }
+
+        /// <summary>Un segmento fuera de horario de un tramo no aprobado: el segmento no empieza con el tramo.</summary>
+        private static EntHeCandidato Segmento(long idTramo, string tramoInicio, string tramoFin,
+                                               string segmentoInicio, string segmentoFin, int tipoHora, int estado = 0)
+        {
+            EntHeCandidato c = Cand(idTramo, tramoInicio, tramoFin, tipoHora, estado);
+            c.SegmentoInicio = H(segmentoInicio);
+            c.SegmentoFin = H(segmentoFin);
+            return c;
+        }
+
+        /// <summary>Una decision sobre una clave de segmento que puede no ser la de ningun candidato actual.</summary>
+        private static EntHeDecision DecEn(int idDecision, int idPeriodo, long idTramo, string segmentoInicio, bool incluir)
+        {
+            return new EntHeDecision
+            {
+                IdDecision = idDecision,
+                IdPeriodo = idPeriodo,
+                IdRegDetTareas = idTramo,
+                SegmentoInicio = H(segmentoInicio),
+                Incluir = incluir,
+                TipoHora = 1,
+                Motivo = "clave " + segmentoInicio,
+                Usuario = "usuario" + idDecision,
+                Fecha = H("2026-09-20 10:00")
+            };
+        }
+
+        private static List<EntHeCandidato> ResolverEn(int idPeriodo, IEnumerable<EntHeCandidato> candidatos,
+                                                       IEnumerable<EntHeDecision> decisiones, List<EntHeRangoPeriodo> periodos)
+        {
+            return NegHeDecisiones.Resolver(idPeriodo, candidatos.ToList(), decisiones.ToList(), periodos);
+        }
+
+        /// <summary>Cuantos periodos pagan el tramo: tiene que ser exactamente uno, ni cero ni dos.</summary>
+        private static int PeriodosQueLoPagan(EntHeCandidato c, IEnumerable<EntHeDecision> decisiones,
+                                              List<EntHeRangoPeriodo> periodos, params int[] idPeriodos)
+        {
+            return idPeriodos.Count(p => ResolverEn(p, new[] { c }, decisiones, periodos).Any(r => r.Incluir));
+        }
+
+        [TestMethod]
+        public void Resolver_IncluidoEnBordeAntesDeCrearseElDuenio_DuenioBloqueadoYBordePaga()
+        {
+            // Aprobado del 17-09: cuando Nomina lo trajo al periodo 3 (borde), el
+            // periodo del 16-09 no existia. Despues se crea. El periodo 3 lo sigue
+            // pagando y el nuevo lo ve bloqueado: antes se bloqueaban los dos y
+            // nadie lo pagaba.
+            EntHeCandidato c = Aprobado(300, "2026-09-17 18:00", "2026-09-17 20:00", 1);
+            List<EntHeDecision> decisiones = new List<EntHeDecision> { Dec(100, Este, c, true, 1, null, "lo trae el 3") };
+            List<EntHeRangoPeriodo> periodos = Periodos();
+            periodos.Add(PeriodoSiguiente());
+
+            EntHeCandidato enEste = ResolverEn(Este, new[] { c }, decisiones, periodos)[0];
+            Assert.IsFalse(enEste.Bloqueado, "El periodo que lo incluyo primero lo retiene.");
+            Assert.IsTrue(enEste.Incluir);
+
+            EntHeCandidato enDuenio = ResolverEn(Siguiente, new[] { c }, decisiones, periodos)[0];
+            Assert.IsTrue(enDuenio.Bloqueado);
+            Assert.IsFalse(enDuenio.Incluir);
+            Assert.AreEqual("incluido en el periodo 16/08/2026 - 15/09/2026", enDuenio.BloqueadoPor);
+
+            Assert.AreEqual(1, PeriodosQueLoPagan(c, decisiones, periodos, Este, Siguiente));
+        }
+
+        [TestMethod]
+        public void Resolver_AprobadoDespuesDeIncluirseEnOtroPeriodo_NoDobleNiCero()
+        {
+            // 10-08 (dueno: el anterior). Sin aprobar, todo el tramo caia fuera de
+            // horario y el periodo 3 lo incluyo con la clave 18:00. Despues la
+            // jefatura lo aprobo: la clave del aprobado es la misma, y el 3 lo
+            // sigue reteniendo.
+            EntHeCandidato aprobado = Aprobado(301, "2026-08-10 18:00", "2026-08-10 20:00", 1);
+            List<EntHeDecision> mismaClave = new List<EntHeDecision> { DecEn(110, Este, 301, "2026-08-10 18:00", true) };
+
+            Assert.AreEqual(1, PeriodosQueLoPagan(aprobado, mismaClave, Periodos(), Anterior, Este), "Misma clave.");
+            Assert.IsTrue(ResolverEn(Anterior, new[] { aprobado }, mismaClave, Periodos())[0].Bloqueado);
+
+            // Si el 3 habia incluido solo la parte de las 18:30, esa clave ya no es
+            // un segmento del tramo: el 3 no la pagaria en su proximo recalculo, asi
+            // que no retiene y lo paga el dueno por omision.
+            List<EntHeDecision> otraClave = new List<EntHeDecision> { DecEn(111, Este, 301, "2026-08-10 18:30", true) };
+
+            Assert.AreEqual(1, PeriodosQueLoPagan(aprobado, otraClave, Periodos(), Anterior, Este), "Clave vieja.");
+            Assert.IsFalse(ResolverEn(Anterior, new[] { aprobado }, otraClave, Periodos())[0].Bloqueado);
+        }
+
+        [TestMethod]
+        public void Resolver_DecisionHuerfanaEnPeriodoAbierto_NoRetiene()
+        {
+            // El anterior (abierto) incluyo la parte de las 19:30 de un tramo del
+            // 17-08 que despues cambio: hoy su unico segmento empieza a las 19:00.
+            // Esa decision ya no paga nada en su recalculo, asi que no bloquea.
+            EntHeCandidato c = Segmento(302, "2026-08-17 18:00", "2026-08-17 21:00",
+                                        "2026-08-17 19:00", "2026-08-17 21:00", 1);
+            List<EntHeDecision> decisiones = new List<EntHeDecision>
+            {
+                DecEn(120, Anterior, 302, "2026-08-17 19:30", true),
+                Dec(121, Este, c, true, 1, null, "se paga aqui")
+            };
+
+            EntHeCandidato r = ResolverEn(Este, new[] { c }, decisiones, Periodos())[0];
+
+            Assert.IsFalse(r.Bloqueado);
+            Assert.IsTrue(r.Incluir);
+        }
+
+        [TestMethod]
+        public void Resolver_DecisionHuerfanaEnPeriodoCerrado_Retiene()
+        {
+            // El anterior ya CERRO pagando la parte de las 18:30 de un tramo del
+            // 17-08. Despues se aprobo: su clave ahora es 18:00. Lo cerrado ya se
+            // pago, asi que retiene el tramo y su dueno (este periodo) no lo paga
+            // otra vez.
+            EntHeCandidato aprobado = Aprobado(303, "2026-08-17 18:00", "2026-08-17 20:00", 1);
+            List<EntHeRangoPeriodo> periodos = new List<EntHeRangoPeriodo>
+            {
+                Periodo(Anterior, "2026-07-15", "2026-08-13", "Cerrado"),
+                Periodo(Este, "2026-08-16", "2026-09-15")
+            };
+            List<EntHeDecision> decisiones = new List<EntHeDecision> { DecEn(130, Anterior, 303, "2026-08-17 18:30", true) };
+
+            EntHeCandidato r = ResolverEn(Este, new[] { aprobado }, decisiones, periodos)[0];
+
+            Assert.IsTrue(r.Bloqueado);
+            Assert.IsFalse(r.Incluir);
+            Assert.AreEqual("incluido en el periodo 15/07/2026 - 13/08/2026", r.BloqueadoPor);
+        }
+
+        [TestMethod]
+        public void Resolver_BloqueoEsPorTramoNoPorSegmento()
+        {
+            // Un tramo sin aprobar del 17-08 con dos segmentos fuera de horario. El
+            // anterior incluyo solo el primero: el tramo es suyo, y aqui quedan
+            // bloqueados los dos, no solo el de la misma clave.
+            EntHeCandidato primero = Segmento(304, "2026-08-17 17:00", "2026-08-17 21:00",
+                                              "2026-08-17 17:30", "2026-08-17 19:00", 1);
+            EntHeCandidato segundo = Segmento(304, "2026-08-17 17:00", "2026-08-17 21:00",
+                                              "2026-08-17 19:00", "2026-08-17 21:00", 2);
+            List<EntHeDecision> decisiones = new List<EntHeDecision>
+            {
+                Dec(140, Anterior, primero, true, 1, null, "lo trajo el anterior"),
+                Dec(141, Este, segundo, true, 2, null, "el resto aqui")
+            };
+
+            List<EntHeCandidato> r = ResolverEn(Este, new[] { primero, segundo }, decisiones, Periodos());
+
+            Assert.IsTrue(r[0].Bloqueado);
+            Assert.IsTrue(r[1].Bloqueado, "El bloqueo es del tramo entero.");
+            Assert.IsFalse(r[1].Incluir);
+
+            // Despues se aprueba (clave 17:00) y el anterior ya habia cerrado
+            // pagando las 17:30: el dueno lo ve bloqueado.
+            EntHeCandidato aprobado = Aprobado(304, "2026-08-17 17:00", "2026-08-17 21:00", 1);
+            List<EntHeRangoPeriodo> conCierre = new List<EntHeRangoPeriodo>
+            {
+                Periodo(Anterior, "2026-07-15", "2026-08-13", "Cerrado"),
+                Periodo(Este, "2026-08-16", "2026-09-15")
+            };
+
+            EntHeCandidato enDuenio = ResolverEn(Este, new[] { aprobado }, decisiones.Take(1), conCierre)[0];
+            Assert.IsTrue(enDuenio.Bloqueado);
+            Assert.IsFalse(enDuenio.Incluir);
+        }
+
         // ================================================= Minutos ==========
 
         private static EntHeCandidato Incluido(long idTramo, string inicio, string fin, int tipo,
@@ -400,11 +581,12 @@ namespace CapaPruebas
         [TestMethod]
         public void Minutos_SegmentoBloqueadoNoSuma()
         {
-            // Aprobado del periodo anterior con una decision de este periodo que lo
-            // incluye: Resolver lo bloquea, y lo bloqueado no entra en el pago.
+            // Aprobado del periodo anterior, que lo incluyo primero, con una
+            // decision de este periodo que tambien lo incluye: Resolver lo
+            // bloquea, y lo bloqueado no entra en el pago.
             EntHeCandidato c = Aprobado(30, "2026-08-10 18:00", "2026-08-10 20:00", 1);
             List<EntHeCandidato> r = NegHeDecisiones.Resolver(Este, new List<EntHeCandidato> { c },
-                new List<EntHeDecision> { Dec(90, Este, c, true, 1) }, Periodos());
+                new List<EntHeDecision> { Dec(89, Anterior, c, true, 1), Dec(90, Este, c, true, 1) }, Periodos());
 
             Dictionary<long, int[]> m = NegHeDecisiones.Minutos(r);
 
@@ -479,6 +661,64 @@ namespace CapaPruebas
             StringAssert.Contains(error, "incluido en el periodo 15/07/2026 - 13/08/2026");
             // Dejarlo afuera si se puede.
             Assert.IsNull(Validar(c, Cambio(c, false, 1)));
+        }
+
+        [TestMethod]
+        public void Validar_DuenioRetienePorOmision_RechazaIncluirEnOtroPeroNoSinDuenio()
+        {
+            // El 10-08 es del anterior, que lo paga por omision: este periodo no se
+            // lo puede quitar. El 14-08 no es de ningun periodo: se puede traer.
+            EntHeCandidato deOtro = Resolver1(Aprobado(310, "2026-08-10 18:00", "2026-08-10 20:00", 1));
+            EntHeCandidato sinDuenio = Resolver1(Aprobado(311, "2026-08-14 18:00", "2026-08-14 20:00", 1));
+
+            string error = Validar(deOtro, Cambio(deOtro, true, 1));
+            Assert.IsNotNull(error);
+            StringAssert.Contains(error, "15/07/2026 - 13/08/2026");
+
+            Assert.IsNull(Validar(sinDuenio, Cambio(sinDuenio, true, 1)));
+        }
+
+        [TestMethod]
+        public void Validar_RetenidoPorPeriodoCerradoConClaveVieja_RechazaIncluir()
+        {
+            // El anterior cerro pagando una clave que ya no existe (el tramo se
+            // aprobo despues): incluirlo en su dueno seria pagarlo dos veces.
+            EntHeCandidato aprobado = Aprobado(312, "2026-08-17 18:00", "2026-08-17 20:00", 1);
+            List<EntHeRangoPeriodo> periodos = new List<EntHeRangoPeriodo>
+            {
+                Periodo(Anterior, "2026-07-15", "2026-08-13", "Cerrado"),
+                Periodo(Este, "2026-08-16", "2026-09-15")
+            };
+            List<EntHeCandidato> r = ResolverEn(Este, new[] { aprobado },
+                new[] { DecEn(150, Anterior, 312, "2026-08-17 18:30", true) }, periodos);
+
+            string error = NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], true, 1) });
+
+            Assert.IsNotNull(error);
+            StringAssert.Contains(error, "15/07/2026 - 13/08/2026");
+        }
+
+        [TestMethod]
+        public void Validar_SinLasDecisionesDeEstePeriodoLoRetieneElDuenio_RechazaIncluir()
+        {
+            // El 3 trajo un borde antes de que existiera su dueno y lo retiene
+            // (Resolver no lo bloquea). La regla de guardado mira el tramo SIN las
+            // decisiones del 3: ahi el dueno lo paga por omision, asi que volver a
+            // incluirlo (por ejemplo, para cambiarle el tipo) se rechaza. Dejarlo
+            // afuera si se puede, y entonces lo paga el dueno.
+            EntHeCandidato c = Aprobado(313, "2026-09-17 18:00", "2026-09-17 20:00", 1);
+            List<EntHeRangoPeriodo> periodos = Periodos();
+            periodos.Add(PeriodoSiguiente());
+            List<EntHeCandidato> r = ResolverEn(Este, new[] { c }, new[] { Dec(160, Este, c, true, 1) }, periodos);
+
+            Assert.IsFalse(r[0].Bloqueado);
+            Assert.AreEqual("incluido en el periodo 16/09/2026 - 15/10/2026", r[0].IncluirRechazadoPor);
+
+            string error = NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], true, 2) });
+            Assert.IsNotNull(error);
+            StringAssert.Contains(error, "16/09/2026 - 15/10/2026");
+
+            Assert.IsNull(NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], false, 1) }));
         }
 
         [TestMethod]

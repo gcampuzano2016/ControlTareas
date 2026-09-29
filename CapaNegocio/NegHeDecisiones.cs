@@ -17,24 +17,33 @@ namespace CapaNegocio
     /// reglas como ultima barrera (codigos -2, -3 y -4), pero la pantalla tiene que
     /// mostrar el bloqueo y el motivo del rechazo ANTES de guardar, y la union por
     /// minuto solo tiene pruebas si vive en C#. Si las reglas cambian, cambian en los
-    /// dos lados: Resolver es el espejo de la regla -2 de Sp_RTA_HeGuardarDecisiones.
+    /// dos lados: Titular es el espejo de la regla -2 de Sp_RTA_HeGuardarDecisiones.
     /// </summary>
     public static class NegHeDecisiones
     {
         /// <summary>
-        /// Completa cada candidato con lo que vale en el periodo idPeriodo:
-        ///   1. la decision vigente de ESTE periodo, si la hay; si no, el valor por
-        ///      omision, que incluye solo un aprobado cuyo dueno es este periodo
-        ///      (asi el pago de hoy no cambia hasta que Nomina marque algo);
-        ///   2. Bloqueado si OTRO periodo lo tiene incluido: por su decision
-        ///      vigente, o porque es su dueno, el tramo es aprobado y alli nadie lo
-        ///      excluyo;
-        ///   3. un bloqueado nunca queda incluido, aunque la decision de este periodo
-        ///      diga lo contrario: esa decision pudo guardarse antes de que el otro
-        ///      periodo lo incluyera, y pagarlo en los dos seria el pago doble.
+        /// Completa cada candidato con lo que vale en el periodo idPeriodo.
+        ///
+        /// El pago doble se decide por TRAMO (Id_RegDetTareas), no por clave de
+        /// segmento: la clave de un tramo cambia cuando cambia su estado (sin
+        /// aprobar son sus segmentos fuera de horario; aprobado es el tramo
+        /// completo), y una regla por clave dejaba que dos periodos pagaran el mismo
+        /// tramo con claves distintas, o que se bloquearan entre si y ninguno lo
+        /// pagara. Cada tramo tiene a lo sumo UN titular (ver Titular), y:
+        ///   1. si el titular existe y es otro periodo, todos los segmentos del
+        ///      tramo quedan Bloqueado aqui, con la leyenda del titular, y nunca
+        ///      incluidos, diga lo que diga la decision de este periodo;
+        ///   2. si no, un segmento queda incluido si la decision vigente de ESTE
+        ///      periodo lo incluye o, sin decision propia, si este periodo es el
+        ///      titular por omision (el dueno de un aprobado): asi el pago de hoy no
+        ///      cambia hasta que Nomina marque algo.
+        ///
+        /// Ademas llena IncluirRechazadoPor con el titular calculado SIN las
+        /// decisiones de este periodo: es lo que mira la regla de guardado (-2 de
+        /// Sp_RTA_HeGuardarDecisiones, y Validar aqui).
         ///
         /// Un periodo 'Anulado' no cuenta para nada: no es dueno y sus decisiones no
-        /// bloquean, porque no paga. Devuelve copias: la entrada no se modifica, asi
+        /// retienen, porque no paga. Devuelve copias: la entrada no se modifica, asi
         /// que se puede resolver la misma lista para otro periodo.
         /// </summary>
         public static List<EntHeCandidato> Resolver(int idPeriodo, IList<EntHeCandidato> candidatos,
@@ -49,18 +58,32 @@ namespace CapaNegocio
                 .ThenBy(p => p.IdPeriodo)
                 .ToList();
             HashSet<int> anulados = new HashSet<int>(todos.Where(p => p.EsAnulado).Select(p => p.IdPeriodo));
+            HashSet<int> cerrados = new HashSet<int>(todos.Where(p => p.EsCerrado).Select(p => p.IdPeriodo));
             List<EntHeRangoPeriodo> validos = todos.Where(p => !p.EsAnulado).ToList();
 
-            // La vigente de cada (periodo, tramo, segmento): la de IdDecision mas alto.
-            // El procedimiento ya la filtra, pero no conviene depender del orden ni de
-            // que siempre venga una sola.
-            Dictionary<Tuple<long, DateTime>, List<EntHeDecision>> vigentesPorSegmento =
+            // La vigente de cada (periodo, tramo, segmento): la de IdDecision mas
+            // alto. El procedimiento ya la filtra, pero no conviene depender del
+            // orden ni de que siempre venga una sola. Las de un periodo anulado se
+            // descartan aqui mismo: no pagan, asi que no retienen ni excluyen.
+            Dictionary<long, List<EntHeDecision>> vigentesPorTramo =
                 (decisiones ?? new List<EntHeDecision>())
-                .Where(d => d != null)
+                .Where(d => d != null && !anulados.Contains(d.IdPeriodo))
                 .GroupBy(d => new { d.IdPeriodo, d.IdRegDetTareas, d.SegmentoInicio })
                 .Select(g => g.OrderByDescending(d => d.IdDecision).First())
-                .GroupBy(d => Clave(d.IdRegDetTareas, d.SegmentoInicio))
+                .GroupBy(d => d.IdRegDetTareas)
                 .ToDictionary(g => g.Key, g => g.ToList());
+
+            // Los segmentos ACTUALES de cada tramo: las claves que hoy devuelve el
+            // procedimiento. Una decision sobre otra clave es de cuando el tramo
+            // tenia otro estado.
+            Dictionary<long, HashSet<DateTime>> segmentosPorTramo = candidatos
+                .Where(c => c != null)
+                .GroupBy(c => c.IdRegDetTareas)
+                .ToDictionary(g => g.Key, g => new HashSet<DateTime>(g.Select(c => c.SegmentoInicio)));
+
+            // El titular se calcula una vez por tramo, no por segmento.
+            Dictionary<long, int?> titular = new Dictionary<long, int?>();
+            Dictionary<long, int?> titularSinEste = new Dictionary<long, int?>();
 
             foreach (EntHeCandidato original in candidatos)
             {
@@ -68,15 +91,23 @@ namespace CapaNegocio
                 EntHeCandidato c = Copiar(original);
 
                 List<EntHeDecision> vigentes;
-                if (!vigentesPorSegmento.TryGetValue(Clave(c.IdRegDetTareas, c.SegmentoInicio), out vigentes))
+                if (!vigentesPorTramo.TryGetValue(c.IdRegDetTareas, out vigentes))
                 {
                     vigentes = new List<EntHeDecision>();
                 }
 
-                List<EntHeRangoPeriodo> duenos = validos.Where(p => p.Contiene(c.TramoInicio)).ToList();
+                if (!titular.ContainsKey(c.IdRegDetTareas))
+                {
+                    HashSet<DateTime> actuales = segmentosPorTramo[c.IdRegDetTareas];
+                    titular[c.IdRegDetTareas] = Titular(c, vigentes, actuales, cerrados, validos, null);
+                    titularSinEste[c.IdRegDetTareas] = Titular(c, vigentes, actuales, cerrados, validos, idPeriodo);
+                }
+                int? elTitular = titular[c.IdRegDetTareas];
+                int? elTitularSinEste = titularSinEste[c.IdRegDetTareas];
 
-                // 1. Decision de este periodo, o valor por omision.
-                EntHeDecision propia = vigentes.FirstOrDefault(d => d.IdPeriodo == idPeriodo);
+                // Decision de este periodo sobre ESTE segmento, o valor por omision.
+                EntHeDecision propia = vigentes.FirstOrDefault(d => d.IdPeriodo == idPeriodo
+                                                                 && d.SegmentoInicio == c.SegmentoInicio);
                 if (propia != null)
                 {
                     c.Incluir = propia.Incluir;
@@ -88,7 +119,10 @@ namespace CapaNegocio
                 }
                 else
                 {
-                    c.Incluir = c.EsAprobado && duenos.Any(p => p.IdPeriodo == idPeriodo);
+                    // Por omision solo paga el titular por omision: el dueno de un
+                    // aprobado (sin decision propia sobre el tramo completo, que es
+                    // este mismo segmento, no puede haberlo excluido).
+                    c.Incluir = c.EsAprobado && Duenio(c, validos) == idPeriodo;
                     c.TipoElegido = c.TipoHora;
                     c.MinutosIncluidos = null;
                     c.Motivo = "";
@@ -96,39 +130,82 @@ namespace CapaNegocio
                     c.DecididoEl = null;
                 }
 
-                // 2. El pago doble. (a) otro periodo no anulado lo incluyo por decision.
-                string bloqueadoPor = null;
-                EntHeDecision incluidaAfuera = vigentes
-                    .Where(d => d.IdPeriodo != idPeriodo && d.Incluir && !anulados.Contains(d.IdPeriodo))
-                    .OrderBy(d => d.IdDecision)
-                    .FirstOrDefault();
-                if (incluidaAfuera != null)
-                {
-                    bloqueadoPor = Leyenda(incluidaAfuera.IdPeriodo, todos);
-                }
-
-                // (b) otro periodo es su dueno y lo paga por omision: solo un
-                //     aprobado, y solo si alli nadie lo excluyo.
-                if (bloqueadoPor == null && c.EsAprobado)
-                {
-                    EntHeRangoPeriodo duenoAjeno = duenos.FirstOrDefault(p =>
-                        p.IdPeriodo != idPeriodo
-                        && !vigentes.Any(d => d.IdPeriodo == p.IdPeriodo && !d.Incluir));
-                    if (duenoAjeno != null)
-                    {
-                        bloqueadoPor = Leyenda(duenoAjeno.IdPeriodo, todos);
-                    }
-                }
-
-                // 3. Un bloqueado nunca queda incluido aqui.
-                c.Bloqueado = bloqueadoPor != null;
-                c.BloqueadoPor = bloqueadoPor ?? "";
+                // Otro titular: bloqueado, y un bloqueado nunca queda incluido aqui.
+                // La decision de este periodo pudo guardarse antes de que el otro lo
+                // retuviera, y pagarlo en los dos seria el pago doble.
+                c.Bloqueado = elTitular.HasValue && elTitular.Value != idPeriodo;
+                c.BloqueadoPor = c.Bloqueado ? Leyenda(elTitular.Value, todos) : "";
                 if (c.Bloqueado) { c.Incluir = false; }
+
+                c.IncluirRechazadoPor = elTitularSinEste.HasValue && elTitularSinEste.Value != idPeriodo
+                    ? Leyenda(elTitularSinEste.Value, todos)
+                    : "";
 
                 resultado.Add(c);
             }
 
             return resultado;
+        }
+
+        /// <summary>
+        /// El periodo que retiene el tramo de c (a lo sumo uno), o null. Espejo
+        /// exacto del bloque -2 de Sp_RTA_HeGuardarDecisiones:
+        ///
+        ///   1. Titular EXPLICITO: un periodo cuya decision vigente sobre ALGUN
+        ///      segmento del tramo dice Incluir = 1, siempre que esa clave sea un
+        ///      segmento ACTUAL del tramo o que el periodo este 'Cerrado'. Un
+        ///      periodo abierto con una clave vieja no retiene: en su proximo
+        ///      recalculo esa clave no esta entre los candidatos y no la paga. Uno
+        ///      cerrado si: ya la pago. Si hubiera varios (no deberia: la regla de
+        ///      guardado lo impide), manda la decision de IdDecision mas bajo, la
+        ///      que llego primero.
+        ///   2. Si no, titular POR OMISION: el dueno (el periodo cuyo rango contiene
+        ///      el dia del tramo) si el tramo esta aprobado y alli nadie excluyo el
+        ///      tramo completo.
+        ///   3. Si no, nadie: cualquiera lo puede incluir.
+        ///
+        /// excluirPeriodo: si viene, sus decisiones no cuentan (ni para retener ni
+        /// para excluir). Es el titular "sin lo de este periodo" que usa la regla
+        /// de guardado: el lote que se guarda reemplaza las decisiones del periodo.
+        ///
+        /// Limitacion conocida (documentada en DESPLIEGUE.md 14): si el estado de
+        /// aprobacion de un tramo cambia DESPUES de que su dueno cerro pagandolo por
+        /// omision, aqui ya no se sabe que se pago -no hay una foto del pago por
+        /// tramo- y otro periodo podria incluirlo. El remedio es reabrir el periodo
+        /// cerrado y recalcularlo.
+        /// </summary>
+        private static int? Titular(EntHeCandidato c, List<EntHeDecision> vigentes, HashSet<DateTime> segmentosActuales,
+                                    HashSet<int> cerrados, List<EntHeRangoPeriodo> validos, int? excluirPeriodo)
+        {
+            EntHeDecision explicita = vigentes
+                .Where(d => d.Incluir
+                            && (!excluirPeriodo.HasValue || d.IdPeriodo != excluirPeriodo.Value)
+                            && (segmentosActuales.Contains(d.SegmentoInicio) || cerrados.Contains(d.IdPeriodo)))
+                .OrderBy(d => d.IdDecision)
+                .FirstOrDefault();
+            if (explicita != null) { return explicita.IdPeriodo; }
+
+            if (!c.EsAprobado) { return null; }
+
+            int? duenio = Duenio(c, validos);
+            if (!duenio.HasValue) { return null; }
+
+            bool excluidoEnSuDuenio = vigentes.Any(d => d.IdPeriodo == duenio.Value
+                                                     && (!excluirPeriodo.HasValue || d.IdPeriodo != excluirPeriodo.Value)
+                                                     && d.SegmentoInicio == c.TramoInicio
+                                                     && !d.Incluir);
+            return excluidoEnSuDuenio ? (int?)null : duenio;
+        }
+
+        /// <summary>
+        /// El dueno del tramo: el primer periodo no anulado (por FechaInicio y luego
+        /// IdPeriodo, igual que el procedimiento) cuyo rango contiene el dia en que
+        /// empieza el tramo. null si el dia no es de ningun periodo.
+        /// </summary>
+        private static int? Duenio(EntHeCandidato c, List<EntHeRangoPeriodo> validos)
+        {
+            EntHeRangoPeriodo p = validos.FirstOrDefault(x => x.Contiene(c.TramoInicio));
+            return p == null ? (int?)null : p.IdPeriodo;
         }
 
         /// <summary>
@@ -245,13 +322,20 @@ namespace CapaNegocio
                 }
             }
 
-            // -2: el pago doble.
+            // -2: el pago doble. Se rechaza incluir si el tramo lo retiene otro
+            // periodo SIN contar las decisiones de este (IncluirRechazadoPor): asi,
+            // si el dueno ya lo paga por omision, otro periodo no se lo puede
+            // quitar. Bloqueado implica eso mismo; se mira tambien por si el
+            // candidato no vino de Resolver.
             foreach (var par in pares)
             {
-                if (par.Item1.Incluir && par.Item2.Bloqueado)
+                EntHeCandidato c = par.Item2;
+                if (!par.Item1.Incluir) { continue; }
+                string retenidoPor = c.Bloqueado ? c.BloqueadoPor : c.IncluirRechazadoPor;
+                if (c.Bloqueado || !string.IsNullOrEmpty(c.IncluirRechazadoPor))
                 {
-                    return "En el tramo " + par.Item2.SegmentoTexto + ": no se puede incluir, ya esta "
-                         + par.Item2.BloqueadoPor + ".";
+                    return "En el tramo " + c.SegmentoTexto + ": no se puede incluir, ya esta "
+                         + retenidoPor + ".";
                 }
             }
 

@@ -28,6 +28,15 @@ namespace CapaEntidad
             get { return string.Equals((EstadoPeriodo ?? "").Trim(), "Anulado", StringComparison.OrdinalIgnoreCase); }
         }
 
+        /// <summary>
+        /// Un periodo cerrado ya pago: su Incluir = 1 retiene el tramo aunque la
+        /// clave del segmento ya no sea la de hoy (ver NegHeDecisiones.Titular).
+        /// </summary>
+        public bool EsCerrado
+        {
+            get { return string.Equals((EstadoPeriodo ?? "").Trim(), "Cerrado", StringComparison.OrdinalIgnoreCase); }
+        }
+
         /// <summary>Si el dia de la fecha cae dentro de [FechaInicio, FechaFin], sin mirar la hora.</summary>
         public bool Contiene(DateTime fecha)
         {

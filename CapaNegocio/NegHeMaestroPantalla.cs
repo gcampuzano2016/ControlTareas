@@ -278,7 +278,7 @@ namespace CapaNegocio
             if (!refrescoOk)
             {
                 r.mensaje = guardado + (periodo.EstaAbierto
-                    ? " Pero no se pudo recalcular el período: pulse «Recalcular»."
+                    ? " Pero no se pudo recalcular el período: pulse «Traer aprobaciones nuevas»."
                     : " No se pudo volver a cargar la pantalla: seleccione el período nuevamente.") + fecha;
                 r.tipoMensaje = "warning";
                 return r;

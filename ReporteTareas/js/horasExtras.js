@@ -1203,11 +1203,26 @@ function PintarFueraDeHorario() {
            periodo) se cae en el Total HE de la grilla, que es lo que se paga. */
         var c = conciliacion[idEmpleado];
         var totalCon = c ? Number(c.TotalConExcluido) : NumeroDe($fila.find(".he-total-he").text());
-        $con.text(FormatoDosDecimales(totalCon));
-        if (c && c.Desactualizada) {
-            $con.addClass("text-warning").attr("title", "Fila desactualizada respecto de las decisiones: pulse «Recalcular».");
+        $con.text(FormatoDosDecimales(totalCon)).toggleClass("text-warning", !!(c && c.Desactualizada));
+
+        /* El desglose va en el title de la celda: sin el, Total HE + las dos
+           columnas no suma la columna nueva y nada explica la diferencia. Esa
+           diferencia es lo aprobado que Nomina excluyo y lo que sobra de un tramo
+           reducido, que el servidor cuenta en UsdExcluido y no es ni «sin
+           aprobar» ni «rechazado». Sale por resta de montos ya redondeados, asi
+           que un -0.01 de redondeo se muestra como 0.00: nunca negativo. */
+        if (c) {
+            var otros = RedondearDos(Number(c.UsdExcluido) - usdSin - usdRech);
+            if (otros < 0) { otros = 0; }
+            var titulo = "Total HE " + FormatoDosDecimales(c.TotalAPagar) +
+                         " + sin aprobar " + FormatoDosDecimales(usdSin) +
+                         " + rechazado " + FormatoDosDecimales(usdRech) +
+                         " + otros no incluidos (aprobado excluido o sobrante de reducciones) " +
+                         FormatoDosDecimales(otros) + ".";
+            if (c.Desactualizada) { titulo += " " + TextoFilaDesactualizada(); }
+            $con.attr("title", titulo);
         } else {
-            $con.removeClass("text-warning").removeAttr("title");
+            $con.removeAttr("title");
         }
 
         resumen.minutosSin += sin50 + sin100;
@@ -1251,7 +1266,20 @@ function TextoFilasDesactualizadas() {
     if (_estadoFuera !== "ok" || !_fueraDeHorario) { return null; }
     var n = Number(_fueraDeHorario.FilasDesactualizadas) || 0;
     if (n <= 0) { return null; }
-    return "Hay " + n + " fila(s) desactualizadas respecto de las decisiones: pulse «Recalcular».";
+    return "Hay " + n + " fila(s) desactualizadas respecto de las decisiones: " + AccionParaActualizar() + ".";
+}
+
+/* Que hacer con una fila desactualizada. El boton que recalcula es «Traer
+   aprobaciones nuevas», y solo aparece con el periodo abierto: con el periodo
+   cerrado, pedir que se pulse seria mandar a buscar un boton que no esta. */
+function AccionParaActualizar() {
+    return _periodoAbierto
+        ? "pulse «Traer aprobaciones nuevas»"
+        : "reabra el período para actualizarlo";
+}
+
+function TextoFilaDesactualizada() {
+    return "Fila desactualizada respecto de las decisiones: " + AccionParaActualizar() + ".";
 }
 
 /* Un Total HE que ya no es lo que pagan los tramos incluidos hoy -alguien decidio
@@ -1497,7 +1525,9 @@ function MostrarDetalleFuera(idEmpleado) {
 
     /* Sin nada que se pueda cambiar, el boton ni aparece: un «Guardar» que
        siempre responde «no hay cambios» solo confunde. */
-    $boton.toggle(editable && candidatos.length > 0);
+    var hayEditables = false;
+    $.each(candidatos, function (i, c) { if (!c.Bloqueado) { hayEditables = true; } });
+    $boton.toggle(editable && hayEditables);
 
     /* Despues de pintar los controles: PrepararConfirmacion engancha el
        reinicio a los input/select que existen en este momento. */
@@ -1560,8 +1590,12 @@ function FilaCandidato(c, editable, vh50, vh100) {
     if (c.TipoElegido !== c.TipoHora) { $tipo.attr("title", "Tipo original: " + (c.TipoHoraTexto || "")); }
     $tr.append($("<td></td>").append($tipo));
 
-    var $minutos = $('<input type="number" class="form-control input-sm fd-minutos" min="1" step="1" />')
-        .attr("max", minutosSegmento)
+    /* type="text" y no "number": con basura («30m», «1e», «-») un input
+       number devuelve .val() == "", que aqui significa «el segmento completo»,
+       o sea pagar MAS sin que nadie lo haya pedido. Como texto, lo escrito
+       llega tal cual y la regex de EstadoFilaCandidato lo rechaza. */
+    var $minutos = $('<input type="text" inputmode="numeric" class="form-control input-sm fd-minutos" maxlength="6" />')
+        .attr("title", "Vacío = el tramo completo (" + minutosSegmento + " min). Solo para reducir.")
         .attr("placeholder", String(minutosSegmento))
         .val(minutosIniciales)
         .prop("disabled", !habilitado);
@@ -1585,7 +1619,8 @@ function FilaCandidato(c, editable, vh50, vh100) {
 function EstadoFilaCandidato($tr) {
     var minutosSegmento = Number($tr.data("minutosSegmento")) || 0;
     var minutos = $.trim(String($tr.find(".fd-minutos").val() || ""));
-    if (minutos !== "" && Number(minutos) === minutosSegmento) { minutos = ""; }
+    /* Solo se normaliza un entero limpio: Number("1e2") tambien da 100. */
+    if (/^\d+$/.test(minutos) && Number(minutos) === minutosSegmento) { minutos = ""; }
 
     return {
         idTramo: $tr.attr("data-tramo"),
@@ -1611,7 +1646,10 @@ $(document).on("input change", "#cuerpoFueraDeHorario .fd-incluir, #cuerpoFueraD
     var e = EstadoFilaCandidato($tr);
     var minutosSegmento = Number($tr.data("minutosSegmento")) || 0;
     var minutos = minutosSegmento;
-    if (e.incluir && e.minutos !== "" && /^\d+$/.test(e.minutos)) {
+    if (e.incluir && e.minutos !== "") {
+        /* Minutos ilegibles: no se valora nada. Mostrar el segmento completo
+           haria creer que eso es lo que se va a pagar. */
+        if (!/^\d+$/.test(e.minutos)) { $tr.find(".fd-usd").text("—"); return; }
         minutos = Math.min(Number(e.minutos), minutosSegmento);
     }
     var vh = e.tipoHora === 2 ? Number($tr.data("vh100")) || 0 : Number($tr.data("vh50")) || 0;
@@ -1635,7 +1673,7 @@ function PintarPieDetalle(idEmpleado) {
 
     if (c.Desactualizada) {
         $pie.append($("<br />")).append($('<span class="text-warning"></span>')
-            .text("Esta fila está desactualizada respecto de las decisiones: pulse «Recalcular»."));
+            .text("Esta fila está desactualizada respecto de las decisiones: " + AccionParaActualizar() + "."));
     }
 }
 
@@ -1660,10 +1698,10 @@ function GuardarDecisionesDetalle(idEmpleado, nombre, $boton, $aviso) {
         return;
     }
 
-    /* Un input type="number" con basura devuelve ""; esto ataja decimales o
-       signos, que el servidor tambien rechaza, sin gastar una ida. */
+    /* Letras, decimales o signos en los minutos: no se guarda nada. El
+       servidor tambien lo rechaza, pero aqui se dice sin gastar una ida. */
     if (minutosInvalidos) {
-        $aviso.text("Los minutos tienen que ser un número entero, o quedar vacíos para el tramo completo.").show();
+        $aviso.text("Hay minutos que no son un número entero: corríjalos, o déjelos vacíos para pagar el tramo completo. No se guardó nada.").show();
         return;
     }
 
@@ -1698,7 +1736,7 @@ function GuardarDecisionesDetalle(idEmpleado, nombre, $boton, $aviso) {
             PintarPantalla(r.resultado);
         } else {
             /* Las decisiones SI se guardaron pero el recalculo fallo (el mensaje
-               pide «Recalcular»). Los candidatos igual cambiaron: se vuelven a
+               pide «Traer aprobaciones nuevas»). Los candidatos igual cambiaron: se vuelven a
                pedir para que la ventana no muestre lo de antes. */
             CargarFueraDeHorario();
         }
@@ -1751,7 +1789,7 @@ function TextoAvisoFueraDeHorario() {
 
     var r = _resumenFuera;
     var texto = (r.personasSin === 0 && r.personasRech === 0)
-        ? "No hay tiempo fuera de horario sin aprobar ni rechazado sin incluir en este período."
+        ? "No hay tiempo sin aprobar ni rechazado fuera del pago en este período."
         : "Hay " + r.personasSin + " colaborador(es) con " +
           TextoHorasUsd(r.minutosSin, r.usdSin) + " fuera de horario sin aprobar y " +
           r.personasRech + " con " + TextoHorasUsd(r.minutosRech, r.usdRech) +

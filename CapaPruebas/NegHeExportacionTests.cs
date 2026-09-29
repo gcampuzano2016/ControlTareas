@@ -670,6 +670,32 @@ namespace CapaPruebas
         }
 
         /// <summary>
+        /// Con el periodo cerrado el boton «Traer aprobaciones nuevas» no aparece:
+        /// el aviso y la columna Estado dicen que hay que reabrirlo, igual que la
+        /// pantalla (AccionParaActualizar en horasExtras.js).
+        /// </summary>
+        [TestMethod]
+        public void Construir_Conciliacion_DesactualizadaEnCerrado_PideReabrir()
+        {
+            EntHePantalla pantalla = PantallaDeEjemplo("Cerrado");
+            EntHeFueraDeHorario fuera = FueraDeEjemplo(4243);
+            fuera.Conciliacion[0].Desactualizada = true;
+
+            using (ExcelPackage paquete = AbrirPaquete(NegHeExportacion.Construir(pantalla, fuera)))
+            {
+                ExcelWorksheet hoja = paquete.Workbook.Worksheets[NegHeExportacion.NombreHojaConciliacion];
+
+                string aviso = Convert.ToString(hoja.Cells[3, 1].Value ?? "");
+                StringAssert.Contains(aviso, "reabra el período para actualizarlo");
+                Assert.IsFalse(aviso.Contains("Traer aprobaciones nuevas"), "Con el periodo cerrado ese boton no existe.");
+
+                string estado = Convert.ToString(hoja.Cells[NegHeExportacion.ConciliacionPrimeraFilaDeDatos, 11].Value);
+                StringAssert.Contains(estado, "Desactualizada");
+                StringAssert.Contains(estado, "reabra el período");
+            }
+        }
+
+        /// <summary>
         /// Cada segmento candidato -aprobado o no, incluido o no- es una fila propia
         /// en "Decisiones", ordenada por nombre y luego por fecha. Quien no esta en
         /// la grilla (nombres.ContainsKey en false) sale con el nombre vacio, no

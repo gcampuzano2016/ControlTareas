@@ -72,6 +72,13 @@ namespace CapaNegocio
         /// <summary>El texto de la columna Estado cuando el TotalHE de la fila no coincide con lo que pagan sus minutos incluidos hoy.</summary>
         public const string TextoConciliacionDesactualizada = "Desactualizada: pulse «Traer aprobaciones nuevas»";
 
+        /// <summary>
+        /// Lo mismo con el periodo cerrado: ahi el boton «Traer aprobaciones nuevas»
+        /// no aparece, y mandar a pulsarlo seria mandar a buscar un boton que no
+        /// esta (igual que AccionParaActualizar en horasExtras.js).
+        /// </summary>
+        public const string TextoConciliacionDesactualizadaCerrado = "Desactualizada: reabra el período para actualizarlo";
+
         private const int FilaDeCierre = 2;
         private const int FilaDeGeneracion = 3;
         private const int FilaDeResumen = 4;
@@ -781,11 +788,16 @@ namespace CapaNegocio
 
             // La fila 3 queda en blanco salvo que haya filas desactualizadas: asi el
             // encabezado no se mueve de la fila 4 tenga o no aviso que mostrar.
+            bool cerrado = pantalla != null && pantalla.Periodo != null
+                && string.Equals(pantalla.Periodo.EstadoPeriodo, "Cerrado", StringComparison.OrdinalIgnoreCase);
+
             if (HayCalculo(fuera) && fuera.FilasDesactualizadas > 0)
             {
                 hoja.Cells[ConciliacionFilaAviso, 1].Value = string.Format(
                     CultureInfo.InvariantCulture,
-                    "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. Pulse «Traer aprobaciones nuevas» en la pantalla antes de usar este archivo.",
+                    cerrado
+                        ? "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. El período está cerrado: reabra el período para actualizarlo antes de usar este archivo."
+                        : "Atención: {0} fila(s) desactualizada(s) -su Total HE no es lo que pagan hoy sus minutos incluidos-. Pulse «Traer aprobaciones nuevas» en la pantalla antes de usar este archivo.",
                     fuera.FilasDesactualizadas);
                 hoja.Cells[ConciliacionFilaAviso, 1].Style.Font.Bold = true;
             }
@@ -839,7 +851,8 @@ namespace CapaNegocio
                 hoja.Cells[fila, 10].Value = c.TotalConExcluido;
                 hoja.Cells[fila, 10].Style.Numberformat.Format = FormatoMoneda;
 
-                hoja.Cells[fila, 11].Value = c.Desactualizada ? TextoConciliacionDesactualizada : "";
+                hoja.Cells[fila, 11].Value = !c.Desactualizada ? ""
+                    : cerrado ? TextoConciliacionDesactualizadaCerrado : TextoConciliacionDesactualizada;
 
                 totalMinAprobado += c.MinutosAprobadoIncluido;
                 totalMinNoAprobado += c.MinutosNoAprobadoIncluido;

@@ -41,7 +41,8 @@ namespace CapaEntidad
         /// <summary>
         /// Cuantas filas de la conciliacion estan desactualizadas (su TotalHE no es
         /// lo que pagan los minutos incluidos hoy). Distinto de 0: hay que pulsar
-        /// «Recalcular» antes de cerrar.
+        /// «Traer aprobaciones nuevas», y mientras tanto el periodo no se deja
+        /// cerrar (NegHorasExtrasPantalla.MotivoParaNoCerrar).
         /// </summary>
         public int FilasDesactualizadas
         {

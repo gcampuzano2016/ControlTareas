@@ -816,5 +816,37 @@ namespace CapaPruebas
             Assert.AreNotEqual(NegHorasExtrasPantalla.MensajeDeEdicionDeFechas(-5), m);
         }
 
+        /// <summary>
+        /// Cerrar con filas desactualizadas cerraria un pago que no es el de las
+        /// decisiones (por ejemplo, pagaria algo que Nomina ya excluyo). Si no se
+        /// pudo verificar, tampoco se cierra: cerrar no es urgente, y un cierre
+        /// sin verificar puede ser justo el desalineado.
+        /// </summary>
+        [TestMethod]
+        public void MotivoParaNoCerrar_SinCalculoOConFilasDesactualizadas_Rechaza()
+        {
+            StringAssert.Contains(NegHorasExtrasPantalla.MotivoParaNoCerrar(null), "No se pudo verificar");
+            StringAssert.Contains(NegHorasExtrasPantalla.MotivoParaNoCerrar(
+                new EntHeFueraDeHorario { Calculado = false, Error = "sin conexion" }), "no se cerró");
+
+            EntHeFueraDeHorario conViejas = new EntHeFueraDeHorario { Calculado = true };
+            conViejas.Conciliacion.Add(new EntHeConciliacionFila { IdEmpleado = 1, Desactualizada = true });
+            conViejas.Conciliacion.Add(new EntHeConciliacionFila { IdEmpleado = 2, Desactualizada = false });
+            conViejas.Conciliacion.Add(new EntHeConciliacionFila { IdEmpleado = 3, Desactualizada = true });
+
+            string motivo = NegHorasExtrasPantalla.MotivoParaNoCerrar(conViejas);
+            Assert.AreEqual("Hay 2 fila(s) desactualizada(s) respecto de las decisiones: pulse «Traer aprobaciones nuevas» antes de cerrar.", motivo);
+        }
+
+        [TestMethod]
+        public void MotivoParaNoCerrar_AlDia_Null()
+        {
+            EntHeFueraDeHorario alDia = new EntHeFueraDeHorario { Calculado = true };
+            alDia.Conciliacion.Add(new EntHeConciliacionFila { IdEmpleado = 1, Desactualizada = false });
+
+            Assert.IsNull(NegHorasExtrasPantalla.MotivoParaNoCerrar(alDia));
+            Assert.IsNull(NegHorasExtrasPantalla.MotivoParaNoCerrar(new EntHeFueraDeHorario { Calculado = true }));
+        }
+
     }
 }

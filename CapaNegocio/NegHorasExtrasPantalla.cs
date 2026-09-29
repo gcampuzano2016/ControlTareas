@@ -359,10 +359,56 @@ namespace CapaNegocio
             return pantalla;
         }
 
-        /// <summary>Cierra el periodo y devuelve la pantalla ya en estado cerrado.</summary>
+        /// <summary>
+        /// null si el periodo se puede cerrar; si no, por que no, en palabras para
+        /// Nomina. Se rechaza:
+        ///   - si no se pudo verificar (fuera nulo o sin calcular): un cierre sin
+        ///     verificar puede ser justo el desalineado, y cerrar no es urgente;
+        ///   - si hay filas desactualizadas: su TotalHE no es lo que pagan hoy los
+        ///     minutos incluidos (se decidio o aprobo algo y el periodo no se
+        ///     recalculo), y cerrar asi pagaria, por ejemplo, lo que Nomina ya
+        ///     excluyo. «Traer aprobaciones nuevas» es el boton que recalcula.
+        /// </summary>
+        public static string MotivoParaNoCerrar(EntHeFueraDeHorario fuera)
+        {
+            if (fuera == null || !fuera.Calculado)
+            {
+                return "No se pudo verificar que el período esté al día; no se cerró. Intente de nuevo.";
+            }
+
+            int desactualizadas = fuera.FilasDesactualizadas;
+            if (desactualizadas > 0)
+            {
+                return "Hay " + desactualizadas + " fila(s) desactualizada(s) respecto de las decisiones: "
+                     + "pulse «Traer aprobaciones nuevas» antes de cerrar.";
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Cierra el periodo y devuelve la pantalla ya en estado cerrado. Antes de
+        /// cerrar comprueba que el periodo este al dia con las decisiones
+        /// (MotivoParaNoCerrar): la pantalla ya lo avisa, pero el aviso no lo
+        /// impedia, y el cierre es lo que se le entrega a Nomina.
+        /// </summary>
         public static EntRespuesta CerrarPeriodo(int idPeriodo, string usuario, string ip)
         {
             EntRespuesta respuesta = new EntRespuesta();
+
+            /* Si el periodo no existe, Periodo llega nulo y CalcularFueraDeHorario
+               lo devuelve sin calcular: se rechaza con el mismo mensaje, igual que
+               una falla de lectura. El procedimiento de cierre sigue siendo la
+               ultima barrera (estado, filas con problema). */
+            EntHeFueraDeHorario fuera = CalcularFueraDeHorario(DaoHorasExtras.CargarPeriodo(idPeriodo).Periodo);
+            string motivo = MotivoParaNoCerrar(fuera);
+            if (motivo != null)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = motivo;
+                respuesta.tipoMensaje = "warning";
+                return respuesta;
+            }
 
             int filasConProblema;
             int codigo = DaoHorasExtras.CerrarPeriodo(idPeriodo, usuario, ip, out filasConProblema);

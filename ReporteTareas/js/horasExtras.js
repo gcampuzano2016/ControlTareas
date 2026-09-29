@@ -1795,8 +1795,10 @@ function TextoAvisoFueraDeHorario() {
           r.personasRech + " con " + TextoHorasUsd(r.minutosRech, r.usdRech) +
           " rechazadas. Esas horas no están incluidas en el pago.";
 
-    /* Cerrar con filas desactualizadas cierra un pago que no es el de las
-       decisiones: el aviso de cierre lo repite, aunque no lo impide. */
+    /* Cerrar con filas desactualizadas cerraria un pago que no es el de las
+       decisiones: el aviso de cierre lo repite, y el servidor rechaza el
+       cierre (NegHorasExtrasPantalla.MotivoParaNoCerrar) hasta que se pulse
+       «Traer aprobaciones nuevas». */
     var desactualizadas = TextoFilasDesactualizadas();
     if (desactualizadas) { texto += " " + desactualizadas; }
 

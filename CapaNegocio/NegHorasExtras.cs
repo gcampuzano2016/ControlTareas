@@ -165,7 +165,14 @@ namespace CapaNegocio
                 r.ValorHoraOrdinaria = 0m;
                 r.ValorHora50 = 0m;
                 r.ValorHora100 = 0m;
-                r.TotalHoras = horas50 + horas100;
+
+                /* Misma regla que el flujo principal (ver mas abajo): con
+                   minutos, TotalHoras se redondea a 2 decimales porque es lo
+                   que se muestra. Round 1 de revision: esta rama se habia
+                   quedado sin redondear, inconsistente con el caso normal. */
+                r.TotalHoras = usaMinutos
+                    ? Math.Round(horas50 + horas100, 2, MidpointRounding.AwayFromZero)
+                    : horas50 + horas100;
                 return r;
             }
 

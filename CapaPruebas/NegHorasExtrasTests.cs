@@ -410,5 +410,57 @@ namespace CapaPruebas
             Assert.AreEqual(0.00m, r.TotalHoras);
             Assert.IsTrue(r.TieneAdvertencia);
         }
+
+        /// <summary>
+        /// Round 1 de revision: la salida temprana de salario/divisor en cero
+        /// tambien tiene que redondear TotalHoras a 2 decimales cuando hay
+        /// minutos, igual que el flujo principal -antes de esta correccion
+        /// se quedaba sin redondear en esta rama, inconsistente con
+        /// Calcular_ConMinutos_HorasMostradasRedondeadas-.
+        ///
+        /// 100 minutos al 50% + 70 minutos al 100% = 170/60 = 2.8333...
+        /// horas, que redondeado alejandose del cero a 2 decimales da 2.83.
+        /// Con salario 0 la fila queda en advertencia y sin pago, pero las
+        /// horas si se muestran -son dato valido, lo que falta es el sueldo-.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_SalarioCero_TotalHorasRedondeado()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(0m, 8, 0m, 0m, minutos50: 100, minutos100: 70), Par());
+
+            Assert.IsTrue(r.TieneAdvertencia);
+            Assert.AreEqual(0.00m, r.Total50);
+            Assert.AreEqual(0.00m, r.Total100);
+            Assert.AreEqual(2.83m, r.TotalHoras);
+        }
+
+        /// <summary>
+        /// Ambos tramos con minutos a la vez, sueldo normal. Con sueldo 1200,
+        /// jornada 8 (divisor 240): horaOrdinaria = 5.00, hora50 = 7.50,
+        /// hora100 = 10.00.
+        ///
+        /// 100 minutos al 50% = 100/60 horas; multiplicado por 7.50 cancela
+        /// el 60 exacto: (100*7.5)/60 = 750/60 = 12.50 -sin redondeo
+        /// intermedio, ver Calcular_ConMinutos_NoRedondeaAntesDeMultiplicar-.
+        ///
+        /// 70 minutos al 100% = 70/60 horas; por 10.00 da 700/60 = 11.6666...
+        /// que redondeado alejandose del cero a 2 decimales da 11.67.
+        ///
+        /// TotalHE = 12.50 + 11.67 = 24.17. TotalHoras = redondeo(170/60, 2)
+        /// = 2.83, igual que en el caso de salario cero de arriba: las horas
+        /// digitadas no cambian aunque el sueldo si.
+        /// </summary>
+        [TestMethod]
+        public void Calcular_ConMinutos_AmbosTramos()
+        {
+            EntHeResultado r = NegHorasExtras.Calcular(
+                Insumo(1200m, 8, 0m, 0m, minutos50: 100, minutos100: 70), Par());
+
+            Assert.AreEqual(12.50m, r.Total50);
+            Assert.AreEqual(11.67m, r.Total100);
+            Assert.AreEqual(24.17m, r.TotalHE);
+            Assert.AreEqual(2.83m, r.TotalHoras);
+        }
     }
 }

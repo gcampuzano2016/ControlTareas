@@ -17,7 +17,7 @@ namespace CapaNegocio
     /// reglas como ultima barrera (codigos -2, -3 y -4), pero la pantalla tiene que
     /// mostrar el bloqueo y el motivo del rechazo ANTES de guardar, y la union por
     /// minuto solo tiene pruebas si vive en C#. Si las reglas cambian, cambian en los
-    /// dos lados: Titular es el espejo de la regla -2 de Sp_RTA_HeGuardarDecisiones.
+    /// dos lados: RechazoAlIncluir es el espejo de la regla -2 de Sp_RTA_HeGuardarDecisiones.
     /// </summary>
     public static class NegHeDecisiones
     {
@@ -38,9 +38,9 @@ namespace CapaNegocio
         ///      titular por omision (el dueno de un aprobado): asi el pago de hoy no
         ///      cambia hasta que Nomina marque algo.
         ///
-        /// Ademas llena IncluirRechazadoPor con el titular calculado SIN las
-        /// decisiones de este periodo: es lo que mira la regla de guardado (-2 de
-        /// Sp_RTA_HeGuardarDecisiones, y Validar aqui).
+        /// Ademas llena IncluirRechazadoPor con el periodo que impediria GUARDAR
+        /// este tramo incluido aqui (ver RechazoAlIncluir): es lo que mira la
+        /// regla de guardado (-2 de Sp_RTA_HeGuardarDecisiones, y Validar aqui).
         ///
         /// Un periodo 'Anulado' no cuenta para nada: no es dueno y sus decisiones no
         /// retienen, porque no paga. Devuelve copias: la entrada no se modifica, asi
@@ -83,7 +83,7 @@ namespace CapaNegocio
 
             // El titular se calcula una vez por tramo, no por segmento.
             Dictionary<long, int?> titular = new Dictionary<long, int?>();
-            Dictionary<long, int?> titularSinEste = new Dictionary<long, int?>();
+            Dictionary<long, int?> rechazo = new Dictionary<long, int?>();
 
             foreach (EntHeCandidato original in candidatos)
             {
@@ -99,11 +99,11 @@ namespace CapaNegocio
                 if (!titular.ContainsKey(c.IdRegDetTareas))
                 {
                     HashSet<DateTime> actuales = segmentosPorTramo[c.IdRegDetTareas];
-                    titular[c.IdRegDetTareas] = Titular(c, vigentes, actuales, cerrados, validos, null);
-                    titularSinEste[c.IdRegDetTareas] = Titular(c, vigentes, actuales, cerrados, validos, idPeriodo);
+                    titular[c.IdRegDetTareas] = Titular(c, vigentes, actuales, cerrados, validos);
+                    rechazo[c.IdRegDetTareas] = RechazoAlIncluir(c, vigentes, actuales, cerrados, validos, idPeriodo);
                 }
                 int? elTitular = titular[c.IdRegDetTareas];
-                int? elTitularSinEste = titularSinEste[c.IdRegDetTareas];
+                int? elRechazo = rechazo[c.IdRegDetTareas];
 
                 // Decision de este periodo sobre ESTE segmento, o valor por omision.
                 EntHeDecision propia = vigentes.FirstOrDefault(d => d.IdPeriodo == idPeriodo
@@ -137,8 +137,8 @@ namespace CapaNegocio
                 c.BloqueadoPor = c.Bloqueado ? Leyenda(elTitular.Value, todos) : "";
                 if (c.Bloqueado) { c.Incluir = false; }
 
-                c.IncluirRechazadoPor = elTitularSinEste.HasValue && elTitularSinEste.Value != idPeriodo
-                    ? Leyenda(elTitularSinEste.Value, todos)
+                c.IncluirRechazadoPor = elRechazo.HasValue
+                    ? Leyenda(elRechazo.Value, todos)
                     : "";
 
                 resultado.Add(c);
@@ -148,8 +148,9 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// El periodo que retiene el tramo de c (a lo sumo uno), o null. Espejo
-        /// exacto del bloque -2 de Sp_RTA_HeGuardarDecisiones:
+        /// El periodo que retiene el tramo de c (a lo sumo uno), o null. Decide que
+        /// se paga y que se ve bloqueado; la regla de GUARDAR (el bloque -2 de
+        /// Sp_RTA_HeGuardarDecisiones) es RechazoAlIncluir:
         ///
         ///   1. Titular EXPLICITO: un periodo cuya decision vigente sobre ALGUN
         ///      segmento del tramo dice Incluir = 1, siempre que esa clave sea un
@@ -164,10 +165,6 @@ namespace CapaNegocio
         ///      tramo completo.
         ///   3. Si no, nadie: cualquiera lo puede incluir.
         ///
-        /// excluirPeriodo: si viene, sus decisiones no cuentan (ni para retener ni
-        /// para excluir). Es el titular "sin lo de este periodo" que usa la regla
-        /// de guardado: el lote que se guarda reemplaza las decisiones del periodo.
-        ///
         /// Limitacion conocida (documentada en DESPLIEGUE.md 14): si el estado de
         /// aprobacion de un tramo cambia DESPUES de que su dueno cerro pagandolo por
         /// omision, aqui ya no se sabe que se pago -no hay una foto del pago por
@@ -175,23 +172,74 @@ namespace CapaNegocio
         /// cerrado y recalcularlo.
         /// </summary>
         private static int? Titular(EntHeCandidato c, List<EntHeDecision> vigentes, HashSet<DateTime> segmentosActuales,
-                                    HashSet<int> cerrados, List<EntHeRangoPeriodo> validos, int? excluirPeriodo)
+                                    HashSet<int> cerrados, List<EntHeRangoPeriodo> validos)
         {
-            EntHeDecision explicita = vigentes
-                .Where(d => d.Incluir
-                            && (!excluirPeriodo.HasValue || d.IdPeriodo != excluirPeriodo.Value)
-                            && (segmentosActuales.Contains(d.SegmentoInicio) || cerrados.Contains(d.IdPeriodo)))
-                .OrderBy(d => d.IdDecision)
-                .FirstOrDefault();
+            EntHeDecision explicita = Explicitas(vigentes, segmentosActuales, cerrados).FirstOrDefault();
             if (explicita != null) { return explicita.IdPeriodo; }
 
+            return DuenioQuePagaPorOmision(c, vigentes, validos);
+        }
+
+        /// <summary>
+        /// El periodo que impide GUARDAR Incluir = 1 sobre el tramo de c en
+        /// idPeriodo, o null si se puede. Espejo exacto del bloque -2 de
+        /// Sp_RTA_HeGuardarDecisiones. Se rechaza si:
+        ///   (a) OTRO periodo lo retiene explicitamente (Incluir = 1 vigente en una
+        ///       clave actual, o en cualquier clave si esta Cerrado). Siempre,
+        ///       aunque este periodo tambien lo tenga incluido: si no, un guardado
+        ///       podria dar vuelta el titular en silencio segun el IdDecision;
+        ///   (b) el tramo esta aprobado, su dueno es OTRO periodo que no lo
+        ///       excluyo, y este periodo NO lo tiene ya incluido (antes del lote)
+        ///       en una clave actual. La primera inclusion sobre un tramo que el
+        ///       dueno paga por omision se rechaza; pero quien ya lo retiene por
+        ///       decision propia (trajo un borde antes de que existiera su dueno)
+        ///       puede volver a guardarlo incluido para cambiarle el tipo o los
+        ///       minutos. Si solo pudiera excluirlo, y el dueno ya hubiera cerrado,
+        ///       nadie lo pagaria.
+        /// </summary>
+        private static int? RechazoAlIncluir(EntHeCandidato c, List<EntHeDecision> vigentes, HashSet<DateTime> segmentosActuales,
+                                             HashSet<int> cerrados, List<EntHeRangoPeriodo> validos, int idPeriodo)
+        {
+            EntHeDecision otra = Explicitas(vigentes, segmentosActuales, cerrados)
+                .FirstOrDefault(d => d.IdPeriodo != idPeriodo);
+            if (otra != null) { return otra.IdPeriodo; }
+
+            int? duenio = DuenioQuePagaPorOmision(c, vigentes, validos);
+            if (!duenio.HasValue || duenio.Value == idPeriodo) { return null; }
+
+            bool yaLoRetiene = vigentes.Any(d => d.IdPeriodo == idPeriodo && d.Incluir
+                                              && segmentosActuales.Contains(d.SegmentoInicio));
+            return yaLoRetiene ? (int?)null : duenio;
+        }
+
+        /// <summary>
+        /// Las decisiones que retienen el tramo explicitamente, de la mas antigua
+        /// (IdDecision mas bajo, la que manda) a la mas nueva: Incluir = 1 vigente
+        /// sobre una clave ACTUAL del tramo, o sobre cualquier clave si su periodo
+        /// esta 'Cerrado'. Un periodo abierto con una clave vieja no retiene: en su
+        /// proximo recalculo esa clave no esta entre los candidatos y no la paga.
+        /// Uno cerrado si: ya la pago.
+        /// </summary>
+        private static IEnumerable<EntHeDecision> Explicitas(List<EntHeDecision> vigentes, HashSet<DateTime> segmentosActuales,
+                                                             HashSet<int> cerrados)
+        {
+            return vigentes
+                .Where(d => d.Incluir && (segmentosActuales.Contains(d.SegmentoInicio) || cerrados.Contains(d.IdPeriodo)))
+                .OrderBy(d => d.IdDecision);
+        }
+
+        /// <summary>
+        /// El dueno de un tramo aprobado si lo paga por omision (alli nadie excluyo
+        /// el tramo completo), o null.
+        /// </summary>
+        private static int? DuenioQuePagaPorOmision(EntHeCandidato c, List<EntHeDecision> vigentes, List<EntHeRangoPeriodo> validos)
+        {
             if (!c.EsAprobado) { return null; }
 
             int? duenio = Duenio(c, validos);
             if (!duenio.HasValue) { return null; }
 
             bool excluidoEnSuDuenio = vigentes.Any(d => d.IdPeriodo == duenio.Value
-                                                     && (!excluirPeriodo.HasValue || d.IdPeriodo != excluirPeriodo.Value)
                                                      && d.SegmentoInicio == c.TramoInicio
                                                      && !d.Incluir);
             return excluidoEnSuDuenio ? (int?)null : duenio;
@@ -322,11 +370,11 @@ namespace CapaNegocio
                 }
             }
 
-            // -2: el pago doble. Se rechaza incluir si el tramo lo retiene otro
-            // periodo SIN contar las decisiones de este (IncluirRechazadoPor): asi,
-            // si el dueno ya lo paga por omision, otro periodo no se lo puede
-            // quitar. Bloqueado implica eso mismo; se mira tambien por si el
-            // candidato no vino de Resolver.
+            // -2: el pago doble. Se rechaza incluir si IncluirRechazadoPor nombra
+            // un periodo (ver RechazoAlIncluir): otro titular explicito, o un
+            // dueno que ya lo paga por omision y este periodo no lo retenia.
+            // Bloqueado implica eso mismo; se mira tambien por si el candidato no
+            // vino de Resolver.
             foreach (var par in pares)
             {
                 EntHeCandidato c = par.Item2;

@@ -399,8 +399,21 @@ namespace CapaNegocio
             /* Si el periodo no existe, Periodo llega nulo y CalcularFueraDeHorario
                lo devuelve sin calcular: se rechaza con el mismo mensaje, igual que
                una falla de lectura. El procedimiento de cierre sigue siendo la
-               ultima barrera (estado, filas con problema). */
-            EntHeFueraDeHorario fuera = CalcularFueraDeHorario(DaoHorasExtras.CargarPeriodo(idPeriodo).Periodo);
+               ultima barrera (estado, filas con problema).
+
+               La lectura del periodo va en su propio try: CalcularFueraDeHorario
+               nunca lanza, pero CargarPeriodo si, y una falla de la base aqui
+               tiene que decir "no se pudo verificar" (estado "0") y no un error
+               generico del handler. */
+            EntHeFueraDeHorario fuera;
+            try
+            {
+                fuera = CalcularFueraDeHorario(DaoHorasExtras.CargarPeriodo(idPeriodo).Periodo);
+            }
+            catch (Exception)
+            {
+                fuera = null;
+            }
             string motivo = MotivoParaNoCerrar(fuera);
             if (motivo != null)
             {

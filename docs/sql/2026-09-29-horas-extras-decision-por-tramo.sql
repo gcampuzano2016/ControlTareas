@@ -236,10 +236,9 @@ GO
    Respuestas (una sola fila):
       0  guardado: TODO el lote
      -1  el periodo no existe o no esta 'Abierto'
-     -2  el pago doble: un elemento con i = 1 sobre un tramo cuyo TITULAR,
-         calculado SIN las decisiones de este periodo, existe y es otro
-         periodo. El titular es por TRAMO (Id_RegDetTareas), no por clave de
-         segmento, y es a lo sumo uno:
+     -2  el pago doble: un elemento con i = 1 sobre un tramo que retiene OTRO
+         periodo. Se decide por TRAMO (Id_RegDetTareas), no por clave de
+         segmento. El titular de un tramo es a lo sumo uno:
            1. explicito: un periodo cuya decision vigente sobre ALGUN
               segmento del tramo dice Incluir = 1, si esa clave es un
               segmento ACTUAL del tramo o si el periodo esta 'Cerrado' (ya
@@ -250,9 +249,14 @@ GO
               FechaInicio, cuyo rango contiene el dia del tramo) si el tramo
               esta aprobado y alli nadie excluyo el tramo completo;
            3. si no, nadie.
-         Asi, si el dueno ya lo paga por omision, otro periodo no se lo puede
-         quitar; y un periodo que trajo un borde antes de que existiera su
-         dueno lo sigue reteniendo cuando el dueno se crea. Un periodo
+         Al guardar se rechaza i = 1 si (a) OTRO periodo lo retiene
+         explicitamente (siempre, aunque este tambien lo tenga incluido: un
+         guardado no puede dar vuelta el titular en silencio), o (b) el dueno
+         es OTRO periodo que lo paga por omision y ESTE periodo no lo tenia ya
+         incluido, antes del lote, en una clave actual. Asi, si el dueno ya lo
+         paga, otro periodo no se lo puede quitar; y un periodo que trajo un
+         borde antes de que existiera su dueno lo sigue reteniendo cuando el
+         dueno se crea, y puede volver a guardarlo (cambiar tipo o minutos). Un periodo
          'Anulado' no cuenta para nada: ni es dueno, ni sus decisiones
          retienen ni excluyen (no se paga, asi que no puede provocar un pago
          doble). Es el espejo de NegHeDecisiones.Titular en CapaNegocio.
@@ -484,14 +488,17 @@ BEGIN
                                       AND pa.EstadoPeriodo = 'Anulado')) v
          WHERE v.Orden = 1;
 
-        /* Se rechaza si algun tramo con un elemento i = 1 tiene, SIN contar las
-           decisiones de este periodo, un titular que no es este periodo:
-             1. explicito: otro periodo lo incluye en una clave actual del
-                tramo, o esta 'Cerrado' (ya lo pago, aunque la clave sea vieja);
-             2. si no hay explicito, por omision: el tramo esta aprobado y su
-                dueno es OTRO periodo, que no excluyo el tramo completo.
-           Con 1 no hace falta saber CUAL es el titular (el de IdDecision mas
-           bajo, en CapaNegocio): cualquiera de ellos es otro periodo. */
+        /* Se rechaza si algun tramo con un elemento i = 1:
+             1. lo retiene explicitamente OTRO periodo: lo incluye en una clave
+                actual del tramo, o esta 'Cerrado' (ya lo pago, aunque la clave
+                sea vieja). Siempre, aunque este periodo tambien lo incluya;
+             2. o, sin eso, esta aprobado, su dueno es OTRO periodo que no
+                excluyo el tramo completo, y ESTE periodo no lo tenia ya incluido
+                en una clave actual. #Vigente se leyo antes del INSERT, asi que
+                ve lo que habia antes del lote: la primera inclusion sobre un
+                tramo que el dueno paga por omision se rechaza, pero quien ya lo
+                retiene puede volver a guardarlo (cambiar tipo o minutos).
+           Espejo de NegHeDecisiones.RechazoAlIncluir. */
         IF EXISTS (SELECT 1
                      FROM (SELECT DISTINCT Id_RegDetTareas, TramoInicio, Aprobado
                              FROM #Lote
@@ -522,7 +529,15 @@ BEGIN
                                                            WHERE v.IdPeriodo       = duenio.IdPeriodo
                                                              AND v.Id_RegDetTareas = l.Id_RegDetTareas
                                                              AND v.SegmentoInicio  = l.TramoInicio
-                                                             AND v.Incluir         = 0))))
+                                                             AND v.Incluir         = 0))
+                           /* ... y este periodo no lo retenia ya */
+                           AND NOT EXISTS (SELECT 1 FROM #Vigente v
+                                            WHERE v.IdPeriodo       = @IdPeriodo
+                                              AND v.Id_RegDetTareas = l.Id_RegDetTareas
+                                              AND v.Incluir         = 1
+                                              AND v.SegmentoInicio IN (SELECT sa.SegmentoInicio
+                                                                         FROM #SegmentoActual sa
+                                                                        WHERE sa.Id_RegDetTareas = l.Id_RegDetTareas))))
         BEGIN
             COMMIT TRANSACTION; SELECT -2 AS Respuestas; RETURN;
         END

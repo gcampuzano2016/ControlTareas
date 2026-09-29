@@ -844,9 +844,3 @@ anteriores.
   otro período podría incluirlo. **Remedio:** reabrir el período cerrado y recalcularlo, o no
   incluir ese tramo en otro período. Un período cerrado que lo incluyó **por decisión** sí lo
   sigue reteniendo aunque el tramo cambie.
-- **Volver a incluir un borde que el período trajo antes de que existiera su dueño.** Si un
-  período incluyó un tramo de sus 7 días de borde cuando el período dueño todavía no existía, lo
-  sigue pagando cuando el dueño se crea (el dueño lo ve «incluido en» el primero). Ese primer
-  período puede **dejarlo afuera** (y entonces lo paga el dueño), pero **no volver a guardarlo
-  incluido** —por ejemplo, para cambiarle el tipo o los minutos—: sin su propia decisión, el
-  tramo le correspondería al dueño.

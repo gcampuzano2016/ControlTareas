@@ -699,26 +699,74 @@ namespace CapaPruebas
         }
 
         [TestMethod]
-        public void Validar_SinLasDecisionesDeEstePeriodoLoRetieneElDuenio_RechazaIncluir()
+        public void Validar_BordeRetenidoAntesDelDuenio_PuedeVolverAGuardarloIncluido()
         {
-            // El 3 trajo un borde antes de que existiera su dueno y lo retiene
-            // (Resolver no lo bloquea). La regla de guardado mira el tramo SIN las
-            // decisiones del 3: ahi el dueno lo paga por omision, asi que volver a
-            // incluirlo (por ejemplo, para cambiarle el tipo) se rechaza. Dejarlo
-            // afuera si se puede, y entonces lo paga el dueno.
+            // El 3 trajo un borde antes de que existiera su dueno y lo retiene. Ya
+            // lo tiene incluido en una clave actual, asi que puede volver a
+            // guardarlo incluido (por ejemplo, para cambiarle el tipo): si solo
+            // pudiera excluirlo, y el dueno ya hubiera cerrado, nadie lo pagaria.
             EntHeCandidato c = Aprobado(313, "2026-09-17 18:00", "2026-09-17 20:00", 1);
             List<EntHeRangoPeriodo> periodos = Periodos();
             periodos.Add(PeriodoSiguiente());
             List<EntHeCandidato> r = ResolverEn(Este, new[] { c }, new[] { Dec(160, Este, c, true, 1) }, periodos);
 
             Assert.IsFalse(r[0].Bloqueado);
-            Assert.AreEqual("incluido en el periodo 16/09/2026 - 15/10/2026", r[0].IncluirRechazadoPor);
-
-            string error = NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], true, 2) });
-            Assert.IsNotNull(error);
-            StringAssert.Contains(error, "16/09/2026 - 15/10/2026");
-
+            Assert.AreEqual("", r[0].IncluirRechazadoPor);
+            Assert.IsNull(NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], true, 2) }));
             Assert.IsNull(NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], false, 1) }));
+        }
+
+        [TestMethod]
+        public void Validar_TitularExplicitoPuedeCambiarTipo()
+        {
+            // El 3 incluyo el tramo del 10-08 (dueno: el anterior) cuando no estaba
+            // aprobado, con la clave 18:00; despues se aprobo y la clave sigue
+            // siendo la misma. El 3 es su titular explicito: puede cambiarle el tipo
+            // y los minutos.
+            EntHeCandidato c = Aprobado(314, "2026-08-10 18:00", "2026-08-10 20:00", 1);
+            List<EntHeCandidato> r = ResolverEn(Este, new[] { c },
+                new[] { DecEn(161, Este, 314, "2026-08-10 18:00", true) }, Periodos());
+
+            Assert.IsFalse(r[0].Bloqueado);
+            Assert.IsNull(NegHeDecisiones.Validar(r, Persona,
+                new List<EntHeCambioDecision> { Cambio(r[0], true, 2, 90, "se reduce") }));
+        }
+
+        [TestMethod]
+        public void Validar_PrimeraInclusionSobreUnTramoDelDuenio_SigueRechazada()
+        {
+            // El 3 solo tenia una clave vieja (18:30) del tramo del 10-08: no lo
+            // retiene, y el dueno lo paga por omision. Incluirlo ahora es la primera
+            // inclusion sobre un tramo del dueno: se rechaza.
+            EntHeCandidato c = Aprobado(315, "2026-08-10 18:00", "2026-08-10 20:00", 1);
+            List<EntHeCandidato> r = ResolverEn(Este, new[] { c },
+                new[] { DecEn(162, Este, 315, "2026-08-10 18:30", true) }, Periodos());
+
+            Assert.AreEqual("incluido en el periodo 15/07/2026 - 13/08/2026", r[0].IncluirRechazadoPor);
+            string error = NegHeDecisiones.Validar(r, Persona, new List<EntHeCambioDecision> { Cambio(r[0], true, 1) });
+            Assert.IsNotNull(error);
+            StringAssert.Contains(error, "15/07/2026 - 13/08/2026");
+        }
+
+        [TestMethod]
+        public void Validar_OtroTitularExplicito_SiempreRechaza()
+        {
+            // Dos periodos con Incluir = 1 en la clave actual de un tramo sin dueno
+            // (no deberia pasar). El anterior (IdDecision mas bajo) es el titular,
+            // pero tampoco puede volver a guardarlo incluido mientras el 3 lo tenga
+            // incluido: asi un guardado no da vuelta el titular en silencio.
+            EntHeCandidato c = Cand(316, "2026-08-14 19:00", "2026-08-14 20:00", 1, 0);
+            EntHeDecision[] decisiones = { Dec(170, Anterior, c, true, 1, null, "x"), Dec(171, Este, c, true, 1, null, "y") };
+
+            List<EntHeCandidato> enAnterior = ResolverEn(Anterior, new[] { c }, decisiones, Periodos());
+            Assert.IsFalse(enAnterior[0].Bloqueado);
+            Assert.IsNotNull(NegHeDecisiones.Validar(enAnterior, Persona,
+                new List<EntHeCambioDecision> { Cambio(enAnterior[0], true, 2, null, "x") }));
+
+            List<EntHeCandidato> enEste = ResolverEn(Este, new[] { c }, decisiones, Periodos());
+            Assert.IsTrue(enEste[0].Bloqueado);
+            Assert.IsNotNull(NegHeDecisiones.Validar(enEste, Persona,
+                new List<EntHeCambioDecision> { Cambio(enEste[0], true, 1, null, "y") }));
         }
 
         [TestMethod]

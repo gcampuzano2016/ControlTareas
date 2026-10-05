@@ -1,0 +1,273 @@
+﻿/* ==========================================================================
+   Curva de Aprendizaje - estilos propios del modulo.
+
+   Va ENCIMA de dos-tema.css (pantallas con Master.Master) y reusa sus
+   variables --crm-*; toda clase lleva el prefijo ca- para no chocar con nada
+   del sistema. La pagina remota (sin master, sin dos-tema.css) define sus
+   propias variables al final de este archivo con .ca-remota.
+
+   Colores de estado del modulo (especificacion, secciones 7.6 y 15): pasteles
+   en la web; la paleta estricta de DOS es solo para los PDF.
+   ========================================================================== */
+
+.ca-pagina {
+    --ca-oscuro: #221e20;
+    --ca-oscuro-alt: #2f2a2c;
+    --ca-rojo: #e20000;
+    --ca-naranja: #f7902b;
+    --ca-petroleo: #0f4560;
+    --ca-verde-azulado: #026666;
+    --ca-purpura: #6d33a0;
+    --ca-borde: #e5e3e2;
+    --ca-fondo: #faf9f8;
+    --ca-hover: #fdf6f0;
+    padding: 20px;
+    color: var(--crm-tinta, #221e20);
+}
+
+/* ------------------------------------------------------------ encabezado */
+.ca-encabezado {
+    background: var(--ca-oscuro);
+    color: #fff;
+    border-radius: 16px;
+    padding: 22px 26px;
+    margin-bottom: 18px;
+}
+.ca-encabezado.ca-colaborador { border-left: 6px solid #4fb3e0; }
+.ca-encabezado.ca-jefe { border-left: 6px solid var(--ca-naranja); }
+.ca-kicker {
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #c4beb8;
+    margin: 0 0 4px;
+}
+.ca-encabezado h1 {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    margin: 0;
+    color: #fff;
+}
+.ca-encabezado .ca-sub { color: #d8d3cf; margin: 6px 0 0; }
+.ca-encabezado .ca-acciones { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.ca-chips { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.ca-chip {
+    background: var(--ca-oscuro-alt);
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-size: 13px;
+    color: #e8e4e1;
+}
+.ca-chip b { color: #fff; margin-right: 4px; font-variant-numeric: tabular-nums; }
+
+/* --------------------------------------------------------------- botones */
+.ca-btn {
+    display: inline-block;
+    border-radius: 10px;
+    padding: 7px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    text-decoration: none;
+    line-height: 1.4;
+    background: #fff;
+}
+.ca-btn:hover, .ca-btn:focus { text-decoration: none; }
+.ca-btn[disabled] { opacity: .6; cursor: progress; }
+.ca-btn-primario { background: var(--ca-rojo); color: #fff; }
+.ca-btn-primario:hover { background: #b80000; color: #fff; }
+.ca-btn-secundario { background: var(--ca-oscuro); color: #fff; }
+.ca-btn-secundario:hover { background: #000; color: #fff; }
+/* outline oscuro SOLO sobre fondo claro; sobre fondo oscuro, el claro */
+.ca-btn-outline { background: transparent; border-color: var(--ca-oscuro); color: var(--ca-oscuro); }
+.ca-btn-outline:hover { background: var(--ca-hover); color: var(--ca-oscuro); }
+.ca-btn-outline-claro { background: transparent; border-color: #fff; color: #fff; }
+.ca-btn-outline-claro:hover { background: rgba(255,255,255,.12); color: #fff; }
+.ca-btn-peligro { background: transparent; border-color: #8f181b; color: #8f181b; }
+.ca-btn-peligro:hover { background: #fbdada; color: #8f181b; }
+.ca-enlace-peligro { color: #f5a3a3; font-size: 12px; cursor: pointer; text-decoration: underline; background: none; border: 0; padding: 0; }
+.ca-enlace-peligro:hover { color: #fff; }
+
+/* ---------------------------------------------------------------- badges */
+.ca-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border-radius: 999px;
+    padding: 2px 10px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.ca-badge::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.ca-badge-amarillo { background: #fdf2ce; color: #8a6d00; }
+.ca-badge-verde { background: #d9f0e8; color: #026666; }
+.ca-badge-rojo { background: #fbdada; color: #8f181b; }
+.ca-badge-purpura { background: #ece2f7; color: #6d33a0; }
+.ca-badge-gris { background: #eeeeee; color: #77787b; }
+
+/* --------------------------------------------------------------- paneles */
+.ca-panel {
+    background: #fff;
+    border: 1px solid var(--ca-borde);
+    border-radius: 16px;
+    padding: 18px 20px;
+    margin-bottom: 18px;
+}
+.ca-panel h2 {
+    font-size: 15px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .02em;
+    margin: 0 0 12px;
+}
+.ca-nota { color: var(--crm-tinta-suave, #77787b); font-size: 12px; }
+.ca-vacio { color: var(--crm-tinta-suave, #77787b); text-align: center; padding: 24px 8px; }
+
+/* ----------------------------------------------------- lista colaboradores */
+.ca-toolbar { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.ca-buscador {
+    flex: 1 1 240px;
+    border: 1px solid var(--ca-borde);
+    border-radius: 999px;
+    padding: 7px 14px;
+    background: #fff;
+}
+.ca-filtro {
+    border: 1px solid var(--ca-borde);
+    border-radius: 999px;
+    padding: 6px 14px;
+    background: #fff;
+    font-size: 13px;
+    cursor: pointer;
+}
+.ca-filtro.activo { background: var(--ca-oscuro); color: #fff; border-color: var(--ca-oscuro); }
+
+.ca-lista-cab, .ca-fila {
+    display: grid;
+    grid-template-columns: minmax(200px, 2.4fr) 1.2fr 1fr .9fr 1fr 110px;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 12px;
+}
+.ca-lista-cab {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--crm-tinta-suave, #77787b);
+    border-bottom: 1px solid var(--ca-borde);
+}
+.ca-fila { border-bottom: 1px solid var(--crm-linea-suave, #f0ecea); cursor: pointer; border-radius: 10px; }
+.ca-fila:hover { background: var(--ca-hover); }
+.ca-colab { display: flex; gap: 10px; align-items: center; min-width: 0; }
+.ca-avatar {
+    width: 34px; height: 34px; border-radius: 50%; flex: 0 0 34px;
+    color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center;
+}
+.ca-recorte { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.ca-colab .ca-nombre { font-weight: 700; }
+.ca-colab .ca-cargo { font-size: 12px; color: var(--crm-tinta-suave, #77787b); }
+.ca-fecha { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.ca-fecha svg { vertical-align: -2px; margin-right: 4px; }
+
+/* -------------------------------------------------------------- ficha */
+.ca-banner { border-top: 4px solid var(--ca-naranja); }
+.ca-banner.ca-banner-seguimiento { border-top-color: var(--ca-rojo); }
+.ca-graficos { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.ca-grafico { position: relative; height: 230px; }
+.ca-grafico.ca-linea { height: 260px; }
+.ca-tarjetas { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; }
+.ca-tarjeta {
+    border: 1px solid var(--ca-borde);
+    border-radius: 12px;
+    padding: 14px 16px;
+    background: #fff;
+}
+.ca-tarjeta.ca-pendiente { background: var(--ca-fondo); }
+.ca-tarjeta-cab { display: flex; justify-content: space-between; gap: 8px; align-items: flex-start; margin-bottom: 8px; }
+.ca-tarjeta-cab b { font-size: 15px; }
+.ca-tarjeta-rol { font-size: 12px; color: var(--crm-tinta-suave, #77787b); }
+.ca-tarjeta p { margin: 4px 0; font-size: 13px; }
+.ca-tarjeta .ca-acciones-tarjeta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+.ca-aviso { background: #fbdada; color: #8f181b; border-radius: 8px; padding: 6px 10px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+.ca-plan { margin-top: 10px; }
+.ca-plan textarea, .ca-enlace input { width: 100%; }
+.ca-enlace { margin-top: 10px; display: none; }
+.ca-enlace .ca-enlace-fila { display: flex; gap: 6px; }
+.ca-tabla { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ca-tabla th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: var(--crm-tinta-suave, #77787b); border-bottom: 1px solid var(--ca-borde); padding: 6px 8px; }
+.ca-tabla td { border-bottom: 1px solid var(--crm-linea-suave, #f0ecea); padding: 7px 8px; vertical-align: top; }
+.ca-tabla tr.ca-clic { cursor: pointer; }
+.ca-tabla tr.ca-clic:hover td { background: var(--ca-hover); }
+.ca-vencida { color: #8f181b; font-weight: 700; }
+.ca-reportes { display: flex; flex-wrap: wrap; gap: 10px; align-items: flex-end; }
+.ca-reportes label { display: block; font-size: 12px; margin-bottom: 2px; }
+
+/* ------------------------------------------------------------ dashboard */
+.ca-kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 18px; }
+.ca-kpi { background: var(--ca-oscuro); color: #fff; border-radius: 14px; padding: 16px 18px; border-top: 4px solid var(--ca-naranja); }
+.ca-kpi:nth-child(2) { border-top-color: var(--ca-petroleo); }
+.ca-kpi:nth-child(3) { border-top-color: var(--ca-verde-azulado); }
+.ca-kpi:nth-child(4) { border-top-color: var(--ca-purpura); }
+.ca-kpi span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: #c4beb8; }
+.ca-kpi b { display: block; font-size: 30px; margin-top: 4px; font-variant-numeric: tabular-nums; }
+.ca-dos-columnas { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.ca-ancho { grid-column: 1 / -1; }
+
+/* ----------------------------------------------------------- formulario */
+.ca-formulario { max-width: 860px; }
+.ca-seccion-titulo {
+    font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+    color: var(--ca-petroleo); border-bottom: 2px solid var(--ca-borde); padding-bottom: 4px; margin: 22px 0 10px;
+}
+.ca-pregunta { margin-bottom: 16px; }
+.ca-pregunta > label.ca-enunciado { display: block; font-weight: 600; margin-bottom: 6px; }
+.ca-opciones label { display: block; font-weight: normal; border: 1px solid var(--ca-borde); border-radius: 10px; padding: 7px 10px; margin-bottom: 5px; cursor: pointer; background: #fff; }
+.ca-opciones label:hover { background: var(--ca-hover); }
+.ca-opciones input { margin-right: 8px; }
+.ca-otro-texto { display: none; margin: 2px 0 6px 26px; width: calc(100% - 26px); }
+.ca-pregunta textarea, .ca-pregunta input[type=text], .ca-pregunta input[type=date], .ca-pregunta select,
+.ca-panel textarea, .ca-panel input[type=text], .ca-panel input[type=date], .ca-panel select {
+    border: 1px solid var(--ca-borde); border-radius: 10px; padding: 6px 10px; max-width: 100%;
+}
+.ca-pregunta textarea { width: 100%; min-height: 70px; }
+.ca-competencia { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 6px 0; border-bottom: 1px solid var(--crm-linea-suave, #f0ecea); }
+.ca-escala-num label { margin: 0 4px; font-weight: normal; cursor: pointer; }
+.ca-compromiso { border: 1px solid var(--ca-borde); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; background: var(--ca-fondo); display: grid; grid-template-columns: 2fr 1.4fr 1fr 150px 30px; gap: 8px; align-items: end; }
+.ca-compromiso label { font-size: 11px; font-weight: 600; display: block; margin-bottom: 2px; }
+.ca-compromiso input, .ca-compromiso select { width: 100%; }
+.ca-compromiso .ca-quitar { background: none; border: 0; color: #8f181b; font-size: 18px; cursor: pointer; }
+.ca-seguimiento { border: 1px solid var(--ca-borde); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; }
+.ca-seguimiento .ca-meta { font-size: 12px; color: var(--crm-tinta-suave, #77787b); margin: 2px 0 6px; }
+.ca-seguimiento .ca-estados label { margin-right: 14px; font-weight: normal; cursor: pointer; }
+.ca-seguimiento input[type=text] { width: 100%; margin-top: 6px; }
+.ca-decision label { display: block; font-weight: normal; }
+.ca-nueva-fecha { display: none; margin: 6px 0; }
+.ca-guardar { margin-top: 20px; display: flex; gap: 10px; }
+
+/* ------------------------------------------------------------ responsive */
+@media (max-width: 760px) {
+    .ca-pagina { padding: 12px; }
+    .ca-lista-cab { display: none; }
+    .ca-fila { grid-template-columns: 1fr; gap: 4px; }
+    .ca-graficos, .ca-dos-columnas { grid-template-columns: 1fr; }
+    .ca-kpis { grid-template-columns: 1fr 1fr; }
+    .ca-compromiso { grid-template-columns: 1fr; }
+}
+
+/* ------------------------------------------------- pagina remota (sin master) */
+body.ca-remota {
+    margin: 0;
+    background: #f4f2ef;
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    color: #221e20;
+    --crm-tinta: #221e20;
+    --crm-tinta-suave: #77787b;
+    --crm-linea-suave: #f0ecea;
+}
+body.ca-remota .ca-pagina { max-width: 780px; margin: 0 auto; }
+body.ca-remota *, body.ca-remota *::before, body.ca-remota *::after { box-sizing: border-box; }

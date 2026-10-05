@@ -84,6 +84,8 @@
     <Compile Include="DaoUsuarioAdmin.cs" />
     <Compile Include="DaoHeParametro.cs" />
     <Compile Include="DaoHorasExtras.cs" />
+    <Compile Include="DaoCurva.cs" />
+    <Compile Include="DaoCurvaUnidad.cs" />
     <Compile Include="DaoPerfil.cs" />
     <Compile Include="DaoPerfilInicio.cs" />
     <Compile Include="DaoPlanRecuperacion.cs" />

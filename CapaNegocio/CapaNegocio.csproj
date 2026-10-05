@@ -222,6 +222,10 @@
     <Compile Include="NegHeParametros.cs" />
     <Compile Include="NegHeParametroPantalla.cs" />
     <Compile Include="NegHorasExtras.cs" />
+    <Compile Include="NegCurvaCurva.cs" />
+    <Compile Include="NegCurvaDashboard.cs" />
+    <Compile Include="NegCurvaFormulario.cs" />
+    <Compile Include="NegCurvaValorRespuesta.cs" />
     <Compile Include="NegHorasExtrasPantalla.cs" />
     <Compile Include="NegPerfilInicio.cs" />
     <Compile Include="NegPerfiles.cs" />

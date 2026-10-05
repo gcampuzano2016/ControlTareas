@@ -116,6 +116,13 @@
     <Compile Include="EntParametrosCorreo.cs" />
     <Compile Include="EntCatalogo.cs" />
     <Compile Include="EntRespuesta.cs" />
+    <Compile Include="CurvaConstantes.cs" />
+    <Compile Include="EntCurvaCatalogo.cs" />
+    <Compile Include="EntCurvaCompromiso.cs" />
+    <Compile Include="EntCurvaDashboard.cs" />
+    <Compile Include="EntCurvaEmpleado.cs" />
+    <Compile Include="EntCurvaEvaluacion.cs" />
+    <Compile Include="EntCurvaIndice.cs" />
     <Compile Include="EntDetTarea.cs" />
     <Compile Include="EntHorarioLaboral.cs" />
     <Compile Include="EntUsuarioHorario.cs" />

@@ -137,6 +137,12 @@ namespace CapaNegocio
             }
         }
 
+        /// <summary>Una evaluacion sin nada mas (el handler de PDF la usa para validar antes de armar).</summary>
+        public static EntCurvaEvaluacion CargarEvaluacionSimple(int evaluacionId)
+        {
+            using (var u = DaoCurvaUnidad.Abrir(false)) return DaoCurva.EvaluacionPorId(u, evaluacionId);
+        }
+
         /// <summary>Todo el proceso leido de una vez (ficha, PDF, prompts de IA).</summary>
         public static EntCurvaExpediente Expediente(int procesoId)
         {

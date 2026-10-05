@@ -1321,6 +1321,22 @@
     <Content Include="Formulario\AdministrarPerfiles.ashx" />
     <Content Include="Formulario\AdministrarPerfil.ashx" />
     <Content Include="Formulario\AdministrarHorasExtras.ashx" />
+    <Content Include="Formulario\DescargarCurvaAprendizaje.ashx" />
+    <Content Include="css\curvaAprendizaje.css" />
+    <Content Include="js\curvaRemota.js" />
+    <Content Include="js\curvaDashboard.js" />
+    <Content Include="js\curvaEvaluacion.js" />
+    <Content Include="js\curvaFicha.js" />
+    <Content Include="js\curvaNuevo.js" />
+    <Content Include="js\curvaColaboradores.js" />
+    <Content Include="js\curvaFormulario.js" />
+    <Content Include="js\curvaComun.js" />
+    <Content Include="Formulario\CurvaEvaluacionRemota.aspx" />
+    <Content Include="Formulario\CurvaDashboard.aspx" />
+    <Content Include="Formulario\CurvaEvaluacion.aspx" />
+    <Content Include="Formulario\CurvaColaboradorFicha.aspx" />
+    <Content Include="Formulario\CurvaColaboradorNuevo.aspx" />
+    <Content Include="Formulario\CurvaColaboradores.aspx" />
     <Content Include="Formulario\CurvaEvaluacionRemota.ashx" />
     <Content Include="Formulario\AdministrarCurvaAprendizaje.ashx" />
     <Content Include="Formulario\AdministrarParametrosHE.ashx" />
@@ -1516,8 +1532,54 @@
     <Compile Include="Formulario\AdministrarPerfil.ashx.cs">
       <DependentUpon>AdministrarPerfil.ashx</DependentUpon>
     </Compile>
+    <Compile Include="Formulario\CurvaAcceso.cs" />
     <Compile Include="Formulario\AdministrarHorasExtras.ashx.cs">
       <DependentUpon>AdministrarHorasExtras.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarCurvaAprendizaje.ashx.cs">
+      <DependentUpon>DescargarCurvaAprendizaje.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaEvaluacionRemota.aspx.designer.cs">
+      <DependentUpon>CurvaEvaluacionRemota.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaEvaluacionRemota.aspx.cs">
+      <DependentUpon>CurvaEvaluacionRemota.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CurvaDashboard.aspx.designer.cs">
+      <DependentUpon>CurvaDashboard.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaDashboard.aspx.cs">
+      <DependentUpon>CurvaDashboard.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CurvaEvaluacion.aspx.designer.cs">
+      <DependentUpon>CurvaEvaluacion.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaEvaluacion.aspx.cs">
+      <DependentUpon>CurvaEvaluacion.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradorFicha.aspx.designer.cs">
+      <DependentUpon>CurvaColaboradorFicha.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradorFicha.aspx.cs">
+      <DependentUpon>CurvaColaboradorFicha.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradorNuevo.aspx.designer.cs">
+      <DependentUpon>CurvaColaboradorNuevo.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradorNuevo.aspx.cs">
+      <DependentUpon>CurvaColaboradorNuevo.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradores.aspx.designer.cs">
+      <DependentUpon>CurvaColaboradores.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaColaboradores.aspx.cs">
+      <DependentUpon>CurvaColaboradores.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Formulario\CurvaEvaluacionRemota.ashx.cs">
       <DependentUpon>CurvaEvaluacionRemota.ashx</DependentUpon>

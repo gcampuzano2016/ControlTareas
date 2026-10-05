@@ -166,7 +166,11 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="PdfSharp, Version=1.32.3057.0, Culture=neutral, PublicKeyToken=f94615aa0424f9eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\PDFsharp.1.32.3057.0\lib\net20\PdfSharp.dll</HintPath>
+    </Reference>
     <Reference Include="System.Configuration" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -227,6 +231,7 @@
     <Compile Include="NegCurvaDashboard.cs" />
     <Compile Include="NegCurvaFormulario.cs" />
     <Compile Include="NegCurvaOnboarding.cs" />
+    <Compile Include="NegCurvaReportes.cs" />
     <Compile Include="NegCurvaResumenIA.cs" />
     <Compile Include="NegCurvaValorRespuesta.cs" />
     <Compile Include="NegHorasExtrasPantalla.cs" />

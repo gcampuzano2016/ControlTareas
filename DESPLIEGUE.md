@@ -1,4 +1,4 @@
-# Despliegue
+﻿# Despliegue
 
 Guía para publicar ReporteTareas. Lee la sección 1 antes del primer
 despliegue posterior a agosto de 2026: cambió dónde viven las contraseñas y un
@@ -868,8 +868,9 @@ dashboard, tres informes PDF y una evaluación remota por enlace. Reemplaza la a
      preguntas). **Ya aplicado el 2026-10-05**; la carga la reemplaza sola mientras no haya
      evaluaciones.
 3. `docs/sql/2026-10-05-curva-aprendizaje-menu.sql`: tres opciones bajo el grupo de
-   `RRHHEmpleados.aspx`, para los perfiles 14 y 18. **Va al final, junto con los binarios**: antes
-   de eso la opción apuntaría a páginas que no existen. **No aplicado todavía.**
+   `RRHHEmpleados.aspx`, para los perfiles 14 y 18. **Aplicado el 2026-10-05** (Id_Menu 20086,
+   20087 y 20088, grupo 20060), antes que los binarios: hasta publicarlos, esas opciones dan
+   «página no encontrada».
 
 Cada script termina con `OK` o `VEREDICTO: FALLO`.
 

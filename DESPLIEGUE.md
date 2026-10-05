@@ -844,3 +844,87 @@ anteriores.
   otro período podría incluirlo. **Remedio:** reabrir el período cerrado y recalcularlo, o no
   incluir ese tramo en otro período. Un período cerrado que lo incluyó **por decisión** sí lo
   sigue reteniendo aunque el tramo cambie.
+
+## 15. Curva de Aprendizaje (módulo nuevo de Talento Humano)
+
+Seguimiento de la curva de aprendizaje del primer año de cada colaborador nuevo: cinco etapas
+(30/60/90/180/365), autoevaluación y evaluación del jefe, compromisos, semáforo, plan de acción,
+dashboard, tres informes PDF y una evaluación remota por enlace. Reemplaza la aplicación aparte
+(Node + SQLite). Especificación completa: `ESPECIFICACION-MODULO-WEBFORMS.md`.
+
+### 15.1 Base de datos (en este orden)
+
+1. `docs/sql/2026-10-05-curva-aprendizaje-esquema.sql`: las 9 tablas `CA_*` y los 28
+   procedimientos `Sp_RTA_Curva*`. **Ya aplicado en `ReporTarea` el 2026-10-05.** Re-correrlo es
+   inofensivo (las tablas solo se crean si no existen).
+2. El catálogo, **uno de los dos**:
+   - **Con migración (lo previsto):** `python docs/sql/generar-carga-curva-aprendizaje.py <copia del .sqlite>`
+     y correr el `docs/sql/carga-generada/carga-curva-aprendizaje.sql` que genera. Trae el
+     catálogo **con sus IDs originales** y reemplaza la siembra. El `.sqlite` está en
+     `%LOCALAPPDATA%\DOS-CurvaAprendizaje\data\curva_aprendizaje.sqlite` de la PC donde corría
+     la aplicación vieja: **usar una copia** y no versionar ni el `.sqlite` ni la salida (son
+     datos de RRHH; la salida ya está en `.gitignore`).
+   - **Sin migración:** `docs/sql/2026-10-05-curva-aprendizaje-siembra.sql` (5 etapas, 90
+     preguntas). **Ya aplicado el 2026-10-05**; la carga la reemplaza sola mientras no haya
+     evaluaciones.
+3. `docs/sql/2026-10-05-curva-aprendizaje-menu.sql`: tres opciones bajo el grupo de
+   `RRHHEmpleados.aspx`, para los perfiles 14 y 18. **Va al final, junto con los binarios**: antes
+   de eso la opción apuntaría a páginas que no existen. **No aplicado todavía.**
+
+Cada script termina con `OK` o `VEREDICTO: FALLO`.
+
+### 15.2 Archivos a publicar
+
+Del paquete `ReporteTareas\obj\Release\Package\PackageTmp`:
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
+  (las capas son `.exe` y van **juntas** con el `.dll`). `bin\PdfSharp.dll` y
+  `bin\Newtonsoft.Json.dll` ya están en el servidor.
+- `Global.asax` (fuerza TLS 1.2 para la IA; no cambia nada más).
+- `Formulario\CurvaColaboradores.aspx`, `CurvaColaboradorNuevo.aspx`, `CurvaColaboradorFicha.aspx`,
+  `CurvaEvaluacion.aspx`, `CurvaDashboard.aspx`, `CurvaEvaluacionRemota.aspx`
+- `Formulario\AdministrarCurvaAprendizaje.ashx`, `CurvaEvaluacionRemota.ashx`, `DescargarCurvaAprendizaje.ashx`
+- `js\curvaComun.js`, `curvaFormulario.js`, `curvaColaboradores.js`, `curvaNuevo.js`,
+  `curvaFicha.js`, `curvaEvaluacion.js`, `curvaDashboard.js`, `curvaRemota.js`
+- `css\curvaAprendizaje.css`
+
+> **Estos binarios llevan todo lo que haya commiteado en la rama**, no solo este módulo.
+
+### 15.3 Configuración (opcional)
+
+En `appsettings.config` del servidor (ver `appsettings.config.ejemplo`):
+
+- `CA.UrlBasePublica`: base del enlace remoto, por ejemplo `https://servidor/ReporteTareas`.
+  Sin ella, el enlace usa el host con el que GTH abrió la ficha; si ese host no es el que los
+  evaluadores pueden abrir, **configurarla**.
+- `CA.IA.Modelo`, `CA.IA.Effort`, `CA.IA.TimeoutSegundos`: los valores por omisión sirven.
+
+**La IA queda apagada a propósito.** Sin la variable de entorno `ANTHROPIC_API_KEY` en el pool de
+IIS, los resúmenes ejecutivos guardan un aviso y todo lo demás funciona. Activarla exige una
+cuenta corporativa de la API aprobada por TI/Legal: los resúmenes envían respuestas de
+evaluaciones de RRHH a un servicio externo.
+
+### 15.4 Verificar después de publicar
+
+1. Con perfil 14 o 18, el menú muestra «Curva de aprendizaje», «Curva: nuevo colaborador» y
+   «Curva: dashboard». Con otro perfil no aparecen, y la URL directa redirige a Principal.
+2. Registrar un colaborador de prueba: la ficha muestra dos tarjetas de 30 días.
+3. «Generar enlace remoto» en una tarjeta y abrir el enlace **en una ventana privada** (sin
+   sesión): se ve el formulario sin menú. Enviarlo y reabrir el enlace: «¡Gracias!».
+4. «Ver informe (PDF)» de la evaluación completada abre el PDF con tildes bien.
+5. Eliminar el colaborador de prueba (dos confirmaciones).
+
+### 15.5 Volver atrás
+
+Correr el script de menú al revés (poner `Estado = '1'` en `PerfilMenu` para las tres hojas) y
+reponer los binarios anteriores. Las tablas y procedimientos pueden quedar: los binarios
+anteriores no los llaman.
+
+### 15.6 Decisiones de negocio pendientes
+
+- **La pregunta NPS (365, colaborador, 0 a 10) baja el índice cuando la respuesta es buena**: su
+  primera opción es la peor. Se dejó igual que el sistema original para que la curva de los
+  colaboradores migrados coincida. Hay que decidir si se excluye del índice o se reordena (y en
+  ese caso migrar sus respuestas).
+- Cambiar una decisión de `aprobado` a `rechazado` detiene el proceso pero **no borra** las
+  evaluaciones de etapas siguientes ya generadas (igual que el sistema original).

@@ -864,6 +864,11 @@ dashboard, tres informes PDF y una evaluación remota por enlace. Reemplaza la a
      `%LOCALAPPDATA%\DOS-CurvaAprendizaje\data\curva_aprendizaje.sqlite` de la PC donde corría
      la aplicación vieja: **usar una copia** y no versionar ni el `.sqlite` ni la salida (son
      datos de RRHH; la salida ya está en `.gitignore`).
+     **Hecha el 2026-10-05** desde el export `curva_aprendizaje_sqlserver.sql` (5 colaboradores,
+     21 evaluaciones, 153 respuestas): el generador también lee ese formato. **Ese export NO se
+     ejecuta tal cual en ReporTarea**: crea `dbo.empleados` y la base no distingue mayúsculas, así
+     que es la misma tabla que `dbo.Empleados`, la ficha de personal. Los 15 índices de la curva
+     coinciden con los del sistema original (prueba 19).
    - **Sin migración:** `docs/sql/2026-10-05-curva-aprendizaje-siembra.sql` (5 etapas, 90
      preguntas). **Ya aplicado el 2026-10-05**; la carga la reemplaza sola mientras no haya
      evaluaciones.

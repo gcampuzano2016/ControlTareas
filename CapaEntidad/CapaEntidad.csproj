@@ -121,6 +121,7 @@
     <Compile Include="EntCurvaCompromiso.cs" />
     <Compile Include="EntCurvaDashboard.cs" />
     <Compile Include="EntCurvaEmpleado.cs" />
+    <Compile Include="EntCurvaFicha.cs" />
     <Compile Include="EntCurvaEvaluacion.cs" />
     <Compile Include="EntCurvaIndice.cs" />
     <Compile Include="EntDetTarea.cs" />

@@ -166,6 +166,7 @@
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Configuration" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
@@ -225,6 +226,8 @@
     <Compile Include="NegCurvaCurva.cs" />
     <Compile Include="NegCurvaDashboard.cs" />
     <Compile Include="NegCurvaFormulario.cs" />
+    <Compile Include="NegCurvaOnboarding.cs" />
+    <Compile Include="NegCurvaResumenIA.cs" />
     <Compile Include="NegCurvaValorRespuesta.cs" />
     <Compile Include="NegHorasExtrasPantalla.cs" />
     <Compile Include="NegPerfilInicio.cs" />

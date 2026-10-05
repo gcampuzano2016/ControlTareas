@@ -616,6 +616,9 @@ GO
    @Completar = 1: pasa de pendiente a completada con fecha de hoy; si ya
    estaba completada no toca nada y devuelve filas = 0 (eso frena el doble
    envio aunque dos peticiones lleguen a la vez).
+   El token NO se borra al completar: reabrir el enlace tiene que mostrar
+   "Gracias" (ya completada), no "enlace invalido". Un enlace usado ya no
+   sirve para nada mas porque la evaluacion dejo de estar pendiente.
    @Completar = 0: solo cambia lo que se indica, sin tocar estado ni
    fecha_completada (editar). */
 IF OBJECT_ID('dbo.Sp_RTA_CurvaEvaluacionActualizar','P') IS NOT NULL DROP PROCEDURE dbo.Sp_RTA_CurvaEvaluacionActualizar;
@@ -635,7 +638,6 @@ BEGIN
   UPDATE dbo.CA_evaluaciones
      SET estado            = CASE WHEN @Completar = 1 THEN 'completada' ELSE estado END,
          fecha_completada  = CASE WHEN @Completar = 1 THEN CAST(GETDATE() AS DATE) ELSE fecha_completada END,
-         token             = CASE WHEN @Completar = 1 THEN NULL ELSE token END,
          conclusion        = CASE WHEN @CambiarConclusion = 1 THEN @Conclusion ELSE conclusion END,
          resumen_ejecutivo = CASE WHEN @CambiarResumen = 1 THEN @Resumen ELSE resumen_ejecutivo END,
          plan_accion_gth   = CASE WHEN @CambiarPlan = 1 THEN @Plan ELSE plan_accion_gth END

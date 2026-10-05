@@ -1321,6 +1321,8 @@
     <Content Include="Formulario\AdministrarPerfiles.ashx" />
     <Content Include="Formulario\AdministrarPerfil.ashx" />
     <Content Include="Formulario\AdministrarHorasExtras.ashx" />
+    <Content Include="Formulario\CurvaEvaluacionRemota.ashx" />
+    <Content Include="Formulario\AdministrarCurvaAprendizaje.ashx" />
     <Content Include="Formulario\AdministrarParametrosHE.ashx" />
     <Content Include="Formulario\DescargarHorasExtras.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
@@ -1516,6 +1518,12 @@
     </Compile>
     <Compile Include="Formulario\AdministrarHorasExtras.ashx.cs">
       <DependentUpon>AdministrarHorasExtras.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\CurvaEvaluacionRemota.ashx.cs">
+      <DependentUpon>CurvaEvaluacionRemota.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarCurvaAprendizaje.ashx.cs">
+      <DependentUpon>AdministrarCurvaAprendizaje.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarParametrosHE.ashx.cs">
       <DependentUpon>AdministrarParametrosHE.ashx</DependentUpon>

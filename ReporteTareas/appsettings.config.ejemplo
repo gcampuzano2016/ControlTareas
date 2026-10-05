@@ -16,4 +16,22 @@
 <appSettings>
   <add key="EncryptionPassword" value="CLAVE_DE_CIFRADO" />
   <add key="EncryptionSalt" value="SALT_DE_CIFRADO" />
+
+  <!--
+    Curva de Aprendizaje. Las cuatro son OPCIONALES: sin ellas el modulo usa
+    los valores de abajo (y el host de la peticion para armar el enlace).
+
+    CA.UrlBasePublica: base con la que se arma el enlace de la evaluacion
+    remota, p.ej. https://intranet.midominio/ReporteTareas (sin "/" final).
+
+    La API key de la IA NO va aqui: es la variable de entorno
+    ANTHROPIC_API_KEY del pool de aplicaciones de IIS, y solo se configura
+    cuando TI/Legal aprueben una cuenta corporativa (los datos de RRHH no salen
+    a una nube de terceros sin cuenta administrada). Sin ella el modulo
+    funciona completo, solo sin resumenes ejecutivos.
+  -->
+  <add key="CA.UrlBasePublica" value="" />
+  <add key="CA.IA.Modelo" value="claude-opus-5-5" />
+  <add key="CA.IA.Effort" value="medium" />
+  <add key="CA.IA.TimeoutSegundos" value="120" />
 </appSettings>

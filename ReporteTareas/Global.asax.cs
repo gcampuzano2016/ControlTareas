@@ -13,6 +13,11 @@ namespace ReporteTareas
             // Código que se ejecuta al iniciar la aplicación
             VerificarConfiguracion();
             GlobalConfiguration.Configure(WebApiConfig.Register);
+
+            // .NET 4.6.1 puede no negociar TLS 1.2 por si solo, y la API de IA
+            // de Curva de Aprendizaje (NegCurvaResumenIA) lo exige. Se AGREGA
+            // a lo que ya este habilitado, no se reemplaza.
+            System.Net.ServicePointManager.SecurityProtocol |= System.Net.SecurityProtocolType.Tls12;
         }
 
         /// <summary>

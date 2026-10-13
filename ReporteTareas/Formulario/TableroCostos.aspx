@@ -119,13 +119,13 @@
             <div class="row">
                 <div class="col-lg-4"><div class="panel panel-default"><div class="panel-heading">Normal</div><div class="panel-body">
                     <div class="tc-grafico-alto"><canvas id="grfTopNormal"></canvas></div>
-                    <table id="tblTopNormal" class="table table-condensed table-bordered tc-tabla"></table></div></div></div>
+                    <div style="overflow-x: auto"><table id="tblTopNormal" class="table table-condensed table-bordered tc-tabla"></table></div></div></div></div>
                 <div class="col-lg-4"><div class="panel panel-default"><div class="panel-heading">Extra</div><div class="panel-body">
                     <div class="tc-grafico-alto"><canvas id="grfTopExtra"></canvas></div>
-                    <table id="tblTopExtra" class="table table-condensed table-bordered tc-tabla"></table></div></div></div>
+                    <div style="overflow-x: auto"><table id="tblTopExtra" class="table table-condensed table-bordered tc-tabla"></table></div></div></div></div>
                 <div class="col-lg-4"><div class="panel panel-default"><div class="panel-heading">Traslado</div><div class="panel-body">
                     <div class="tc-grafico-alto"><canvas id="grfTopTraslado"></canvas></div>
-                    <table id="tblTopTraslado" class="table table-condensed table-bordered tc-tabla"></table></div></div></div>
+                    <div style="overflow-x: auto"><table id="tblTopTraslado" class="table table-condensed table-bordered tc-tabla"></table></div></div></div></div>
             </div>
 
             <div class="panel panel-default"><div class="panel-heading">Detalle de actividades</div>

@@ -934,3 +934,41 @@ anteriores no los llaman.
   ese caso migrar sus respuestas).
 - Cambiar una decisión de `aprobado` a `rechazado` detiene el proceso pero **no borra** las
   evaluaciones de etapas siguientes ya generadas (igual que el sistema original).
+
+## 16. Tablero de Costos (Nómina, perfiles 14 y 18)
+
+Lleva a la aplicación el `Dashboard_Tareas_Aranda.xlsx` que se generaba a mano con
+`C:\ReporteExcel\generar_dashboard.py`. Spec: `docs/superpowers/specs/2026-10-12-tablero-costos-design.md`.
+
+### 16.1 Base de datos
+
+`docs/sql/2026-10-12-tablero-costos.sql` crea:
+- el procedimiento de lectura `Sp_RTA_TableroCostos`;
+- la tabla `TC_Auditoria` y el procedimiento `Sp_RTA_TableroCostosAuditar`;
+- la hoja de menú *Nómina → Tablero de Costos*, visible **solo** para los perfiles 14 y 18.
+
+Es repetible y **no escribe en `HE_*` ni en `R_DetTareasAranda`**. Va **antes** de los binarios. La última línea debe decir `VEREDICTO: OK`.
+
+Para verificar, correr `docs/sql/2026-10-12-tablero-costos-verificacion.sql`. Es de solo lectura; la prueba de auditoría se revierte.
+
+> **Si se agrega un perfil al tablero:** hay que cambiarlo en **dos** lugares:
+> `AdministrarTableroCostos.PerfilesAutorizados` (código) y `PerfilMenu` (base).
+> Con solo uno, la persona ve la opción y recibe «No tiene permisos», o tiene permiso y no ve la opción.
+
+### 16.2 Archivos a publicar
+
+Todos juntos. Las capas son `.exe` y van con el `.dll` de la web; publicarlos por separado ya rompió los correos el 18-09.
+
+- `bin\ReporteTareas.dll`, `bin\CapaEntidad.exe`, `bin\CapaNegocio.exe`, `bin\CapaDato.exe`
+- `Formulario\TableroCostos.aspx`
+- `Formulario\AdministrarTableroCostos.ashx`
+- `Formulario\DescargarTableroCostos.ashx`
+- `js\tableroCostos.js`
+- `js\chart.umd.js`, si el servidor todavía no lo tiene. Lo usa también el dashboard de jefatura.
+
+### 16.3 Verificar después de publicar
+
+1. Con un usuario de perfil 14 o 18, abrir el tablero con Desde `2025-01-01` y Hasta `2026-12-31`: el total de actividades coincide con el paso 2 de la verificación SQL.
+2. Descargar el Excel y comprobar que hay una fila nueva en `TC_Auditoria`.
+3. Con un usuario de otro perfil, la opción no aparece y la URL directa redirige a Principal.
+4. Si alguien no ve cambios del `.js` después de un redespliegue, subir el `?v=` en `TableroCostos.aspx`.

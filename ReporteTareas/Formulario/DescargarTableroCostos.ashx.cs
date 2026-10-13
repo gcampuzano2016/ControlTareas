@@ -21,7 +21,7 @@ namespace JsonJQueryNetTableroCostos
     {
         public void ProcessRequest(HttpContext context)
         {
-            if (context.Session == null || context.Session["UserLogin"] == null || context.Session["Cod_Usuario"] == null)
+            if (!AdministrarTableroCostos.Autenticado(context))
             {
                 NoDisponible(context, "Su sesión expiró. Vuelva a iniciar sesión.", 401);
                 return;
@@ -55,7 +55,8 @@ namespace JsonJQueryNetTableroCostos
             }
             catch (Exception ex)
             {
-                NoDisponible(context, "No se pudo registrar la descarga y, por seguridad, no se entrega el archivo. " + ex.Message, 500);
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+                NoDisponible(context, "No se pudo registrar la descarga y, por seguridad, no se entrega el archivo.", 500);
                 return;
             }
 
@@ -68,7 +69,8 @@ namespace JsonJQueryNetTableroCostos
             }
             catch (Exception ex)
             {
-                NoDisponible(context, "No se pudo generar el archivo. " + ex.Message, 500);
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+                NoDisponible(context, "No se pudo generar el archivo.", 500);
                 return;
             }
 

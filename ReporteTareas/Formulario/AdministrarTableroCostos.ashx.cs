@@ -36,9 +36,11 @@ namespace JsonJQueryNetTableroCostos
                cabecera diga utf-8, y cada tilde llega rota. */
             context.Response.ContentEncoding = Encoding.UTF8;
             context.Response.ContentType = "application/json";
+            context.Response.Cache.SetCacheability(HttpCacheability.NoCache);
+            context.Response.Cache.SetNoStore();
 
             string salida;
-            if (context.Session == null || context.Session["UserLogin"] == null)
+            if (!Autenticado(context))
             {
                 context.Response.TrySkipIisCustomErrors = true;
                 context.Response.StatusCode = 401;
@@ -81,7 +83,8 @@ namespace JsonJQueryNetTableroCostos
             }
             catch (Exception ex)
             {
-                return Mensaje("0", "Petición no válida. " + ex.Message, "danger");
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+                return Mensaje("0", "Petición no válida.", "danger");
             }
         }
 
@@ -109,16 +112,29 @@ namespace JsonJQueryNetTableroCostos
             }
             catch (Exception ex)
             {
-                return Mensaje("0", "No se pudo cargar el tablero. " + ex.Message, "danger");
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+                return Mensaje("0", "No se pudo consultar el tablero. Intente nuevamente.", "danger");
             }
         }
 
         // ------------------------------------- compartido con la descarga
 
+        /// <summary>
+        /// Login.aspx "reinicia" la sesion escribiendo "" en UserLogin y
+        /// Cod_Usuario (sin tocar Id_Perfil), asi que null no basta: hay que
+        /// exigir que ambos tengan texto. Un solo lugar para los dos handlers.
+        /// </summary>
+        internal static bool Autenticado(HttpContext context)
+        {
+            return context.Session != null
+                && !string.IsNullOrWhiteSpace(Convert.ToString(context.Session["UserLogin"], CultureInfo.InvariantCulture))
+                && !string.IsNullOrWhiteSpace(Convert.ToString(context.Session["Cod_Usuario"], CultureInfo.InvariantCulture));
+        }
+
         internal static bool Autorizado(HttpContext context)
         {
             int idPerfil;
-            return int.TryParse(Convert.ToString(context.Session["Id_Perfil"], CultureInfo.InvariantCulture), out idPerfil)
+            return Autenticado(context) && int.TryParse(Convert.ToString(context.Session["Id_Perfil"], CultureInfo.InvariantCulture), out idPerfil)
                 && Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
         }
 

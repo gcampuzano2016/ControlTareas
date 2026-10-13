@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="ActualizarTareas.aspx.cs" Inherits="ReporteTareas.Formulario.ActualizarTareas" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/actualizarTareas.js?v=2" type="text/javascript"></script>
+    <script src="../js/actualizarTareas.js?v=3" type="text/javascript"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -197,7 +197,7 @@
                                                     </textarea>
                                                     <p class="help-block"></p>
                                                 </div>
-                                                <div class="col-lg-12">
+                                                <div class="col-lg-12" style="display:none">
                                                     <label>¿Hora extra?</label>
                                                     <select id="frmcmbHorasExtras" class="form-control">
                                                         <option value="0"></option>

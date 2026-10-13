@@ -1,0 +1,317 @@
+/* ============================================================================
+   Horas Extras - fase 2: los procedimientos de la pantalla.
+
+   Ninguno calcula. El valor hora y los totales los calcula NegHorasExtras en
+   C#, que es la unica implementacion de la formula; estos procedimientos
+   entregan insumos y guardan resultados ya calculados.
+   ============================================================================ */
+
+SET QUOTED_IDENTIFIER ON;
+SET ANSI_NULLS ON;
+GO
+
+/* ----------------------------------------------------------- GUARD -------- */
+/* Si la fase 3 ya esta aplicada, este script NO debe volver a correr.
+
+   La fase 3 recrea Sp_RTA_HeGuardarFila con un parametro mas -@Auditar, que es
+   lo que hace que un cambio de horas quede auditado-. Si alguien vuelve a
+   correr ESTE script despues de aquel, el DROP/CREATE de mas abajo lo devuelve
+   a 22 parametros y el DAO desplegado, que manda 23, empieza a dar "too many
+   arguments" en CADA guardado. Quien lo sufra ve "no se pudieron guardar estas
+   filas" sin ninguna pista de la causa.
+
+   El resto de este script es inofensivo de repetir, pero no hay forma de
+   saltarse solo una seccion: CREATE PROCEDURE tiene que ser la primera
+   instruccion de su lote y no se puede envolver en un IF. Asi que se salta el
+   script entero, que es lo correcto: si la fase 3 esta puesta, todo lo que
+   este script crea ya existe.
+
+   El aviso de DESPLIEGUE.md -"si dudas si ya corriste uno, correlo de nuevo"-
+   es cierto de cada script por separado y falso del conjunto. Este guard es lo
+   que lo vuelve cierto tambien del conjunto. */
+IF OBJECT_ID('dbo.Sp_RTA_HeCerrarPeriodo','P') IS NOT NULL
+BEGIN
+    PRINT 'La fase 3 ya esta aplicada. Este script NO se ejecuta: recrearia';
+    PRINT 'Sp_RTA_HeGuardarFila sin el parametro @Auditar y romperia todos los';
+    PRINT 'guardados. Para modificarlo, usa 2026-09-16-horas-extras-fase3.sql.';
+    SET NOEXEC ON;
+END
+GO
+
+/* --------------------------------------------------------- 1. periodos ---- */
+IF OBJECT_ID('dbo.Sp_RTA_HeListarPeriodos','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeListarPeriodos;
+GO
+CREATE PROCEDURE dbo.Sp_RTA_HeListarPeriodos
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT IdPeriodo, Anio, Mes, Descripcion, EstadoPeriodo,
+           FechaCierre, UsuarioCierre
+      FROM dbo.HE_Periodo
+     ORDER BY Anio DESC, Mes DESC;
+END
+GO
+
+/* ----------------------------------------------------- 2. crear periodo --- */
+IF OBJECT_ID('dbo.Sp_RTA_HeCrearPeriodo','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeCrearPeriodo;
+GO
+CREATE PROCEDURE dbo.Sp_RTA_HeCrearPeriodo
+    @Anio        INT,
+    @Mes         INT,
+    @Usuario     VARCHAR(50),
+    @Ip          VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @Anio < 2020 OR @Anio > 2100 OR @Mes < 1 OR @Mes > 12
+    BEGIN
+        SELECT Respuestas = -1, IdPeriodo = 0;
+        RETURN;
+    END
+
+    DECLARE @IdPeriodo INT;
+
+    SELECT @IdPeriodo = IdPeriodo FROM dbo.HE_Periodo WHERE Anio = @Anio AND Mes = @Mes;
+
+    /* Ya existe: no se toca. Devolverlo tal cual es lo que hace que abrir dos
+       veces el mismo mes sea inofensivo. */
+    IF @IdPeriodo IS NOT NULL
+    BEGIN
+        SELECT Respuestas = 0, IdPeriodo = @IdPeriodo;
+        RETURN;
+    END
+
+    INSERT INTO dbo.HE_Periodo (Anio, Mes, Descripcion, EstadoPeriodo, UsuarioCreacion, Ip_Modificacion)
+    VALUES (@Anio, @Mes,
+            DATENAME(MONTH, DATEFROMPARTS(@Anio, @Mes, 1)) + ' ' + CONVERT(VARCHAR(4), @Anio),
+            'Abierto', @Usuario, @Ip);
+
+    SELECT Respuestas = 0, IdPeriodo = SCOPE_IDENTITY();
+END
+GO
+
+/* ---------------------------------------------------------- 3. insumos ---- */
+IF OBJECT_ID('dbo.Sp_RTA_HeInsumos','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeInsumos;
+GO
+/* Materia prima para armar el snapshot de un periodo.
+
+   Dos result sets, en este orden:
+     1. un renglon por colaborador con lo que Empleados y HE_ColaboradorParametro
+        saben de el
+     2. TODO el historial de sueldos de esos colaboradores, sin resolver cual
+        rige: eso lo decide NegHorasExtras.SalarioVigente, que a igual fecha de
+        vigencia da prioridad al ajuste sobre el rol. Resolverlo aqui seria
+        escribir esa regla por segunda vez en otro lenguaje. */
+CREATE PROCEDURE dbo.Sp_RTA_HeInsumos
+    @FechaCorte DATE
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT c.IdEmpleado,
+           Cedula  = LTRIM(RTRIM(ISNULL(e.Cedula, ''))),
+           Nombre  = LTRIM(RTRIM(ISNULL(e.Nombre, ''))),
+           Cargo   = ISNULL(c.Cargo, ''),
+           Empresa = ISNULL(c.Empresa, ''),
+           c.JornadaHorasDia,
+           c.DivisorManual,
+           c.AplicaHE,
+           MotivoNoAplica = ISNULL(c.MotivoNoAplica, '')
+      FROM dbo.HE_ColaboradorParametro c
+      JOIN dbo.Empleados e ON e.IdEmpleado = c.IdEmpleado
+     WHERE c.Estado = '1'
+     ORDER BY e.Nombre, c.IdEmpleado;
+
+    SELECT s.IdEmpleado, s.Monto, s.FechaVigenciaDesde, Origen = ISNULL(s.Origen, '')
+      FROM dbo.HE_Salario s
+      JOIN dbo.HE_ColaboradorParametro c ON c.IdEmpleado = s.IdEmpleado AND c.Estado = '1'
+     WHERE s.Estado = '1' AND s.FechaVigenciaDesde <= @FechaCorte
+     ORDER BY s.IdEmpleado, s.FechaVigenciaDesde;
+END
+GO
+
+/* ------------------------------------------------------ 4. guardar fila --- */
+IF OBJECT_ID('dbo.Sp_RTA_HeGuardarFila','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeGuardarFila;
+GO
+/* Inserta o actualiza UNA fila de HE_Detalle con valores YA calculados.
+
+   Lo usan dos caminos: armar el snapshot al abrir un periodo, y guardar una
+   edicion. Por eso recibe el snapshot completo y no solo las horas: al abrir,
+   no hay fila que actualizar.
+
+   Ademas de Respuestas, siempre devuelve IdDetalle (misma forma en las tres
+   ramas: la fase 3 lo necesita para escribir HE_DetalleAuditoria). En las
+   ramas de error IdDetalle va NULL porque no hay fila que identificar.
+
+   Respuestas: 0 bien, -1 el periodo no existe, -2 el periodo no esta Abierto. */
+CREATE PROCEDURE dbo.Sp_RTA_HeGuardarFila
+    @IdPeriodo               INT,
+    @IdEmpleado              BIGINT,
+    @CedulaSnapshot          VARCHAR(20),
+    @NombreSnapshot          VARCHAR(400),
+    @EmpresaSnapshot         VARCHAR(120),
+    @CargoSnapshot           VARCHAR(200),
+    @JornadaHorasDiaSnapshot INT,
+    @SalarioBaseSnapshot     DECIMAL(18,2),
+    @AplicaHESnapshot        BIT,
+    @Divisor                 INT,
+    @ValorHoraOrdinaria      DECIMAL(18,6),
+    @ValorHora50             DECIMAL(18,6),
+    @ValorHora100            DECIMAL(18,6),
+    @Horas50                 DECIMAL(9,2),
+    @Horas100                DECIMAL(9,2),
+    @Total50                 DECIMAL(18,2),
+    @Total100                DECIMAL(18,2),
+    @TotalHoras              DECIMAL(9,2),
+    @TotalHE                 DECIMAL(18,2),
+    @Observacion             VARCHAR(400),
+    @Usuario                 VARCHAR(50),
+    @Ip                      VARCHAR(64)
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @Estado VARCHAR(10);
+    SELECT @Estado = EstadoPeriodo FROM dbo.HE_Periodo WHERE IdPeriodo = @IdPeriodo;
+
+    IF @Estado IS NULL
+    BEGIN
+        SELECT Respuestas = -1, IdDetalle = CAST(NULL AS INT);
+        RETURN;
+    END
+
+    IF @Estado <> 'Abierto'
+    BEGIN
+        SELECT Respuestas = -2, IdDetalle = CAST(NULL AS INT);
+        RETURN;
+    END
+
+    DECLARE @IdDetalle INT;
+
+    UPDATE dbo.HE_Detalle
+       SET CedulaSnapshot = @CedulaSnapshot, NombreSnapshot = @NombreSnapshot,
+           EmpresaSnapshot = @EmpresaSnapshot, CargoSnapshot = @CargoSnapshot,
+           JornadaHorasDiaSnapshot = @JornadaHorasDiaSnapshot,
+           SalarioBaseSnapshot = @SalarioBaseSnapshot, AplicaHESnapshot = @AplicaHESnapshot,
+           Divisor = @Divisor, ValorHoraOrdinaria = @ValorHoraOrdinaria,
+           ValorHora50 = @ValorHora50, ValorHora100 = @ValorHora100,
+           Horas50 = @Horas50, Horas100 = @Horas100,
+           Total50 = @Total50, Total100 = @Total100,
+           TotalHoras = @TotalHoras, TotalHE = @TotalHE,
+           Observacion = @Observacion,
+           Fec_Modificacion = SYSDATETIME(), Usu_Modificacion = @Usuario, Ip_Modificacion = @Ip
+     WHERE IdPeriodo = @IdPeriodo AND IdEmpleado = @IdEmpleado;
+
+    IF @@ROWCOUNT = 0
+    BEGIN
+        INSERT INTO dbo.HE_Detalle
+            (IdPeriodo, IdEmpleado, CedulaSnapshot, NombreSnapshot, EmpresaSnapshot,
+             CargoSnapshot, JornadaHorasDiaSnapshot, SalarioBaseSnapshot, AplicaHESnapshot,
+             Divisor, ValorHoraOrdinaria, ValorHora50, ValorHora100,
+             Horas50, Horas100, Total50, Total100, TotalHoras, TotalHE,
+             Observacion, Usu_Modificacion, Ip_Modificacion)
+        VALUES
+            (@IdPeriodo, @IdEmpleado, @CedulaSnapshot, @NombreSnapshot, @EmpresaSnapshot,
+             @CargoSnapshot, @JornadaHorasDiaSnapshot, @SalarioBaseSnapshot, @AplicaHESnapshot,
+             @Divisor, @ValorHoraOrdinaria, @ValorHora50, @ValorHora100,
+             @Horas50, @Horas100, @Total50, @Total100, @TotalHoras, @TotalHE,
+             @Observacion, @Usuario, @Ip);
+
+        SET @IdDetalle = CAST(SCOPE_IDENTITY() AS INT);
+    END
+    ELSE
+    BEGIN
+        SELECT @IdDetalle = IdDetalle
+          FROM dbo.HE_Detalle
+         WHERE IdPeriodo = @IdPeriodo AND IdEmpleado = @IdEmpleado;
+    END
+
+    SELECT Respuestas = 0, IdDetalle = @IdDetalle;
+END
+GO
+
+/* ----------------------------------------------------- 5. cargar periodo -- */
+IF OBJECT_ID('dbo.Sp_RTA_HeCargarPeriodo','P') IS NOT NULL
+    DROP PROCEDURE dbo.Sp_RTA_HeCargarPeriodo;
+GO
+/* Dos result sets, en este orden:
+     1. la cabecera del periodo (0 filas si no existe)
+     2. sus filas de detalle */
+CREATE PROCEDURE dbo.Sp_RTA_HeCargarPeriodo
+    @IdPeriodo INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT IdPeriodo, Anio, Mes, Descripcion, EstadoPeriodo, FechaCierre, UsuarioCierre
+      FROM dbo.HE_Periodo WHERE IdPeriodo = @IdPeriodo;
+
+    SELECT d.IdDetalle, d.IdEmpleado, d.CedulaSnapshot, d.NombreSnapshot,
+           d.EmpresaSnapshot, d.CargoSnapshot, d.JornadaHorasDiaSnapshot,
+           d.SalarioBaseSnapshot, d.AplicaHESnapshot, d.Divisor,
+           d.ValorHoraOrdinaria, d.ValorHora50, d.ValorHora100,
+           d.Horas50, d.Horas100, d.Total50, d.Total100, d.TotalHoras, d.TotalHE,
+           Observacion = ISNULL(d.Observacion, ''),
+           MotivoNoAplica = ISNULL(c.MotivoNoAplica, '')
+      FROM dbo.HE_Detalle d
+      LEFT JOIN dbo.HE_ColaboradorParametro c ON c.IdEmpleado = d.IdEmpleado
+     WHERE d.IdPeriodo = @IdPeriodo
+     ORDER BY d.NombreSnapshot, d.IdEmpleado;
+END
+GO
+
+/* ------------------------------------------------- aserciones -------------- */
+
+/* Todo este bloque va en un solo batch, sin GO en medio: un GO entre el
+   DECLARE y su ultimo uso hace fallar el script entero con "must declare
+   the scalar variable". Por eso va entero al final, despues del ultimo GO
+   de arriba, y no intercalado entre cada CREATE PROCEDURE. */
+DECLARE @Fallos INT = 0;
+
+IF OBJECT_ID('dbo.Sp_RTA_HeListarPeriodos','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeListarPeriodos no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeCrearPeriodo','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeCrearPeriodo no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeInsumos','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeInsumos no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeGuardarFila','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeGuardarFila no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF OBJECT_ID('dbo.Sp_RTA_HeCargarPeriodo','P') IS NULL
+BEGIN
+    RAISERROR('FALLO: Sp_RTA_HeCargarPeriodo no quedo creado.', 16, 1);
+    SET @Fallos += 1;
+END
+
+IF @Fallos > 0
+    RAISERROR('FALLO: %d de los cinco procedimientos no quedaron creados.', 16, 1, @Fallos);
+ELSE
+    PRINT 'Horas Extras fase 2: los cinco procedimientos quedaron creados.';
+GO
+
+/* Deshace el guard de la cabecera: sin esto, la sesion de quien corriera el
+   script se quedaria en NOEXEC y todo lo que ejecutara despues -en la misma
+   ventana- se analizaria sin ejecutarse, en silencio. */
+SET NOEXEC OFF;
+GO

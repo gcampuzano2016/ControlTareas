@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
 using ReporteTareas.Controles;
+using System;
+using System.Collections.Generic;
 using System.Data;
+using System.Web.UI.WebControls;
 
 namespace ReporteTareas.Formulario
 {
@@ -31,15 +28,15 @@ namespace ReporteTareas.Formulario
                     catch (Exception ex)
                     { }
                 }
-            }  
+            }
 
         }
 
         protected void dgv_Tareas_SelectedIndexChanged(object sender, EventArgs e)
-        {           
+        {
             if (dgv_Tareas.Rows[dgv_Tareas.SelectedIndex].Cells[0].Text == "Aprobar H. Extras")
             {
-               
+
             }
             else if (dgv_Tareas.Rows[dgv_Tareas.SelectedIndex].Cells[1].Text == "Revisar Tarea")
             {

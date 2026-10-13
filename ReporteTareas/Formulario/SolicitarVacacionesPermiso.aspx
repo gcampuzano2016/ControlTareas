@@ -5,7 +5,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/Convenio.js?v=22" type="text/javascript"></script>
+    <script src="../js/padFirma.js?v=3" type="text/javascript"></script>
+    <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
+    <script src="../js/Convenio.js?v=47" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -14,6 +16,44 @@
     <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />
     <script src="../bower_components/sweetalert/js/sweetalert.min.js"></script>
     <script src="../bower_components/sweetalert/js/sweetalert.init.js"></script>
+
+    <%-- La tabla de la consulta de solicitudes (Convenio.js, RecorreJSONTableSelect).
+         DataTables llega desde Master.Master solo con su JS, sin hoja de estilos:
+         lo minimo que necesita (flechas de orden, buscador, paginacion) va aca.
+         Queda en la pagina y no en dos-tema.css para no obligar a republicar el
+         Master ni a cambiar su ?v= por una sola pantalla. --%>
+    <style>
+        .tabla-solicitudes > thead > tr > th,
+        .tabla-solicitudes > tbody > tr > td { padding: 9px 12px; white-space: nowrap; }
+        .tabla-solicitudes > tbody > tr > td:first-child { font-weight: normal; }
+        .tabla-solicitudes .acciones-solicitud .btn { margin-right: 3px; }
+        .tabla-solicitudes .acciones-solicitud .btn:last-child { margin-right: 0; }
+        .tabla-solicitudes .texto-recortado { max-width: 220px; overflow: hidden; text-overflow: ellipsis; }
+
+        .tabla-solicitudes > thead > tr > th.sorting,
+        .tabla-solicitudes > thead > tr > th.sorting_asc,
+        .tabla-solicitudes > thead > tr > th.sorting_desc { cursor: pointer; position: relative; padding-right: 24px; }
+        .tabla-solicitudes > thead > tr > th.sorting:after,
+        .tabla-solicitudes > thead > tr > th.sorting_asc:after,
+        .tabla-solicitudes > thead > tr > th.sorting_desc:after { font-family: FontAwesome; position: absolute; right: 9px; }
+        .tabla-solicitudes > thead > tr > th.sorting:after { content: "\f0dc"; opacity: .25; }
+        .tabla-solicitudes > thead > tr > th.sorting_asc:after { content: "\f0de"; opacity: .8; }
+        .tabla-solicitudes > thead > tr > th.sorting_desc:after { content: "\f0dd"; opacity: .8; }
+
+        /* Las filas de Bootstrap traen margin -15px esperando un contenedor con
+           padding, pero #datosTablaPrincipal lo tiene en 0 inline: sin esto el
+           selector y el buscador quedan cortados a los costados. */
+        #tablaSolicitudes_wrapper { overflow: visible; }
+        #table-datosTablaPrincipal > .row,
+        #tablaSolicitudes_wrapper > .row { margin-left: 0; margin-right: 0; }
+        #tablaSolicitudes_wrapper .tabla-solicitudes-scroll { overflow-x: auto; margin: 6px 0; }
+        #tablaSolicitudes_wrapper .dataTables_length select { width: auto; height: auto; padding: 4px 8px; display: inline-block; margin: 0 4px; }
+        #tablaSolicitudes_wrapper .dataTables_filter { text-align: right; }
+        #tablaSolicitudes_wrapper .dataTables_filter input { width: 220px; display: inline-block; margin-left: 6px; }
+        #tablaSolicitudes_wrapper .dataTables_info { padding-top: 14px; color: var(--crm-tinta-suave); }
+        #tablaSolicitudes_wrapper .dataTables_paginate { text-align: right; }
+        #tablaSolicitudes_wrapper .pagination { margin: 8px 0; }
+    </style>
 
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -97,20 +137,28 @@
                                                                         <input type="text" class="form-control" id="frmTxtHoraHastaV" onchange="DiasVacaciones()">
                                                                         <p class="help-block" id="frmTxtHoraHastaMsg"></p>
                                                                     </div>
-                                                                    <div class="col-lg-3" id="IdFeriado" style="display: block">
-                                                                        <label>Feriados:</label>
-                                                                        <input type="text" class="form-control" id="frmTxtTiempoF" value="0" onchange="DiasVacaciones()">
-                                                                        <p class="help-block"></p>
-                                                                    </div>
                                                                     <div class="col-lg-3">
                                                                         <label>Dias:</label>
                                                                         <input type="text" class="form-control" id="frmTxtTiempoDiasV" value="1" disabled>
-                                                                        <p class="help-block"></p>
+                                                                        <!-- Los feriados ya no se digitan: salen de la tabla Feriado. Se
+                                                                             muestran acá cuando hay, para que el número de días se
+                                                                             entienda sin tener que preguntar. -->
+                                                                        <p class="help-block" id="frmTxtFeriadosMsg"></p>
+                                                                        <input type="hidden" id="frmTxtTiempoF" value="0">
+                                                                    </div>
+                                                                    <div class="col-lg-3">
+                                                                        <label>Regresa a trabajar:</label>
+                                                                        <input type="text" class="form-control" id="frmTxtRegresaTrabajar" disabled>
+                                                                        <p class="help-block">Día siguiente a Fecha Hasta</p>
                                                                     </div>
                                                                 </div>
                                                                 <div class="col-lg-12">
                                                                     <label style="color: red;" id="Idlista1">---</label>
                                                                     <label style="color: red;" id="Idlista2">---</label>
+                                                                </div>
+                                                                <!-- Aviso de saldo insuficiente. No bloquea el envío: informa. -->
+                                                                <div class="col-lg-12">
+                                                                    <div id="IdAvisoSaldo" class="alert alert-warning" style="display: none; margin-bottom: 10px;"></div>
                                                                 </div>
                                                                 <div class="form-group col-lg-3">
                                                                     <label>Días de vacaciones dispobibles</label>
@@ -133,6 +181,14 @@
                                                                 </div>
                                                             </div>
                                                             <div class="row">
+                                                                <!-- Firma del colaborador. Nombre, cargo y cedula los toma el
+                                                                     sistema de la sesion: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaborador"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
                                                                 <div class="" style="text-align: center">
                                                                     <button id="btnGuardar1" onclick="GuardarSolicitud1()" type="button" class="btn btn-primary">Solicitar</button>
                                                                 </div>
@@ -151,10 +207,6 @@
                                                         <div class="panel-body">
                                                             <div class="col-lg-12">
                                                                 <div class="form-group col-lg-6">
-                                                                    <label>Fecha:</label>
-                                                                    <input type="text" class="form-control" id="txtfechaP">
-                                                                </div>
-                                                                <div class="form-group col-lg-6">
                                                                     <label>Cédula:</label>
                                                                     <input type="text" class="form-control" id="txtCedulaP" disabled>
                                                                 </div>
@@ -166,23 +218,104 @@
                                                                     <label>Departamento:</label>
                                                                     <input type="text" class="form-control" id="txtDepartamentoP" disabled>
                                                                 </div>
-                                                                <div class="form-group col-lg-12">
+                                                                <div class="form-group col-lg-6">
                                                                     <label>Jefe de Area:</label>
                                                                     <input type="text" class="form-control" id="txtJefaAreaP" disabled>
                                                                 </div>
                                                                 <div class="form-group col-lg-12">
                                                                     <div class="form-group col-lg-3">
-                                                                        <label>Actividad a realizar</label>
+                                                                        <label>Tipo de Permiso</label>
                                                                         <select id="txtActividadPC" class="form-control" onchange="AgregaActividad()">
-                                                                            <option value="CITA MEDICA">CITA MEDICA</option>
-                                                                            <option value="CITACION JUDICIAL">CITACION JUDICIAL</option>
-                                                                            <option value="OTROS">OTROS</option>
+                                                                            <option value="PERSONAL">Personal</option>
+                                                                            <option value="MEDICO">Médico</option>
+                                                                            <option value="FAMILIAR">Familiar</option>
+                                                                            <option value="CALAMIDAD">Calamidad</option>
+                                                                            <option value="TELETRABAJO">Teletrabajo</option>
+                                                                            <option value="OTRO">Otro</option>
                                                                         </select>
                                                                         <p class="help-block"></p>
                                                                     </div>
                                                                     <div class="form-group col-lg-9" style="display: none" id="IdOtrasActividad">
                                                                         <label>Actividad a realizar:</label>
                                                                         <input type="text" class="form-control" id="txtActividadP">
+                                                                    </div>
+                                                                    <!-- Respaldo adjunto. Decide si se pide archivo. No aparece en
+                                                                         Médico, donde el adjunto es obligatorio, ni en Teletrabajo,
+                                                                         que no usa el campo genérico. -->
+                                                                    <div class="form-group col-lg-3" style="display: none" id="IdRespaldo">
+                                                                        <label>Respaldo adjunto</label>
+                                                                        <select id="cboRespaldo" class="form-control" onchange="CambiaRespaldoAdjunto()">
+                                                                            <option value="NO_APLICA">No aplica</option>
+                                                                            <option value="SI">Sí</option>
+                                                                            <option value="NO">No</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <!-- Rama de Teletrabajo. Aparece solo con ese tipo. -->
+                                                                    <div class="col-lg-12" style="display: none" id="IdTeletrabajo">
+                                                                        <div class="panel panel-default" style="margin-top:10px">
+                                                                            <div class="panel-heading">Teletrabajo</div>
+                                                                            <div class="panel-body">
+                                                                                <!-- La fecha vive acá cuando el permiso es teletrabajo, y no arriba con
+                                                                                     las horas: abierto este panel, aquel campo queda demasiado lejos para
+                                                                                     leerse como la fecha del teletrabajo.
+                                                                                
+                                                                                     Es la misma fecha, no una segunda. Lo que se escribe acá se copia a
+                                                                                     txtfechaP, que sigue siendo el valor que viaja al guardar y del que
+                                                                                     dependen el saldo mensual, el plazo de recuperación y el PDF. -->
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Fecha del teletrabajo <span style="color:#a94442">*</span></label>
+                                                                                    <input type="text" class="form-control" id="txtTTFecha" onchange="CambiaFechaTeletrabajo()">
+                                                                                    <p class="help-block">El día en que trabaja fuera de la oficina.</p>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Modalidad</label>
+                                                                                    <select id="cboModalidadTT" class="form-control" onchange="CambiaModalidadTeletrabajo()">
+                                                                                        <option value="COMPLETA">Jornada completa</option>
+                                                                                        <option value="HORAS">Por horas</option>
+                                                                                    </select>
+                                                                                </div>
+                                                                                <!-- Solo con modalidad por horas. Despues de esa hora la
+                                                                                     persona se presenta de forma presencial. -->
+                                                                                <div class="form-group col-lg-4" style="display: none" id="IdTTHoras">
+                                                                                    <label>Hora Desde / Hasta</label>
+                                                                                    <div class="row">
+                                                                                        <div class="col-lg-6">
+                                                                                            <input type="text" class="form-control" id="txtTTHoraDesde" placeholder="08:00" maxlength="5">
+                                                                                        </div>
+                                                                                        <div class="col-lg-6">
+                                                                                            <input type="text" class="form-control" id="txtTTHoraHasta" placeholder="12:00" maxlength="5">
+                                                                                        </div>
+                                                                                    </div>
+                                                                                    <p class="help-block">Después de esa hora se presenta de forma presencial.</p>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-4">
+                                                                                    <label>Lugar desde donde trabajará</label>
+                                                                                    <input type="text" class="form-control" id="txtTTLugar" maxlength="200" placeholder="Domicilio — Quito">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Medios de contacto</label>
+                                                                                    <input type="text" class="form-control" id="txtTTMedios" maxlength="200" placeholder="Teléfono / Teams">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Motivo general</label>
+                                                                                    <input type="text" class="form-control" id="txtTTMotivo" maxlength="500">
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Actividades a ejecutar</label>
+                                                                                    <textarea class="form-control" id="txtTTActividades" rows="2" maxlength="1000"></textarea>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-6">
+                                                                                    <label>Entregables esperados</label>
+                                                                                    <textarea class="form-control" id="txtTTEntregables" rows="2" maxlength="1000"></textarea>
+                                                                                </div>
+                                                                                <div class="form-group col-lg-12">
+                                                                                    <label>
+                                                                                        <input type="checkbox" id="chkTTConectividad">
+                                                                                        Confirmo conectividad y confidencialidad de la información
+                                                                                    </label>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
                                                                     </div>
                                                                     <div class="form-group col-lg-9" style="display: block" id="IdOtrasActividadCargar">
                                                                         <form role="form">
@@ -210,63 +343,92 @@
                                                                         </form>
                                                                     </div>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <!-- La fecha del permiso vive acá, junto a las horas, y no arriba entre
+                                                                     los datos autocompletados: ahí se leía como la fecha del documento.
+                                                                     Es el día de la ausencia, y de él depende de qué mes sale el saldo
+                                                                     del permiso mensual. Por eso al cambiarla se vuelve a consultar. -->
+                                                                <div class="col-lg-3" id="IdFechaPermiso">
+                                                                    <label>Fecha del permiso:</label>
+                                                                    <input type="text" class="form-control" id="txtfechaP" onchange="ConsultarSaldoMensual(); MostrarPlazoRecuperacion()">
+                                                                    <p class="help-block">El día en que se ausenta.</p>
+                                                                </div>
+                                                                <div class="col-lg-3" id="IdHoraDesdeP">
                                                                     <label>Hora Desde:</label>
                                                                     <input type="text" class="form-control" id="frmTxtHoraDesdeP">
                                                                     <p class="help-block" id="frmTxtHoraDesdePMsg"></p>
                                                                 </div>
-                                                                <div class="col-lg-3">
+                                                                <div class="col-lg-3" id="IdHoraHastaP">
                                                                     <label>Hora Hasta:</label>
                                                                     <input type="text" class="form-control" id="frmTxtHoraHastaP">
                                                                     <p class="help-block" id="frmTxtHoraHastaPMsg"></p>
                                                                 </div>
-                                                                <div class="col-lg-6">
+                                                                <div class="col-lg-3" id="IdTiempoP">
                                                                     <label>Tiempo:</label>
                                                                     <input type="text" class="form-control" id="frmTxtTiempoP" disabled>
                                                                     <p class="help-block"></p>
                                                                 </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <label>Cargo a vacaciones</label>
+                                                                <!-- Permiso mensual de 3 horas. El saldo se consulta al abrir el
+                                                                     formulario y cada vez que cambia la fecha: la bolsa es del mes
+                                                                     en que la persona se ausenta, no del mes en que lo pide.
+
+                                                                     No aplica a Médico, Calamidad ni Teletrabajo. -->
+                                                                <div class="form-group col-lg-6" id="IdPermisoMensual" style="display: none">
+                                                                    <label>
+                                                                        <input type="checkbox" id="chkPermisoMensual" onchange="CambiaPermisoMensual()">
+                                                                        ¿Usa permiso mensual de 3 horas?
+                                                                    </label>
+                                                                    <p class="help-block" id="msgPermisoMensual">Consultando su saldo del mes...</p>
                                                                 </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <label>SI</label>
-                                                                    <input class="form-check-input" type="checkbox" value="" id="IdSI" onchange="DesactivarCheck1()">
+                                                                <!-- El tratamiento del excedente solo tiene sentido si hay excedente:
+                                                                     se oculta cuando el permiso entra completo en la bolsa mensual. -->
+                                                                <div class="form-group col-lg-6" id="IdExcedente" style="display: none">
+                                                                    <label>Tratamiento del excedente</label>
+                                                                    <select id="cboExcedente" class="form-control" onchange="CambiaTratamientoExcedente()">
+                                                                        <option value="">-- Seleccione --</option>
+                                                                        <option value="VACACIONES">Vacaciones</option>
+                                                                        <option value="RECUPERACION">Recuperación</option>
+                                                                        <option value="SIN_REMUNERACION">Permiso sin remuneración</option>
+                                                                    </select>
+                                                                    <p class="help-block" id="msgExcedente"></p>
+                                                                    <!-- Las casillas viejas siguen existiendo, ocultas: el guardado y
+                                                                         la columna CargoVacaciones se alimentan de ellas, y así el
+                                                                         histórico conserva el mismo significado. Las mantiene
+                                                                         sincronizadas CambiaTratamientoExcedente(). -->
+                                                                    <input type="checkbox" id="IdSI" style="display: none">
+                                                                    <input type="checkbox" id="IdNO" style="display: none">
                                                                 </div>
-                                                                <div class="form-group col-lg-3">
-                                                                    <label>NO</label>
-                                                                    <input class="form-check-input" type="checkbox" value="" id="IdNO" onchange="DesactivarCheck2()">
-                                                                </div>
-                                                                <div class="col-lg-6" id="CargarHorarioRecuperacion" style="display: none">
-                                                                    <div class="tab-pane active" id="pago">
-                                                                        <table id="TbFormaPago" class="table table-forma-pago ">
-                                                                            <thead>
-                                                                                <tr>
-                                                                                    <th>Fecha Recuperación</th>
-                                                                                    <th>Hora Inicio</th>
-                                                                                    <th>Hora Final</th>
-                                                                                    <th>Tiempo</th>
-                                                                                </tr>
-                                                                            </thead>
-                                                                            <tbody>
-                                                                                <form class="form-horizontal form-forma-pagos"></form>
-                                                                                <tr class="tr_clone_field_forma_pago">
-                                                                                    <td>
-                                                                                        <input name="Fecha_forma_pago[]" type="text" class="form-control" id="txtfechaR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="fecha1_forma_pago[]" type="text" class="form-control" id="frmTxtHoraDesdeR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="fecha2_forma_pago[]" type="text" class="form-control" id="frmTxtHoraHastaR">
-                                                                                    </td>
-                                                                                    <td>
-                                                                                        <input name="tiempo_forma_pago[]" type="text" class="form-control" id="frmTxtTiempoR">
-                                                                                    </td>
-                                                                                </tr>
-                                                                            </tbody>
-                                                                        </table>
-                                                                        <div class="text-right">
-                                                                            <a class="btn btn-primary btn-outline btn-sm add-forma-pago" onclick="AgregarFormaDePago()">Añadir Campo</a>
+                                                                <!-- Plan de recuperacion. Aparece solo cuando el excedente se trata
+                                                                     asi. Reemplaza a un bloque anterior que estaba muerto: era una
+                                                                     tabla de N filas copiada de un widget de formas de pago, sin los
+                                                                     campos que pide la especificacion, y nunca se mostraba. -->
+                                                                <div class="col-lg-12" style="display: none" id="IdRecuperacion">
+                                                                    <div class="panel panel-default" style="margin-top:10px">
+                                                                        <div class="panel-heading">Plan de recuperación</div>
+                                                                        <div class="panel-body">
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Fecha propuesta <span style="color:#a94442">*</span></label>
+                                                                                <input type="text" class="form-control" id="txtRecFecha" placeholder="dd/mm/aaaa">
+                                                                            </div>
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Horario propuesto</label>
+                                                                                <input type="text" class="form-control" id="txtRecHorario" maxlength="100" placeholder="08:00 a 10:00">
+                                                                            </div>
+                                                                            <div class="form-group col-lg-4">
+                                                                                <label>Fecha máxima de cierre</label>
+                                                                                <input type="text" class="form-control" id="txtRecMaxima" disabled>
+                                                                                <p class="help-block">30 días desde el permiso.</p>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-6">
+                                                                                <label>Actividades a ejecutar</label>
+                                                                                <textarea class="form-control" id="txtRecActividades" rows="2" maxlength="1000"></textarea>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-6">
+                                                                                <label>Entregables esperados</label>
+                                                                                <textarea class="form-control" id="txtRecEntregables" rows="2" maxlength="1000"></textarea>
+                                                                            </div>
+                                                                            <div class="form-group col-lg-12">
+                                                                                <p class="help-block">Pasada la fecha máxima, su jefe inmediato confirma si el tiempo se recuperó.</p>
+                                                                            </div>
                                                                         </div>
                                                                     </div>
                                                                 </div>
@@ -275,6 +437,14 @@
                                                                     <textarea class="form-control" rows="2" cols="50" id="frmTxtObservacionesP">
 																	</textarea>
                                                                     <p class="help-block"></p>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <!-- Firma del colaborador, igual que en vacaciones. Nombre, cargo y
+                                                                     cédula los toma el sistema de la sesión: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaboradorP"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -352,7 +522,7 @@
                                                                 </div>
                                                             </div>
                                                             <!-- /.panel-heading -->
-                                                            <div class="panel-body" style="height: 400px; overflow-y: auto; overflow-x: auto;">
+                                                            <div class="panel-body">
                                                                 <div id="table-datosTablaPrincipal" class="dataTables_wrapper form-inline dt-bootstrap no-footer">
                                                                     <div class="row">
                                                                         <div class="col-sm-12" id='datosTablaPrincipal' style="padding: 0px">

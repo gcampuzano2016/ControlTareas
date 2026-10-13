@@ -5,7 +5,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/Inventario.js?v=33"></script>
+    <script src="../js/Inventario.js?v=34"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -15,7 +15,7 @@
     <script src="../bower_components/sweetalert/js/sweetalert.init.js"></script>
     <link href="../dist/css/Montos.css" rel="stylesheet" />
     <link href="../dist/css/styleInventario.css" rel="stylesheet" />
-        <!-- El script de la librería PDF-->
+    <!-- El script de la librería PDF-->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
 </asp:Content>
 
@@ -252,23 +252,25 @@
     <!-- Modal -->
     <!-- Modal de Visualizacion de PDF -->
     <div id="ModalEgresoInventarioPDF" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-lg"> <!-- Agrega la clase 'modal-lg' para que el modal sea grande -->
+        <div class="modal-dialog modal-lg">
+            <!-- Agrega la clase 'modal-lg' para que el modal sea grande -->
             <div class="modal-content">
                 <div class="modal-header bg-info">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">View</h4>
                 </div>
                 <div class="modal-body modal-body-custom">
-                    <div class="container" style="margin-top:3rem; margin-bottom: 1rem; padding:0;">
+                    <div class="container" style="margin-top: 3rem; margin-bottom: 1rem; padding: 0;">
 
-                        <div class="row-flex" style="margin: 0 0 1rem 0;"><!-- Cuadros 1-->            
-                            
-                            <div class="div1-mitad" style="max-width:50%; padding: 0; margin: 0 0.5rem 0 0;">
+                        <div class="row-flex" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 1-->
 
-                                <div class="image-container .div1-mitad" style=" display: grid; justify-items: center; align-items: center; padding: 0; ">
+                            <div class="div1-mitad" style="max-width: 50%; padding: 0; margin: 0 0.5rem 0 0;">
+
+                                <div class="image-container .div1-mitad" style="display: grid; justify-items: center; align-items: center; padding: 0;">
                                     <img src="../carrusel/imagenes/logo_dos_textoGris.png" alt="Descripción de la imagen">
                                 </div>
-                               
+
                                 <div class="columna text-container" style="padding-left: 0.2rem;">
                                     <div class="letra-bold">
                                         <span class="">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
@@ -277,12 +279,12 @@
                                         <span class="letra-bold" style="width: 25%;">Dirección:</span> <span id="txtDireccion">AV. MARISCAL SUCRE OE6-201 Y JOSE MIGUEL CARRION</span>
                                     </div>
                                     <div class="doble-columna">
-                                        <span class="letra-bold" style="width: 25%;">Matríz: </span> <span id="txtMatriz">MIGUEL CARRION, QUITO - Ecuador</span>
+                                        <span class="letra-bold" style="width: 25%;">Matríz: </span><span id="txtMatriz">MIGUEL CARRION, QUITO - Ecuador</span>
                                     </div>
                                     <div class="doble-columna">
                                         <span class="letra-bold" style="width: 25%;">Sucursal:</span> <span id="txtSucursal">QUITO</span>
                                     </div>
-                    
+
                                     <div class="doble-columna">
                                         <span class="" style="width: 50%;">Contribuyente especial Nro:</span> <span id="txtContribuyenteEsp">143</span>
                                     </div>
@@ -295,13 +297,13 @@
                                     <div class="doble-columna">
                                         <span class="" style="width: 50%;">Fecha Fin Transporte:</span> <span id="txtFechaFinTrans"></span>
                                     </div>
-                                </div>                
-                           </div>
+                                </div>
+                            </div>
 
-                            <div class="columna div2 letra-bold" style="max-width:50%; padding-left: 0.2rem; margin: 0 0 0 0.5rem;">
+                            <div class="columna div2 letra-bold" style="max-width: 50%; padding-left: 0.2rem; margin: 0 0 0 0.5rem;">
                                 <div class="centered-element">
                                     <span class="">RUC:  1790885186001</span>
-                                </div> 
+                                </div>
                                 <div class="centered-element">
                                     <span class="">ACTA DE ENTREGA - REMISION:</span>
                                 </div>
@@ -311,9 +313,9 @@
                                 </div>
                                 <div class="">
                                     <span>NÚMERO DE AUTORIZACIÓN</span>
-                                </div>    
+                                </div>
                                 <br />
-                                <div class="doble-columna">                                       
+                                <div class="doble-columna">
                                     <span style="width: 65%;">FECHA Y HORA DE AUTORIZACIÓN:</span> <span id="txtFechaAuto"></span>
                                 </div>
                                 <div class="">
@@ -322,27 +324,29 @@
                                 <div class="">
                                     <span>EMISIÓN:</span>
                                 </div>
-                           </div>            
+                            </div>
                         </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 2-->
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 2-->
                             <div class="columna div1" style="padding-left: 0.2rem;">
                                 <div class="doble-columna">
-                                     <span style="width: 25%;">RUC/CI (Transportista)</span><span ID="TxtRuc">17908851860001</span> 
+                                    <span style="width: 25%;">RUC/CI (Transportista)</span><span id="TxtRuc">17908851860001</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Razón Social / Nombres y apellidos:</span><span ID="TxtRazonSoc">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
+                                    <span style="width: 25%;">Razón Social / Nombres y apellidos:</span><span id="TxtRazonSoc">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Placa:</span><span ID="TxtPlaca">0</span>
+                                    <span style="width: 25%;">Placa:</span><span id="TxtPlaca">0</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Punto de Partida:</span><span ID="TxtPuntoPar">AV. OCCIDENTAL OE6-201 Y JOSE MIGUEL CARRION</span>          
+                                    <span style="width: 25%;">Punto de Partida:</span><span id="TxtPuntoPar">AV. OCCIDENTAL OE6-201 Y JOSE MIGUEL CARRION</span>
                                 </div>
                             </div>
-                     </div>
+                        </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 3-->
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 3-->
                             <div class="columna div1" style="padding-left: 0.2rem;">
                                 <div class="doble-columna">
                                     <span style="width: 25%;">Comprobante de venta:</span><span id="TxtComprobanteVnt">143654</span>
@@ -353,17 +357,17 @@
                                 <div class="doble-columna">
                                     <div class="doble-columna" style="width: 62%;">
                                         <span style="width: 45%;">Motivo Traslado:</span><span id="TxtMotivoTras">Compra directa</span>
-                                    </div>                    
+                                    </div>
                                     <div class="flex-half doble-columna">
                                         <span style="width: 30%;">Fecha de Emisión:</span><span id="TxtFechaEmision"></span>
                                     </div>
-                                </div>  
-                                <div class="doble-columna">   
+                                </div>
+                                <div class="doble-columna">
                                     <br />
-                                    <div class="doble-columna" style="width: 62%;">                                            
+                                    <div class="doble-columna" style="width: 62%;">
                                         <span style="width: 45%;">Destino (Punto de llegada):</span><span id="TxtDestino">MARISCAL SUCRE OE6-201 Y JOSE MIGUEL</span>
                                     </div>
-                                    <div class="flex-half doble-columna">                                        
+                                    <div class="flex-half doble-columna">
                                         <span style="width: 30%;">CIUDAD:</span><span id="TxtCiudad3">QUITO</span>
                                     </div>
                                 </div>
@@ -385,27 +389,28 @@
                             </div>
                         </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 4-->
-                            <table id="tbl_ProductosInv" class="columna div1 table table-sm" style="margin-bottom:0;">
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 4-->
+                            <table id="tbl_ProductosInv" class="columna div1 table table-sm" style="margin-bottom: 0;">
                                 <thead>
-                                    <tr style="text-align:center;">
-                                        <th style="width:10%;" class="titulosTabla">Cantidad</th>
-                                        <th style="width:36%;" class="titulosTabla">Descripción</th>
-                                        <th style="width:18%;" class="titulosTabla">Código Principal</th>
-                                        <th style="width:18%;" class="titulosTabla">Código Auxiliar</th>
-                                        <th style="width:18%;" class="titulosTabla">N° de Serie</th>
+                                    <tr style="text-align: center;">
+                                        <th style="width: 10%;" class="titulosTabla">Cantidad</th>
+                                        <th style="width: 36%;" class="titulosTabla">Descripción</th>
+                                        <th style="width: 18%;" class="titulosTabla">Código Principal</th>
+                                        <th style="width: 18%;" class="titulosTabla">Código Auxiliar</th>
+                                        <th style="width: 18%;" class="titulosTabla">N° de Serie</th>
                                     </tr>
                                 </thead>
-                                <tbody style="text-align:center;">
-
+                                <tbody style="text-align: center;">
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="row-flex" style="margin: 0 0 1rem 0;"> <!-- Cuadros 5-->
-                            <div class="columna col-80" style="padding-left: 0.2rem;">
-                                <div>
-                                    <span>Pedido de Venta:</span>
+                        <div class="row-flex" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 5-->
+                            <div class="columna div1 col-80" style="padding-left: 0.2rem;">
+                                <div class="doble-columna">
+                                    <span style="width: 15%; padding-right: 0.5rem;">Pedido de Venta:</span><span id="TxtCodigoVenta"></span>
                                 </div>
                                 <div>
                                     <span>Email:</span>
@@ -413,13 +418,14 @@
                                 <div>
                                     <span>Atención:</span>
                                 </div>
-                                <div>
-                                    <span>Observaciones:</span>
+                                <div class="doble-columna">
+                                    <span style="width: 15%; padding-right: 0.5rem;">Observaciones:</span><span id="TxtObservacion"></span>
                                 </div>
-                            </div>            
+                            </div>
                         </div>
 
-                        <div class="row-flex letra-bold" style="margin: 0 0 2rem 0;"> <!-- Cuadros 6-->
+                        <div class="row-flex letra-bold" style="margin: 0 0 2rem 0;">
+                            <!-- Cuadros 6-->
                             <div class="columna col-80 " style="padding-left: 0.2rem;">
                                 <div style="margin-top: 5px;">
                                     <span>RECIBÍ CONFORME:</span>
@@ -427,7 +433,7 @@
                                 <div style="margin-top: 5px;">
                                     <span>CEDULA DE IDENTIDAD:</span>
                                 </div>
-                                <div style="margin-top: 5px;">                    
+                                <div style="margin-top: 5px;">
                                     <span>FECHA:</span>
                                 </div>
                                 <div style="margin-top: 5px;">
@@ -435,43 +441,46 @@
                                 </div>
                                 <div style="margin-top: 5px;">
                                     <span>FIRMA:</span>
-                                </div>  
+                                </div>
                             </div>
-                        </div>         
-                        
-                    </div>            
-                </div>            
-                
-                <div class="container" style="margin: 1rem auto 0 33%">
-                    <button class="btn btn-info col-sm-3" type="button"onclick="generatePDF()">Descargar</button>
+                        </div>
+
+                    </div>
                 </div>
-                <div class="modal-footer" style="margin-top:2rem;">                
+
+                <div class="container" style="margin: 1rem auto 0 33%">
+                    <button class="btn btn-info col-sm-3" type="button" onclick="generatePDF()">Descargar</button>
+                </div>
+                <div class="modal-footer" style="margin-top: 2rem;">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
                 <!-- /.modal-content -->
             </div>
-        <!-- /.modal-dialog -->    
-       </div>
-    </div>    <!-- Modal -->
+            <!-- /.modal-dialog -->
+        </div>
+    </div>
+    <!-- Modal -->
     <!-- Modal de Visualizacion de PDF -->
     <div id="ModalEgresoInventarioPDF" class="modal fade" role="dialog">
-        <div class="modal-dialog modal-lg"> <!-- Agrega la clase 'modal-lg' para que el modal sea grande -->
+        <div class="modal-dialog modal-lg">
+            <!-- Agrega la clase 'modal-lg' para que el modal sea grande -->
             <div class="modal-content">
                 <div class="modal-header bg-info">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                     <h4 class="modal-title">View</h4>
                 </div>
                 <div class="modal-body modal-body-custom">
-                    <div class="container" style="margin-top:3rem; margin-bottom: 1rem; padding:0;">
+                    <div class="container" style="margin-top: 3rem; margin-bottom: 1rem; padding: 0;">
 
-                        <div class="row-flex" style="margin: 0 0 1rem 0;"><!-- Cuadros 1-->            
-                            
-                            <div class="div1-mitad" style="max-width:50%; padding: 0; margin: 0 0.5rem 0 0;">
+                        <div class="row-flex" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 1-->
 
-                                <div class="image-container .div1-mitad" style=" display: grid; justify-items: center; align-items: center; padding: 0; ">
+                            <div class="div1-mitad" style="max-width: 50%; padding: 0; margin: 0 0.5rem 0 0;">
+
+                                <div class="image-container .div1-mitad" style="display: grid; justify-items: center; align-items: center; padding: 0;">
                                     <img src="../carrusel/imagenes/logo_dos_textoGris.png" alt="Descripción de la imagen">
                                 </div>
-                               
+
                                 <div class="columna text-container" style="padding-left: 0.2rem;">
                                     <div class="letra-bold">
                                         <span class="">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
@@ -480,12 +489,12 @@
                                         <span class="letra-bold" style="width: 25%;">Dirección:</span> <span id="txtDireccion">AV. MARISCAL SUCRE OE6-201 Y JOSE MIGUEL CARRION</span>
                                     </div>
                                     <div class="doble-columna">
-                                        <span class="letra-bold" style="width: 25%;">Matríz: </span> <span id="txtMatriz">MIGUEL CARRION, QUITO - Ecuador</span>
+                                        <span class="letra-bold" style="width: 25%;">Matríz: </span><span id="txtMatriz">MIGUEL CARRION, QUITO - Ecuador</span>
                                     </div>
                                     <div class="doble-columna">
                                         <span class="letra-bold" style="width: 25%;">Sucursal:</span> <span id="txtSucursal">QUITO</span>
                                     </div>
-                    
+
                                     <div class="doble-columna">
                                         <span class="" style="width: 50%;">Contribuyente especial Nro:</span> <span id="txtContribuyenteEsp">143</span>
                                     </div>
@@ -498,13 +507,13 @@
                                     <div class="doble-columna">
                                         <span class="" style="width: 50%;">Fecha Fin Transporte:</span> <span id="txtFechaFinTrans"></span>
                                     </div>
-                                </div>                
-                           </div>
+                                </div>
+                            </div>
 
-                            <div class="columna div2 letra-bold" style="max-width:50%; padding-left: 0.2rem; margin: 0 0 0 0.5rem;">
+                            <div class="columna div2 letra-bold" style="max-width: 50%; padding-left: 0.2rem; margin: 0 0 0 0.5rem;">
                                 <div class="centered-element">
                                     <span class="">RUC:  1790885186001</span>
-                                </div> 
+                                </div>
                                 <div class="centered-element">
                                     <span class="">ACTA DE ENTREGA - REMISION:</span>
                                 </div>
@@ -514,9 +523,9 @@
                                 </div>
                                 <div class="">
                                     <span>NÚMERO DE AUTORIZACIÓN</span>
-                                </div>    
+                                </div>
                                 <br />
-                                <div class="doble-columna">                                       
+                                <div class="doble-columna">
                                     <span style="width: 65%;">FECHA Y HORA DE AUTORIZACIÓN:</span> <span id="txtFechaAuto"></span>
                                 </div>
                                 <div class="">
@@ -525,27 +534,29 @@
                                 <div class="">
                                     <span>EMISIÓN:</span>
                                 </div>
-                           </div>            
+                            </div>
                         </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 2-->
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 2-->
                             <div class="columna div1" style="padding-left: 0.2rem;">
                                 <div class="doble-columna">
-                                     <span style="width: 25%;">RUC/CI (Transportista)</span><span ID="TxtRuc">17908851860001</span> 
+                                    <span style="width: 25%;">RUC/CI (Transportista)</span><span id="TxtRuc">17908851860001</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Razón Social / Nombres y apellidos:</span><span ID="TxtRazonSoc">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
+                                    <span style="width: 25%;">Razón Social / Nombres y apellidos:</span><span id="TxtRazonSoc">COMPUTADORES Y EQUIPOS COMPUEQUIP DOS S.A.</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Placa:</span><span ID="TxtPlaca">0</span>
+                                    <span style="width: 25%;">Placa:</span><span id="TxtPlaca">0</span>
                                 </div>
                                 <div class="doble-columna">
-                                    <span style="width: 25%;">Punto de Partida:</span><span ID="TxtPuntoPar">AV. OCCIDENTAL OE6-201 Y JOSE MIGUEL CARRION</span>          
+                                    <span style="width: 25%;">Punto de Partida:</span><span id="TxtPuntoPar">AV. OCCIDENTAL OE6-201 Y JOSE MIGUEL CARRION</span>
                                 </div>
                             </div>
-                     </div>
+                        </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 3-->
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 3-->
                             <div class="columna div1" style="padding-left: 0.2rem;">
                                 <div class="doble-columna">
                                     <span style="width: 25%;">Comprobante de venta:</span><span id="TxtComprobanteVnt">143654</span>
@@ -556,17 +567,17 @@
                                 <div class="doble-columna">
                                     <div class="doble-columna" style="width: 62%;">
                                         <span style="width: 45%;">Motivo Traslado:</span><span id="TxtMotivoTras">Compra directa</span>
-                                    </div>                    
+                                    </div>
                                     <div class="flex-half doble-columna">
                                         <span style="width: 30%;">Fecha de Emisión:</span><span id="TxtFechaEmision"></span>
                                     </div>
-                                </div>  
-                                <div class="doble-columna">   
+                                </div>
+                                <div class="doble-columna">
                                     <br />
-                                    <div class="doble-columna" style="width: 62%;">                                            
+                                    <div class="doble-columna" style="width: 62%;">
                                         <span style="width: 45%;">Destino (Punto de llegada):</span><span id="TxtDestino">MARISCAL SUCRE OE6-201 Y JOSE MIGUEL</span>
                                     </div>
-                                    <div class="flex-half doble-columna">                                        
+                                    <div class="flex-half doble-columna">
                                         <span style="width: 30%;">CIUDAD:</span><span id="TxtCiudad3">QUITO</span>
                                     </div>
                                 </div>
@@ -588,24 +599,25 @@
                             </div>
                         </div>
 
-                        <div class="row" style="margin: 0 0 1rem 0;"> <!-- Cuadros 4-->
-                            <table id="tbl_ProductosInv" class="columna div1 table table-sm" style="margin-bottom:0;">
+                        <div class="row" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 4-->
+                            <table id="tbl_ProductosInv" class="columna div1 table table-sm" style="margin-bottom: 0;">
                                 <thead>
-                                    <tr style="text-align:center;">
-                                        <th style="width:10%;" class="titulosTabla">Cantidad</th>
-                                        <th style="width:36%;" class="titulosTabla">Descripción</th>
-                                        <th style="width:18%;" class="titulosTabla">Código Principal</th>
-                                        <th style="width:18%;" class="titulosTabla">Código Auxiliar</th>
-                                        <th style="width:18%;" class="titulosTabla">N° de Serie</th>
+                                    <tr style="text-align: center;">
+                                        <th style="width: 10%;" class="titulosTabla">Cantidad</th>
+                                        <th style="width: 36%;" class="titulosTabla">Descripción</th>
+                                        <th style="width: 18%;" class="titulosTabla">Código Principal</th>
+                                        <th style="width: 18%;" class="titulosTabla">Código Auxiliar</th>
+                                        <th style="width: 18%;" class="titulosTabla">N° de Serie</th>
                                     </tr>
                                 </thead>
-                                <tbody style="text-align:center;">
-
+                                <tbody style="text-align: center;">
                                 </tbody>
                             </table>
                         </div>
 
-                        <div class="row-flex" style="margin: 0 0 1rem 0;"> <!-- Cuadros 5-->
+                        <div class="row-flex" style="margin: 0 0 1rem 0;">
+                            <!-- Cuadros 5-->
                             <div class="columna col-80" style="padding-left: 0.2rem;">
                                 <div>
                                     <span>Pedido de Venta:</span>
@@ -619,10 +631,11 @@
                                 <div>
                                     <span>Observaciones:</span>
                                 </div>
-                            </div>            
+                            </div>
                         </div>
 
-                        <div class="row-flex letra-bold" style="margin: 0 0 2rem 0;"> <!-- Cuadros 6-->
+                        <div class="row-flex letra-bold" style="margin: 0 0 2rem 0;">
+                            <!-- Cuadros 6-->
                             <div class="columna col-80 " style="padding-left: 0.2rem;">
                                 <div style="margin-top: 5px;">
                                     <span>RECIBÍ CONFORME:</span>
@@ -630,7 +643,7 @@
                                 <div style="margin-top: 5px;">
                                     <span>CEDULA DE IDENTIDAD:</span>
                                 </div>
-                                <div style="margin-top: 5px;">                    
+                                <div style="margin-top: 5px;">
                                     <span>FECHA:</span>
                                 </div>
                                 <div style="margin-top: 5px;">
@@ -638,23 +651,23 @@
                                 </div>
                                 <div style="margin-top: 5px;">
                                     <span>FIRMA:</span>
-                                </div>  
+                                </div>
                             </div>
-                        </div>         
-                        
-                    </div>            
-                </div>            
-                
-                <div class="container" style="margin: 1rem auto 0 33%">
-                    <button class="btn btn-info col-sm-3" type="button"onclick="generatePDF()">Descargar</button>
+                        </div>
+
+                    </div>
                 </div>
-                <div class="modal-footer" style="margin-top:2rem;">                
+
+                <div class="container" style="margin: 1rem auto 0 33%">
+                    <button class="btn btn-info col-sm-3" type="button" onclick="generatePDF()">Descargar</button>
+                </div>
+                <div class="modal-footer" style="margin-top: 2rem;">
                     <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
                 </div>
                 <!-- /.modal-content -->
             </div>
-        <!-- /.modal-dialog -->    
-       </div>
+            <!-- /.modal-dialog -->
+        </div>
     </div>
 
 </asp:Content>

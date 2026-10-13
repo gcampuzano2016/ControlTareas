@@ -1,16 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
-using ReporteTareas.Controles;
-using System.Data;
-using SeguridadAppHelper;
-
-using System.Text;
+﻿using ReporteTareas.Controles;
+using System;
 using System.IO;
 
 namespace ReporteTareas.Formulario

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
-using System.Data;
+﻿using System.Data;
 
 namespace CapaEntidad
 {
@@ -17,7 +11,7 @@ namespace CapaEntidad
         // 0 - Error, 1 - Exito
         public string estado { get; set; }
         // Contendra el resultado de la consulta, puede ser: arreglo para grid.
-        public dynamic resultado { get; set; } 
+        public dynamic resultado { get; set; }
         // Mensaje que se muestra al usaurio, puede ser de exito o error dependiendo del estado
         public string mensaje { get; set; }
         // Tipo de mensaje que permitira indicar si el mensaje a mostrarse es confirmación, warning, alerta, informativo
@@ -30,6 +24,12 @@ namespace CapaEntidad
 
         public string rutapdf { get; set; }
         public string Archivo { get; set; }
+
+        // Identificadores separados por coma de las filas que quedaron pendientes de
+        // autorizacion. Lo llena Sp_RTAInsertaDetalleTarea_V2, que puede insertar
+        // varias filas de un solo guardado cuando el horario se parte en tramos.
+        // Queda vacio en los demas procedimientos.
+        public string IdsHorasExtras { get; set; }
 
     }
 }

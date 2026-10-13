@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-
-using System.Web;
+﻿using CapaEntidad;
+using CapaNegocio;
 using PdfSharp;
 using PdfSharp.Pdf;
+using System;
 using System.IO;
+using System.Web;
 using TheArtOfDev.HtmlRenderer.PdfSharp;
-
-using CapaEntidad;
-using CapaNegocio;
 
 namespace ReporteTareas.clases
 {

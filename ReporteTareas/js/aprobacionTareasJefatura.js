@@ -87,7 +87,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, divPanelShow, divPane
                     //}
 
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -720,13 +720,22 @@ function BtnConsulta() {
         ObtenerListaRecursosHorasDiarias();
         document.getElementById("Pagina1").style.display = "block";
         document.getElementById("Pagina2").style.display = "none";
+        document.getElementById("Pagina3").style.display = "none";
     }
     else if( $("#cmbEstados").val() == "3" ){
         document.getElementById("Pagina1").style.display = "none";
         document.getElementById("Pagina2").style.display = "block";
+        document.getElementById("Pagina3").style.display = "none";
         tipoGeneral = 0;
         idregistroGeneral = 0;
         ObtenerListaTareasHorasExtras(0, 0);
+    }
+    else if ($("#cmbEstados").val() == "4") {
+        $("#divMensajes").html("");
+        document.getElementById("Pagina1").style.display = "none";
+        document.getElementById("Pagina2").style.display = "none";
+        document.getElementById("Pagina3").style.display = "block";
+        CargarDashboardAprobacion();
     }
 }
 
@@ -737,7 +746,7 @@ function BtnDescarga() {
 
 function BuscarEstado() {
 
-    if ($("#cmbEstados").val() == "1" || $("#cmbEstados").val() == "2") {
+    if ($("#cmbEstados").val() == "1" || $("#cmbEstados").val() == "2" || $("#cmbEstados").val() == "4") {
         document.getElementById("btnDescarga").style.display = "none";
     }
     else if ($("#cmbEstados").val() == "3") {
@@ -776,7 +785,7 @@ function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
                     $('#modalMensajeInformativo').modal('show');
                 }
             } else {
-                var mesnajeError = "No existen datos para esta consulta.";
+                var mesnajeError = DosTextoDescargaVacia();
                 $("#modalMensajeInformativoTipo").attr("style", "background: #f2dede")
                 $("#MensajeInformativo").html(mesnajeError);
                 $('#modalMensajeInformativo').modal('show');
@@ -1172,7 +1181,7 @@ function ListadoArchivosTarea(div, idTarea) {
                     $(div).html(htmlListaArchivosAdjuntos);
                 }
             } else {
-                $("#divMensajes").html("No existen datos para esta consulta.");
+                $(div).html(DosVacio("No hay archivos adjuntos.", ""));
             }
 
             $("#divMensajes").html("");

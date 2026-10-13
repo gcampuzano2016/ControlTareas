@@ -7,6 +7,7 @@ let txtLentes, txtExam1, txtExam2, txtExam3, txtExam4, txtExam5, txtExam6, metPl
 let txtMedicacionHabSelect, txtCualMedicamento1, txtCantdidadMed1, txtCualMedicamento2, txtCantdidadMed2, txtCualMedicamento3, txtCantdidadMed3;
 let contadorMedicacion = 0;
 let IdPerfil = 0;
+var inputActivoNum = null; // Variable global para rastrear el input usado en DIAGNOSTICO
 
 function MensajeIncorrecto(resultado) {
     sweetAlert("Error", resultado, "error");
@@ -67,7 +68,7 @@ function ObtenerListaEmpleados(cedula, descripcion, tipo2) {
 
     var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
 
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
 }
 function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
 
@@ -91,7 +92,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                         $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                     }
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -109,6 +110,10 @@ function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
 
     if (tipoControl == "tableSelectBusqueda") {
         contenido = RecorreJSONTableSelectBusqueda(json, boton, idSeleccionado);
+        $(div).html(contenido);
+    }
+    if (tipoControl == "tableSelectBusquedaCIE") {
+        contenido = RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado);
         $(div).html(contenido);
     }
     return contenido;
@@ -258,40 +263,85 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Obtén referencias a los elementos relevantes
-    var aptitudSelect = document.getElementById("txtAptitudSelect");
-    var descObservacion = document.getElementById("descObservacion");
-    var descLimitacion = document.getElementById("descLimitacion");
-    var txtDescObservacion = document.getElementById("txtDescObservacion");
-    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+//document.addEventListener("DOMContentLoaded", function () {
+//    // Obtén referencias a los elementos relevantes
+//    var aptitudSelect = document.getElementById("txtAptitudSelect");
+//    var descObservacion = document.getElementById("descObservacion");
+//    var descLimitacion = document.getElementById("descLimitacion");
+//    var txtDescObservacion = document.getElementById("txtDescObservacion");
+//    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
 
-    // Agrega un controlador de eventos change al campo select
-    aptitudSelect.addEventListener("change", toggleAptitudDiv);
+//    // Agrega un controlador de eventos change al campo select
+//    aptitudSelect.addEventListener("change", toggleAptitudDiv);
 
-    // Función para mostrar u ocultar los campos según la selección
-    function toggleAptitudDiv() {
-        if (aptitudSelect.value === "aptoObservacion") {
-            descObservacion.style.display = "block";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = false;
-            txtDescLimitacion.disabled = true;
-        } else if (aptitudSelect.value === "aptoLimitacion") {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "block";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = false;
-        } else {
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "none";
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = true;
-        }
+//    // Función para mostrar u ocultar los campos según la selección
+//    function toggleAptitudDiv() {
+//        if (aptitudSelect.value === "aptoObservacion") {
+//            descObservacion.style.display = "block";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = false;
+//            txtDescLimitacion.disabled = true;
+//        } else if (aptitudSelect.value === "aptoLimitacion") {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "block";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = false;
+//        } else {
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "none";
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = true;
+//        }
+//    }
+
+//    // Llama a la función inicialmente para manejar el estado inicial
+//    toggleAptitudDiv();
+//});
+
+
+/*=====================================================================
+ *          Buscamos los codigos CIE en la base de datos
+ *====================================================================*/
+
+function BuscarCodigosCIE() {
+    let txtDiagDescripcion = document.getElementById(`txtDiagDescripcion${inputActivoNum}`);
+    if (txtDiagDescripcion.value.length > 2) {
+        let CIEBuscar = txtDiagDescripcion.value;
+        idSeleccionado = 0;
+        ObtenerListaCodigosCIE(CIEBuscar, "", "", inputActivoNum);
+    } else {
+        document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
     }
+}
 
-    // Llama a la función inicialmente para manejar el estado inicial
-    toggleAptitudDiv();
-});
+function ObtenerListaCodigosCIE(codigo, descripcion, idproceso) {
+    var Datos = "[{ \"action\": \"BuscarCodigoCIE\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + codigo + "\"} }]";
+    CargarPagina(`#comboCodigos${inputActivoNum}`, 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectBusquedaCIE", idproceso);
+}
+
+function CargarCodigoCIE(CODIGO, DESCRIPCION) {
+    // Mostrar el código seguido por la descripción
+    document.getElementById(`txtDiagDescripcion${inputActivoNum}`).value = `${DESCRIPCION}`;
+
+    // Colocar el código en el campo CIE y desactivar la edición
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).value = CODIGO;
+    document.getElementById(`txtDiagCIE${inputActivoNum}`).disabled = true;
+
+    // Ocultar la lista desplegable
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "none";
+}
+
+function RecorreJSONTableSelectCodigoCIE(json, boton, idSeleccionado) {
+    var x = "";
+    $.each(json, function (i, item) {
+        x = x + `<li><a role='option' onclick='CargarCodigoCIE("${item.Codigo}","${item.DescCodigo}");'>${item.Codigo} - ${item.DescCodigo}</a></li>`;
+    });
+    document.getElementById(`comboCodigos${inputActivoNum}`).innerHTML = x;
+    document.getElementById(`comboCodigos${inputActivoNum}`).style.display = "block";
+}
+function setInputActivo(num) {
+    inputActivoNum = num;
+}
 
 
 
@@ -325,6 +375,41 @@ function BorrarCajas() {
     $('#txtPorcentajeDiscapacidad').text("");
 }
 
+/* =================================================================================
+ *          Obtener las fechas de Salida y Reingreso y calcular los dias
+ * ===============================================================================*/
+function calcularDias() {
+    const fechaUltimoDia = document.getElementById('fechaUltimoDia').value;
+    const fechaReintegro = document.getElementById('fechaReintegro').value;
+
+    // Validar que ambas fechas estén llenas
+    if (fechaUltimoDia && fechaReintegro) {
+        const fechaSalida = new Date(fechaUltimoDia);
+        const fechaRegreso = new Date(fechaReintegro);
+
+        // Validar que la fecha de reingreso sea posterior a la de salida
+        if (fechaRegreso <= fechaSalida) {
+            alert("La fecha de Reingreso debe ser posterior a la fecha de salida.");
+            document.getElementById('txtTotalDias').value = ""; // Limpiar campo de total de días
+            return;
+        }
+
+        // Calcular la diferencia de días
+        const diferenciaMilisegundos = fechaRegreso - fechaSalida;
+        const diferenciaDias = diferenciaMilisegundos / (1000 * 60 * 60 * 24);
+
+        // Asignar la diferencia al campo de total de días
+        document.getElementById('txtTotalDias').value = diferenciaDias;
+    } else {
+        // Limpiar campo de total de días si alguna fecha falta
+        document.getElementById('txtTotalDias').value = "";
+    }
+}
+
+// Ejecutar la función al iniciar la página, por si las fechas ya están llenas
+document.addEventListener("DOMContentLoaded", calcularDias);
+
+
 function GuardarReintegro() {
     /*
     Esta función se encarga de guardar la información de una historia clínica en el servidor.
@@ -339,7 +424,7 @@ function GuardarReintegro() {
     Finalmente, limpia el contenido del div 'divMensajes' (donde se muestran mensajes informativos).
     */
 
-    var url = "ObtenerListaTareas.ashx";
+    var url = "ObtenerNuevaListaTareas.ashx";
     var datos = "";
     var mensajeVerificacion = "";
     var tipoMensaje = "warning";
@@ -386,6 +471,22 @@ function GuardarReintegro() {
         mensajeVerificacion += "- Debe ingresar el motivo de la consulta";
         contadorVerificacion += 1;
     }*/
+
+
+    // Obtener valores de las fechas
+    const fechaUltimoDia = $('#fechaUltimoDia').val();
+    const fechaReintegro = $('#fechaReintegro').val();
+
+    // Convertir las fechas a objetos Date para comparar
+    const fechaSalida = new Date(fechaUltimoDia);
+    const fechaRegreso = new Date(fechaReintegro);
+
+    // Validar que la fecha de reingreso sea posterior a la de salida
+    if (fechaReintegro && fechaUltimoDia && fechaRegreso <= fechaSalida) {
+        mensajeVerificacion += "- La fecha de Reingreso debe ser posterior a la de salida\n";
+        contadorVerificacion++;
+    }
+
     /*if ($('#txtAntecedentesPersonales').val() == "") {
         mensajeVerificacion += "- Debe ingresar el campo Antecedentes personales";
         contadorVerificacion += 1;
@@ -506,42 +607,42 @@ function GuardarReintegro() {
     }*/
 
 
-    if ($('#txtConstPresionArterial').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la presión arterial";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTemperatura').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la temperatura";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaCardicaca').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstSaturacionOxigeno').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPeso').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el peso actual";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstTalla').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la talla";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstMasaCorporal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
-        contadorVerificacion += 1;
-    }
-    if ($('#txtConstPerimetroAbdominal').val() == "") {
-        mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
-        contadorVerificacion += 1;
-    }
+    //if ($('#txtConstPresionArterial').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la presión arterial";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTemperatura').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la temperatura";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaCardicaca').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuancia cardiaca";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstSaturacionOxigeno').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la Saturación de Oxígeno";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstFrecuenciaRespiratoria').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la frecuencia respiratoria";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPeso').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el peso actual";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstTalla').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la talla";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstMasaCorporal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar el indice de masa corporal";
+    //    contadorVerificacion += 1;
+    //}
+    //if ($('#txtConstPerimetroAbdominal').val() == "") {
+    //    mensajeVerificacion += "- Debe ingresar la información del perimetro abdominal";
+    //    contadorVerificacion += 1;
+    //}
 
 
     if (contadorVerificacion > 0) {
@@ -555,10 +656,17 @@ function GuardarReintegro() {
     datosFormulario = {
         'formulario': "3",
         'session': $("#ContentPlaceHolder1_txtUsuario").val(),
+        'txtNumHistoria': $('#txtNumHistoria').val(),
+        'txtNumArchivo': $('#txtNumArchivo').val(),
         'txtNombre': $('#txtNombre').val(),
         'txtSexo': $('#txtSexo').val(),
         'txtEdad': $('#txtEdad').val(),
-        
+        'txtPuestoTrabajo': $('#txtPuestoTrabajo').val(),
+        'txtSociedad': $('#txtSociedad').val(),
+        'fechaUltimoDia': $('#fechaUltimoDia').val(),
+        'txtTotalDias': $('#txtTotalDias').val(),
+        'fechaReintegro': $('#fechaReintegro').val(),
+        'txtCausaSalida': $('#txtCausaSalida').val(),
         'txtMotivoConsulta': $('#txtMotivoConsulta').val(),
         'txtEnfermedadActual': $('#txtEnfermedadActual').val(),
         'txtConstPresionArterial': $('#txtConstPresionArterial').val(),
@@ -636,6 +744,7 @@ function GuardarReintegro() {
         'txtAptitudSelect': $('#txtAptitudSelect').val(),
         'txtDescObservacion': $('#txtDescObservacion').val(),
         'txtDescLimitacion': $('#txtDescLimitacion').val(),
+        'txtDescReubicacion': $('#txtDescReubicacion').val(),
         'txtRecomendacion': $('#txtRecomendacion').val(),
 
         'txtReligion': "",
@@ -646,7 +755,7 @@ function GuardarReintegro() {
         'txtDiscapacidad': "",
         'txtTipoDiscapacidad': "",
         'txtPorcentajeDiscapacidad': "",
-        'txtAreaTrabajo': "",        
+        'txtAreaTrabajo': "",
         'txtAntecedentesPersonales': "",
         'txtAntecedentesFamiliares': "",
         'txtPuestoTrabajo1': "",
@@ -678,7 +787,7 @@ function GuardarReintegro() {
         'txtMedidadPreventiva3': "",
 
         'txtPatologia': "",
-        'txtRevisionOrganos': "",     
+        'txtRevisionOrganos': "",
         'txtMenarquia': "",
         'txtCiclos': "",
         'fechaUltimaMens': "",
@@ -771,11 +880,20 @@ function GuardarReintegro() {
         'EnfermedadesProfSelect': "",
         'txtEspecificarEnfermedadesProfSelect': "",
         'txtObservacionesEnfermedadesProf': "",
-        'txtActividadesExtraLaborales': "",        
+        'txtActividadesExtraLaborales': "",
         'txtTipoExamenSelect4': "",
         'txtNomExamen4': "",
         'fechaExam4': "",
         'txtResExamen4': "",
+        'txtHbtsIncidentes': "",
+        'txtfechaAccTrabAnio': "",
+        'txtfechaAccTrabMes': "",
+        'txtfechaAccTrabDia': "",
+        'txtfechaEnfProfAnio': "",
+        'txtfechaEnfProfMes': "",
+        'txtfechaEnfProfDia': "",
+        'txtfechaFormulario': $('#fechaFormulario').val(),
+        'txthoraFormulario': $('#horaFormulario').val(),
         'nombre': $("#ContentPlaceHolder1_txtLoginUsuario").val()
     };
 
@@ -793,14 +911,15 @@ function GuardarReintegro() {
         },
         success: function (respuesta) {
             var mensaje = "";
-            if (respuesta.estado == "1") {
-                MensajeCorrecto(respuesta.mensaje);
-                //VerListaEmpleados();
-                $("#divMensajes").html("");
-            }
+            //if (respuesta.estado == "1") {
+            MensajeCorrecto(respuesta.mensaje);
+            //VerListaEmpleados();
+            $("#divMensajes").html("");
+            window.open(respuesta.mensaje);
+            /*}
             else if (respuesta.estado == "0") {
                 MensajeIncorrecto(respuesta.mensaje);
-            }
+            }*/
         },
         error: function (objeto, msgError, objError) {
             var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";

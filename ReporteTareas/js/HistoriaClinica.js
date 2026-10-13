@@ -18,7 +18,7 @@ function alerta(respuesta) {
 
 function VerSeleccionFormulario() {
     document.getElementById("cuadroFormularios").style.display = "block";
-    document.getElementById("cuadroListaForms").style.display = "none"; 
+    document.getElementById("cuadroListaForms").style.display = "none";
 }
 function VerListaFormulario() {
     document.getElementById("cuadroFormularios").style.display = "none";
@@ -52,7 +52,7 @@ function seleccionarPestania(pestaniaId) {
                 break;
             case 'pestania3':
                 VerFormConsulta();
-                break;            
+                break;
             default:
                 break;
         }
@@ -63,27 +63,69 @@ function seleccionarPestania(pestaniaId) {
 }
 //cambios---------------------------------------------------------------------------------------------------------------------
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Obtener todos los enlaces con la clase "nav-link"
-    const links = document.querySelectorAll('.nav-link');
-    // Agregar eventos para cambiar el color del enlace cuando el mouse está encima
-    links.forEach(link => {
-        link.addEventListener('mouseover', () => {
-            link.style.backgroundColor = '#FF0000'; // Cambiar el color de fondo a rojo
-            link.style.color = 'white'; // Cambiar el color del texto a blanco (opcional)
-        });
+/* ============================================
+ *          Seleccion de formulario
+ * ===========================================*/
+/* Cada caja del cuadro de seleccion y la pantalla que abre.
 
-        link.addEventListener('mouseout', () => {
-            link.style.backgroundColor = '#B81111'; // Restaurar el color de fondo predeterminado
-            link.style.color = 'aliceblue'; // Restaurar el color del texto predeterminado (opcional)
+   Va como tabla y no como una constante por caja porque el marcado cambia: hoy
+   cuatro de estas cajas estan comentadas en HistoriaClinica.aspx (Preocupacional,
+   Periodica, Reintegro y Retiro), reemplazadas por Evaluacion Ocupacional 2026.
+   Antes el codigo hacia getElementById de cada una y enseguida addEventListener
+   sin comprobar: la primera comentada devolvia null, reventaba el bloque entero
+   y se quedaban sin enlazar todas las cajas que venian despues. Por eso no
+   abrian ni Inmunizaciones ni el Certificado. Al recorrer la tabla y saltar las
+   que no estan, comentar una caja ya no arrastra a las demas. */
+const PANTALLAS_POR_CAJA = {
+    btnAtencionMedica:            'HistorialClinico.aspx',
+    btnEvaluacionNueva:           'HistoriaEvaluacion.aspx',
+    btnEvaluacionPreocupacional:  'DepartamentoMedico.aspx',
+    btnEvaluacionPeriodica:       'HistoriaPeriodica.aspx',
+    btnEvaluacionReintegro:       'HistoriaReintegro.aspx',
+    btnEvaluacionRetiro:          'HistoriaRetiro.aspx',
+    btnRegInmunizaciones:         'HistoriaInmunizaciones.aspx',
+    btnCertificado:               'HistoriaCertificado.aspx'
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    const sendPostRequest = (actionUrl) => {
+        let cedulaEmpleado = $('#txtCedula').val();
+
+        // Crear un formulario dinámico
+        let form = document.createElement('form');
+        form.method = 'POST';
+        form.action = actionUrl;
+
+        // Crear un campo de entrada oculto
+        let inputCedula = document.createElement('input');
+        inputCedula.type = 'hidden';
+        inputCedula.name = 'cedula';
+        inputCedula.value = cedulaEmpleado;
+
+        // Añadir el campo al formulario
+        form.appendChild(inputCedula);
+
+        // Añadir el formulario al cuerpo del documento
+        document.body.appendChild(form);
+
+        // Enviar el formulario
+        form.submit();
+    };
+
+    Object.keys(PANTALLAS_POR_CAJA).forEach((idCaja) => {
+        const caja = document.getElementById(idCaja);
+        if (!caja) { return; }          /* la caja esta comentada en el aspx */
+
+        caja.addEventListener('click', () => {
+            // Mostrar el spinner
+            $("#divSpinner").show();
+            sendPostRequest(PANTALLAS_POR_CAJA[idCaja]);
         });
     });
 
-    // INGRESAR SOLO MAYUSCOLAS EN EL INGRESO DEL NOMBRE
-    function convertirAMayusculas(input) {
-        input.value = input.value.toUpperCase();
-    }
-
+    // Ocultar el spinner
+    $("#divSpinner").hide();
 });
 
 
@@ -95,7 +137,7 @@ function BuscarEmpleado2() {
     if ($('#txtEmpleado').val().length > 4) {
         let cedulaBuscar = document.getElementById("txtEmpleado").value;
         idSeleccionado = 0;
-        ObtenerListaEmpleados2(cedulaBuscar, "","");
+        ObtenerListaEmpleados2(cedulaBuscar, "", "");
     }
     else {
         document.getElementById("comboEmpleados2").style.display = "none";
@@ -103,7 +145,7 @@ function BuscarEmpleado2() {
 }
 function ObtenerListaEmpleados2(cedula, descripcion, idproceso) {
     var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
-    CargarPagina('#comboEmpleados2', 'ObtenerListaTareas.ashx', Datos, "tableSelectEmpleado", idproceso);
+    CargarPagina('#comboEmpleados2', 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectEmpleado", idproceso);
 }
 function CargarEmpleado2(ID, NOMBRE) {
     $('#txtEmpleado').val(NOMBRE);
@@ -112,26 +154,26 @@ function CargarEmpleado2(ID, NOMBRE) {
 }
 /*function ObtenerListaComboEmpleados2() {
     var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"0\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + $("#ContentPlaceHolder1_txtIdCliente").val() + "\"} }]";
-    CargarPagina('#cboCliente2', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+    CargarPagina('#cboCliente2', 'ObtenerNuevaListaTareas.ashx', Datos, "select", "", "");
 }*/
 function RecorreJSONTableSelectEmpleado(json, boton, idSeleccionado) {
 
     var x = "";
 
-        $.each(json, function (i, item) {
-            x = x + "<li><a role='option' onclick='CargarEmpleado2(\"" + item.Cedula + "\", \"" + item.Nombre + "\");'>" + item.Nombre + "</a></li>";
-        });
+    $.each(json, function (i, item) {
+        x = x + "<li><a role='option' onclick='CargarEmpleado2(\"" + item.Cedula + "\", \"" + item.Nombre + "\");'>" + item.Nombre + "</a></li>";
+    });
 
     document.getElementById("comboEmpleados2").innerHTML = x;
     document.getElementById("comboEmpleados2").style.display = "block";
-    
+
 }
 
 
 // Obtener la cedula ingresada de cualquier formulario
 document.addEventListener('DOMContentLoaded', () => {
     //const txtEmpleado = document.getElementById('txtEmpleado');
-    
+
     const urlParams = new URLSearchParams(window.location.search);
     const cedulaEmpleado = urlParams.get('cedula');
 
@@ -152,7 +194,7 @@ function BuscarEmpleado(cedulaBuscar) {
     if (!cedulaBuscar) {
         cedulaBuscar = document.getElementById("txtEmpleado").value;
     }
-
+    document.getElementById("cuadroListaForms").style.display = "none";
     // Muestra las pestañas y los formularios
     document.getElementById("pestanias").style.display = "block";
     document.getElementById("cuadroFormularios").style.display = "block";
@@ -170,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById("txtEmpleado").value = cedulaEmpleado;
         BuscarEmpleado(cedulaEmpleado); // Llama a la función con la cédula del campo oculto
-    } 
+    }
 });
 
 
@@ -178,7 +220,7 @@ function ObtenerListaEmpleados(cedula, descripcion, tipo2) {
 
     var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
 
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
 }
 function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
 
@@ -202,7 +244,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                         $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                     }
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -259,7 +301,7 @@ function dtEmpleados(json) {
         let Sexo = item.Sexo;
         document.getElementById("txtSexo").value = Sexo;
 
-        let EstadoCivil = item.EstadoCivil; 
+        let EstadoCivil = item.EstadoCivil;
         document.getElementById("txtEstadoCivil").value = EstadoCivil;
         let PuestoTrabajo = item.PuestoTrabajo;
         document.getElementById("txtPuestoTrabajo").value = PuestoTrabajo;
@@ -274,7 +316,7 @@ function dtEmpleados(json) {
         } else {
             console.error("El formato del nombre no es válido");
         }
-        document.getElementById("txtNombreUsuario").textContent = Nombre; 
+        document.getElementById("txtNombreUsuario").textContent = Nombre;
         document.getElementById("txtIdEmpleado").textContent = Cedula;
     });
 }
@@ -290,7 +332,7 @@ function ObtenerListaContactos(cedula, descripcion, tipo2) {
 
     var Datos = "[{ \"action\": \"BuscarContactoEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
 
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectContactos", tipo2);
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectContactos", tipo2);
 }
 function RecorreJSONTableSelectContacto(json, boton, idSeleccionado) {
 
@@ -406,7 +448,7 @@ function VerFormularios() {
 }
 function ObtenerListaFormularios(tipo, sociedad, areaTrabajo, nombre, fecha1, fecha2, tipo2) {
     var DatosLF = "[{ \"action\": \"BuscarListaFormularios\", \"parameters\" : { tipo : \"" + tipo + "\", nombre : \"" + nombre + "\", sociedad : \"" + sociedad + "\", areaTrabajo : \"" + areaTrabajo + "\", fecha1 : \"" + fecha1 + "\", fecha2: \"" + fecha2 + "\"} }]";
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', DatosLF, "tableSelectFormularios", tipo2);
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', DatosLF, "tableSelectFormularios", tipo2);
 }
 function RecorreJSONTableSelectFormulario(json, boton, idSeleccionado) {
 
@@ -432,7 +474,7 @@ function dtFormularios(json) {
             { data: 'Tipo' },
             { data: 'Fecha' },
             { defaultContent: "<a title='Ver archivo' class='btn btn-abrirFormulario btn-xs'><i class='fa fa-eye' aria-hidden='true'></i></a>" }
-         ],
+        ],
 
         language: {
             "decimal": ",",
@@ -469,7 +511,7 @@ $(document).on('click', '.btn-abrirFormulario', function () {
     // Construye la URL completa al archivo
     //var url = '/HistoriasClinicas/' + nombreCarpeta + '/' + nombreArchivo;
     var DatosA = "[{ \"action\": \"AbrirDocHistoria\", \"parameters\" : { nombreArchivo : \"" + nombreArchivo + "\", nombreCarpeta: \"" + nombreCarpeta + "\"} }]";
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', DatosA, "tableSelectFormularios");
+    CargarAbrirArchivo('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', DatosA, "tableSelectFormularios");
 
     // Abre el archivo en una nueva ventana del navegador
     //window.open(url, '_blank');
@@ -487,11 +529,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Recorre cada cuadro y aplica el comportamiento
     boxes.forEach((box) => {
         const originalColor = box.style.backgroundColor;
-        
+
         box.addEventListener('mouseenter', () => {
             // Oscurece el color del cuadro actual
             const darkerColor = darkenColor(originalColor, 0.1); // Puedes ajustar el valor para oscurecer más o menos
-            box.style.backgroundColor = darkerColor;            
+            box.style.backgroundColor = darkerColor;
             // Cambia el cursor a una mano
             box.style.cursor = 'pointer';
         });
@@ -515,65 +557,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 
-/* ============================================
- *          Seleccion de formulario
- * ===========================================*/
-document.addEventListener('DOMContentLoaded', () => {
-    const btnEvaluacionPreocupacional = document.getElementById('btnEvaluacionPreocupacional');
-    const btnEvaluacionPeriodica = document.getElementById('btnEvaluacionPeriodica');
-    const btnEvaluacionReintegro = document.getElementById('btnEvaluacionReintegro');
-    const btnEvaluacionRetiro = document.getElementById('btnEvaluacionRetiro');
-    const btnRegInmunizaciones = document.getElementById('btnRegInmunizaciones'); 
-    const btnCertificado = document.getElementById('btnCertificado');
-
-    const sendPostRequest = (actionUrl) => {
-        let cedulaEmpleado = $('#txtCedula').val();
-
-        // Crear un formulario dinámico
-        let form = document.createElement('form');
-        form.method = 'POST';
-        form.action = actionUrl;
-
-        // Crear un campo de entrada oculto
-        let inputCedula = document.createElement('input');
-        inputCedula.type = 'hidden';
-        inputCedula.name = 'cedula';
-        inputCedula.value = cedulaEmpleado;
-
-        // Añadir el campo al formulario
-        form.appendChild(inputCedula);
-
-        // Añadir el formulario al cuerpo del documento
-        document.body.appendChild(form);
-
-        // Enviar el formulario
-        form.submit();
-    };
-
-    btnEvaluacionPreocupacional.addEventListener('click', () => {
-        sendPostRequest('DepartamentoMedico.aspx');
-    });
-
-    btnEvaluacionPeriodica.addEventListener('click', () => {
-        sendPostRequest('HistoriaPeriodica.aspx');
-    });
-
-    btnEvaluacionReintegro.addEventListener('click', () => {
-        sendPostRequest('HistoriaReintegro.aspx');
-    });
-
-    btnEvaluacionRetiro.addEventListener('click', () => {
-        sendPostRequest('HistoriaRetiro.aspx');
-    });
-
-    btnRegInmunizaciones.addEventListener('click', () => {
-        sendPostRequest('HistoriaInmunizaciones.aspx');
-    });
-
-    btnCertificado.addEventListener('click', () => {
-        sendPostRequest('HistoriaCertificado.aspx');
-    });
-});
+/* Aca habia un segundo bloque "Seleccion de formulario", copia del de arriba sin
+   Atencion Medica ni el spinner. Nunca llego a enlazar nada porque moria en el
+   mismo null, y eso escondia que enlazaba las mismas cajas dos veces: al dejar
+   de reventar, cada clic habria enviado el formulario dos veces. Se elimina; el
+   bloque de arriba, que recorre PANTALLAS_POR_CAJA, ya cubre todas las cajas. */
 
 
 /* =============================================================================== *
@@ -581,71 +569,71 @@ document.addEventListener('DOMContentLoaded', () => {
  * =============================================================================== */
 function GuardarContacto() {
 
-        var url = "ObtenerListaTareas.ashx";
-        var datos = "";
-        var mensajeVerificacion = "";
-        var tipoMensaje = "warning";
-        var contadorVerificacion = 0;
+    var url = "ObtenerNuevaListaTareas.ashx";
+    var datos = "";
+    var mensajeVerificacion = "";
+    var tipoMensaje = "warning";
+    var contadorVerificacion = 0;
 
 
-        if ($('#txtNombreContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el Nombre de Contacto";
-            contadorVerificacion += 1;
-        }
+    if ($('#txtNombreContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el Nombre de Contacto";
+        contadorVerificacion += 1;
+    }
 
-        if ($('#txtTelefonoContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el teléfono de Contacto ";
-            contadorVerificacion += 1;
-        }
+    if ($('#txtTelefonoContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el teléfono de Contacto ";
+        contadorVerificacion += 1;
+    }
 
-        if ($('#txtParentescoContacto').val() == "") {
-            mensajeVerificacion += "- Debe ingresar el parentesco de Contacto ";
-            contadorVerificacion += 1;
-        } 
+    if ($('#txtParentescoContacto').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el parentesco de Contacto ";
+        contadorVerificacion += 1;
+    }
 
-        if (contadorVerificacion > 0) {
-            alerta(mensajeVerificacion);
-            return;
-        }
-
-        var datosInfoAdicional = "";
-
-        datosInfoAdicional = {
-            'txtOpcion': "2",
-            'session': $("#txtEmpleado").val(),
-            'txtNombreContacto': $('#txtNombreContacto').val(),
-            'txtTelfContacto': $('#txtTelefonoContacto').val(),
-            'txtParentescoContacto': $('#txtParentescoContacto').val()
-        };
-
-        var datos = JSON.stringify([{ 'action': 'GuardarContactoEmergencia', 'parameters': datosInfoAdicional }]);
-
-        $.ajax({
-            type: "POST",
-            url: url,
-            data: datos,
-            contentType: "application/json; charset=utf-8",
-            dataType: "json",
-            beforeSend: function () {
-                $("#divMensajes").html("Guardando Información...");
-            },
-            success: function (respuesta) {
-                var mensaje = "";
-                if (respuesta.estado == "1") {
-                    MensajeCorrecto(respuesta.mensaje);
-                    $("#divMensajes").html("");
-                }
-                else if (respuesta.estado == "0") {
-                    MensajeIncorrecto(respuesta.mensaje);
-                }
-            },
-            error: function (objeto, msgError, objError) {
-                var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
-                MensajeIncorrecto(mesnajeError);
-            }
-        });
-
+    if (contadorVerificacion > 0) {
+        alerta(mensajeVerificacion);
         return;
+    }
+
+    var datosInfoAdicional = "";
+
+    datosInfoAdicional = {
+        'txtOpcion': "2",
+        'session': $("#txtEmpleado").val(),
+        'txtNombreContacto': $('#txtNombreContacto').val(),
+        'txtTelfContacto': $('#txtTelefonoContacto').val(),
+        'txtParentescoContacto': $('#txtParentescoContacto').val()
+    };
+
+    var datos = JSON.stringify([{ 'action': 'GuardarContactoEmergencia', 'parameters': datosInfoAdicional }]);
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                MensajeCorrecto(respuesta.mensaje);
+                $("#divMensajes").html("");
+            }
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
+
+    return;
 }
 
 
@@ -679,7 +667,44 @@ function MensajeContactoEmergencia() {
     let cedulaBu = document.getElementById("txtEmpleado").value;
     //document.getElementById("pestanias").style.display = "block";
     //document.getElementById("cuadroFormularios").style.display = "block";
-    ObtenerListaContactos(cedulaBu, "", "");      
+    ObtenerListaContactos(cedulaBu, "", "");
+}
+
+function CargarAbrirArchivo(div, url, datos, tipoControl, boton, idSeleccionado) {
+
+    if (div != undefined) {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: datos,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function (respuesta) {
+                $("#divMensajes").html("Cargando Información...");
+            },
+            success: function (respuesta) {
+                if (respuesta != null) {
+                    var idTotalRegistro = respuesta.length;
+                    if (respuesta.length == 0) {
+                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
+                    }
+                    else {
+                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
+                        window.open(respuesta.mensaje);
+                    }
+                } else {
+                    $(div).html(DosVacio());
+                }
+
+                $("#divMensajes").html("");
+
+            },
+            error: function (objeto, msgError, objError) {
+                var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+            }
+        });
+    }
 }
 
 

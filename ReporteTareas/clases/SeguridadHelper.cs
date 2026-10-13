@@ -1,7 +1,7 @@
 ﻿using System;
-using System.Text;
-using System.Security.Cryptography;
 using System.IO;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace SeguridadAppHelper
 {
@@ -32,7 +32,7 @@ namespace SeguridadAppHelper
             return Convert.ToBase64String(encripted);
         }
 
-        
+
         public string Desencripta(string Cadena)
         {
             byte[] inputBytes = Convert.FromBase64String(Cadena);

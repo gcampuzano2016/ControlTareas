@@ -103,11 +103,11 @@
                                 <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                     <asp:GridView ID="dgv_Tareas" runat="server" CellPadding="4" ForeColor="#333333" GridLines="None" CssClass="table-responsive table-striped table-bordered table-hover" AutoGenerateColumns="False" Width="100%">
                                         <Columns>
-                                            <asp:BoundField DataField="Nom_Cliente" HeaderText="Nom. Cliente" Visible="true" />
-                                            <asp:BoundField DataField="Num_OrdenServicio" HeaderText="N° OS" Visible="true" />
-                                            <asp:BoundField DataField="Id_Responsable" HeaderText="Id. Responsable" Visible="true" />
+                                            <asp:BoundField DataField="Nom_Cliente" HeaderText="Cliente" Visible="true" />
+                                            <asp:BoundField DataField="Num_OrdenServicio" HeaderText="N° de orden de servicio" Visible="true" />
+                                            <asp:BoundField DataField="Id_Responsable" HeaderText="Código del responsable" Visible="true" />
                                             <asp:BoundField DataField="Det_Tarea" HeaderText="Descripción Tarea" Visible="true" />
-                                            <asp:BoundField DataField="Det_Fecha" HeaderText="Fch. Tarea" Visible="true" />
+                                            <asp:BoundField DataField="Det_Fecha" HeaderText="Fecha de la tarea" Visible="true" />
                                             <asp:BoundField DataField="Det_Fch_RegDetalleIni" HeaderText="H. Inicio" Visible="true" />
                                             <asp:BoundField DataField="Det_Fch_RegDetalleFin" HeaderText="H. Fin" Visible="true" />
                                             <asp:BoundField DataField="Det_Tiempo" HeaderText="Tiempo" Visible="true" />

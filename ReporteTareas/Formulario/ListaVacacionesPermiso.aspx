@@ -5,7 +5,9 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/ProcesoConvenio.js?v=23" type="text/javascript"></script>
+    <script src="../js/padFirma.js?v=3" type="text/javascript"></script>
+    <script src="../js/feriadosVacaciones.js?v=1" type="text/javascript"></script>
+    <script src="../js/ProcesoConvenio.js?v=33" type="text/javascript"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -99,17 +101,33 @@
                                                                     <p class="help-block" id="frmTxtHoraHastaMsg"></p>
                                                                 </div>
                                                                 <div class="col-lg-3">
-                                                                    <label>Feriados:</label>
-                                                                    <input type="text" class="form-control" id="frmTxtTiempoF" value="0" onchange="DiasVacaciones()">
-                                                                    <p class="help-block"></p>
-                                                                </div>
-                                                                <div class="col-lg-3">
                                                                     <label>Dias:</label>
                                                                     <input type="text" class="form-control" id="frmTxtTiempoDiasV" value="0" disabled>
-                                                                    <p class="help-block"></p>
+                                                                    <!-- Los feriados ya no se digitan: salen de la tabla Feriado. Se
+                                                                         muestran acá cuando hay, para que el número de días se
+                                                                         entienda sin tener que preguntar. -->
+                                                                    <p class="help-block" id="frmTxtFeriadosMsg"></p>
+                                                                    <input type="hidden" id="frmTxtTiempoF" value="0">
+                                                                </div>
+                                                                <div class="col-lg-3">
+                                                                    <label>Regresa a trabajar:</label>
+                                                                    <input type="text" class="form-control" id="frmTxtRegresaTrabajar" disabled>
+                                                                    <p class="help-block">Día siguiente a Fecha Hasta</p>
                                                                 </div>
                                                                 <div class="form-group col-lg-3">
                                                                     <label>Saldo de vacaciones</label>
+                                                                </div>
+                                                                <!-- Aviso de saldo insuficiente. No bloquea el envío: informa. -->
+                                                                <div class="col-lg-12">
+                                                                    <div id="IdAvisoSaldo" class="alert alert-warning" style="display: none; margin-bottom: 10px;"></div>
+                                                                </div>
+                                                            </div>
+                                                            <div class="row">
+                                                                <!-- Firma del colaborador. Nombre, cargo y cedula los toma el
+                                                                     sistema de la sesion: no se digitan. -->
+                                                                <div class="form-group col-lg-6">
+                                                                    <label>Su firma: <span style="color:#a94442">*</span></label>
+                                                                    <div id="divFirmaColaborador"></div>
                                                                 </div>
                                                             </div>
                                                             <div class="row">
@@ -264,6 +282,14 @@
                                                                     </select>
                                                                     <p class="help-block"></p>
                                                                 </div>
+                                                                <div class="form-group col-lg-3">
+                                                                    <label>Filtros</label>
+                                                                    <select id="cboFitros" class="form-control">
+                                                                        <option value="1">Fecha Registro</option>
+                                                                        <option value="2">Fecha Salida</option>
+                                                                    </select>
+                                                                    <p class="help-block"></p>
+                                                                </div>
                                                             </div>
                                                         </div>
                                                         <div class="panel-footer">
@@ -400,6 +426,71 @@
         <!-- /.modal -->
 
         <!-- Modal -->
+        <!-- Comprobante de asistencia. Segundo momento del permiso médico: el
+             colaborador vuelve una vez pasada la cita y sube el justificativo. -->
+        <div class="modal fade" id="modalComprobante" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #fcf8e3">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Comprobante de asistencia</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-lg-12">
+                            <p class="help-block" id="txtDetalleComprobante"></p>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>Justificativo de que asistió a la cita</label>
+                            <input type="file" id="archivoComprobante" multiple />
+                            <p class="help-block">Se agrega a los documentos de esta solicitud.</p>
+                        </div>
+                        <div class="col-lg-12" id="divComprobanteAnteriores"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cerrar</button>
+                        <button type="button" onclick="SubirComprobante()" class="btn btn-primary" id="btnSubirComprobante">Subir</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cierre de una recuperación. Solo aparece para las que ya vencieron:
+             confirmar antes sería opinar sobre algo que todavía puede pasar. -->
+        <div class="modal fade" id="modalCerrarRecuperacion" tabindex="-1" role="dialog" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header" style="background: #fcf8e3">
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                        <h4 class="modal-title">Confirmar recuperación</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col-lg-12">
+                            <p id="txtDetalleRecuperacion" class="help-block"></p>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>¿Se recuperó el tiempo?</label>
+                            <select id="cboSeRecupero" class="form-control" onchange="CambiaSeRecupero()">
+                                <option value="1">Sí, se recuperó</option>
+                                <option value="0">No se recuperó</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label id="lblObsRecuperacion">Observaciones</label>
+                            <textarea class="form-control" id="txtObsRecuperacion" rows="2" maxlength="500"></textarea>
+                        </div>
+                        <div class="form-group col-lg-12">
+                            <label>Su firma: <span style="color:#a94442">*</span></label>
+                            <div id="divFirmaRecuperacion"></div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Cancelar</button>
+                        <button type="button" onclick="ConfirmarRecuperacion()" class="btn btn-primary" id="btnCerrarRecuperacion">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="modalCargarProceso" tabindex="-1" role="dialog" aria-labelledby="modalCargarProcesoLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
@@ -411,13 +502,20 @@
                         <div class="form-group col-lg-12">
                             </br>
 							<label>Estado</label>
-                            <select id="cboEstado2" class="form-control">
+                            <div id="IdFaltanteSaldo" style="display: none"></div>
+                            <select id="cboEstado2" class="form-control" onchange="MotivoAutomaticoSiCorresponde()">
                             </select>
                         </div>
                         <div class="form-group col-lg-12">
                             <label>Motivo:</label>
                             <textarea class="form-control" id="txtDescripcionReq2" name="txtDescripcionReq" rows="2" cols="50"></textarea>
                             <p class="help-block"></p>
+                        </div>
+                        <!-- Firma del paso. Su nombre, cargo y cédula los toma el
+                             sistema de la sesión: no se digitan. -->
+                        <div class="form-group col-lg-12">
+                            <label>Su firma: <span style="color:#a94442">*</span></label>
+                            <div id="divFirmaProceso"></div>
                         </div>
                     </div>
                     <div class="modal-footer">

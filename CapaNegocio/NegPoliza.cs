@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
-   public class NegPoliza
+    public class NegPoliza
     {
         public static EntRespuesta RTAInsertaNuevaPoliza(EntPoliza objEntPoliza)
         {

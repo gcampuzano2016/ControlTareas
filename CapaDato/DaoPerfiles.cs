@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -78,7 +75,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -132,7 +132,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
 
@@ -179,7 +182,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return cmbEstados;
         }
@@ -225,10 +231,91 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
+        }
+
+        public static List<EntPerfiles> ListarPerfilesAdmin(string filtro)
+        {
+            List<EntPerfiles> lista = new List<EntPerfiles>();
+
+            DaoReporTareaAranda cn = new DaoReporTareaAranda();
+            using (SqlConnection cnx = cn.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_ListarPerfilesAdmin", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@filtro", SqlDbType.VarChar, 100).Value = filtro ?? string.Empty;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(new EntPerfiles()
+                        {
+                            IdPerfil = Convert.ToInt32(dr["IdPerfiles"]),
+                            NombrePerfil = Convert.ToString(dr["NombrePerfil"]),
+                            Estado = Convert.ToInt32(dr["Estado"]),
+                            Usuarios = Convert.ToInt32(dr["Usuarios"])
+                        });
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        /// <summary>
+        /// Elimina un perfil. Quien decide si se puede es el procedimiento
+        /// almacenado, no este metodo: la validacion tiene que estar donde no se
+        /// la pueda saltar llamando al handler por HTTP.
+        /// </summary>
+        public static EntRespuesta EliminarPerfil(int idPerfil)
+        {
+            EntRespuesta respuesta = new EntRespuesta();
+
+            try
+            {
+                DaoReporTareaAranda cn = new DaoReporTareaAranda();
+                using (SqlConnection cnx = cn.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_EliminarPerfil", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@IdPerfiles", SqlDbType.Int).Value = idPerfil;
+                    cnx.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            int codigo = Convert.ToInt32(dr["Respuestas"]);
+                            respuesta.estado = codigo == 1 ? "1" : "0";
+                            respuesta.mensaje = Convert.ToString(dr["Mensaje"]);
+                            respuesta.tipoMensaje = codigo == 1 ? "success" : "warning";
+                            respuesta.resultado = codigo.ToString();
+                        }
+                        else
+                        {
+                            respuesta.estado = "0";
+                            respuesta.mensaje = "El servidor no devolvio respuesta.";
+                            respuesta.tipoMensaje = "danger";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.mensaje = "Error al eliminar el perfil. " + ex.Message;
+                respuesta.tipoMensaje = "danger";
+            }
+
+            return respuesta;
         }
 
 

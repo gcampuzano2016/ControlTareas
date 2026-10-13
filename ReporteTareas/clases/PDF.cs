@@ -1,26 +1,16 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
-using System.Runtime.Serialization;
-using System.Runtime.Serialization.Json;
-using Pechkin;
-
-using System.Web;
-using System.Web.Services;
-using System.Web.Script.Serialization;
-
-using CapaEntidad;
+﻿using CapaEntidad;
 using CapaNegocio;
-
 using Gma.QrCodeNet.Encoding;
 using Gma.QrCodeNet.Encoding.Windows.Render;
-
+using Pechkin;
+using Pechkin.Synchronized;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Drawing.Printing;
-using Pechkin.Synchronized;
+using System.IO;
+using System.Text;
+using System.Web;
 
 namespace PDF
 {
@@ -59,10 +49,10 @@ namespace PDF
                     pdfBuffer = pechkin.Convert(contenidohtml);
                     VerErrores("Paso 5: " + "Paso 5", "Log", "Detalle");
                     // PDF simple de cadena
-                   
+
                     //pdfBuffer = new SimplePechkin(new GlobalConfig()).Convert(contenidohtml);
 
-                    // Carpeta donde se crear� el archivo
+                    // Carpeta donde se crear� el archivo
                     folderPath = HttpContext.Current.Server.MapPath("~/descargas/");
                     VerErrores("folderPath: " + folderPath.ToString(), "Log", "Detalle");
                     string directory = folderPath;
@@ -81,7 +71,7 @@ namespace PDF
                         registro.Ruta_Archivo = directory;
                         registro.Descripcion_Archivo = filename;
                         int result = NegSolicitud.RTA_ActualizarRutaRide(registro);
-                      
+
                     }
                     else
                     {
@@ -122,11 +112,388 @@ namespace PDF
             }
             catch (Exception _Exception)
             {
-                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
-                VerErrores("Exception: "+ _Exception.ToString(), "Log", "Detalle");
+                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
+                VerErrores("Exception: " + _Exception.ToString(), "Log", "Detalle");
             }
 
             return false;
+        }
+        #endregion
+
+        #region DocumentoDeSolicitud
+        /// <summary>
+        /// Arma el documento de una solicitud con el formato de los modelos de
+        /// Talento Humano y lo deja en ~/descargas/, registrado contra la solicitud.
+        /// Devuelve el nombre del archivo, o cadena vacía si falló.
+        ///
+        /// Vive acá y no en el handler porque hay dos momentos que lo necesitan:
+        /// cuando se crea la solicitud —la copia que acompaña al correo— y cuando
+        /// alguien descarga el documento firmado desde la lista. Antes cada uno
+        /// generaba su propio PDF por caminos distintos, y el de la creación salía
+        /// convertido de la plantilla del correo: dos documentos que no se parecían
+        /// en nada para la misma solicitud.
+        ///
+        /// Se puede llamar en cualquier estado. Las firmas que todavía no existen
+        /// salen como "Pendiente", que es lo correcto para una copia recién creada.
+        /// </summary>
+        public string DocumentoDeSolicitud(long idVacaciones)
+        {
+            /* Las rutas se resuelven aca, con HttpContext a mano. La sobrecarga de
+               abajo no lo usa: puede correr en otro hilo, donde HttpContext.Current
+               es null. */
+            string carpetaDescargas = HttpContext.Current.Server.MapPath("~/descargas/");
+            string rutaLogo = HttpContext.Current.Server.MapPath("~/Img/imagesCorreo/logo_dos_textoGris.png");
+
+            if (!File.Exists(rutaLogo))
+            {
+                rutaLogo = HttpContext.Current.Server.MapPath("~/Img/logo_dos.png");
+            }
+            if (!File.Exists(rutaLogo)) { rutaLogo = ""; }
+
+            return DocumentoDeSolicitud(idVacaciones, carpetaDescargas, rutaLogo);
+        }
+
+        /// <summary>
+        /// Igual que la anterior, pero con las rutas ya resueltas. Existe para poder
+        /// llamarla desde un hilo que no es el de la peticion.
+        /// </summary>
+        public string DocumentoDeSolicitud(long idVacaciones, string carpetaDescargas, string rutaLogo)
+        {
+            string temporales = "";
+            System.Diagnostics.Stopwatch reloj = System.Diagnostics.Stopwatch.StartNew();
+
+            try
+            {
+                Etapa(reloj, idVacaciones, "inicio");
+
+                DatosDelDocumento datos = CargarDatos(idVacaciones);
+                if (datos == null) { return ""; }
+
+                EntSolicitud solicitud = datos.Solicitud;
+                List<EntFirmaSolicitud> firmas = datos.Firmas;
+                string folio = datos.Folio;
+
+                Etapa(reloj, idVacaciones, "solicitud, firmas y folio");
+
+                /* Los trazos se escriben a disco porque wkhtmltopdf de esta versión
+                   no resuelve base64 embebido. Se borran al terminar: el original
+                   vive en la base. */
+                temporales = carpetaDescargas + "tmp_" + idVacaciones + "_" +
+                             DateTime.Now.ToString("yyyyMMddHHmmssfff") + "\\";
+                Directory.CreateDirectory(temporales);
+
+                foreach (EntFirmaSolicitud f in firmas)
+                {
+                    if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+                    string ruta = temporales + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(ruta, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = ruta;
+                }
+
+
+                string html = HtmlSolicitud.Construir(solicitud, firmas, folio, rutaLogo,
+                                                      datos.Detalle, datos.Periodos);
+
+                Etapa(reloj, idVacaciones, "html armado");
+
+                string archivo = GenerarPdfSolicitud(html, folio, carpetaDescargas);
+
+                Etapa(reloj, idVacaciones, "pdf convertido");
+
+                if (string.IsNullOrEmpty(archivo)) { return ""; }
+
+                /* Se deja registrado contra la solicitud para poder volver a
+                   descargarlo desde el historial. */
+                EntSolicitud registro = new EntSolicitud()
+                {
+                    IdVacaciones = idVacaciones,
+                    Ruta_Archivo = "descargas/",
+                    Descripcion_Archivo = archivo
+                };
+                NegSolicitud.RTA_ActualizarRutaRide(registro);
+
+                Etapa(reloj, idVacaciones, "registrado, listo");
+
+                return archivo;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("DocumentoDeSolicitud: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+            finally
+            {
+                /* Si esto falla no importa: son archivos de render, no el registro. */
+                try
+                {
+                    if (!string.IsNullOrEmpty(temporales) && Directory.Exists(temporales))
+                    {
+                        Directory.Delete(temporales, true);
+                    }
+                }
+                catch { }
+            }
+        }
+        #endregion
+
+        /// <summary>
+        /// Deja en el log cuanto llevaba el documento al llegar a cada etapa.
+        ///
+        /// Existe porque cuando esto se colgo en produccion no habia forma de saber
+        /// donde. Son cinco lineas por solicitud y solo se escriben al generar un
+        /// documento, no en cada peticion.
+        /// </summary>
+        private void Etapa(System.Diagnostics.Stopwatch reloj, long idVacaciones, string etapa)
+        {
+            VerErrores("DocumentoDeSolicitud " + idVacaciones + " | " + etapa + " | "
+                       + reloj.ElapsedMilliseconds + " ms", "Log", "Detalle");
+        }
+
+        /// <summary>Lo que hace falta para armar el documento de una solicitud.</summary>
+        private class DatosDelDocumento
+        {
+            public EntSolicitud Solicitud;
+            public List<EntFirmaSolicitud> Firmas;
+            public string Folio;
+            public EntDetallePermiso Detalle;
+            public string Periodos;
+        }
+
+        /// <summary>
+        /// Lee de la base todo lo que lleva el documento. Vive aparte porque lo
+        /// necesitan los dos: el PDF que se adjunta y el cuerpo del correo.
+        /// </summary>
+        private DatosDelDocumento CargarDatos(long idVacaciones)
+        {
+            /* El cargador de solicitudes recibe int, aunque la columna sea bigint.
+               Convert lanza si no cabe, que es lo que se quiere: mejor un error
+               visible que un id truncado en silencio. */
+            EntSolicitud solicitud =
+                NegSolicitud.ConsultaSp_RTANotificarSolicitud(0, Convert.ToInt32(idVacaciones));
+
+            if (solicitud == null || solicitud.IdVacaciones == 0)
+            {
+                VerErrores("CargarDatos: no existe la solicitud " + idVacaciones, "Log", "Detalle");
+                return null;
+            }
+
+            DatosDelDocumento datos = new DatosDelDocumento();
+            datos.Solicitud = solicitud;
+            datos.Firmas = NegFirmaSolicitud.Listar(idVacaciones);
+            datos.Folio = NegFirmaSolicitud.Folio(idVacaciones);
+
+            /* El detalle del permiso: tipo, teletrabajo, saldo mensual y plan de
+               recuperación. En vacaciones no aplica y queda null, que es lo que la
+               plantilla espera. */
+            datos.Detalle = solicitud.IdTipoSolicitud == 1
+                ? NegDetallePermiso.Obtener(idVacaciones)
+                : null;
+
+            /* Los períodos de los que salen los días. Solo en vacaciones. */
+            datos.Periodos = solicitud.IdTipoSolicitud != 1
+                ? NegVacaciones.PeriodosConSaldo(solicitud.CodSap)
+                : "";
+
+            return datos;
+        }
+
+        /// <summary>
+        /// Escribe los trazos en descargas/firmas y deja en RutaTrazo su direccion
+        /// web, para que se vean en el correo.
+        ///
+        /// En el PDF los trazos van por file:/// desde una carpeta temporal que se
+        /// borra. En un correo eso no sirve: el archivo tiene que seguir estando y
+        /// tiene que alcanzarse por http desde la maquina de quien lee. Por eso estos
+        /// quedan, con un nombre fijo por solicitud y rol, y se sobreescriben si se
+        /// vuelve a generar.
+        ///
+        /// Quedan accesibles a quien conozca la direccion, igual que los PDF firmados
+        /// que ya viven en esa misma carpeta.
+        /// </summary>
+        private void PublicarFirmas(DatosDelDocumento datos, string carpetaDescargas, string baseUrl)
+        {
+            if (datos.Firmas == null) { return; }
+
+            string carpeta = carpetaDescargas + "firmas\\";
+            if (!Directory.Exists(carpeta)) { Directory.CreateDirectory(carpeta); }
+
+            foreach (EntFirmaSolicitud f in datos.Firmas)
+            {
+                f.RutaTrazo = "";
+                if (string.IsNullOrEmpty(f.TrazoBase64)) { continue; }
+
+                try
+                {
+                    string nombre = datos.Solicitud.IdVacaciones + "_" + f.Rol + "_" + f.Secuencia + ".png";
+                    File.WriteAllBytes(carpeta + nombre, Convert.FromBase64String(f.TrazoBase64));
+                    f.RutaTrazo = baseUrl + "/descargas/firmas/" + nombre;
+                }
+                catch (Exception ex)
+                {
+                    /* Una firma que no se pudo escribir sale como recuadro sin trazo;
+                       el resto del documento no se pierde por eso. */
+                    VerErrores("PublicarFirmas: " + ex.Message, "Log", "Detalle");
+                }
+            }
+        }
+
+        #region HtmlDeSolicitudParaCorreo
+        /// <summary>
+        /// El mismo documento, pero como cuerpo de correo. Devuelve cadena vacia si
+        /// no se pudo armar.
+        ///
+        /// Dos diferencias con el que va al PDF, y las dos por lo mismo: el correo se
+        /// abre en la maquina de otra persona.
+        ///
+        /// El logo va por direccion web y no por file:///, que apunta al disco del
+        /// servidor. Y las firmas dibujadas no van: son archivos temporales del
+        /// servidor que se borran, y ademas Outlook bloquea las imagenes embebidas.
+        /// Los recuadros igual muestran quien firmo, con que cargo y cuando; el trazo
+        /// esta en el PDF adjunto, que es el documento que vale.
+        /// </summary>
+        public string HtmlDeSolicitudParaCorreo(long idVacaciones, string urlSitio,
+                                                string carpetaDescargas, string htmlAcciones)
+        {
+            try
+            {
+                DatosDelDocumento datos = CargarDatos(idVacaciones);
+                if (datos == null) { return ""; }
+
+                string baseUrl = urlSitio.TrimEnd(new char[] { (char)47 });
+
+                PublicarFirmas(datos, carpetaDescargas, baseUrl);
+
+                return HtmlSolicitud.Construir(datos.Solicitud, datos.Firmas, datos.Folio,
+                                               baseUrl + "/Img/imagesCorreo/logo_dos_textoGris.png",
+                                               datos.Detalle, datos.Periodos, htmlAcciones);
+            }
+            catch (Exception ex)
+            {
+                VerErrores("HtmlDeSolicitudParaCorreo: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+        #endregion
+
+        #region GenerarPdfSolicitud
+        /// <summary>
+        /// Convierte HTML a PDF y lo deja en ~/descargas/, devolviendo el nombre
+        /// del archivo generado, o cadena vacía si falló.
+        ///
+        /// Existe en vez de reusar EnvioCorreoEncuesta, que hace casi lo mismo pero
+        /// tiene tres problemas para este uso:
+        ///
+        ///   - Nunca devuelve true. Su variable de resultado se declara en false y
+        ///     no se toca, así que quien la llama no puede distinguir un PDF creado
+        ///     de uno que no se creó.
+        ///   - Arma el nombre del archivo con "hh:mm:ss", que es hora de 12 sin
+        ///     AM/PM. Dos documentos generados a la 01:00 y a las 13:00 del mismo
+        ///     día se sobrescriben, y dos en el mismo segundo también.
+        ///   - Se llama "EnvioCorreoEncuesta" y no envía correos ni tiene que ver
+        ///     con encuestas.
+        ///
+        /// No se toca esa función porque hay tres pantallas colgando de ella.
+        /// </summary>
+        /// <param name="contenidoHtml">El documento ya armado.</param>
+        /// <param name="prefijo">Prefijo del nombre del archivo, normalmente el folio.</param>
+        public string GenerarPdfSolicitud(string contenidoHtml, string prefijo)
+        {
+            return GenerarPdfSolicitud(contenidoHtml, prefijo,
+                                       HttpContext.Current.Server.MapPath("~/descargas/"));
+        }
+
+        /// <summary>
+        /// Igual que la anterior, con la carpeta de salida ya resuelta, para poder
+        /// correr fuera del hilo de la peticion.
+        /// </summary>
+        public string GenerarPdfSolicitud(string contenidoHtml, string prefijo, string carpetaDescargas)
+        {
+            if (string.IsNullOrEmpty(contenidoHtml)) { return ""; }
+
+            try
+            {
+                /* Estas tres marcas separan las dos cosas que pueden fallar y que
+                   desde afuera se ven igual: que no cargue la libreria nativa, y que
+                   cargue pero la conversion no vuelva.
+
+                   wkhtmltox0.dll es una compilacion de 32 bits -viene con mingwm10 y
+                   libgcc_s_dw2-1-, asi que en un grupo de aplicaciones de 64 bits no
+                   se puede cargar. Si el hilo despachador de Pechkin muere al
+                   inicializarla, Convert espera una respuesta que no llega nunca. */
+                VerErrores("GenerarPdfSolicitud: proceso de " + (IntPtr.Size * 8)
+                           + " bits, creando el convertidor", "Log", "Detalle");
+
+                /* Dos intentos. En el servidor la conversion viene fallando una de cada
+                   dos veces -las solicitudes con archivo y sin archivo se alternan una
+                   por una-, mientras que en una consola seis seguidas salen bien. Sea
+                   cual sea la causa de fondo, un segundo intento con un convertidor
+                   nuevo recupera el caso.
+
+                   El reintento solo ocurre cuando la conversion vuelve rapido y vacia.
+                   Si se cuelga, el limite de tiempo esta afuera y aca no se vuelve a
+                   entrar: no se le suman treinta segundos mas a nadie. */
+                byte[] pdf = null;
+
+                for (int intento = 1; intento <= 2 && (pdf == null || pdf.Length == 0); intento++)
+                {
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + ", creando el convertidor",
+                               "Log", "Detalle");
+
+                    SynchronizedPechkin convertidor = new SynchronizedPechkin(new GlobalConfig());
+
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + ", convirtiendo "
+                               + contenidoHtml.Length + " caracteres", "Log", "Detalle");
+
+                    pdf = convertidor.Convert(contenidoHtml);
+
+                    VerErrores("GenerarPdfSolicitud: intento " + intento + " -> "
+                               + (pdf == null ? "null" : pdf.Length.ToString() + " bytes"),
+                               "Log", "Detalle");
+                }
+
+                if (pdf == null || pdf.Length == 0)
+                {
+                    VerErrores("GenerarPdfSolicitud: Pechkin devolvio vacio en los dos intentos",
+                               "Log", "Detalle");
+                    return "";
+                }
+
+                string carpeta = carpetaDescargas;
+                if (!Directory.Exists(carpeta)) { Directory.CreateDirectory(carpeta); }
+
+                /* Nombre único: folio más marca de tiempo hasta el milisegundo en
+                   24 horas. Regenerar el mismo documento crea un archivo nuevo en
+                   vez de pisar el anterior, que es lo que se quiere para algo que
+                   lleva firmas. */
+                string nombre = LimpiarNombre(prefijo) + "_" +
+                                DateTime.Now.ToString("yyyyMMdd_HHmmss_fff") + ".pdf";
+
+                if (!ByteArrayToFile(carpeta + nombre, pdf))
+                {
+                    VerErrores("GenerarPdfSolicitud: no se pudo escribir " + nombre, "Log", "Detalle");
+                    return "";
+                }
+
+                return nombre;
+            }
+            catch (Exception ex)
+            {
+                VerErrores("GenerarPdfSolicitud: " + ex.Message, "Log", "Detalle");
+                return "";
+            }
+        }
+
+        /// <summary>Deja el prefijo apto para nombre de archivo.</summary>
+        private string LimpiarNombre(string texto)
+        {
+            if (string.IsNullOrEmpty(texto)) { return "solicitud"; }
+
+            StringBuilder limpio = new StringBuilder();
+            foreach (char c in texto)
+            {
+                limpio.Append(char.IsLetterOrDigit(c) || c == '-' || c == '_' ? c : '_');
+            }
+            return limpio.ToString();
         }
         #endregion
 
@@ -160,7 +527,7 @@ namespace PDF
             catch (Exception ex)
             {
                 VerErrores("ex-QR: " + ex.Message.ToString(), "Log", "Detalle");
-                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
+                //Console.WriteLine("Excepci�n detectada en el proceso al intentar guardar: {0}", _Exception.ToString());
                 //VerErrores("Exception.ToString(): " + ex.ToString(), "Log", "Detalle");
             }
             return rutaQr;

@@ -32,7 +32,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, divPanelShow, divPane
                     }
 
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -191,7 +191,7 @@ function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
                     $('#modalMensajeInformativo').modal('show');
                 }
             } else {
-                var mesnajeError = "No existen datos para esta consulta.";
+                var mesnajeError = DosTextoDescargaVacia();
                 $("#modalMensajeInformativoTipo").attr("style", "background: #f2dede")
                 $("#MensajeInformativo").html(mesnajeError);
                 $('#modalMensajeInformativo').modal('show');

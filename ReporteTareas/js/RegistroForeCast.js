@@ -80,6 +80,11 @@ function ObtenerListaComboGerenteCuenta() {
     CargarPagina('#cboVendedor', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
 }
 
+function ObtenerSemanadelMes() {
+    var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"54\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + "0" + "\", Mes: \"" + $("#cboFecha1Buscar").val() + "\"} }]";
+    CargarPagina('#cboSemana', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+}
+
 function ObtenerListaComboGerenteCuentaUnico1() {
     var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"31\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + "0" + "\"} }]";
     CargarPagina('#cboVendedor', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
@@ -413,7 +418,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                         $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                     }
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -730,7 +735,7 @@ function ObtenerConsultarForeCastDetalleFiltros(idForeCast, tipo, fechaInicio, f
         $("#cboAnio1").val("");
         $("#cboFecha1Buscar").val("");
     }
-    var Datos = "[{ \"action\": \"ReporteConsultarForeCastFiltros\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", idForeCast: \"" + idForeCast + "\", FechaFacturacion: \"" + $("#cboFecha1Buscar").val() + "\", MesEstimadoCierre: \"" + "" + "\", IdCliente: \"" + idCliente2 + "\",IdGerenteCuenta: \"" + $("#cboVendedor2").val() + "\",IdGestorProducto: \"" + $("#cboGerente2").val() + "\",IdMarca: \"" + $("#cboMarca2").val() + "\",sucursal: \"" + $("#cboSucursal2").val() + "\",SegmentodeMercado: \"" + $("#cboSegmentacion2").val() + "\",IdPrioridad: \"" + $("#cboPrioridad2").val() + "\",mespago: \"" + $("#cboFecha2Buscar").val() + "\",tipofecha: \"" + $("#cboTipoFecha").val() + "\",anio: \"" + $("#cboAnio1").val() + "\",cierrenegocio: \"" + $("#cboCierreNegocio2").val() + "\",IdPrioProyecto: \"" + IdPrioridad + "\",ProyecEstrategico: \"" + IdEstrategico + "\",TipoProyecto: \"" + $("#cboTipoProyecto2").val() + "\"} }]";
+    var Datos = "[{ \"action\": \"ReporteConsultarForeCastFiltros\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", idForeCast: \"" + idForeCast + "\", FechaFacturacion: \"" + $("#cboFecha1Buscar").val() + "\", MesEstimadoCierre: \"" + "" + "\", IdCliente: \"" + idCliente2 + "\",IdGerenteCuenta: \"" + $("#cboVendedor2").val() + "\",IdGestorProducto: \"" + $("#cboGerente2").val() + "\",IdMarca: \"" + $("#cboMarca2").val() + "\",sucursal: \"" + $("#cboSucursal2").val() + "\",SegmentodeMercado: \"" + $("#cboSegmentacion2").val() + "\",IdPrioridad: \"" + $("#cboPrioridad2").val() + "\",mespago: \"" + $("#cboFecha2Buscar").val() + "\",tipofecha: \"" + $("#cboTipoFecha").val() + "\",anio: \"" + $("#cboAnio1").val() + "\",cierrenegocio: \"" + $("#cboCierreNegocio2").val() + "\",IdPrioProyecto: \"" + IdPrioridad + "\",ProyecEstrategico: \"" + IdEstrategico + "\",TipoProyecto: \"" + $("#cboTipoProyecto2").val() + "\",Semana: \"" + $("#cboSemana").val() + "\"} }]";
     CargarPagina('#datosTablaPrincipalForeCast', 'ObtenerListaTareas.ashx', Datos, "tableSelectForeCast", tipo);
 }
 
@@ -770,7 +775,7 @@ function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
                     $('#modalMensajeInformativo').modal('show');
                 }
             } else {
-                var mesnajeError = "No existen datos para esta consulta.";
+                var mesnajeError = DosTextoDescargaVacia();
                 $("#modalMensajeInformativoTipo").attr("style", "background: #f2dede")
                 $("#MensajeInformativo").html(mesnajeError);
                 $('#modalMensajeInformativo').modal('show');
@@ -952,7 +957,7 @@ function ActualizarPrioridad(data) {
 function ActualizarEstrategico(data) {
 
     if (data.ActivarPrioridad == 1) {
-        if ($("#ContentPlaceHolder1_txtLoginUsuario").val() == "hverduga" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "breyes" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "npinos" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "cpinos" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "rsuquillo")
+        if ($("#ContentPlaceHolder1_txtLoginUsuario").val() == "rparreno" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "breyes" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "npinos" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "cpinos" || $("#ContentPlaceHolder1_txtLoginUsuario").val() == "rsuquillo")
         {
             if (data.ProyecEstrategico == 1) {
                 ConfirmarActualizarOportunidad("Proyecto Estrategico", "Esta seguro desactivar el Proyecto Estrategico", "warning", data.IdForeCast, 1)
@@ -2390,7 +2395,7 @@ function ListadoArchivosForeCast(div, idTarea) {
                     $(div).html(htmlListaArchivosAdjuntos);
                 }
             } else {
-                $("#divMensajes").html("No existen datos para esta consulta.");
+                $(div).html(DosVacio("No hay archivos adjuntos.", ""));
             }
 
             $("#divMensajes").html("");

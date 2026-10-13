@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaEntidad;
-using CapaNegocio;
+﻿using CapaEntidad;
 using ReporteTareas.Controles;
 using SeguridadAppHelper;
+using System;
+using System.Collections.Generic;
 
 namespace ReporteTareas.Formulario
 {
@@ -33,7 +32,7 @@ namespace ReporteTareas.Formulario
                     { }
                 }
             }
-            
+
         }
 
 

@@ -11,17 +11,58 @@ let relacionTrabajoSelected = null;
 
 
 function MensajeIncorrecto(resultado) {
-    sweetAlert("Error", resultado, "error");
+    Swal.fire({
+        //error
+        type: 'error',
+        title: 'Error',
+        text: '¡Algo salió mal...!   ' + resultado,
+        width: '700px',
+        height: '300px'
+    });
 }
 
 function MensajeCorrecto(resultado) {
-    sweetAlert("Exito", resultado, "success");
+    Swal.fire({
+        type: 'success',
+        title: 'Éxito',
+        text: '' + resultado,
+        width: '700px',
+        height: '300px'
+    });
+}
+function MensajeAlerta(resultado) {
+    let timerInterval;
+    Swal.fire({
+        type: 'warning',
+        title: "Importante...!!!",
+        text: resultado,
+        icon: "warning",
+        timer: 4000,
+        timerProgressBar: true,
+        didOpen: () => {
+            Swal.showLoading();
+            const timer = Swal.getPopup().querySelector("b");
+            timerInterval = setInterval(() => {
+                timer.textContent = `${Swal.getTimerLeft()}`;
+            }, 100);
+        },
+        willClose: () => {
+            clearInterval(timerInterval);
+        }
+    });
 }
 
 function alerta(respuesta) {
-    sweetAlert("Advertencia", respuesta, "error");
+    Swal.fire({
+        type: 'info',
+        title: "Advertencia...!!!",
+        text: respuesta,
+        icon: "info",
+        timer: 4000,
+        width: '800px',
+        heightAuto: false,
+    });
 }
-
 
 
 /* =================================================================================
@@ -36,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('CedulaEmpleado está vacío o no se pudo encontrar el campo oculto.');
     }
 });
+
 // Definir la función para buscar un empleado
 function BuscarEmpleado(cedula) {
     //let cedulaBuscar = document.getElementById("txtEmpleado").value;
@@ -49,7 +91,7 @@ function ObtenerListaEmpleados(cedula, descripcion, tipo2) {
 
     var Datos = "[{ \"action\": \"BuscarEmpleadoPorCedula\", \"parameters\" : { tipo : \"" + "" + "\", descripcion: \"" + "" + "\", session: \"" + cedula + "\"} }]";
 
-    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerNuevaListaTareas.ashx', Datos, "tableSelectBusqueda", tipo2);
 }
 function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
 
@@ -73,7 +115,7 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                         $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                     }
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -203,8 +245,9 @@ function cargarImagen(primerNombre, segundoNombre, primerApellido) {
 //  Función para calcular la edad usando la fecha de nacimiento
 function calcularEdad(fechaNacimiento) {
     const fechaActual = new Date();
-    const partes = fechaNacimiento.split('/');
-    const fechaNac = new Date(partes[2], partes[1] - 1, partes[0]); // Restamos 1 al mes porque en JavaScript los meses van de 0 a 11
+    const partes = fechaNacimiento.split('-'); // Dividimos la fecha en partes
+    const fechaNac = new Date(partes[0], partes[1] - 1, partes[2]); // Año, mes (ajustado), día
+
     let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
     const mesActual = fechaActual.getMonth();
     const mesNac = fechaNac.getMonth();
@@ -221,71 +264,71 @@ function calcularEdad(fechaNacimiento) {
 /* ====================================================================
  *      Controlamos las opciones de APTITUD MEDICA PARA EL TRABAJO
  * ====================================================================*/
-document.addEventListener('DOMContentLoaded', function () {
-    // Obtener todos los contenedores de menús desplegables
-    const dropdownContainers = document.querySelectorAll('.dropdown-container');
+//document.addEventListener('DOMContentLoaded', function () {
+//    // Obtener todos los contenedores de menús desplegables
+//    const dropdownContainers = document.querySelectorAll('.dropdown-container');
 
-    // Agregar la funcionalidad a cada contenedor
-    dropdownContainers.forEach(function (container) {
-        const dropdownButton = container.querySelector('.dropdown-button');
-        const dropdownContent = container.querySelector('.dropdown-content');
+//    // Agregar la funcionalidad a cada contenedor
+//    dropdownContainers.forEach(function (container) {
+//        const dropdownButton = container.querySelector('.dropdown-button');
+//        const dropdownContent = container.querySelector('.dropdown-content');
 
-        dropdownButton.addEventListener('click', function (event) {
-            event.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
-            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
-        });
+//        dropdownButton.addEventListener('click', function (event) {
+//            event.stopPropagation(); // Evita que el clic se propague y cierre inmediatamente
+//            dropdownContent.style.display = dropdownContent.style.display === 'block' ? 'none' : 'block';
+//        });
 
-        // Cierra el menú desplegable solo si se hace clic fuera del menú y no en las casillas de verificación
-        document.addEventListener('click', function (event) {
-            if (!dropdownContent.contains(event.target) && event.target !== dropdownButton) {
-                dropdownContent.style.display = 'none';
-            }
-        });
-    });
-});
+//        // Cierra el menú desplegable solo si se hace clic fuera del menú y no en las casillas de verificación
+//        document.addEventListener('click', function (event) {
+//            if (!dropdownContent.contains(event.target) && event.target !== dropdownButton) {
+//                dropdownContent.style.display = 'none';
+//            }
+//        });
+//    });
+//});
 
-document.addEventListener("DOMContentLoaded", function () {
-    // Obtén referencias a los elementos relevantes
-    var aptitudSelect = document.getElementById("txtAptitudSelect");
-    var obsAptitud = document.getElementById("obsAptitud");
-    var descObservacion = document.getElementById("descObservacion");
-    var descLimitacion = document.getElementById("descLimitacion");
-    var txtobsAptitud = document.getElementById("txtObsAptitud");
-    var txtDescObservacion = document.getElementById("txtDescObservacion");
-    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
+//document.addEventListener("DOMContentLoaded", function () {
+//    // Obtén referencias a los elementos relevantes
+//    var aptitudSelect = document.getElementById("txtAptitudSelect");
+//    var obsAptitud = document.getElementById("obsAptitud");
+//    var descObservacion = document.getElementById("descObservacion");
+//    var descLimitacion = document.getElementById("descLimitacion");
+//    var txtobsAptitud = document.getElementById("txtObsAptitud");
+//    var txtDescObservacion = document.getElementById("txtDescObservacion");
+//    var txtDescLimitacion = document.getElementById("txtDescLimitacion");
 
-    // Agrega un controlador de eventos change al campo select
-    aptitudSelect.addEventListener("change", toggleAptitudDiv);
+//    // Agrega un controlador de eventos change al campo select
+//    aptitudSelect.addEventListener("change", toggleAptitudDiv);
 
-    // Función para mostrar u ocultar los campos según la selección
-    function toggleAptitudDiv() {
-        if (aptitudSelect.value === "aptoObservacion") {
-            obsAptitud.style.display = "none";
-            descObservacion.style.display = "block";
-            descLimitacion.style.display = "none";
-            txtobsAptitud.disabled = true;
-            txtDescObservacion.disabled = false;
-            txtDescLimitacion.disabled = true;
-        } else if (aptitudSelect.value === "aptoLimitacion") {
-            obsAptitud.style.display = "none";
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "block";
-            txtobsAptitud.disabled = true;
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = false;
-        } else {
-            obsAptitud.style.display = "block";
-            descObservacion.style.display = "none";
-            descLimitacion.style.display = "none";
-            txtobsAptitud.disabled = false;
-            txtDescObservacion.disabled = true;
-            txtDescLimitacion.disabled = true;
-        }
-    }
+//    // Función para mostrar u ocultar los campos según la selección
+//    function toggleAptitudDiv() {
+//        if (aptitudSelect.value === "aptoObservacion") {
+//            obsAptitud.style.display = "none";
+//            descObservacion.style.display = "block";
+//            descLimitacion.style.display = "none";
+//            txtobsAptitud.disabled = true;
+//            txtDescObservacion.disabled = false;
+//            txtDescLimitacion.disabled = true;
+//        } else if (aptitudSelect.value === "aptoLimitacion") {
+//            obsAptitud.style.display = "none";
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "block";
+//            txtobsAptitud.disabled = true;
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = false;
+//        } else {
+//            obsAptitud.style.display = "block";
+//            descObservacion.style.display = "none";
+//            descLimitacion.style.display = "none";
+//            txtobsAptitud.disabled = false;
+//            txtDescObservacion.disabled = true;
+//            txtDescLimitacion.disabled = true;
+//        }
+//    }
 
-    // Llama a la función inicialmente para manejar el estado inicial
-    toggleAptitudDiv();
-});
+//    // Llama a la función inicialmente para manejar el estado inicial
+//    toggleAptitudDiv();
+//});
 
 
 
@@ -293,16 +336,24 @@ document.addEventListener("DOMContentLoaded", function () {
 document.addEventListener('DOMContentLoaded', function () {
     console.log('La página ha sido cargada');
 
+    let evalRetiroSelected = "";
+    let diagSelected = "";
+    let relacionTrabajoSelected = "";
+
     // Selecciona todos los checkbox con el atributo name "evalRetiro"
     const evalRetiroCheckboxes = document.querySelectorAll('input[name="evalRetiro"]');
     evalRetiroCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('click', (e) => {
+            evalRetiroSelected = ""; // Restablecer en cada click
             evalRetiroCheckboxes.forEach((groupCheckbox) => {
                 if (groupCheckbox !== checkbox) {
                     groupCheckbox.checked = false;
                 }
+                if (groupCheckbox.checked) {
+                    evalRetiroSelected = groupCheckbox.value;
+                }
             });
-            evalRetiroSelected = checkbox.value;
+            console.log("Eval Retiro Selected:", evalRetiroSelected);
         });
     });
 
@@ -310,12 +361,16 @@ document.addEventListener('DOMContentLoaded', function () {
     const diagCheckboxes = document.querySelectorAll('input[name="diag"]');
     diagCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('click', (e) => {
+            diagSelected = ""; // Restablecer en cada click
             diagCheckboxes.forEach((groupCheckbox) => {
                 if (groupCheckbox !== checkbox) {
                     groupCheckbox.checked = false;
                 }
+                if (groupCheckbox.checked) {
+                    diagSelected = groupCheckbox.value;
+                }
             });
-            diagSelected = checkbox.value;
+            console.log("Diag Selected:", diagSelected);
         });
     });
 
@@ -323,19 +378,24 @@ document.addEventListener('DOMContentLoaded', function () {
     const relacionTrabajoCheckboxes = document.querySelectorAll('input[name="relacionTrabajo"]');
     relacionTrabajoCheckboxes.forEach((checkbox) => {
         checkbox.addEventListener('click', (e) => {
+            relacionTrabajoSelected = ""; // Restablecer en cada click
             relacionTrabajoCheckboxes.forEach((groupCheckbox) => {
                 if (groupCheckbox !== checkbox) {
                     groupCheckbox.checked = false;
                 }
+                if (groupCheckbox.checked) {
+                    relacionTrabajoSelected = groupCheckbox.value;
+                }
             });
-            relacionTrabajoSelected = checkbox.value;
+            console.log("Relacion Trabajo Selected:", relacionTrabajoSelected);
         });
     });
 });
 
+
 function GuardarCertificado() {
     
-    var url = "ObtenerListaTareas.ashx";
+    var url = "ObtenerNuevaListaTareas.ashx";
     var datos = "";
     var mensajeVerificacion = "";
     var tipoMensaje = "warning";
@@ -346,26 +406,30 @@ function GuardarCertificado() {
         return;
     }
 
-    evalRetiroSelected = $("input[name='evalRetiro']:checked").val();
+    evalRetiroSelected = $("input[name='evalRetiro']:checked").val() || "";
+    diagSelected = $("input[name='diag']:checked").val() || "";
+    relacionTrabajoSelected = $("input[name='relacionTrabajo']:checked").val() || "";
 
     var datosFormulario = "";
 
     datosFormulario = {
         'formulario': "5",
         'session': $("#ContentPlaceHolder1_txtUsuario").val(),
+        'txtNumHistoria': $('#txtNumHistoria').val(),
+        'txtNumArchivo': $('#txtNumArchivo').val(),
         'txtNombre': $('#txtNombre').val(),
         'txtSexo': $('#txtSexo').val(),
         'txtEdad': $('#txtEdad').val(),
         'txtPuestoTrabajo': $('#txtPuestoTrabajo').val(),
+        'txtSociedad': $('#txtSociedad').val(),
 
         'txtFechaEmision': $('#fechaEmision').val(),
         'txtEvaluacion': $('#txtEvaluacion').val(),
                
         'txtAptitudSelect': $('#txtAptitudSelect').val(),
         'txtDescAptitud': $('#txtDescAptitud').val(),
-        'txtDescObservacion': $('#txtDescObservacion').val(),
-        'txtDescLimitacion': $('#txtDescLimitacion').val(),
-
+        'txtDescObservacion': "",
+        'txtDescLimitacion': "",
         
         'txtevalRetiro': evalRetiroSelected,
         'txtdiag': diagSelected,
@@ -587,6 +651,13 @@ function GuardarCertificado() {
         'txtNomExamen4': "",
         'fechaExam4': "",
         'txtResExamen4': "",
+        'txtHbtsIncidentes': "",
+        'txtfechaAccTrabAnio': "",
+        'txtfechaAccTrabMes': "",
+        'txtfechaAccTrabDia': "",
+        'txtfechaEnfProfAnio': "",
+        'txtfechaEnfProfMes': "",
+        'txtfechaEnfProfDia': "",
         'nombre': $("#ContentPlaceHolder1_txtLoginUsuario").val()
     };
 
@@ -608,6 +679,7 @@ function GuardarCertificado() {
                 MensajeCorrecto(respuesta.mensaje);
                 //VerListaEmpleados();
                 $("#divMensajes").html("");
+                window.open(respuesta.mensaje);
             }
             else if (respuesta.estado == "0") {
                 MensajeIncorrecto(respuesta.mensaje);

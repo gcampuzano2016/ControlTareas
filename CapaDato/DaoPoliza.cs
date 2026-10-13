@@ -1,17 +1,12 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
-   public class DaoPoliza
+    public class DaoPoliza
     {
         public static EntRespuesta RTAInsertaNuevaPoliza(EntPoliza objEntPoliza)
         {
@@ -98,7 +93,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -196,7 +194,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -253,7 +254,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -303,13 +307,16 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
         }
 
-        public static List<EntPoliza> ConsultaSp_RTAListaPolizas(string buscar, string FchIni, string FchFin, int IdPedido, string BENEFICIARIO,string Proceso,int idFecha)
+        public static List<EntPoliza> ConsultaSp_RTAListaPolizas(string buscar, string FchIni, string FchFin, int IdPedido, string BENEFICIARIO, string Proceso, int idFecha)
         {
             List<EntPoliza> listaTareas = null;
 
@@ -365,7 +372,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -411,7 +421,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

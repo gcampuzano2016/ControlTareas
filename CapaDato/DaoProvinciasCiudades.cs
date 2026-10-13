@@ -3,9 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaDato
 {
@@ -34,27 +31,28 @@ namespace CapaDato
 
                 resultados = new List<EntProvinciaCiudad>();
 
-                while (dr.Read()){
-                                
+                while (dr.Read())
+                {
+
                     EntProvinciaCiudad provinciaCiudad = new EntProvinciaCiudad();
 
                     if (opcion == 1)
                     {
-                         provinciaCiudad.Id = Convert.ToInt32(dr["idProvincia"].ToString());
-                         provinciaCiudad.Nombre = dr["nombreProvincia"].ToString();
-                         //provinciaCiudad.ProvinciaId = Convert.ToInt32(dr[""].ToString());
+                        provinciaCiudad.Id = Convert.ToInt32(dr["idProvincia"].ToString());
+                        provinciaCiudad.Nombre = dr["nombreProvincia"].ToString();
+                        //provinciaCiudad.ProvinciaId = Convert.ToInt32(dr[""].ToString());
                     }
                     else
                     {
-                         provinciaCiudad.Id = Convert.ToInt32(dr["idCiudad"].ToString());
-                         provinciaCiudad.Nombre = dr["nombreCiudad"].ToString();
-                         provinciaCiudad.ProvinciaId = Convert.ToInt32(dr["idProvincia"].ToString());
+                        provinciaCiudad.Id = Convert.ToInt32(dr["idCiudad"].ToString());
+                        provinciaCiudad.Nombre = dr["nombreCiudad"].ToString();
+                        provinciaCiudad.ProvinciaId = Convert.ToInt32(dr["idProvincia"].ToString());
                     }
 
                     resultados.Add(provinciaCiudad);
                 }
-                    
-                
+
+
             }
             catch (Exception ex)
             {

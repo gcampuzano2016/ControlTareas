@@ -4,7 +4,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script src="../js/DepartamentoMedico.js?v=11"></script>
+    <script src="../js/DepartamentoMedico.js?v=12"></script>
 
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
@@ -19,8 +19,7 @@
     <link href="../dist/css/depMedico.css" rel="stylesheet" />
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
-    
+<asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">  
 
     
     <div id="page-wrapper" style="padding: 0; background-color: #9DA8AD; height: max-content;">
@@ -120,7 +119,7 @@
                     </div>
                 </div>
                 
-<!-- cambios -->
+
                 <div class="tabs" id="pestanias" style="background-color: #0D2538; padding-top: 1rem; display:block;">
                     <ul class="nav nav-tabs">
                         <li class="nav-item">
@@ -137,7 +136,6 @@
                         </li>
                     </ul>
                 </div>
-<!-- cambios -->
 
 
                 <div class="" style="background-color: #9DA8AD;">
@@ -165,13 +163,13 @@
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-azulmedio" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon input-azulmedio" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-azulmedio input-azulmedio" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon input-azulmedio input-azulmedio" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
@@ -200,20 +198,28 @@
                                                     <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
                                                 </div>                                                    
                                             </div>
-                                            <div class="horizontal-group">
+                                            <div class="horizontal">
                                                 <div class="input-group col-sm-6">
                                                     <span class="input-group-addon input-basic3 input-azulmedio"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
                                                     <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
-                                                </div>                                                
+                                                </div>   
+                                                <div class="input-group col-sm-5" style="margin-left: 6rem;">
+                                                    <span class="input-group-addon select-temas"><i class="	fa fa-h-square"></i>  Num de Historia:</span>
+                                                    <input id="txtNumHistoria" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div>                                                 
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
                                                     <span class="input-group-addon select-temas" ><i class="glyphicon glyphicon-check"></i>  Fecha de Ingreso al trabajo:</span>
-                                                    <input type="date" class="form-control" style="" id="fechaIng" name="fechaNac" value="">
+                                                    <input type="date" class="form-control" style="" id="fechaIng" name="fechaIng" value="">
+                                                </div>
+                                                <div class="input-group col-sm-5" style="margin-left: 6rem;">
+                                                    <span class="input-group-addon select-temas"><i class="fa fa-file-text"></i>  Num de Archivo:</span>
+                                                    <input id="txtNumArchivo" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
                                                 </div>
                                             </div>
                                             <div class="horizontal">
-                                                <div class="input-group col-sm-11" style="">
+                                                <div class="input-group col-sm-12" style="">
                                                     <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Actividades relevantes al puesto de trabajo a ocupar:</span>
                                                     <input id="txtActRelevantes" type="text" class="form-control" name="actividades" value="">
                                                 </div>
@@ -419,83 +425,78 @@
                                 </div>
                             </div>
                             <div class="" style="">
-<!-- cambios -->                
+             
                                 <div style="text-align:center;padding:0 0; background-color: #333; border-radius: 10px; margin: 1rem 3rem 20px 3rem; ">
                                     <h3><a style="text-decoration:none;color:white;" href="https://www.zeitverschiebung.net/es/city/3652462"><br />Quito, Ecuador</a></h3>
                                     <iframe src="https://www.zeitverschiebung.net/clock-widget-iframe-v2?language=es&size=medium&timezone=America%2FGuayaquil" width="100%" height="115" frameborder="0" seamless></iframe>
                                 </div>
-<!-- cambios -->
-
-                                <!--div class="horizontal-group-special contenedor-horizontal" style="margin-top:0;">
-                                    
-                                     <div class="form-group col-sm-6" style="margin-bottom:0;">
-                                         <label for="disabledTextInput" class="control-label">Tipo de consulta</label>
-                                         <select id="txtTipoConsulta" class="form-control">
-                                                <option value="" disabled selected>Seleccionar</option>
-                                                <option value="primera">primera</option>
-                                                <option value="segunda">segunda</option>
-                                                <option value="anual">anual</option>
-                                         </select>
-                                    </div>
-                                    <div class="form-group col-sm-6" style="margin-bottom:0;">
-                                        <label for="disabledTextInput" class="">Forma de consulta</label>
-                                        <select id="txtFormaConsulta" class="form-control">
-                                               <option value="" disabled selected>Seleccionar</option>
-                                        </select>
-                                     </div>
-                                </!--div>
-                                
-                                <div class="horizontal-group-special contenedor-horizontal" style="justify-content:flex-start; margin-top:0;">                                    
-                                   
-                                    <div class="form-group col-sm-6" style="margin-bottom:0;">
-                                        <label for="disabledTextInput" class="">Tipo de atención</label>
-                                        <select id="txtTipoAtencion" class="form-control">
-                                               <option value="" disabled selected>Seleccionar</option>
-                                               <option value="evaluacionPreocupaciona">Evaluación Preocupaciona</option>
-                                               <option value="evaluacionPeriodica">Evaluación Periódica</option>
-                                               <option value="evaluaciónReintegro">Evaluación de reintegro</option>
-                                               <option value="evaluaciónRetiro">Evaluación de retiro</option>
-                                               <option value="saludTrabajo">Salud en el trabajo</option>
-                                        </select>
-                                    </div>
-                                    
-                                </div-->
+                                                             
 
                                 <div class="horizontal-group-special contenedor-horizontal" style="justify-content:flex-start; margin-top:0;">
                                     <div class="form-group col-sm-12" style="margin-bottom:0;">
                                         <label for="disabledTextInput" class="control-label">Motivo de consulta</label>
-                                        <textarea id="txtMotivoConsulta" rows="3" style="width: 100%; resize: vertical;" placeholder="Anotar la causa del problema en la versión del informante"></textarea>
+                                        <textarea id="txtMotivoConsulta" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Anotar la causa del problema en la versión del informante"></textarea>
                                     </div>
                                 </div>
 
                                 <div class="horizontal-group-special contenedor-horizontal" style="margin-top:0;">
                                     <div class="form-group row" style="width:100%; margin-bottom:0;">
                                          <label for="disabledTextInput" class="col-form-label">ENFERMEDAD ACTUAL</label>
-                                        <textarea id="txtEnfermedadActual" rows="5" style="width: 100%;" placeholder="Colocar la información recopilada en la anamnesis sobre el origen, la evolución cronológica y las características de todos y cada uno de los síntomas y/o signos del usuario, de los tratamientos efectuados, entre otros datos que puedan aportar y dar indicios de la patología actual."></textarea>
+                                        <textarea id="txtEnfermedadActual" rows="5" style="width: 100%; padding:0.5rem;" placeholder="Colocar la información recopilada en la anamnesis sobre el origen, la evolución cronológica y las características de todos y cada uno de los síntomas y/o signos del usuario, de los tratamientos efectuados, entre otros datos que puedan aportar y dar indicios de la patología actual."></textarea>
                                     </div>
                                        
                                 </div>
 
                                 <div class="horizontal-group-special contenedor-horizontal" style="margin-top:0;">
-                                    <div class="form-group row" style="width: 100%;" style="margin-bottom:0;">
-                                        <label for="disabledTextInput" class="col-form-label">REVISIÓN ACTUAL DE ÓRGANOS Y SISTEMAS</label>
-                                        <div class="grupo-input">
-                                                    <select id="txtPatologia" class="form-control select-medidas">
-                                                        <option value=""selected>- Seleccionar -  (Patologías)</option>
-                                                        <option value="1">1. PIEL - ANEXOS</option>
-                                                        <option value="2">2. ÓRGANOS DE LOS SENTIDOS</option>
-                                                        <option value="3">3. RESPIRATORIO</option>
-                                                        <option value="4">4. CARDIO-VASCULAR</option>
-                                                        <option value="5">5. DIGESTIVO</option>
-                                                        <option value="6">6. GENITO - URINARIO</option>
-                                                        <option value="7">7. MÚSCULO ESQUELÉTICO</option>
-                                                        <option value="8">8. ENDOCRINO</option>
-                                                        <option value="9">9. HEMO LINFÁTICO</option>
-                                                        <option value="10">10. NERVIOSO</option>
-
-                                                    </select>
+                                    <div class="form-group row" style="width: 100%; margin-bottom:0;">
+                                        <label for="disabledTextInput" class="col-form-label">REVISIÓN ACTUAL DE ÓRGANOS Y SISTEMAS</label>                                        
+                                        <!-- Lista de opciones con casillas de verificación -->
+                                        <div class="col-sm-10 dropdown-container"style="padding-left:0;">
+                                            <div class="input-group-addon dropdown-button" style="background-color:#ecc385;width:50%;">-- Seleccione las opciones --</div>  
+                                            <div class="dropdown-content2">
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionA" style="margin-right: 1rem;">
+                                                    <label for="opcion1"> 1. PIEL - ANEXOS</label>
                                                 </div>
-                                        <textarea id="txtRevisionOrganos" rows="5" style="width: 100%; resize: vertical;" placeholder="Cuando se identifique patologías describir en esta sección, colocando el número y los síntomas manifestados por el usuario."></textarea>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionB" style="margin-right: 1rem;">
+                                                    <label for="opcion2"> 2. ÓRGANOS DE LOS SENTIDOS</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionC" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 3. RESPIRATORIO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionD" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 4. CARDIO-VASCULAR</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionE" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 5. DIGESTIVO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionF" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 6. GENITO - URINARIO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionG" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 7. MÚSCULO ESQUELÉTICO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionH" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 8. ENDOCRINO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionI" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 9. HEMO LINFÁTICO</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="RevicionJ" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 10. NERVIOSO</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <textarea id="txtRevisionOrganos" rows="5" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Cuando se identifique patologías describir en esta sección, colocando el número y los síntomas manifestados por el usuario."></textarea>
                                     </div>
 
                                 </div>  
@@ -811,7 +812,7 @@
 
                                     <div class="contenedor-horizontal" style="margin: 1rem 2rem 0 2rem;">
                                         <label for="disabledTextInput" class="col-form-label">Observaciones</label>
-                                        <textarea id="txtExamFisicoObservacion" rows="5" style="width: 100%; resize: vertical;" value="" placeholder="En la sección de “observaciones”, detallar la patología encontrada."></textarea>
+                                        <textarea id="txtExamFisicoObservacion" rows="5" style="width: 100%; resize: vertical; padding:0.5rem;" value="" placeholder="En la sección de “observaciones”, detallar la patología encontrada."></textarea>
                                     </div>
 
                                 </div>
@@ -828,13 +829,51 @@
                             <div class="horizontal-group-special contenedor-horizontal">
                                 <div class="col-sm-12">
                                         <label for="disabledTextInput" class="col-sm-6 col-form-label">Antecedentes personales</label>
-                                        <textarea id="txtAntecedentesPersonales" rows="4" style="width: 100%; resize: vertical;" placeholder="Registrar la información proporcionada por el usuario en la anamnesis, en lo referente a antecedentes clínicos registrar enfermedades, alergias, traumatismos; en cuanto a antecedentes quirúrgicos, detallar las principales intervenciones quirúrgicas a las que se ha sometido."></textarea>
+                                        <textarea id="txtAntecedentesPersonales" rows="4" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Registrar la información proporcionada por el usuario en la anamnesis, en lo referente a antecedentes clínicos registrar enfermedades, alergias, traumatismos; en cuanto a antecedentes quirúrgicos, detallar las principales intervenciones quirúrgicas a las que se ha sometido."></textarea>
                                 </div>
                             </div>
                             <div class="horizontal-group-special contenedor-horizontal" style="margin-bottom:2rem;">
                                 <div class="col-sm-12">
-                                        <label for="disabledTextInput" class="col-sm-6 col-form-label">Antecedentes familiares</label>
-                                        <textarea id="txtAntecedentesFamiliares" rows="4" style="width: 100%; resize: vertical;" placeholder="Registrar la información anotando el número de cada una de las patologías de importancia presentadas en los familiares del usuario, tomando en consideración las siguientes: 1. Enfermedad cardio-vascular, 2. Enfermedad metabólica, 3. Enfermedad Neurológica, 4. Enfermedad oncológica, 5. Enfermedad infecciosa, 6. Enfermedad hereditaria / Congénita, 7. Discapacidades, 8. Otros"></textarea>
+                                     <label for="disabledTextInput" class="col-sm-6 col-form-label">Antecedentes familiares</label>
+                                    <!-- Lista de opciones con casillas de verificación -->
+                                        <div class="col-sm-10 dropdown-container"style="padding-left:0;">
+                                            <div class="input-group-addon dropdown-button" style="background-color:#ecc385;width:50%;">-- Seleccione las opciones --</div>  
+                                            <div class="dropdown-content2">
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamA" style="margin-right: 1rem;">
+                                                    <label for="opcion1"> 1. ENFERMEDAD CARDIO-VASCULAR</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamB" style="margin-right: 1rem;">
+                                                    <label for="opcion2"> 2. ENFERMEDAD METABÓLICA</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamC" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 3. ENFERMEDAD NEUROLÓGICA</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamD" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 4. ENFERMEDAD ONCOLÓGICA</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamE" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 5. ENFERMEDAD INFECCIOSA</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamF" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 6. ENFERMEDAD HEREDITARIA / CONGÉNITA</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamG" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 7. DISCAPACIDADES</label>
+                                                </div>
+                                                <div class="dropdown-option">
+                                                    <input type="checkbox" class="checkbox" id="AntFamH" style="margin-right: 1rem;">
+                                                    <label for="opcion3"> 8. OTROS</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                     <textarea id="txtAntecedentesFamiliares" rows="4" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Registrar la información anotando el número de cada una de las patologías de importancia presentadas en los familiares del usuario, tomando en consideración las siguientes: 1. Enfermedad cardio-vascular, 2. Enfermedad metabólica, 3. Enfermedad Neurológica, 4. Enfermedad oncológica, 5. Enfermedad infecciosa, 6. Enfermedad hereditaria / Congénita, 7. Discapacidades, 8. Otros"></textarea>
                                 </div>
                             </div>
                         </div>
@@ -901,7 +940,7 @@
 
                                 <div class="col-sm-4">
                                     <div class="text-center">
-                                        <textarea id="txtResultadoExam1" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
+                                        <textarea id="txtResultadoExam1" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -931,7 +970,7 @@
 
                                 <div class="col-sm-4">
                                     <div class="text-center">
-                                        <textarea id="txtResultadoExam2" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
+                                        <textarea id="txtResultadoExam2" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -960,7 +999,7 @@
 
                                 <div class="col-sm-4">
                                     <div class="text-center">
-                                        <textarea id="txtResultadoExam3" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
+                                        <textarea id="txtResultadoExam3" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -990,7 +1029,7 @@
 
                                 <div class="col-sm-4">
                                     <div class="text-center">
-                                        <textarea id="txtResultadoExam4" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando
+                                        <textarea id="txtResultadoExam4" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando
 no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                     </div>
                                 </div>
@@ -1001,46 +1040,46 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                 <div class="horizontal-group-around">
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Menarquia:</span>
+                                        <span class="input-group-addon input-azul">Menarquia:</span>
                                         <input id="txtMenarquia" type="number" class="form-control" placeholder="Edad en años" min="0" value="">
                                     </div>
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Ciclos de la regla:</span>
+                                        <span class="input-group-addon input-azul">Ciclos de la regla:</span>
                                         <input id="txtCiclos" type="number" class="form-control" name="nombre" placeholder="0" min="0" value="">
                                     </div>
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Última menstruación:</span>
+                                        <span class="input-group-addon input-azul">Última menstruación:</span>
                                         <input type="date" class="form-control" style="" id="fechaUltimaMens" name="fechaUltimaMens" value="">
                                     </div>
                                 </div>
                                 <div class="horizontal-group-around">
                                     <div class="grupfo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon" style="width: 40%;">Número de cesáreas:</span>
+                                        <span class="input-group-addon input-azul" style="width: 40%;">Número de cesáreas:</span>
                                         <input id="txtNumCesareas" type="number" class="form-control" name="nombre" placeholder="0" min="0" value="">
                                     </div>
 
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon" style="width: 40%;">Número de partos:</span>
+                                        <span class="input-group-addon input-azul" style="width: 40%;">Número de partos:</span>
                                         <input id="txtNumPartos" type="number" class="form-control" name="nombre" placeholder="0" min="0" value="">
                                     </div>
 
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon" style="width: 40%;">Número de abortos:</span>
+                                        <span class="input-group-addon input-azul" style="width: 40%;">Número de abortos:</span>
                                         <input id="txtNumAbortos" type="number" class="form-control" name="nombre" placeholder="0" min="0" value="">
                                     </div>
                                 </div>
 
                                 <div class="horizontal-group-around">
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Número de gestas:</span>
+                                        <span class="input-group-addon input-azul">Número de gestas:</span>
                                         <input id="txtNumGestas" type="number" class="form-control" name="nombre" placeholder="0" min="0" value="">
                                     </div>
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Número de hijos vivos:</span>
+                                        <span class="input-group-addon input-azul">Número de hijos vivos:</span>
                                         <input id="txtNumHijosVivos" type="number" class="form-control" name="nombre" placeholder="0" value="">
                                     </div>
                                     <div class="grupo-input col-sm-3" style="margin-bottom: 10px;">
-                                        <span class="input-group-addon">Número de hijos muertos:</span>
+                                        <span class="input-group-addon input-azul">Número de hijos muertos:</span>
                                         <input id="txtNumHijosMuertos" type="number" class="form-control" name="nombre" placeholder="0" value="">
                                     </div>
                                 </div>
@@ -1150,7 +1189,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                     <div class="col-sm-4">
                                         <div class="text-center">
-                                            <textarea id="txtResultadoExam5" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
+                                            <textarea id="txtResultadoExam5" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1182,7 +1221,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                     <div class="col-sm-4">
                                         <div class="text-center">
-                                            <textarea id="txtResultadoExam6" rows="3" style="width: 100%; resize: vertical;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
+                                            <textarea id="txtResultadoExam6" rows="3" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Solo en caso de existir anomalías colocar lo encontrado, cuando no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></textarea>
                                         </div>
                                     </div>
                                 </div>
@@ -1273,7 +1312,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                             <div class="col-sm-9">
                                                 <div class="form-group row">
                                                     <label for="disabledTextInput" class="col-sm-6 col-form-label">Reacciones</label>
-                                                    <textarea id="txtReaccionesAlergia" rows="5" style="width: 100%; resize: vertical;" value="">Reacciones</textarea>
+                                                    <textarea id="txtReaccionesAlergia" rows="5" style="width: 100%; resize: vertical; padding:0.5rem;"placeholder="Ingrese el texto aqui." value=""></textarea>
                                                 </div>
                                             </div>
                                         </div>
@@ -1293,10 +1332,10 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                             <div class="horizontal-group-special">
                                 <!-- row cuadros -->
-                                <div class="col-sm-9">
+                                <div class="col-sm-11">
                                     <div class="form-group row">
                                         <label for="disabledTextInput" class="col-sm-6 col-form-label">Actividades extras, deportes u otras</label>
-                                        <textarea id="txtActividadesExtraLaborales" rows="5" style="width: 100%; resize: vertical;" placeholder="Actividades"></textarea>
+                                        <textarea id="txtActividadesExtraLaborales" rows="5" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Actividades"></textarea>
                                     </div>
                                 </div>
                             </div>
@@ -1311,7 +1350,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-left: 2rem;">
+                            <div class="row" style="margin-left: 5rem;">
 
                                 <!--  Titulos   -->
                                 <div class="col" style="margin-bottom: 10px;">
@@ -1355,7 +1394,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-left: 3rem;">
+                            <div class="row" style="margin-left: 5rem;">
 
                                 <div class="col" style="margin-bottom: 10px;">
                                     <!-- cuadros 1 -->
@@ -1400,7 +1439,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                             </div>
 
-                            <div class="row" style="margin-left: 3rem;">
+                            <div class="row" style="margin-left: 5rem;">
 
 
                                 <div class="col" style="margin-bottom: 10px;">
@@ -1446,9 +1485,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 </div>
                             </div>
 
-                            <div class="row" style="margin-left: 3rem;">
-
-
+                            <div class="row" style="margin-left: 5rem;">
                                 <div class="col" style="margin-bottom: 10px;">
                                     <!-- cuadros 3 -->
 
@@ -1490,8 +1527,16 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                         </div>
                                     </div>
 
-                                </div>
+                                </div>                               
+
                             </div>
+
+                            <%--<div class="row" style="margin-left: 4rem;">
+                                 <div class="col-sm-11" style="margin-top: 2rem;">
+                                     <label for="disabledTextInput" class="col-sm-12 col-form-label">INCIDENTES</label>
+                                     <textarea id="txtHbtsIncidentes" rows="3" style="width: 100%; resize: vertical;" placeholder="Describir los principales incidentes suscitados"></textarea>
+                                 </div>
+                            </div>--%>
                         </div>
 
                         <!--    Cuadro de Cuadro de estilo de vida    -->
@@ -1716,7 +1761,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                 <div class="input-group cuadros-ingreso-normal" style="">
                                     <select id="riesgoTrabajoSelect1" class="form-control">
-                                        <option value="" selected>Seleccionar</option>
+                                        <option value="" selected>- Seleccionar -</option>
                                         <option value="antriesgofisico">Físico</option>
                                         <option value="antriesgomecanico">Mecánico</option>
                                         <option value="antriesgoquimico">Químico</option>
@@ -1750,7 +1795,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                 <div class="input-group cuadros-ingreso-normal" style="">
                                     <select id="riesgoTrabajoSelect2" class="form-control">
-                                        <option value="" selected>Seleccionar</option>
+                                        <option value="" selected>-Seleccionar-</option>
                                         <option value="antriesgofisico">Físico</option>
                                         <option value="antriesgomecanico">Mecánico</option>
                                         <option value="antriesgoquimico">Químico</option>
@@ -1784,7 +1829,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                 <div class="input-group cuadros-ingreso-normal" style="">
                                     <select id="riesgoTrabajoSelect3" class="form-control">
-                                        <option value="" selected>Seleccionar</option>
+                                        <option value="" selected>-Seleccionar-</option>
                                         <option value="antriesgofisico">Físico</option>
                                         <option value="antriesgomecanico">Mecánico</option>
                                         <option value="antriesgoquimico">Químico</option>
@@ -1818,7 +1863,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                                 <div class="input-group cuadros-ingreso-normal" style="margin-bottom: 10px;">
                                     <select id="riesgoTrabajoSelect4" class="form-control">
-                                        <option value="" selected>Seleccionar</option>
+                                        <option value="" selected>-Seleccionar-</option>
                                         <option value="antriesgofisico">Físico</option>
                                         <option value="antriesgomecanico">Mecánico</option>
                                         <option value="antriesgoquimico">Químico</option>
@@ -1863,7 +1908,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     </div> 
                                 </div>
 
-                                <div class="horizontal-group-around" style="padding-top: 5px;margin-top:0;">                                                              
+                                <div class="horizontal-group-simple" style="padding-top: 5px;margin-top:0;">                                                              
                                     <div class="col-sm-2 text-center input-group">
                                         <select id="AccidentesTrabajoSelect" class="form-control" onchange="handleAccidentesTrabajoSelect()">
                                             <option value="" selected hidden>Si/No</option>
@@ -1873,7 +1918,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     </div>
                                     <div class="col-sm-4 text-center input-group">
                                          <select id="txtEspecificarAccidentesTrabajoSelect" class="form-control" disabled>
-                                             <option value="" selected>Seleccionar</option>
+                                             <option value="" selected>-Seleccionar-</option>
                                              <option value="IESS">Instituto Ecuatoriano de Seguridad Social (IESS)</option>
                                              <option value="ISSFA">Instituto de Seguridad Social de las Fuerzas Armadas (ISSFA)</option>
                                              <option value="ISSPOL">Instituto de Seguridad Social de la Policía Nacional (ISSPOL) </option>
@@ -1881,10 +1926,10 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                          </select>
                                     </div>
                                     <div class="col-sm-2 text-center input-group">                                        
-                                        <input type="date" class="form-control" id="fechaInst1" name="fechaInst1">
+                                        <input type="date" class="form-control" id="fechaAccTrab">
                                     </div>
-                                    <div class="col-sm-4 input-group" style="">
-                                        <textarea id="txtObservacionesAccTrabajo" rows="2" style="width: 100%; resize: vertical;" placeholder="Registrar el nombre de la empresa, puesto de trabajo, área, datos sobre la enfermedad, así también colocar el diagnóstico con el Código CIE, y otra información relacionada con la enfermedad profesional suscitada, como secuelas en caso de existir." disabled></textarea>                                        
+                                    <div class="col-sm-4 text-center input-group" style="">
+                                        <textarea id="txtObservacionesAccTrabajo" rows="2" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Registrar el nombre de la empresa, puesto de trabajo, área, datos sobre la enfermedad, así también colocar el diagnóstico con el Código CIE, y otra información relacionada con la enfermedad profesional suscitada, como secuelas en caso de existir." disabled></textarea>                                        
                                     </div> 
                                                                        
                                 </div>
@@ -1925,7 +1970,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     </div>
                                     <div class="col-sm-4 text-center input-group">
                                          <select id="txtEspecificarEnfermedadesProfSelect" class="form-control input-medium" disabled>
-                                                <option value="" selected>Seleccionar</option>
+                                                <option value="" selected>-Seleccionar-</option>
                                                 <option value="IESS">Instituto Ecuatoriano de Seguridad Social (IESS)</option>
                                                 <option value="ISSFA">Instituto de Seguridad Social de las Fuerzas Armadas (ISSFA)</option>
                                                 <option value="ISSPOL">Instituto de Seguridad Social de la Policía Nacional (ISSPOL) </option>
@@ -1933,10 +1978,10 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                          </select>
                                     </div>
                                     <div class="col-sm-2 text-center input-group">
-                                        <input type="date" class="form-control" style="" id="fechaInst2" name="fechaInst2">
+                                        <input type="date" class="form-control" style="" id="fechaEnfProf">
                                     </div>
                                     <div class="col-sm-4 text-center input-group">
-                                            <textarea id="txtObservacionesEnfermedadesProf" rows="3" style="width: 100%; resize: vertical;" placeholder="Registrar el nombre de la empresa, puesto de trabajo, área, datos sobre la enfermedad, así también colocar el diagnóstico con el Código CIE, y otra información relacionada con la enfermedad profesional suscitada, como secuelas en caso de existir." disabled></textarea>
+                                            <textarea id="txtObservacionesEnfermedadesProf" rows="2" style="width: 100%; resize: vertical; padding:0.5rem;" placeholder="Registrar el nombre de la empresa, puesto de trabajo, área, datos sobre la enfermedad, así también colocar el diagnóstico con el Código CIE, y otra información relacionada con la enfermedad profesional suscitada, como secuelas en caso de existir." disabled></textarea>
                                     </div>
                                 </div>
 
@@ -1968,7 +2013,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">FÍSICO</label>
                                         <select id="txtFisicoSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="TemperaturasAltas">Temperaturas altas</option>
                                             <option value="TemperaturasBajas">Temperaturas bajas</option>
                                             <option value="RadiacionIonizante">Radiación Ionizante</option>
@@ -1986,7 +2031,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">MECÁNICO</label>
                                         <select id="txtMecanicoSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="AtrapamientoMaquinas">Atrapamiento entre máquinas</option>
                                             <option value="AtrapamientoSuperficies">Atrapamiento entre superficies</option>
                                             <option value="AtrapamientoObjetos">Atrapamiento entre objetos</option>
@@ -2034,7 +2079,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtFisicoSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="TemperaturasAltas">Temperaturas altas</option>
                                             <option value="TemperaturasBajas">Temperaturas bajas</option>
                                             <option value="RadiacionIonizante">Radiación Ionizante</option>
@@ -2051,7 +2096,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtMecanicoSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="AtrapamientoMaquinas">Atrapamiento entre máquinas</option>
                                             <option value="AtrapamientoSuperficies">Atrapamiento entre superficies</option>
                                             <option value="AtrapamientoObjetos">Atrapamiento entre objetos</option>
@@ -2099,7 +2144,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtFisicoSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="TemperaturasAltas">Temperaturas altas</option>
                                             <option value="TemperaturasBajas">Temperaturas bajas</option>
                                             <option value="RadiacionIonizante">Radiación Ionizante</option>
@@ -2116,7 +2161,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtMecanicoSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="AtrapamientoMaquinas">Atrapamiento entre máquinas</option>
                                             <option value="AtrapamientoSuperficies">Atrapamiento entre superficies</option>
                                             <option value="AtrapamientoObjetos">Atrapamiento entre objetos</option>
@@ -2156,7 +2201,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">QUÍMICO</label>
                                         <select id="txtQuimicoSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Solidos">Sólidos</option>
                                             <option value="Polvos">Polvos</option>
                                             <option value="Humos">Humos</option>
@@ -2173,7 +2218,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">BIOLÓGICO</label>
                                         <select id="txtBiologicoSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Virus">Virus</option>
                                             <option value="Hongos">Hongos</option>
                                             <option value="Bacterias">Bacterias</option>
@@ -2188,7 +2233,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">ERGONÓMICO</label>
                                         <select id="txtErgonomicoSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="ManejoCargas">Manejo manual de cargas</option>
                                             <option value="MovimientoRepetitivos">Movimiento repetitivos</option>
                                             <option value="PosturasForzadas">Posturas forzadas</option>
@@ -2201,8 +2246,8 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                     <fieldset class="input-group text-center">
                                         <label for="disabledTextInput" class="control-label">PSICOSOCIAL</label>
                                         <select id="txtPSicosocialSelect1" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
-                                            <option value="MonotoniaTrabajo ">Monotonía del trabajo </option>
+                                            <option value="" selected>-Seleccionar-</option>
+                                            <option value="MonotoniaTrabajo">Monotonía del trabajo </option>
                                             <option value="SobrecargaLaboral">Sobrecarga laboral</option>
                                             <option value="MinuciosidadTarea">Minuciosidad de la tarea</option>
                                             <option value="AltaResponsabilidad">Alta responsabilidad</option>
@@ -2253,7 +2298,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                  <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtQuimicoSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Solidos">Sólidos</option>
                                             <option value="Polvos">Polvos</option>
                                             <option value="Humos">Humos</option>
@@ -2269,7 +2314,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtBiologicoSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Virus">Virus</option>
                                             <option value="Hongos">Hongos</option>
                                             <option value="Bacterias">Bacterias</option>
@@ -2283,7 +2328,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtErgonomicoSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="ManejoCargas">Manejo manual de cargas</option>
                                             <option value="MovimientoRepetitivos">Movimiento repetitivos</option>
                                             <option value="PosturasForzadas">Posturas forzadas</option>
@@ -2295,8 +2340,8 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtPSicosocialSelect2" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
-                                            <option value="MonotoniaTrabajo ">Monotonía del trabajo </option>
+                                            <option value="" selected>-Seleccionar-</option>
+                                            <option value="MonotoniaTrabajo">Monotonía del trabajo </option>
                                             <option value="SobrecargaLaboral">Sobrecarga laboral</option>
                                             <option value="MinuciosidadTarea">Minuciosidad de la tarea</option>
                                             <option value="AltaResponsabilidad">Alta responsabilidad</option>
@@ -2346,7 +2391,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                    <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtQuimicoSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Solidos">Sólidos</option>
                                             <option value="Polvos">Polvos</option>
                                             <option value="Humos">Humos</option>
@@ -2362,7 +2407,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtBiologicoSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="Virus">Virus</option>
                                             <option value="Hongos">Hongos</option>
                                             <option value="Bacterias">Bacterias</option>
@@ -2376,7 +2421,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtErgonomicoSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
+                                            <option value="" selected>-Seleccionar-</option>
                                             <option value="ManejoCargas">Manejo manual de cargas</option>
                                             <option value="MovimientoRepetitivos">Movimiento repetitivos</option>
                                             <option value="PosturasForzadas">Posturas forzadas</option>
@@ -2388,8 +2433,8 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 <div class="cuadros-ingreso-normal3" style="margin-bottom: 10px;">
                                     <fieldset class="input-group text-center">
                                         <select id="txtPSicosocialSelect3" class="form-control input-medium select-temas">
-                                            <option value="" selected>Seleccionar</option>
-                                            <option value="MonotoniaTrabajo ">Monotonía del trabajo </option>
+                                            <option value="" selected>-Seleccionar-</option>
+                                            <option value="MonotoniaTrabajo">Monotonía del trabajo </option>
                                             <option value="SobrecargaLaboral">Sobrecarga laboral</option>
                                             <option value="MinuciosidadTarea">Minuciosidad de la tarea</option>
                                             <option value="AltaResponsabilidad">Alta responsabilidad</option>
@@ -2579,7 +2624,7 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                             <div class="form-group row" style="margin: 0 2rem;">
                                 <label for="disabledTextInput" class="col-form-label">Observaciones</label>
-                                <textarea id="txtExamenbservacion" rows="5" style="width: 100%; resize: vertical;" value="" placeholder="En la sección de “observaciones”, detallar la patología encontrada."></textarea>
+                                <textarea id="txtExamenbservacion" rows="5" style="width: 100%; resize: vertical; padding:0.5rem;" value="" placeholder="En la sección de “observaciones”, detallar la patología encontrada."></textarea>
                             </div>
 
                         </div>
@@ -2618,12 +2663,11 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                                 </div>
                             </div>
 
-
                             <div class="horizontal-group-simple" style="margin: 1rem 2rem 0 2rem;">
                                 <div class="cuadros-ingreso-normal7">
                                     <div class="grupo-input text-center">
-                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(2)"  oninput="BuscarCodigosCIE()">
-                                        <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboCodigos2"></ul>
+                                        <input id="txtDiagDescripcion2" type="text" class="form-control select-medidas" placeholder="Descripción" value="" onfocus="setInputActivo(2)" oninput="BuscarCodigosCIE()">
+                                        <ul class="typeahead dropdown-menu" role="listbox" id="comboCodigos2"></ul>
                                     </div>
                                 </div>
                                 <div class="cuadros-ingreso-normal3">
@@ -2677,35 +2721,38 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
 
                             <div class="horizontal-group-simple" style="margin: 2rem 3rem;">
 
-                                <div class="cuadros-ingreso-normal5" style="padding-right: 3rem;">
+                                <div class="col-sm-4" style="padding-right: 1rem;">
                                     <fieldset class="grupo-input text-center">
                                         <label for="disabledTextInput">APTITUD</label>
                                             <select id="txtAptitudSelect" class="form-control">
                                                 <option value="" selected>- Seleccionar -</option>
                                                 <option value="apto">APTO </option>
-                                                <option value="aptoObservacion">APTO EN OBSERVACIÓN</option>      
+                                                <option value="aptoObservacion">APTO CON OBSERVACIÓN</option>      
                                                 <option value="aptoLimitacion">APTO CON LIMITACIONES </option>   
                                                 <option value="noApto">NO APTO</option>   
                                             </select>
                                      </fieldset>
                                 </div>
-                                <div class="cuadros-ingreso-normal6" id="descObservacion">
-                                    <div class="grupo-input text-center" >
-                                        <label for="disabledTextInput">Observación</label>
-                                        <input id="txtDescObservacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
-                                    </div>
-                                </div>     
-                                <div class="cuadros-ingreso-normal6" id="descLimitacion">
-                                    <div class="grupo-input text-center" >
-                                        <label for="disabledTextInput">Limitación</label>
-                                        <input id="txtDescLimitacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
-                                    </div>
-                                </div>  
+                                <div class="col-sm-8">
+                                    <div class="col-sm-12" id="descObservacion">
+                                        <div class="grupo-input text-center" >
+                                            <label for="disabledTextInput">Observación</label>
+                                            <input id="txtDescObservacion" type="text" class="form-control select-temas" placeholder="Descripción" value="">
+                                        </div>
+                                    </div>     
+                                    <div class="col-sm-12" id="descLimitacion" style="margin-top:1rem;">
+                                        <div class="grupo-input text-center" >
+                                            <label for="disabledTextInput">Limitación</label>
+                                            <input id="txtDescLimitacion" type="text" class="form-control select-principal" placeholder="Descripción" value="">
+                                        </div>
+                                    </div> 
+
+                                </div> 
                            </div>
 
                             <div class="form-group" style="margin: 0 2rem;">
                                 <label for="disabledTextInput" class="col-form-label">RECOMENDACIONES Y/O TRATAMIENTO</label>
-                                <textarea id="txtRecomendacion" rows="4" style="width: 100%; resize: vertical;" value="" placeholder="De acuerdo a la valoración médica efectuada colocar las recomendaciones y/o tratamiento farmacológico y no farmacológico."></textarea>
+                                <textarea id="txtRecomendacion" rows="4" style="width: 100%; resize: vertical; padding:0.5rem;" value="" placeholder="De acuerdo a la valoración médica efectuada colocar las recomendaciones y/o tratamiento farmacológico y no farmacológico."></textarea>
                             </div>
 
                         </div>
@@ -2721,12 +2768,28 @@ no existan hallazgos colocar en resultado “normal” (no dejar en blanco)"></t
                     </div>                 
                     
                 </div>
-                <div class="" id="btnCarga" style="display:none; justify-content:center;">
-                    <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosPersonales" onclick="GuardarHistoria()" style="width: 25%; margin: 3rem;">Cargar Datos</button>
-                </div>        
+
+                <div class="horizontal-group-start" id="btnCarga" style="display:none; margin-top:4rem; margin-bottom:3rem;">
+                    <div class="col-sm-4" style="color:whitesmoke; display:flex; justify-content:space-between; padding-left:0; padding-right:0;">
+                        <div class="col-sm-6 text-center input-group horizontal-group-start">       
+                            <label class="control-label">fecha: </label>
+                            <input type="date" style="margin-left:0.5rem;" class="form-control" id="fechaFormulario" value="">
+                        </div>
+                        <div class="col-sm-5 input-group horizontal-group-end" style="padding-right:1rem;">  
+                            <label class="control-label">hora: </label>
+                            <input type="text" style="margin-left:0.5rem;" class="form-control" id="horaFormulario" placeholder="00:00" value="">
+                        </div>
+                    </div>
+
+                    <!--div class="" id="btnCarga" style="display:none; justify-content:center;"-->
+                        <button class="btn btn-info col-sm-6" type="button" id="btnCargarDatosPersonales" onclick="GuardarHistoria()" style="width: 25%; margin-left:5rem;">Cargar Datos</button>
+                    <!--/div-->        
                 
-                <!-- Boton flotante de regreso-->
-                <a id="btnRegresar" class="chat-button"></a>
+                    <!-- Boton flotante de regreso-->
+                    <div><a id="btnRegresar" class="text-center chat-button"></a></div>                        
+                </div>
+
+                
 
                 <!-- Modal de advertencia -->
                 <div id="confirmModal" class="modal fade" role="dialog">

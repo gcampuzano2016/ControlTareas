@@ -245,7 +245,7 @@
                             <div class="row">
                                 <div class="form-group col-lg-4">
                                     <label>N° PARTE</label>
-                                    <input readonly="readonly" type="text" class="form-control" id="txtNumPartes" placeholder="N° PARTE">
+                                    <input readonly="readonly" type="text" class="form-control" id="txtNumPartes" placeholder="N° de parte">
                                 </div>
                                 <div class="form-group col-lg-4">
                                     <label>UNIDAD DE MEDIDA</label>

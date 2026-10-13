@@ -17,6 +17,7 @@
     <link href="../bower_components/metisMenu/dist/metisMenu.min.css" rel="stylesheet">
     <link href="../dist/css/sb-admin-2.css" rel="stylesheet">
     <link href="../bower_components/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link href="../css/dos-tema.css?v=11" rel="stylesheet">
     <script>
         window.onload = function () {
             const hostname = window.location.hostname;
@@ -38,7 +39,7 @@
                     <div class="col-md-4 col-md-offset-4">
                         <div class="login-panel panel panel-info">
                             <div class="panel-heading" style="text-align: center; background-color: white">
-                                <img src="../Img/iconoDos.png" height="70" /><br />
+                                <img src="../Img/iconoDos.png" height="120" /><br />
                                 <h1 class="text-center panel-collapse"><font color="#6F6F6F" size="5">Sistema de Gesti&oacute;n Interno </font></h1>
                                 <font color="6F6F6F">Versión 2.5</font>
                             </div>
@@ -83,6 +84,34 @@
                     </div>
                 </div>
             </div>
+            <%-- Espera del inicio de sesion. La validacion va contra Active
+                 Directory y tarda varios segundos; sin aviso la gente vuelve a
+                 apretar Ingresar creyendo que no tomo. --%>
+            <div id="dosEsperando" class="dos-esperando" role="status" aria-live="polite">
+                <div class="dos-esperando-caja">
+                    <div class="dos-esperando-aro"></div>
+                    <p class="dos-esperando-texto">Verificando sus credenciales...</p>
+                </div>
+            </div>
+            <script>
+                (function () {
+                    var formulario = document.getElementById("form1");
+                    var capa = document.getElementById("dosEsperando");
+                    if (!formulario || !capa) { return; }
+
+                    /* Se engancha al submit y no al clic del boton: asi tambien
+                       cubre a quien entra apretando Enter en el campo. */
+                    formulario.onsubmit = function () {
+                        capa.className = "dos-esperando visible";
+                    };
+
+                    /* Al volver atras en el navegador la pagina puede restaurarse
+                       desde cache con la capa puesta. Sin esto queda tapada. */
+                    window.addEventListener("pageshow", function () {
+                        capa.className = "dos-esperando";
+                    });
+                })();
+            </script>
             <script src="../bower_components/jquery/dist/jquery.min.js"></script>
             <script src="../bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
             <script src="../bower_components/metisMenu/dist/metisMenu.min.js"></script>

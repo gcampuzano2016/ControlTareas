@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -21,6 +17,10 @@ namespace CapaEntidad
         public String Mail { get; set; }
         public String StrEstado { get; set; }
         public String Combo { get; set; }
+
+        // Cantidad de usuarios que tienen este perfil. La usa la pantalla de
+        // administracion para saber si el perfil se puede eliminar.
+        public Int32 Usuarios { get; set; }
 
     }
 }

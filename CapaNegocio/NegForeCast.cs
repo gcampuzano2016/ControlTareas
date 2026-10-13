@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -29,9 +28,9 @@ namespace CapaNegocio
             return respuesta;
         }
 
-        public static List<EntForeCast> ConsultaSp_RTAListaForeCast(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio,string cierrenegocio, int IdPrioProyecto,int ProyecEstrategico, string TipoProyecto)
+        public static List<EntForeCast> ConsultaSp_RTAListaForeCast(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico, string TipoProyecto, string semana)
         {
-            return DaoForeCast.ConsultaSp_RTAListaForeCast(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, IdMarca, sucursal, SegmentodeMercado, StrIdPrioridad, Idusuario, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto);
+            return DaoForeCast.ConsultaSp_RTAListaForeCast(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, IdMarca, sucursal, SegmentodeMercado, StrIdPrioridad, Idusuario, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto, semana);
         }
 
         public static List<EntForeCast> ConsultaSp_RTAListaForeCastGD(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio)
@@ -39,9 +38,20 @@ namespace CapaNegocio
             return DaoForeCast.ConsultaSp_RTAListaForeCastGD(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, IdMarca, sucursal, SegmentodeMercado, StrIdPrioridad, Idusuario, idFecha, Anio, cierrenegocio);
         }
 
-        public static EntRespuesta ConsultaSp_RTAListaForeCastDescargar(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico,string TipoProyecto)
+        public static EntRespuesta ConsultaSp_RTAListaForeCastDescargar(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico, string TipoProyecto)
         {
-            return DaoForeCast.ConsultaSp_RTAListaForeCastDescargar(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, IdMarca, sucursal, SegmentodeMercado, StrIdPrioridad, Idusuario, idFecha, Anio,cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto);
+            return DaoForeCast.ConsultaSp_RTAListaForeCastDescargar(FechaFacturacion, MesEstimadoCierre, IdCliente, IdGerenteCuenta, IdGestorProducto, IdMarca, sucursal, SegmentodeMercado, StrIdPrioridad, Idusuario, idFecha, Anio, cierrenegocio, IdPrioProyecto, ProyecEstrategico, TipoProyecto);
+        }
+
+
+        public static EntRespuesta InsertarModificarEliminarRegistroBiometrico(EntRegistroBiometrico biometrico)
+        {
+            return DaoForeCast.InsertarModificarEliminarRegistroBiometrico(biometrico);
+        }
+
+        public static EntRespuesta InsertarModificarEliminarRegistroActividad(EntActividad actividad)
+        {
+            return DaoForeCast.InsertarModificarEliminarRegistroActividad(actividad);
         }
 
         public static EntRespuesta ConsultaSp_RTAListaForeCastDescargarPersonalizado(string FechaFacturacion, string MesEstimadoCierre, int IdCliente, int IdGerenteCuenta, string IdGestorProducto, string IdMarca, string sucursal, string SegmentodeMercado, string StrIdPrioridad, string Idusuario, int idFecha, int Anio, string cierrenegocio, int IdPrioProyecto, int ProyecEstrategico)
@@ -67,6 +77,11 @@ namespace CapaNegocio
         public static List<EntForeCast> ConsultaSp_RTAConsultarForeCastGD(int IdForeCast, int tipo)
         {
             return DaoForeCast.ConsultaSp_RTAConsultarForeCastGD(IdForeCast, tipo);
+        }
+
+        public static List<EntRegistroBiometrico> Sp_RTAConsultaBiometria(int Id_Usuario, DateTime FechaRegistro)
+        {
+            return DaoForeCast.Sp_RTAConsultaBiometria(Id_Usuario, FechaRegistro);
         }
 
         public static List<EntForeCast> ConsultaSp_RTAValidarClienteForeCast(string Descripcion, int tipo)

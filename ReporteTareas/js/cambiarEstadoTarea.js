@@ -44,7 +44,7 @@ function CargarPagina(div, url, datos, tipoControl, boton) {
                     }
 
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
@@ -267,7 +267,7 @@ function ListadoArchivosTarea(div, idTarea) {
                     $(div).html(htmlListaArchivosAdjuntos);
                 }
             } else {
-                $("#divMensajes").html("No existen datos para esta consulta.");
+                $(div).html(DosVacio("No hay archivos adjuntos.", ""));
             }
 
             $("#divMensajes").html("");

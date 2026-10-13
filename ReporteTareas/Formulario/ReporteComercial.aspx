@@ -32,7 +32,7 @@
                                                     </div>
                                                 <div class="col-lg-11">
                                                     
-                                                    <iframe width="800" height="600" src="https://app.powerbi.com/view?r=eyJrIjoiNTY5Y2Q3MzktNDU0Zi00ZjE3LTkyNTYtOWY1NWEwNGIzYzU4IiwidCI6IjgwODc0OTA5LTMzMjUtNDEzMS1iNmFiLTdiMDVjZDEwNmJhZSIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
+                                                    <iframe width="800" height="600" src="https://app.powerbi.com/view?r=eyJrIjoiYWE4MjcyYWUtYjIzNi00ZDM3LWFmOWQtNDRhODY1NjNjYzY1IiwidCI6IjgwODc0OTA5LTMzMjUtNDEzMS1iNmFiLTdiMDVjZDEwNmJhZSIsImMiOjR9" frameborder="0" allowFullScreen="true"></iframe>
                                                                                                         
                                                 </div>
 

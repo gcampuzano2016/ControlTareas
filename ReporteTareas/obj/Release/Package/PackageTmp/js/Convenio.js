@@ -1,0 +1,2723 @@
+﻿let idTipoSolicitud = 0;
+let idVacaciones = 0;
+let SaldoDias = 0;
+let EstadoSolicitud = "";
+let TipoSolicitud = 0;
+let StrTipoSolicitud = "";
+
+/* Los feriados descuentan días en Vacaciones, pero no en Planificación: antes
+   eso se expresaba mostrando u ocultando el campo "Feriados", que ya no existe
+   porque el número se calcula solo. La regla sigue siendo la misma, ahora en
+   una bandera. */
+let AplicaFeriados = true;
+
+function DesactivarCheck1() {
+    var text = document.getElementById("IdNO");
+    if (text.checked == true) {
+        text.checked = false;
+    }
+    document.getElementById("CargarHorarioRecuperacion").style.display = "none";
+}
+
+function CargarTodoEmpleados() {
+
+    if ($('#txtReemplazo').val() == "0") {
+        ObtenerListaComboReemplazo();
+    }
+    else if ($('#txtReemplazo').val() == "-1") {
+        ObtenerListaComboReemplazoTodos()
+    }
+
+}
+
+function DesactivarCheck2() {
+    var text = document.getElementById("IdSI");
+    if (text.checked == true) {
+        text.checked = false;
+    }
+
+    var text2 = document.getElementById("IdNO");
+    if (text2.checked == true) {
+       // document.getElementById("CargarHorarioRecuperacion").style.display = "block";
+    }
+    else {
+        //document.getElementById("CargarHorarioRecuperacion").style.display = "none";
+    }
+  }
+
+function AgregarFormaDePago() {
+
+        var tr = $(".tr_clone_field_forma_pago");
+        var clone = tr.clone(true);
+        //clone.find(':text').val('0');
+        clone.removeClass("tr_clone_field_forma_pago");
+        clone.append("<td><a class='table_delete_row_field' href='#' alt='Eliminar Campo Adicional'><i class='fa fa-trash-o'></i></button></td>")
+        $(".table-forma-pago").find('tbody').append(clone);
+        $(".table-forma-pago tbody").children(':last').hide().fadeIn(750);
+
+        $(".table_delete_row_field").click(function () {
+            $(this).closest('tr').fadeOut(500, function () {
+                $(this).remove();
+            });
+            return false;
+        });
+}
+
+function MensajeIncorrecto(resultado) {
+    sweetAlert("Error", resultado, "error");
+}
+
+function MensajeCorrecto(resultado) {
+    sweetAlert("Exito", resultado, "success");
+}
+
+function alerta(respuesta) {
+    sweetAlert("Advertencia", respuesta, "error");
+}
+
+function alerta2(respuesta) {
+    sweetAlert("Advertencia", respuesta, "");
+}
+
+function CancelarCambios1() {
+    document.getElementById("RegistroVacaciones").style.display = "none";
+    document.getElementById("RegistroPermisos").style.display = "none";
+    document.getElementById("ListaSolicitud").style.display = "block";
+    var comboSolicitud = document.getElementById("cboSolicitud");
+    comboSolicitud.selectedIndex = 0;
+}
+
+function CancelarCambios2() {
+    document.getElementById("RegistroVacaciones").style.display = "none";
+    document.getElementById("RegistroPermisos").style.display = "none";
+    document.getElementById("ListaSolicitud").style.display = "block";
+    var comboSolicitud = document.getElementById("cboSolicitud");
+    comboSolicitud.selectedIndex = 0;
+}
+
+function BtnPermiso() {
+    document.getElementById("RegistroVacaciones").style.display = "none";
+    document.getElementById("RegistroPermisos").style.display = "block";
+    document.getElementById("ListaSolicitud").style.display = "none";
+
+    PrepararFirmaColaboradorPermiso();
+
+    /* El saldo del mes, para saber si la casilla se puede ofrecer. */
+    ConsultarSaldoMensual();
+
+    /* Las dos ramas condicionales arrancan en el estado que corresponda al
+       formulario recién abierto, en vez de esperar a que el usuario toque algo. */
+    AgregaActividad();
+    CambiaTratamientoExcedente();
+}
+
+/* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
+   se limpia entre solicitudes: crearlo de nuevo dejaria manejadores duplicados
+   sobre el mismo lienzo y el trazo saldria doble. */
+var _padColaborador = null;
+
+function PrepararFirmaColaborador() {
+    if (_padColaborador === null) {
+        _padColaborador = PadFirma("divFirmaColaborador", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaborador.limpiar();
+    }
+}
+
+/* Pad del formulario de permisos. Es otro lienzo, asi que necesita su propia
+   instancia: un mismo PadFirma no puede atender dos contenedores. */
+var _padColaboradorP = null;
+
+function PrepararFirmaColaboradorPermiso() {
+    if (_padColaboradorP === null) {
+        _padColaboradorP = PadFirma("divFirmaColaboradorP", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaboradorP.limpiar();
+    }
+}
+
+function BtnVacaciones() {
+    PrepararFirmaColaborador();
+    document.getElementById("RegistroVacaciones").style.display = "block";
+    document.getElementById("RegistroPermisos").style.display = "none";
+    document.getElementById("ListaSolicitud").style.display = "none";
+}
+
+function ObtenerListaComboSolicitud() {
+    var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"35\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + $("#ContentPlaceHolder1_txtIdCliente").val() + "\"} }]";
+    CargarPagina('#cboSolicitud', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+}
+
+function ObtenerListaComboSolicitud2() {
+    var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"39\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + $("#ContentPlaceHolder1_txtIdCliente").val() + "\"} }]";
+    CargarPagina('#cboEstado2', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+}
+
+function ObtenerListaComboReemplazo() {
+    var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"36\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + $("#ContentPlaceHolder1_txtIdCliente").val() + "\"} }]";
+    CargarPagina('#txtReemplazo', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+}
+
+function ObtenerListaComboReemplazoTodos() {
+    var Datos = "[{ \"action\": \"ListaComboContrato\", \"parameters\" : { \"Tipo\" : \"49\", session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\",\"IdSucursal\" : \"0\", IdCliente: \"" + $("#ContentPlaceHolder1_txtIdCliente").val() + "\"} }]";
+    CargarPagina('#txtReemplazo', 'ObtenerListaTareas.ashx', Datos, "select", "", "");
+}
+
+function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
+
+    if (div != undefined) {
+        $.ajax({
+            type: "POST",
+            url: url,
+            data: datos,
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            beforeSend: function (respuesta) {
+                $("#divMensajes").html("Cargando Información...");
+            },
+            success: function (respuesta) {
+                if (respuesta != null) {
+                    var idTotalRegistro = respuesta.length;
+                    if (respuesta.length == 0) {
+                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
+                    }
+                    else {
+                        $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
+                    }
+                } else {
+                    $(div).html(DosVacio());
+                }
+
+                $("#divMensajes").html("");
+
+            },
+            error: function (objeto, msgError, objError) {
+                var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+            }
+        });
+    }
+}
+
+function RecorreJSON(div, json, tipoControl, boton, idSeleccionado) {
+
+    var contenido = "";
+
+    if (tipoControl == "select") {
+        contenido = RecorreJSONSelect(div, json, idSeleccionado);
+    }
+
+    if (tipoControl == "tableSelect") {
+        DestruirTablaSolicitudes();
+        $(div).html(RecorreJSONTableSelect(json, boton));
+        InicializarTablaSolicitudes();
+        /* CargarPagina escribe en el div lo que devuelve esta funcion. Si
+           devolviera el HTML, volveria a pintar la tabla encima de la que
+           DataTables acaba de armar. Con undefined, .html() no toca nada: es lo
+           mismo que ya hace la rama "select". */
+        return undefined;
+    }
+
+    if (tipoControl == "tableSelectPantalla") {
+        contenido = RecorreDatosPantalla(json);
+    }
+    if (tipoControl == "tableSelectSaldo") {
+        contenido = RecorreJSONTableSelectSaldos(json, boton);
+    }
+    if (tipoControl == "tableSelectDias") {
+        contenido = RecorreDatosDiasSolicitados(json, boton);
+    }
+    if (tipoControl == "detalleDatos") {
+        contenido = RecorreDatosSolicitud(json);
+        $(div).html(contenido);
+    }
+    
+    return contenido;
+}
+
+function VerDocumento() {
+    let proceso = "";
+}
+
+function AprobarSolicitud(idvacaciones, estadoSolicitud, Descripcion) {
+
+    if (estadoSolicitud == "APROBADO") {
+        alerta2("ya no puede realizar cambio.")
+    }
+    else {
+        idVacaciones = idvacaciones;
+        StrTipoSolicitud = Descripcion;
+        $("#modalCargarProceso").modal('show');
+    }
+}
+
+/* Vuelve a mandarle al jefe el correo de aprobacion, para cuando el envio del
+   guardado fallo. closeOnConfirm en false para que el resultado reemplace a la
+   confirmacion: con true, sweetAlert cierra tambien el aviso que se abre en el
+   callback. */
+function ReenviarCorreoSolicitud(idvacaciones) {
+    swal({
+        title: "¿Reenviar correo?",
+        text: "Se volverá a enviar a su jefe inmediato el correo de aprobación de la solicitud " + idvacaciones + ".",
+        type: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Reenviar",
+        cancelButtonText: "Cancelar",
+        closeOnConfirm: false,
+        showLoaderOnConfirm: true
+    }, function () {
+        var parametros = { "session": $("#ContentPlaceHolder1_txtUsuario").val(), "IdVacaciones": idvacaciones };
+        $.ajax({
+            type: "POST",
+            url: "ObtenerListaTareas.ashx",
+            data: JSON.stringify([{ "action": "ReenviarCorreoSolicitud", "parameters": parametros }]),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (respuesta) {
+                if (respuesta.estado == "1") {
+                    MensajeCorrecto(respuesta.mensaje);
+                } else if (respuesta.tipoMensaje == "warning") {
+                    alerta2(respuesta.mensaje);
+                } else {
+                    MensajeIncorrecto(respuesta.mensaje);
+                }
+            },
+            error: function () {
+                MensajeIncorrecto("No se pudo contactar al servidor para reenviar el correo, vuelva a intentarlo en unos segundos.");
+            }
+        });
+    });
+}
+
+function EditarSolicitud(idvacaciones, tipoVacacion) {
+    idVacaciones = idvacaciones;
+    BuscarSolicitudEditar(tipoVacacion);
+    ObtenerSolicitudIndividual(idvacaciones);
+    ListadoArchivosSolicitud("#divArchivosAdjuntosAnteriores",idvacaciones);
+    document.getElementById("IdCargarArchivo").style.display = "block";
+}
+
+function CambiarEstado(idvacaciones, tipoVacacion) {
+    idVacaciones = idvacaciones;
+    BuscarSolicitudEditar("VACACIONES_PLA");
+    ObtenerSolicitudIndividual(idvacaciones);
+    ListadoArchivosSolicitud("#divArchivosAdjuntosAnteriores", idvacaciones);
+    document.getElementById("IdCargarArchivo").style.display = "block";
+}
+
+
+function ActualizarProceso() {
+    if ($('#cboEstado2').val() == "-- SELECCIONE --") {
+        alerta("Debe seleccionar un estado");
+    }
+    else {
+        if ($('#txtDescripcionReq2').val() == "") {
+            alerta("Debe agregar el motivo");
+        }
+        else {
+
+            if ($('#cboEstado2').val() == "ANULAR") {
+                ActualizarSolicitudProceso(4);
+            }           
+        }
+    }
+
+}
+
+function ActualizarSolicitudProceso(tipo) {
+
+    var url = "ObtenerListaTareas.ashx";
+    var datos = "";
+    var mensajeVerificacion = "";
+    var tipoMensaje = "warning";
+    var contadorVerificacion = 0;
+
+    if ($('#cboEstado2').val() == "SELECCIONAR") {
+        mensajeVerificacion += "- Debe ingresar el estado ";
+        contadorVerificacion += 1;
+    }
+
+    if (contadorVerificacion > 0) {
+        alerta(mensajeVerificacion);
+        return;
+    }
+
+    var datosFormulario = "";
+
+    var datosFormulario = "";
+
+    datosFormulario = datosFormulario + "{";
+    datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosFormulario = datosFormulario + "'IdVacaciones': '" + idVacaciones + "',";
+    datosFormulario = datosFormulario + "'EstadoSolicitud': '" + $('#cboEstado2').val() + "',";
+    datosFormulario = datosFormulario + "'Motivo': '" + $('#txtDescripcionReq2').val() + "',";
+    datosFormulario = datosFormulario + "'StrTipoSolicitud': '" + StrTipoSolicitud + "',";
+    datosFormulario = datosFormulario + "'tipo': '" + tipo + "'";
+
+    datosFormulario = datosFormulario + "}";
+
+    datos = "[{'action': 'ActualizarSolicitud', 'parameters' : " + datosFormulario + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                $("#modalCargarProceso").modal('hide');
+                var combo2 = document.getElementById("cboEstado2");
+                combo2.value = "SELECCIONAR";
+                ObtenerListaSolicitud(0, 0, $("#txtFechaConsulta1").val(), $("#txtFechaConsulta2").val(), 1, "");
+                MensajeCorrecto(respuesta.mensaje);
+                $("#divMensajes").html("");
+            }
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
+
+    return;
+
+}
+
+/* La consulta de solicitudes del colaborador.
+
+   Se quitaron cedula, colaborador, departamento y jefe: la consulta solo trae
+   las solicitudes propias, asi que eran la misma informacion repetida en cada
+   fila. Siguen en el detalle y en el Descargar XLS.
+
+   La tabla la ordena, pagina y filtra DataTables (InicializarTablaSolicitudes),
+   que carga Master.Master para todas las pantallas. */
+function RecorreJSONTableSelect(json, idSeleccionado) {
+    var info = "";
+    info = info + "<table id='tablaSolicitudes' class='table table-hover tabla-solicitudes' style='width: 100%;'>";
+    info = info + "<thead><tr>";
+    info = info + "<th>Acciones</th>";
+    info = info + "<th>Estado</th>";
+    info = info + "<th>Código</th>";
+    info = info + "<th>Tipo</th>";
+    info = info + "<th>Fecha registro</th>";
+    info = info + "<th>Desde</th>";
+    info = info + "<th>Hasta</th>";
+    info = info + "<th>Horas</th>";
+    info = info + "<th>Actividad</th>";
+    info = info + "<th>Días</th>";
+    info = info + "<th>Feriado</th>";
+    info = info + "<th>Total días</th>";
+    info = info + "<th>Saldo días</th>";
+    info = info + "<th>Motivo rechazo</th>";
+    info = info + "</tr></thead>";
+
+    info = info + "<tbody>";
+    $.each(json, function (i, item) {
+
+        info = info + "<tr>";
+
+        info = info + "<td class='acciones-solicitud'>";
+        info = info + "<button type='button' title='Imprimir Solicitud' class='btn btn-btn-editClientes btn-xs' onclick='VerListadoArchivosVacaciones(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");' ><i class='fa fa-print' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Anular solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.EstadoSolicitud + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-tasks' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Editar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='EditarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-pencil-square-o' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' title='Cambiar estado de Planificación a Vacaciones' class='btn btn-btn-editClientes btn-xs' onclick='CambiarEstado(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\");' ><i class='fa fa-cubes' aria-hidden='true'></i></button>";
+        /* Solo mientras el jefe no decide: despues el enlace de aprobar ya no
+           sirve. El servidor lo vuelve a comprobar, esto solo evita ofrecerlo. */
+        if (item.EstadoSolicitud == "POR APROBAR") {
+            info = info + "<button type='button' title='Reenviar correo al jefe' class='btn btn-btn-editClientes btn-xs' onclick='ReenviarCorreoSolicitud(\"" + item.IdVacaciones + "\");' ><i class='fa fa-envelope-o' aria-hidden='true'></i></button>";
+        }
+        if (item.conteoArchivosAdjuntos != '0') {
+            info = info + "<button type='button' title='Archivos adjuntos' class='btn btn-info btn-xs' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
+        }
+
+        /* El boton de descarga del PDF firmado queda oculto por pedido del
+           usuario. No se borra la logica: DescargarPdfSolicitud sigue estando y
+           el servidor sigue armando el documento, asi que volver a mostrarlo es
+           devolver este bloque y nada mas.
+
+        if (item.EstadoSolicitud == "PROCESADO") {
+            info = info + "<button type='button' title='Descargar PDF firmado' class='btn btn-success btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
+        }
+        */
+
+        info = info + "</td>";
+        info = info + "<td><span class='label " + ClaseEstadoSolicitud(item.EstadoSolicitud) + "'>" + EscaparHtml(item.EstadoSolicitud) + "</span></td>";
+        info = info + "<td>" + item.IdVacaciones + "</td>";
+        info = info + "<td>" + EscaparHtml(item.Descripcion) + "</td>";
+        info = info + CeldaFecha(item.FechaRegistro);
+        info = info + CeldaFecha(item.FechaDesde);
+        info = info + CeldaFecha(item.FechaHasta);
+        info = info + "<td>" + EscaparHtml(item.Horas) + "</td>";
+        info = info + CeldaTextoLargo(item.Actividad);
+        info = info + "<td class='text-right'>" + item.TotalDias.toFixed(2) + "</td>";
+        info = info + "<td class='text-right'>" + item.Feriado.toFixed(2) + "</td>";
+        info = info + "<td class='text-right'>" + format_two_digits((item.Feriado + item.TotalDias).toFixed(2)) + "</td>";
+        info = info + "<td class='text-right'>" + item.SaldoDias + "</td>";
+        info = info + CeldaTextoLargo(item.MotivoAnulacion);
+        info = info + "</tr>";
+    });
+
+    info = info + "</tbody>";
+    info = info + "</table>";
+
+    return info;
+}
+
+/* Color del estado con las pildoras del tema (dos-tema.css): ambar mientras
+   espera, verde si se concedio, rojo si no sigue. */
+function ClaseEstadoSolicitud(estado) {
+    var e = $.trim(estado || "").toUpperCase();
+    if (e == "POR APROBAR") { return "label-warning"; }
+    if (e == "APROBADO" || e == "PROCESADO") { return "label-success"; }
+    if (e.indexOf("RECHAZADO") == 0 || e == "ANULAR" || e == "ANULADO") { return "label-danger"; }
+    return "label-default";
+}
+
+function EscaparHtml(texto) {
+    return $("<div>").text(texto == null ? "" : String(texto)).html();
+}
+
+/* Las fechas llegan como "dd/MM/yyyy" (a veces con hora): ordenadas como texto,
+   el 01/10/2026 quedaria antes que el 14/04/2022. data-order le da a DataTables
+   una clave aaaammdd que si ordena bien. */
+function CeldaFecha(fecha) {
+    var texto = fecha == null ? "" : String(fecha);
+    var partes = /^(\d{1,2})\/(\d{1,2})\/(\d{4})(.*)$/.exec($.trim(texto));
+    var orden = partes ? partes[3] + ("0" + partes[2]).slice(-2) + ("0" + partes[1]).slice(-2) + partes[4] : texto;
+    return "<td data-order='" + EscaparHtml(orden) + "' class='text-nowrap'>" + EscaparHtml(texto) + "</td>";
+}
+
+/* Actividad y motivo pueden ser largos: una sola linea con puntos suspensivos,
+   y el texto completo al pasar el mouse. */
+function CeldaTextoLargo(texto) {
+    var t = EscaparHtml(texto);
+    return "<td><div class='texto-recortado' title='" + t.replace(/'/g, "&#39;") + "'>" + t + "</div></td>";
+}
+
+/* La tabla se vuelve a pintar entera en cada consulta (y despues de anular o
+   editar), asi que la instancia anterior se destruye antes de reemplazarla:
+   si no, DataTables sigue guardando la configuracion de una tabla que ya no
+   esta en la pagina. */
+function DestruirTablaSolicitudes() {
+    var tabla = $("#tablaSolicitudes");
+    if (tabla.length && $.fn.DataTable && $.fn.DataTable.isDataTable(tabla)) {
+        tabla.DataTable().destroy();
+    }
+}
+
+function InicializarTablaSolicitudes() {
+    var tabla = $("#tablaSolicitudes");
+    if (!tabla.length || !$.fn.DataTable) { return; }
+    tabla.DataTable({
+        order: [[2, "desc"]],
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        autoWidth: false,
+        /* El layout de Bootstrap de siempre, pero con la tabla sola dentro de su
+           propio scroll horizontal: asi el buscador y la paginacion no se
+           desplazan con ella cuando no entra a lo ancho. */
+        dom: "<'row'<'col-sm-6'l><'col-sm-6'f>>" +
+             "<'tabla-solicitudes-scroll'tr>" +
+             "<'row'<'col-sm-5'i><'col-sm-7'p>>",
+        columnDefs: [{ targets: 0, orderable: false, searchable: false }],
+        language: {
+            search: "Buscar:",
+            lengthMenu: "Mostrar _MENU_ solicitudes",
+            info: "Solicitudes _START_ a _END_ de _TOTAL_",
+            infoEmpty: "Sin solicitudes",
+            infoFiltered: "(filtradas de _MAX_)",
+            zeroRecords: "Ninguna solicitud coincide con la búsqueda",
+            emptyTable: "No hay solicitudes en el rango consultado",
+            paginate: { first: "Primera", last: "Última", next: "Siguiente", previous: "Anterior" }
+        }
+    });
+}
+
+function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
+    var info = "";
+    //
+    // Despliegue de titulos de cabecera
+    //
+    var totalValor3 = 0;
+    var thInicial = "<th class='' tabindex='0' aria-controls='dataTables - Datos' rowspan='1' colspan='1' aria-label='Engine version: activate to sort column ascending' style='width: 147px;'>";
+    var thFinal = "</th>";
+    info = info + "<table width='70%' class='table table-striped table-bordered table-hover dataTable no-footer dtr-inline' role='grid' aria-describedby='dataTables-example_info' style='width: 70%;'>";
+    info = info + "<thead><tr role='row'>";
+    info = info + thInicial + "PERIODO" + thFinal;
+    info = info + thInicial + "DIAS GENERADOS" + thFinal;
+    info = info + thInicial + "DIAS TOMADOS" + thFinal;
+    info = info + thInicial + "SALDO" + thFinal;
+    info = info + "</tr></thead>";
+
+    info = info + "<tbody>";
+
+    var esImpar = true;
+    $.each(json, function (i, item) {
+
+        info = info + "<tr class='gradeA odd' role = 'row' id='tr-" + item.IdSaldos + "'>";
+        info = info + "<td class='sorting_1'>" + item.PERIODO + "</td>";
+        info = info + "<td class='sorting_1'>" + item.DIASGENERADOS + "</td>";
+        info = info + "<td class='sorting_1'>" + item.DIASTOMADOS + "</td>";
+        info = info + "<td class='sorting_1' style='text-align: right;'>" + item.SALDO + "</td>";
+        info = info + "</tr>";
+        totalValor3 = totalValor3 + parseFloat(item.SALDO);
+    });
+
+    /* Antes esta función descontaba los feriados del campo "Días" cada vez que
+       corría. Como también se la llama al cambiar de tipo de solicitud, un mismo
+       rango podía quedar descontado dos veces. Ahora "Días" llega con el valor
+       definitivo desde DiasVacaciones() y acá solo se resta del saldo: mismo
+       resultado, sin depender de cuántas veces se ejecute. */
+    var diasSolicitados = parseFloat($('#frmTxtTiempoDiasV').val()) || 0;
+    var saldoGenerado = parseFloat(totalValor3);
+
+    if (totalValor3 > 0) {
+
+        totalValor3 = saldoGenerado - diasSolicitados;
+
+        info = info + "<tr>";
+        info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
+        info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
+        info = info + "<td class='sorting_1' colspan='1' style='text-align: left;'>TOTAL: </td>";
+        info = info + "<td class='sorting_1' style='text-align: right;'><b>" + "" + format_two_digits((totalValor3).toFixed(2)) + "</b></td>";
+        info = info + "</tr>";
+        SaldoDias = totalValor3;
+    }
+
+    /* El aviso va fuera del if a propósito. Ese if solo dibuja la fila TOTAL
+       cuando hay saldo positivo, y el caso que más importa avisar es justamente
+       el de saldo en cero: adentro no se mostraría nunca. */
+    if (AplicaFeriados) {
+        FeriadosAvisarSaldo(diasSolicitados, saldoGenerado - diasSolicitados);
+    }
+
+    info = info + "</tbody>";
+    info = info + "</table>";
+
+    return info;
+}
+
+function RecorreJSONSelect(div, selectValues) {
+
+    $(div).empty();
+
+    $.each(selectValues, function (key, value) {
+        //
+        // Despliegue de datos
+        //
+        $(div)
+            .append($("<option></option>")
+                .attr("value", value.Id)
+                .text(value.Valor));
+    });
+
+    return;
+}
+
+function BuscarSolicitudEditar(seleccionarTipo) {
+
+    var selectedSolicitud = seleccionarTipo;
+    if (selectedSolicitud == "PERMISO") {
+        BtnPermiso();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 1);
+        document.getElementById("btnGuardar2").innerHTML = "Actualizar";
+    }
+    else if (selectedSolicitud == "VACACIONES_PLA") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
+        AplicaFeriados = true;
+
+        //document.getElementById("Vacaciones").style.display = "block";
+        //document.getElementById("Planificacion").style.display = "none";
+
+        document.getElementById("btnGuardar1").innerHTML = "Cambiar a Vacaciones";
+    }
+    else if (selectedSolicitud == "VACACIONES") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
+        AplicaFeriados = true;
+
+        //document.getElementById("Vacaciones").style.display = "block";
+        //document.getElementById("Planificacion").style.display = "none";
+
+        document.getElementById("btnGuardar1").innerHTML = "Actualizar";
+    }
+    else if (selectedSolicitud == "PLANIFICAR VACACIONES") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Planificación de vacaciones";
+        AplicaFeriados = false;
+
+        //document.getElementById("Vacaciones").style.display = "none";
+        //document.getElementById("Planificacion").style.display = "block";
+
+        document.getElementById("btnGuardar1").innerHTML = "Actualizar";
+
+        var contenido = "";
+        var div = "datosTablaPrincipal3";
+        contenido = RecorreJSONTableMetas();
+        $(div).html(contenido);
+    }
+}
+
+function BuscarSolicitud() {
+    var combooSolicitud = document.getElementById("cboSolicitud");
+    var selectedSolicitud = combooSolicitud.options[combooSolicitud.selectedIndex].text;
+    if (selectedSolicitud == "PERMISO") {
+        BtnPermiso();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 1);
+        document.getElementById("btnGuardar2").innerHTML = "Solicitar";
+        document.getElementById("IdCargarArchivo").style.display = "none";
+        //BorrarBotones(1);
+    }
+    else if (selectedSolicitud == "VACACIONES") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Convenio de vacaciones";
+        AplicaFeriados = true;
+
+        //document.getElementById("Vacaciones").style.display = "block";
+        //document.getElementById("Planificacion").style.display = "none";
+        document.getElementById("btnGuardar1").innerHTML = "Solicitar";
+        //BorrarBotones(0);
+    }
+    else if (selectedSolicitud == "PLANIFICAR VACACIONES") {
+        BtnVacaciones();
+        EstadoSolicitud = selectedSolicitud;
+        ObtenerDatosEmpleado(1, 2);
+        ObtenerListaComboReemplazo();
+        ObtenerListaSaldoVacaciones(0);
+        ObtenerListaDiasSolicitados(1);
+        document.getElementById("fomTitleLabel").innerHTML = "Planificación de vacaciones";
+        AplicaFeriados = false;
+
+        //document.getElementById("Vacaciones").style.display = "none";
+        //document.getElementById("Planificacion").style.display = "block";
+
+        document.getElementById("btnGuardar1").innerHTML = "Solicitar";
+
+        var contenido = "";
+        var div = "datosTablaPrincipal3";
+        contenido = RecorreJSONTableMetas();
+        $(div).html(contenido);
+        //BorrarBotones(0);
+    }
+}
+
+function RecorreJSONTableMetas() {
+    var info = "";
+
+    var esImpar = true;
+    var iniciaBarrido = true;
+    var totalValor3 = 0;
+
+            //
+            // Despliegue de titulos de cabecera
+            //
+            var thInicial = "<th class='' tabindex='0' aria-controls='dataTables - Datos' rowspan='1' colspan='1' aria-label='Engine version: activate to sort column ascending' style='width: 147px;text-align:center;'>";
+            var thFinal = "</th>";
+            info = info + "<table id='tbl_metas' width='100%' class='table table-striped table-bordered table-hover dataTable no-footer dtr-inline' role='grid' aria-describedby='dataTables-example_info' style='width: 100%;'>";
+            info = info + "<thead><tr role='row'>";
+            info = info + thInicial + "Fecha Desde" + thFinal;
+            info = info + thInicial + "Fecha Hasta" + thFinal;
+            info = info + thInicial + "Dias" + thFinal;
+            info = info + thInicial + "---ACCIONES---" + thFinal;
+            info = info + "</tr></thead>";
+            info = info + "<tbody>";
+
+        //
+        // Despliegue de datos
+        // 
+        info = info + "<td class='sorting_1'>" + 1 + "</td>";
+        info = info + "<td class='sorting_1' style='text-align: center;'><input type='text' class='form-control' id='frmTxtHoraDesdeV1'/></td>";
+        info = info + "<td class='sorting_1' style='text-align: right;'><input type='text' class='form-control' id='frmTxtHoraHastaV1'/></td>";
+        info = info + "<td class='sorting_1' style='text-align: right;'><input type='text' class='form-control' id='frmTxtTiempoDiasV1'/></td>";
+        info = info + "<td class='sorting_1' style='text-align:center'>";
+        info = info + "<i class='fa fa-plus' style='cursor: pointer' onclick='Agregar();' title'Agregar mas fechas'></i>";
+        //info = info + "&nbsp;&nbsp;|&nbsp;&nbsp;";
+        //info = info + "<a href='#' class='btn-eliminaDetalle' title='Eliminar meta' data-id=''><i class='fa fa-trash-o'></i></a>";
+        info = info + "</td>";
+        info = info + "</tr>";
+
+
+    info = info + "</tbody>";
+    info = info + "</table>";
+
+    return info;
+}
+
+function SacarDias(f1, f2) {
+    var aFecha1 = f1.split('/');
+    var aFecha2 = f2.split('/');
+    var fFecha1 = Date.UTC(aFecha1[2], aFecha1[1] - 1, aFecha1[0]);
+    var fFecha2 = Date.UTC(aFecha2[2], aFecha2[1] - 1, aFecha2[0]);
+    var dif = fFecha2 - fFecha1;
+    var dias = Math.floor(dif / (1000 * 60 * 60 * 24));
+    return parseFloat(dias)+1;
+}
+/* Recalcula días, feriados y fecha de regreso cada vez que cambian las fechas.
+   Los helpers viven en feriadosVacaciones.js, compartido con ProcesoConvenio.js. */
+function DiasVacaciones() {
+    var desde = $('#frmTxtHoraDesdeV').val();
+    var hasta = $('#frmTxtHoraHastaV').val();
+
+    var naturales = SacarDias(desde, hasta);
+    $('#frmTxtTiempoDiasV').val(naturales);
+    $('#frmTxtRegresaTrabajar').val(FeriadosDiaSiguiente(hasta));
+
+    if (!AplicaFeriados) {
+        /* Planificación: los feriados no descuentan, igual que antes. */
+        FeriadosLimpiarUI();
+        ObtenerListaSaldoVacaciones(0);
+        return;
+    }
+
+    FeriadosConsultar(desde, hasta, naturales, function () {
+        ObtenerListaSaldoVacaciones(0);
+    });
+}
+
+function BorrarBotones(idTipo) {
+
+    SaldoDias = 0;
+    if (idTipo == 0) {
+        $('#txtCedulaV').val("");
+        $('#txtNombreColaboradorV').val("");
+        $('#txtDepartamentoV').val("");
+        $('#txtJefaAreaV').val("");
+        $('#txtActividadP').val("");
+        //$('#frmTxtHoraDesdeV').val("");
+        //$('#frmTxtHoraHastaV').val("");
+        $("#frmTxtHoraDesdeV").datepicker('setDate', 'today');
+        $("#frmTxtHoraHastaV").datepicker('setDate', 'today');
+        $('#frmTxtTiempoDiasV').val("0");
+        $('#frmTxtRegresaTrabajar').val("");
+        FeriadosLimpiarUI();
+        CancelarCambios1();
+    }
+    else if (idTipo == 1) {
+        $('#txtCedulaP').val("");
+        $('#txtNombreColaboradorP').val("");
+        $('#txtDepartamentoP').val("");
+        $('#txtJefaAreaP').val("");
+        $('#txtActividadP').val("");
+        //$('#frmTxtHoraDesdeP').val("");
+        //$('#frmTxtHoraHastaP').val("");
+        $("#frmTxtHoraDesdeP").datepicker('setDate', 'today');
+        $("#frmTxtHoraHastaP").datepicker('setDate', 'today');
+        $('#frmTxtTiempoP').val("0");
+        $('#frmTxtObservacionesP').val("");
+        CancelarCambios2();
+    }
+    else if (idTipo == 2) {
+        let prueba = 0;
+    }
+}
+
+function ObtenerDatosEmpleado(tipo,id) {
+    TipoSolicitud = id;
+    var Datos = "[{ \"action\": \"ReporteDatosEmpleado\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", tipo: \"" + tipo + "\" } }]";
+    CargarPagina('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "tableSelectPantalla", tipo);
+}
+
+function RecorreDatosPantalla(json) {
+
+    $.each(json, function (i, item) {
+        if (TipoSolicitud == 1) {
+            $('#txtCedulaP').val(item.Cedula);
+            $('#txtNombreColaboradorP').val(item.Nom_Usuario);
+            $('#txtDepartamentoP').val(item.Departamento);
+            $('#txtJefaAreaP').val(item.JefeInmediato);
+        }
+        else if (TipoSolicitud == 2){
+            $('#txtCedulaV').val(item.Cedula);
+            $('#txtNombreColaboradorV').val(item.Nom_Usuario);
+            $('#txtDepartamentoV').val(item.Departamento);
+            $('#txtJefaAreaV').val(item.JefeInmediato);
+        }
+    });
+}
+
+function RecorreDatosSolicitud(json) {
+   
+    if (json.Descripcion == "PERMISO") {
+        $('#txtActividadP').val(json.Actividad);
+        $('#frmTxtHoraDesdeP').val(json.FechaDesde);
+        $('#frmTxtHoraHastaP').val(json.FechaHasta);
+        $('#frmTxtTiempoP').val(json.Horas);
+        $('#frmTxtObservacionesP').val(json.Observacion);
+        if (json.StrCargoVacaciones == "SI") {
+            document.getElementById("IdSI").checked = true
+            document.getElementById("IdNO").checked = false
+        }
+        else if (json.StrCargoVacaciones == "NO") {
+            document.getElementById("IdSI").checked = false
+            document.getElementById("IdNO").checked = true
+        }
+        var combo3 = document.getElementById("cboSolicitud");
+        combo3.value = json.IdTipoSolicitud;
+    }
+    else if (json.Descripcion == "VACACIONES") {
+        //$('#txtReemplazo').val(json.Remplazo);
+        //var combo2 = document.getElementById("txtReemplazo");
+        //combo2.value = json.Remplazo;
+        $('#frmTxtHoraDesdeV').val(json.FechaDesde);
+        $('#frmTxtHoraHastaV').val(json.FechaHasta);
+        $('#frmTxtTiempoF').val(json.Feriado);
+        $('#frmTxtTiempoDiasV').val(json.TotalDias);
+        var combo3 = document.getElementById("cboSolicitud");
+        combo3.value = json.IdTipoSolicitud;
+    }
+    else if (json.Descripcion == "PLANIFICAR VACACIONES") {
+        //$('#txtReemplazo').val(json.Remplazo);
+        //var combo2 = document.getElementById("txtReemplazo");
+        //combo2.value = json.Remplazo;
+        $('#frmTxtHoraDesdeV').val(json.FechaDesde);
+        $('#frmTxtHoraHastaV').val(json.FechaHasta);
+        $('#frmTxtTiempoDiasV').val(json.TotalDias);
+        var combo3 = document.getElementById("cboSolicitud");
+        combo3.value = json.IdTipoSolicitud;
+    }
+}
+
+function RecorreDatosDiasSolicitados(json) {
+
+    $.each(json, function (i, item) {
+        let proceso2 = item.TOTAL;
+        if (proceso2 != 0) {
+            document.getElementById('Idlista1').innerHTML = "Días solicitados desde el aplicativo pendiente de registrar en SAP: "
+            document.getElementById('Idlista2').innerHTML = proceso2.toFixed(2);
+        }
+    });
+}
+
+function ObtenerListaSolicitud(tipo, idRegistro, fechaInicio, fechaFinal, pagina, estadosolicitud) {
+
+    var Datos = "[{ \"action\": \"ReporteListaSolicitud\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + "0" + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + estadosolicitud + "\", usuario: \"" + "0" + "\", tipofecha: \"" + "0" + "\" } }]";
+    CargarPagina('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "tableSelect", tipo);
+}
+
+function ObtenerSolicitudIndividual(idvaluar) {
+
+    var Datos = "[{ \"action\": \"SolicitudIndividual\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", IdVacaciones: \"" + idvaluar + "\" } }]";
+    CargarPagina('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "detalleDatos", 0);
+}
+
+function ObtenerListaSolicitudDescarga(tipo, idRegistro, fechaInicio, fechaFinal, pagina, estadosolicitud) {
+
+    var Datos = "[{ \"action\": \"ListaSolicitudDescargaXLS\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + "0" + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + estadosolicitud + "\" } }]";
+    idCliente2 = 0;
+    DetalleTareasDescargaXLS('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "table");
+}
+
+function ObtenerListaSaldoVacaciones(tipo) {
+
+    var Datos = "[{ \"action\": \"ReporteListaSaldoVacaciones\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", tipo: \"" + tipo + "\" } }]";
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectSaldo", tipo);
+}
+
+function ObtenerListaDiasSolicitados(tipo) {
+
+    var Datos = "[{ \"action\": \"ReporteListaSaldoVacaciones\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", tipo: \"" + tipo + "\" } }]";
+    CargarPagina('#datosTablaPrincipal2', 'ObtenerListaTareas.ashx', Datos, "tableSelectDias", tipo);
+}
+
+function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function (respuesta) {
+            $("#divMensajes").html("Cargando Información...");
+        },
+        success: function (respuesta) {
+            if (respuesta != null) {
+                if (respuesta.estado == "1") {
+                    // Se abre el enlace al documento
+                    window.open(respuesta.mensaje);
+                } else {
+                    $("#MensajeInformativo").html(respuesta.mensaje);
+                    $('#modalMensajeInformativo').modal('show');
+                }
+            } else {
+                var mesnajeError = DosTextoDescargaVacia();
+                $("#modalMensajeInformativoTipo").attr("style", "background: #f2dede")
+                $("#MensajeInformativo").html(mesnajeError);
+                $('#modalMensajeInformativo').modal('show');
+            }
+
+            $("#divMensajes").html("");
+
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+
+        }
+    });
+
+    return;
+}
+
+function BtnConsulta() {
+    $("#divMensajes").html("");
+
+    var fechaInicio = "";
+    var fechaFinal = "";
+
+    var text = document.getElementById("idFiltros");
+    if (text.checked == true) {
+        fechaInicio = "";
+        fechaFinal = "";
+    } else {
+        fechaInicio = $("#txtFechaConsulta1").val();
+        fechaFinal = $("#txtFechaConsulta2").val();
+    }
+
+    ObtenerListaSolicitud(0, 0, fechaInicio, fechaFinal,1,"");
+}
+
+function BtnDescarga() {
+    $("#divMensajes").html("");
+    var fechaInicio = "";
+    var fechaFinal = "";
+
+    var text = document.getElementById("idFiltros");
+    if (text.checked == true) {
+        fechaInicio = "";
+        fechaFinal = "";
+    } else {
+        fechaInicio = $("#txtFechaConsulta1").val();
+        fechaFinal = $("#txtFechaConsulta2").val();
+    }
+
+    ObtenerListaSolicitudDescarga(0, 0, fechaInicio, fechaFinal, 1, "");
+
+}
+
+function MostrarMensajeDialogo(divModalTipo, divMensaje, divModal, mensaje, tipoMensaje) {
+    if (tipoMensaje == "warning") {
+        $(divModalTipo).attr("style", "background: #fcf8e3")
+    }
+    if (tipoMensaje == "danger") {
+        $(divModalTipo).attr("style", "background: #f2dede")
+    }
+    if (tipoMensaje == "info") {
+        $(divModalTipo).attr("style", "background: #d9edf7")
+    }
+    if (tipoMensaje == "success") {
+        $(divModalTipo).attr("style", "background: #dff0d8")
+    }
+
+    $(divMensaje).html(mensaje);
+    $(divModal).modal('show');
+    $("#divMensajes").html("");
+
+    return;
+}
+
+function GuardarSolicitud1() {
+    if (document.getElementById('btnGuardar1').innerHTML == "Solicitar") {
+        GuardarSolicitudVacaciones(0);
+    }
+    else if (document.getElementById('btnGuardar1').innerHTML == "Actualizar")
+    {
+        GuardarSolicitudVacaciones(1);
+    }
+    else if (document.getElementById('btnGuardar1').innerHTML == "Cambiar a Vacaciones") {
+        GuardarSolicitudVacaciones(5);
+    }
+    else if (document.getElementById('btnGuardar1').innerHTML == "Eliminar") {
+        GuardarSolicitudVacaciones(4);
+    }
+}
+
+function GuardarSolicitud2() {
+    if (document.getElementById('btnGuardar2').innerHTML == "Solicitar") {
+        GuardarSolicitudPermiso(0);
+    }
+    else if (document.getElementById('btnGuardar2').innerHTML == "Actualizar") {
+        GuardarSolicitudPermiso(1);
+    }
+    else if (document.getElementById('btnGuardar2').innerHTML == "Eliminar") {
+        GuardarSolicitudPermiso(4);
+    }
+}
+
+/* Antes de validar se vuelve a consultar el saldo mensual, y recien despues se
+   envia.
+
+   La pantalla consulta el saldo al abrirse y al cambiar la fecha, y lo deja en
+   memoria. Quien pedia dos permisos seguidos sin recargar validaba el segundo
+   con el saldo de antes del primero: el selector de tratamiento del excedente no
+   aparecia, y el permiso se enviaba sin decir de donde salen esas horas.
+
+   El texto que queda guardado ya lo calcula el servidor. Esto arregla la otra
+   mitad: lo que decide si el formulario se puede enviar.
+
+   ConsultarSaldoMensual ya reevalua el selector al volver, asi que la validacion
+   de mas abajo ve el estado nuevo sin tener que repetir esa cuenta aca. */
+var _consultandoSaldo = false;
+
+function GuardarSolicitudPermiso(tipo) {
+    /* Un segundo clic mientras la consulta viaja no arranca otro envio. */
+    if (_consultandoSaldo) { return; }
+    _consultandoSaldo = true;
+
+    ConsultarSaldoMensual(function () {
+        _consultandoSaldo = false;
+        EnviarSolicitudPermiso(tipo);
+    });
+}
+
+function EnviarSolicitudPermiso(tipo) {
+
+    var url = "ObtenerListaTareas.ashx";
+    var datos = "";
+    var mensajeVerificacion = "";
+    var tipoMensaje = "warning";
+    var contadorVerificacion = 0;
+    var ActividadArealizar = "";
+
+    var proceso = 0;
+    var text1 = document.getElementById("IdSI");
+    var text2 = document.getElementById("IdNO");
+    if (text1.checked == true) {
+        proceso =1;
+    }
+    else if(text1.checked == true) { 
+        proceso =0;
+    }
+
+
+    if ($('#txtfechaP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar la fecha ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtCedulaP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar la identificación ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtNombreColaboradorP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre del Colaborador ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtDepartamentoP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre del departamento ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtJefaAreaP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre de su jefe inmediato ";
+        contadorVerificacion += 1;
+    }
+
+    /* La validación de "Otro" quedó junto a las demás del tipo de permiso, más
+       abajo. Antes vivía acá comparando contra "OTROS", el valor del catálogo
+       anterior, que ya no existe. */
+
+    /* Un teletrabajo de jornada completa no tiene horas que registrar, y en el de
+       por horas las pide el panel. El mensaje tiene que nombrar el campo que la
+       persona esta viendo, no el que esta escondido. */
+    var esTeletrabajoAqui = (TipoPermisoSeleccionado() === "TELETRABAJO");
+    var jornadaCompleta = esTeletrabajoAqui && ($("#cboModalidadTT").val() !== "HORAS");
+
+    if (!jornadaCompleta) {
+        var faltanHoras =
+            ($('#frmTxtHoraDesdeP').val() == "" ||
+             $('#frmTxtHoraHastaP').val() == "" ||
+             $('#frmTxtTiempoP').val() == "");
+
+        if (faltanHoras) {
+            mensajeVerificacion += esTeletrabajoAqui
+                ? "- Debe ingresar el horario del teletrabajo "
+                : "- Debe ingresar las horas de permiso ";
+            contadorVerificacion += 1;
+        }
+    }
+
+    if ($('#frmTxtObservacionesP').val() == "") {
+        mensajeVerificacion += "- Debe ingresar la observación ";
+        contadorVerificacion += 1;
+    }
+
+    /* La columna Actividad se sigue llenando con una etiqueta legible del tipo,
+       o con el texto libre cuando es "Otro". Es de donde leen la lista y los
+       reportes desde 2022: llenarla mantiene lo nuevo visible ahí sin tocar nada
+       de eso, y de paso lo viejo y lo nuevo se ven parejos. */
+    var _tipoPermiso = TipoPermisoSeleccionado();
+
+    if ($('#txtActividadP').val() != "" && _tipoPermiso == "OTRO") {
+        ActividadArealizar = $('#txtActividadP').val();
+    }
+    else {
+        ActividadArealizar = _rotuloTipoPermiso[_tipoPermiso] || _tipoPermiso;
+    }
+
+    if (_tipoPermiso == "") {
+        mensajeVerificacion += "- Debe seleccionar el tipo de permiso ";
+        contadorVerificacion += 1;
+    }
+
+    if (_tipoPermiso == "OTRO" && $('#txtActividadP').val() == "") {
+        mensajeVerificacion += "- Debe describir la actividad a realizar ";
+        contadorVerificacion += 1;
+    }
+
+    /* El adjunto de la cita médica bloquea el envío. La especificación lo pide
+       explícito —"validar antes de habilitar el botón Enviar, no solo al
+       guardar"— y es el caso más frecuente: 607 de 1437 permisos son médicos.
+       Un permiso médico sin respaldo es justo lo que esto viene a impedir. */
+    if (_tipoPermiso == "MEDICO" && ArchivosElegidos() === 0) {
+        mensajeVerificacion += "- Debe adjuntar la cita médica ";
+        contadorVerificacion += 1;
+    }
+
+    /* Si el permiso se pasa del saldo mensual, o la bolsa ya está en cero, el
+       excedente tiene que tener tratamiento: son horas que salen de algún lado.
+       Antes solo se avisaba, y se podía enviar sin elegir. */
+    if (CorrespondeTratamientoExcedente() && ($("#cboExcedente").val() || "") === "") {
+        mensajeVerificacion += "- Debe indicar el tratamiento del excedente ";
+        contadorVerificacion += 1;
+    }
+
+    if ($("#cboExcedente").val() == "RECUPERACION" && $("#txtRecFecha").val() == "") {
+        mensajeVerificacion += "- Debe proponer una fecha de recuperación ";
+        contadorVerificacion += 1;
+    }
+
+    if (_tipoPermiso == "TELETRABAJO") {
+        if ($('#cboModalidadTT').val() == "HORAS" &&
+            ($('#txtTTHoraDesde').val() == "" || $('#txtTTHoraHasta').val() == "")) {
+            mensajeVerificacion += "- Debe indicar la hora desde y hasta del teletrabajo ";
+            contadorVerificacion += 1;
+        }
+        if ($('#txtTTLugar').val() == "") {
+            mensajeVerificacion += "- Debe indicar el lugar desde donde trabajará ";
+            contadorVerificacion += 1;
+        }
+        if (!document.getElementById("chkTTConectividad").checked) {
+            mensajeVerificacion += "- Debe confirmar conectividad y confidencialidad ";
+            contadorVerificacion += 1;
+        }
+    }
+
+    /* La firma es requisito del alta, igual que en vacaciones. En una
+       actualizacion no se vuelve a firmar: la firma vale por el momento en que
+       se hizo. */
+    if (tipo == 0 && (_padColaboradorP === null || _padColaboradorP.estaVacio())) {
+        alerta("Debe firmar la solicitud antes de enviarla.");
+        return;
+    }
+
+    if (contadorVerificacion > 0) {
+        alerta(mensajeVerificacion);
+        return;
+    }
+
+    var datosFormulario = "";
+
+    datosFormulario = datosFormulario + "{";
+    datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosFormulario = datosFormulario + "'IdVacaciones': '" + idVacaciones + "',";
+    datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + $('#cboSolicitud').val()  + "',";
+    datosFormulario = datosFormulario + "'txtfechaP': '" + $('#txtfechaP').val() + "',";
+    datosFormulario = datosFormulario + "'txtCedulaP': '" + $('#txtCedulaP').val() + "',";
+    datosFormulario = datosFormulario + "'txtNombreColaboradorP': '" + $('#txtNombreColaboradorP').val() + "',";
+    datosFormulario = datosFormulario + "'txtDepartamentoP': '" + $('#txtDepartamentoP').val() + "',";
+    datosFormulario = datosFormulario + "'txtJefaAreaP': '" + $('#txtJefaAreaP').val() + "',";
+    datosFormulario = datosFormulario + "'txtActividadP': '" + ActividadArealizar + "',";
+    datosFormulario = datosFormulario + "'frmTxtHoraDesdeP': '" + $('#frmTxtHoraDesdeP').val() + "',";
+    datosFormulario = datosFormulario + "'frmTxtHoraHastaP': '" + $('#frmTxtHoraHastaP').val() + "',";
+    datosFormulario = datosFormulario + "'frmTxtTiempoP': '" + $('#frmTxtTiempoP').val() + "',";
+    datosFormulario = datosFormulario + "'IdSI': '" + proceso + "',";
+    datosFormulario = datosFormulario + "'IdNO': '" + $('#IdNO').val() + "',";
+    datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
+    datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
+    datosFormulario = datosFormulario + "'frmTxtObservacionesP': '" + $('#frmTxtObservacionesP').val() + "',";
+
+    /* Campos de CB-GAP-POL-01. Van aparte del alta: el handler los guarda con su
+       propio procedimiento una vez que la solicitud tiene id. */
+    datosFormulario = datosFormulario + "'TipoPermiso': '" + _tipoPermiso + "',";
+    datosFormulario = datosFormulario + "'TratamientoExcedente': '" + ($('#cboExcedente').val() || "") + "',";
+    datosFormulario = datosFormulario + "'Modalidad': '" + ($('#cboModalidadTT').val() || "") + "',";
+    datosFormulario = datosFormulario + "'TeletrabajoHoraDesde': '" + $('#txtTTHoraDesde').val() + "',";
+    datosFormulario = datosFormulario + "'TeletrabajoHoraHasta': '" + $('#txtTTHoraHasta').val() + "',";
+    datosFormulario = datosFormulario + "'Lugar': '" + $('#txtTTLugar').val() + "',";
+    datosFormulario = datosFormulario + "'MediosContacto': '" + $('#txtTTMedios').val() + "',";
+    datosFormulario = datosFormulario + "'MotivoGeneral': '" + $('#txtTTMotivo').val() + "',";
+    datosFormulario = datosFormulario + "'Actividades': '" + $('#txtTTActividades').val() + "',";
+    datosFormulario = datosFormulario + "'Entregables': '" + $('#txtTTEntregables').val() + "',";
+    datosFormulario = datosFormulario + "'ConfirmaConectividad': '" + (document.getElementById("chkTTConectividad").checked ? "1" : "0") + "',";
+    datosFormulario = datosFormulario + "'UsaPermisoMensual': '" + (document.getElementById("chkPermisoMensual").checked ? "1" : "0") + "',";
+    datosFormulario = datosFormulario + "'RecuperacionFecha': '" + $("#txtRecFecha").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionHorario': '" + $("#txtRecHorario").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionActividades': '" + $("#txtRecActividades").val() + "',";
+    datosFormulario = datosFormulario + "'RecuperacionEntregables': '" + $("#txtRecEntregables").val() + "',";
+    /* El saldo tal como se le mostro al colaborador: queda como constancia en el
+       PDF. Se manda el texto y no el numero para que documento y pantalla digan
+       exactamente lo mismo. */
+    datosFormulario = datosFormulario + "'SaldoMensualTexto': '" + ((document.getElementById("chkPermisoMensual").checked && _saldoMensual !== null) ? _saldoMensual.Mensaje : "") + "',";
+    datosFormulario = datosFormulario + "'RespaldoAdjunto': '" + ($("#cboRespaldo").val() || "") + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaboradorP !== null ? _padColaboradorP.obtenerTrazo() : "") + "'";
+
+    datosFormulario = datosFormulario + "}";
+
+    datos = "[{'action': 'GuardarNuevoPermiso', 'parameters' : " + datosFormulario + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                BorrarBotones(1);
+                ObtenerListaSolicitud(0, 0, $("#txtFechaConsulta1").val(), $("#txtFechaConsulta2").val(), 1, "");
+                idVacaciones = 0;
+
+                if (respuesta.resultado != 0 && window.FormData !== undefined) {
+                    var url = 'CargaArchivos.ashx';
+                    var fileUpload = $("#archivosAdjuntos").get(0);
+                    var files = fileUpload.files;
+
+                    // Create FormData object  
+                    var fileData = new FormData();
+
+                    // Looping over all files and add it to FormData object  
+                    for (var i = 0; i < files.length; i++) {
+                        fileData.append(files[i].name, files[i]);
+                    }
+
+                    // Adding one more key to FormData object  
+                    fileData.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
+                    fileData.append('action', 'CargarArchivos');
+                    fileData.append('Id_RegTareas', respuesta.resultado);
+                    fileData.append('idServicio', "6");
+
+                    $.ajax({
+                        type: "POST",
+                        url: url,
+                        data: fileData,
+                        contentType: false, // Not to set any content header  
+                        processData: false, // Not to process data  
+                        dataType: "json",
+                        beforeSend: function (respuesta) {
+                            $("#divMensajes").html("Cargando Archivos...");
+                        },
+                        success: function (respuesta) {
+                            if (respuesta.estado == "1") {
+                                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", respuesta.mensaje, respuesta.tipoMensaje);
+                                ListadoArchivosSolicitud("#divArchivosAdjuntosAnteriores", respuesta.resultado);
+                            }
+                            $("progress").hide();
+
+
+                        },
+                        xhr: function () {
+                            var fileXhr = $.ajaxSettings.xhr();
+                            if (fileXhr.upload) {
+                                $("progress").show();
+                                fileXhr.upload.addEventListener("progress", function (e) {
+                                    if (e.lengthComputable) {
+                                        $("#fileProgress").attr({
+                                            value: e.loaded,
+                                            max: e.total
+                                        });
+                                    }
+                                }, false);
+                            }
+                            return fileXhr;
+                        },
+                        error: function (objeto, msgError, objError) {
+                            var mesnajeError = "La acción de cargar de archivo esta tomando demasiado tiempo. Verifique su conexión de red y luego intente nuevamente cargar los archivos.";
+                            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+                        }
+                    });
+
+                }
+                else {
+                    MensajeCorrecto(respuesta.mensaje);
+                    $("#divMensajes").html("");
+                }
+            }
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
+
+    return;
+
+}
+
+function VerListadoArchivosSolicitud(div, idTarea) {
+
+    var url = "CargaArchivos.ashx";
+
+    var datosParametros = "";
+    datosParametros = datosParametros + "{";
+    datosParametros = datosParametros + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosParametros = datosParametros + "'frmTxtCodigo': '" + idTarea + "',";
+    datosParametros = datosParametros + "'IdServicio': '" + "6" + "'";
+    datosParametros = datosParametros + "}";
+
+    datos = "[{'action': 'ListaArchivosTarea', 'parameters' : " + datosParametros + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function (respuesta) {
+            $("#divMensajes").html("Cargando Información...");
+        },
+        success: function (respuesta) {
+            if (respuesta != null) {
+                if (respuesta.estado == "1") {
+                    var htmlListaArchivosAdjuntos = "<table border='1' style='border-collapse: collapse;border: 1px solid #efefef; width:100%'>";
+                    $.each(respuesta.resultado, function (i, item) {
+                        //
+                        // Despliegue de datos
+                        // 
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<tr id='tdArchivo_" + item.Id_ArchivosTarea + "'><td>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<a href='../descargas/" + item.Nombre_ArchivoCodigo + "' target='_blank' style='font-size:12px'>&nbsp;<i class='fa " + item.Icon_Nombre + "'></i>&nbsp;" + item.Nombre_Archivo + "</a><br>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td><td>" + "";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td></tr>";
+                    });
+
+                    htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</table>";
+                    $(div).html(htmlListaArchivosAdjuntos);
+                }
+            } else {
+                var mesnajeTexto = "No existen archivos adjuntos.";
+                $("#divMensajes").html(mesnajeTexto);
+                $(div).html(mesnajeTexto);
+            }
+
+            $("#divMensajes").html("");
+
+            $("#modalMensajeInformativoLabel").html('Listado de Archivos');
+            $("#modalMensajeInformativo").modal('show');
+
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+        }
+    });
+
+}
+
+function ListadoArchivosSolicitud(div, idTarea) {
+
+    var url = "CargaArchivos.ashx";
+
+    var datosParametros = "";
+    datosParametros = datosParametros + "{";
+    datosParametros = datosParametros + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosParametros = datosParametros + "'frmTxtCodigo': '" + idTarea + "',";
+    datosParametros = datosParametros + "'IdServicio': '" + "6" + "'";
+    datosParametros = datosParametros + "}";
+
+    datos = "[{'action': 'ListaArchivosTarea', 'parameters' : " + datosParametros + " }]";
+
+    // Create FormData object  
+    var fileData = new FormData();
+    fileData.append('action', 'ListaArchivosTarea');
+    fileData.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
+    fileData.append('frmTxtCodigo', $("#frmTxtCodigo").val());
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function (respuesta) {
+            $("#divMensajes").html("Cargando Información...");
+        },
+        success: function (respuesta) {
+            if (respuesta != null) {
+                if (respuesta.estado == "1") {
+                    var htmlListaArchivosAdjuntos = "<table border='1' style='border-collapse: collapse;border: 1px solid #efefef; width:100%'>";
+                    $.each(respuesta.resultado, function (i, item) {
+                        //
+                        // Despliegue de datos
+                        // 
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<tr id='tdArchivo_" + item.Id_ArchivosTarea + "'><td>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<a href='../descargas/" + item.Nombre_ArchivoCodigo + "' target='_blank' style='font-size:10px'>&nbsp;<i class='fa " + item.Icon_Nombre + "'></i>&nbsp;" + item.Nombre_Archivo + "</a><br>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td><td>" + "<i class='fa fa-trash-o' onclick='ConfirmarEliminarArchivo(\"" + item.Id_ArchivosTarea + "\", \"" + item.Icon_Nombre + "\",\"" + item.Nombre_Archivo + "\")'></i>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td></tr>";
+                    });
+
+                    htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</table>";
+                    $(div).html(htmlListaArchivosAdjuntos);
+                }
+            } else {
+                $(div).html(DosVacio("No hay archivos adjuntos.", ""));
+            }
+
+            $("#divMensajes").html("");
+
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+        }
+    });
+
+
+}
+
+function ConfirmarEliminarArchivo(codigoItem, iconArchivo, nombreArchivo) {
+    // Habilitar mensaje
+    var mensaje = 'Desea continuar con la eliminación del archivo.';
+    var mensaje = "Desea continuar con la eliminación del archivo <i class='fa " + iconArchivo + "'></i>&nbsp;(" + nombreArchivo + ").";
+    $("#txtCodigoItem").val(codigoItem);
+    $("#modalMensajeConfirmacioMensaje").html(mensaje);
+    $("#modalMensajeConfirmacion").modal('show');
+
+    return;
+}
+
+function EliminarArchivo() {
+
+    var url = "CargaArchivos.ashx";
+
+    var datosParametros = "";
+    datosParametros = datosParametros + "{";
+    datosParametros = datosParametros + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosParametros = datosParametros + "'txtCodigoItem': '" + $("#txtCodigoItem").val() + "'";
+    datosParametros = datosParametros + "}";
+
+    datos = "[{'action': 'BorrarArchivosContrato', 'parameters' : " + datosParametros + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function (respuesta) {
+            $("#divMensajes").html("Borrando Información...");
+        },
+        success: function (respuesta) {
+
+            if (respuesta.estado == "1") {
+                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", respuesta.mensaje, respuesta.tipoMensaje);
+                $("#tdArchivo_" + $("#txtCodigoItem").val()).remove();
+            } else {
+                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", respuesta.mensaje, respuesta.tipoMensaje);
+            }
+
+            $("#divMensajes").html("");
+
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "El borrado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+        }
+    });
+
+    $("#modalMensajeConfirmacion").modal('hide');
+
+    return;
+}
+
+function GuardarSolicitudVacaciones(tipo) {
+
+    var url = "ObtenerListaTareas.ashx";
+    var datos = "";
+    var mensajeVerificacion = "";
+    var tipoMensaje = "warning";
+    var contadorVerificacion = 0;
+
+
+
+    if ($('#txtfechaV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar la fecha ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtCedulaV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar la identificación ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtNombreColaboradorV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre del Colaborador ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtDepartamentoV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre del departamento ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtJefaAreaV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar el nombre de su jefe inmediato ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#frmTxtHoraDesdeV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar los dias de vacaciones ";
+        contadorVerificacion += 1;
+    }
+
+
+    if ($('#frmTxtHoraHastaV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar los dias de vacaciones ";
+        contadorVerificacion += 1;
+    }
+
+    if ($('#txtReemplazo').val() == null) {
+        mensajeVerificacion += "- Debe ingresar el reemplazo ";
+        contadorVerificacion += 1;
+    }
+
+
+    if ($('#frmTxtTiempoDiasV').val() == "") {
+        mensajeVerificacion += "- Debe ingresar los dias de vacaciones ";
+        contadorVerificacion += 1;
+    }
+
+    /* La firma es requisito del alta. En una actualizacion no se vuelve a
+       firmar: la firma vale por el momento en que se hizo. */
+    if (tipo == 0 && (_padColaborador === null || _padColaborador.estaVacio())) {
+        alerta("Debe firmar la solicitud antes de enviarla.");
+        return;
+    }
+
+    if (contadorVerificacion > 0) {
+        alerta(mensajeVerificacion);
+        return;
+    }
+
+
+    var datosFormulario = "";
+
+    datosFormulario = datosFormulario + "{";
+    datosFormulario = datosFormulario + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosFormulario = datosFormulario + "'IdVacaciones': '" + idVacaciones + "',";
+    if (tipo == 5) {
+        datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + "2" + "',";
+    }
+    else {
+        datosFormulario = datosFormulario + "'IdTipoSolicitud': '" + $('#cboSolicitud').val() + "',";
+    }
+    datosFormulario = datosFormulario + "'txtfechaV': '" + $('#txtfechaV').val() + "',";
+    datosFormulario = datosFormulario + "'txtCedulaV': '" + $('#txtCedulaV').val() + "',";
+    datosFormulario = datosFormulario + "'txtNombreColaboradorV': '" + $('#txtNombreColaboradorV').val() + "',";
+    datosFormulario = datosFormulario + "'txtDepartamentoV': '" + $('#txtDepartamentoV').val() + "',";
+    datosFormulario = datosFormulario + "'txtJefaAreaV': '" + $('#txtJefaAreaV').val() + "',";
+    datosFormulario = datosFormulario + "'txtReemplazo': '" + $('#txtReemplazo').val()  + "',";
+    datosFormulario = datosFormulario + "'frmTxtHoraDesdeV': '" + $('#frmTxtHoraDesdeV').val() + "',";
+    datosFormulario = datosFormulario + "'frmTxtHoraHastaV': '" + $('#frmTxtHoraHastaV').val() + "',";
+    datosFormulario = datosFormulario + "'frmTxtTiempoF': '" + $('#frmTxtTiempoF').val() + "',";
+    datosFormulario = datosFormulario + "'SaldoDias': '" + SaldoDias.toString().replace(".",",") + "',";
+    datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
+    datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
+    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaborador !== null ? _padColaborador.obtenerTrazo() : "") + "'";
+
+    datosFormulario = datosFormulario + "}";
+
+    datos = "[{'action': 'GuardarNuevaVacaciones', 'parameters' : " + datosFormulario + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function () {
+            $("#divMensajes").html("Guardando Información...");
+        },
+        success: function (respuesta) {
+            var mensaje = "";
+            if (respuesta.estado == "1") {
+                BorrarBotones(0);
+                ObtenerListaSolicitud(0, 0, $("#txtFechaConsulta1").val(), $("#txtFechaConsulta2").val(), 1, "");
+                idVacaciones = 0;
+                MensajeCorrecto(respuesta.mensaje);
+                $("#divMensajes").html("");
+            }
+            else if (respuesta.estado == "0") {
+                MensajeIncorrecto(respuesta.mensaje);
+            }
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La acción de Guardado de información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MensajeIncorrecto(mesnajeError);
+        }
+    });
+
+    return;
+
+}
+
+function time_format(d) {
+    hours = format_two_digits(d.getHours());
+    minutes = format_two_digits(d.getMinutes());
+    seconds = format_two_digits(d.getSeconds());
+    return hours + ":" + minutes + ":" + seconds;
+}
+
+function format_two_digits(n) {
+    return n < 10 ? '0' + n : n;
+}
+
+function VerListadoArchivosVacaciones(div, IdSolicitud) {
+
+    var url = "CargaArchivos.ashx";
+
+    var datosParametros = "";
+    datosParametros = datosParametros + "{";
+    datosParametros = datosParametros + "'session': '" + $("#ContentPlaceHolder1_txtUsuario").val() + "',";
+    datosParametros = datosParametros + "'frmTxtCodigo': '" + IdSolicitud + "'";
+    datosParametros = datosParametros + "}";
+
+    datos = "[{'action': 'ListaArchivosVacaciones', 'parameters' : " + datosParametros + " }]";
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        beforeSend: function (respuesta) {
+            $("#divMensajes").html("Cargando Información...");
+        },
+        success: function (respuesta) {
+            if (respuesta != null) {
+                if (respuesta.estado == "1") {
+                    var htmlListaArchivosAdjuntos = "<table border='1' style='border-collapse: collapse;border: 1px solid #efefef; width:100%'>";
+                    $.each(respuesta.resultado, function (i, item) {
+                        //
+                        // Despliegue de datos
+                        // 
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<tr id='tdArchivo_" + item.Id_ArchivosTarea + "'><td>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "<a href='../descargas/" + item.Nombre_ArchivoCodigo + "' target='_blank' style='font-size:12px'>&nbsp;<i class='fa " + item.Icon_Nombre + "'></i>&nbsp;" + item.Nombre_Archivo + "</a><br>";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td><td>" + "";
+                        htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</td></tr>";
+                    });
+
+                    htmlListaArchivosAdjuntos = htmlListaArchivosAdjuntos + "</table>";
+                    $(div).html(htmlListaArchivosAdjuntos);
+                }
+            } else {
+                var mesnajeTexto = "No existen archivos adjuntos.";
+                $("#divMensajes").html(mesnajeTexto);
+                $(div).html(mesnajeTexto);
+            }
+
+            $("#divMensajes").html("");
+
+            $("#modalMensajeInformativoLabel").html('Listado de Archivos');
+            $("#modalMensajeInformativo").modal('show');
+
+        },
+        error: function (objeto, msgError, objError) {
+            var mesnajeError = "La busqueda de la información está tomando demasiado tiempo, la Red podría estar saturada, vuelva a intentarlo en unos segundos.";
+            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+        }
+    });
+
+}
+
+/* Etiqueta legible de cada tipo. Se guarda además en la columna Actividad, que
+   es de donde leen la lista y los reportes desde 2022: así lo nuevo sigue
+   apareciendo ahí sin tener que tocar nada de eso. */
+var _rotuloTipoPermiso = {
+    "PERSONAL": "PERSONAL",
+    "MEDICO": "CITA MEDICA",
+    "FAMILIAR": "ASUNTO FAMILIAR",
+    "CALAMIDAD": "CALAMIDAD DOMESTICA",
+    "TELETRABAJO": "TELETRABAJO",
+    "OTRO": ""
+};
+
+function TipoPermisoSeleccionado() {
+    return $("#txtActividadPC").val() || "";
+}
+
+/* Muestra la rama que corresponde al tipo elegido, y decide si se pide archivo.
+
+   Tres reglas de la especificación se cruzan sobre el mismo bloque de adjuntos,
+   por eso se resuelven juntas y no cada una por su lado:
+
+     Teletrabajo  no usa el campo genérico "Adjuntar Archivos". Textual.
+     Médico       el adjunto es obligatorio, así que no tiene sentido preguntar
+                  si hay respaldo: se pide siempre.
+     Los demás    lo decide "Respaldo adjunto": solo con "Sí" se pide archivo.
+*/
+/* Baja un archivo del servidor sin que el navegador lo bloquee.
+
+   Con window.open dentro de la respuesta de un ajax, Chrome lo toma por ventana
+   emergente y lo bloquea en silencio. Un enlace con download y un clic
+   programatico si baja. */
+function DescargarArchivo(ruta) {
+    var enlace = document.createElement("a");
+    enlace.href = ruta;
+    enlace.download = "";
+    enlace.style.display = "none";
+
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    setTimeout(function () { document.body.removeChild(enlace); }, 0);
+}
+
+/* El documento firmado de la propia solicitud.
+
+   Es el mismo que descarga Talento Humano desde la otra pantalla: el servidor lo
+   arma en el momento, asi que siempre sale con las firmas que existan. */
+function DescargarPdfSolicitud(idvacaciones) {
+    $("#divMensajes").html("Generando el PDF...");
+
+    var datos = JSON.stringify([{
+        "action": "GenerarPdfSolicitud",
+        "parameters": { "idVacaciones": idvacaciones }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#divMensajes").html("");
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo generar el PDF." : respuesta.mensaje);
+                return;
+            }
+
+            DescargarArchivo(respuesta.mensaje);
+        },
+        error: function () {
+            $("#divMensajes").html("");
+            alerta("No se pudo generar el PDF. Intente nuevamente.");
+        }
+    });
+}
+
+function AgregaActividad() {
+    var tipo = TipoPermisoSeleccionado();
+
+    /* "Otro" es el único que pide describir a mano. Es también el que hereda el
+       comportamiento del antiguo OTROS. */
+    var esOtro = (tipo === "OTRO");
+    document.getElementById("IdOtrasActividad").style.display = esOtro ? "block" : "none";
+
+    var esTeletrabajo = (tipo === "TELETRABAJO");
+    document.getElementById("IdTeletrabajo").style.display = esTeletrabajo ? "block" : "none";
+    if (esTeletrabajo) { CambiaModalidadTeletrabajo(); }
+
+    /* La fecha y las horas se muestran en un lugar o en el otro, nunca en los
+       dos: dos campos con el mismo dato en pantalla se contradicen apenas
+       alguien edita uno. */
+    MostrarFechaSegunTipo(esTeletrabajo);
+    MostrarHorasSegunTipo(esTeletrabajo);
+
+    var esMedico = (tipo === "MEDICO");
+
+    /* El selector de respaldo solo aparece donde de verdad decide algo. */
+    document.getElementById("IdRespaldo").style.display =
+        (esTeletrabajo || esMedico) ? "none" : "block";
+
+    MostrarPermisoMensual(tipo);
+    MostrarAdjuntos();
+}
+
+/* La duracion del permiso a partir de las horas de abajo, que son las que mandan.
+   Es la misma cuenta que hace el datetimepicker al cambiar la hora, pero vive
+   aparte porque el panel de teletrabajo tambien necesita dispararla. */
+function CalcularTiempoPermiso() {
+    var desde = moment($("#frmTxtHoraDesdeP").val(), "HH:mm");
+    var hasta = moment($("#frmTxtHoraHastaP").val(), "HH:mm");
+
+    if (!desde.isValid() || !hasta.isValid() || hasta.isBefore(desde)) {
+        $("#frmTxtTiempoP").val("");
+    }
+    else {
+        var d = moment.duration(hasta.diff(desde));
+        $("#frmTxtTiempoP").val(
+            ("0" + d.hours()).slice(-2) + ":" + ("0" + d.minutes()).slice(-2));
+    }
+
+    CambiaPermisoMensual();
+}
+
+/* La fecha del permiso tiene dos lugares donde mostrarse: arriba junto a las
+   horas, y dentro del panel de teletrabajo. Es un solo dato.
+
+   txtfechaP manda: es lo que viaja al guardar y de lo que dependen el saldo
+   mensual, el plazo de recuperacion y el PDF. txtTTFecha es nada mas otra vista
+   del mismo valor, y por eso se copia en las dos direcciones. */
+function MostrarFechaSegunTipo(esTeletrabajo) {
+    document.getElementById("IdFechaPermiso").style.display =
+        esTeletrabajo ? "none" : "block";
+
+    if (esTeletrabajo) {
+        $("#txtTTFecha").val($("#txtfechaP").val());
+    }
+    else {
+        /* Al salir de teletrabajo se conserva lo que la persona ya habia elegido
+           adentro, en vez de hacerla escribirlo de nuevo. Si ademas cambio de mes,
+           hay que volver a preguntar el saldo: la bolsa es la del mes en que se
+           ausenta. */
+        var elegida = $("#txtTTFecha").val();
+        if (elegida !== "" && elegida !== $("#txtfechaP").val()) {
+            $("#txtfechaP").val(elegida);
+            ConsultarSaldoMensual();
+            MostrarPlazoRecuperacion();
+        }
+    }
+}
+
+function CambiaFechaTeletrabajo() {
+    $("#txtfechaP").val($("#txtTTFecha").val());
+
+    /* Lo mismo que hace el campo de arriba al cambiar: la bolsa mensual es la del
+       mes en que se ausenta, y el plazo de recuperacion cuelga de esta fecha. */
+    ConsultarSaldoMensual();
+    MostrarPlazoRecuperacion();
+}
+
+/* Tipos a los que NO se les ofrece el permiso mensual de 3 horas.
+
+   Teletrabajo no es una ausencia sino una modalidad de trabajo: no hay tiempo
+   que descontar. Médico se justifica con la cita adjunta, que es obligatoria, y
+   por eso tampoco pasa por la bolsa ni pide tratamiento del excedente.
+
+   Calamidad sí la usa: es una ausencia de horas como cualquier otra, y si se
+   pasa del saldo mensual el excedente se trata igual que en un permiso personal.
+   Estuvo fuera de esta lista un tiempo, hasta que se probó y se corrigió. */
+var _sinPermisoMensual = ["TELETRABAJO", "MEDICO"];
+
+function AplicaPermisoMensual(tipo) {
+    return _sinPermisoMensual.indexOf(tipo) === -1;
+}
+
+function MostrarPermisoMensual(tipo) {
+    var aplica = AplicaPermisoMensual(tipo);
+    document.getElementById("IdPermisoMensual").style.display = aplica ? "block" : "none";
+
+    if (!aplica) {
+        /* Se destilda además de ocultarse: una casilla marcada y escondida sigue
+           enviando su valor, y quedaría un permiso médico consumiendo la bolsa. */
+        document.getElementById("chkPermisoMensual").checked = false;
+    }
+
+    /* El tratamiento del excedente depende de si quedó algo sin cubrir. */
+    MostrarTratamientoExcedente();
+}
+
+/* El tratamiento del excedente solo aparece si hay excedente.
+
+   Si el permiso entra completo en la bolsa mensual no hay horas que tratar, y
+   ofrecer Vacaciones, Recuperación o Sin remuneración solo invita a elegir algo
+   que no corresponde. Si se pasa, la parte no cubierta sí necesita tratamiento y
+   el selector vuelve. */
+/* Tipos que no piden decidir qué hacer con el excedente.
+
+   Teletrabajo no descuenta nada: es una modalidad de trabajo, no una ausencia,
+   así que no hay horas que cargar a ninguna bolsa.
+
+   Médico se justifica con la cita adjunta —que además es obligatoria— y no se
+   descuenta de vacaciones, ni se recupera, ni va sin remuneración.
+
+   Calamidad no está en la lista: hoy sigue pidiendo tratamiento. Si Talento
+   Humano decide que tampoco corresponde, se agrega acá y listo. */
+var _sinTratamientoExcedente = ["TELETRABAJO", "MEDICO"];
+
+/* Si este permiso necesita que se decida qué hacer con el excedente.
+
+   Una sola función para las dos cosas que dependen de esto —que el selector se
+   vea y que la validación lo exija— porque separarlas deja el formulario
+   imposible de enviar: un campo escondido que igual se pide. */
+function CorrespondeTratamientoExcedente() {
+    if (_sinTratamientoExcedente.indexOf(TipoPermisoSeleccionado()) !== -1) {
+        return false;
+    }
+
+    return ExcedeElSaldoMensual();
+}
+
+function MostrarTratamientoExcedente() {
+    var mostrar = CorrespondeTratamientoExcedente();
+    document.getElementById("IdExcedente").style.display = mostrar ? "block" : "none";
+
+    if (!mostrar) {
+        /* Se limpia al ocultarlo: si no, quedaría guardado un tratamiento para un
+           excedente que no existe. */
+        $("#cboExcedente").val("");
+        CambiaTratamientoExcedente();
+    }
+}
+
+/* Decide si se muestra el bloque de carga de archivos. */
+function MostrarAdjuntos() {
+    var tipo = TipoPermisoSeleccionado();
+    var mostrar;
+
+    if (tipo === "TELETRABAJO") {
+        mostrar = false;
+    }
+    else if (tipo === "MEDICO") {
+        mostrar = true;
+    }
+    else {
+        mostrar = ($("#cboRespaldo").val() === "SI");
+    }
+
+    document.getElementById("IdOtrasActividadCargar").style.display = mostrar ? "block" : "none";
+
+    /* Que el colaborador sepa por qué se le pide el archivo antes de buscarlo. */
+    var $msg = $("#msgAdjuntoObligatorio");
+    if (tipo === "MEDICO") {
+        if ($msg.length === 0) {
+            $("#IdOtrasActividadCargar").prepend(
+                '<p class="help-block text-danger" id="msgAdjuntoObligatorio">' +
+                'Adjunte la cita médica. Sin ella no se puede enviar la solicitud.</p>');
+        }
+    }
+    else {
+        $msg.remove();
+    }
+}
+
+function CambiaRespaldoAdjunto() {
+    MostrarAdjuntos();
+}
+
+/* Cuántos archivos hay elegidos en el campo de carga. */
+function ArchivosElegidos() {
+    var campo = document.getElementById("archivosAdjuntos");
+    if (campo === null || campo.files === undefined) { return 0; }
+    return campo.files.length;
+}
+
+/* El saldo del permiso mensual del mes que corresponde al permiso. Se guarda
+   para no volver a preguntarle al servidor en cada validación. */
+var _saldoMensual = null;
+
+/* Si la consulta del saldo ya volvio, con dato o con error. Distingue "todavia
+   no se" de "se que no hay saldo", que llevan a pantallas distintas. */
+var _saldoConsultado = false;
+
+/* Consulta el saldo y ajusta la casilla.
+
+   Se llama al abrir el formulario y cada vez que cambia la fecha del permiso,
+   porque la bolsa es del mes en que la persona se ausenta: quien el 29 de agosto
+   pide un permiso para el 2 de septiembre está usando la bolsa de septiembre. */
+function ConsultarSaldoMensual(alTerminar) {
+    var datos = JSON.stringify([{
+        "action": "SaldoPermisoMensual",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "fecha": $("#txtfechaP").val(),
+            "idVacaciones": idVacaciones
+        }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            _saldoConsultado = true;
+
+            if (respuesta == null || typeof respuesta.MinutosDisponibles == "undefined") {
+                /* Respondio, pero sin saldo utilizable. Cuenta como bolsa que no
+                   cubre nada, igual que el error: el selector de excedente tiene
+                   que salir. Antes se salia por acá sin reevaluarlo. */
+                _saldoMensual = null;
+                $("#msgPermisoMensual").text("").removeClass("text-danger");
+                $("#chkPermisoMensual").prop("disabled", true);
+                document.getElementById("chkPermisoMensual").checked = false;
+                MostrarTratamientoExcedente();
+                AvisarSaldoConsultado(alTerminar);
+                return;
+            }
+
+            _saldoMensual = respuesta;
+            $("#msgPermisoMensual").text(respuesta.Mensaje);
+
+            var agotado = (parseInt(respuesta.MinutosDisponibles, 10) <= 0);
+
+            /* Agotado: la opción se deshabilita hasta el mes siguiente, como pide
+               la especificación. Se destilda además, porque una casilla marcada y
+               deshabilitada seguiría enviando el valor. */
+            $("#chkPermisoMensual").prop("disabled", agotado);
+            if (agotado) {
+                document.getElementById("chkPermisoMensual").checked = false;
+                $("#msgPermisoMensual").addClass("text-danger");
+            }
+            else {
+                $("#msgPermisoMensual").removeClass("text-danger");
+            }
+
+            CambiaPermisoMensual();
+            AvisarSaldoConsultado(alTerminar);
+        },
+        error: function () {
+            _saldoConsultado = true;
+
+            /* Sin saldo confirmado no se ofrece la opción: es preferible que
+               tramiten el permiso por el camino normal a consumir una bolsa que
+               nadie pudo verificar. */
+            _saldoMensual = null;
+            $("#chkPermisoMensual").prop("disabled", true);
+            document.getElementById("chkPermisoMensual").checked = false;
+            $("#msgPermisoMensual")
+                .text("No se pudo consultar su saldo del mes. Puede continuar sin usar el permiso mensual.")
+                .addClass("text-danger");
+
+            /* Sin bolsa que lo cubra, el permiso entero es excedente. */
+            MostrarTratamientoExcedente();
+            AvisarSaldoConsultado(alTerminar);
+        }
+    });
+}
+
+/* Corre el aviso si vino. Los tres caminos de ConsultarSaldoMensual terminan
+   aca, tambien el del error: quien espera para validar tiene que seguir en los
+   tres, o el boton de guardar se queda muerto. */
+function AvisarSaldoConsultado(alTerminar) {
+    if (typeof alTerminar === "function") { alTerminar(); }
+}
+
+/* Si queda tiempo del permiso sin cubrir por la bolsa mensual.
+
+   Tres situaciones:
+
+     No usa la bolsa      todo el permiso es excedente.
+     La usa y le alcanza  no hay excedente. Es el caso que oculta el selector.
+     La usa y se pasa     el sobrante es excedente y necesita tratamiento.
+
+   Un permiso sin horas todavía cargadas no se cuenta como excedente: no se sabe.
+*/
+function ExcedeElSaldoMensual() {
+    var tipo = TipoPermisoSeleccionado();
+
+    /* Los tipos que no consumen la bolsa mensual: el permiso entero queda fuera
+       de ella, se sepan o no las horas todavía. A los que además no piden
+       tratamiento —Teletrabajo y Médico— los filtró ya quien llama. */
+    if (!AplicaPermisoMensual(tipo)) { return true; }
+
+    /* Mientras la consulta del saldo no vuelve no se afirma nada, para no mostrar
+       y esconder el selector en el mismo segundo. */
+    if (!_saldoConsultado) { return false; }
+
+    /* Sin saldo no hay nada que pueda cubrir el permiso, así que el excedente es
+       seguro antes de saber cuántas horas son. Por eso el selector sale junto con
+       el aviso de agotado y no recién cuando se cargan las horas.
+
+       Vale para las dos formas de quedarse sin bolsa: la del mes ya consumida, y
+       la consulta que no se pudo hacer. */
+    if (_saldoMensual === null) { return true; }
+    if (parseInt(_saldoMensual.MinutosDisponibles, 10) <= 0) { return true; }
+
+    /* Con saldo disponible ya depende de cuánto pida, y eso no se sabe hasta que
+       cargue las horas. */
+    var pedidos = MinutosDelPermiso();
+    if (pedidos === 0) { return false; }
+
+    if (!document.getElementById("chkPermisoMensual").checked) { return true; }
+
+    return pedidos > parseInt(_saldoMensual.MinutosDisponibles, 10);
+}
+
+/* Avisa cuánto del permiso se cubre con la bolsa y cuánto queda como excedente. */
+function CambiaPermisoMensual() {
+    /* Marcar o desmarcar la casilla cambia si queda excedente, y con eso si el
+       selector de tratamiento tiene razon de estar. Va primero para que valga
+       tambien en los caminos que salen temprano. */
+    MostrarTratamientoExcedente();
+
+    if (!document.getElementById("chkPermisoMensual").checked || _saldoMensual === null) {
+        $("#msgExcedenteMensual").remove();
+        return;
+    }
+
+    var disponibles = parseInt(_saldoMensual.MinutosDisponibles, 10);
+    var pedidos = MinutosDelPermiso();
+
+    $("#msgExcedenteMensual").remove();
+
+    if (pedidos > disponibles) {
+        var excedente = pedidos - disponibles;
+        $("#msgPermisoMensual").after(
+            '<p class="help-block text-danger" id="msgExcedenteMensual">Su permiso es de ' +
+            MinutosATexto(pedidos) + ' y el saldo mensual cubre ' + MinutosATexto(disponibles) +
+            '. Las ' + MinutosATexto(excedente) + ' restantes necesitan un tratamiento del excedente.</p>');
+    }
+}
+
+/* El tiempo del permiso en minutos. El campo lo calcula la pantalla como HH:MM. */
+function MinutosDelPermiso() {
+    var texto = $("#frmTxtTiempoP").val() || "";
+    var partes = texto.split(":");
+    if (partes.length !== 2) { return 0; }
+
+    var h = parseInt(partes[0], 10);
+    var m = parseInt(partes[1], 10);
+    if (isNaN(h) || isNaN(m)) { return 0; }
+    return h * 60 + m;
+}
+
+function MinutosATexto(minutos) {
+    var h = Math.floor(minutos / 60);
+    var m = minutos % 60;
+    return h + "h" + (m < 10 ? "0" : "") + m;
+}
+
+/* Muestra hasta cuándo hay plazo para recuperar.
+
+   El cálculo se repite acá y en el procedimiento, y eso es a propósito: el
+   servidor es el que manda —rechaza una fecha fuera de plazo— pero el
+   colaborador necesita ver el límite mientras llena el formulario, no después
+   de que se lo rechacen. Si la regla cambia, se cambia en los dos lugares; por
+   eso está marcada en el procedimiento. */
+/* Lee una fecha en dd/mm/aaaa. Devuelve null si el texto no es una fecha. */
+function FechaDesdeTexto(texto) {
+    var partes = (texto || "").split('/');
+    if (partes.length !== 3) { return null; }
+
+    var d = new Date(partes[2], partes[1] - 1, partes[0]);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+function TextoDesdeFecha(d) {
+    var dd = ("0" + d.getDate()).slice(-2);
+    var mm = ("0" + (d.getMonth() + 1)).slice(-2);
+    return dd + "/" + mm + "/" + d.getFullYear();
+}
+
+function MostrarPlazoRecuperacion() {
+    /* Espeja hacia la otra vista, para que las dos digan lo mismo sin importar
+       por cual se haya editado. */
+    if ($("#txtTTFecha").val() !== $("#txtfechaP").val()) {
+        $("#txtTTFecha").val($("#txtfechaP").val());
+    }
+
+    var permiso = FechaDesdeTexto($("#txtfechaP").val());
+
+    if (permiso === null) {
+        $("#txtRecMaxima").val("");
+        AcotarFechaRecuperacion(null, null);
+        return;
+    }
+
+    var maxima = new Date(permiso.getTime());
+    maxima.setDate(maxima.getDate() + 30);
+
+    $("#txtRecMaxima").val(TextoDesdeFecha(maxima));
+
+    /* El calendario se acota al mismo plazo que muestra el campo de al lado. Es
+       mejor que no deje elegir una fecha imposible a dejarla elegir y rechazarla
+       despues. */
+    AcotarFechaRecuperacion(permiso, maxima);
+}
+
+/* Limita el calendario del plan al rango util, y descarta lo ya elegido si quedo
+   fuera: al mover la fecha del permiso, la propuesta anterior puede haber dejado
+   de tener sentido, y sin esto viajaba igual al guardar. */
+function AcotarFechaRecuperacion(desde, hasta) {
+    var $campo = $("#txtRecFecha");
+    if (!$campo.length || !$campo.hasClass("hasDatepicker")) { return; }
+
+    $campo.datepicker("option", "minDate", desde);
+    $campo.datepicker("option", "maxDate", hasta);
+
+    if (desde === null) { return; }
+
+    var elegida = FechaDesdeTexto($campo.val());
+    if (elegida !== null && (elegida < desde || elegida > hasta)) {
+        $campo.val("");
+    }
+}
+
+/* Las horas solo aplican a la modalidad por horas. */
+function CambiaModalidadTeletrabajo() {
+    var porHoras = ($("#cboModalidadTT").val() === "HORAS");
+    document.getElementById("IdTTHoras").style.display = porHoras ? "block" : "none";
+
+    if (porHoras) {
+        CambiaHoraTeletrabajo();
+    }
+    else {
+        /* Jornada completa: no hay horas que registrar. Se limpian las de abajo
+           para que no viaje el horario de un intento anterior. */
+        $("#frmTxtHoraDesdeP").val("");
+        $("#frmTxtHoraHastaP").val("");
+        $("#frmTxtTiempoP").val("");
+    }
+}
+
+/* Las horas del permiso tienen dos lugares donde mostrarse, igual que la fecha:
+   abajo con el resto del permiso, y dentro del panel de teletrabajo. Con
+   teletrabajo elegido queda solo el panel.
+
+   frmTxtHoraDesdeP y frmTxtHoraHastaP siguen mandando: son las que arman
+   FechaDesde y FechaHasta al guardar. Las del panel las alimentan. */
+function MostrarHorasSegunTipo(esTeletrabajo) {
+    var mostrar = esTeletrabajo ? "none" : "block";
+    document.getElementById("IdHoraDesdeP").style.display = mostrar;
+    document.getElementById("IdHoraHastaP").style.display = mostrar;
+    document.getElementById("IdTiempoP").style.display = mostrar;
+}
+
+/* Copia las horas del panel a las del permiso y recalcula la duracion. */
+function CambiaHoraTeletrabajo() {
+    $("#frmTxtHoraDesdeP").val($("#txtTTHoraDesde").val());
+    $("#frmTxtHoraHastaP").val($("#txtTTHoraHasta").val());
+    CalcularTiempoPermiso();
+}
+
+/* Mantiene sincronizadas las casillas viejas.
+
+   CargoVacaciones sigue siendo la columna que alimenta el alta y la que tiene
+   1437 permisos de historia. En vez de cambiarle el significado, se la deriva:
+   "Vacaciones" es el único tratamiento que carga días al saldo, igual que el
+   SI de antes. Los otros dos no lo hacen, igual que el NO. */
+function CambiaTratamientoExcedente() {
+    var valor = $("#cboExcedente").val() || "";
+    var cargaAVacaciones = (valor === "VACACIONES");
+
+    document.getElementById("IdSI").checked = cargaAVacaciones;
+    document.getElementById("IdNO").checked = (valor !== "" && !cargaAVacaciones);
+
+    /* El plan solo se pide cuando el excedente se recupera. */
+    document.getElementById("IdRecuperacion").style.display =
+        (valor === "RECUPERACION") ? "block" : "none";
+    if (valor === "RECUPERACION") { MostrarPlazoRecuperacion(); }
+
+    var $msg = $("#msgExcedente");
+    if (valor === "RECUPERACION") {
+        $msg.text("Proponga cómo va a recuperar el tiempo.");
+    }
+    else if (valor === "SIN_REMUNERACION") {
+        $msg.text("Talento Humano lo registra para el descuento correspondiente.");
+    }
+    else if (valor === "VACACIONES") {
+        $msg.text("Se descuenta de su saldo de vacaciones.");
+    }
+    else {
+        $msg.text("");
+    }
+}
+
+$(function () {
+
+
+    $.blockUI.defaults.message = "Espere un momento, por favor...";
+
+    $(document).ajaxStart($.blockUI).ajaxStop($.unblockUI);
+    ObtenerListaComboSolicitud2();
+    ObtenerListaComboSolicitud();
+
+    var dateFormat = "dd/mm/yy";
+
+    from = $("#txtFechaConsulta1").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            to.datepicker("option", "minDate", getDate(this));
+            $("#btn_Descarga").hide();
+        }),
+
+        to = $("#txtFechaConsulta2").datepicker(
+            {
+                dateFormat: dateFormat,
+                dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+                dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+                firstDay: 1,
+                gotoCurrent: true,
+                monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+            })
+            .on("change", function () {
+                from.datepicker("option", "maxDate", getDate(this));
+                $("#btn_Descarga").hide();
+            });
+
+    tofrom11 = $("#txtfechaV").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom12 = $("#txtfechaP").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    /* Las horas del teletrabajo. Eran dos inputs de texto pelados con placeholder,
+       mientras que las de abajo tienen reloj: ahora que son las unicas visibles con
+       este tipo de permiso, tienen que comportarse igual.
+
+       Al cambiar copian su valor a las de abajo, que son las que arman FechaDesde
+       y FechaHasta al guardar. */
+    $("#txtTTHoraDesde").datetimepicker({ format: "HH:mm" })
+        .on("dp.change", function () { CambiaHoraTeletrabajo(); });
+
+    $("#txtTTHoraHasta").datetimepicker({ format: "HH:mm" })
+        .on("dp.change", function () { CambiaHoraTeletrabajo(); });
+
+    /* La fecha del teletrabajo. Es otra vista de txtfechaP, asi que lleva el mismo
+       calendario; quien sincroniza los dos valores es CambiaFechaTeletrabajo. */
+    $("#txtTTFecha").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        });
+
+    /* La fecha propuesta del plan de recuperación. Se quedó sin calendario cuando
+       se armó el bloque: era un input de texto pelado y había que escribir la
+       fecha a mano.
+
+       No lleva el .on("change") que copian los de arriba: ese handler mueve el
+       maxDate del filtro de consulta, que no tiene nada que ver con esto. */
+    $("#txtRecFecha").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        });
+
+    tofrom13 = $("#frmTxtHoraDesdeV").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom14 = $("#frmTxtHoraHastaV").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    tofrom15 = $("#txtfechaR").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"]
+        })
+        .on("change", function () {
+            from.datepicker("option", "maxDate", getDate(this));
+            $("#btn_Descarga").hide();
+        });
+
+    $("#txtFechaConsulta1").datepicker('setDate', 'today');
+    $("#txtFechaConsulta2").datepicker('setDate', 'today');
+
+    $("#txtfechaP").datepicker('setDate', 'today');
+    $("#txtfechaV").datepicker('setDate', 'today');
+    $("#txtfechaR").datepicker('setDate', 'today');
+
+    $("#frmTxtHoraDesdeV").datepicker('setDate', 'today');
+    $("#frmTxtHoraHastaV").datepicker('setDate', 'today');
+
+
+    formFrom = $("#frmTxtFecha").datepicker(
+        {
+            dateFormat: dateFormat,
+            dayNames: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+            firstDay: 1,
+            gotoCurrent: true,
+            monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Deciembre"],
+        });
+
+
+    formFromTime = $('#frmTxtHoraDesdeP').datetimepicker({
+        format: 'HH:mm'
+    }).on('dp.change', function (e) {
+        var minutosInicioTotal = getMinutes(formFromTime);
+        var minutosFinalTotal = getMinutes(formToTime);
+
+        if (minutosInicioTotal > minutosFinalTotal) {
+            formToTime.val(formFromTime.val());
+        }
+
+        calculeTime(formFromTime.val(), formToTime.val(), '#frmTxtTiempoP');
+        /* El tiempo cambio: puede haber pasado a exceder la bolsa mensual, o a
+           caber en ella. CambiaPermisoMensual reevalua el selector de excedente. */
+        CambiaPermisoMensual();
+
+    });
+
+
+    formToTime = $('#frmTxtHoraHastaP').datetimepicker({
+        format: 'HH:mm'
+    }).on('dp.change', function (e) {
+        var minutosInicioTotal = getMinutes(formFromTime);
+        var minutosFinalTotal = getMinutes(formToTime);
+
+        if (minutosInicioTotal > minutosFinalTotal) {
+            formFromTime.val(formToTime.val());
+        }
+
+        calculeTime(formFromTime.val(), formToTime.val(), '#frmTxtTiempoP');
+        /* El tiempo cambio: puede haber pasado a exceder la bolsa mensual, o a
+           caber en ella. CambiaPermisoMensual reevalua el selector de excedente. */
+        CambiaPermisoMensual();
+
+    });
+
+
+    formFromTime2 = $('#frmTxtHoraDesdeR').datetimepicker({
+        format: 'HH:mm'
+    }).on('dp.change', function (e) {
+        var minutosInicioTotal = getMinutes(formFromTime);
+        var minutosFinalTotal = getMinutes(formToTime);
+
+        if (minutosInicioTotal > minutosFinalTotal) {
+            formToTime2.val(formFromTime2.val());
+        }
+
+        calculeTime(formFromTime2.val(), formToTime2.val(), '#frmTxtTiempoR');
+
+    });
+
+
+    formToTime2 = $('#frmTxtHoraHastaR').datetimepicker({
+        format: 'HH:mm'
+    }).on('dp.change', function (e) {
+        var minutosInicioTotal = getMinutes(formFromTime);
+        var minutosFinalTotal = getMinutes(formToTime);
+
+        if (minutosInicioTotal > minutosFinalTotal) {
+            formFromTime2.val(formToTime2.val());
+        }
+
+        calculeTime(formFromTime2.val(), formToTime2.val(), '#frmTxtTiempoR');
+
+    });
+
+    function calculeTime(timeInitial, timeFinaly, elementResult) {
+
+        var fromDateCalcule = moment(timeInitial, 'HH:mm');
+        var toDateCalcule = moment(timeFinaly, 'HH:mm');
+
+        if (fromDateCalcule.isValid() && toDateCalcule.isValid()) {
+
+            var duration = moment.duration(toDateCalcule.diff(fromDateCalcule));
+
+            $(elementResult).val(moment(duration.hours() + ':' + duration.minutes(), 'HH:mm').format('HH:mm'));
+
+        } else {
+            $("#messageNotify").html('Tiempos ingresados no válidos');
+        }
+
+        return;
+    }
+
+    function getMinutes(element) {
+
+        var timeElement = moment(element.val(), "HH:mm");
+        var minutesTotal = (timeElement.hours() * 60) + timeElement.minutes();
+
+        return parseInt(minutesTotal);
+    }
+
+    function getDate(element) {
+
+        var date;
+        try {
+            date = $.datepicker.parseDate(dateFormat, element.value);
+        } catch (error) {
+            date = null;
+        }
+
+        return date;
+    }
+
+
+    // ------------------------------------------------------------------
+
+    $('#btnCargarArchivosAdjuntos').click(function () {
+
+        if (idVacaciones == 0) {
+
+            alerta("Para cargar un archivo debe cargar una solicitud de permisos...");
+        }
+        else {
+            var url = 'CargaArchivos.ashx';
+
+            // Checking whether FormData is available in browser  
+            if (window.FormData !== undefined) {
+
+                var fileUpload = $("#archivosAdjuntos").get(0);
+                var files = fileUpload.files;
+
+                // Create FormData object  
+                var fileData = new FormData();
+
+                // Looping over all files and add it to FormData object  
+                for (var i = 0; i < files.length; i++) {
+                    fileData.append(files[i].name, files[i]);
+                }
+
+                // Adding one more key to FormData object  
+                fileData.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
+                fileData.append('action', 'CargarArchivos');
+                fileData.append('Id_RegTareas', idVacaciones);
+                fileData.append('idServicio', "6");
+
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    data: fileData,
+                    contentType: false, // Not to set any content header  
+                    processData: false, // Not to process data  
+                    dataType: "json",
+                    beforeSend: function (respuesta) {
+                        $("#divMensajes").html("Cargando Archivos...");
+                    },
+                    success: function (respuesta) {
+                        if (respuesta.estado == "1") {
+                            MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", respuesta.mensaje, respuesta.tipoMensaje);
+                            ListadoArchivosCosteo("#divArchivosAdjuntosAnteriores", idVacaciones);
+                        }
+                        $("progress").hide();
+
+
+                    },
+                    xhr: function () {
+                        var fileXhr = $.ajaxSettings.xhr();
+                        if (fileXhr.upload) {
+                            $("progress").show();
+                            fileXhr.upload.addEventListener("progress", function (e) {
+                                if (e.lengthComputable) {
+                                    $("#fileProgress").attr({
+                                        value: e.loaded,
+                                        max: e.total
+                                    });
+                                }
+                            }, false);
+                        }
+                        return fileXhr;
+                    },
+                    error: function (objeto, msgError, objError) {
+                        var mesnajeError = "La acción de cargar de archivo esta tomando demasiado tiempo. Verifique su conexión de red y luego intente nuevamente cargar los archivos.";
+                        MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+                    }
+                });
+            } else {
+                var mesnajeError = "FormData no es soportado por su navegador.";
+                MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo", "#modalMensajeInformativo", mesnajeError, 'danger');
+            }
+        }
+    });
+
+
+});
+
+
+$(document).ready(function () {
+
+    $('.js-example-basic-multiple').select2({
+        width: '500px'
+    });
+});

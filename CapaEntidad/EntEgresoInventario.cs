@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -13,7 +9,7 @@ namespace CapaEntidad
         public string Cod_Usuario { get; set; }
         public DateTime FechaRegistro { get; set; }
         public string StrFechaRegistro { get; set; }
-        public double  CantidadComprada { get; set; }
+        public double CantidadComprada { get; set; }
         public double SubTotal { get; set; }
         public double Iva { get; set; }
         public double Total { get; set; }

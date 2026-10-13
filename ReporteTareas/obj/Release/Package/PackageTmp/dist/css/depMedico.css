@@ -1,0 +1,2410 @@
+﻿body {
+    /*display: flex;
+    justify-content: center;
+    align-items: center;*/
+}
+hr {
+    border: 0;
+    height: 2px;
+    background: #96A6B0; /* Color de la línea */
+}
+
+/*  -----------------Estilos para el placeholder de un select   --------------     */
+.select-placeholder {
+    color: #94a3b8;
+}
+.select-placeholder option:not([value=""]) {
+    color: #334155;
+}
+
+.contenedor-horizontal {
+    margin: 0 2rem;
+    padding-top: 0;
+    align-items: center
+}
+
+.titulo-pag {
+    margin: 1rem 0 0 0;
+    list-style: none;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.imagen-div {
+    width: auto; /* Ancho de tu div */
+    height: 200px; /* Alto de tu div */
+    /*background-image: url('../carrusel/imagenes/usuarios.png');  Ruta de la imagen */
+    background-size: contain; /* Ajustar la imagen al tamaño del div sin deformarla */
+    background-repeat: no-repeat; /* Evitar que la imagen se repita */
+    background-position: center center; /* Centrar la imagen en el div */
+}
+
+/*    Icono para contacto de emergencia    */
+.user-icon {
+    width: 70px;
+    height: 70px;
+    background-color: #E32617; /* Color de fondo del círculo */
+    border-radius: 50%; /* Para hacerlo circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* Color del icono */
+    font-size: 45px; /* Tamaño del icono */
+}
+
+/* clase para pestaña seleccionada */
+.tab-seleccionada {
+    background-color: #F4F4F4 !important;
+    color: #07BCC8 !important;
+    cursor: default !important;
+    font-weight: bold;
+}
+
+.nav-link {
+    background-color: #A90505;
+    color: #EDEDED;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+.centered-element {
+    margin: 0;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/*----------------------------------------------------------------------------------------
+        Estilos para el Spinner para esperar que termine de cargar la informacion
+-----------------------------------------------------------------------------------------*/
+.overlay {
+    position: fixed; /* Posicionamos el overlay en toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Fondo oscuro y transparente */
+    z-index: 1; /* Posicionamos el overlay debajo del spinner */
+}
+
+.spinner-container {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2; /* Posicionamos el spinner encima del overlay */
+}
+
+.spinner {
+    border: 8px solid #f3f3f3; /* Color de fondo */
+    border-top: 8px solid #3498db; /* Color de la parte superior */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1.5s linear infinite;
+    margin: 20px auto; /* Centrando el spinner */
+}
+
+.loading-text {
+    font-size: 18px;
+    color: #333;
+    margin-top: 10px;
+}
+
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 20px;
+}
+.horizontal {
+    display: flex;
+    align-items: center;
+    margin-top: 2rem;
+}
+.horizontal-cuadriculado-flow {
+    display: flow-root;
+    align-items: center;
+    justify-content: space-between;
+}
+.horizontal-simple {
+    display: table-row;
+    align-items: center;
+}
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+.horizontal-group-simple {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.horizontal-group-special {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin-top: 2rem;
+}
+.horizontal-group-around {
+    display: flex;
+    justify-content: space-around;
+    justify-items: stretch;
+}
+.horizontal-group-evenly {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.horizontal-group-end {
+    display: flex;
+    align-items: center;
+    justify-content:end;
+}
+.horizontal-group-start {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+.centrar-elemento {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.input-basic {
+    width: 25px;
+}
+.input-basic3 {
+    width: 30px;
+}
+.input-medium {
+    width: 45px;
+}
+
+.contenedor {
+    max-width: 80%; /*Define el ancho máximo del contenedor */
+    margin-left: auto; /* Centra el contenedor horizontalmente */
+    margin-right: auto;
+    padding-left: 15px; /* Agrega un poco de espacio en los bordes izquierdo y derecho */
+    padding-right: 15px;
+}
+
+.columna {
+    width:50%;
+    margin-top:1rem;
+}
+
+/* Estilo para los botones SI / NO */
+.btn-custom:hover {
+    background-image: linear-gradient(to bottom, #587EDD, #7E38D8);
+}
+.btn-custom {
+    background-image: linear-gradient(to bottom, #29CAE4, #08759B);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+}
+    .btn-custom.active {
+        background-image: none;
+        background-color: #587EDD;
+        color: white;
+    }
+
+
+/* Estilos para las opciones de checkbox 3 en horizontal */
+.opcCheckboxMargen {
+    background-color: #9DA8AD;
+    padding: 0.5rem 3rem 0.5rem 2rem;
+    border-radius: 5px;
+    font-style: italic;
+    font-family: system-ui;    
+}
+    .opcCheckboxMargen label {
+        font-weight: 500;
+    }
+
+
+/* Estilo de titulos para labels*/
+.titulo-examen {
+    background-color: rgba(160, 163, 172, 0.233);
+    text-align: center;
+    padding-bottom: 2rem;
+    padding-top: 2rem;
+    width: 100%;
+}
+
+/* Estilo de titulos para labels*/
+.titulo-cuadros {
+    font-size: smaller;
+    text-align:center;
+
+}
+
+/*  Boton flotante de regreso en todas las paginas*/
+.chat-button {
+    height: 50px;
+    width: 50px;
+    border-radius: 60px;
+    background: url(../../carrusel/imagenes/icons/010-atras-1.png);
+    /*background-color: rgba(29, 41, 80, 0.692);
+    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.2);*/
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    bottom: 33px;
+    right: 30px;
+    cursor:pointer;
+}
+
+/*  grupo de input vertical*/
+.grupo-input {
+    position: relative;
+    /* display: table; */
+    border-collapse: separate;
+}
+/* variante de input-group-addon */
+.input-group-mio {
+    display: block;
+    padding: 5px 12px;
+    line-height: 1;
+    color: #555;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/*  Estilo para color degradado de well */
+.color-well {
+    /*background: radial-gradient(to bottom, #EADAE5, #DCB0BA);*/
+    background-color: #DFD5E8;
+}
+.color-well2 {
+    background-color: #EECDF9;
+}
+.color-well3 {
+    background-color: #D6D9EC;
+}
+.color-well4 {
+    /*background: linear-gradient(to bottom, #D5DFE8, #F8DDFC);*/
+    /*background: linear-gradient(to bottom, #DF33A8, #351E3E);*/
+    background: radial-gradient(ellipse at 50% 50%, #D21696 0%, #180A1E 100%); /*DF33A8 351E3E*/
+    border: none;
+    border-radius: 8px;
+}
+.color-opaco {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+
+/* Cuadros de ingreso con formato de col-sm-2 sin padding*/
+.cuadros-ingreso-normal {
+    width: 16.66666667%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de col-sm-3 sin padding*/
+.cuadros-ingreso-normal3 {
+    width: 20%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de col-sm-4 sin padding*/
+.cuadros-ingreso-normal4 {
+    width: 30%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal5 {
+    width: 40%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal6 {
+    width: 60%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal7 {
+    width: 70%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de sin padding*/
+.cuadros-ingreso-normalX {    
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+}
+/*Select de FACTORES DE RIESGOS DEL PUESTO DE TRABAJO ACTUAL FBE3F1*/
+.select-principal {
+    background-color: #FAE6F2;
+}
+.select-temas {
+    background-color: #DDDCDF;
+}
+.select-medidas {
+    background-color: #e1e8f5;
+}
+.select-otros {
+    background-color: #E5FAEA;
+}
+.select-vacio {
+    background-color: #fdfdcff2;
+}
+
+/* Input de la Historia clinica INMUNIZACIONES */
+.select-dorado {
+    background-color: #FCBA4D;
+}
+.input-azul {
+    background-color: #CECAE5;
+}
+.input-nombre {
+    background-color: #E4E7FD;
+}
+.input-azulmedio {
+    background-color: #D3DDEC;
+}
+.input-azulobscuro {
+    background-color: #0C5C82;
+}
+.input-rosado {
+    background-color: #c153aa;
+    color: white;
+}
+
+
+/* Ingreso cuadros de consulta*/
+.sin-border-right {
+    border-right: none;
+}
+
+
+/*==============  Menu desplegable de opciones =================*/
+
+/* Estilo para el contenedor del menú desplegable */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+/* Estilo para el botón del menú */
+.dropdown-button {
+    background-color: #f1f1f1;
+    border: 1px solid #aeaeb1;
+    padding: 8px 16px;
+    cursor: pointer;
+    z-index: 5; /* Asegura que el botón esté en un nivel superior */
+}
+
+/* Estilo para la lista de opciones */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #02043ea1;
+    color: #fff3f3;
+    border: 1px solid #919397;
+    z-index: 1000; /* Aumenta el z-index para que esté sobre otros elementos */
+    width: 100%;
+}
+
+.dropdown-content2 {
+    display: none;
+    position: absolute;
+    background-color: #102044f0;
+    color: #fff3f3;
+    border: 1px solid #919397;
+    z-index: 1000; /* Aumenta el z-index para que esté sobre otros elementos */
+    width: 100%;
+}
+
+/* Estilo para los elementos de la lista */
+.dropdown-option {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    z-index: 1000; /* Asegura que los elementos también estén en un nivel superior */
+}
+
+/* Estilo para las casillas de verificación */
+.checkbox {
+    margin-right: 10px;
+}
+
+    /* Estilo para la casilla de verificación cuando está seleccionada */
+    .checkbox:checked + label {
+        font-weight: bold;
+    }
+
+.icon-box {
+    width: 100px; /* Ancho del cuadro */
+    height: 100px; /* Alto del cuadro */
+    background-color: #3498db; /* Color de fondo */
+    border-radius: 15px; /* Bordes redondeados */
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+.icon-box2 {
+    width: 100px; /* Ancho del cuadro */
+    height: 100px; /* Alto del cuadro */
+    background-color: #e61293;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.icon-seleccion {
+    font-size: 45px; /* Tamaño del icono */
+    color: #fff; /* Color del icono */
+}
+
+/*======= Cuadros de seleccion de formulario ============*/
+.box-link {
+    display: block; /* Hace que el enlace sea un bloque, ocupando todo el espacio del contenedor */
+    text-decoration: none; /* Elimina el subrayado predeterminado en el enlace */
+    color: inherit; /* Hereda el color de texto del contenedor */
+}
+
+/*  Media query para DepartamentoMedico.aspx - Antecedentes laborales titulos de Accidentes de trabajo   */
+@media only screen and (min-width: 576px) {
+    .titulos-antecedentes {
+        width: 16.66666667%;
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+        margin: 0 0.1rem 10px 0.1rem;
+    }
+    .titulo-antecedente-especial {
+        width: 16.66666667%; /* Cambiado el ancho para que ocupen toda la fila */
+        padding-top: 1rem;
+        margin: 0 0.1rem 10px 0.1rem;
+
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    .titulos-antecedentes {
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+        margin-right: 1px;
+        width: 16.66666667%;
+        position: relative;
+    }
+    .titulo-antecedente-especial {
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+    }
+}
+
+
+/*  Sweeetalert aumento de tamaño */
+.swal2-popup {
+    font-size: 1.6rem !important;
+    font-weight: 600;
+}
+.custom-swal-title {
+    font-size: 24px; /* Cambia el tamaño de la letra del título */
+}
+
+.custom-swal-text {
+    font-size: 16px; /* Cambia el tamaño de la letra del texto */
+}
+
+/*  estableccer el tamaño de la lista par los CIE*/
+.comboCodigosCIE {
+    max-height: 200px; /* Limita la altura del <ul> a 100px */
+    overflow-y: auto; /* Activa el desplazamiento vertical */
+    /*position: absolute;*/ /* Asegura que el <ul> se despliegue sobre otros elementos */
+    width: 120%; /* Asegura que ocupe todo el ancho del contenedor */
+    background-color: #fff; /* Fondo blanco para mayor visibilidad */
+    border: 1px solid #ccc; /* Borde para distinguir el menú */
+    z-index: 1000; /* Coloca el menú sobre otros elementos */
+}
+
+
+/* ---------------------------------------------
+    Estilos para la tabla de Inmunizaciones 
+   --------------------------------------------*/
+/* Cambia el color del texto de los labels */
+.dataTables_length label, .dataTables_filter label {
+    color: #04cefd; /* Cambia a dorado */
+    font-weight: bold; /* Opción para hacer el texto en negrita */
+    margin-left: 2rem;
+}
+/* Centrar texto en las columnas especificadas */
+#tbl_Formularios td:nth-child(1),
+#tbl_Formularios td:nth-child(2),
+#tbl_Formularios td:nth-child(3),
+#tbl_Formularios td:nth-child(4),
+#tbl_Formularios td:nth-child(5),
+#tbl_Formularios td:nth-child(6) {
+    text-align: center;
+}
+/* Colores alternados para las filas de la tabla Empleados */
+#tbl_Formularios tbody tr:nth-child(odd) {
+    background-color: #e4e4e5; /* Color para las filas impares */
+}
+
+#tbl_Formularios tbody tr:nth-child(even) {
+    background-color: #ffffff; /* Color para las filas pares */
+}
+
+/* Ajustar la altura de la fila de encabezados */
+#tbl_Formularios th {
+    height: 40px;
+}
+/* Aplicar una altura mínima a las celdas de la tabla */
+#tbl_Formularios td,
+#tbl_Formularios th {
+    min-height: 50px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+/* Estilo para los encabezados de la tabla */
+.header-custom {
+    background-color: black; /* Cambia a tu color preferido */
+    color: white; /* Cambia el color del texto si es necesario */
+}
+
+
+
+/*----------------------------------------------------------------------------------------
+        Estilos para el Spinner para esperar que termine de cargar la informacion
+-----------------------------------------------------------------------------------------*/
+.overlay {
+    position: fixed; /* Posicionamos el overlay en toda la pantalla */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Fondo oscuro y transparente */
+    z-index: 1; /* Posicionamos el overlay debajo del spinner */
+}
+.spinner-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 2; /* Posicionamos el spinner encima del overlay */
+}
+.spinner {
+    border: 8px solid #f3f3f3; /* Color de fondo */
+    border-top: 8px solid #3498db; /* Color de la parte superior */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1.5s linear infinite;
+    margin: 20px auto; /* Centrando el spinner */
+}
+.loading-text {
+    font-size: 18px;
+    color: #333;
+    margin-top: 10px;
+}
+/* Animación del spinner */
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+.loading-text {
+    font-size: 18px;
+    color: #FFFFFF; /* Cambiamos el color del texto a blanco */
+    margin-top: 10px;
+}
+
+
+
+/* =================================================================
+        Estilos para los indicadores de campos obligatorios   
+  ================================================================== */
+/* Estilo del label */
+.control-label {
+    position: relative; /* Necesario para posicionar el indicador respecto al label */
+    display: inline-block; /* Asegura que el texto del label y el punto estén alineados */
+    margin-left: 20px; /* Espacio opcional entre el texto y el indicador */
+}
+
+/* Estilo del input */
+.control-input {
+    position: relative; /* Necesario para posicionar el indicador respecto al input */
+}
+
+/* Estilo del punto indicador (a la izquierda) */
+.indicator-izq {
+    position: absolute;
+    top: 50%; /* Alinea verticalmente al texto o al input */
+    right: 100%; /* Desplaza el punto a la izquierda del label o input */
+    transform: translateY(-50%); /* Centra el punto verticalmente */
+    width: 5.2px;
+    height: 5.2px;
+    background-color: red;
+    border-radius: 50%; /* Hace el punto circular */
+    cursor: grab; /* Cambia el cursor al pasar el mouse */
+    z-index: 10; /* Asegura que el indicador esté sobre otros elementos */
+}
+
+/* Tooltip para el indicador izquierdo */
+.indicator-izq::after {
+    content: "Campo obligatorio"; /* Texto del tooltip */
+    position: absolute;
+    top: -35px; /* Ajusta para colocar el tooltip arriba del indicador */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333; /* Fondo oscuro para el tooltip */
+    color: #fff; /* Texto blanco */
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000; /* Asegura que el tooltip esté sobre todos los elementos */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    visibility: hidden; /* Oculta el tooltip por defecto */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Mostrar el tooltip al pasar el mouse */
+.indicator-izq:hover::after {
+    visibility: visible;
+    opacity: 0.8;
+    transform: translateX(-50%) translateY(-5px); /* Suaviza el movimiento del tooltip */
+}
+
+
+/* Estilo del punto indicador (a la derecha) */
+.indicator-der {
+    position: absolute;
+    top: 50%; /* Alinea verticalmente al texto o al input */
+    right: -15px; /* Desplaza el punto a la derecha del label o input */
+    transform: translateY(-50%); /* Centra el punto verticalmente */
+    width: 5.4px;
+    height: 5.4px;
+    background-color: red;
+    border-radius: 50%; /* Hace el punto circular */
+    cursor: grab; /* Cambia el cursor a pointer al pasar el mouse */
+    z-index: 10; /* Asegura que el indicador esté sobre otros elementos */
+}
+
+/* Tooltip para el indicador */
+.indicator-der::after {
+    content: "Campo obligatorio"; /* Texto del tooltip */
+    position: absolute;
+    top: -35px; /* Ajusta para colocar el tooltip arriba del indicador */
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333; /* Fondo oscuro para el tooltip */
+    color: #fff; /* Texto blanco */
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    z-index: 1000; /* Asegura que el tooltip esté sobre todos los elementos */
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.2);
+    visibility: hidden; /* Oculta el tooltip por defecto */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+
+/* Mostrar el tooltip al pasar el mouse */
+.indicator-der:hover::after {
+    visibility: visible;
+    opacity: 0.8;
+    transform: translateX(-50%) translateY(-5px); /* Suaviza el movimiento del tooltip */
+}
+
+
+/*==================================================
+                ReporteSalud 
+===================================================*/
+
+/*    Fondo para el Dashboard     */
+.fondo-Dashboard {
+    background-image: linear-gradient(rgba(100,100,100,0.05), rgba(100,100,100,0.4)), url('../../carrusel/imagenes/fondo_papel.jpg');
+    background-size: cover; /* Para ajustar la imagen al tamaño del well */
+    background-repeat: no-repeat;
+}
+
+
+/*==================================================
+                Historial Clinico 
+===================================================*/
+/*  Estilos para activar o desactivar inputs dependiendo del checkbox   */
+#idHistorialClinico .inputs-control-mod {
+    padding: 3px 12px;
+    font-size: 14px;
+    line-height: 1.42857143;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #777777;
+    border-radius: 4px;
+}
+
+    #idHistorialClinico .inputs-control-mod:disabled {
+        /*background-color: #f5f5f5;*/
+        color: #999;
+        cursor: not-allowed;
+    }
+
+#idHistorialClinico .checkbox {
+    margin-right: 10px;
+}
+
+
+
+/* ==============================================================
+        Estilos para el area donde se cargan los archivos   
+ ===============================================================*/
+.containerFiles {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    /*max-width: 900px;*/
+    margin: 2rem auto 2rem auto;
+}
+
+.title-list {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.title-button {
+    padding: 2px 15px;
+    border: 2px solid #007BFF;
+    background-color: white;
+    color: #007BFF;
+    border-radius: 25px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+    .title-button:hover {
+        background-color: #c4f6f2;
+        border-color: #0056b3;
+    }
+
+    .title-button.selected {
+        background-color: #007BFF;
+        color: white;
+        border: 2px solid #0056b3;
+    }
+
+
+/*  ----> Estilos para el espacio donde se arrastran los archivos    */
+.drop-zone {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 15rem;
+    width: 70%;
+    margin: 5px auto; /* Centra horizontalmente */
+    padding: 40px;
+    border: 2px dashed #007BFF;
+    color: #007BFF;
+    border-radius: 15px;
+    text-align: center;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+    .drop-zone.dragover {
+        background-color: rgba(0, 123, 255, 0.2);
+        border-color: #0056b3;
+    }
+
+/*  Estilos para mostrar la lista de archivos y el progress bar  */
+.file-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 12px;
+    margin: 0 2rem 1rem 2rem;
+    background-color: rgba(0, 255, 26, 0.25);
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+    .file-item span {
+        flex: 2;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .file-item progress {
+        flex: 3;
+        margin: 5px 1.5rem;
+    }
+
+.delete-btn {
+    background-color: #7d7d7d76;
+    border: none;
+    color: red;
+    font-size: 1.2rem;
+    cursor: pointer;
+    padding: 5px;
+}
+
+    .delete-btn:hover {
+        color: darkred;
+    }
+
+/* Estilos para el switch solo dentro de #idBtnsFinales */
+#idBtnsFinales .switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+    #idBtnsFinales .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+#idBtnsFinales .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    transition: all 0.3s ease;
+    border-radius: 34px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+}
+
+    #idBtnsFinales .slider:before {
+        position: absolute;
+        content: "";
+        height: 26px;
+        width: 26px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        transition: all 0.3s ease;
+        border-radius: 50%;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+#idBtnsFinales .switch input:checked + .slider {
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.3);
+}
+
+#idBtnsFinales .switch input:focus + .slider {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+#idBtnsFinales .switch input:checked + .slider:before {
+    transform: translateX(26px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+#idBtnsFinales .slider:hover {
+    transform: scale(1.05);
+}
+
+#idBtnsFinales .switch input:checked + .slider:hover {
+    background: linear-gradient(45deg, #5a6fd8 0%, #6a4190 100%);
+}
+
+
+/* =======================================================
+        Modal de PDF para mostrar la atención médica
+==========================================================*/
+.linea {
+    margin-top: 0;
+    margin-bottom: 0;
+    height: 1px;
+    width: 99%;
+    background-color: #303030;
+}
+#ModalEgresoInventarioPDF .modal-body {
+    margin: 0 1rem 0 1rem;
+    padding: 0 0 0 0;
+    max-height: 100%;
+    display: flex;
+    justify-content: center;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: 11px;
+}
+
+    #ModalEgresoInventarioPDF .modal-body .letra-bold {
+        font-weight: bold;
+    }
+
+    /* Estilos específicos para los elementos dentro del modal */
+    #ModalEgresoInventarioPDF .modal-body .container {
+        display: block;
+    }
+    #ModalEgresoInventarioPDF .modal-body .columna {
+        width: 80%;
+        margin-top: 1rem;    
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .row {
+        display: grid;
+        /*grid-template-columns: repeat(6, 1fr);*/
+        padding: 0;
+    }
+
+    /* #ModalEgresoInventarioPDF .modal-body .row-mitad {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-gap: 1rem;
+        padding: 0;
+    }*/
+    /* Estilo específico para el cuadro centrado de los datos de contacto  */
+    #ModalEgresoInventarioPDF .modal-body .row-flex {
+        display: flex;
+        justify-content: center;
+        padding: 0;
+        width: 100%;
+    }
+
+
+    /*#ModalEgresoInventarioPDF .modal-body .col-80 {
+        flex-grow: 1;
+        max-width: 90%;
+    }
+*/
+    /*#ModalEgresoInventarioPDF .modal-body .div1 {
+        grid-column: span 6;
+    }*/
+
+    /*#ModalEgresoInventarioPDF .modal-body .div2 {
+        flex-grow: 1;
+    }*/
+    /* Estilos específicos para centrar el logo*/
+    #ModalEgresoInventarioPDF .modal-body .div1-mitad {
+        /*flex-grow: 1;*/
+        display: grid;
+        grid-gap: 1rem;
+        padding: 0;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .image-container {
+        /*grid-column: span 2;*/
+    }
+
+    /*#ModalEgresoInventarioPDF .modal-body .text-container {
+        grid-column: span 3;
+    }*/
+
+    #ModalEgresoInventarioPDF .modal-body .div1-mitad img {
+        width: 30%;
+    }
+
+    /* Estilos específicos para centrar los titulos en la mitad de la pagina */
+    #ModalEgresoInventarioPDF .modal-body .centered-element-Modal {
+        display: grid;
+        place-items: center;
+    }
+
+    #ModalEgresoInventarioPDF .modal-body .doble-columna {
+        display: flex;
+    }
+
+        #ModalEgresoInventarioPDF .modal-body .doble-columna span {
+            word-break: break-word; /* Permitir que el texto largo se divida */
+            overflow-wrap: break-word;
+            position: relative;
+        }
+
+    /*#ModalEgresoInventarioPDF .modal-body .flex-half {
+        flex: 1 1 50%;
+    }*/
+
+
+    /* Evitar que las tablas se corten al final de una página */
+    #ModalEgresoInventarioPDF .modal-body table {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+        width: 100%;
+    }
+
+    /* Evitar que las filas de la tabla se dividan */
+    #ModalEgresoInventarioPDF .modal-body tr {
+        page-break-inside: avoid !important;
+        break-inside: avoid !important;
+    }
+
+    /* Evitar que el texto se corte en palabras */
+    #ModalEgresoInventarioPDF .modal-body td {
+        word-break: break-word !important;
+        overflow-wrap: break-word !important;
+        white-space: normal !important;
+    }
+
+
+/********************************************************
+       Estilos para el Selector de genero
+*********************************************************/
+
+/*.selector-genero label {
+    color: #2d3748;
+    margin-bottom: 20px;
+    font-size: 24px;
+}*/
+
+.selector-genero .control-label {
+    /*margin-bottom: 10px;*/
+    display: block;
+}
+
+.selector-genero .opciones {
+    display: flex;
+    gap: 12px;
+}
+
+.selector-genero input[type="radio"] {
+    display: none;
+}
+
+.selector-genero .opciones label {
+    flex: 1;
+    cursor: pointer;
+    padding: 7px 20px;
+    border-radius: 7px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    font-weight: 600;
+    color: #475569;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+    .selector-genero .opciones label::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        transition: opacity 0.3s ease;
+        z-index: 0;
+        opacity: 0;
+    }
+
+    .selector-genero .opciones label .emoji {
+        position: relative;
+        z-index: 1;
+    }
+
+    .selector-genero .opciones label .texto {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* Color azul para hombre */
+    .selector-genero .opciones label[for="hombre"]::before {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+
+    /* Color rosado para mujer */
+    .selector-genero .opciones label[for="mujer"]::before {
+        background: linear-gradient(135deg, #ec4899 0%, #892171 100%);
+    }
+
+.selector-genero input[type="radio"]:checked + label::before {
+    opacity: 1;
+}
+
+.selector-genero input[type="radio"]:checked + label {
+    color: white;
+    border-color: transparent;
+}
+
+    .selector-genero input[type="radio"]:checked + label[for="hombre"] {
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+    }
+
+    .selector-genero input[type="radio"]:checked + label[for="mujer"] {
+        box-shadow: 0 8px 25px rgba(236, 72, 153, 0.4);
+    }
+
+.selector-genero .opciones label:hover {
+    transform: scale(1.05);
+    border-color: #94a3b8;
+}
+
+.selector-genero .emoji {
+    font-size: 20px;
+    font-style: normal;
+}
+
+
+
+
+
+
+
+/********************************************************
+       Estilos para la tabla de Atenciones medicas
+*********************************************************/
+
+.tablaDocsCargados {
+    width: 100%;
+    border-radius: 6px;
+    overflow: hidden;
+    background: linear-gradient(135deg, #667eea20, #764ba220);
+    color: black;
+    font-weight: 400;
+    border-collapse: collapse;
+    border: none;
+}
+.well.tabla-documentos-cargados {
+    background-color: white !important;
+    padding-top: 1rem;
+    margin: 2rem 5px 1rem 5px;
+    border: none;
+    color: white;
+}
+
+.tablaDocsCargados thead.tabla-header-color {
+    /*background: linear-gradient(to right, #0353cd, #5900c9);*/
+    background: linear-gradient(to right,rgba(80, 120, 184, 0.6),rgba(159, 89, 199, 0.6));
+    color: white;
+    text-align: center;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+    .tablaDocsCargados tbody tr:hover {
+        background-color: rgba(255, 255, 255, 0.2) !important;
+    }
+
+    .tablaDocsCargados,
+    .tablaDocsCargados th {
+        padding: 0.5rem;
+    }
+        .tablaDocsCargados td {
+            border: 2px solid #b4b9be70;  Se aplica a todas las celdas 
+            border-top-left-radius: 3px;
+            border-top-right-radius: 3px;
+            padding: 0.3rem;
+        }
+
+         Opcional: eliminar bordes de los extremos para dejar solo los interiores 
+        .tablaDocsCargados tr:first-child th {
+            border-top: none;
+        }
+
+        .tablaDocsCargados tr:last-child td {
+            border-bottom: none;
+        }
+
+        .tablaDocsCargados tr td:first-child,
+        .tablaDocsCargados tr th:first-child {
+            border-left: none;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+
+        .tablaDocsCargados tr td:last-child,
+        .tablaDocsCargados tr th:last-child {
+            border-right: none;
+            text-align:center;
+        }
+
+
+  /*Titulo modero de Inicio*/
+.header-med {
+    background: #ffffffc9;
+    border-radius: 10px;
+    padding: 5px 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 4px 20px rgb(0 0 0 / 23%);
+    border-left: 5px solid #3498db;
+    text-align: center;
+}
+
+    .header-med h2 {
+        color: #2c3e50;
+        font-size: 22px;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .header-med p {
+        color: #7f8c8d;
+        font-size: 16px;
+    }
+
+ /*Mejoras para las tarjetas/wells*/
+.medical-card {
+    background: white;
+}
+
+    .medical-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #3498db, #2ecc71);
+        border-radius: 15px 15px 0 0;
+    }
+
+    .medical-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.12);
+    }
+
+ /*Estilo para checkboxes y listas*/ 
+.checkbox-list {
+    list-style: none;
+    margin: 5px 0 15px 0;
+}
+
+.checkbox-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    padding: 5px 12px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+    .checkbox-item:hover {
+        background: #e9ecef;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+        width: 18px;
+        height: 18px;
+        margin-right: 12px;
+        accent-color: #3498db;
+    }
+
+    .checkbox-item label {
+        color: #495057;
+        font-size: 14px;
+        cursor: pointer;
+        flex: 1;
+    }
+
+    .checkbox-item.checked1 {
+        background: #dae0e5;
+        border-left: 3px solid #2196f3;
+    }
+    .checkbox-item.checked2 {
+        background: #e5dae5;
+        border-left: 3px solid #a621f3;
+    }
+
+.additional-text {
+    color: #6c757d;
+    font-style: italic;
+    font-size: 13px;
+    margin-left: 5px;
+}
+
+/*  NUEVO   */
+/* Aplica el diseño solo dentro de #contenedorTarjetas */
+
+#contenedorTarjetas {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /*background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);*/
+    padding: 2rem;
+    /*min-height: 100vh;*/
+}
+
+    #contenedorTarjetas .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 10px;
+        margin-bottom: 2rem;
+    }
+
+    #contenedorTarjetas .card {
+        background: white;
+        border-radius: 20px;
+        padding: 10px 20px;
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        cursor: pointer;
+        color: #2a2a2a;
+        border: 1px solid #a8b4c0;
+    }
+
+        #contenedorTarjetas .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+        }
+
+        #contenedorTarjetas .card:hover {
+            transform: translateY(-3px) scale(1.01);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+        }
+
+    #contenedorTarjetas .card-top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 5px 0;
+    }
+
+    #contenedorTarjetas .patient-name {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: #2d3748;
+        text-transform: capitalize;
+    }
+
+    #contenedorTarjetas .status-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        /*font-size: 0.85rem;*/
+        color: #718096;
+    }
+
+    #contenedorTarjetas .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #48bb78;
+    }
+
+    #contenedorTarjetas .appointment-details {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3rem;
+        margin-bottom: 2.5rem;
+    }
+
+    #contenedorTarjetas .detail-box {
+        text-align: center;
+        padding: 15px;
+        border-radius: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+
+        #contenedorTarjetas .detail-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+            transition: left 0.6s ease;
+        }
+
+        #contenedorTarjetas .detail-box:hover::before {
+            left: 100%;
+        }
+
+    #contenedorTarjetas .date-box {
+        background: linear-gradient(135deg, #667eea36, #6a2ea62e);
+        border: 1px solid #667eea30;
+    }
+
+    #contenedorTarjetas .time-box {
+        background: linear-gradient(135deg, #f093fb4d, #f5576c30);
+        border: 1px solid #f093fb30;
+    }
+
+    #contenedorTarjetas .detail-label {
+        color: #718096;
+        font-size: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+    }
+
+    #contenedorTarjetas .detail-value {
+        color: #2d3748;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    #contenedorTarjetas .expand-btn {
+        background: rgba(102, 126, 234, 0.1);
+        border: none;
+        color: #667eea;
+        padding: 8px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+        #contenedorTarjetas .expand-btn:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: scale(1.1);
+        }
+
+        #contenedorTarjetas .expand-btn i {
+            transition: transform 0.3s ease;
+        }
+
+        #contenedorTarjetas .expand-btn.expanded i {
+            transform: rotate(180deg);
+        }
+
+    #contenedorTarjetas .card-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        opacity: 0;
+    }
+
+        #contenedorTarjetas .card-content.expanded {
+            max-height: 1000px;
+            opacity: 1;
+            margin-top: 20px;
+        }
+
+    #contenedorTarjetas .content-section {
+        margin-bottom: 20px;
+        padding: 15px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #667eea;
+    }
+
+        #contenedorTarjetas .content-section h4 {
+            color: #2d3748;
+            margin-bottom: 10px;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+    #contenedorTarjetas .checkbox-list {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    #contenedorTarjetas .checkbox-item {
+        display: flex;
+        align-items: center;
+        padding: 4px 12px;
+        background: white;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+
+        #contenedorTarjetas .checkbox-item:hover {
+            background: #e6f3ff;
+        }
+
+        #contenedorTarjetas .checkbox-item input {
+            margin-right: 10px;
+            accent-color: #667eea;
+        }
+
+    #contenedorTarjetas .text-content {
+        background: white;
+        padding: 15px;
+        border-radius: 8px;
+        border-left: 4px solid #48bb78;
+        color: #2d3748;
+        line-height: 1.6;
+    }
+
+    #contenedorTarjetas .documents-section {
+        background: #1a202c;
+        border-radius: 12px;
+        overflow: hidden;
+        margin-top: 15px;
+    }
+
+    #contenedorTarjetas .documents-header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 15px;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    #contenedorTarjetas .documents-table {
+        width: 100%;
+        color: white;
+    }
+
+        #contenedorTarjetas .documents-table th,
+        #contenedorTarjetas .documents-table td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        #contenedorTarjetas .documents-table th {
+            background: #2d3748;
+            font-weight: 600;
+        }
+
+        #contenedorTarjetas .documents-table tr:hover {
+            background: rgba(102, 126, 234, 0.2);
+        }
+    
+@media (max-width: 768px) {
+    #contenedorTarjetas .cards-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #contenedorTarjetas .appointment-details {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    #contenedorTarjetas .card {
+        padding: 20px;
+        /*font-size: 0.8rem;*/
+    }
+}
+
+#contenedorTarjetas .fade-in {
+    animation: fadeIn 0.6s ease forwards;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* =====================================================
+                NUEVO DISEÑO DE FICHAS 
+ =======================================================*/
+
+/* --   estilos en General -- */
+
+#pestaniaEvaluacion {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 400;
+    /*color: #334155;*/
+    line-height: 1.5;
+}
+
+    #pestaniaEvaluacion h1,
+    #pestaniaEvaluacion h2,
+    #pestaniaEvaluacion h3,
+    #pestaniaEvaluacion h4 {
+        font-family: 'DM Sans', sans-serif;
+        font-weight: 600;
+        /*color: #0f172a;*/
+    }
+
+    /*#pestaniaEvaluacion label {
+        font-size: 12px;
+        font-weight: 500;
+        color: #64748b;
+    }*/
+
+    #pestaniaEvaluacion input,
+    #pestaniaEvaluacion select,
+    #pestaniaEvaluacion textarea {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 400;
+        /*color: #334155;*/
+    }
+
+        /*#pestaniaEvaluacion input::placeholder,
+        #pestaniaEvaluacion textarea::placeholder {
+            color: #94a3b8;
+            opacity: 1;
+        }*/
+
+    #pestaniaEvaluacion button {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    #pestaniaEvaluacion th {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 12px;
+        font-weight: 600;
+        color: #0f172a;
+    }
+
+    #pestaniaEvaluacion td {
+        font-family: 'DM Sans', sans-serif;
+        font-size: 13px;
+        color: #334155;
+    }
+
+
+/* --   estilos del formulario  -- */
+
+.contenedor-horizontal2 {
+    margin: 0 2rem;
+    padding-top: 0;
+    align-items: center
+}
+
+.cuadros-blancos-redondeados {
+    margin: 2rem;
+    border: 2px solid #2e333930;
+    border-radius: 6px;
+    background-color: white;
+    padding: 1rem;
+    align-items: baseline;
+}
+
+.cuadros-blancos-redondeado-ingreso {
+    background-color: #2c2c2c17;
+    border: 2px solid #30363d26;
+    border-radius: 10px;
+    padding: 1.5rem !important;
+    margin: 2rem;
+    align-items: baseline;
+}
+
+.cuadros-obscuros-redondeados {
+    margin: 2rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    background-color: #161b22;
+    padding: 1rem;
+    align-items: baseline;
+}
+
+.cuadros-fondo-texto-ingreso {
+    width: 100%;
+    resize: vertical;
+    background-color: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 1rem;
+}
+
+.cuadros-fondo-input-ingreso {
+    width: 100%;
+    resize: vertical;
+    background-color: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 6px;
+    padding: 0.5rem;
+}
+
+.color-texto-primario { /* Modo claro */
+    color: #0f172a;
+}
+.color-texto-secundario {
+    color: #334155;
+}
+.color-texto-muted {
+    color: #64748b;
+}
+    .texto-muted::placeholder {
+        color: #64748b;
+        opacity: 1; /* Firefox reduce la opacidad por defecto */
+    }
+
+
+
+.cuadros-obscuros-redondeados {
+    background-color: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 1.5rem !important;
+    margin: 2rem;
+    align-items: baseline;
+}
+.cuadros-obscuros-redondeados-internos {
+    background-color: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 10px;
+    padding: 1.5rem !important;
+    margin: 2rem;
+    align-items: baseline;
+}
+.cuadros-fondo-input-ingreso-obs,
+.cuadros-fondo-texto-ingreso-obs {
+    width: 100%;
+    background-color: #162130;
+    border: 2px solid #64748b;
+    border-radius: 6px;
+    padding: 0.4rem;
+    color: #f1f5f9; /* texto ingresado: blanco claro */
+    font-size: 13px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-sizing: border-box;
+}
+
+.cuadros-fondo-texto-ingreso-obs {
+    resize: vertical;
+    padding: 1rem;
+    border-width: 1px;
+    border-color: #30363d;
+}
+
+    .cuadros-fondo-input-ingreso-obs:focus,
+    .cuadros-fondo-texto-ingreso-obs:focus {
+        outline: none;
+        /*border-color: #38bdf8;*/
+        /*box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.15);*/
+    }
+
+    .cuadros-fondo-input-ingreso-obs::placeholder,
+    .cuadros-fondo-texto-ingreso-obs::placeholder,
+    .texto-muted-obs::placeholder {
+        color: #aaaeb2; /* placeholder más claro */
+        opacity: 1;
+    }
+
+
+.color-texto-primario-obs {
+    color: #c8d1e4;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.color-texto-secundario-obs {
+    color: #899aaa;
+    letter-spacing: 0.05em;
+}
+.color-texto-secundario-obs-ama {
+    color: #e3b341;
+    letter-spacing: 0.05em;
+}
+
+
+
+/**************     Estilos para el selector de SI o No     *******************************/
+
+.selector-si-no-3 {
+    /*margin-bottom: 25px;*/
+}
+
+    .selector-si-no-3 .control-label {
+        margin-bottom: 10px;
+        display: block;
+        font-weight: 600;
+        color: #2d3748;
+    }
+
+    .selector-si-no-3 .opciones {
+        display: flex;
+        gap: 12px;
+    }
+
+    .selector-si-no-3 input[type="radio"] {
+        display: none;
+    }
+
+    .selector-si-no-3 .opciones label {
+        flex: 1;
+        cursor: pointer;
+        padding: 12px 3rem;
+        border-radius: 10px;
+        text-align: center;
+        transition: all 0.3s ease;
+        background: #f8fafc;
+        border: 2px solid #cbd5e1;
+        font-weight: 600;
+        color: #475569;
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+        .selector-si-no-3 .opciones label::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transition: opacity 0.3s ease;
+            z-index: 0;
+            opacity: 0;
+        }
+
+        .selector-si-no-3 .opciones label[for$="-si"]::before {
+            background: linear-gradient(135deg, #24c961 0%, #0e8c3c 100%);
+        }
+
+
+.selector-si-no-3 .opciones label[for$="-no"]::before {
+    background: linear-gradient(135deg, #ef4444 0%, #7f1d1d 100%);
+}
+
+    .selector-si-no-3 input[type="radio"]:checked + label::before {
+        opacity: 1;
+    }
+
+    .selector-si-no-3 input[type="radio"]:checked + label {
+        color: white;
+        border-color: transparent;
+    }
+
+        .selector-si-no-3 input[type="radio"]:checked + label[for$="-si"] {
+            box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
+        }
+
+        .selector-si-no-3 input[type="radio"]:checked + label[for$="-no"] {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+        }
+
+    .selector-si-no-3 .opciones label:hover {
+        transform: scale(1.05);
+        border-color: #94a3b8;
+    }
+
+    .selector-si-no-3 .icono,
+    .selector-si-no-3 .texto {
+        position: relative;
+        z-index: 1;
+    }
+
+    .selector-si-no-3 .icono {
+        font-size: 18px;
+    }
+
+/* Input adicional */
+.input-adicional {
+    margin-top: 15px;
+    display: none;
+}
+
+    .input-adicional.visible {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.input-adicional input[type="text"] {
+    width: 100%;
+    padding: 6px;
+    /*border: 2px solid #cbd5e1;*/
+    /*border-radius: 8px;*/
+    /*font-size: 14px;*/
+    transition: border-color 0.3s ease;
+}
+
+
+/**************     Estilos para la seccion de consumo sustancias y para tablas     *******************************/
+
+#consumoSustancias .tabla-header-row {
+    display: flex;
+    align-items: center;
+    border-radius: 6px 6px 0 0;
+    margin: 0 1rem;
+    overflow: hidden;
+    width: calc(100% - 2rem); /* compensa el margin */
+    box-sizing: border-box;
+}
+
+    /* Sobreescribe las clases tabla-col-* dentro del header */
+    #consumoSustancias .tabla-header-row .tabla-col-label,
+    #consumoSustancias .tabla-header-row .tabla-col-sm,
+    #consumoSustancias .tabla-header-row .tabla-col-md {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 10px 8px !important;
+        min-width: 0;
+        min-height: 40px; /* altura mínima igual para todas */
+        display: flex !important;
+        align-items: center; /* centra verticalmente */
+        justify-content: center; /* centra horizontalmente */
+        word-break: break-word; /* permite romper palabras largas */
+        line-height: 1.3;
+    }
+
+    #consumoSustancias .tabla-header-row .tabla-col-label {
+        background-color: #1a9ea8 !important;
+        flex: 2;
+    }
+
+    #consumoSustancias .tabla-header-row .tabla-col-sm:nth-child(2) {
+        background-color: #17b8c4 !important;
+        flex: 2;
+    }
+
+    #consumoSustancias .tabla-header-row .tabla-col-md:nth-child(3) {
+        background-color: #14c4c4 !important;
+        flex: 2;
+    }
+
+    /*#consumoSustancias .tabla-header-row .tabla-col-md:nth-child(4) {
+        background-color: #0eb8a8 !important;
+        flex: 2;
+    }*/
+
+    #consumoSustancias .tabla-header-row .tabla-col-sm:nth-child(4) {
+        background-color: #0ca898 !important;
+        flex: 2;
+    }
+
+    #consumoSustancias .tabla-header-row .tabla-col-md:nth-child(5) {
+        background-color: #0a9888 !important;
+        flex: 2;
+    }
+
+
+
+/**************     Estilos para la seccion de estilos de vida     *******************************/
+#estiloVida .tabla-header-row {
+    display: flex;
+    align-items: center;
+    border-radius: 6px 6px 0 0;
+    margin: 0 1rem;
+    overflow: hidden;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+}
+
+    #estiloVida .tabla-header-row .tabla-col-label,
+    #estiloVida .tabla-header-row .tabla-col-sm,
+    #estiloVida .tabla-header-row .tabla-col-md {
+        font-size: 11px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 10px 8px !important;
+        min-width: 0;
+        min-height: 40px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word;
+        line-height: 1.3;
+    }
+
+    /* estiloVida - header y datos con mismo ancho */
+    #estiloVida .tabla-header-row > div:nth-child(1) {
+        flex: 0 0 25%;
+        max-width: 25%;
+    }    
+    #estiloVida .tabla-data-row > div:nth-child(1) {
+        flex: 0 0 24%;
+        max-width: 24%;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(2){
+        flex: 0 0 15%;
+        max-width: 15%;
+    }
+    #estiloVida .tabla-data-row > div:nth-child(2) {
+        flex: 0 0 16%;
+        max-width: 16%;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(3) {
+        flex: 0 0 40%;
+        max-width: 40%;
+    }
+    #estiloVida .tabla-data-row > div:nth-child(3) {
+        flex: 0 0 41%;
+        max-width: 41%;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(4){
+        flex: 0 0 22%;
+        max-width: 22%;
+    }    
+    #estiloVida .tabla-data-row > div:nth-child(4) {
+        flex: 0 0 20%;
+        max-width: 20%;
+    }
+
+    
+    /* colores del header por separado */
+    #estiloVida .tabla-header-row > div:nth-child(1) {
+        background-color: #1a9ea8 !important;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(2) {
+        background-color: #17b8c4 !important;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(3) {
+        background-color: #14c4c4 !important;
+    }
+
+    #estiloVida .tabla-header-row > div:nth-child(4) {
+        background-color: #0eb8a8 !important;
+    }
+
+
+
+#consumoSustancias .tabla-data-row .tabla-col-sm,
+#consumoSustancias .tabla-data-row .tabla-col-md,
+#estiloVida .tabla-data-row .tabla-col-sm,
+#estiloVida .tabla-data-row .tabla-col-md {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#consumoSustancias .tabla-data-row .cuadros-fondo-input-ingreso,
+#estiloVida .tabla-data-row .cuadros-fondo-input-ingreso {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+    text-align: center !important;
+}
+
+#consumoSustancias .tabla-data-row select.cuadros-fondo-input-ingreso,
+#estiloVida .tabla-data-row select.cuadros-fondo-input-ingreso {
+    text-align-last: center !important;
+}
+
+
+.tabla-data-row {
+    display: flex !important;
+    align-items: center;
+    padding: 6px 1rem;
+    margin: 0 1rem;
+    border-top: 1px solid #e2e8f0;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+}
+
+    .tabla-data-row:last-of-type {
+        border-bottom: 1px solid #e2e8f0;
+        border-radius: 0 0 6px 6px;
+    }
+
+    .tabla-data-row:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+.tabla-col-label {
+    flex: 2;
+    min-width: 0;
+    font-weight: 600;
+    font-size: 12px;
+    color: #334155;
+    padding: 0 4px;
+}
+
+.tabla-col-sm {
+    flex: 1;
+    min-width: 0;
+    padding: 0 4px;
+}
+
+.tabla-col-md {
+    flex: 2;
+    min-width: 0;
+    padding: 0 4px;
+}
+
+
+/**************     Estilos para la seccion de Actividad laboral    *******************************/
+
+/* =====================================================
+   ACTIVIDAD LABORAL - Header general
+======================================================= */
+#actividadLaboral .tabla-header-row {
+    display: flex;
+    align-items: center;
+    border-radius: 6px 6px 0 0;
+    margin: 0 1rem;
+    overflow: hidden;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+}
+
+    #actividadLaboral .tabla-header-row .tabla-col-label,
+    #actividadLaboral .tabla-header-row .tabla-col-sm,
+    #actividadLaboral .tabla-header-row .tabla-col-md {
+        font-size: 10px !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        text-transform: uppercase;
+        text-align: center;
+        padding: 8px 4px !important;
+        min-height: 40px;
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+        word-break: break-word;
+        line-height: 1.2;
+    }
+
+/* ── Header fila 1 y Data row A — mismos % ── */
+#actividadLaboral .act-header-1 > div:nth-child(1),
+#actividadLaboral .act-lab-row-a > div:nth-child(1) {
+    flex: 0 0 30%;
+    max-width: 30%;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(2),
+#actividadLaboral .act-lab-row-a > div:nth-child(2) {
+    flex: 0 0 30%;
+    max-width: 30%;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(3),
+#actividadLaboral .act-lab-row-a > div:nth-child(3) {
+    flex: 0 0 20%;
+    max-width: 20%;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(4),
+#actividadLaboral .act-lab-row-a > div:nth-child(4) {
+    flex: 0 0 20%;
+    max-width: 20%;
+}
+
+/* ── Header fila 2 y Data row B — mismos % ── */
+#actividadLaboral .act-header-2 > div:nth-child(1),
+#actividadLaboral .act-lab-row-b > div:nth-child(1) {
+    flex: 0 0 25%;
+    max-width: 25%;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(2),
+#actividadLaboral .act-lab-row-b > div:nth-child(2) {
+    flex: 0 0 15%;
+    max-width: 15%;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(3),
+#actividadLaboral .act-lab-row-b > div:nth-child(3) {
+    flex: 0 0 15%;
+    max-width: 15%;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(4),
+#actividadLaboral .act-lab-row-b > div:nth-child(4) {
+    flex: 0 0 22.5%;
+    max-width: 22.5%;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(5),
+#actividadLaboral .act-lab-row-b > div:nth-child(5) {
+    flex: 0 0 22.5%;
+    max-width: 22.5%;
+}
+/* ── Colores Header fila 1 ── */
+#actividadLaboral .act-header-1 > div:nth-child(1) {
+    background-color: #1a9ea8 !important;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(2) {
+    background-color: #17b8c4 !important;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(3) {
+    background-color: #14c4c4 !important;
+}
+
+#actividadLaboral .act-header-1 > div:nth-child(4) {
+    background-color: #0eb8a8 !important;
+}
+
+/* ── Colores Header fila 2 ── */
+#actividadLaboral .act-header-2 > div:nth-child(1) {
+    background-color: #0ca898 !important;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(2) {
+    background-color: #0a9888 !important;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(3) {
+    background-color: #099080 !important;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(4) {
+    background-color: #088878 !important;
+}
+
+#actividadLaboral .act-header-2 > div:nth-child(5) {
+    background-color: #077870 !important;
+}
+
+/* ── Border radius headers ── */
+#actividadLaboral .act-header-1 {
+    border-radius: 6px 6px 0 0;
+}
+
+#actividadLaboral .act-header-2 {
+    border-radius: 0;
+    margin-top: 2px !important;
+}
+/* =====================================================
+   ACTIVIDAD LABORAL - Data rows
+======================================================= */
+#actividadLaboral .tabla-data-row {
+    display: flex !important;
+    align-items: center;
+    padding: 6px 1rem;
+    margin: 0 1rem;
+    border-left: 1px solid #e2e8f0;
+    border-right: 1px solid #e2e8f0;
+    border-bottom: 1px solid #f1f5f9;
+    width: calc(100% - 2rem);
+    box-sizing: border-box;
+}
+
+/* Separador visual entre registros */
+#actividadLaboral .act-lab-row-b {
+    border-bottom: 2px solid #e2e8f0 !important;
+    margin-bottom: 6px;
+}
+
+#actividadLaboral .tabla-data-row .tabla-col-label,
+#actividadLaboral .tabla-data-row .tabla-col-sm,
+#actividadLaboral .tabla-data-row .tabla-col-md {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#actividadLaboral .tabla-data-row .cuadros-fondo-input-ingreso {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
+}
+
+#actividadLaboral .tabla-data-row select.cuadros-fondo-input-ingreso {
+    text-align-last: center !important;
+}
+
+/* =====================================================
+   ACTIVIDAD LABORAL - Responsive
+======================================================= */
+@media (max-width: 992px) {
+    #actividadLaboral .tabla-header-row .tabla-col-label,
+    #actividadLaboral .tabla-header-row .tabla-col-sm,
+    #actividadLaboral .tabla-header-row .tabla-col-md {
+        font-size: 8px !important;
+        padding: 6px 2px !important;
+        line-height: 1.1;
+    }
+}
+
+@media (min-width: 992px) and (max-width: 1400px) {
+    #actividadLaboral .tabla-header-row .tabla-col-label,
+    #actividadLaboral .tabla-header-row .tabla-col-sm,
+    #actividadLaboral .tabla-header-row .tabla-col-md {
+        font-size: 9px !important;
+        padding: 7px 3px !important;
+        line-height: 1.2;
+    }
+}
+
+@media (min-width: 1400px) {
+    #actividadLaboral .tabla-header-row .tabla-col-label,
+    #actividadLaboral .tabla-header-row .tabla-col-sm,
+    #actividadLaboral .tabla-header-row .tabla-col-md {
+        font-size: 11px !important;
+        padding: 10px 6px !important;
+        line-height: 1.3;
+    }
+}

@@ -1,7 +1,7 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="CreaTareas.aspx.cs" Inherits="ReporteTareas.Formulario.CreaTareas" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/CreaTarea.js"></script>
+    <script src="../js/CreaTarea.js?v=2"></script>
         <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -42,7 +42,7 @@
                                             <div class="col-lg-12">
                                                 <div class="col-lg-4">
 													<label>Num. OS</label>
-													<input type="text" class="form-control"  id="txt_Os" placeholder="Num. OS">
+													<input type="text" class="form-control"  id="txt_Os" placeholder="N° de orden de servicio">
 													<p class="help-block"></p>														
                                                 </div>
 

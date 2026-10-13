@@ -1,0 +1,412 @@
+﻿body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+hr {
+    border: 0;
+    height: 2px;
+    background: #96A6B0; /* Color de la línea */
+}
+.contenedor-horizontal {
+    margin: 0 2rem;
+    padding-top: 0;
+    align-items: center
+}
+
+.titulo-pag {
+    margin: 1rem 0 0 0;
+    list-style: none;
+    background-color: #f5f5f5;
+    border-radius: 4px;
+}
+
+.imagen-div {
+    width: auto; /* Ancho de tu div */
+    height: 200px; /* Alto de tu div */
+    /*background-image: url('../carrusel/imagenes/usuarios.png');  Ruta de la imagen */
+    background-size: contain; /* Ajustar la imagen al tamaño del div sin deformarla */
+    background-repeat: no-repeat; /* Evitar que la imagen se repita */
+    background-position: center center; /* Centrar la imagen en el div */
+}
+
+/*    Icono para contacto de emergencia    */
+.user-icon {
+    width: 70px;
+    height: 70px;
+    background-color: #E32617; /* Color de fondo del círculo */
+    border-radius: 50%; /* Para hacerlo circular */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #fff; /* Color del icono */
+    font-size: 45px; /* Tamaño del icono */
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    gap: 20px;
+}
+.horizontal {
+    display: flex;
+    align-items: center;
+    margin-top: 2rem;
+}
+.horizontal-cuadriculado-flow {
+    display: flow-root;
+    align-items: center;
+    justify-content: space-between;
+}
+.horizontal-simple {
+    display: table-row;
+    align-items: center;
+}
+.horizontal-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 2rem;
+}
+.horizontal-group-simple {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.horizontal-group-special {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 2rem;
+}
+.horizontal-group-around {
+    display: flex;
+    justify-content: space-around;
+    justify-items: stretch;
+}
+.horizontal-group-evenly {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+}
+.horizontal-group-end {
+    display: flex;
+    align-items: center;
+    justify-content:end;
+}
+.horizontal-group-start {
+    display: flex;
+    align-items: center;
+    justify-content: start;
+}
+.centrar-elemento {
+    margin-left: auto;
+    margin-right: auto;
+    display: block;
+}
+.input-basic {
+    width: 25px;
+}
+.input-basic3 {
+    width: 30px;
+}
+.input-medium {
+    width: 45px;
+}
+
+.contenedor {
+    max-width: 80%; /*Define el ancho máximo del contenedor */
+    margin-left: auto; /* Centra el contenedor horizontalmente */
+    margin-right: auto;
+    padding-left: 15px; /* Agrega un poco de espacio en los bordes izquierdo y derecho */
+    padding-right: 15px;
+}
+
+.columna {
+    width:50%;
+    margin-top:1rem;
+}
+
+/* Estilo para los botones SI / NO */
+.btn-custom:hover {
+    background-image: linear-gradient(to bottom, #587EDD, #7E38D8);
+}
+.btn-custom {
+    background-image: linear-gradient(to bottom, #29CAE4, #08759B);
+    color: black;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 18px;
+    cursor: pointer;
+}
+    .btn-custom.active {
+        background-image: none;
+        background-color: #587EDD;
+        color: white;
+    }
+
+
+/* Estilo de titulos para labels*/
+.titulo-examen {
+    background-color: rgba(160, 163, 172, 0.233);
+    text-align: center;
+    padding-bottom: 2rem;
+    padding-top: 2rem;
+    width: 100%;
+}
+
+/* Estilo de titulos para labels*/
+.titulo-cuadros {
+    font-size: smaller;
+    text-align:center;
+
+}
+
+/*  Boton flotante de regreso en todas las paginas*/
+.chat-button {
+    height: 50px;
+    width: 50px;
+    border-radius: 60px;
+    background: url(../../carrusel/imagenes/icons/010-atras-1.png);
+    /*background-color: rgba(29, 41, 80, 0.692);
+    box-shadow: 0px 3px 12px rgba(0, 0, 0, 0.2);*/
+    background-size: 80%;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;    
+    cursor:pointer;
+}
+
+/*  grupo de input vertical*/
+.grupo-input {
+    position: relative;
+    /* display: table; */
+    border-collapse: separate;
+}
+/* variante de input-group-addon */
+.input-group-mio {
+    display: block;
+    padding: 5px 12px;
+    line-height: 1;
+    color: #555;
+    text-align: center;
+    background-color: #eee;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+/*  Estilo para color degradado de well */
+.color-well {
+    /*background: radial-gradient(to bottom, #EADAE5, #DCB0BA);*/
+    background-color: #DFD5E8;
+}
+.color-well2 {
+    background-color: #EECDF9;
+}
+.color-well3 {
+    background-color: #D6D9EC;
+}
+.color-well4 {
+    /*background: linear-gradient(to bottom, #D5DFE8, #F8DDFC);*/
+    /*background: linear-gradient(to bottom, #DF33A8, #351E3E);*/
+    background: radial-gradient(ellipse at 50% 50%, #DF33A8 0%, #351E3E 100%);
+}
+.color-opaco {
+    background-color: rgba(255, 255, 255, 0.9);
+}
+
+/* Cuadros de ingreso con formato de col-sm-2 sin padding*/
+.cuadros-ingreso-normal {
+    width: 16.66666667%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de col-sm-3 sin padding*/
+.cuadros-ingreso-normal3 {
+    width: 20%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de col-sm-4 sin padding*/
+.cuadros-ingreso-normal4 {
+    width: 30%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal5 {
+    width: 40%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal6 {
+    width: 60%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+.cuadros-ingreso-normal7 {
+    width: 70%;
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+    float: left;
+}
+/* Cuadros de ingreso con formato de sin padding*/
+.cuadros-ingreso-normalX {    
+    position: relative;
+    min-height: 1px;
+    /* padding-right: 15px; */
+    /* padding-left: 15px; */
+    top: 0px;
+    left: 0px;
+}
+/*Select de FACTORES DE RIESGOS DEL PUESTO DE TRABAJO ACTUAL FBE3F1*/
+.select-principal {
+    background-color: #FAE6F2;
+}
+.select-temas {
+    background-color: #DDDCDF;
+}
+.select-medidas {
+    background-color: #E4E7FD;
+}
+.select-otros {
+    background-color: #E5FAEA;
+}
+.select-vacio {
+    background-color: #fdfdcff2;
+}
+
+/* Input de la Historia clinica INMUNIZACIONES */
+.select-dorado {
+    background-color: #FCBA4D;
+}
+.input-azul {
+    background-color: #CECAE5;
+}
+.input-nombre {
+    background-color: #E4E7FD;
+}
+
+/* Ingreso cuadros de consulta*/
+.sin-border-right {
+    border-right: none;
+}
+
+
+/*  Menu desplegable de opciones*/
+/* Estilo para el contenedor del menú desplegable */
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+/* Estilo para el botón del menú */
+.dropdown-button {
+    background-color: #f1f1f1;
+    border: 1px solid #aeaeb1;
+    padding: 8px 16px;
+    cursor: pointer;
+}
+/* Estilo para la lista de opciones */
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: #02043ea1;
+    color: #fff3f3;
+    border: 1px solid #919397;
+    z-index: 1;
+    width: 100%;
+}
+/* Estilo para los elementos de la lista */
+.dropdown-option {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+}
+/* Estilo para las casillas de verificación */
+.checkbox {
+    margin-right: 10px;
+}
+/* Estilo para la casilla de verificación cuando está seleccionada */
+.checkbox:checked + label {
+    font-weight: bold;
+}
+.icon-box {
+    width: 100px; /* Ancho del cuadro */
+    height: 100px; /* Alto del cuadro */
+    background-color: #3498db; /* Color de fondo */
+    border-radius: 15px; /* Bordes redondeados */
+    display: flex;
+    align-items: center;
+    justify-content: center;    
+}
+.icon-seleccion {
+    font-size: 45px; /* Tamaño del icono */
+    color: #fff; /* Color del icono */
+}
+
+/* Cuadros de seleccion de formulario */
+.box-link {
+    display: block; /* Hace que el enlace sea un bloque, ocupando todo el espacio del contenedor */
+    text-decoration: none; /* Elimina el subrayado predeterminado en el enlace */
+    color: inherit; /* Hereda el color de texto del contenedor */
+}
+
+/*  Media query para DepartamentoMedico.aspx - Antecedentes laborales titulos de Accidentes de trabajo   */
+@media only screen and (min-width: 576px) {
+    .titulos-antecedentes {
+        width: 16.66666667%;
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+        margin: 0 0.1rem 10px 0.1rem;
+    }
+    .titulo-antecedente-especial {
+        width: 16.66666667%; /* Cambiado el ancho para que ocupen toda la fila */
+        padding-top: 1rem;
+        margin: 0 0.1rem 10px 0.1rem;
+
+    }
+}
+
+@media only screen and (min-width: 1400px) {
+    .titulos-antecedentes {
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+        margin-right: 1px;
+        width: 16.66666667%;
+        position: relative;
+    }
+    .titulo-antecedente-especial {
+        padding-top: 1.5rem;
+        padding-bottom: 1rem;
+    }
+}

@@ -1,9 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Runtime.Serialization;
 
 namespace CapaEntidad
 {
@@ -31,7 +26,7 @@ namespace CapaEntidad
         public string COSTO_PLAN { get; set; }
         public string COSTO_REAL { get; set; }
         public string SALDO_DE_COSTOS { get; set; }
-        public string ESTATUS  { get; set; }
+        public string ESTATUS { get; set; }
         public string FECHA_ESTIMADA_DE_CIERRE { get; set; }
         public string FECHA_CIERRE { get; set; }
         public string MANTENIMIENTO { get; set; }

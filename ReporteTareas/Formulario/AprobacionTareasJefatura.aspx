@@ -1,10 +1,12 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="AprobacionTareasJefatura.aspx.cs" Inherits="ReporteTareas.Formulario.AprobacionTareasJefatura" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
-    <script src="../js/aprobacionTareasJefatura.js?v=1" type="text/javascript"></script>
+    <script src="../js/aprobacionTareasJefatura.js?v=2" type="text/javascript"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
     <script src="../js/jquery.blockUI.js" type="text/javascript"></script>
+    <script src="../js/chart.umd.js" type="text/javascript"></script>
+    <script src="../js/dashboardAprobacion.js?v=5" type="text/javascript"></script>
    
 </asp:Content>
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -46,6 +48,7 @@
                                     <option value="1">PENDIENTE DE APROBACION</option>
                                     <option value="2">TAREAS APROBADAS</option>
                                     <option value="3">TAREAS NO EJECUTADAS</option>
+                                    <option value="4">DASHBOARD</option>
                                 </select>
                             </div>
                         </div>
@@ -92,6 +95,142 @@
                             <div class="col-lg-4 col-md-4 col-sm-4 col-xs-4" style="text-align:center">
                             </div>
                         </div>						
+                        <%-- La tercera vista. Nace oculta igual que Pagina2; la
+                             enciende BtnConsulta cuando el combo vale 4. --%>
+                        <div class="panel-body" style="display: none;" id="Pagina3">
+
+                            <div id="dashMensaje" class="alert alert-warning" style="display: none"></div>
+
+                            <div class="row">
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-success">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashHorasAprobadas">–</div>
+                                            <div class="text-muted">Horas aprobadas</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-warning">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashHorasPendientes">–</div>
+                                            <div class="text-muted">Horas pendientes</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashHorasOtros">–</div>
+                                            <div class="text-muted" title="Estados distintos de pendiente y aprobado">Otros estados</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-info">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashPersonasDia">–</div>
+                                            <div class="text-muted">Personas-día</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashDemoraPromedio">–</div>
+                                            <div class="text-muted">Demora promedio</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-2 col-md-4 col-sm-6">
+                                    <div class="panel panel-danger">
+                                        <div class="panel-body">
+                                            <div style="font-size: 22px" id="dashMasViejo">–</div>
+                                            <div class="text-muted">Lo más viejo sin aprobar (a hoy)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <%-- Las tareas no ejecutadas van en una tarjeta aparte y NUNCA
+                                 dentro de un gráfico: una fila de esa consulta es una tarea,
+                                 y las de arriba son horas y personas-día. Mezclarlas daría un
+                                 número que se ve bien y no significa nada. --%>
+                            <div class="row">
+                                <div class="col-lg-4 col-md-6">
+                                    <div class="panel panel-default">
+                                        <div class="panel-body">
+                                            <span style="font-size: 22px" id="dashNoEjecutadas">–</span>
+                                            <span class="text-muted">tareas no ejecutadas en el rango</span>
+                                            <a href="javascript:void(0)" id="dashIrNoEjecutadas"
+                                               onclick="IrANoEjecutadas()">Ver el detalle</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Evolución por semana</div>
+                                        <div class="panel-body" style="height: 260px">
+                                            <canvas id="graficoEvolucion"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Horas aprobadas por empresa</div>
+                                        <div class="panel-body" style="height: 260px">
+                                            <canvas id="graficoPorEmpresa"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-12">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Horas aprobadas por persona y cliente</div>
+                                        <div class="panel-body" style="overflow-x: auto">
+                                            <div id="dashTablaClientesVacia" class="text-muted" style="display: none">
+                                                Sin horas aprobadas en el rango.
+                                            </div>
+                                            <table id="dashTablaClientes" class="table table-condensed table-striped" style="font-size: 12px"></table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-lg-8">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Horas por persona
+                                            <small class="text-muted">&mdash; el asterisco marca a quien tuvo días que no llegaron a 8 h; el detalle, en el globo del gráfico</small>
+                                        </div>
+                                        <div class="panel-body" style="height: 320px; overflow-y: auto">
+                                            <%-- La envoltura es la que crece, no el panel: Chart.js con
+                                                 responsive ajusta el canvas a su contenedor, asi que
+                                                 dandole altura al canvas no pasa nada. El panel se queda
+                                                 en 320px y scrollea; la envoltura la estira el JS segun
+                                                 cuanta gente haya. --%>
+                                            <div id="envolturaPorPersona">
+                                                <canvas id="graficoPorPersona"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-lg-4">
+                                    <div class="panel panel-default">
+                                        <div class="panel-heading">Demora en aprobar</div>
+                                        <div class="panel-body" style="height: 320px">
+                                            <canvas id="graficoDemora"></canvas>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
                         <!-- /.panel-heading -->						
             </div>
           </div>

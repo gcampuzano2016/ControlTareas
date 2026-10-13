@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -20,6 +16,6 @@ namespace CapaEntidad
         public String NombreAlergia { get; set; }
         public String TipoAlergia { get; set; }
         public String ReaccionesAlergia { get; set; }
-       
+
     }
 }

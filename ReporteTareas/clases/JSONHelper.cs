@@ -1,11 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Web.Script.Serialization;
 using System.IO;
-using System.Runtime.Serialization;
 using System.Runtime.Serialization.Json;
+using System.Text;
 
 
 
@@ -30,7 +26,12 @@ namespace JSONHelper
                 DataContractJsonSerializer jsonSerializer = new DataContractJsonSerializer(objeto.GetType());
                 MemoryStream ms = new MemoryStream();
                 jsonSerializer.WriteObject(ms, objeto);
-                jsonResult = Encoding.Default.GetString(ms.ToArray());
+                /* DataContractJsonSerializer escribe siempre UTF-8. Leerlo con
+                   Encoding.Default (windows-1252) partia cada tilde o enie en dos
+                   caracteres; eso solo se veia bien mientras los handlers
+                   respondian en windows-1252, y dejo de verse el 21-09 al
+                   pasarlos a UTF-8: el combo de usuarios salia con los nombres rotos. */
+                jsonResult = Encoding.UTF8.GetString(ms.ToArray());
             }
             catch { throw; }
             return jsonResult;

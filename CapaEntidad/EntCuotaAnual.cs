@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CapaEntidad
 {
@@ -11,7 +7,7 @@ namespace CapaEntidad
         public Int32 IdCuotaAnual { get; set; }
         public Int32 IdProceso { get; set; }
         public Int32 IdMetas { get; set; }
-        public string  Fecha { get; set; }
+        public string Fecha { get; set; }
         public string CuotaAnual { get; set; }
         public Int32 Tipo { get; set; }
         public string Nombres { get; set; }

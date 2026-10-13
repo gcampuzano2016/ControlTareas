@@ -1,5 +1,6 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="HistoriaClinica.aspx.cs" Inherits="ReporteTareas.Formulario.HistoriaClinica" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+    <meta charset="UTF-8"> 
     <!-- Asegúrate de cargar primero jQuery -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     
@@ -7,7 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
-    <script src="../js/HistoriaClinica.js?v=4"></script>
+    <script src="../js/HistoriaClinica.js?v=6"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -64,19 +65,25 @@
                         <li data-target="#myCarousel" data-slide-to="2"></li>
                         <li data-target="#myCarousel" data-slide-to="3"></li>
                         <li data-target="#myCarousel" data-slide-to="4"></li>
-
+                        <li data-target="#myCarousel" data-slide-to="5"></li>
                     </ol>
 
                     <!-- Imagenes del carrusel  -->
                     <div class="carousel-inner">
                         <div class="item active">
-                            <img src="../carrusel/imagenes/slogan2.png">
+                            <img src="../carrusel/imagenes/medicina6.jpg">
                             <div class="carousel-caption">
                             </div>
                         </div>
 
                         <div class="item ">
-                            <img src="../carrusel/imagenes/medicina6.jpg">
+                            <img src="../carrusel/imagenes/medicina2.jpg">
+                            <div class="carousel-caption">
+                            </div>
+                        </div>
+
+                        <div class="item ">
+                            <img src="../carrusel/imagenes/medicina4.jpg">
                             <div class="carousel-caption">
                             </div>
                         </div>
@@ -94,7 +101,7 @@
                         </div>
 
                         <div class="item ">
-                            <img src="../carrusel/imagenes/medicina4.jpg">
+                            <img src="../carrusel/imagenes/slogan2.png">
                             <div class="carousel-caption">
                             </div>
                         </div>
@@ -114,15 +121,14 @@
 
                 <div class="input-group col-sm-4" style="margin: 0 auto; padding-top: 1rem; padding-bottom: 1rem;">
                     <input type="text" id="txtEmpleado" class="form-control" placeholder="Buscar paciente" oninput="BuscarEmpleado2()" value="">
-                    <ul class="typeahead dropdown-menu" role="listbox" style="top: 65px; left: 10px;" id="comboEmpleados2"></ul>
+                    <ul class="typeahead dropdown-menu" role="listbox" style="top: 45px; left: 10px;" id="comboEmpleados2"></ul>
                     <div class="input-group-btn">
                         <button class="btn btn-default" type="button" id="btnBuscarDatosPersonales" onclick="BuscarEmpleado()"><i class="glyphicon glyphicon-search"></i></button>
                     </div>
                 </div>
 
                 <div class="" style="background-color: #9DA8AD; padding: 1rem 1rem 0.2rem 1rem;">
-              
-                                      
+                                                    
                         <!--  Cuadro Datos personales  -->
                         <div class="well" style="margin-bottom: 10px; margin-top: 0; padding-top: 1rem;">
                             <div class="well-header" style="margin-top: 0;">
@@ -137,49 +143,49 @@
                                              <div class="horizontal-group">
                                                 <div class="input-group col-sm-12">
                                                     <span class="input-group-addon select-dorado" style="width: 25%;"><i class="glyphicon glyphicon-user"></i>  Nombre:</span>
-                                                    <input id="txtNombre" type="text" class="form-control" name="nombre" placeholder="Nombre" oninput="convertirAMayusculas(this)" readonly>
+                                                    <input id="txtNombre" type="text" class="form-control" name="nombre" placeholder="Nombre" oninput="convertirAMayusculas(this)" >
                                                 </div>
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
+                                                    <span class="input-group-addon  select-temas" style="width: 25px; text-align:left;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
                                                     <input type="text" class="form-control" style="" id="txtSexo" name="txtSexo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-basic3" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
+                                                    <span class="input-group-addon input-basic3 select-temas" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
                                                     <input type="text" class="form-control" style="" id="fechaNac" name="fechaNac" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-basic"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
                                                     <input id="txtEdad" type="number" class="form-control" name="edad" placeholder="0" readonly>
                                                 </div>
                                             </div>
 
-                                            <div class="horizontal">                                                
-                                                <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
-                                                    <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
-                                                </div>    
-                                                <div class="input-group col-sm-5" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
+                                            <div class="horizontal">   
+                                                <div class="input-group col-sm-6" >
+                                                    <span class="input-group-addon input-medium select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
                                                     <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
                                                 </div>
+                                                <div class="input-group col-sm-4" style="margin-left: 6rem;">
+                                                    <span class="input-group-addon select-temas" ><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
+                                                    <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
+                                                </div>  
                                             </div>
                                             <div class="horizontal-group">
                                                 <div class="input-group col-sm-8">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas" style="text-align:left;"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
                                                     <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
                                                 </div>                                                
                                             </div>
@@ -193,8 +199,7 @@
                                         </div>
 
                                     </formview>
-                                </div>                                                    
-
+                                </div>    
                         </div>                        
 
 
@@ -219,7 +224,30 @@
                         <!-- Cuadro de seleccion de Nuevo formularios -->
                         <div class="well" id="cuadroFormularios" style="display:none; margin-bottom: 10px; margin-top: 0; padding-top: 1rem;">
                            
-                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionPreocupacional" style="background-color:#B3C6E8; margin-top: 1rem;">
+                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnAtencionMedica" style="background-color:rgb(149, 204, 203); margin-top: 1rem;">
+                                <div class="icon-box" style="width:10rem;">
+                                   <i class="icon-seleccion glyphicon glyphicon-grain"></i>                              
+                                </div>
+                                
+                                <div class="cuadros-ingreso-normal7">
+                                    <h3>Atención Médica</h3>
+                                    <p>Servicio destinado a evaluar el estado de salud del personal de Compuequip DOS S.A. Incluye el diagnóstico, tratamiento y prevención de enfermedades o lesiones.
+Este formulario recoge la información de la atención realizada al empleado.</p>
+                                </div>
+                            </div>
+
+                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionNueva" style="background-color:#B3C6E8; margin-top: 1rem;">
+                                <div class="icon-box" style="width:10rem;">
+                                   <i class="icon-seleccion fa fa-stethoscope"></i>                               
+                                </div>
+                                
+                                <div class="cuadros-ingreso-normal7">
+                                    <h3>Evaluación Ocupacional 2026</h3>
+                                    <p>El formulario de evaluación preocupacional – inicio, será llenado por el personal médico y se aplicará al usuario en las siguientes instancias:</p>
+                                </div>
+                            </div>
+
+                            <%--<div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionPreocupacional" style="background-color:#B3C6E8; margin-top: 1rem;">
                                 <div class="icon-box" style="width:10rem;">
                                    <i class="icon-seleccion fa fa-file-text "></i>                               
                                 </div>
@@ -232,9 +260,9 @@
                                         <li>Al inicio de las actividades laborales en una empresa, institución pública o privada</li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div>--%>
 
-                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionPeriodica" style="background-color:#D1BBED">
+                            <%--<div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionPeriodica" style="background-color:#D1BBED">
                                 <div class="icon-box" style="width:10rem;">
                                    <i class="icon-seleccion fa fa-stethoscope  "></i>                               
                                 </div>
@@ -242,12 +270,11 @@
                                 <div class="cuadros-ingreso-normal7">
                                     <h3>Evaluación Periódica</h3>
                                     <p>El formulario de evaluación periódica, se aplicará al usuario anualmente a partir del segundo año de
-haber ingresado a la empresa o institución, instancia pública y privada.</p>
-                                    
+haber ingresado a la empresa o institución, instancia pública y privada.</p>                                    
                                 </div>
-                            </div>
+                            </div>--%>
                             
-                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionReintegro" style="background-color:#B9E3AE">
+                            <%--<div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionReintegro" style="background-color:rgb(184 229 173)">
                                 
                                   <div class="icon-box" style="width:10rem;">
                                      <i class="icon-seleccion fa fa-medkit "></i>                               
@@ -261,9 +288,9 @@ haber ingresado a la empresa o institución, instancia pública y privada.</p>
     incapacidad laboral.</p>                                    
                                  </div>
                                 
-                            </div>
+                            </div>--%>
 
-                            <div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionRetiro" style="background-color:#B3C6E8; margin-top: 1rem;">
+                            <%--<div class="well horizontal-group-evenly TipoFormulario box" id="btnEvaluacionRetiro" style="background-color:#B3C6E8; margin-top: 1rem;">
                                 <div class="icon-box" style="width:10rem;">
                                    <i class="icon-seleccion fa fa-sign-out "></i>                               
                                 </div>
@@ -273,7 +300,7 @@ haber ingresado a la empresa o institución, instancia pública y privada.</p>
                                     <p>Este formulario se debe utilizar cuando el usuario se desvincule de la empresa o institución pública o
 privada dentro de los 5 días posteriores a su salida.</p>
                                 </div>
-                            </div>
+                            </div>--%>
 
                             <div class="well horizontal-group-evenly TipoFormulario box" id="btnRegInmunizaciones" style="background-color:#D1BBED; margin-top: 1rem;">
                                 <div class="icon-box" style="width:10rem;">
@@ -293,12 +320,9 @@ privada dentro de los 5 días posteriores a su salida.</p>
                                 
                                 <div class="cuadros-ingreso-normal7">
                                     <h3>Certificado de salud en el trabajo</h3>
-                                    <p>Una vez ejecutadas las evaluaciones médicas preocupacional – inicio, periódica, reintegro, y retiro
-como resultado de todo el proceso, se emitirá el <strong>certificado</strong> en dos (2) copias originales, una de las
-cuales será archivada como parte de la historia clínica ocupacional y la otra entregada al usuario para
-los fines pertinentes.</p>
+                                    <p>Una vez ejecutadas las evaluaciones médicas preocupacional – inicio, periódica, reintegro, y retiro como resultado de todo el proceso, se emitirá el <strong>certificado</strong> en dos (2) copias originales, una de las cuales será archivada como parte de la historia clínica ocupacional y la otra entregada al usuario para los fines pertinentes.</p>
                                 </div>
-                            </div>
+                            </div>                            
                             
                         </div>
 
@@ -321,6 +345,7 @@ los fines pertinentes.</p>
                                                      <option value="PREOCUPACIONAL">Evaluación Preocupacional</option>
                                                      <option value="PERIODICA">Evaluación Periodica</option>     
                                                      <option value="REINTEGRO">Evaluación de Reintegro</option> 
+                                                     <option value="INMUNIZACIONES">Formulario de Inmunizaciones</option> 
                                                      <option value="Todas">Todas</option>
                                                </select>
                                          </fieldset>
@@ -381,7 +406,15 @@ los fines pertinentes.</p>
 
                         </div> <!-- Fin del well de Busqueda -->     
                              
-                        
+                        <!-- Spinner -->
+                        <div id="divSpinner" style="display:none;">
+                          <div class="overlay"></div> <!-- Agregamos un elemento overlay -->
+                          <div class="spinner-container">
+                            <div class="spinner"></div>
+                            <p class="loading-text">Cargando...</p>
+                          </div>
+                        </div>    
+
                         <!--------------------------------------------->
                         <!--        Modal Contacto de emergencia     -->
                         <!--------------------------------------------->

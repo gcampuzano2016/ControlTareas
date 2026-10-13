@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -32,11 +27,11 @@ namespace CapaDato
                 while (dr.Read())
                 {
                     EntInventario Tarea = new EntInventario();
-                    Tarea.IdInventario =Convert.ToInt32(dr["IdInventario"].ToString());
+                    Tarea.IdInventario = Convert.ToInt32(dr["IdInventario"].ToString());
                     Tarea.IdMarca = Convert.ToInt32(dr["IdMarca"].ToString());
                     Tarea.CodigoSAP = (dr["CodigoSAP"].ToString());
                     Tarea.NumParte = (dr["NumParte"].ToString());
-                    Tarea.Descripcion =(dr["Descripcion"].ToString());
+                    Tarea.Descripcion = (dr["Descripcion"].ToString());
                     Tarea.Cantidad = Convert.ToDouble(dr["Cantidad"].ToString());
                     Tarea.Ubicacion = (dr["Ubicacion"].ToString());
                     Tarea.Almacen = (dr["Almacen"].ToString());
@@ -53,7 +48,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
             return objInventario;
         }
@@ -77,12 +75,12 @@ namespace CapaDato
                 cmd.Parameters.AddWithValue("@CodigoSAP", objInventario.CodigoSAP);
                 cmd.Parameters.AddWithValue("@NumParte", objInventario.NumParte);
                 cmd.Parameters.AddWithValue("@Descripcion", objInventario.Descripcion);
-                cmd.Parameters.AddWithValue("@Cantidad", objInventario.Cantidad );
-                cmd.Parameters.AddWithValue("@Ubicacion", objInventario.Ubicacion );
+                cmd.Parameters.AddWithValue("@Cantidad", objInventario.Cantidad);
+                cmd.Parameters.AddWithValue("@Ubicacion", objInventario.Ubicacion);
                 cmd.Parameters.AddWithValue("@Almacen", objInventario.Almacen);
-                cmd.Parameters.AddWithValue("@NumSerie", objInventario.NumSerie );
+                cmd.Parameters.AddWithValue("@NumSerie", objInventario.NumSerie);
                 cmd.Parameters.AddWithValue("@PrecioUnitario", objInventario.PrecioUnitario);
-                cmd.Parameters.AddWithValue("@Usuario", objInventario.Usuario );
+                cmd.Parameters.AddWithValue("@Usuario", objInventario.Usuario);
                 cmd.Parameters.AddWithValue("@Estado", objInventario.Estado);
                 cmd.Parameters.AddWithValue("@Tipo", objInventario.Tipo);
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -130,7 +128,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -173,7 +174,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

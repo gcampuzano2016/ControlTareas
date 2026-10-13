@@ -36,14 +36,14 @@
                                             <asp:CommandField ButtonType="Button"  SelectText=" " ShowInsertButton="True" NewText="Solicitar Aprobar H. Extras" ControlStyle-CssClass ="btn btn-primary" />
                                             <asp:CommandField ButtonType="Button"  SelectText=" " ShowEditButton="True" EditText="Revisar Tarea"  ControlStyle-CssClass ="btn btn-primary" />
                                             <asp:BoundField DataField="Id_RegTareas" HeaderText="ID." Visible="true" />
-                                            <asp:BoundField DataField="Num_OrdenServicio" HeaderText="N° OS" Visible="true" />
-                                            <asp:BoundField DataField="Id_CompAranda" HeaderText="N° Ticket" Visible="false" />
-                                            <asp:BoundField DataField="Fch_Registro" HeaderText="Fch. Registro" Visible="false" />
-                                            <asp:BoundField DataField="Fch_EstAtencion" HeaderText="Fch. Est. Atencion" Visible="false" />
-                                            <asp:BoundField DataField="Fch_EstSolucion" HeaderText="Fch. Est. Solucion" Visible="false" />
-                                            <asp:BoundField DataField="Id_Responsable" HeaderText="Id. Responsable" Visible="false" />
-                                            <asp:BoundField DataField="Nom_Responsable" HeaderText="Nom. Responsable" Visible="false" />
-                                            <asp:BoundField DataField="Nom_Empresa" HeaderText="Nom. Cliente" Visible="true" />
+                                            <asp:BoundField DataField="Num_OrdenServicio" HeaderText="N° de orden de servicio" Visible="true" />
+                                            <asp:BoundField DataField="Id_CompAranda" HeaderText="N° de ticket" Visible="false" />
+                                            <asp:BoundField DataField="Fch_Registro" HeaderText="Fecha de registro" Visible="false" />
+                                            <asp:BoundField DataField="Fch_EstAtencion" HeaderText="Atención estimada" Visible="false" />
+                                            <asp:BoundField DataField="Fch_EstSolucion" HeaderText="Solución estimada" Visible="false" />
+                                            <asp:BoundField DataField="Id_Responsable" HeaderText="Código del responsable" Visible="false" />
+                                            <asp:BoundField DataField="Nom_Responsable" HeaderText="Responsable" Visible="false" />
+                                            <asp:BoundField DataField="Nom_Empresa" HeaderText="Cliente" Visible="true" />
                                             <asp:BoundField DataField="Nom_SlaAranda" HeaderText="Tipo SLA" Visible="false" />
                                             <asp:BoundField DataField="Det_Tarea" HeaderText="Det. Tarea" Visible="true" />
                                             <asp:BoundField DataField="Estado" HeaderText="Estado Tarea" Visible="true" />
@@ -126,19 +126,19 @@
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_Os" Text="N° Orden de Servicio" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_Os" Text="N° de orden de servicio" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_Os" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_Ticket" Text="Cod. Ticket" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_Ticket" Text="N° de ticket" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_Ticket" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_FchRegistro" Text="Fch. Registro" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_FchRegistro" Text="Fecha de registro" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_FchRegistro" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
 
@@ -154,24 +154,24 @@
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_Cliente" Text="Nom. Cliente" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_Cliente" Text="Cliente" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_Cliente" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_NomResponsable" Text="Nom. Responsable" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_NomResponsable" Text="Responsable" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_NomResponsable" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
 
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_FchTenInicio" Text="Fch. Inicio" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_FchTenInicio" Text="Inicio" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_FchTenInicio" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
                                                 <div class="col-lg-3">
                                                     <h6>
-                                                        <asp:Label ID="lbl_FchTenFin" Text="Fch. Fin" runat="server" CssClass="text-center"></asp:Label></h6>
+                                                        <asp:Label ID="lbl_FchTenFin" Text="Fin" runat="server" CssClass="text-center"></asp:Label></h6>
                                                     <asp:TextBox ID="txt_FchTenFin" runat="server" CssClass="form-control tam-text-box" Enabled="true" />
                                                 </div>
                                             </div>

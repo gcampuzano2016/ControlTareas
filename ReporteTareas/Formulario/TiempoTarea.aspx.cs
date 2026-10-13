@@ -1,16 +1,15 @@
-﻿using System;
+﻿using CapaEntidad;
+using CapaNegocio;
+using ReporteTareas.Controles;
+using System;
 using System.Collections.Generic;
+using System.Data;
 using System.IO;
-using System.Linq;
+using System.Reflection;
+using System.Text;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-using CapaEntidad;
-using CapaNegocio;
-using ReporteTareas.Controles;
-using System.Data;
-using System.Text;
-using System.Reflection;
 
 
 namespace ReporteTareas.Formulario
@@ -33,7 +32,7 @@ namespace ReporteTareas.Formulario
                         List<EntDetTarea> listaDetTareas = new List<EntDetTarea>();
                         //listaDetTareas = NegTareas.Sp_RTAConsultaUsuarioPorJefe("1001");
                         listaDetTareas = NegTareas.Sp_RTAConsultaUsuarioPorJefe(Session["Cod_Usuario"].ToString());
-                        if (listaDetTareas.Count>0)
+                        if (listaDetTareas.Count > 0)
                         {
                             CboUsuarios.DataSource = ToDataTable(listaDetTareas);
                             CboUsuarios.DataTextField = "Nom_Cliente";                            // FieldName of Table in DataBase
@@ -114,7 +113,7 @@ namespace ReporteTareas.Formulario
                 Response.AddHeader("content-disposition", "attachment;filename=GridViewExport.xls");
                 Response.Charset = "windows-1252";
                 Response.ContentType = "application/vnd.ms-excel";
-             
+
                 StringWriter sw = new StringWriter();
                 sw.WriteLineAsync(output.ToString());
                 Response.Output.Write(sw.ToString());
@@ -133,13 +132,13 @@ namespace ReporteTareas.Formulario
             if (CboUsuarios.SelectedItem.ToString() == "SELECCIONAR EMPLEADO")
             {
                 CodUnico = Session["Cod_Usuario"].ToString();
-                listaDetTareas = NegTareas.ListaDetTareas(CodUnico, fchIni, fchFin,"","",0,0,0,0,1); // negDetalleFacturaTemp.listaDetalleTempPresenta(Session["CodUnico"].ToString());
+                listaDetTareas = NegTareas.ListaDetTareas(CodUnico, fchIni, fchFin, "", "", 0, 0, 0, 0, 1); // negDetalleFacturaTemp.listaDetalleTempPresenta(Session["CodUnico"].ToString());
             }
             else
             {
-                listaDetTareas = NegTareas.ListaDetTareas(CboUsuarios.SelectedValue, fchIni, fchFin,"","",0,0,0,0,0); // negDetalleFacturaTemp.listaDetalleTempPresenta(Session["CodUnico"].ToString());
+                listaDetTareas = NegTareas.ListaDetTareas(CboUsuarios.SelectedValue, fchIni, fchFin, "", "", 0, 0, 0, 0, 0); // negDetalleFacturaTemp.listaDetalleTempPresenta(Session["CodUnico"].ToString());
             }
-            Session["Tabla"] =ToDataTable(listaDetTareas);
+            Session["Tabla"] = ToDataTable(listaDetTareas);
 
             dgv_Tareas.DataSource = listaDetTareas;
             dgv_Tareas.DataBind();

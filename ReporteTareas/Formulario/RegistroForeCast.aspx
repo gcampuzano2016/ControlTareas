@@ -5,7 +5,7 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
 
-    <script src="../js/RegistroForeCast.js?v=118" type="text/javascript"></script>
+    <script src="../js/RegistroForeCast.js?v=3" type="text/javascript"></script>
     <script src="../js/moment.min.js" type="text/javascript"></script>
     <script src="../js/moment-with-locales.min.js" type="text/javascript"></script>
     <script src="../js/bootstrap-datetimepicker.js" type="text/javascript"></script>
@@ -417,7 +417,12 @@
                                                     </div>
                                                     <div class="form-group col-lg-2">
                                                         <label>Mes</label>
-                                                        <select id="cboFecha1Buscar" class="js-example-basic-multiple4" name="facturacion[]" multiple="multiple">
+                                                        <select id="cboFecha1Buscar" class="js-example-basic-multiple4" name="facturacion[]" multiple="multiple" onchange="ObtenerSemanadelMes()">
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-lg-3">
+                                                        <label>Semana</label>
+                                                        <select id="cboSemana" class="form-control">
                                                         </select>
                                                     </div>
                                                     <div class="form-group col-lg-4" style="display: none">
@@ -425,12 +430,12 @@
                                                         <select id="cboFecha2Buscar" class="js-example-basic-multiple5" name="cierre[]" multiple="multiple">
                                                         </select>
                                                     </div>
+                                                </div>
+                                                <div class="row">
                                                     <div class="form-group col-lg-2">
                                                         <label>Proyecto Prioridad</label>
                                                         <input class="form-check-input" type="checkbox" value="" id="idFiltroPrioridad" onchange="SeleccionarPrioridad()">
                                                     </div>
-                                                </div>
-                                                <div class="row">
                                                     <div id="TipoProyecto2" class="form-group col-lg-2">
                                                         <label>Tipo Proyecto</label>
                                                         <select id="cboTipoProyecto2" class="form-control">
@@ -535,7 +540,7 @@
                                                             <th>Fecha Estimado de Cierre</th>
                                                             <th>Fecha de Facturación</th>
                                                             <th>Prioridad</th>
-                                                           <%-- <th>Observaciones</th>--%>
+                                                            <%-- <th>Observaciones</th>--%>
                                                             <th>% Cierre Negocio</th>
                                                             <th>Gerente de Producto</th>
                                                             <th>Gerente de Cuenta</th>

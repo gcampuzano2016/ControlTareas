@@ -5,6 +5,11 @@ let EstadoSolicitud = "";
 let TipoSolicitud = 0;
 let StrTipoSolicitud = "";
 
+/* Los feriados descuentan días en Vacaciones, pero no en Planificación. Antes
+   eso se expresaba con el campo "Feriados"; ahora que el número se calcula solo,
+   la regla vive en esta bandera. */
+let AplicaFeriados = true;
+
 function MensajeIncorrecto(resultado) {
     sweetAlert("Error", resultado, "error");
 }
@@ -39,7 +44,22 @@ function BtnPermiso() {
     document.getElementById("ListaSolicitud").style.display = "none";
 }
 
+/* Pad de firma del colaborador. Se crea al abrir el formulario de vacaciones y
+   se limpia entre solicitudes: crearlo de nuevo dejaria manejadores duplicados
+   sobre el mismo lienzo y el trazo saldria doble. */
+var _padColaborador = null;
+
+function PrepararFirmaColaborador() {
+    if (_padColaborador === null) {
+        _padColaborador = PadFirma("divFirmaColaborador", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padColaborador.limpiar();
+    }
+}
+
 function BtnVacaciones() {
+    PrepararFirmaColaborador();
     document.getElementById("RegistroVacaciones").style.display = "block";
     document.getElementById("RegistroPermisos").style.display = "none";
     document.getElementById("ListaSolicitud").style.display = "none";
@@ -139,10 +159,15 @@ function CargarPagina(div, url, datos, tipoControl, boton, idSeleccionado) {
                         $(div).html(RecorreJSON(div, respuesta, tipoControl, idTotalRegistro, boton));
                     }
                 } else {
-                    $(div).html("No existen datos para esta consulta.");
+                    $(div).html(DosVacio());
                 }
 
                 $("#divMensajes").html("");
+
+                /* Si se llego con ?solicitud= en la direccion, se abre esa. Solo
+                   despues de la tabla: esta misma funcion carga tambien los combos,
+                   y ahi no hay ninguna fila donde buscarla. */
+                if (div === "#datosTablaPrincipal") { AbrirSolicitudPedida(); }
 
             },
             error: function (objeto, msgError, objError) {
@@ -189,10 +214,394 @@ function VerDocumento() {
     let proceso = "";
 }
 
-function AprobarSolicitud(idvacaciones, Descripcion) {
+/* ------------------------------------------- comprobante de asistencia --- */
+
+var _idComprobante = 0;
+
+/* Si a esta solicitud le corresponde subir el comprobante de asistencia.
+
+   Tres condiciones de la especificación: que sea cita médica, que ya esté
+   aprobada, y que la fecha del permiso haya pasado. Antes de la cita no hay nada
+   que justificar.
+
+   Se reconoce por Actividad y no por TipoPermiso porque así funciona también
+   para los 607 permisos médicos anteriores a agosto de 2026, que no tienen tipo
+   pero sí dicen "CITA MEDICA". */
+function CorrespondeComprobante(item) {
+    if (item.Actividad !== "CITA MEDICA") { return false; }
+    if (item.EstadoSolicitud !== "APROBADO" && item.EstadoSolicitud !== "PROCESADO") { return false; }
+
+    var partes = (item.FechaDesde || "").split('/');
+    if (partes.length !== 3) { return false; }
+
+    var fecha = new Date(partes[2], partes[1] - 1, partes[0]);
+    if (isNaN(fecha.getTime())) { return false; }
+
+    var hoy = new Date();
+    hoy.setHours(0, 0, 0, 0);
+    return fecha < hoy;
+}
+
+function AbrirComprobante(idvacaciones, fecha) {
+    _idComprobante = idvacaciones;
+    $("#archivoComprobante").val("");
+    $("#txtDetalleComprobante").text(
+        "Permiso de cita médica del " + fecha + ". Suba el justificativo de que asistió.");
+
+    /* Lo que ya está cargado, para que no suban dos veces lo mismo. */
+    VerListadoArchivosSolicitud("#divComprobanteAnteriores", idvacaciones);
+
+    $("#modalComprobante").modal('show');
+}
+
+function SubirComprobante() {
+    var campo = document.getElementById("archivoComprobante");
+    if (campo === null || campo.files.length === 0) {
+        alerta("Debe elegir el archivo del comprobante.");
+        return;
+    }
+
+    if (window.FormData === undefined) {
+        alerta("Su navegador no permite subir archivos desde aquí.");
+        return;
+    }
+
+    var datos = new FormData();
+    for (var i = 0; i < campo.files.length; i++) {
+        datos.append(campo.files[i].name, campo.files[i]);
+    }
+    /* Mismo endpoint y mismo idServicio que el resto de adjuntos de solicitudes:
+       el comprobante es un documento más de esta solicitud. */
+    datos.append('session', $("#ContentPlaceHolder1_txtUsuario").val());
+    datos.append('action', 'CargarArchivos');
+    datos.append('Id_RegTareas', _idComprobante);
+    datos.append('idServicio', "6");
+
+    $("#btnSubirComprobante").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "CargaArchivos.ashx",
+        data: datos,
+        contentType: false,
+        processData: false,
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnSubirComprobante").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo subir el comprobante." : respuesta.mensaje);
+                return;
+            }
+
+            $("#archivoComprobante").val("");
+            VerListadoArchivosSolicitud("#divComprobanteAnteriores", _idComprobante);
+            MensajeCorrecto("Comprobante cargado.");
+        },
+        error: function () {
+            $("#btnSubirComprobante").prop("disabled", false);
+            alerta("No se pudo subir el comprobante. Intente nuevamente.");
+        }
+    });
+}
+
+/* ---------------------------------------------- cierre de recuperaciones --- */
+
+var _padRecuperacion = null;
+var _idRecuperacion = 0;
+
+/* Abre el cierre de una recuperación vencida. */
+function CerrarRecuperacion(idvacaciones, detalle) {
+    _idRecuperacion = idvacaciones;
+    $("#txtDetalleRecuperacion").text(detalle || "");
+    $("#txtObsRecuperacion").val("");
+    $("#cboSeRecupero").val("1");
+
+    if (_padRecuperacion === null) {
+        _padRecuperacion = PadFirma("divFirmaRecuperacion", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padRecuperacion.limpiar();
+    }
+
+    CambiaSeRecupero();
+    $("#modalCerrarRecuperacion").modal('show');
+}
+
+/* Decir que no se recuperó tiene consecuencias para el colaborador, así que el
+   motivo pasa a ser obligatorio y el rótulo lo dice. El servidor lo valida
+   igual: esto es para que se vea antes de intentar guardar. */
+function CambiaSeRecupero() {
+    var seRecupero = ($("#cboSeRecupero").val() === "1");
+    $("#lblObsRecuperacion").html(seRecupero
+        ? "Observaciones"
+        : "Motivo <span style='color:#a94442'>*</span>");
+}
+
+function ConfirmarRecuperacion() {
+    var seRecupero = $("#cboSeRecupero").val();
+    var observacion = $("#txtObsRecuperacion").val();
+
+    if (seRecupero === "0" && $.trim(observacion) === "") {
+        alerta("Debe indicar por qué no se recuperó el tiempo.");
+        return;
+    }
+
+    if (_padRecuperacion === null || _padRecuperacion.estaVacio()) {
+        alerta("Debe firmar para registrar el cierre.");
+        return;
+    }
+
+    var datos = JSON.stringify([{
+        "action": "ConfirmarRecuperacion",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "idVacaciones": _idRecuperacion,
+            "seRecupero": seRecupero,
+            "observacion": observacion,
+            "trazo": _padRecuperacion.obtenerTrazo()
+        }
+    }]);
+
+    $("#btnCerrarRecuperacion").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnCerrarRecuperacion").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo confirmar." : respuesta.mensaje);
+                return;
+            }
+
+            $("#modalCerrarRecuperacion").modal('hide');
+            MensajeCorrecto(respuesta.mensaje);
+        },
+        error: function () {
+            $("#btnCerrarRecuperacion").prop("disabled", false);
+            alerta("No se pudo confirmar la recuperación. No se registró el cierre.");
+        }
+    });
+}
+
+/* Genera el PDF firmado y lo abre.
+
+   Se genera en el momento en vez de guardar uno al aprobar, porque el archivo
+   queda registrado contra la solicitud y así una descarga posterior siempre
+   refleja las firmas que hay, no las que había. La conversión tarda un par de
+   segundos: por eso el aviso y el botón deshabilitado. */
+/* Baja un archivo del servidor sin que el navegador lo bloquee.
+
+   Antes esto era window.open dentro de la respuesta de un ajax. Como para el
+   navegador eso no es un clic de la persona sino algo que pasa despues, Chrome lo
+   trata como ventana emergente y lo bloquea: la descarga no ocurria y no salia
+   ningun error, solo el aviso chico de la barra de direcciones.
+
+   Un enlace con download y un clic programatico si baja: no abre ventana, no se
+   sale de la pagina, y no depende de que la persona tenga habilitadas las
+   emergentes. */
+function DescargarArchivo(ruta) {
+    var enlace = document.createElement("a");
+    enlace.href = ruta;
+    enlace.download = "";
+    enlace.style.display = "none";
+
+    document.body.appendChild(enlace);
+    enlace.click();
+
+    /* Se quita despues del clic; el navegador ya tomo la descarga. */
+    setTimeout(function () { document.body.removeChild(enlace); }, 0);
+}
+
+function DescargarPdfSolicitud(idvacaciones) {
+    var $btn = $(event ? event.currentTarget : null);
+    $btn.prop("disabled", true);
+    $("#divMensajes").html("Generando el PDF...");
+
+    var datos = JSON.stringify([{
+        "action": "GenerarPdfSolicitud",
+        "parameters": { "idVacaciones": idvacaciones }
+    }]);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $btn.prop("disabled", false);
+            $("#divMensajes").html("");
+
+            if (respuesta == null || respuesta.estado != "1") {
+                MensajeIncorrecto(respuesta == null ? "No se pudo generar el PDF." : respuesta.mensaje);
+                return;
+            }
+
+            /* En mensaje viene la ruta relativa del archivo generado. */
+            DescargarArchivo(respuesta.mensaje);
+        },
+        error: function () {
+            $btn.prop("disabled", false);
+            $("#divMensajes").html("");
+            MensajeIncorrecto("No se pudo generar el PDF. Intente nuevamente.");
+        }
+    });
+}
+
+/* El pad del modal de aprobación. Se crea una sola vez y se limpia en cada
+   apertura: instanciarlo de nuevo dejaría manejadores duplicados sobre el mismo
+   lienzo y el trazo saldría doble. */
+var _padProceso = null;
+
+/* Datos del faltante, para armar el motivo automático si el jefe rechaza. */
+var _faltante = null;
+
+function AprobarSolicitud(idvacaciones, Descripcion, totalDias, saldoDias, fechaDesde, fechaHasta) {
     idVacaciones = idvacaciones;
     StrTipoSolicitud = Descripcion;
+
+    if (_padProceso === null) {
+        _padProceso = PadFirma("divFirmaProceso", { ancho: 400, alto: 140 });
+    }
+    else {
+        _padProceso.limpiar();
+    }
+
+    /* SaldoDias se guardó al pedir la solicitud como saldo disponible menos días
+       pedidos, así que en negativo significa exactamente "no alcanza". Hasta
+       ahora el jefe aprobaba sin ver esta cuenta. */
+    MostrarFaltanteDeSaldo(totalDias, saldoDias, fechaDesde, fechaHasta);
+
+    $("#txtDescripcionReq2").val("");
     $("#modalCargarProceso").modal('show');
+}
+
+function MostrarFaltanteDeSaldo(totalDias, saldoDias, fechaDesde, fechaHasta) {
+    _faltante = null;
+    $("#IdFaltanteSaldo").hide().empty();
+
+    var saldo = parseFloat(saldoDias);
+    var pedidos = parseFloat(totalDias);
+    if (isNaN(saldo) || isNaN(pedidos) || saldo >= 0) { return; }
+
+    var faltan = Math.abs(saldo);
+    var disponibles = pedidos - faltan;
+
+    _faltante = {
+        pedidos: pedidos,
+        faltan: faltan,
+        disponibles: disponibles,
+        desde: fechaDesde,
+        hasta: fechaHasta
+    };
+
+    $("#IdFaltanteSaldo").html(
+        '<div class="alert alert-warning" style="margin-bottom:10px">' +
+        '<b>Al colaborador no le alcanza el saldo.</b><br>' +
+        'Solicita ' + pedidos.toFixed(2) + ' días y tiene ' + disponibles.toFixed(2) +
+        ' disponibles: le faltan <b>' + faltan.toFixed(2) + '</b>.' +
+        '<br><br>Puede rechazarla —el motivo se llena solo con estos números— o aprobarla ' +
+        'de todos modos si acordó el adelanto por fuera. ' +
+        '<i>El adelanto automático del siguiente período todavía no está disponible: ' +
+        'depende de definir con Talento Humano cómo se concilia con SAP.</i>' +
+        '</div>').show();
+}
+
+/* Redacta el motivo del rechazo con los números, para que el colaborador reciba
+   la explicación y no un "rechazado" a secas.
+
+   Solo rellena si el campo está vacío: si el jefe ya escribió algo, lo suyo
+   manda. */
+function MotivoAutomaticoSiCorresponde() {
+    if (_faltante === null) { return; }
+    if ($.trim($("#txtDescripcionReq2").val()) !== "") { return; }
+    if ($("#cboEstado2").val() !== "RECHAZADO") { return; }
+
+    $("#txtDescripcionReq2").val(
+        "Su solicitud de vacaciones (" + _faltante.desde + " – " + _faltante.hasta + ", " +
+        _faltante.pedidos.toFixed(2) + " días) fue rechazada. Tiene " +
+        _faltante.disponibles.toFixed(2) + " días disponibles y solicitó " +
+        _faltante.pedidos.toFixed(2) + ": le faltan " + _faltante.faltan.toFixed(2) +
+        ". Puede ajustar las fechas o pedirle a su jefe que apruebe el adelanto " +
+        "del siguiente período.");
+}
+
+/* Quién firma se deduce del estado que se está poniendo: el jefe aprueba o
+   rechaza, Talento Humano procesa o rechaza como GTH. Así el rol no depende de
+   un dato nuevo que alguien tenga que mantener. */
+function RolQueFirma(estado) {
+    if (estado === "APROBADO" || estado === "RECHAZADO") { return "JEFE"; }
+    if (estado === "PROCESADO" || estado === "RECHAZADO GTH") { return "GTH"; }
+    return "";
+}
+
+function DecisionDelEstado(estado) {
+    return (estado === "RECHAZADO" || estado === "RECHAZADO GTH") ? "RECHAZADO" : "APROBADO";
+}
+
+/* Registra la firma y, solo si quedó guardada, sigue con el cambio de estado.
+
+   Ese orden importa. Si el estado cambiara primero y la firma fallara, quedaría
+   una solicitud aprobada sin firma, que es justo lo que este trabajo viene a
+   evitar. Al revés lo peor que pasa es una firma de un paso que no se completó,
+   y eso se arregla reintentando: el procedimiento responde "ese paso ya estaba
+   firmado" en vez de duplicar, así que volver a darle Guardar termina el
+   trámite. */
+function FirmarYActualizar(tipo) {
+    var estado = $('#cboEstado2').val();
+    var rol = RolQueFirma(estado);
+
+    if (rol === "") {
+        alerta("No se reconoce el estado seleccionado.");
+        return;
+    }
+
+    if (_padProceso === null || _padProceso.estaVacio()) {
+        alerta("Debe firmar para registrar su decisión.");
+        return;
+    }
+
+    var datos = JSON.stringify([{
+        "action": "GuardarFirmaSolicitud",
+        "parameters": {
+            "session": $("#ContentPlaceHolder1_txtUsuario").val(),
+            "idVacaciones": idVacaciones,
+            "rol": rol,
+            "decision": DecisionDelEstado(estado),
+            "comentario": $('#txtDescripcionReq2').val(),
+            "trazo": _padProceso.obtenerTrazo()
+        }
+    }]);
+
+    $("#btnBorrarArchivo2").prop("disabled", true);
+
+    $.ajax({
+        type: "POST",
+        url: "ObtenerListaTareas.ashx",
+        data: datos,
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (respuesta) {
+            $("#btnBorrarArchivo2").prop("disabled", false);
+
+            if (respuesta == null || respuesta.estado != "1") {
+                alerta(respuesta == null ? "No se pudo registrar la firma." : respuesta.mensaje);
+                return;
+            }
+
+            ActualizarSolicitudProceso(tipo);
+        },
+        error: function () {
+            $("#btnBorrarArchivo2").prop("disabled", false);
+            alerta("No se pudo registrar la firma. No se cambió el estado de la solicitud.");
+        }
+    });
 }
 
 function EnvioCorreo(idvacaciones, Descripcion) {
@@ -212,17 +621,20 @@ function ActualizarProceso() {
         }
         else {
 
+            /* Ahora todo cambio de estado pasa por la firma. FirmarYActualizar
+               solo llama a ActualizarSolicitudProceso si la firma quedó
+               registrada. */
             if ($('#cboEstado2').val() == "APROBADO") {
-                ActualizarSolicitudProceso(2);
+                FirmarYActualizar(2);
             }
             else if ($('#cboEstado2').val() == "RECHAZADO") {
-                ActualizarSolicitudProceso(3);
+                FirmarYActualizar(3);
             }
             else if ($('#cboEstado2').val() == "RECHAZADO GTH") {
-                ActualizarSolicitudProceso(7);
+                FirmarYActualizar(7);
             }
             else if ($('#cboEstado2').val() == "PROCESADO") {
-                ActualizarSolicitudProceso(8);
+                FirmarYActualizar(8);
             }
         }
     }
@@ -269,7 +681,7 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
         info = info + "<td class='sorting_1' style='text-align:center'>";
         info = info + "<button type='button' value='Actualizar' title='Imprimir Solicitud' class='btn btn-btn-editClientes btn-xs'  onclick='VerListadoArchivosVacaciones(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");' ><i class='fa fa-print' aria-hidden='true'></i></button>";
         info = info + "&nbsp;|&nbsp;";
-        info = info + "<button type='button' value='Actualizar' title='Aprobar o rechazar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"); '><i class='fa fa-tasks' aria-hidden='true'></i></button>";
+        info = info + "<button type='button' value='Actualizar' title='Aprobar o rechazar solicitud' class='btn btn-btn-editClientes btn-xs' onclick='AprobarSolicitud(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"," + item.TotalDias + "," + item.SaldoDias + ",\"" + item.FechaDesde + "\",\"" + item.FechaHasta + "\"); '><i class='fa fa-tasks' aria-hidden='true'></i></button>";
         info = info + "&nbsp;|&nbsp;";
         if (item.conteoArchivosAdjuntos != '0') {
             info = info + "<button type=\"button\" title='Documento cargado.' class=\"btn btn-info btn-circle\" style='cursor: pointer' onclick='VerListadoArchivosSolicitud(\"#MensajeInformativo\", \"" + item.IdVacaciones + "\");'>" + item.conteoArchivosAdjuntos + "&nbsp;<i class='fa fa-folder-open-o'></i></button>";
@@ -280,6 +692,34 @@ function RecorreJSONTableSelect(json, idSeleccionado) {
                 info = info + "<button type='button' value='Actualizar' title='Solicitar documento.' class='btn btn-btn-editClientes btn-xs' onclick='EnvioCorreo(\"" + item.IdVacaciones + "\",\"" + item.Descripcion + "\"); '><i class='fa fa-envelope' aria-hidden='true'></i></button>";
             }
         }
+
+        /* El segundo momento del permiso médico: subir el comprobante de que
+           asistió, una vez pasada la cita. */
+        if (CorrespondeComprobante(item)) {
+            info = info + "&nbsp;|&nbsp;";
+            info = info + "<button type='button' title='Subir comprobante de asistencia' class='btn btn-warning btn-xs' onclick='AbrirComprobante(\"" + item.IdVacaciones + "\",\"" + item.FechaDesde + "\");'><i class='fa fa-stethoscope' aria-hidden='true'></i></button>";
+        }
+
+        /* La descarga esta disponible en cualquier estado, solo en esta pantalla.
+
+           Antes salia unicamente en PROCESADO, que es cuando el documento tiene
+           las tres firmas. El problema aparecio con las solicitudes del 26-ago al
+           1-sep: a 14 de ellas les fallo la conversion al crearse y quedaron sin
+           archivo, y las que no llegaron a cerrarse -22883 entre ellas- no tenian
+           por donde recuperarse. El servidor rearma el documento cada vez que se
+           pide, asi que basta con poder pedirlo.
+
+           El estado no se esconde, se muestra: verde con las tres firmas, gris y
+           con otro rotulo mientras falten. Quien baja un documento a medio firmar
+           tiene que saberlo, y esa era la razon de la restriccion anterior. */
+        var documentoCerrado = (item.EstadoSolicitud == "PROCESADO");
+
+        info = info + "&nbsp;|&nbsp;";
+        info = info + "<button type='button' title='" +
+            (documentoCerrado ? "Descargar PDF firmado" : "Descargar PDF (todavia sin las tres firmas)") +
+            "' class='btn " + (documentoCerrado ? "btn-success" : "btn-default") +
+            " btn-xs' onclick='DescargarPdfSolicitud(\"" + item.IdVacaciones + "\");'><i class='fa fa-file-pdf-o' aria-hidden='true'></i></button>";
+
         info = info + "</td>";
         info = info + "<td class='sorting_1'>" + item.EstadoSolicitud + "</td>";
         info = info + "<td class='sorting_1'>" + item.IdVacaciones + "</td>";
@@ -338,11 +778,16 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         totalValor3 = totalValor3 + parseFloat(item.SALDO);
     });
 
+    /* "Días" llega con el valor definitivo desde DiasVacaciones(); acá solo se
+       resta del saldo. Antes se descontaban los feriados en cada corrida, y como
+       esta función también se llama al cambiar de tipo de solicitud, un mismo
+       rango podía quedar descontado dos veces. */
+    var diasSolicitados = parseFloat($('#frmTxtTiempoDiasV').val()) || 0;
+    var saldoGenerado = parseFloat(totalValor3);
+
     if (totalValor3 > 0) {
 
-        $('#frmTxtTiempoDiasV').val(parseFloat($('#frmTxtTiempoDiasV').val()) - parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) - (parseFloat($('#frmTxtTiempoDiasV').val()) + parseFloat($('#frmTxtTiempoF').val()));
-        totalValor3 = parseFloat(totalValor3) + (parseFloat($('#frmTxtTiempoF').val()));
+        totalValor3 = saldoGenerado - diasSolicitados;
         info = info + "<tr>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
         info = info + "<td class='sorting_1' colspan='1' style='text-align: right;'><b></b></td>";
@@ -350,6 +795,13 @@ function RecorreJSONTableSelectSaldos(json, idSeleccionado) {
         info = info + "<td class='sorting_1' style='text-align: right;'><b>" + "" + format_two_digits((totalValor3).toFixed(2)) + "</b></td>";
         info = info + "</tr>";
         SaldoDias = totalValor3;
+    }
+
+    /* El aviso va fuera del if a propósito. Ese if solo dibuja la fila TOTAL
+       cuando hay saldo positivo, y el caso que más importa avisar es justamente
+       el de saldo en cero: adentro no se mostraría nunca. */
+    if (AplicaFeriados) {
+        FeriadosAvisarSaldo(diasSolicitados, saldoGenerado - diasSolicitados);
     }
 
     info = info + "</tbody>";
@@ -395,12 +847,14 @@ function BuscarSolicitud() {
     else if (selectedSolicitud == "VACACIONES") {
         BtnVacaciones();
         EstadoSolicitud = selectedSolicitud;
+        AplicaFeriados = true;
         ObtenerDatosEmpleado(1, 2);
         ObtenerListaComboReemplazo();
         ObtenerListaSaldoVacaciones(0);
     }
     else if (selectedSolicitud == "PLANIFICAR VACACIONES") {
         EstadoSolicitud = selectedSolicitud;
+        AplicaFeriados = false;
     }
 }
 
@@ -414,9 +868,25 @@ function SacarDias(f1, f2) {
     return parseFloat(dias)+1;
 }
 
+/* Recalcula días, feriados y fecha de regreso. Los helpers viven en
+   feriadosVacaciones.js, compartido con Convenio.js. */
 function DiasVacaciones() {
-    $('#frmTxtTiempoDiasV').val(SacarDias($('#frmTxtHoraDesdeV').val(), $('#frmTxtHoraHastaV').val()));
-    ObtenerListaSaldoVacaciones();
+    var desde = $('#frmTxtHoraDesdeV').val();
+    var hasta = $('#frmTxtHoraHastaV').val();
+
+    var naturales = SacarDias(desde, hasta);
+    $('#frmTxtTiempoDiasV').val(naturales);
+    $('#frmTxtRegresaTrabajar').val(FeriadosDiaSiguiente(hasta));
+
+    if (!AplicaFeriados) {
+        FeriadosLimpiarUI();
+        ObtenerListaSaldoVacaciones();
+        return;
+    }
+
+    FeriadosConsultar(desde, hasta, naturales, function () {
+        ObtenerListaSaldoVacaciones();
+    });
 }
 
 function BorrarBotones(idTipo) {
@@ -432,8 +902,9 @@ function BorrarBotones(idTipo) {
         //$('#frmTxtHoraHastaV').val("");
         $("#frmTxtHoraDesdeV").datepicker('setDate', 'today');
         $("#frmTxtHoraHastaV").datepicker('setDate', 'today');
-        $('#frmTxtTiempoF').val("0");
         $('#frmTxtTiempoDiasV').val("0");
+        $('#frmTxtRegresaTrabajar').val("");
+        FeriadosLimpiarUI();
         CancelarCambios1();
         idVacaciones = 0;
     }
@@ -486,11 +957,59 @@ function ObtenerUsuario() {
     var selectedUsuario = comboUsuario.options[comboUsuario.selectedIndex].text;
 }
 
+/* La solicitud que venia en la direccion, o cadena vacia.
+
+   El correo a Talento Humano trae ?solicitud=1234 para que no tenga que buscarla
+   en el listado. Se lee una vez al cargar la pagina. */
+var _solicitudPedida = (function () {
+    var partes = window.location.search.substring(1).split("&");
+
+    for (var i = 0; i < partes.length; i++) {
+        var par = partes[i].split("=");
+        if (par[0] === "solicitud" && /^[0-9]+$/.test(par[1] || "")) { return par[1]; }
+    }
+
+    return "";
+})();
+
+/* Abre el recuadro de aprobacion de esa solicitud, si esta en el listado.
+
+   Se busca el boton por su onclick en vez de rearmar la llamada: AprobarSolicitud
+   necesita seis datos de la fila -dias, saldo, fechas- y duplicarlos aca seria
+   copiar la fila entera. Pulsar el boton que ya los tiene es mas simple y no se
+   desincroniza si esa firma cambia.
+
+   Se intenta una sola vez: si la solicitud no esta en el rango de fechas del
+   filtro, se le dice, en vez de dejarla esperando algo que no va a pasar. */
+function AbrirSolicitudPedida() {
+    if (_solicitudPedida === "") { return; }
+
+    var buscado = _solicitudPedida;
+    _solicitudPedida = "";
+
+    var boton = null;
+
+    $("#datosTablaPrincipal button").each(function () {
+        var accion = $(this).attr("onclick") || "";
+        if (accion.indexOf('AprobarSolicitud("' + buscado + '"') !== -1) { boton = this; }
+    });
+
+    if (boton === null) {
+        MostrarMensajeDialogo("#modalMensajeInformativoTipo", "#MensajeInformativo",
+            "#modalMensajeInformativo",
+            "La solicitud " + buscado + " no aparece con los filtros actuales. " +
+            "Amplie el rango de fechas o el estado y vuelva a buscarla.", "warning");
+        return;
+    }
+
+    boton.click();
+}
+
 function ObtenerListaSolicitud(tipo, idRegistro, fechaInicio, fechaFinal, pagina, estadosolicitud) {
 
     var data = $("#cmbUsuarios2").val();
 
-    var Datos = "[{ \"action\": \"ReporteListaSolicitud\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + $("#cboSolicitud").val() + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + $("#cboEstadoSolicitud").val() + "\", usuario: \"" + $("#cmbUsuarios2").val() + "\" } }]";
+    var Datos = "[{ \"action\": \"ReporteListaSolicitud\", \"parameters\" : { session: \"" + $("#ContentPlaceHolder1_txtUsuario").val() + "\", fechaDesde: \"" + fechaInicio + "\", fechaHasta: \"" + fechaFinal + "\", busqueda: \"" + $("#cboSolicitud").val() + "\", tipo: \"" + tipo + "\", pagina: \"" + pagina + "\", estadosolicitud: \"" + $("#cboEstadoSolicitud").val() + "\", usuario: \"" + $("#cmbUsuarios2").val() + "\", tipofecha: \"" + $("#cboFitros").val() + "\" } }]";
     CargarPagina('#datosTablaPrincipal', 'ObtenerListaTareas.ashx', Datos, "tableSelect", tipo);
 }
 
@@ -556,14 +1075,14 @@ function DetalleTareasDescargaXLS(div, url, datos, tipoControl) {
         success: function (respuesta) {
             if (respuesta != null) {
                 if (respuesta.estado == "1") {
-                    // Se abre el enlace al documento
-                    window.open(respuesta.mensaje);
+                    // Se baja el documento
+                    DescargarArchivo(respuesta.mensaje);
                 } else {
                     $("#MensajeInformativo").html(respuesta.mensaje);
                     $('#modalMensajeInformativo').modal('show');
                 }
             } else {
-                var mesnajeError = "No existen datos para esta consulta.";
+                var mesnajeError = DosTextoDescargaVacia();
                 $("#modalMensajeInformativoTipo").attr("style", "background: #f2dede")
                 $("#MensajeInformativo").html(mesnajeError);
                 $('#modalMensajeInformativo').modal('show');
@@ -888,6 +1407,13 @@ function GuardarSolicitudVacaciones(tipo) {
         contadorVerificacion += 1;
     }
 
+    /* La firma es requisito del alta. En una actualización no se vuelve a firmar:
+       la firma vale por el momento en que se hizo. */
+    if (tipo == 0 && (_padColaborador === null || _padColaborador.estaVacio())) {
+        mensajeVerificacion += "- Debe firmar la solicitud antes de enviarla ";
+        contadorVerificacion += 1;
+    }
+
     if (contadorVerificacion > 0) {
         alerta(mensajeVerificacion);
         return;
@@ -913,7 +1439,8 @@ function GuardarSolicitudVacaciones(tipo) {
     datosFormulario = datosFormulario + "'SaldoDias': '" + SaldoDias.toString().replace(".",",") + "',";
     datosFormulario = datosFormulario + "'EstadoSolicitud': '" + EstadoSolicitud + "',";
     datosFormulario = datosFormulario + "'tipo': '" + tipo + "',";
-    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "'";
+    datosFormulario = datosFormulario + "'frmTxtTiempoDiasV': '" + $('#frmTxtTiempoDiasV').val() + "',";
+    datosFormulario = datosFormulario + "'firmaTrazo': '" + (tipo == 0 && _padColaborador !== null ? _padColaborador.obtenerTrazo() : "") + "'";
 
     datosFormulario = datosFormulario + "}";
 

@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using CapaDato;
+﻿using CapaDato;
 using CapaEntidad;
-using System.Data;
+using System.Collections.Generic;
 
 namespace CapaNegocio
 {
@@ -18,7 +16,7 @@ namespace CapaNegocio
             return respuesta;
         }
 
-        public static List<EntRebates> ConsultaSp_RTAListaRebetes(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago, string estado, string  Anio, string meses, int idFecha)
+        public static List<EntRebates> ConsultaSp_RTAListaRebetes(string FchIni, string FchFin, int IdTipoIngreso, int IdMarca, int IdPago, string estado, string Anio, string meses, int idFecha)
         {
             return DaoRebates.ConsultaSp_RTAListaRebetes(FchIni, FchFin, IdTipoIngreso, IdMarca, IdPago, estado, Anio, meses, idFecha);
         }
@@ -27,7 +25,7 @@ namespace CapaNegocio
         {
             return DaoRebates.ConsultaSp_RTAListaRebetesDescargar(FchIni, FchFin, IdTipoIngreso, IdMarca, IdPago, estado, Anio, meses, idFecha);
         }
-        public static List<EntRebates> ConsultaSp_RTAConsultarPeriodoFiscal(int IdMarca, string FchIni, string FchFin,int IdAnioFiscal, int tipo)
+        public static List<EntRebates> ConsultaSp_RTAConsultarPeriodoFiscal(int IdMarca, string FchIni, string FchFin, int IdAnioFiscal, int tipo)
         {
             return DaoRebates.ConsultaSp_RTAConsultarPeriodoFiscal(IdMarca, FchIni, FchFin, IdAnioFiscal, tipo);
         }

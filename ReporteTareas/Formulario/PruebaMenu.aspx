@@ -1,4 +1,4 @@
-<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="PruebaMenu.aspx.cs" Inherits="ReporteTareas.Formulario.PruebaMenu" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="PruebaMenu.aspx.cs" Inherits="ReporteTareas.Formulario.PruebaMenu" %>
    <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <script src="../js/PruebaMenu.js?v=8" type="text/javascript"></script>
     <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />

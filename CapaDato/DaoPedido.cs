@@ -1,13 +1,8 @@
-﻿using System;
+﻿using CapaEntidad;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Data;
-using System.Data.Sql;
 using System.Data.SqlClient;
-using CapaEntidad;
-using System.Globalization;
 
 namespace CapaDato
 {
@@ -86,7 +81,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -96,7 +94,7 @@ namespace CapaDato
         {
             EntRespuesta Respuesta = new EntRespuesta();
             Int32 respuestaSP = 0;
-             string respuestaSP1 = "";
+            string respuestaSP1 = "";
             SqlCommand cmd = null;
             SqlDataReader dr = null;
 
@@ -170,7 +168,7 @@ namespace CapaDato
                 dr.Read();
 
                 respuestaSP1 = dr["Respuestas"].ToString();
-                if(respuestaSP1 == "")
+                if (respuestaSP1 == "")
                 {
                     respuestaSP = 1;
                 }
@@ -210,14 +208,17 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
 
         }
 
-        public static EntRespuesta ConsultaSp_RTAListaPedidoDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses,int idFecha,int IdRenovacion)
+        public static EntRespuesta ConsultaSp_RTAListaPedidoDescargar(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses, int idFecha, int IdRenovacion)
         {
             EntRespuesta Respuesta = new EntRespuesta();
             DataTable dtResultados = new DataTable();
@@ -264,12 +265,15 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
         }
-        public static List<EntPedido> ConsultaSp_RTAListaPedido(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion,int Anio,string meses,int idFecha,int IdRenovacion)
+        public static List<EntPedido> ConsultaSp_RTAListaPedido(string FchIni, string FchFin, string busqueda, int IdCliente, int IdGerenteCuenta, int IdGestorProducto, string sucursal, string estado, int IdClasificacion, int Anio, string meses, int idFecha, int IdRenovacion)
         {
             List<EntPedido> listaTareas = null;
 
@@ -316,8 +320,8 @@ namespace CapaDato
                     Tarea.SEGMENTACION = dr["SEGMENTACION"].ToString();
                     Tarea.CLASIFICACION = dr["CLASIFICACION"].ToString();
                     Tarea.DETALLE = dr["DETALLE"].ToString();
-                    Tarea.VALOR = Convert.ToDouble( dr["VALOR"].ToString());
-                    Tarea.RENTABILIDAD = Convert.ToDouble( dr["RENTABILIDAD"].ToString());
+                    Tarea.VALOR = Convert.ToDouble(dr["VALOR"].ToString());
+                    Tarea.RENTABILIDAD = Convert.ToDouble(dr["RENTABILIDAD"].ToString());
                     Tarea.MARGEN = Convert.ToDouble(dr["MARGEN"].ToString());
                     Tarea.ESTADO = dr["ESTADO"].ToString();
                     Tarea.N_FACTURA = dr["N_FACTURA"].ToString();
@@ -344,7 +348,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -414,7 +421,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return listaTareas;
@@ -433,7 +443,7 @@ namespace CapaDato
                 cnx.Open();
                 cmd = new SqlCommand("Sp_RTAInsertaNuevoCliente", cnx);
 
-                cmd.Parameters.AddWithValue("@CLIENTE", objEntPedido.CLIENTE);               
+                cmd.Parameters.AddWithValue("@CLIENTE", objEntPedido.CLIENTE);
                 cmd.Parameters.AddWithValue("@Tipo", objEntPedido.Tipo);
 
                 cmd.CommandType = CommandType.StoredProcedure;
@@ -473,7 +483,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;
@@ -534,7 +547,10 @@ namespace CapaDato
             }
             finally
             {
-                cmd.Connection.Close();
+                if (cmd != null && cmd.Connection != null)
+                {
+                    cmd.Connection.Close();
+                }
             }
 
             return Respuesta;

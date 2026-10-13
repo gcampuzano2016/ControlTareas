@@ -1,4 +1,4 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="HistoriaCertificado.aspx.cs" Inherits="ReporteTareas.Formulario.HistoriaCertificado" %>
+﻿ <%@ Page Title="" Language="C#" MasterPageFile="~/Formulario/Master.Master" AutoEventWireup="true" CodeBehind="HistoriaCertificado.aspx.cs" Inherits="ReporteTareas.Formulario.HistoriaCertificado" %>
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
 
     <!-- Cargar jQuery primero -->
@@ -17,8 +17,14 @@
 
     <!-- Archivos CSS -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />
+    <%--<link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />--%>
     <link href="../dist/css/depMedico.css" rel="stylesheet" />
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <link href="../bower_components/sweetalert/css/animate.css" rel="stylesheet" />
+    <link href="../bower_components/sweetalert/css/sweetalert2.min.css" rel="stylesheet" />
+    <script src="../bower_components/sweetalert/js/sweetalert2.all.min.js"></script>
 
 </asp:Content>
 
@@ -91,46 +97,58 @@
                                             </div>
                                             <div class="horizontal">
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-credit-card"></i>  Cédula:</span>
                                                     <input id="txtCedula" type="text" class="form-control" name="cedula" placeholder="Cedula" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">  
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-leaf"></i>  Estado civil:</span>
                                                     <input id="txtEstadoCivil" type="text" class="form-control" name="estadocivil" placeholder="Estado civil" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
+                                                    <span class="input-group-addon select-temas" style="width: 25px;"><i class="glyphicon glyphicon-ok-circle"></i>  Sexo:</span>                                                    
                                                     <input type="text" class="form-control" style="" id="txtSexo" name="txtSexo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal">    
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon input-basic3" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
+                                                    <span class="input-group-addon input-basic3 select-temas" ><i class="glyphicon glyphicon-gift"></i>  Fecha de Nacimiento:</span>
                                                     <input type="text" class="form-control" style="" id="fechaNac" name="fechaNac" readonly>
                                                 </div>
                                                 <div class="input-group col-sm-4" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-basic"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
+                                                    <span class="input-group-addon input-basic select-temas"><i class="glyphicon glyphicon-star"></i>  Edad:</span>
                                                     <input id="txtEdad" type="number" class="form-control" name="edad" placeholder="0" readonly>
                                                 </div>
                                             </div>
 
                                             <div class="horizontal">                                                
                                                 <div class="input-group col-sm-6">
-                                                    <span class="input-group-addon" style="width: 35%;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
+                                                    <span class="input-group-addon select-temas" style="width: 35%; text-align:left;"><i class="glyphicon glyphicon-home"></i>  Sociedad:</span>
                                                     <input id="txtSociedad" type="text" class="form-control" name="sociedad" placeholder="Sociedad" readonly>
                                                 </div>    
                                                 <div class="input-group col-sm-5" style="margin-left: 6rem;">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas"><i class="glyphicon glyphicon-link"></i>  Area de trabajo:</span>
                                                     <input id="txtAreaTrabajo" type="text" class="form-control" name="areatrabajo" placeholder="Area de trabajo" readonly>
                                                 </div>
                                             </div>
                                             <div class="horizontal-group">
                                                 <div class="input-group col-sm-8">
-                                                    <span class="input-group-addon input-medium"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
+                                                    <span class="input-group-addon input-medium select-temas" style="text-align:left;"><i class="glyphicon glyphicon-lock"></i>  Puesto de trabajo:</span>
                                                     <input id="txtPuestoTrabajo" type="text" class="form-control" name="puestotrabajo" placeholder="Puesto de trabajo" readonly>
                                                 </div>                                                
+                                            </div>
+                                            <div class="horizontal">  
+                                                <div class="input-group col-sm-5">
+                                                    <span class="input-group-addon input-azulmedio"><i class="	fa fa-h-square"></i>  Num de Historia:</span>
+                                                    <input id="txtNumHistoria" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div>   
+                                            </div>
+                                            <div class="horizontal">                                                    
+                                                <div class="input-group col-sm-5">
+                                                    <span class="input-group-addon input-azulmedio"><i class="fa fa-file-text"></i>  Num de Archivo:</span>
+                                                    <input id="txtNumArchivo" type="text" class="form-control" name="sociedad" placeholder="XXXX-XXXX" value="">
+                                                </div>
                                             </div>
                                             <!-- ... otros campos ... -->
                                         </div>
@@ -197,10 +215,10 @@
                                 <div class="col-sm-6 grupo-input text-center" id="obsAptitud">
                                     <div class="grupo-input text-center" >
                                         <label for="disabledTextInput">Observación</label>
-                                        <input id="txtDescAptitud" type="text" class="form-control select-temas" placeholder="Ingrese una observacion de ser necesario." value="">
+                                        <input id="txtDescAptitud" type="text" class="form-control select-temas" placeholder="Detalle de la observación" value="">
                                     </div>
                                 </div> 
-                                <div class="col-sm-6 grupo-input text-cente" id="descObservacion">
+<%--                                <div class="col-sm-6 grupo-input text-cente" id="descObservacion">
                                     <div class="grupo-input text-center" >
                                         <label for="disabledTextInput">Observación</label>
                                         <input id="txtDescObservacion" type="text" class="form-control select-principal" placeholder="Detalle de la observación" value="">
@@ -211,7 +229,7 @@
                                         <label for="disabledTextInput">Limitación</label>
                                         <input id="txtDescLimitacion" type="text" class="form-control select-principal" placeholder="Detalle de la limitación" value="">
                                     </div>
-                                </div>  
+                                </div> --%> 
                            </div>
 
                         </div>
@@ -232,11 +250,8 @@
                                     
                                     <div class="input-group horizontal-group">
                                         <label class="col-sm-6 control-label">El usuario se realizó la evaluación médica de retiro:</label>
-                                        <div class="col-sm-6 horizontal-group-simple" style="background-color:#9DA8AD; padding:0.3rem 3rem 0.3rem 2rem;" >
+                                        <div class="col-sm-6 horizontal-group-simple opcCheckboxMargen" style="background-color:#9DA8AD;" >
                                             <div class="checkbox" style="margin:0;">
-                                                <label></label>
-                                                </div>
-                                            <div class="checkbox" style="margin:0 0 0 2rem;">
                                                 <label>
                                                     <input type="checkbox" id="evalRetiroSi" name="evalRetiro" value="si">
                                                     <span class="checkbox-material"><span class="check"></span></span>
@@ -254,8 +269,8 @@
                                     </div>
 
                                     <div class="input-group horizontal-group">
-                                      <label class="col-sm-5 control-label">Condición del diagnóstico:</label>
-                                      <div class="col-sm-6 horizontal-group-simple" style="background-color:#9DA8AD; padding:0.5rem 3rem 0.5rem 2rem;">
+                                      <label class="col-sm-6 control-label">Condición del diagnóstico:</label>
+                                      <div class="col-sm-6 horizontal-group-simple opcCheckboxMargen" style="background-color:#9DA8AD;">
                                         <div class="checkbox" style="margin:0;">
                                           <label>
                                             <input type="checkbox" id="diagPresuntiva" name="diag" value="presuntiva">
@@ -282,7 +297,7 @@
 
                                     <div class="input-group horizontal-group" style="">
                                       <label class="col-sm-6 control-label">La condición de salud está relacionada con el trabajo:</label>
-                                      <div class="col-sm-6 horizontal-group-simple" style="background-color:#9DA8AD; padding:0.5rem 3rem 0.5rem 2rem;">
+                                      <div class="col-sm-6 horizontal-group-simple opcCheckboxMargen" style="background-color:#9DA8AD;">
                                         <div class="checkbox" style="margin:0;">
                                           <label>
                                             <input type="checkbox" id="relacionTrabajoSi" name="relacionTrabajo" value="si">
@@ -337,7 +352,7 @@
                         <div class="modal-dialog">
                             <!-- Modal content-->
                             <div class="modal-content">
-                                <div class="modal-header bg-info">
+                                <div class="modal-header bg-primary">
                                     <button type="button" class="close" data-dismiss="modal">&times;</button>
                                     <h4 class="modal-title">Advertencia</h4>
                                 </div>

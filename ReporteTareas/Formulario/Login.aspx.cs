@@ -230,23 +230,14 @@ namespace ReporteTareas.Formulario
                 }
                 else
                 {
-                    objUsuario = NegUsuario.RTA_ConsultaUsuarioRTA(txt_login.Text);
-                    if (objUsuario != null)
-                    {
-                        Session["UserLogin"] = objUsuario.Log_Usuario;
-                        Session["Cod_Usuario"] = objUsuario.Cod_Usuario;
-                        Session["Nom_Usuario"] = objUsuario.Nom_Usuario;
-                        Session["Log_Usuario"] = objUsuario.Log_Usuario;
-                        Session["Cod_Perfil"] = objUsuario.Cod_Perfil;
-                        Session["E_Mail"] = objUsuario.E_Mail;
-                        Session["Rol_Usuario"] = objUsuario.Rol_Usuario;
-                        Session["IdCliente"] = objUsuario.IdCliente;
-                        Session["Id_Perfil"] = objUsuario.Id_Perfil;
-
-                        var inicioSec = NegPerfilInicio.ObtenerPerfilInicio(objUsuario.Id_Perfil);
-                        Session["Id_Usuario"] = inicioSec.IdTipo;
-                        Response.Redirect(inicioSec.Href);
-                    }
+                    /* Usuarios con IdCliente: antes recibian sesion sin que nadie
+                       comprobara la clave (bastaba el nombre de usuario). No pasan
+                       por Active Directory y su Pass_Usuario no es un hash, asi que
+                       no hay contra que validarlos: se rechazan. Para darle acceso a
+                       uno, ponerle IdCliente = 0 y entra por Active Directory. */
+                    Response.Write(negUser.mensajeInformativo("Credenciales de acceso No Autorizadas", "danger", true, "divMensajesContenido_1"));
+                    txt_pass.Text = "";
+                    txt_pass.Focus();
                 }
             }
             else

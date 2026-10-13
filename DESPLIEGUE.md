@@ -972,3 +972,12 @@ Todos juntos. Las capas son `.exe` y van con el `.dll` de la web; publicarlos po
 2. Descargar el Excel y comprobar que hay una fila nueva en `TC_Auditoria`.
 3. Con un usuario de otro perfil, la opción no aparece y la URL directa redirige a Principal.
 4. Si alguien no ve cambios del `.js` después de un redespliegue, subir el `?v=` en `TableroCostos.aspx`.
+5. La opción aparece en Nómina para los perfiles 14 y 18.
+
+### 16.4 Reversa
+
+1. Ocultar la hoja del menú (identificarla por su `Href`, no por el Id):
+   `UPDATE PerfilMenu SET Estado = '1' WHERE id_Menu IN (SELECT Id_Menu FROM MenuDos WHERE Href = 'TableroCostos.aspx')`
+   (afecta a los perfiles 14 y 18).
+2. Reponer los binarios anteriores **todos juntos** (`ReporteTareas.dll` y los tres `.exe` de capa).
+3. La tabla `TC_Auditoria` y los procedimientos pueden quedar: ningún binario anterior los llama.

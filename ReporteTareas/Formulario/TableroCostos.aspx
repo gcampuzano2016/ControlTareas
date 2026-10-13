@@ -69,6 +69,7 @@
                         </div>
                     </div>
                     <div id="tcError" class="alert alert-danger tc-aviso"></div>
+                    <div id="tcRangoAviso" class="alert alert-info tc-aviso"></div>
                     <div id="tcAviso" class="alert alert-warning tc-aviso"></div>
                     <div id="tcVacio" class="alert alert-info tc-aviso"></div>
                     <div id="tcParametros" class="alert alert-warning tc-aviso"></div>

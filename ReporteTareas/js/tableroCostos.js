@@ -8,6 +8,9 @@
 
 var tcDatos = null;
 var tcRango = '';
+/* Rango de la ultima consulta correcta: es el que esta en pantalla. */
+var tcDesde = '';
+var tcHasta = '';
 var tcGraficos = {};
 var tcPagina = 0;
 var TC_POR_PAGINA = 50;
@@ -30,6 +33,7 @@ $(document).ready(function () {
     $('#cboMes, #cboResponsable, #cboEmpresa, #cboContrato, #cboRecargo, #cboEstadoHE')
         .on('change', function () { Consultar(false); });
     $('#btnConsultar').on('click', function () { Consultar(true); });
+    $('#txtDesde, #txtHasta').on('change keyup', RangoCambiado);
     $('#btnExcel').on('click', Descargar);
     $('#btnAnterior').on('click', function () { CambiarPagina(-1); });
     $('#btnSiguiente').on('click', function () { CambiarPagina(1); });
@@ -42,10 +46,11 @@ function FechaIso(d) {
     return d.getFullYear() + '-' + (m < 10 ? '0' : '') + m + '-' + (dia < 10 ? '0' : '') + dia;
 }
 
-function Parametros() {
+/* El rango sale de las cajas solo si usarCajas (boton Consultar); si no, es el de la pantalla. */
+function Parametros(usarCajas) {
     return {
-        desde: $('#txtDesde').val() || '',
-        hasta: $('#txtHasta').val() || '',
+        desde: usarCajas ? ($('#txtDesde').val() || '') : tcDesde,
+        hasta: usarCajas ? ($('#txtHasta').val() || '') : tcHasta,
         mes: $('#cboMes').val() || 'Todos',
         responsable: $('#cboResponsable').val() || 'Todos',
         empresa: $('#cboEmpresa').val() || 'Todos',
@@ -67,12 +72,17 @@ function Consultar(refrescar) {
     }
 
     /* Un rango nuevo puede no tener el mes, la persona o la empresa elegidos. */
-    var rango = $('#txtDesde').val() + '|' + $('#txtHasta').val();
+    var p = Parametros(refrescar);
+    var rango = p.desde + '|' + p.hasta;
+    /* Se guardan los combos de la pantalla: si la consulta falla se restauran. */
+    var combosAntes = {};
+    $.each(['#cboMes', '#cboResponsable', '#cboEmpresa', '#cboContrato', '#cboRecargo', '#cboEstadoHE'], function (i, id) {
+        combosAntes[id] = $(id).val();
+    });
+    /* Un rango nuevo puede no tener el mes, la persona o la empresa elegidos. */
     if (refrescar && rango !== tcRango) {
         $('#cboMes, #cboResponsable, #cboEmpresa, #cboContrato').val('Todos');
     }
-
-    var p = Parametros();
     p.refrescar = refrescar ? '1' : '0';
     $('#btnConsultar').prop('disabled', true).text('Consultando…');
 
@@ -84,16 +94,21 @@ function Consultar(refrescar) {
         dataType: 'json',
         success: function (r) {
             if (!r || r.estado !== '1') {
+                RestaurarCombos(combosAntes);
                 Mostrar('#tcError', (r && r.mensaje) || 'No se pudo cargar el tablero.');
                 return;
             }
             Mostrar('#tcError', '');
             tcDatos = r.resultado;
             tcRango = rango;
+            tcDesde = p.desde;
+            tcHasta = p.hasta;
+            RangoCambiado();
             tcPagina = 0;
             Dibujar();
         },
         error: function (x) {
+            RestaurarCombos(combosAntes);
             var r = null;
             try { r = JSON.parse(x.responseText); } catch (e) { r = null; }
             Mostrar('#tcError', (r && r.mensaje) || 'No se pudo comunicar con el servidor.');
@@ -102,6 +117,18 @@ function Consultar(refrescar) {
             $('#btnConsultar').prop('disabled', false).text('Consultar');
         }
     });
+}
+
+/* Si falla una consulta, los combos vuelven a lo que corresponde a los datos que siguen en pantalla. */
+function RestaurarCombos(valores) {
+    $.each(valores, function (id, v) { $(id).val(v); });
+}
+
+/* Avisa y bloquea Excel mientras las cajas de fecha no coinciden con el rango consultado. */
+function RangoCambiado() {
+    var distinto = !!tcDatos && (($('#txtDesde').val() || '') !== tcDesde || ($('#txtHasta').val() || '') !== tcHasta);
+    $('#btnExcel').prop('disabled', distinto);
+    Mostrar('#tcRangoAviso', distinto ? 'Las fechas cambiaron: pulse Consultar para ver y descargar ese rango.' : '');
 }
 
 /* ------------------------------------------------------------ formato */
@@ -323,5 +350,6 @@ function CambiarPagina(delta) {
 }
 
 function Descargar() {
-    window.location = 'DescargarTableroCostos.ashx?' + $.param(Parametros());
+    if (!tcDatos) { return; }
+    window.location = 'DescargarTableroCostos.ashx?' + $.param(Parametros(false));
 }

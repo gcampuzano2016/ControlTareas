@@ -106,6 +106,66 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void Resumen_ConPersonasSinSalario_LasAvisaEnLaFila3()
+        {
+            EntTableroCostos t = Tablero();
+            t.SinSalario.Add("PERSONA UNO");
+            t.SinSalario.Add("PERSONA DOS");
+
+            using (ExcelPackage p = Abrir(NegTableroCostosExportacion.Construir(t, "filtros")))
+            {
+                string aviso = p.Workbook.Worksheets[NegTableroCostosExportacion.HojaResumen].Cells[3, 1].Text;
+                StringAssert.Contains(aviso, "Sin salario en Horas Extras");
+                StringAssert.Contains(aviso, "PERSONA UNO, PERSONA DOS.");
+                Assert.IsFalse(aviso.Contains("Faltan parámetros"));
+            }
+        }
+
+        [TestMethod]
+        public void Resumen_ConParametrosPorDefecto_LosAvisaEnLaFila3()
+        {
+            EntTableroCostos t = Tablero();
+            t.ParametrosPorDefecto = true;
+
+            using (ExcelPackage p = Abrir(NegTableroCostosExportacion.Construir(t, "filtros")))
+            {
+                string aviso = p.Workbook.Worksheets[NegTableroCostosExportacion.HojaResumen].Cells[3, 1].Text;
+                StringAssert.Contains(aviso, "Faltan parámetros vigentes de Horas Extras");
+                Assert.IsFalse(aviso.Contains("Sin salario"));
+            }
+        }
+
+        [TestMethod]
+        public void Resumen_ConAmbosAvisos_LosLleva()
+        {
+            EntTableroCostos t = Tablero();
+            t.SinSalario.Add("PERSONA UNO");
+            t.ParametrosPorDefecto = true;
+
+            using (ExcelPackage p = Abrir(NegTableroCostosExportacion.Construir(t, "filtros")))
+            {
+                string aviso = p.Workbook.Worksheets[NegTableroCostosExportacion.HojaResumen].Cells[3, 1].Text;
+                StringAssert.Contains(aviso, "PERSONA UNO");
+                StringAssert.Contains(aviso, "Faltan parámetros");
+            }
+        }
+
+        [TestMethod]
+        public void Resumen_SinAvisos_DejaVaciaLaFila3()
+        {
+            EntTableroCostos t = Tablero();
+            t.SinSalario.Clear();
+            t.ParametrosPorDefecto = false;
+
+            using (ExcelPackage p = Abrir(NegTableroCostosExportacion.Construir(t, "filtros")))
+            {
+                ExcelWorksheet ws = p.Workbook.Worksheets[NegTableroCostosExportacion.HojaResumen];
+                Assert.AreEqual("", ws.Cells[3, 1].Text);
+                Assert.AreEqual("filtros", ws.Cells[2, 1].Text);
+            }
+        }
+
+        [TestMethod]
         public void Construir_SinActividades_NoFalla()
         {
             EntTableroCostos vacio = NegTableroCostos.Armar(new EntTcClasificado(), new EntTcFiltro());

@@ -56,6 +56,25 @@ namespace CapaNegocio
             ws.Cells[1, 1].Style.Font.Size = 14;
             ws.Cells[2, 1].Value = filtros;
 
+            // Fila 3: los mismos avisos que muestra la pantalla; cambian el significado de los totales.
+            string avisos = "";
+            if (t.SinSalario != null && t.SinSalario.Count > 0)
+            {
+                avisos = "Sin salario en Horas Extras (sus horas se valoran en $0; complételos en Horas Extras): "
+                       + string.Join(", ", t.SinSalario) + ".";
+            }
+            if (t.ParametrosPorDefecto)
+            {
+                avisos += (avisos.Length > 0 ? " " : "")
+                        + "Faltan parámetros vigentes de Horas Extras (Factor50, Factor100 o DiasMes): se usan 1,5 / 2 / 30, como el Excel.";
+            }
+            if (avisos.Length > 0)
+            {
+                ws.Cells[3, 1].Value = avisos;
+                ws.Cells[3, 1].Style.Font.Bold = true;
+                ws.Cells[3, 1].Style.Font.Color.SetColor(255, 0xB8, 0x5A, 0x12);
+            }
+
             Cabecera(ws, FilaCabeceraResumen, ColumnasResumen);
 
             int fila = FilaCabeceraResumen + 1;

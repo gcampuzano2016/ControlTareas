@@ -1341,6 +1341,8 @@
     <Content Include="Formulario\AdministrarCurvaAprendizaje.ashx" />
     <Content Include="Formulario\AdministrarParametrosHE.ashx" />
     <Content Include="Formulario\DescargarHorasExtras.ashx" />
+    <Content Include="Formulario\AdministrarTableroCostos.ashx" />
+    <Content Include="Formulario\DescargarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
     <Content Include="Formulario\AprobacionTareasRevisor.aspx" />
@@ -1592,6 +1594,12 @@
     </Compile>
     <Compile Include="Formulario\DescargarHorasExtras.ashx.cs">
       <DependentUpon>DescargarHorasExtras.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarTableroCostos.ashx.cs">
+      <DependentUpon>AdministrarTableroCostos.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarTableroCostos.ashx.cs">
+      <DependentUpon>DescargarTableroCostos.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarMarcacion.ashx.cs">
       <DependentUpon>AdministrarMarcacion.ashx</DependentUpon>

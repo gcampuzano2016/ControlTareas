@@ -11,6 +11,14 @@ var tcRango = '';
 /* Rango de la ultima consulta correcta: es el que esta en pantalla. */
 var tcDesde = '';
 var tcHasta = '';
+/* Filtros exactos con los que se armo lo que esta en pantalla: el Excel usa
+   estos, nunca lo que muestran los combos en ese momento (pueden haber
+   cambiado y su consulta seguir en curso, o haber fallado). */
+var tcFiltro = null;
+/* Numero de la ultima consulta enviada: si llegan respuestas fuera de orden,
+   solo se dibuja la ultima. */
+var tcConsulta = 0;
+var tcConsultando = 0;
 var tcGraficos = {};
 var tcPagina = 0;
 var TC_POR_PAGINA = 50;
@@ -84,7 +92,10 @@ function Consultar(refrescar) {
         $('#cboMes, #cboResponsable, #cboEmpresa, #cboContrato').val('Todos');
     }
     p.refrescar = refrescar ? '1' : '0';
+    var numero = ++tcConsulta;
+    tcConsultando++;
     $('#btnConsultar').prop('disabled', true).text('Consultando…');
+    $('#btnExcel').prop('disabled', true);
 
     $.ajax({
         type: 'POST',
@@ -93,6 +104,7 @@ function Consultar(refrescar) {
         contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         success: function (r) {
+            if (numero !== tcConsulta) { return; }
             if (!r || r.estado !== '1') {
                 RestaurarCombos(combosAntes);
                 Mostrar('#tcError', (r && r.mensaje) || 'No se pudo cargar el tablero.');
@@ -103,18 +115,26 @@ function Consultar(refrescar) {
             tcRango = rango;
             tcDesde = p.desde;
             tcHasta = p.hasta;
-            RangoCambiado();
+            tcFiltro = {
+                desde: p.desde, hasta: p.hasta, mes: p.mes, responsable: p.responsable,
+                empresa: p.empresa, contrato: p.contrato, recargo: p.recargo, estadoHE: p.estadoHE
+            };
             tcPagina = 0;
             Dibujar();
         },
         error: function (x) {
+            if (numero !== tcConsulta) { return; }
             RestaurarCombos(combosAntes);
             var r = null;
             try { r = JSON.parse(x.responseText); } catch (e) { r = null; }
             Mostrar('#tcError', (r && r.mensaje) || 'No se pudo comunicar con el servidor.');
         },
         complete: function () {
-            $('#btnConsultar').prop('disabled', false).text('Consultar');
+            tcConsultando--;
+            if (tcConsultando === 0) {
+                $('#btnConsultar').prop('disabled', false).text('Consultar');
+                RangoCambiado();
+            }
         }
     });
 }
@@ -127,7 +147,7 @@ function RestaurarCombos(valores) {
 /* Avisa y bloquea Excel mientras las cajas de fecha no coinciden con el rango consultado. */
 function RangoCambiado() {
     var distinto = !!tcDatos && (($('#txtDesde').val() || '') !== tcDesde || ($('#txtHasta').val() || '') !== tcHasta);
-    $('#btnExcel').prop('disabled', distinto);
+    $('#btnExcel').prop('disabled', distinto || !tcFiltro || tcConsultando > 0);
     Mostrar('#tcRangoAviso', distinto ? 'Las fechas cambiaron: pulse Consultar para ver y descargar ese rango.' : '');
 }
 
@@ -350,6 +370,6 @@ function CambiarPagina(delta) {
 }
 
 function Descargar() {
-    if (!tcDatos) { return; }
-    window.location = 'DescargarTableroCostos.ashx?' + $.param(Parametros(false));
+    if (!tcFiltro || tcConsultando > 0) { return; }
+    window.location = 'DescargarTableroCostos.ashx?' + $.param(tcFiltro);
 }

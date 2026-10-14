@@ -952,8 +952,10 @@ Es repetible y **no escribe en `HE_*` ni en `R_DetTareasAranda`**. Va **antes** 
 Para verificar, correr `docs/sql/2026-10-12-tablero-costos-verificacion.sql`. Es de solo lectura; la prueba de auditoría se revierte.
 
 > **Si se agrega un perfil al tablero:** hay que cambiarlo en **dos** lugares:
-> `AdministrarTableroCostos.PerfilesAutorizados` (código) y `PerfilMenu` (base).
+> `NegTableroCostos.PerfilesAutorizados` (código) y `PerfilMenu` (base).
 > Con solo uno, la persona ve la opción y recibe «No tiene permisos», o tiene permiso y no ve la opción.
+>
+> **Para dárselo a una sola persona** no se toca el código: ver 16.5.
 
 ### 16.2 Archivos a publicar
 
@@ -981,3 +983,19 @@ Todos juntos. Las capas son `.exe` y van con el `.dll` de la web; publicarlos po
    (afecta a los perfiles 14 y 18).
 2. Reponer los binarios anteriores **todos juntos** (`ReporteTareas.dll` y los tres `.exe` de capa).
 3. La tabla `TC_Auditoria` y los procedimientos pueden quedar: ningún binario anterior los llama.
+
+### 16.5 Acceso para una persona puntual (módulo extra)
+
+Además de los perfiles 14 y 18, entra quien tenga **«Tablero de Costos»** marcado como módulo extra en
+*Menú por usuario* (`ParametrizacionMenuUsuario.aspx`, tabla `R_UsuarioMenu`). La misma marca le dibuja la
+opción en el menú y le da el permiso en el código: no hay que escribir su código de usuario en ningún lado.
+
+1. **Base, antes de los binarios:** `docs/sql/2026-10-14-tablero-costos-acceso-por-usuario.sql` crea
+   `Sp_RTA_TableroCostosAccesoUsuario` (solo lectura). Termina con `VEREDICTO: OK`. Sin él, los perfiles 14 y 18
+   siguen entrando (no lo llaman) y los demás reciben «No tiene permisos».
+2. **Binarios:** `ReporteTareas.dll`, `CapaNegocio.exe` y `CapaDato.exe`, juntos (y `CapaEntidad.exe`, como siempre).
+3. **Dar el acceso:** en *Menú por usuario*, buscar a la persona, marcar *Nómina → Tablero de Costos* y guardar.
+   **La pantalla guarda la lista completa de extras de esa persona**: no desmarcar lo que ya tenía.
+4. **Quitarlo:** desmarcar la opción y guardar. El acceso se corta en la siguiente petición, sin cerrar sesión.
+
+Ojo: dar el **perfil** 2 (u otro) en `PerfilMenu` sigue sin abrir el tablero a ese perfil; eso exige el cambio de código de arriba.

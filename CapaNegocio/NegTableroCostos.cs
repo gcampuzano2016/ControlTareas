@@ -36,6 +36,43 @@ namespace CapaNegocio
         public const string CatTraslado50 = "Traslado 50%";
         public const string CatTraslado100 = "Traslado 100%";
 
+        /// <summary>
+        /// Perfiles que ven el tablero completo. Quien agregue uno aqui tiene que
+        /// agregarlo tambien en PerfilMenu (docs/sql/2026-10-12-tablero-costos.sql).
+        /// </summary>
+        public static readonly int[] PerfilesAutorizados = { 14, 18 };
+
+        /// <summary>
+        /// Regla de acceso al tablero: un perfil autorizado, o el modulo extra
+        /// TableroCostos.aspx asignado a la persona en R_UsuarioMenu (pantalla
+        /// ParametrizacionMenuUsuario.aspx). Lo segundo da el tablero a una
+        /// persona sin abrirlo a todo su perfil.
+        ///
+        /// Los perfiles autorizados no consultan la base. Si la consulta por
+        /// usuario falla, se niega: el tablero muestra montos calculados con
+        /// salarios.
+        /// </summary>
+        public static bool PuedeVer(int? idPerfil, Func<bool> accesoPorUsuario)
+        {
+            if (idPerfil.HasValue && Array.IndexOf(PerfilesAutorizados, idPerfil.Value) >= 0)
+            {
+                return true;
+            }
+            if (accesoPorUsuario == null)
+            {
+                return false;
+            }
+            try
+            {
+                return accesoPorUsuario();
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError("Tablero de Costos: no se pudo consultar el acceso por usuario. " + ex);
+                return false;
+            }
+        }
+
         public static readonly string[] Recargos = { SinRecargo, Recargo50, Recargo100 };
         public static readonly string[] EstadosHE = { "Aprobado", "Solicitado", "Rechazado", "Sin solicitud", "No aplica" };
 

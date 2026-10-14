@@ -67,6 +67,51 @@ namespace CapaPruebas
             return NegTableroCostos.Clasificar(d).Filas.Single();
         }
 
+        // ------------------------------------------------------- acceso
+
+        private static bool NoDebeConsultar()
+        {
+            throw new AssertFailedException("Un perfil autorizado no debe consultar la base.");
+        }
+
+        [TestMethod]
+        public void PuedeVer_Perfiles14y18_SinConsultarLaBase()
+        {
+            Assert.IsTrue(NegTableroCostos.PuedeVer(14, NoDebeConsultar));
+            Assert.IsTrue(NegTableroCostos.PuedeVer(18, NoDebeConsultar));
+        }
+
+        [TestMethod]
+        public void PuedeVer_OtroPerfilConModuloExtra_Entra()
+        {
+            Assert.IsTrue(NegTableroCostos.PuedeVer(2, () => true));
+        }
+
+        [TestMethod]
+        public void PuedeVer_OtroPerfilSinModuloExtra_NoEntra()
+        {
+            Assert.IsFalse(NegTableroCostos.PuedeVer(2, () => false));
+        }
+
+        [TestMethod]
+        public void PuedeVer_SinPerfilEnSesion_DecideElModuloExtra()
+        {
+            Assert.IsTrue(NegTableroCostos.PuedeVer(null, () => true));
+            Assert.IsFalse(NegTableroCostos.PuedeVer(null, () => false));
+        }
+
+        [TestMethod]
+        public void PuedeVer_SiLaConsultaFalla_NoEntra()
+        {
+            Assert.IsFalse(NegTableroCostos.PuedeVer(2, () => { throw new InvalidOperationException("sin conexion"); }));
+        }
+
+        [TestMethod]
+        public void PuedeVer_SinConsulta_NoEntra()
+        {
+            Assert.IsFalse(NegTableroCostos.PuedeVer(2, (Func<bool>)null));
+        }
+
         // ------------------------------------------------------- tipo
 
         [TestMethod]

@@ -100,6 +100,26 @@ namespace CapaDato
             }
         }
 
+        /// <summary>
+        /// True si el usuario tiene TableroCostos.aspx como modulo extra activo
+        /// en R_UsuarioMenu. Los errores se propagan: quien llama decide negar.
+        /// </summary>
+        public static bool AccesoPorUsuario(string codUsuario)
+        {
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_TableroCostosAccesoUsuario", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@CodUsuario", SqlDbType.VarChar, 50).Value = (object)codUsuario ?? DBNull.Value;
+                cnx.Open();
+
+                object v = cmd.ExecuteScalar();
+                return v != null && v != DBNull.Value && Convert.ToInt32(v, CultureInfo.InvariantCulture) == 1;
+            }
+        }
+
         private static string Texto(IDataRecord dr, string columna)
         {
             object v = dr[columna];

@@ -13,11 +13,11 @@ namespace JsonJQueryNetTableroCostos
     /// <summary>
     /// Handler de TableroCostos.aspx. Accion: ConsultarTablero.
     ///
-    /// El control de perfil NO es cosmetico: el menu solo esconde la opcion, y
-    /// la pantalla muestra montos calculados con salarios. Esta lista es la
-    /// unica; TableroCostos.aspx.cs y DescargarTableroCostos la reusan. Quien
-    /// agregue un perfil aqui tiene que agregarlo tambien en PerfilMenu
-    /// (docs/sql/2026-10-12-tablero-costos.sql).
+    /// El control de acceso NO es cosmetico: el menu solo esconde la opcion, y
+    /// la pantalla muestra montos calculados con salarios. Autorizado es el
+    /// unico punto; TableroCostos.aspx.cs y DescargarTableroCostos lo reusan.
+    /// La regla (perfiles 14/18 o modulo extra por usuario) esta en
+    /// NegTableroCostos.PuedeVer.
     ///
     /// Las actividades clasificadas del rango quedan en Session: cambiar un
     /// filtro no vuelve a la base. "refrescar" = "1" (boton Consultar) fuerza
@@ -25,8 +25,6 @@ namespace JsonJQueryNetTableroCostos
     /// </summary>
     public class AdministrarTableroCostos : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
-        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
-
         private const string ClaveRango = "TableroCostos.Rango";
         private const string ClaveDatos = "TableroCostos.Datos";
 
@@ -133,9 +131,14 @@ namespace JsonJQueryNetTableroCostos
 
         internal static bool Autorizado(HttpContext context)
         {
+            if (!Autenticado(context))
+            {
+                return false;
+            }
             int idPerfil;
-            return Autenticado(context) && int.TryParse(Convert.ToString(context.Session["Id_Perfil"], CultureInfo.InvariantCulture), out idPerfil)
-                && Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
+            int? perfil = int.TryParse(Convert.ToString(context.Session["Id_Perfil"], CultureInfo.InvariantCulture), out idPerfil)
+                ? idPerfil : (int?)null;
+            return NegTableroCostos.PuedeVer(perfil, Convert.ToString(context.Session["Cod_Usuario"], CultureInfo.InvariantCulture));
         }
 
         internal static bool LeerRango(string desdeTexto, string hastaTexto, out DateTime desde, out DateTime hasta, out string error)

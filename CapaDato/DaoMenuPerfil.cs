@@ -128,5 +128,101 @@ namespace CapaDato
 
             return respuesta;
         }
+
+        /// <summary>Lista las acciones del catalogo con su estado (activo 0/1) para el perfil.</summary>
+        public static List<EntAccionPermiso> ListarAccionesPerfil(int idPerfil)
+        {
+            List<EntAccionPermiso> lista = new List<EntAccionPermiso>();
+            DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+            using (SqlConnection cnx = conexion.conectar())
+            using (SqlCommand cmd = new SqlCommand("Sp_RTA_ListarAccionesPerfil", cnx))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+                cmd.Parameters.Add("@IdPerfil", SqlDbType.Int).Value = idPerfil;
+                cnx.Open();
+
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        lista.Add(new EntAccionPermiso()
+                        {
+                            Id_Accion = Convert.ToInt32(dr["Id_Accion"].ToString()),
+                            Clave = dr["Clave"].ToString(),
+                            Id_Menu = Convert.ToInt32(dr["Id_Menu"].ToString()),
+                            Titulo = dr["Titulo"].ToString(),
+                            Descripcion = dr["Descripcion"].ToString(),
+                            Activo = Convert.ToInt32(dr["Activo"].ToString())
+                        });
+                    }
+                }
+            }
+
+            return lista;
+        }
+
+        /// <summary>Guarda (atomico) los menus y las acciones activos del perfil.</summary>
+        public static EntRespuesta GuardarPermisosPerfil(int idPerfil, string menusCsv, string accionesCsv, string usuarioRegistro)
+        {
+            EntRespuesta respuesta = new EntRespuesta()
+            {
+                estado = "0",
+                resultado = "0",
+                tipoMensaje = "danger",
+                mensaje = ""
+            };
+
+            try
+            {
+                DaoReporTareaAranda conexion = new DaoReporTareaAranda();
+
+                using (SqlConnection cnx = conexion.conectar())
+                using (SqlCommand cmd = new SqlCommand("Sp_RTA_GuardarPermisosPerfil", cnx))
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.Add("@IdPerfil", SqlDbType.Int).Value = idPerfil;
+                    cmd.Parameters.Add("@MenusCsv", SqlDbType.VarChar, -1).Value = menusCsv ?? string.Empty;
+                    cmd.Parameters.Add("@AccionesCsv", SqlDbType.VarChar, -1).Value = accionesCsv ?? string.Empty;
+                    cmd.Parameters.Add("@UsuarioRegistro", SqlDbType.VarChar, 50).Value = usuarioRegistro ?? "SISTEMA";
+
+                    cnx.Open();
+
+                    using (SqlDataReader dr = cmd.ExecuteReader())
+                    {
+                        if (dr.Read())
+                        {
+                            int respuestaSP = Convert.ToInt32(dr["Respuestas"].ToString());
+                            respuesta.resultado = respuestaSP.ToString();
+                            respuesta.mensaje = dr["Mensaje"].ToString();
+
+                            if (respuestaSP > 0)
+                            {
+                                respuesta.estado = "1";
+                                respuesta.tipoMensaje = "success";
+                            }
+                            else
+                            {
+                                respuesta.estado = "0";
+                                respuesta.tipoMensaje = "warning";
+                            }
+                        }
+                        else
+                        {
+                            respuesta.mensaje = "El procedimiento no devolvió información.";
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                respuesta.estado = "0";
+                respuesta.resultado = "0";
+                respuesta.tipoMensaje = "danger";
+                respuesta.mensaje = "Ocurrió un error al guardar los permisos del perfil. Detalle: " + ex.Message;
+            }
+
+            return respuesta;
+        }
     }
 }

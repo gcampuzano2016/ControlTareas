@@ -20,5 +20,15 @@ namespace CapaNegocio
         {
             return DaoMenuPerfil.GuardarMenuPerfil(idPerfil, activosCsv);
         }
+
+        public static List<EntAccionPermiso> ListarAccionesPerfil(int idPerfil)
+        {
+            return DaoMenuPerfil.ListarAccionesPerfil(idPerfil);
+        }
+
+        public static EntRespuesta GuardarPermisosPerfil(int idPerfil, string menusCsv, string accionesCsv, string usuarioRegistro)
+        {
+            return DaoMenuPerfil.GuardarPermisosPerfil(idPerfil, menusCsv, accionesCsv, usuarioRegistro);
+        }
     }
 }

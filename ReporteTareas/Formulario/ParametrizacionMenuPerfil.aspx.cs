@@ -1,3 +1,4 @@
+using ReporteTareas.clases;
 using ReporteTareas.Controles;
 using SeguridadAppHelper;
 using System;
@@ -13,6 +14,11 @@ namespace ReporteTareas.Formulario
         protected void Page_Load(object sender, EventArgs e)
         {
             GenLogin.RedireccionarALogin(this);
+
+            if (!Permisos.PuedeEntrar(Context, Pantallas.ParametrizacionMenuPerfil))
+            {
+                Response.Redirect("~/Formulario/Principal.aspx", true);
+            }
 
             if (Session["UserLogin"] != null)
             {

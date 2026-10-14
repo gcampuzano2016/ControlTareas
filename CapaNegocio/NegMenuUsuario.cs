@@ -20,5 +20,15 @@ namespace CapaNegocio
         {
             return DaoMenuUsuario.GuardarMenuUsuario(codUsuario, extrasCsv, usuarioRegistro);
         }
+
+        public static List<EntAccionPermiso> ListarAccionesUsuario(string codUsuario)
+        {
+            return DaoMenuUsuario.ListarAccionesUsuario(codUsuario);
+        }
+
+        public static EntRespuesta GuardarPermisosUsuario(string codUsuario, string extrasCsv, string accionesCsv, string usuarioRegistro)
+        {
+            return DaoMenuUsuario.GuardarPermisosUsuario(codUsuario, extrasCsv, accionesCsv, usuarioRegistro);
+        }
     }
 }

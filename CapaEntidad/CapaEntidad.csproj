@@ -117,6 +117,7 @@
     <Compile Include="EntArchivoTarea.cs" />
     <Compile Include="EntParametrosCorreo.cs" />
     <Compile Include="EntCatalogo.cs" />
+    <Compile Include="EntAccionPermiso.cs" />
     <Compile Include="EntRespuesta.cs" />
     <Compile Include="CurvaConstantes.cs" />
     <Compile Include="EntCurvaCatalogo.cs" />

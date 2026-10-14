@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -21,10 +22,14 @@ namespace JsonJQueryNetMenuUsuario
         {
             StringBuilder responseAction = new StringBuilder();
 
-            // Endpoint de control de accesos: sin sesión válida no se ejecuta ninguna acción.
-            if (context.Session == null || context.Session["UserLogin"] == null)
+            // Endpoint de control de accesos: sin sesión válida y sin permiso a la pantalla no se ejecuta ninguna acción.
+            if (!Permisos.Autenticado(context))
             {
                 responseAction.Append(responseMessage("0", "Su sesión ha expirado. Vuelva a iniciar sesión.", "danger"));
+            }
+            else if (!Permisos.PuedeEntrar(context, Pantallas.ParametrizacionMenuUsuario))
+            {
+                responseAction.Append(responseMessage("0", "No tiene permisos para esta pantalla.", "danger"));
             }
             else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
@@ -54,6 +59,18 @@ namespace JsonJQueryNetMenuUsuario
                 {
                     existAction = true;
                     responseAction.Append(GuardarMenuUsuario(context, parameters));
+                }
+
+                if (Action == "ListaAccionesUsuario")
+                {
+                    existAction = true;
+                    responseAction.Append(ListaAccionesUsuario(parameters));
+                }
+
+                if (Action == "GuardarPermisosUsuario")
+                {
+                    existAction = true;
+                    responseAction.Append(GuardarPermisosUsuario(context, parameters));
                 }
 
                 if (!existAction)
@@ -176,6 +193,106 @@ namespace JsonJQueryNetMenuUsuario
             {
                 return responseMessage("0", "Ocurrió un error al guardar los módulos del usuario. " + ex.Message, "danger");
             }
+        }
+
+        private string ListaAccionesUsuario(dynamic campos)
+        {
+            try
+            {
+                string codUsuario = "";
+                try { codUsuario = Convert.ToString(campos["codUsuario"]); }
+                catch { codUsuario = ""; }
+
+                if (string.IsNullOrEmpty(codUsuario))
+                {
+                    return responseMessage("0", "Debe seleccionar un usuario.", "warning");
+                }
+
+                return ToJson(NegMenuUsuario.ListarAccionesUsuario(codUsuario));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al cargar las acciones. " + ex.Message, "danger");
+            }
+        }
+
+        private string GuardarPermisosUsuario(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                string codUsuario = "";
+                try { codUsuario = Convert.ToString(campos["codUsuario"]); }
+                catch { codUsuario = ""; }
+
+                if (string.IsNullOrEmpty(codUsuario))
+                {
+                    return responseMessage("0", "Debe seleccionar un usuario.", "warning");
+                }
+
+                string extrasCsv;
+                if (!TryArmarCsv(campos as object, "extras", out extrasCsv))
+                {
+                    return responseMessage("0", "El listado de módulos contiene un valor inválido.", "warning");
+                }
+
+                string accionesCsv;
+                if (!TryArmarCsv(campos as object, "acciones", out accionesCsv))
+                {
+                    return responseMessage("0", "El listado de acciones contiene un valor inválido.", "warning");
+                }
+
+                // Quien asigna sale de la sesión, nunca del cliente.
+                string usuarioRegistro = "SISTEMA";
+                if (context.Session != null && context.Session["Cod_Usuario"] != null)
+                {
+                    usuarioRegistro = context.Session["Cod_Usuario"].ToString();
+                }
+
+                EntRespuesta respuesta = NegMenuUsuario.GuardarPermisosUsuario(codUsuario, extrasCsv, accionesCsv, usuarioRegistro);
+                return ToJson(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Ocurrió un error al guardar los permisos del usuario. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Arma un CSV de enteros positivos con la lista que llega bajo la clave. Una clave que
+        /// no llega es una lista vacia; un valor que no es arreglo, o con un elemento que no es
+        /// entero positivo, es invalido y no se guarda nada.
+        /// </summary>
+        private static bool TryArmarCsv(object campos, string clave, out string csv)
+        {
+            csv = string.Empty;
+
+            IDictionary<string, object> diccionario = campos as IDictionary<string, object>;
+            object valor;
+            if (diccionario == null || !diccionario.TryGetValue(clave, out valor) || valor == null)
+            {
+                return true;
+            }
+
+            System.Collections.IEnumerable lista = valor as System.Collections.IEnumerable;
+            if (lista == null || valor is string)
+            {
+                return false;
+            }
+
+            List<string> ids = new List<string>();
+            foreach (var v in lista)
+            {
+                int id;
+                if (!int.TryParse(Convert.ToString(v), out id) || id <= 0)
+                {
+                    return false;
+                }
+
+                ids.Add(id.ToString());
+            }
+
+            csv = string.Join(",", ids);
+            return true;
         }
 
         private string responseMessage(string estado, string mensaje, string tipoMensaje, string resultado = "")

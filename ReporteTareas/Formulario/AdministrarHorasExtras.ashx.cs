@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Text;
 using System.Web;
@@ -36,53 +37,22 @@ namespace JsonJQueryNetHorasExtras
     public class AdministrarHorasExtras : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
         /// <summary>
-        /// Servicios2 (2), Talento Humano (14) y Super Admin (18):
-        /// los mismos perfiles a los que el menu les muestra la pantalla.
-        ///
-        /// Esta lista NO es de solo lectura: quien esta aqui puede teclear horas,
-        /// guardar, cerrar un periodo y corregir sus fechas. Lo unico reservado
-        /// al 18 es reabrir un periodo cerrado (PerfilesQueReabren). Agregar un
-        /// perfil aqui es darle el modulo entero, no el permiso de mirarlo.
-        ///
-        /// internal, no private: DescargarHorasExtras.ashx.cs -mismo namespace,
-        /// mismo proyecto de presentacion- reusa esta misma lista para su propia
-        /// comprobacion de perfil en vez de declarar la suya, y HorasExtras.aspx.cs
-        /// la lee en su Page_Load para redirigir a quien no este. Los tres
-        /// protegen el mismo dato (el sueldo del periodo) con el mismo criterio;
-        /// si este criterio cambia algun dia, cambia en un solo lugar.
-        ///
-        /// Quien agregue un perfil aqui tiene que acordarse de PerfilMenu: la
-        /// pantalla se abre por URL directa aunque el menu no la muestre, y al
-        /// reves, una fila de menu sin el perfil en esta lista dibuja una opcion
-        /// que al pulsarla redirige a Principal.aspx.
+        /// Las barreras de este modulo estan AQUI, en el handler: el menu solo
+        /// decide que la opcion se vea, no que el .ashx no se pueda llamar.
+        /// Quien tiene cada permiso ya no se fija en el codigo: se administra en
+        /// el portal y lo responde ReporteTareas.clases.Permisos. Hay tres
+        /// niveles:
+        ///   - entrar al modulo (pantalla HorasExtras.aspx): quien entra puede
+        ///     teclear horas, guardar, cerrar un periodo y corregir sus fechas;
+        ///   - reabrir un periodo cerrado (accion HorasExtrasReabrir), por
+        ///     separacion de funciones: quien opera el mes puede cerrarlo, pero
+        ///     deshacer un cierre formal exige otro permiso. NegHorasExtrasPantalla
+        ///     .ReabrirPeriodo y el procedimiento SQL no comprueban permisos a
+        ///     proposito: este handler es el unico lugar donde existe esa barrera;
+        ///   - cargar sueldos y ajustes de sueldo (accion HorasExtrasEditarMaestro),
+        ///     el dato mas delicado del modulo.
+        /// Ocultar un boton en la pagina es cortesia, no barrera.
         /// </summary>
-        internal static readonly int[] PerfilesAutorizados = { 2, 14, 18 };
-
-        /// <summary>
-        /// Solo Super Admin (18) puede reabrir un periodo cerrado. Separacion de
-        /// funciones: quien opera el mes puede cerrarlo, pero deshacer un cierre
-        /// formal exige otro perfil.
-        ///
-        /// Se comprueba AQUI y no solo ocultando el boton: ocultarlo es cortesia
-        /// para quien no puede, no una barrera para quien no debe. El
-        /// procedimiento SQL no conoce perfiles y NegHorasExtrasPantalla.ReabrirPeriodo
-        /// tampoco los comprueba a proposito -este handler es el unico lugar
-        /// donde existe esta barrera.
-        /// </summary>
-        private static readonly int[] PerfilesQueReabren = { 18 };
-
-        /// <summary>
-        /// Talento Humano (14) y Super Admin (18): los unicos que pueden agregar una
-        /// persona al modulo con su sueldo, o registrarle un ajuste de sueldo. Es el
-        /// dato mas delicado del modulo; el perfil 2 ve la pantalla pero no carga
-        /// sueldos.
-        ///
-        /// internal: HorasExtras.aspx.cs la lee para decidir si MUESTRA los botones.
-        /// Esa es cortesia; la barrera de verdad es la comprobacion de las dos
-        /// acciones de este handler.
-        /// </summary>
-        internal static readonly int[] PerfilesQueEditanMaestro = { 14, 18 };
-
         public void ProcessRequest(HttpContext context)
         {
             /* Los bytes de la respuesta se escriben con la codificacion que fija
@@ -99,7 +69,7 @@ namespace JsonJQueryNetHorasExtras
             {
                 salida.Append(Mensaje("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
-            else if (!EstaEn(context, PerfilesAutorizados))
+            else if (!Permisos.PuedeEntrar(context, Pantallas.HorasExtras))
             {
                 salida.Append(Mensaje("0", "No tiene permisos para esta pantalla.", "danger"));
             }
@@ -205,10 +175,10 @@ namespace JsonJQueryNetHorasExtras
         /// <summary>
         /// Corrige las fechas de un periodo ya creado y lo deja recalculado.
         ///
-        /// No lleva comprobacion de perfil propia: ProcessRequest ya cierra el
-        /// handler entero a PerfilesAutorizados, y editar las fechas de un
-        /// periodo ABIERTO es del mismo orden que abrirlo. Reabrir es lo unico
-        /// que pide mas -solo el 18-, y este metodo no puede tocar un periodo
+        /// No lleva comprobacion de permiso propia: ProcessRequest ya cierra el
+        /// handler entero a quien puede entrar a la pantalla, y editar las
+        /// fechas de un periodo ABIERTO es del mismo orden que abrirlo. Reabrir
+        /// es lo unico que pide mas -la accion HorasExtrasReabrir-, y este metodo no puede tocar un periodo
         /// cerrado: el procedimiento lo rechaza con -6.
         ///
         /// Las fechas vacias se atajan aqui, igual que en AbrirPeriodo: el
@@ -317,7 +287,7 @@ namespace JsonJQueryNetHorasExtras
 
         private string ReabrirPeriodo(HttpContext context, dynamic p)
         {
-            if (!EstaEn(context, PerfilesQueReabren))
+            if (!Permisos.PuedeHacer(context, Acciones.HorasExtrasReabrir))
             {
                 return Mensaje("0", "Su perfil no puede reabrir un período cerrado.", "warning");
             }
@@ -342,7 +312,7 @@ namespace JsonJQueryNetHorasExtras
         /// </summary>
         private string AgregarColaborador(HttpContext context, dynamic p)
         {
-            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            if (!Permisos.PuedeHacer(context, Acciones.HorasExtrasEditarMaestro))
             {
                 return Mensaje("0", "Su perfil no puede cargar datos ni sueldos del módulo.", "warning");
             }
@@ -370,7 +340,7 @@ namespace JsonJQueryNetHorasExtras
         /// <summary>Agrega una fila de ajuste al historial de sueldos. Nunca pisa la anterior.</summary>
         private string AgregarAjusteSalario(HttpContext context, dynamic p)
         {
-            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            if (!Permisos.PuedeHacer(context, Acciones.HorasExtrasEditarMaestro))
             {
                 return Mensaje("0", "Su perfil no puede cargar datos ni sueldos del módulo.", "warning");
             }
@@ -406,7 +376,7 @@ namespace JsonJQueryNetHorasExtras
         /// </summary>
         private string GuardarDecisiones(HttpContext context, dynamic p)
         {
-            if (!EstaEn(context, PerfilesQueEditanMaestro))
+            if (!Permisos.PuedeHacer(context, Acciones.HorasExtrasEditarMaestro))
             {
                 return Mensaje("0", "Su perfil no puede decidir qué tramos se pagan.", "warning");
             }
@@ -512,13 +482,6 @@ namespace JsonJQueryNetHorasExtras
         {
             bool b;
             return v is bool ? (bool)v : bool.TryParse(Convert.ToString(v), out b) && b;
-        }
-
-        private static bool EstaEn(HttpContext context, int[] perfiles)
-        {
-            int idPerfil;
-            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(perfiles, idPerfil) >= 0;
         }
 
         private static string Usuario(HttpContext context)

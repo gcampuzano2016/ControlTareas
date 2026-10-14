@@ -1,4 +1,5 @@
 ﻿using ReporteTareas.Controles;
+using ReporteTareas.clases;
 using System;
 
 namespace ReporteTareas.Formulario
@@ -28,19 +29,10 @@ namespace ReporteTareas.Formulario
         {
             GenLogin.RedireccionarALogin(this);
 
-            /* La lista de perfiles vive en UN solo sitio -el handler- y esta
-               pagina la reusa. Tenerla dos veces no seria un riesgo de
-               seguridad -la barrera de verdad es la del handler- sino de
-               mantenimiento callado: anadir un perfil alli y olvidarlo aqui
-               deja a esa gente con permiso para llamar al handler y sin poder
-               abrir la pantalla, y nadie relaciona una cosa con la otra. */
-            int idPerfil;
-            bool tienePermiso = int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil)
-                                 && Array.IndexOf(
-                                        JsonJQueryNetHorasExtras.AdministrarParametrosHE.PerfilesAutorizados,
-                                        idPerfil) >= 0;
-
-            if (!tienePermiso)
+            /* Quien puede entrar lo responde Permisos, el mismo lugar que usa el
+               handler; la barrera de verdad es la del handler y esto es cortesia
+               para no mostrar una pantalla vacia. */
+            if (!Permisos.PuedeEntrar(Context, Pantallas.ParametrizacionHorasExtras))
             {
                 Response.Redirect("~/Formulario/Principal.aspx", true);
             }

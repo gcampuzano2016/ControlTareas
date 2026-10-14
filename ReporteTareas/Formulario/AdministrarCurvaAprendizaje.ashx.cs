@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -29,25 +30,21 @@ namespace JsonJQueryNetCurvaAprendizaje
     /// </summary>
     public class AdministrarCurvaAprendizaje : HttpTaskAsyncHandler, System.Web.SessionState.IRequiresSessionState
     {
-        /// <summary>
-        /// Talento Humano (14) y Super Admin (18). La misma lista esta en
-        /// docs/sql/2026-10-05-curva-aprendizaje-menu.sql: si cambia una,
-        /// cambiar la otra. internal: las paginas y DescargarCurvaAprendizaje.ashx
-        /// la reusan en vez de declarar la suya.
-        /// </summary>
-        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
-
         internal static readonly JsonSerializerSettings Json = new JsonSerializerSettings
         {
             DateFormatString = "yyyy-MM-dd",
             NullValueHandling = NullValueHandling.Include
         };
 
+        /// <summary>
+        /// El modulo entero (handler, descarga y sus pantallas) depende de la
+        /// pantalla CurvaColaboradores.aspx: quien la tiene en su menu, por
+        /// perfil o como adicional, usa todo el modulo. Las otras dos opciones
+        /// del menu de Curva solas no dan acceso.
+        /// </summary>
         internal static bool Autorizado(HttpContext context)
         {
-            if (context.Session == null || context.Session["UserLogin"] == null) return false;
-            int idPerfil;
-            return int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil) && PerfilesAutorizados.Contains(idPerfil);
+            return Permisos.PuedeEntrar(context, Pantallas.CurvaColaboradores);
         }
 
         public override async Task ProcessRequestAsync(HttpContext context)

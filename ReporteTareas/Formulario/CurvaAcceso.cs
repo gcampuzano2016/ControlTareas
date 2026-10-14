@@ -6,8 +6,9 @@ namespace ReporteTareas.Formulario
 {
     /// <summary>
     /// Puerta de las pantallas de Curva de Aprendizaje: sesion iniciada y
-    /// perfil autorizado, con la MISMA lista que usa el handler
-    /// (AdministrarCurvaAprendizaje.PerfilesAutorizados). Es cortesia: la
+    /// pantalla CurvaColaboradores.aspx en el menu de quien entra, con la
+    /// MISMA regla que usa el handler (AdministrarCurvaAprendizaje.Autorizado,
+    /// que pregunta a ReporteTareas.clases.Permisos). Es cortesia: la
     /// barrera de verdad es la del handler, pero sin esto quien teclea la URL
     /// ve la pantalla vacia y recien le saltan los "no tiene permisos".
     ///

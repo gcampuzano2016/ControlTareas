@@ -10,7 +10,7 @@ namespace CapaNegocio
     /// ajuste de sueldo de quien ya esta, desde la pantalla de Horas Extras.
     ///
     /// NO comprueba perfiles, igual que el resto del modulo: la barrera esta en el
-    /// handler (PerfilesQueEditanMaestro, 14 y 18).
+    /// handler (accion HorasExtrasEditarMaestro de ReporteTareas.clases.Permisos).
     ///
     /// Nunca pisa un sueldo: los dos caminos insertan una fila nueva en
     /// HE_Salario, con usuario, fecha e ip. Ese es el rastro de quien cambio que.

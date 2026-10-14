@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,8 +17,9 @@ namespace JsonJQueryNetTableroCostos
     /// El control de acceso NO es cosmetico: el menu solo esconde la opcion, y
     /// la pantalla muestra montos calculados con salarios. Autorizado es el
     /// unico punto; TableroCostos.aspx.cs y DescargarTableroCostos lo reusan.
-    /// La regla (perfiles 14/18 o modulo extra por usuario) esta en
-    /// NegTableroCostos.PuedeVer.
+    /// La regla esta en ReporteTareas.clases.Permisos (pantalla
+    /// TableroCostos.aspx, por perfil o como adicional del usuario): quien la
+    /// tiene se administra en el portal, no aqui.
     ///
     /// Las actividades clasificadas del rango quedan en Session: cambiar un
     /// filtro no vuelve a la base. "refrescar" = "1" (boton Consultar) fuerza
@@ -131,14 +133,7 @@ namespace JsonJQueryNetTableroCostos
 
         internal static bool Autorizado(HttpContext context)
         {
-            if (!Autenticado(context))
-            {
-                return false;
-            }
-            int idPerfil;
-            int? perfil = int.TryParse(Convert.ToString(context.Session["Id_Perfil"], CultureInfo.InvariantCulture), out idPerfil)
-                ? idPerfil : (int?)null;
-            return NegTableroCostos.PuedeVer(perfil, Convert.ToString(context.Session["Cod_Usuario"], CultureInfo.InvariantCulture));
+            return Autenticado(context) && Permisos.PuedeEntrar(context, Pantallas.TableroCostos);
         }
 
         internal static bool LeerRango(string desdeTexto, string hastaTexto, out DateTime desde, out DateTime hasta, out string error)

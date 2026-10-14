@@ -16,15 +16,6 @@ namespace CapaNegocio
         }
 
         /// <summary>
-        /// Quien puede ver el tablero, con la consulta real a R_UsuarioMenu.
-        /// La regla esta en PuedeVer, que no toca la base.
-        /// </summary>
-        public static bool PuedeVer(int? idPerfil, string codUsuario)
-        {
-            return PuedeVer(idPerfil, () => DaoTableroCostos.AccesoPorUsuario(codUsuario));
-        }
-
-        /// <summary>
         /// Registra la descarga ANTES de armar el archivo. Si no puede, lanza una
         /// excepcion y el handler no entrega nada: el Excel lleva valores
         /// calculados con salarios.

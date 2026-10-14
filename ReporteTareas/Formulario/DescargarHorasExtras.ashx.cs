@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Web;
 using System.Web.Caching;
@@ -108,16 +109,13 @@ namespace JsonJQueryNetHorasExtras
         }
 
         /// <summary>
-        /// Mismo criterio que AdministrarHorasExtras.ashx.cs, misma lista: se
-        /// reusa PerfilesAutorizados de ahi (internal, mismo namespace) en vez
-        /// de declarar una copia que algun dia alguien cambie en un solo lugar
-        /// y no en el otro.
+        /// Mismo criterio que AdministrarHorasExtras.ashx.cs: quien puede entrar
+        /// a la pantalla HorasExtras.aspx, segun ReporteTareas.clases.Permisos.
+        /// El archivo lleva sueldos, asi que se comprueba aqui y no solo en el menu.
         /// </summary>
         private static bool TienePermiso(HttpContext context)
         {
-            int idPerfil;
-            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(AdministrarHorasExtras.PerfilesAutorizados, idPerfil) >= 0;
+            return Permisos.PuedeEntrar(context, Pantallas.HorasExtras);
         }
 
         /// <summary>De quien es esta descarga, para la auditoria. Sale de la sesion, nunca del cliente.</summary>

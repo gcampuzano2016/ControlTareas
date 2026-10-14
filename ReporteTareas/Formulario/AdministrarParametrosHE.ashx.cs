@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -22,6 +23,11 @@ namespace JsonJQueryNetHorasExtras
     /// con el que se le paga a las 64. Un Factor50 mal puesto no se nota en la
     /// pantalla de parametros, se nota en la nomina del mes.
     ///
+    /// LA BARRERA REAL ESTA AQUI. Ni CapaNegocio ni el procedimiento SQL conocen
+    /// perfiles, y el menu solo decide que la opcion se VEA, no que el .ashx no
+    /// se pueda LLAMAR. Quien puede entrar (pantalla ParametrizacionHorasExtras.aspx)
+    /// se administra en el portal y lo responde ReporteTareas.clases.Permisos.
+    ///
     /// El orden de las comprobaciones importa: sesion primero, perfil despues,
     /// parametros al final. Comprobar el perfil antes que la sesion leeria
     /// Session["Id_Perfil"] sobre una sesion nula; validar parametros antes que
@@ -32,24 +38,6 @@ namespace JsonJQueryNetHorasExtras
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
     public class AdministrarParametrosHE : IHttpHandler, System.Web.SessionState.IRequiresSessionState
     {
-        /// <summary>
-        /// Talento Humano (14) y Super Admin (18): los mismos perfiles a los
-        /// que el menu le muestra la opcion.
-        ///
-        /// LA BARRERA REAL ESTA AQUI. Ni CapaNegocio ni el procedimiento SQL
-        /// conocen perfiles, y el menu solo decide que la opcion se VEA, no
-        /// que el .ashx no se pueda LLAMAR: sin esta lista, cualquier usuario
-        /// con sesion iniciada podria cambiar el factor de recargo con una
-        /// peticion fabricada que no pase nunca por el menu.
-        ///
-        /// internal, no private, igual que en el modulo hermano:
-        /// ParametrizacionHorasExtras.aspx.cs la reusa para su redireccion de
-        /// cortesia en vez de declarar su propia copia. Un perfil anadido aqui
-        /// y olvidado alli deja a esa gente con permiso de handler y sin
-        /// pantalla, y nadie relaciona una cosa con la otra.
-        /// </summary>
-        internal static readonly int[] PerfilesAutorizados = { 14, 18 };
-
         /// <summary>
         /// Lo que viaja a la pantalla por cada fila del historial. Es
         /// EntHeParametroFila mas los tres rasgos que la pantalla necesita
@@ -103,7 +91,7 @@ namespace JsonJQueryNetHorasExtras
             {
                 salida.Append(Mensaje("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
-            else if (!EstaEn(context, PerfilesAutorizados))
+            else if (!Permisos.PuedeEntrar(context, Pantallas.ParametrizacionHorasExtras))
             {
                 salida.Append(Mensaje("0", "No tiene permisos para esta pantalla.", "danger"));
             }
@@ -248,13 +236,6 @@ namespace JsonJQueryNetHorasExtras
 
             respuesta.resultado = filas;
             return respuesta;
-        }
-
-        private static bool EstaEn(HttpContext context, int[] perfiles)
-        {
-            int idPerfil;
-            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(perfiles, idPerfil) >= 0;
         }
 
         private static string Usuario(HttpContext context)

@@ -7,6 +7,7 @@
 
 var _usuarios = [];
 var _modulos = [];
+var _acciones = [];
 
 $(document).ready(function () {
     BuscarUsuarios();
@@ -92,9 +93,62 @@ function SeleccionarUsuario(indice) {
             return;
         }
         _modulos = respuesta || [];
-        RenderArbol(_modulos);
-        $("#panelDetalle").show();
+        PostMenuUsuario("ListaAccionesUsuario", { "codUsuario": item.Cod_Usuario }, function (resAcc) {
+            if (resAcc != null && typeof resAcc.estado != "undefined") {
+                MostrarMensaje(resAcc.mensaje, resAcc.tipoMensaje);
+                _acciones = [];
+            } else {
+                _acciones = resAcc || [];
+            }
+            RenderArbol(_modulos);
+            $("#panelDetalle").show();
+        });
     });
+}
+
+/* Acciones de una pantalla, debajo de ella. Heredada del perfil -> marcada y
+   deshabilitada. Adicional -> marcada y editable. Son casillas aparte
+   (chkAccion, nunca chkModulo): no viajan como modulos. */
+function PintarAcciones(idMenu) {
+    var html = "";
+    $.each(_acciones, function (i, a) {
+        if (a.Id_Menu != idMenu) { return; }
+        var esPerfil = (a.ActivoPerfil == 1);
+        var marcado = (esPerfil || a.ActivoUsuario == 1) ? "checked" : "";
+        var bloqueado = esPerfil ? "disabled" : "";
+        var etiqueta = "";
+        if (esPerfil) {
+            etiqueta = " <span class='label label-default'>Perfil</span>";
+        } else if (a.ActivoUsuario == 1) {
+            etiqueta = " <span class='label label-success'>Extra</span>";
+        }
+        html += "<div style='margin-left:56px'>";
+        html += "<label style='font-weight:normal' title='" + EscaparAttr(a.Descripcion) + "'>";
+        html += "<input type='checkbox' class='chkAccion' data-accion='" + EscaparAttr(String(a.Id_Accion)) + "'";
+        html += " data-menu='" + EscaparAttr(String(a.Id_Menu)) + "' " + marcado + " " + bloqueado;
+        html += " onchange='OnAccionChange(" + parseInt(a.Id_Menu, 10) + ", this)' /> ";
+        html += "<i class='fa fa-cog' style='color:#777'></i> " + Escapar(a.Titulo);
+        html += "</label>" + etiqueta + "</div>";
+    });
+    return html;
+}
+
+/* Marcar una accion marca su pantalla si es editable (y por OnHijoChange, el padre). */
+function OnAccionChange(idMenu, chk) {
+    if (!$(chk).is(":checked")) { return; }
+    var $pantalla = $(".chkModulo[data-menu='" + idMenu + "']").not(":disabled");
+    $pantalla.prop("checked", true);
+    var padre = $pantalla.attr("data-padre");
+    if (padre) { OnHijoChange(padre); }
+}
+
+/* Desmarcar una pantalla desmarca sus acciones editables y avisa una vez. */
+function DesmarcarAccionesDe(idMenu) {
+    var $acc = $(".chkAccion[data-menu='" + idMenu + "']:checked").not(":disabled");
+    if ($acc.length > 0) {
+        $acc.prop("checked", false);
+        MostrarMensaje("Se quitaron también las acciones de esa pantalla.", "warning");
+    }
 }
 
 function RenderArbol(lista) {
@@ -128,6 +182,7 @@ function RenderArbol(lista) {
         info += "<i class='" + EscaparAttr(padre.Class_Icon) + "'></i> " + Escapar(padre.Titulo);
         info += "</label>";
         info += Etiqueta(padre);
+        info += PintarAcciones(padre.Id_Menu);
         info += "<span class='ramaResumen' data-rama='" + EscaparAttr(String(padre.Id_Menu)) + "'></span>";
 
         info += "<div class='ramaHijos' data-rama='" + EscaparAttr(String(padre.Id_Menu)) + "'>";
@@ -138,6 +193,7 @@ function RenderArbol(lista) {
             info += "<i class='" + EscaparAttr(hijo.Class_Icon) + "'></i> " + Escapar(hijo.Titulo);
             info += "</label>";
             info += Etiqueta(hijo);
+            info += PintarAcciones(hijo.Id_Menu);
             info += "</div>";
         });
         info += "</div>";
@@ -202,8 +258,8 @@ function PintarCheck(item, clase, idPadre) {
     var marcado = (esPerfil || item.ActivoUsuario == 1) ? "checked" : "";
     var bloqueado = esPerfil ? "disabled" : "";
     var evento = (clase === "chkHijo")
-        ? " onchange='OnHijoChange(" + idPadre + ")'"
-        : " onchange='OnPadreChange(" + item.Id_Menu + ")'";
+        ? " onchange='OnHijoChangeConAcciones(" + parseInt(idPadre, 10) + ", " + parseInt(item.Id_Menu, 10) + ", this)'"
+        : " onchange='OnPadreChange(" + parseInt(item.Id_Menu, 10) + ")'";
 
     var html = "<input type='checkbox' class='chkModulo " + clase + "'";
     html += " data-menu='" + EscaparAttr(String(item.Id_Menu)) + "'";
@@ -234,13 +290,24 @@ function OnHijoChange(idPadre) {
     SincronizarRama(idPadre);
 }
 
-/* Desmarcar un padre editable desmarca sus hijos editables.
+/* Hijo: marca al padre y, si se desmarca, quita sus acciones editables. */
+function OnHijoChangeConAcciones(idPadre, idMenu, chk) {
+    OnHijoChange(idPadre);
+    if (!chk.checked) { DesmarcarAccionesDe(idMenu); }
+}
+
+/* Desmarcar un padre editable desmarca sus hijos editables y las acciones
+   editables de todos ellos.
    El padre sigue siendo clicable con la rama contraida, asi que hay que
    refrescar el resumen: si no, quedaria anunciando extras que ya se quitaron. */
 function OnPadreChange(idPadre) {
     var padreChecked = $(".chkPadre[data-menu='" + idPadre + "']").is(":checked");
     if (!padreChecked) {
-        $(".chkHijo[data-padre='" + idPadre + "']").not(":disabled").prop("checked", false);
+        $(".chkHijo[data-padre='" + idPadre + "']").not(":disabled").each(function () {
+            $(this).prop("checked", false);
+            DesmarcarAccionesDe($(this).attr("data-menu"));
+        });
+        DesmarcarAccionesDe(idPadre);
     }
     SincronizarRama(idPadre);
 }
@@ -258,8 +325,13 @@ function GuardarModulos() {
         extras.push(parseInt($(this).attr("data-menu"), 10));
     });
 
+    var acciones = [];
+    $(".chkAccion:checked").not(":disabled").each(function () {
+        acciones.push(parseInt($(this).attr("data-accion"), 10));
+    });
+
     $("#btnGuardar").prop("disabled", true);
-    PostMenuUsuario("GuardarMenuUsuario", { "codUsuario": codUsuario, "extras": extras }, function (respuesta) {
+    PostMenuUsuario("GuardarPermisosUsuario", { "codUsuario": codUsuario, "extras": extras, "acciones": acciones }, function (respuesta) {
         $("#btnGuardar").prop("disabled", false);
         if (respuesta == null) {
             MostrarMensaje("No se recibió respuesta del servidor.", "danger");

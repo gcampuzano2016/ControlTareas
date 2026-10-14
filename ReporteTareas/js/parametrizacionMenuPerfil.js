@@ -4,6 +4,7 @@
    ============================================================================ */
 
 var _menus = [];
+var _acciones = [];
 
 $(document).ready(function () {
     CargarPerfiles();
@@ -52,8 +53,54 @@ function BuscarMenus() {
             return;
         }
         _menus = respuesta || [];
-        RenderArbol(_menus);
+        PostMenu("ListaAccionesPerfil", { "idPerfil": idPerfil }, function (resAcc) {
+            if (resAcc != null && typeof resAcc.estado != "undefined") {
+                MostrarMensaje(resAcc.mensaje, resAcc.tipoMensaje);
+                _acciones = [];
+            } else {
+                _acciones = resAcc || [];
+            }
+            RenderArbol(_menus);
+        });
     });
+}
+
+/* Acciones de una pantalla, debajo de ella. Son casillas aparte (chkAccion):
+   nunca viajan como menus. */
+function PintarAcciones(idMenu) {
+    var html = "";
+    var esSuper = ($("#cmbPerfil").val() === "18");
+    $.each(_acciones, function (i, a) {
+        if (a.Id_Menu != idMenu) { return; }
+        var marcado = (esSuper || a.Activo == 1) ? "checked" : "";
+        var bloqueado = esSuper ? "disabled" : "";
+        html += "<div style='margin-left:56px'>";
+        html += "<label style='font-weight:normal' title='" + EscaparAttr(a.Descripcion) + "'>";
+        html += "<input type='checkbox' class='chkAccion' data-accion='" + EscaparAttr(String(a.Id_Accion)) + "'";
+        html += " data-menu='" + EscaparAttr(String(a.Id_Menu)) + "' " + marcado + " " + bloqueado;
+        html += " onchange='OnAccionChange(" + parseInt(a.Id_Menu, 10) + ", this)' /> ";
+        html += "<i class='fa fa-cog' style='color:#777'></i> " + Escapar(a.Titulo);
+        html += "</label></div>";
+    });
+    return html;
+}
+
+/* Marcar una accion marca su pantalla (y por OnHijoChange, el padre). */
+function OnAccionChange(idMenu, chk) {
+    if (!$(chk).is(":checked")) { return; }
+    var $pantalla = $(".chkMenu[data-menu='" + idMenu + "']");
+    $pantalla.prop("checked", true);
+    var padre = $pantalla.attr("data-padre");
+    if (padre) { OnHijoChange(padre); }
+}
+
+/* Desmarcar una pantalla desmarca sus acciones editables y avisa una vez. */
+function DesmarcarAccionesDe(idMenu) {
+    var $acc = $(".chkAccion[data-menu='" + idMenu + "']:checked").not(":disabled");
+    if ($acc.length > 0) {
+        $acc.prop("checked", false);
+        MostrarMensaje("Se quitaron también las acciones de esa pantalla.", "warning");
+    }
 }
 
 function RenderArbol(lista) {
@@ -66,6 +113,10 @@ function RenderArbol(lista) {
         return;
     }
 
+    if ($("#cmbPerfil").val() === "18") {
+        info += "<div class='alert alert-info'>Super Admin: tiene todas las acciones; las pantallas que desmarque solo dejan de verse en su menú.</div>";
+    }
+
     $.each(padres, function (i, padre) {
         var chkP = (padre.Activo == 1) ? "checked" : "";
         info += "<div style='margin:4px 0'>";
@@ -73,15 +124,17 @@ function RenderArbol(lista) {
         info += "<input type='checkbox' class='chkMenu chkPadre' data-menu='" + EscaparAttr(String(padre.Id_Menu)) + "' " + chkP + " onchange='OnPadreChange(" + padre.Id_Menu + ")' /> ";
         info += "<i class='" + EscaparAttr(padre.Class_Icon) + "'></i> " + Escapar(padre.Titulo);
         info += "</label>";
+        info += PintarAcciones(padre.Id_Menu);
 
         var hijos = $.grep(lista, function (m) { return m.Id_MenuPadre == padre.Id_Menu; });
         $.each(hijos, function (j, hijo) {
             var chkH = (hijo.Activo == 1) ? "checked" : "";
             info += "<div style='margin-left:28px'>";
             info += "<label>";
-            info += "<input type='checkbox' class='chkMenu chkHijo' data-menu='" + EscaparAttr(String(hijo.Id_Menu)) + "' data-padre='" + EscaparAttr(String(padre.Id_Menu)) + "' " + chkH + " onchange='OnHijoChange(" + padre.Id_Menu + ")' /> ";
+            info += "<input type='checkbox' class='chkMenu chkHijo' data-menu='" + EscaparAttr(String(hijo.Id_Menu)) + "' data-padre='" + EscaparAttr(String(padre.Id_Menu)) + "' " + chkH + " onchange='OnHijoChangeConAcciones(" + parseInt(padre.Id_Menu, 10) + ", " + parseInt(hijo.Id_Menu, 10) + ", this)' /> ";
             info += "<i class='" + EscaparAttr(hijo.Class_Icon) + "'></i> " + Escapar(hijo.Titulo);
             info += "</label>";
+            info += PintarAcciones(hijo.Id_Menu);
             info += "</div>";
         });
         info += "</div>";
@@ -98,11 +151,21 @@ function OnHijoChange(idPadre) {
     }
 }
 
-/* Desmarcar el padre desmarca sus hijos */
+/* Hijo: marca al padre y, si se desmarca, quita sus acciones */
+function OnHijoChangeConAcciones(idPadre, idMenu, chk) {
+    OnHijoChange(idPadre);
+    if (!chk.checked) { DesmarcarAccionesDe(idMenu); }
+}
+
+/* Desmarcar el padre desmarca sus hijos y las acciones de todos ellos */
 function OnPadreChange(idPadre) {
     var padreChecked = $(".chkPadre[data-menu='" + idPadre + "']").is(":checked");
     if (!padreChecked) {
-        $(".chkHijo[data-padre='" + idPadre + "']").prop("checked", false);
+        $(".chkHijo[data-padre='" + idPadre + "']").each(function () {
+            $(this).prop("checked", false);
+            DesmarcarAccionesDe($(this).attr("data-menu"));
+        });
+        DesmarcarAccionesDe(idPadre);
     }
 }
 
@@ -118,8 +181,13 @@ function GuardarMenus() {
         activos.push(parseInt($(this).attr("data-menu"), 10));
     });
 
+    var acciones = [];
+    $(".chkAccion:checked").not(":disabled").each(function () {
+        acciones.push(parseInt($(this).attr("data-accion"), 10));
+    });
+
     $("#btnGuardar").prop("disabled", true);
-    PostMenu("GuardarMenuPerfil", { "idPerfil": idPerfil, "activos": activos }, function (respuesta) {
+    PostMenu("GuardarPermisosPerfil", { "idPerfil": idPerfil, "activos": activos, "acciones": acciones }, function (respuesta) {
         $("#btnGuardar").prop("disabled", false);
         if (respuesta == null) {
             MostrarMensaje("No se recibió respuesta del servidor.", "danger");

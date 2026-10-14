@@ -5,6 +5,9 @@
 
 var _menus = [];
 var _acciones = [];
+var _accionesOk = false;
+var _seleccion = 0;
+var _perfilCargado = "";
 
 $(document).ready(function () {
     CargarPerfiles();
@@ -47,18 +50,28 @@ function BuscarMenus() {
         $("#datosArbolMenu").html("");
         return;
     }
+    _seleccion++;
+    var miSeleccion = _seleccion;
+    _accionesOk = false;
+    _perfilCargado = "";
+    $("#datosArbolMenu").html("");
     PostMenu("ListaMenuPerfil", { "idPerfil": idPerfil }, function (respuesta) {
+        if (miSeleccion !== _seleccion) { return; }
         if (respuesta != null && typeof respuesta.estado != "undefined") {
             MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
             return;
         }
         _menus = respuesta || [];
         PostMenu("ListaAccionesPerfil", { "idPerfil": idPerfil }, function (resAcc) {
+            if (miSeleccion !== _seleccion) { return; }
+            _perfilCargado = String(idPerfil);
             if (resAcc != null && typeof resAcc.estado != "undefined") {
                 MostrarMensaje(resAcc.mensaje, resAcc.tipoMensaje);
                 _acciones = [];
+                _accionesOk = false;
             } else {
                 _acciones = resAcc || [];
+                _accionesOk = true;
             }
             RenderArbol(_menus);
         });
@@ -69,7 +82,7 @@ function BuscarMenus() {
    nunca viajan como menus. */
 function PintarAcciones(idMenu) {
     var html = "";
-    var esSuper = ($("#cmbPerfil").val() === "18");
+    var esSuper = (_perfilCargado === "18");
     $.each(_acciones, function (i, a) {
         if (a.Id_Menu != idMenu) { return; }
         var marcado = (esSuper || a.Activo == 1) ? "checked" : "";
@@ -113,7 +126,7 @@ function RenderArbol(lista) {
         return;
     }
 
-    if ($("#cmbPerfil").val() === "18") {
+    if (_perfilCargado === "18") {
         info += "<div class='alert alert-info'>Super Admin: tiene todas las acciones; las pantallas que desmarque solo dejan de verse en su menú.</div>";
     }
 
@@ -173,6 +186,14 @@ function GuardarMenus() {
     var idPerfil = $("#cmbPerfil").val();
     if (idPerfil == null || idPerfil === "") {
         MostrarMensaje("Debe seleccionar un perfil.", "warning");
+        return;
+    }
+    if (String(idPerfil) !== _perfilCargado) {
+        MostrarMensaje("Vuelva a seleccionar el perfil antes de guardar.", "warning");
+        return;
+    }
+    if (!_accionesOk) {
+        MostrarMensaje("No se pudieron cargar las acciones; vuelva a seleccionar el perfil antes de guardar.", "warning");
         return;
     }
 

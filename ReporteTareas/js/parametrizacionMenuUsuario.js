@@ -8,6 +8,9 @@
 var _usuarios = [];
 var _modulos = [];
 var _acciones = [];
+var _accionesOk = false;
+var _seleccion = 0;
+var _usuarioCargado = "";
 
 $(document).ready(function () {
     BuscarUsuarios();
@@ -87,18 +90,28 @@ function SeleccionarUsuario(indice) {
     $("#txtNombreUsuarioSel").val(item.Nom_Usuario + " (" + item.Cod_Usuario + ")");
     $("#txtPerfilSel").val(item.NombrePerfil + " (" + item.Id_Perfil + ")");
 
+    _seleccion++;
+    var miSeleccion = _seleccion;
+    _accionesOk = false;
+    _usuarioCargado = "";
+    $("#datosArbolMenu").html("");
     PostMenuUsuario("ListaMenuUsuario", { "codUsuario": item.Cod_Usuario }, function (respuesta) {
+        if (miSeleccion !== _seleccion) { return; }
         if (respuesta != null && typeof respuesta.estado != "undefined") {
             MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
             return;
         }
         _modulos = respuesta || [];
         PostMenuUsuario("ListaAccionesUsuario", { "codUsuario": item.Cod_Usuario }, function (resAcc) {
+            if (miSeleccion !== _seleccion) { return; }
+            _usuarioCargado = String(item.Cod_Usuario);
             if (resAcc != null && typeof resAcc.estado != "undefined") {
                 MostrarMensaje(resAcc.mensaje, resAcc.tipoMensaje);
                 _acciones = [];
+                _accionesOk = false;
             } else {
                 _acciones = resAcc || [];
+                _accionesOk = true;
             }
             RenderArbol(_modulos);
             $("#panelDetalle").show();
@@ -316,6 +329,14 @@ function GuardarModulos() {
     var codUsuario = $("#txtCodUsuarioSel").val();
     if (codUsuario == null || codUsuario === "") {
         MostrarMensaje("Debe seleccionar un usuario.", "warning");
+        return;
+    }
+    if (String(codUsuario) !== _usuarioCargado) {
+        MostrarMensaje("Vuelva a seleccionar el usuario antes de guardar.", "warning");
+        return;
+    }
+    if (!_accionesOk) {
+        MostrarMensaje("No se pudieron cargar las acciones; vuelva a seleccionar el usuario antes de guardar.", "warning");
         return;
     }
 

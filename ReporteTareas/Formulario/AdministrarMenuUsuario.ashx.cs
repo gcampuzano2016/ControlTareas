@@ -229,6 +229,11 @@ namespace JsonJQueryNetMenuUsuario
                     return responseMessage("0", "Debe seleccionar un usuario.", "warning");
                 }
 
+                if (!TieneClave(campos as object, "extras") || !TieneClave(campos as object, "acciones"))
+                {
+                    return responseMessage("0", "Faltan datos para guardar los permisos.", "warning");
+                }
+
                 string extrasCsv;
                 if (!TryArmarCsv(campos as object, "extras", out extrasCsv))
                 {
@@ -255,6 +260,16 @@ namespace JsonJQueryNetMenuUsuario
             {
                 return responseMessage("0", "Ocurrió un error al guardar los permisos del usuario. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Indica si la clave llego con un valor (una lista vacia explicita si cuenta).
+        /// </summary>
+        private static bool TieneClave(object campos, string clave)
+        {
+            IDictionary<string, object> diccionario = campos as IDictionary<string, object>;
+            object valor;
+            return diccionario != null && diccionario.TryGetValue(clave, out valor) && valor != null;
         }
 
         /// <summary>

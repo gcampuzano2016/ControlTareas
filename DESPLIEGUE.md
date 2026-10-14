@@ -1003,9 +1003,9 @@ Spec: `docs/superpowers/specs/2026-10-14-permisos-desde-el-portal-design.md`.
 
 ### 17.1 Qué es
 
-El menú decide el acceso a las 10 pantallas protegidas: Tablero de Costos, Horas Extras (y su descarga de Excel),
-Parámetros de Horas Extras, Curva de Aprendizaje (todo el módulo), Perfiles del personal, Perfiles, Usuarios,
-Menú por perfil y Menú por usuario. Además hay **acciones** por perfil y por usuario (`HorasExtras.Reabrir`,
+El menú decide el acceso a **9** pantallas protegidas: Tablero de Costos, Horas Extras, Parámetros de Horas Extras,
+Curva de Aprendizaje (todo el módulo), Perfiles del personal, Perfiles, Usuarios, Menú por perfil y Menú por usuario.
+La descarga del Excel de Horas Extras usa el permiso de Horas Extras. Además hay **acciones** por perfil y por usuario (`HorasExtras.Reabrir`,
 `HorasExtras.EditarMaestro`, `Usuarios.CambiarPerfil`). El perfil 18 puede todo: en *Menú por perfil* sus pantallas
 se pueden editar, pero sus acciones salen bloqueadas.
 
@@ -1013,20 +1013,33 @@ se pueden editar, pero sus acciones salen bloqueadas.
 
 1. `docs/sql/2026-10-14-permisos-esquema.sql`.
 2. `docs/sql/2026-10-14-permisos-ajustes-menu.sql`.
-3. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`), más
+3. `docs/sql/2026-10-14-permisos-verificacion.sql` **antes** de publicar (debe dar `VEREDICTO: OK`: revisa la matriz de
+   menú, los extras por usuario y que no haya acciones por usuario).
+4. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`), más
    `ParametrizacionMenuPerfil.aspx`, `ParametrizacionMenuUsuario.aspx` y sus dos `.js`
    (`js\parametrizacionMenuPerfil.js`, `js\parametrizacionMenuUsuario.js`).
-4. `docs/sql/2026-10-14-permisos-verificacion.sql`.
+5. `docs/sql/2026-10-14-permisos-verificacion.sql` otra vez.
 
 Cada script termina con `VEREDICTO: OK`.
+
+**Advertencias:**
+
+- Binarios publicados **antes** que el SQL: todo usuario que no sea perfil 18 queda negado en las pantallas protegidas.
+- Reponer los binarios anteriores reabre el `AdministrarMenuPerfil.ashx` viejo, que no exige sesión. Si se hace, publicar de
+  nuevo los binarios nuevos cuanto antes o retirar ese `.ashx`.
 
 ### 17.3 Cómo dar una pantalla o una acción
 
 Marcarla en *Menú por perfil* o en *Menú por usuario*. Tarda hasta 2 minutos en aplicarse para quien ya tiene la sesión abierta.
 
+- **Curva de aprendizaje:** solo la opción «Curva de aprendizaje» da el módulo (pantalla y descargas). Marcar juntas las tres
+  opciones de Curva («Curva de aprendizaje», «Curva: nuevo colaborador» y «Curva: dashboard»); las dos últimas no dan acceso sin la primera. La pantalla de administración no avisa de esto.
+- **Completar datos (`HorasExtras.EditarMaestro`):** además de agregar personas y registrar ajustes de sueldo, controla qué
+  tramos se pagan.
+
 ### 17.4 Cambios futuros
 
-- **Agregar una acción nueva:** una fila en `RTA_Accion` y una línea `Permisos.PuedeHacer` en el código.
+- **Agregar una acción nueva:** una fila en `RTA_Accion`, su constante en `Acciones` (`ReporteTareas/clases/Permisos.cs`) y una línea `Permisos.PuedeHacer` en el código.
 - **Proteger una pantalla más:** una línea `Permisos.PuedeEntrar` en su `.aspx.cs` y en su handler.
 
 ### 17.5 Reversa

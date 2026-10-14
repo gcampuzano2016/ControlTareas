@@ -16,7 +16,9 @@
    Sp_RTA_GuardarMenuUsuario siguen sirviendo a los binarios viejos. Por eso se
    puede correr antes de publicar.
 
-   Repetible. El perfil 18 (Super Admin) no lleva filas: el codigo le da todo.
+   Repetible, pero volver a correrlo NO refresca las filas del catalogo que ya
+   existen (Titulo, Descripcion, Id_Menu): para cambiar una, se actualiza a mano.
+   El perfil 18 (Super Admin) no lleva filas: el codigo le da todo.
    ============================================================================ */
 SET NOCOUNT ON;
 SET QUOTED_IDENTIFIER ON;
@@ -76,7 +78,7 @@ GO
 DECLARE @Cat TABLE (Clave VARCHAR(60), Href VARCHAR(100), Titulo VARCHAR(100), Descripcion VARCHAR(300));
 INSERT @Cat VALUES
  ('HorasExtras.Reabrir',       'HorasExtras.aspx',            'Reabrir periodo cerrado',            'Deshacer el cierre formal de un periodo de horas extras.'),
- ('HorasExtras.EditarMaestro', 'HorasExtras.aspx',            'Completar datos y ajustes de sueldo', 'Agregar personas al modulo con su sueldo y registrar ajustes de sueldo.'),
+ ('HorasExtras.EditarMaestro', 'HorasExtras.aspx',            'Completar datos, ajustes de sueldo y tramos a pagar', 'Agregar personas al modulo con su sueldo, registrar ajustes de sueldo y decidir que tramos se pagan.'),
  ('Usuarios.CambiarPerfil',    'ParametrizacionUsuarios.aspx','Cambiar el perfil de un usuario',     'Asignar otro perfil a un usuario. El perfil decide casi todos sus accesos.');
 
 INSERT INTO dbo.RTA_Accion (Clave, Id_Menu, Titulo, Descripcion, Estado)
@@ -335,11 +337,6 @@ BEGIN
 
         DELETE FROM @Extras WHERE IdMenu NOT IN (SELECT Id_Menu FROM dbo.MenuDos);
 
-        /* solo excepciones reales: lo que ya da el perfil no se guarda como extra */
-        DELETE x FROM @Acc x
-         WHERE EXISTS (SELECT 1 FROM dbo.RTA_PerfilAccion pa
-                        WHERE pa.IdPerfil = @IdPerfil AND pa.Id_Accion = x.IdAccion AND pa.Estado = 'A');
-
         /* invariante accion => pantalla, salvo que la pantalla ya la de el perfil */
         INSERT INTO @Extras (IdMenu)
         SELECT DISTINCT a.Id_Menu FROM @Acc x JOIN dbo.RTA_Accion a ON a.Id_Accion = x.IdAccion
@@ -419,6 +416,12 @@ IF OBJECT_ID('dbo.Sp_RTA_PermisosUsuario','P') IS NULL OR OBJECT_ID('dbo.Sp_RTA_
    OR OBJECT_ID('dbo.Sp_RTA_ListarAccionesUsuario','P') IS NULL OR OBJECT_ID('dbo.Sp_RTA_GuardarPermisosPerfil','P') IS NULL
    OR OBJECT_ID('dbo.Sp_RTA_GuardarPermisosUsuario','P') IS NULL
 BEGIN RAISERROR('FALLO: falta uno de los cinco procedimientos.', 16, 1); SET @Fallos += 1; END
+
+/* el arbol de administracion dibuja solo dos niveles: la pantalla de una accion no puede ser de nivel 3 */
+IF EXISTS (SELECT 1 FROM dbo.RTA_Accion a JOIN dbo.MenuDos m ON m.Id_Menu = a.Id_Menu
+                                           JOIN dbo.MenuDos p ON p.Id_Menu = m.Id_MenuPadre
+            WHERE a.Estado = 'A' AND ISNULL(p.Id_MenuPadre, 0) <> 0)
+BEGIN RAISERROR('FALLO: una accion activa cuelga de una pantalla de nivel 3 (el arbol solo dibuja dos niveles).', 16, 1); SET @Fallos += 1; END
 
 IF @Fallos = 0
     PRINT 'VEREDICTO: OK - esquema de permisos listo en la base.';

@@ -16,7 +16,7 @@
      4. ParametrizacionMenuPerfil.aspx y ParametrizacionMenuUsuario.aspx: solo
         el 18 -> se QUITAN del menu del 14 y del 19.
 
-   Se desactiva (Estado = '1'), no se borra. Un grupo que quede sin ninguna
+   Se desactiva (Estado = 1, numerico), no se borra. Un grupo que quede sin ninguna
    hoja visible para ese perfil tambien se oculta, para no dejar un titulo
    vacio en el menu. Repetible.
    ============================================================================ */

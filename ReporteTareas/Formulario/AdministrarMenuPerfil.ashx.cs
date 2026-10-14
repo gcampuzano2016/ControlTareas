@@ -191,6 +191,11 @@ namespace JsonJQueryNetMenuPerfil
                     return responseMessage("0", "Debe seleccionar un perfil.", "warning");
                 }
 
+                if (!TieneClave(campos as object, "activos") || !TieneClave(campos as object, "acciones"))
+                {
+                    return responseMessage("0", "Faltan datos para guardar los permisos.", "warning");
+                }
+
                 string menusCsv;
                 if (!TryArmarCsv(campos as object, "activos", out menusCsv))
                 {
@@ -217,6 +222,16 @@ namespace JsonJQueryNetMenuPerfil
             {
                 return responseMessage("0", "Ocurrió un error al guardar los permisos del perfil. " + ex.Message, "danger");
             }
+        }
+
+        /// <summary>
+        /// Indica si la clave llego con un valor (una lista vacia explicita si cuenta).
+        /// </summary>
+        private static bool TieneClave(object campos, string clave)
+        {
+            IDictionary<string, object> diccionario = campos as IDictionary<string, object>;
+            object valor;
+            return diccionario != null && diccionario.TryGetValue(clave, out valor) && valor != null;
         }
 
         /// <summary>

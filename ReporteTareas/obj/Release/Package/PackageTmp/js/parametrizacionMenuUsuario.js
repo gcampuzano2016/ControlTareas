@@ -9,6 +9,7 @@ var _usuarios = [];
 var _modulos = [];
 var _acciones = [];
 var _accionesOk = false;
+var _esSuperAdmin = false;
 var _seleccion = 0;
 var _usuarioCargado = "";
 
@@ -93,6 +94,7 @@ function SeleccionarUsuario(indice) {
     _seleccion++;
     var miSeleccion = _seleccion;
     _accionesOk = false;
+    _esSuperAdmin = (parseInt(item.Id_Perfil, 10) === 18);
     _usuarioCargado = "";
     $("#datosArbolMenu").html("");
     PostMenuUsuario("ListaMenuUsuario", { "codUsuario": item.Cod_Usuario }, function (respuesta) {
@@ -126,7 +128,7 @@ function PintarAcciones(idMenu) {
     var html = "";
     $.each(_acciones, function (i, a) {
         if (a.Id_Menu != idMenu) { return; }
-        var esPerfil = (a.ActivoPerfil == 1);
+        var esPerfil = (a.ActivoPerfil == 1 || _esSuperAdmin);
         var marcado = (esPerfil || a.ActivoUsuario == 1) ? "checked" : "";
         var bloqueado = esPerfil ? "disabled" : "";
         var etiqueta = "";
@@ -173,6 +175,9 @@ function RenderArbol(lista) {
     }
 
     var info = "";
+    if (_esSuperAdmin) {
+        info += "<div class='alert alert-info'>Super Admin: tiene todas las acciones por su perfil.</div>";
+    }
     $.each(padres, function (i, padre) {
         var hijos = $.grep(lista, function (m) { return m.Id_MenuPadre == padre.Id_Menu; });
 

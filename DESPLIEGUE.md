@@ -951,11 +951,10 @@ Es repetible y **no escribe en `HE_*` ni en `R_DetTareasAranda`**. Va **antes** 
 
 Para verificar, correr `docs/sql/2026-10-12-tablero-costos-verificacion.sql`. Es de solo lectura; la prueba de auditoría se revierte.
 
-> **Si se agrega un perfil al tablero:** hay que cambiarlo en **dos** lugares:
-> `NegTableroCostos.PerfilesAutorizados` (código) y `PerfilMenu` (base).
-> Con solo uno, la persona ve la opción y recibe «No tiene permisos», o tiene permiso y no ve la opción.
+> **Si se agrega un perfil al tablero:** ya no se toca el código. Basta con marcar la opción en `PerfilMenu`
+> (pantalla *Menú por perfil*): el acceso lo decide el menú (ver §17).
 >
-> **Para dárselo a una sola persona** no se toca el código: ver 16.5.
+> **Para dárselo a una sola persona:** ver 16.5.
 
 ### 16.2 Archivos a publicar
 
@@ -990,12 +989,53 @@ Además de los perfiles 14 y 18, entra quien tenga **«Tablero de Costos»** mar
 *Menú por usuario* (`ParametrizacionMenuUsuario.aspx`, tabla `R_UsuarioMenu`). La misma marca le dibuja la
 opción en el menú y le da el permiso en el código: no hay que escribir su código de usuario en ningún lado.
 
-1. **Base, antes de los binarios:** `docs/sql/2026-10-14-tablero-costos-acceso-por-usuario.sql` crea
-   `Sp_RTA_TableroCostosAccesoUsuario` (solo lectura). Termina con `VEREDICTO: OK`. Sin él, los perfiles 14 y 18
-   siguen entrando (no lo llaman) y los demás reciben «No tiene permisos».
-2. **Binarios:** `ReporteTareas.dll`, `CapaNegocio.exe` y `CapaDato.exe`, juntos (y `CapaEntidad.exe`, como siempre).
-3. **Dar el acceso:** en *Menú por usuario*, buscar a la persona, marcar *Nómina → Tablero de Costos* y guardar.
-   **La pantalla guarda la lista completa de extras de esa persona**: no desmarcar lo que ya tenía.
-4. **Quitarlo:** desmarcar la opción y guardar. El acceso se corta en la siguiente petición, sin cerrar sesión.
+> **Reemplazado por la §17.** `Sp_RTA_TableroCostosAccesoUsuario` (y su script `2026-10-14-tablero-costos-acceso-por-usuario.sql`)
+> ya no se usa: el acceso pasa por la regla general de permisos. Ya no hace falta correr ese script.
 
-Ojo: dar el **perfil** 2 (u otro) en `PerfilMenu` sigue sin abrir el tablero a ese perfil; eso exige el cambio de código de arriba.
+El acceso sigue dándose igual: en *Menú por usuario*, buscar a la persona, marcar *Nómina → Tablero de Costos* y guardar.
+**La pantalla guarda la lista completa de extras de esa persona**: no desmarcar lo que ya tenía.
+Para quitarlo, desmarcar la opción y guardar. Tarda hasta 2 minutos en aplicarse (ver §17).
+Dar un **perfil** en `PerfilMenu` también abre el tablero a ese perfil, sin cambios de código.
+
+## 17. Permisos desde el portal
+
+Spec: `docs/superpowers/specs/2026-10-14-permisos-desde-el-portal-design.md`.
+
+### 17.1 Qué es
+
+El menú decide el acceso a las 10 pantallas protegidas: Tablero de Costos, Horas Extras (y su descarga de Excel),
+Parámetros de Horas Extras, Curva de Aprendizaje (todo el módulo), Perfiles del personal, Perfiles, Usuarios,
+Menú por perfil y Menú por usuario. Además hay **acciones** por perfil y por usuario (`HorasExtras.Reabrir`,
+`HorasExtras.EditarMaestro`, `Usuarios.CambiarPerfil`). El perfil 18 puede todo: en *Menú por perfil* sus pantallas
+se pueden editar, pero sus acciones salen bloqueadas.
+
+### 17.2 Orden
+
+1. `docs/sql/2026-10-14-permisos-esquema.sql`.
+2. `docs/sql/2026-10-14-permisos-ajustes-menu.sql`.
+3. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`), más
+   `ParametrizacionMenuPerfil.aspx`, `ParametrizacionMenuUsuario.aspx` y sus dos `.js`
+   (`js\parametrizacionMenuPerfil.js`, `js\parametrizacionMenuUsuario.js`).
+4. `docs/sql/2026-10-14-permisos-verificacion.sql`.
+
+Cada script termina con `VEREDICTO: OK`.
+
+### 17.3 Cómo dar una pantalla o una acción
+
+Marcarla en *Menú por perfil* o en *Menú por usuario*. Tarda hasta 2 minutos en aplicarse para quien ya tiene la sesión abierta.
+
+### 17.4 Cambios futuros
+
+- **Agregar una acción nueva:** una fila en `RTA_Accion` y una línea `Permisos.PuedeHacer` en el código.
+- **Proteger una pantalla más:** una línea `Permisos.PuedeEntrar` en su `.aspx.cs` y en su handler.
+
+### 17.5 Reversa
+
+Reponer los binarios anteriores, **todos juntos**. Las tablas pueden quedar. El script de ajustes trae su reversa comentada.
+
+### 17.6 Lista para probar en producción
+
+- **Con alguien del perfil 14:** entra a Tablero, Horas Extras, Parámetros de Horas Extras, Curva, Perfiles del personal y Usuarios;
+  **no** entra a Perfiles, Menú por perfil ni Menú por usuario; ve «Completar datos» y **no** ve «Reabrir».
+- **Con la persona de perfil 2 que tiene el Tablero como adicional:** entra a Tablero y a Horas Extras, sin «Completar datos».
+- **Con cualquiera de los dos:** escribir la dirección de una pantalla que no tiene lo manda a Principal.

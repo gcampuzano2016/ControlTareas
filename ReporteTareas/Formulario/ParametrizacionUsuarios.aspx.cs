@@ -1,3 +1,4 @@
+using ReporteTareas.clases;
 using ReporteTareas.Controles;
 using SeguridadAppHelper;
 using System;
@@ -13,6 +14,11 @@ namespace ReporteTareas.Formulario
         protected void Page_Load(object sender, EventArgs e)
         {
             GenLogin.RedireccionarALogin(this);
+
+            if (!Permisos.PuedeEntrar(Context, Pantallas.ParametrizacionUsuarios))
+            {
+                Response.Redirect("~/Formulario/Principal.aspx", true);
+            }
 
             if (Session["UserLogin"] != null)
             {
@@ -38,7 +44,7 @@ namespace ReporteTareas.Formulario
         }
 
         /// <summary>
-        /// Solo Super Admin (18) ve el control para cambiar el perfil de otro
+        /// Solo quien tiene la accion de cambiar perfil ve el control para cambiar el perfil de otro
         /// usuario.
         ///
         /// La barrera de verdad esta en AdministrarUsuarios.ashx.cs, que lo
@@ -47,11 +53,7 @@ namespace ReporteTareas.Formulario
         /// </summary>
         protected bool PuedeCambiarPerfil
         {
-            get
-            {
-                int idPerfil;
-                return int.TryParse(Convert.ToString(Session["Id_Perfil"]), out idPerfil) && idPerfil == 18;
-            }
+            get { return Permisos.PuedeHacer(Context, Acciones.UsuariosCambiarPerfil); }
         }
     }
 }

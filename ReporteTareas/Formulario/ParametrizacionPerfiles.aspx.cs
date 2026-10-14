@@ -1,3 +1,4 @@
+using ReporteTareas.clases;
 using ReporteTareas.Controles;
 using System;
 
@@ -12,6 +13,11 @@ namespace ReporteTareas.Formulario
         protected void Page_Load(object sender, EventArgs e)
         {
             GenLogin.RedireccionarALogin(this);
+
+            if (!Permisos.PuedeEntrar(Context, Pantallas.ParametrizacionPerfiles))
+            {
+                Response.Redirect("~/Formulario/Principal.aspx", true);
+            }
 
             // La pantalla se alimenta por AJAX desde AdministrarPerfiles.ashx.
             // La sesión la valida ese handler en cada llamada.

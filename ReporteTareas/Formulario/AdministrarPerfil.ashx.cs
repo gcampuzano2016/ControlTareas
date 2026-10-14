@@ -997,7 +997,7 @@ namespace JsonJQueryNetPerfil
         {
             try
             {
-                if (!PerfilIdentidad.EsRRHH(context))
+                if (!PerfilIdentidad.VeAjenos(context))
                 {
                     return responseMessage("0", "No tiene permiso para ver el listado de personal.", "danger");
                 }

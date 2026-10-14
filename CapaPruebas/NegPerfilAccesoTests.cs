@@ -18,9 +18,6 @@ namespace CapaPruebas
     {
         private const string Yo    = "USR001";
         private const string Otro  = "USR002";
-        private const string Rrhh  = "14";
-        private const string Admin = "18";
-        private const string Comun = "7";
 
         /* ------------------------------------------------ sin codigo pedido --- */
 
@@ -32,7 +29,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_SinCodigoPedido_DevuelveElDeLaSesion()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Comun, "");
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, "");
 
             Assert.IsTrue(r.Permitido, "Sin codigo pedido siempre se permite: es el propio perfil");
             Assert.AreEqual(Yo, r.CodUsuario);
@@ -41,7 +38,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_CodigoPedidoNulo_DevuelveElDeLaSesion()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Comun, null);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, null);
 
             Assert.IsTrue(r.Permitido);
             Assert.AreEqual(Yo, r.CodUsuario);
@@ -50,18 +47,9 @@ namespace CapaPruebas
         /* --------------------------------------------------------- permitido --- */
 
         [TestMethod]
-        public void Objetivo_PerfilTalentoHumano_PuedePedirUnoAjeno()
+        public void Objetivo_QuienVeAjenos_PuedePedirUnoAjeno()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Rrhh, Otro);
-
-            Assert.IsTrue(r.Permitido);
-            Assert.AreEqual(Otro, r.CodUsuario);
-        }
-
-        [TestMethod]
-        public void Objetivo_PerfilSuperAdmin_PuedePedirUnoAjeno()
-        {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Admin, Otro);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, true, Otro);
 
             Assert.IsTrue(r.Permitido);
             Assert.AreEqual(Otro, r.CodUsuario);
@@ -75,7 +63,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_UsuarioComunPideElSuyo_SePermite()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Comun, Yo);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, Yo);
 
             Assert.IsTrue(r.Permitido);
             Assert.AreEqual(Yo, r.CodUsuario);
@@ -90,7 +78,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_CodigoPedidoConRelleno_SeComparaRecortado()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Comun, "  " + Yo + "  ");
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, "  " + Yo + "  ");
 
             Assert.IsTrue(r.Permitido);
             Assert.AreEqual(Yo, r.CodUsuario, "Ademas de permitirlo, devuelve el codigo ya recortado");
@@ -105,7 +93,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_UsuarioComunPideUnoAjeno_SeRechaza()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, Comun, Otro);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, Otro);
 
             Assert.IsFalse(r.Permitido);
             Assert.AreEqual("", r.CodUsuario, "Un rechazo no puede devolver ningun codigo utilizable");
@@ -120,7 +108,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_PerfilNoNumerico_SeRechazaElAjeno()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, "no-es-un-numero", Otro);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, Otro);
 
             Assert.IsFalse(r.Permitido);
         }
@@ -128,7 +116,7 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_PerfilAusente_SeRechazaElAjeno()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, null, Otro);
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo(Yo, false, Otro);
 
             Assert.IsFalse(r.Permitido);
         }
@@ -141,23 +129,10 @@ namespace CapaPruebas
         [TestMethod]
         public void Objetivo_SesionSinCodigo_SeRechaza()
         {
-            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo("", Comun, "");
+            EntPerfilObjetivo r = NegPerfilAcceso.Objetivo("", false, "");
 
             Assert.IsFalse(r.Permitido);
             Assert.AreNotEqual("", r.Mensaje);
-        }
-
-        /* ------------------------------------------------------------ EsRRHH --- */
-
-        [TestMethod]
-        public void EsRRHH_CatorceYDieciocho_SonLosDosUnicos()
-        {
-            Assert.IsTrue(NegPerfilAcceso.EsRRHH("14"));
-            Assert.IsTrue(NegPerfilAcceso.EsRRHH("18"));
-            Assert.IsFalse(NegPerfilAcceso.EsRRHH("7"));
-            Assert.IsFalse(NegPerfilAcceso.EsRRHH("1"));
-            Assert.IsFalse(NegPerfilAcceso.EsRRHH(""));
-            Assert.IsFalse(NegPerfilAcceso.EsRRHH(null));
         }
     }
 }

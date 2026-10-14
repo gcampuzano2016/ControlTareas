@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -26,7 +27,7 @@ namespace JsonJQueryNetUsuarios
             {
                 responseAction.Append(responseMessage("0", "Su sesión expiró. Vuelva a iniciar sesión.", "danger"));
             }
-            else if (!EstaEn(context, PerfilesQueAdministranUsuarios))
+            else if (!Permisos.PuedeEntrar(context, Pantallas.ParametrizacionUsuarios))
             {
                 responseAction.Append(responseMessage("0", "No tiene permisos para esta pantalla.", "danger"));
             }
@@ -252,45 +253,22 @@ namespace JsonJQueryNetUsuarios
         }
 
         /// <summary>
-        /// Quien puede entrar a la pantalla de administracion de usuarios:
-        /// Talento Humano (14), Super Admin (18) y Servicios4 (19).
+        /// Quien puede entrar a la pantalla de administracion de usuarios y quien
+        /// puede cambiar el perfil de otro: lo decide el portal.
         ///
-        /// Son exactamente los tres que el menu ya autoriza -la opcion 20077 y
-        /// su grupo padre 20042, las dos en Estado '0'-, asi que nadie que hoy
-        /// use la pantalla se queda afuera.
+        /// Entrar es tener la pantalla ParametrizacionUsuarios.aspx; cambiar el
+        /// perfil es tener, ademas, la accion UsuariosCambiarPerfil. Entrar a la
+        /// pantalla no alcanza para esto ultimo: el perfil es el que da acceso a
+        /// todo, y sin la segunda pregunta cualquiera que administre usuarios
+        /// podria ponerse un perfil mayor con una peticion directa.
         ///
         /// Se comprueba UNA vez en ProcessRequest y no accion por accion: asi
         /// una accion nueva queda cubierta por omision en vez de quedar abierta
         /// por omision, que es como estuvieron estas cinco hasta hoy.
         ///
-        /// OJO con el acoplamiento: los perfiles 1, 2 y 3 tienen fila en
-        /// PerfilMenu con Estado '1' -registrados pero ocultos-. Si alguien los
-        /// pone en '0' para "habilitarlos" sin tocar esta lista, veran la opcion
-        /// y la pantalla los rechazara. El menu y el codigo son dos fuentes que
-        /// hay que mover juntas.
+        /// Ya no hay dos fuentes que mover juntas: el menu decide, y el handler
+        /// pregunta lo mismo a Permisos.
         /// </summary>
-        private static readonly int[] PerfilesQueAdministranUsuarios = { 14, 18, 19 };
-
-        /// <summary>
-        /// Y de esos, solo Super Admin (18) cambia el perfil de otro usuario.
-        ///
-        /// Mas estrecha que la de arriba y encima de ella: entrar a la pantalla
-        /// no alcanza. El perfil es el que da acceso a todo, y sin esta segunda
-        /// lista un 14 o un 19 podria ponerse el 18 con una peticion directa.
-        /// </summary>
-        private static readonly int[] PerfilesQueCambianPerfil = { 18 };
-
-        private static bool EstaEn(HttpContext context, int[] perfiles)
-        {
-            int idPerfil;
-            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil)) { return false; }
-            return Array.IndexOf(perfiles, idPerfil) >= 0;
-        }
-
-        private static bool EsSuperAdmin(HttpContext context)
-        {
-            return EstaEn(context, PerfilesQueCambianPerfil);
-        }
 
         /// <summary>
         /// Los perfiles que se pueden elegir, para el desplegable.
@@ -306,7 +284,7 @@ namespace JsonJQueryNetUsuarios
         /// </summary>
         private string ListarPerfiles(HttpContext context)
         {
-            if (!EsSuperAdmin(context))
+            if (!Permisos.PuedeHacer(context, Acciones.UsuariosCambiarPerfil))
             {
                 return responseMessage("0", "Su perfil no puede cambiar el perfil de otros usuarios.", "warning");
             }
@@ -331,7 +309,7 @@ namespace JsonJQueryNetUsuarios
         /// </summary>
         private string CambiarPerfilUsuario(HttpContext context, dynamic campos)
         {
-            if (!EsSuperAdmin(context))
+            if (!Permisos.PuedeHacer(context, Acciones.UsuariosCambiarPerfil))
             {
                 return responseMessage("0", "Su perfil no puede cambiar el perfil de otros usuarios.", "warning");
             }

@@ -19,29 +19,13 @@ namespace CapaNegocio
     ///
     /// No conoce HttpContext. Quien la llama extrae los tres datos de donde sea
     /// que vengan -sesion, JSON, formulario multipart, query string- y los pasa.
+    ///
+    /// Quien puede ver perfiles ajenos NO se decide aca: se decide afuera, con el
+    /// permiso de la pantalla PerfilesPersonal.aspx en el portal, y llega como
+    /// veAjenos. Esta clase solo aplica esa respuesta.
     /// </summary>
     public class NegPerfilAcceso
     {
-        /// <summary>
-        /// Talento Humano (14) y Super Admin (18): los mismos dos perfiles a los
-        /// que el menu le muestra las pantallas de nomina, y los mismos que
-        /// AdministrarHorasExtras.ashx ya autoriza.
-        /// </summary>
-        public static readonly int[] PerfilesRRHH = { 14, 18 };
-
-        /// <summary>
-        /// Si ese perfil de sesion es uno de los dos que pueden ver y editar
-        /// perfiles ajenos. Cualquier cosa que no sea exactamente 14 o 18
-        /// -vacio, nulo, texto, un numero cualquiera- es que no.
-        /// </summary>
-        public static bool EsRRHH(string idPerfilSesion)
-        {
-            int idPerfil;
-            if (!int.TryParse((idPerfilSesion ?? "").Trim(), out idPerfil)) { return false; }
-
-            return Array.IndexOf(PerfilesRRHH, idPerfil) >= 0;
-        }
-
         /// <summary>
         /// Sobre que perfil se esta actuando.
         ///
@@ -54,7 +38,7 @@ namespace CapaNegocio
         /// Pedir el propio codigo NO es pedir uno ajeno: se compara recortando,
         /// igual que compara todo el resto del modulo.
         /// </summary>
-        public static EntPerfilObjetivo Objetivo(string codSesion, string idPerfilSesion, string codPedido)
+        public static EntPerfilObjetivo Objetivo(string codSesion, bool veAjenos, string codPedido)
         {
             string propio = (codSesion ?? "").Trim();
             string pedido = (codPedido ?? "").Trim();
@@ -69,7 +53,7 @@ namespace CapaNegocio
                 return Permitido(propio);
             }
 
-            if (EsRRHH(idPerfilSesion))
+            if (veAjenos)
             {
                 return Permitido(pedido);
             }

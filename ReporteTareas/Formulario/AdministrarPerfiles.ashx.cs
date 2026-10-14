@@ -1,5 +1,6 @@
 using CapaEntidad;
 using CapaNegocio;
+using ReporteTareas.clases;
 using System;
 using System.Text;
 using System.Web;
@@ -75,17 +76,10 @@ namespace JsonJQueryNetPerfiles
             context.Response.Write(responseAction.ToString());
         }
 
-        /// <summary>Perfiles con perfil de administración: 2, 18 y 19.</summary>
-        private static readonly int[] PerfilesAutorizados = { 2, 18, 19 };
-
+        /// <summary>Quien tiene la pantalla de administración de perfiles en el portal.</summary>
         private bool TienePermisoDeAdministracion(HttpContext context)
         {
-            int idPerfil;
-            if (!int.TryParse(Convert.ToString(context.Session["Id_Perfil"]), out idPerfil))
-            {
-                return false;
-            }
-            return Array.IndexOf(PerfilesAutorizados, idPerfil) >= 0;
+            return Permisos.PuedeEntrar(context, Pantallas.ParametrizacionPerfiles);
         }
 
         private string ListarPerfiles(dynamic campos)

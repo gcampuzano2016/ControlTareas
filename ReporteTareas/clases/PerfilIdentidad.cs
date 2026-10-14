@@ -7,10 +7,11 @@ namespace ReporteTareas.clases
     /// <summary>
     /// De donde sale la identidad en el modulo de perfil.
     ///
-    /// Esta clase NO decide nada: extrae de HttpContext y le pregunta a
-    /// NegPerfilAcceso, que es donde vive la regla y donde estan las pruebas.
-    /// Si alguna vez aparece un "if" con un numero de perfil en este archivo,
-    /// esta en el lugar equivocado.
+    /// Esta clase NO decide nada: extrae de HttpContext, le pregunta a
+    /// Permisos si la sesion ve perfiles ajenos y se lo pasa a NegPerfilAcceso,
+    /// que es donde vive la regla y donde estan las pruebas. Si alguna vez
+    /// aparece un "if" con un numero de perfil en este archivo, esta en el
+    /// lugar equivocado.
     ///
     /// Existe porque el modulo habla por tres transportes distintos -JSON,
     /// multipart y query string- y el criterio tiene que ser uno solo. Cada
@@ -35,32 +36,19 @@ namespace ReporteTareas.clases
         /// <summary>DE QUIEN es el perfil sobre el que se actua.</summary>
         internal static EntPerfilObjetivo Objetivo(HttpContext context, string codPedido)
         {
-            string idPerfil = "";
-            if (context.Session != null && context.Session["Id_Perfil"] != null)
-            {
-                idPerfil = context.Session["Id_Perfil"].ToString();
-            }
-
-            return NegPerfilAcceso.Objetivo(Autor(context), idPerfil, codPedido);
+            return NegPerfilAcceso.Objetivo(Autor(context), VeAjenos(context), codPedido);
         }
 
         /// <summary>
-        /// Si la sesion es de Talento Humano o Super Admin.
+        /// Si la sesion puede ver y corregir perfiles ajenos: quien tiene la
+        /// pantalla PerfilesPersonal.aspx (por perfil o como adicional).
         ///
-        /// Delega en NegPerfilAcceso, igual que Objetivo: la lista de perfiles
-        /// vive en un solo sitio y esta clase sigue sin decidir nada. Hace falta
-        /// aparte porque hay acciones -listar a todo el personal- que no son
-        /// "sobre el perfil de alguien" y por lo tanto no pasan por Objetivo.
+        /// Hace falta aparte porque hay acciones -listar a todo el personal- que
+        /// no son "sobre el perfil de alguien" y por lo tanto no pasan por Objetivo.
         /// </summary>
-        internal static bool EsRRHH(HttpContext context)
+        internal static bool VeAjenos(HttpContext context)
         {
-            string idPerfil = "";
-            if (context.Session != null && context.Session["Id_Perfil"] != null)
-            {
-                idPerfil = context.Session["Id_Perfil"].ToString();
-            }
-
-            return NegPerfilAcceso.EsRRHH(idPerfil);
+            return Permisos.PuedeEntrar(context, Pantallas.PerfilesPersonal);
         }
 
         /// <summary>El codigo pedido en el payload JSON, o cadena vacia.</summary>

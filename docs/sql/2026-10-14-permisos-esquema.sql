@@ -82,7 +82,7 @@ INSERT @Cat VALUES
 INSERT INTO dbo.RTA_Accion (Clave, Id_Menu, Titulo, Descripcion, Estado)
 SELECT c.Clave, m.Id_Menu, c.Titulo, c.Descripcion, 'A'
   FROM @Cat c
-  JOIN dbo.MenuDos m ON m.Href = c.Href
+  JOIN (SELECT Href = LTRIM(RTRIM(Href)), Id_Menu = MIN(Id_Menu) FROM dbo.MenuDos WHERE ISNULL(LTRIM(RTRIM(Href)),'') <> '' GROUP BY LTRIM(RTRIM(Href))) m ON m.Href = c.Href
  WHERE NOT EXISTS (SELECT 1 FROM dbo.RTA_Accion a WHERE a.Clave = c.Clave);
 
 /* Siembra = las listas que hoy estan en el codigo, sin el 18:

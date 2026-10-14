@@ -28,7 +28,7 @@ GO
 DECLARE @Hoja INT, @Padre INT;
 
 /* 1. agregar ParametrizacionHorasExtras.aspx al 14, con su grupo */
-SELECT @Hoja = Id_Menu, @Padre = Id_MenuPadre FROM dbo.MenuDos WHERE Href = 'ParametrizacionHorasExtras.aspx';
+SELECT @Hoja = m.Id_Menu, @Padre = m.Id_MenuPadre FROM dbo.MenuDos m WHERE LTRIM(RTRIM(m.Href)) = 'ParametrizacionHorasExtras.aspx' AND m.Id_Menu = (SELECT MIN(x.Id_Menu) FROM dbo.MenuDos x WHERE LTRIM(RTRIM(x.Href)) = 'ParametrizacionHorasExtras.aspx');
 
 UPDATE dbo.PerfilMenu SET Estado = 0 WHERE IdPerfil = 14 AND id_Menu IN (@Hoja, @Padre) AND Estado <> 0;
 INSERT INTO dbo.PerfilMenu (IdPerfil, id_Menu, Estado)
@@ -46,7 +46,7 @@ INSERT @Quitar VALUES
 UPDATE pm SET pm.Estado = 1
   FROM dbo.PerfilMenu pm
   JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
-  JOIN @Quitar q ON q.IdPerfil = pm.IdPerfil AND q.Href = m.Href
+  JOIN @Quitar q ON q.IdPerfil = pm.IdPerfil AND q.Href = LTRIM(RTRIM(m.Href))
  WHERE pm.Estado = 0;
 
 /* grupos que quedaron vacios para esos perfiles */
@@ -55,7 +55,7 @@ UPDATE pm SET pm.Estado = 1
   JOIN dbo.MenuDos g ON g.Id_Menu = pm.id_Menu
  WHERE pm.IdPerfil IN (14, 19) AND pm.Estado = 0
    AND ISNULL(LTRIM(RTRIM(g.Href)), '') = ''
-   AND g.Id_Menu IN (SELECT m.Id_MenuPadre FROM dbo.MenuDos m JOIN @Quitar q ON q.Href = m.Href)
+   AND g.Id_Menu IN (SELECT m.Id_MenuPadre FROM dbo.MenuDos m JOIN @Quitar q ON q.Href = LTRIM(RTRIM(m.Href)))
    AND NOT EXISTS (SELECT 1 FROM dbo.PerfilMenu h JOIN dbo.MenuDos mh ON mh.Id_Menu = h.id_Menu
                     WHERE h.IdPerfil = pm.IdPerfil AND h.Estado = 0 AND mh.Id_MenuPadre = g.Id_Menu);
 GO
@@ -64,20 +64,20 @@ GO
 DECLARE @Fallos INT = 0;
 
 IF NOT EXISTS (SELECT 1 FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
-                WHERE m.Href = 'ParametrizacionHorasExtras.aspx' AND pm.IdPerfil = 14 AND pm.Estado = 0)
+                WHERE LTRIM(RTRIM(m.Href)) = 'ParametrizacionHorasExtras.aspx' AND pm.IdPerfil = 14 AND pm.Estado = 0)
 BEGIN RAISERROR('FALLO: el 14 no tiene ParametrizacionHorasExtras.aspx.', 16, 1); SET @Fallos += 1; END
 
 IF EXISTS (SELECT 1 FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
             WHERE pm.Estado = 0 AND pm.IdPerfil <> 18
-              AND m.Href IN ('ParametrizacionMenuPerfil.aspx', 'ParametrizacionMenuUsuario.aspx'))
-BEGIN RAISERROR('FALLO: un perfil distinto del 18 administra permisos.', 16, 1); SET @Fallos += 1; END
+              AND LTRIM(RTRIM(m.Href)) IN ('ParametrizacionMenuPerfil.aspx', 'ParametrizacionMenuUsuario.aspx'))
+BEGIN RAISERROR('AVISO/FALLO: un perfil distinto del 18 administra permisos; revisar a mano.', 16, 1); SET @Fallos += 1; END
 
 IF EXISTS (SELECT 1 FROM dbo.R_UsuarioMenu um JOIN dbo.MenuDos m ON m.Id_Menu = um.Id_Menu
-            WHERE um.Estado = 'A' AND m.Href IN ('ParametrizacionMenuPerfil.aspx', 'ParametrizacionMenuUsuario.aspx'))
+            WHERE um.Estado = 'A' AND LTRIM(RTRIM(m.Href)) IN ('ParametrizacionMenuPerfil.aspx', 'ParametrizacionMenuUsuario.aspx'))
 BEGIN RAISERROR('AVISO/FALLO: hay usuarios con Menu por perfil o por usuario como adicional; revisar a mano.', 16, 1); SET @Fallos += 1; END
 
 IF EXISTS (SELECT 1 FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
-            WHERE m.Href = 'ParametrizacionPerfiles.aspx' AND pm.IdPerfil = 14 AND pm.Estado = 0)
+            WHERE LTRIM(RTRIM(m.Href)) = 'ParametrizacionPerfiles.aspx' AND pm.IdPerfil = 14 AND pm.Estado = 0)
 BEGIN RAISERROR('FALLO: el 14 sigue viendo ParametrizacionPerfiles.aspx.', 16, 1); SET @Fallos += 1; END
 
 IF @Fallos = 0
@@ -91,6 +91,6 @@ UPDATE pm SET Estado = 0 FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu 
  WHERE (pm.IdPerfil = 14 AND m.Href IN ('ParametrizacionPerfiles.aspx','ParametrizacionMenuPerfil.aspx','ParametrizacionMenuUsuario.aspx'))
     OR (pm.IdPerfil = 19 AND m.Href IN ('ParametrizacionMenuPerfil.aspx','ParametrizacionMenuUsuario.aspx'));
 UPDATE pm SET Estado = 1 FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
- WHERE pm.IdPerfil = 14 AND m.Href = 'ParametrizacionHorasExtras.aspx';
+ WHERE pm.IdPerfil = 14 AND LTRIM(RTRIM(m.Href)) = 'ParametrizacionHorasExtras.aspx';
 -- y reactivar a mano los grupos que se hayan ocultado (mirar Id_MenuPadre de esas hojas).
 */

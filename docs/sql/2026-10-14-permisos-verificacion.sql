@@ -14,8 +14,8 @@ INSERT @E VALUES
  ('ParametrizacionMenuPerfil.aspx',18),('ParametrizacionMenuUsuario.aspx',18);
 
 ;WITH R AS (
-    SELECT DISTINCT m.Href, pm.IdPerfil FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
-     WHERE pm.Estado = 0 AND m.Href IN (SELECT Href FROM @E))
+    SELECT DISTINCT Href = LTRIM(RTRIM(m.Href)), pm.IdPerfil FROM dbo.PerfilMenu pm JOIN dbo.MenuDos m ON m.Id_Menu = pm.id_Menu
+     WHERE pm.Estado = 0 AND LTRIM(RTRIM(m.Href)) IN (SELECT Href FROM @E))
 SELECT Diferencia = CASE WHEN r.Href IS NULL THEN 'FALTA en el menu' ELSE 'SOBRA en el menu' END,
        Href = ISNULL(e.Href, r.Href), IdPerfil = ISNULL(e.IdPerfil, r.IdPerfil)
   INTO #Dif

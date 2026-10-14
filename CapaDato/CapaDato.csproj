@@ -59,6 +59,7 @@
     <Compile Include="DaoCuotaAnual.cs" />
     <Compile Include="DaoDashboardAprobacion.cs" />
     <Compile Include="DaoTableroCostos.cs" />
+    <Compile Include="DaoPermisos.cs" />
     <Compile Include="DaoCalificacionForeCast.cs" />
     <Compile Include="DaoEgresoInventario.cs" />
     <Compile Include="DaoEmpleado.cs" />

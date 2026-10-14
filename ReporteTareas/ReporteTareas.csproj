@@ -1472,6 +1472,7 @@
     <Compile Include="clases\PdfLista.cs" />
     <Compile Include="clases\PdfHojaVida.cs" />
     <Compile Include="clases\PerfilIdentidad.cs" />
+    <Compile Include="clases\Permisos.cs" />
     <Compile Include="clases\SeguridadHelper.cs" />
     <Compile Include="clases\RespuestaJson.cs" />
     <Compile Include="Connected Services\Autentificacion2\Reference.cs">

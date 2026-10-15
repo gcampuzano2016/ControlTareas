@@ -194,6 +194,7 @@
     <Compile Include="NegCalificacionExportacion.cs" />
     <Compile Include="NegEgresoInventario.cs" />
     <Compile Include="NegEmpleado.cs" />
+    <Compile Include="NegEmpleadoAcceso.cs" />
     <Compile Include="NegDetallePermiso.cs" />
     <Compile Include="NegFirmaSolicitud.cs" />
     <Compile Include="NegFirmaUsuario.cs" />

@@ -1,5 +1,6 @@
 ﻿using CapaEntidad;
 using ReporteTareas.Controles;
+using ReporteTareas.clases;
 using SeguridadAppHelper;
 using System;
 using System.Collections.Generic;
@@ -14,6 +15,12 @@ namespace ReporteTareas.Formulario
         protected void Page_Load(object sender, EventArgs e)
         {
             GenLogin.RedireccionarALogin(this);
+            /* La barrera de verdad esta en ObtenerListaTareas.ashx.cs; esto es
+               cortesia para no mostrar una pantalla vacia. */
+            if (!Permisos.PuedeEntrar(Context, Pantallas.ListaEmpleados))
+            {
+                Response.Redirect("~/Formulario/Principal.aspx", true);
+            }
             if (Session["UserLogin"] != null)
             {
                 if (!IsPostBack)

@@ -17,6 +17,8 @@ using System.Text;
 using System.Web;
 using System.Web.Script.Serialization;
 using System.Web.Services;
+using System.Web.SessionState;
+using ReporteTareas.clases;
 
 namespace JsonJQueryNetTareas
 {
@@ -25,7 +27,13 @@ namespace JsonJQueryNetTareas
     /// </summary>
     [WebService(Namespace = "http://tempuri.org/")]
     [WebServiceBinding(ConformsTo = WsiProfiles.BasicProfile1_1)]
-    public class ObtenerListaTareas : IHttpHandler
+    /* IReadOnlySessionState y no IRequiresSessionState: las acciones de empleados
+       necesitan leer la sesion para preguntar a Permisos, y con la de solo lectura
+       las pantallas que disparan varias consultas a la vez contra este handler no
+       quedan en fila esperando el bloqueo exclusivo de la sesion. Ninguna accion
+       de este handler escribe en la sesion; Permisos guarda ahi su cache, y si
+       ese guardado no persistiera solo se recalcularia en la proxima consulta. */
+    public class ObtenerListaTareas : IHttpHandler, IReadOnlySessionState
     {
 
         public void ProcessRequest(HttpContext context)
@@ -968,20 +976,22 @@ namespace JsonJQueryNetTareas
                     existAction = true;
                     responseAction.Append(BuscarCodigoCIE(parameters));
                 }
+                /* Modulo de empleados: lo decide Permisos con la sesion, nunca lo
+                   que mande el navegador. Ver VeListaEmpleados mas abajo. */
                 if (Action == "BuscarListaEmpleados")
                 {
                     existAction = true;
-                    responseAction.Append(BuscarListaEmpleados(parameters));
+                    responseAction.Append(BuscarListaEmpleados(context, parameters));
                 }
                 if (Action == "BuscarListaEmpleadosDescargar")
                 {
                     existAction = true;
-                    responseAction.Append(BuscarListaEmpleadosDescargar(parameters));
+                    responseAction.Append(VeListaEmpleados(context) ? BuscarListaEmpleadosDescargar(parameters) : SinPermisoEmpleados());
                 }
                 if (Action == "BuscarListaCargaFam")
                 {
                     existAction = true;
-                    responseAction.Append(BuscarListaCargaFam(parameters));
+                    responseAction.Append(VeListaEmpleados(context) ? BuscarListaCargaFam(parameters) : SinPermisoEmpleados());
                 }
                 if (Action == "GuardarContactoEmergencia")
                 {
@@ -991,12 +1001,12 @@ namespace JsonJQueryNetTareas
                 if (Action == "EliminarEmpleado")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarEmpleado(parameters));
+                    responseAction.Append(VeListaEmpleados(context) ? EliminarEmpleado(parameters) : SinPermisoEmpleados());
                 }
                 if (Action == "EliminarCargaFam")
                 {
                     existAction = true;
-                    responseAction.Append(EliminarCargaFam(parameters));
+                    responseAction.Append(VeListaEmpleados(context) ? EliminarCargaFam(parameters) : SinPermisoEmpleados());
                 }
 
                 if (Action == "BuscarListaFormularios")
@@ -12670,26 +12680,42 @@ namespace JsonJQueryNetTareas
             }
             return Lista.SerializaToJson2();
         }
-        public string BuscarListaEmpleados(dynamic parameters)
+        /// <summary>
+        /// Lista completa de empleados, su descarga, su baja y las cargas
+        /// familiares: solo quien puede entrar a «Lista de Empleados».
+        /// </summary>
+        private static bool VeListaEmpleados(HttpContext context)
+        {
+            return Permisos.PuedeEntrar(context, Pantallas.ListaEmpleados);
+        }
+
+        private string SinPermisoEmpleados()
+        {
+            return responseMessage("0", "No tiene permisos para esta pantalla.", "danger", "");
+        }
+
+        /// <summary>
+        /// Antes el perfil (tipo) y el usuario (session) los mandaba el navegador,
+        /// y con tipo=0 cualquiera recibia la nomina completa. Ahora salen de la
+        /// sesion: el navegador solo dice si pide la lista ("Lista") o la ficha.
+        /// </summary>
+        public string BuscarListaEmpleados(HttpContext context, dynamic parameters)
         {
             List<EntEmpleado> Lista = null;
-            EntEmpleado empleado = new EntEmpleado();
-            EntRespuesta respuesta = new EntRespuesta();
-            SeguridadHelper seguridad = new SeguridadHelper();
-            string session = parameters["session"].ToString();
-            string IdUsuarioSession = "";
-            IdUsuarioSession = seguridad.Desencripta(session.ToString());
-            string descripcion = parameters["descripcion"].ToString();
-            int tipo = Convert.ToInt32(parameters["tipo"].ToString());
+            string descripcion = Convert.ToString(parameters["descripcion"]);
+            string IdUsuarioSession;
+            int tipo;
             try
             {
-                if (tipo == 14 || tipo == 18)
+                bool permitido = NegEmpleadoAcceso.ConsultaLista(
+                    VeListaEmpleados(context),
+                    Permisos.PuedeEntrar(context, Pantallas.RRHHEmpleados),
+                    descripcion == "Lista",
+                    Permisos.Autenticado(context) ? Convert.ToString(context.Session["Cod_Usuario"]) : null,
+                    out IdUsuarioSession, out tipo);
+                if (!permitido)
                 {
-                    if (descripcion == "Lista")
-                    {
-                        tipo = 0;
-                        IdUsuarioSession = "";
-                    }
+                    return SinPermisoEmpleados();
                 }
                 Lista = NegEmpleado.Sp_RTAConsultarListaEmpleados(IdUsuarioSession, tipo);
             }

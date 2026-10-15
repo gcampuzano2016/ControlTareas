@@ -94,6 +94,10 @@ namespace ReporteTareas.clases
         internal const string ParametrizacionUsuarios = "ParametrizacionUsuarios.aspx";
         internal const string ParametrizacionMenuPerfil = "ParametrizacionMenuPerfil.aspx";
         internal const string ParametrizacionMenuUsuario = "ParametrizacionMenuUsuario.aspx";
+        /// <summary>Lista completa de empleados, su descarga y su mantenimiento (ObtenerListaTareas.ashx).</summary>
+        internal const string ListaEmpleados = "ListaEmpleados.aspx";
+        /// <summary>«Datos Empleado»: solo la ficha propia.</summary>
+        internal const string RRHHEmpleados = "RRHHEmpleados.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>

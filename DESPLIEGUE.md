@@ -1052,3 +1052,42 @@ Reponer los binarios anteriores, **todos juntos**. Las tablas pueden quedar. El 
   **no** entra a Perfiles, Menú por perfil ni Menú por usuario; ve «Completar datos» y **no** ve «Reabrir».
 - **Con la persona de perfil 2 que tiene el Tablero como adicional:** entra a Tablero y a Horas Extras, sin «Completar datos».
 - **Con cualquiera de los dos:** escribir la dirección de una pantalla que no tiene lo manda a Principal.
+
+## 18. Módulo de empleados protegido
+
+### 18.1 Qué es
+
+`ObtenerListaTareas.ashx` no usaba la sesión: las acciones de las pantallas «Lista de Empleados» (`ListaEmpleados.aspx`) y
+«Datos Empleado» (`RRHHEmpleados.aspx`) confiaban en el perfil y el usuario que mandaba el navegador. Cualquiera que mandara
+`tipo=0` recibía la nómina completa (cédula, dirección, teléfono, fecha de nacimiento), y la descarga del Excel no pedía ni sesión.
+
+Ahora el handler lee la sesión (`IReadOnlySessionState`) y decide con Permisos:
+
+| Acción | Exige |
+|---|---|
+| `BuscarListaEmpleados` con «Lista» (todos) | «Lista de Empleados» |
+| `BuscarListaEmpleados` sin «Lista» (la ficha propia, por el `Cod_Usuario` de la sesión) | cualquiera de las dos pantallas |
+| `BuscarListaEmpleadosDescargar`, `EliminarEmpleado`, `BuscarListaCargaFam`, `EliminarCargaFam` | «Lista de Empleados» |
+
+Las dos `.aspx` mandan a Principal a quien no tenga la pantalla. `GuardarNuevoEmpleado` y `GuardarNuevaCargaFamiliar`, que
+llama el `.js`, no existen en el handler (responden «No existe la acción solicitada»); no cambian.
+
+En el menú de producción (medido el 2026-10-15) las dos pantallas están visibles solo para el perfil 14, sin adicionales por
+usuario: nadie pierde lo que hoy usa. Dar «Datos Empleado» sin «Lista de Empleados» deja ver la ficha propia pero no sus cargas
+familiares.
+
+### 18.2 Orden
+
+Sin SQL. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`). Las
+`.aspx` no cambian: el cambio de las páginas está en su código, dentro del `.dll`.
+
+### 18.3 Reversa
+
+Reponer los binarios anteriores, todos juntos. Reabre el hueco.
+
+### 18.4 Lista para probar en producción
+
+- **Con alguien del perfil 14:** «Lista de Empleados» muestra a todos y descarga el Excel; «Datos Empleado» muestra solo su ficha
+  y sus cargas familiares. Igual que antes.
+- **Con alguien de otro perfil (no 14 ni 18):** escribir `.../Formulario/ListaEmpleados.aspx` o `.../Formulario/RRHHEmpleados.aspx`
+  lo manda a Principal.

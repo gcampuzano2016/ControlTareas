@@ -231,6 +231,7 @@
     <Compile Include="NegAgendaVista.cs" />
     <Compile Include="NegAgendaCorreo.cs" />
     <Compile Include="NegAgendaAreas.cs" />
+    <Compile Include="NegAgenda.Datos.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

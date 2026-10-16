@@ -80,6 +80,7 @@
     <Compile Include="NegEmpleadoAccesoTests.cs" />
     <Compile Include="NegPermisosTests.cs" />
     <Compile Include="NegAgendaEquipoTests.cs" />
+    <Compile Include="NegAgendaActividadTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

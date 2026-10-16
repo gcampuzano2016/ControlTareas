@@ -55,6 +55,7 @@
     <Compile Include="EntDashboardAprobacion.cs" />
     <Compile Include="EntTableroCostos.cs" />
     <Compile Include="EntPermisos.cs" />
+    <Compile Include="EntAgenda.cs" />
     <Compile Include="EntCalificacionForeCast.cs" />
     <Compile Include="EntDatosMed.cs" />
     <Compile Include="EntDetalleInventario.cs" />

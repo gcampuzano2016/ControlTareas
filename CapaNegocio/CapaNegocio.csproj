@@ -226,6 +226,7 @@
     <Compile Include="NegTableroCostos.Datos.cs" />
     <Compile Include="NegTableroCostosExportacion.cs" />
     <Compile Include="NegPermisos.cs" />
+    <Compile Include="NegAgendaEquipo.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

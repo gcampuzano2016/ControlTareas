@@ -26,7 +26,9 @@ namespace CapaNegocio
 
         public static string Asunto(EntAgendaActividad a)
         {
-            return "Nueva actividad asignada: " + (a == null ? "" : (a.Titulo ?? "").Trim());
+            string t = a == null ? "" : (a.Titulo ?? "");
+            t = System.Text.RegularExpressions.Regex.Replace(t, @"[\r\n]+", " ").Trim();
+            return "Nueva actividad asignada: " + t;
         }
 
         /// <summary>URL_SITE + /Formulario/Agenda.aspx; vacio si no hay URL configurada.</summary>

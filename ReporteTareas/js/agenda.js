@@ -37,6 +37,9 @@ $(document).ready(function () {
         agInicio = r;
         agLunes = r.Lunes;
         if (r.TieneEquipo) { AbrirEquipo(); } else { AbrirPersona(r.CodUsuario); }
+    }, function (mensaje) {
+        $('.ag-toolbar').hide();
+        Mostrar('#agError', mensaje);
     });
 });
 

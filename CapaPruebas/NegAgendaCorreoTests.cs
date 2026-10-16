@@ -31,6 +31,14 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void Asunto_QuitaSaltosDeLinea()
+        {
+            EntAgendaActividad a = Asignada();
+            a.Titulo = "Linea uno\r\nLinea dos";
+            Assert.AreEqual("Nueva actividad asignada: Linea uno Linea dos", NegAgendaCorreo.Asunto(a));
+        }
+
+        [TestMethod]
         public void Cuerpo_TituloFechaEntregablesYQuienAsigno()
         {
             string c = NegAgendaCorreo.Cuerpo(Asignada(), "Ana Perez", "Luis Mora", "https://portal.ejemplo/RTareas/");

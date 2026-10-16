@@ -195,6 +195,26 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnviarCorreoAgenda
+        /// <summary>
+        /// Aviso de la agenda: un destinatario y el cuerpo HTML ya armado por
+        /// NegAgendaCorreo. Devuelve false si no salio; el motivo queda en
+        /// ErrorProceso. La bitacora de la agenda la escribe el handler.
+        /// </summary>
+        public bool EnviarCorreoAgenda(string destinatario, string asunto, string cuerpoHtml)
+        {
+            EntParametrosCorreo parametros = new EntParametrosCorreo();
+            parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+            parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+            parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+            parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+            parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+            parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+            return EnviarCorreoPermiso(destinatario, asunto, cuerpoHtml, parametros, "", "Equipo y agenda - Sistema de Tareas");
+        }
+        #endregion
+
         #region EnvioCorreoPoliza
         public bool EnvioCorreoPoliza(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, string body, Int32 idpoliza)
         {
@@ -1629,7 +1649,7 @@ namespace CorreoHelper
             return Temp;
         }
 
-        public bool EnviarCorreoPermiso(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento)
+        public bool EnviarCorreoPermiso(string correosDestinatarios, string correoTitulo, string correoContenido, EntParametrosCorreo parametrosServidorCorreo, string RutaDocumento, string nombreRemitente = null)
         {
             bool Temp = false;
 
@@ -1640,7 +1660,7 @@ namespace CorreoHelper
             string body = correoContenido;
             int portNumber = parametrosServidorCorreo.portNumber;
             bool enableSSL = parametrosServidorCorreo.enableSSL;
-            string emailFromName = "Registro de Permiso - Sistema de Tareas";
+            string emailFromName = string.IsNullOrEmpty(nombreRemitente) ? "Registro de Permiso - Sistema de Tareas" : nombreRemitente;
 
             using (MailMessage mail = new MailMessage())
             {

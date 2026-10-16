@@ -98,6 +98,9 @@ namespace ReporteTareas.clases
         internal const string ListaEmpleados = "ListaEmpleados.aspx";
         /// <summary>«Datos Empleado»: solo la ficha propia.</summary>
         internal const string RRHHEmpleados = "RRHHEmpleados.aspx";
+        /// <summary>Equipo y agenda: la abre cualquier usuario interno; lo que ve lo decide AdministrarAgenda.</summary>
+        internal const string Agenda = "Agenda.aspx";
+        internal const string ParametrizacionAreasAgenda = "ParametrizacionAreasAgenda.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>
@@ -106,5 +109,6 @@ namespace ReporteTareas.clases
         internal const string HorasExtrasReabrir = "HorasExtras.Reabrir";
         internal const string HorasExtrasEditarMaestro = "HorasExtras.EditarMaestro";
         internal const string UsuariosCambiarPerfil = "Usuarios.CambiarPerfil";
+        internal const string AgendaVerTodos = "Agenda.VerTodos";
     }
 }

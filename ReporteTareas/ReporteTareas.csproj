@@ -1343,6 +1343,7 @@
     <Content Include="Formulario\DescargarHorasExtras.ashx" />
     <Content Include="Formulario\TableroCostos.aspx" />
     <Content Include="Formulario\AdministrarTableroCostos.ashx" />
+    <Content Include="Formulario\AdministrarAgenda.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
@@ -1600,6 +1601,9 @@
     </Compile>
     <Compile Include="Formulario\AdministrarTableroCostos.ashx.cs">
       <DependentUpon>AdministrarTableroCostos.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarAgenda.ashx.cs">
+      <DependentUpon>AdministrarAgenda.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\DescargarTableroCostos.ashx.cs">
       <DependentUpon>DescargarTableroCostos.ashx</DependentUpon>

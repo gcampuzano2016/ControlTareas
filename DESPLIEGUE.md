@@ -1114,10 +1114,19 @@ Las actividades **no** son las tareas de servicio de Aranda.
 1. `docs/sql/2026-10-15-agenda-esquema.sql` (ya aplicado en desarrollo, que es la misma base: repetirlo no hace nada).
 2. `docs/sql/2026-10-15-agenda-precarga.sql` (ídem).
 3. `docs/sql/2026-10-15-agenda-menu.sql` — **recién ahora**: antes, la opción de menú llevaría a una página que no existe.
+3b. `docs/sql/2026-10-15-agenda-verificacion.sql` — correrlo aquí, justo después del menú y **antes** de los binarios; se vuelve a
+   correr después de ellos (paso 5).
 4. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`), más
    `Formulario\Agenda.aspx`, `Formulario\ParametrizacionAreasAgenda.aspx`, `Formulario\AdministrarAgenda.ashx`,
    `js\agenda.js` y `js\parametrizacionAreasAgenda.js`.
-5. `docs/sql/2026-10-15-agenda-verificacion.sql` — debe dar `VEREDICTO: OK`.
+
+   Estos binarios **también** llevan el §18 «Módulo de empleados protegido» (commit d166526), que no se había publicado:
+   publicar el §19 aplica también el §18, así que los controles del §18.4 se corren junto con los del §19.4.
+
+   **No publicar `Web.config` en esta entrega.** El `Web.config` del paquete ya trae el bloque corregido
+   `<mimeMap fileExtension=".js" …>` (c6da315), pero producción no ha recibido un `Web.config` desde el 2026-09-23; publicarlo
+   es una decisión aparte, y si algún día se publica, comprobar después que un `.js` responde 200 y, si da 500.19, quitar el bloque.
+5. `docs/sql/2026-10-15-agenda-verificacion.sql` otra vez — debe dar `VEREDICTO: OK`.
 
 ### 19.3 Quién cuenta como activo
 
@@ -1128,13 +1137,18 @@ su estado), y la gente cuyo jefe no cumple el criterio solo la ve `Agenda.VerTod
 
 ### 19.4 Lista para probar en producción
 
+Es **obligatoria** antes de anunciar el módulo a los usuarios. Los roles de jefe y de colaborador nunca se probaron de punta a
+punta: solo se probaron las reglas y, en local, un usuario con `Agenda.VerTodos`.
+
 - **Gerencia (perfil 10):** ve todas las áreas, asigna una actividad a alguien y a esa persona le llega el correo.
 - **Un jefe:** ve solo su cadena, aun buscando por nombre a alguien de otra área.
 - **Un colaborador:** entra directo a su agenda, marca sus entregables, no puede mover la fecha de lo que le asignaron y no
   abre «Áreas de la agenda» (escribir la dirección lo manda a Principal).
-- **Correo real:** la prueba en local se hizo solo con una persona sin correo (aviso amarillo y bitácora con Enviado = 0). Que llegue el correo con tildes y el botón «Ver en mi agenda» se comprueba aquí, en la prueba de Gerencia.
+- **Correo real:** la prueba en local se hizo solo con una persona sin correo (aviso amarillo y bitácora con Enviado = 0). Que llegue el correo con tildes y el botón «Ver en mi agenda» se comprueba aquí, en la prueba de Gerencia. Si no llega, mirar `AG_CorreoBitacora.Error` de esa actividad.
 
 ### 19.5 Reversa
 
-Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-15-agenda-menu.sql`. Las
+Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-15-agenda-menu.sql`.
+Revertir los binarios también deshace el §18 (reabre el hueco de la lista de empleados): tras una reversa hay que volver a
+publicar el §18 lo antes posible. Las
 tablas `AG_*` pueden quedar: no las usa nada más.

@@ -1,7 +1,7 @@
 # Equipo y agenda (Entrega 1 de «Equipo, Calendario y Procesos») — Diseño
 
 **Fecha:** 2026-10-15
-**Estado:** aprobado en conversación; pendiente de revisión escrita
+**Estado:** aprobado (revisión escrita 2026-10-15)
 **Rama:** `ProyectoNuevosCambios`
 **Pedido por:** Gerencia General
 **Antecedentes:**
@@ -60,7 +60,7 @@ Dos personas tienen un jefe que ese criterio deja fuera, porque el jefe tiene `E
 | `1345` Pinos Agila Nathaly Pamela | `1087` Lasso Peñafiel Isabel Cristina |
 | `3408342` Viteri Egas Verónica Elizabeth | `3178922` Luis Alfonso Salazar Vaca |
 
-Ver la **pregunta abierta 1**.
+Ver las **decisiones de la revisión**, punto 1.
 
 ### Departamentos (de los 105)
 
@@ -83,7 +83,7 @@ propio y `Departamento` solo sirve para la precarga: lo usan Vacaciones y Horari
 ### Perfil «Gerencia»
 
 El perfil 10 «Gerencia» tiene tres personas activas: Carlos Pinos (`1074`), Rubén Suquillo (`1072`, Ciberseguridad y
-Networking) y Rafael Parreño (`2641457`, Comercial). Ver la **pregunta abierta 2**.
+Networking) y Rafael Parreño (`2641457`, Comercial). Ver las **decisiones de la revisión**, punto 2.
 
 ### Infraestructura que se reutiliza
 
@@ -177,8 +177,7 @@ Viven en `CapaNegocio`, sin base, sesión ni `HttpContext`, igual que `NegPermis
   además el perfil tiene «Equipo y agenda» en su menú. Por eso el script de menú da la pantalla a todos los perfiles
   internos. El perfil 18 la tiene siempre.
 
-**Quién cuenta como activo** sale de **un solo procedimiento** (`Sp_RTA_AgendaPersonasActivas`): si la respuesta a la
-pregunta abierta 1 cambia el criterio, se cambia en un lugar.
+**Quién cuenta como activo** sale de **un solo procedimiento** (`Sp_RTA_AgendaPersonasActivas`): si el criterio cambia, se cambia en un lugar.
 
 **`NegAgendaActividad`: qué se puede hacer**
 
@@ -271,7 +270,7 @@ En `docs/sql/`, re-ejecutables, cada uno termina en `VEREDICTO: OK`:
    `ADMINISTRACIÓN` unificados y colores por defecto; la fila «Sin área»; y el área de cada persona. No pisa lo que ya
    esté cargado si se corre de nuevo.
 3. `2026-10-15-agenda-menu.sql`: «Equipo y agenda» en `PerfilMenu` para todos los perfiles con usuarios internos activos;
-   «Áreas de la agenda» para 14 y 18; `Agenda.VerTodos` para el perfil que resulte de la pregunta abierta 2. Trae la
+   «Áreas de la agenda» para 14 y 18; `Agenda.VerTodos` para el perfil 10 «Gerencia». Trae la
    reversa comentada.
 4. `2026-10-15-agenda-verificacion.sql`: todas las personas activas tienen área o caen en «Sin área»; hay una sola fila
    «Sin área»; no hay ciclos de jefes; el menú y la acción quedaron como se esperaba; y lista a las personas cuyo jefe
@@ -316,17 +315,12 @@ la verificación otra vez. Se documenta en una sección nueva de `DESPLIEGUE.md`
 
 **Reversa:** reponer los binarios anteriores, todos juntos, y aplicar la reversa del menú. Las tablas pueden quedar.
 
-## Preguntas abiertas (para la revisión de este documento)
+## Decisiones de la revisión (2026-10-15)
 
-1. **¿Quién cuenta como activo?** El criterio de los selectores de jefe (`EstadoUsuario` NULL) da 105 personas y deja
-   fuera a Isabel Lasso y a Luis Salazar, que son jefes de alguien. Sumar `EstadoUsuario = 0` da 224 y trae cuentas de
-   prueba (`aranda`, «ADMINISTRADOR DE PRUEBAS») y un código repetido. **Recomendación:** usar el de los selectores
-   (105) y que Talento Humano corrija el estado de esas dos jefaturas; mientras tanto, Nathaly Pinos y Verónica Viteri
-   solo las ve Gerencia.
-2. **¿A quién se le da `Agenda.VerTodos`?** Dárselo al perfil 10 «Gerencia» se lo da también a Rubén Suquillo y a Rafael
-   Parreño. **Recomendación:** dárselo al perfil 10 si esas dos personas deben ver a toda la empresa; si no, solo al
-   18 y pedir que Carlos Pinos pase a un perfil propio, o habilitar acciones por usuario (hoy la verificación de
-   Permisos exige que no haya).
+1. **Activo = criterio de los selectores de jefe** (`Usuario_Estado = 'A'` y `EstadoUsuario` NULL, internos): 105
+   personas. Talento Humano corrige el estado de Isabel Lasso (`1087`) y Luis Salazar (`3178922`); hasta entonces,
+   Nathaly Pinos y Verónica Viteri solo las ve quien tiene `Agenda.VerTodos`.
+2. **`Agenda.VerTodos` al perfil 10 «Gerencia»**: Carlos Pinos, Rubén Suquillo y Rafael Parreño ven a toda la empresa.
 
 ## Fuera de alcance
 

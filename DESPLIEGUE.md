@@ -1091,3 +1091,50 @@ Reponer los binarios anteriores, todos juntos. Reabre el hueco.
   y sus cargas familiares. Igual que antes.
 - **Con alguien de otro perfil (no 14 ni 18):** escribir `.../Formulario/ListaEmpleados.aspx` o `.../Formulario/RRHHEmpleados.aspx`
   lo manda a Principal.
+
+## 19. Equipo y agenda (Entrega 1 de «Equipo, Calendario y Procesos»)
+
+Spec: `docs/superpowers/specs/2026-10-15-agenda-equipo-entrega1-design.md`.
+
+### 19.1 Qué es
+
+Dos pantallas nuevas en el grupo de menú «Equipo y agenda»:
+
+- **«Equipo y agenda»** (`Agenda.aspx`): tarjetas por área con la carga de la semana, y la agenda de lunes a viernes de
+  cada persona, con actividades, entregables y atrasadas. La ve cualquier usuario interno: cada uno a sí mismo, cada jefe a
+  toda su cadena hacia abajo (`Cod_Jefe_Inm`), y a todos quien tiene la acción `Agenda.VerTodos` (perfil 10 «Gerencia»; el
+  18 siempre). Asignarle algo a otra persona le envía un correo.
+- **«Áreas de la agenda»** (`ParametrizacionAreasAgenda.aspx`): catálogo de áreas con color y área de cada persona. Perfiles
+  14 y 18.
+
+Las actividades **no** son las tareas de servicio de Aranda.
+
+### 19.2 Orden
+
+1. `docs/sql/2026-10-15-agenda-esquema.sql` (ya aplicado en desarrollo, que es la misma base: repetirlo no hace nada).
+2. `docs/sql/2026-10-15-agenda-precarga.sql` (ídem).
+3. `docs/sql/2026-10-15-agenda-menu.sql` — **recién ahora**: antes, la opción de menú llevaría a una página que no existe.
+4. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa: `CapaEntidad`, `CapaNegocio`, `CapaDato`), más
+   `Formulario\Agenda.aspx`, `Formulario\ParametrizacionAreasAgenda.aspx`, `Formulario\AdministrarAgenda.ashx`,
+   `js\agenda.js` y `js\parametrizacionAreasAgenda.js`.
+5. `docs/sql/2026-10-15-agenda-verificacion.sql` — debe dar `VEREDICTO: OK`.
+
+### 19.3 Quién cuenta como activo
+
+`Usuario_Estado = 'A'` y `EstadoUsuario` NULL, solo internos: el criterio de los selectores de jefe. Está en un solo lugar,
+`Sp_RTA_AgendaPersonasActivas`. Quien no cumple el criterio no entra a la agenda (ve un aviso para que Talento Humano revise
+su estado), y la gente cuyo jefe no cumple el criterio solo la ve `Agenda.VerTodos`. La verificación lista a esas personas
+(chequeo 6).
+
+### 19.4 Lista para probar en producción
+
+- **Gerencia (perfil 10):** ve todas las áreas, asigna una actividad a alguien y a esa persona le llega el correo.
+- **Un jefe:** ve solo su cadena, aun buscando por nombre a alguien de otra área.
+- **Un colaborador:** entra directo a su agenda, marca sus entregables, no puede mover la fecha de lo que le asignaron y no
+  abre «Áreas de la agenda» (escribir la dirección lo manda a Principal).
+- **Correo real:** la prueba en local se hizo solo con una persona sin correo (aviso amarillo y bitácora con Enviado = 0). Que llegue el correo con tildes y el botón «Ver en mi agenda» se comprueba aquí, en la prueba de Gerencia.
+
+### 19.5 Reversa
+
+Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-15-agenda-menu.sql`. Las
+tablas `AG_*` pueden quedar: no las usa nada más.

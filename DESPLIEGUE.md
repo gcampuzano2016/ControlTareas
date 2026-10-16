@@ -1152,3 +1152,27 @@ Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al 
 Revertir los binarios también deshace el §18 (reabre el hueco de la lista de empleados): tras una reversa hay que volver a
 publicar el §18 lo antes posible. Las
 tablas `AG_*` pueden quedar: no las usa nada más.
+
+## 20. Editar una actividad clasifica la hora extra
+
+### 20.1 Qué es
+
+Hasta el 2026-10-16, editar una actividad guardaba el tipo de hora que traía el combo (en blanco = 0). Quien creaba la actividad
+con la fecha por defecto y después le cambiaba fecha y hora a un horario fuera de jornada perdía la hora extra sin aviso.
+Ahora `Sp_RTAActualizaDetalleTarea` clasifica según el horario del responsable, igual que al crear.
+
+### 20.2 Orden
+
+1. `docs/sql/2026-09-15-clasificacion-al-editar.sql` — **ya ejecutado en producción el 2026-10-16 17:14.**
+2. Binarios **juntos** (`ReporteTareas.dll` y los tres `.exe` de capa). Sin ellos la edición ya clasifica, pero **no envía la
+   solicitud a la jefatura**. Son los mismos binarios del §19: publicar el §19 aplica también este.
+
+### 20.3 Lista para probar en producción
+
+- Crear una actividad dentro de la jornada y editarla a un sábado o a un horario nocturno: debe quedar al 100% o al 50% y llegar
+  el correo de solicitud al jefe inmediato.
+- Editarla a un rango que cruza el fin de la jornada: debe rechazarse con la lista de tramos para registrar por separado.
+
+### 20.4 Reversa
+
+`Actualizacion/rollback-Sp_RTAActualizaDetalleTarea-2023.sql` (cambiar `CREATE` por `ALTER`). Vuelve a perder el tipo al editar.

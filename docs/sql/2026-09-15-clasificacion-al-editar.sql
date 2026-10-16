@@ -2,7 +2,7 @@
    La edición también clasifica el tipo de hora
    ReporTarea  |  2026-09-15
 
-   PENDIENTE DE EJECUTAR. Correr primero en PRUEBAS.
+   EJECUTADO EN PRODUCCION el 2026-10-16.
 
    ----------------------------------------------------------------------------
    Qué cambia y por qué
@@ -235,7 +235,7 @@ BEGIN
 	--------------------------------------------
 
 	-- ------------------------------------------------
-	-- Actulizo la fecha de fin para determinar el tiempo de duraciÃ³n de la tarea
+	-- Actulizo la fecha de fin para determinar el tiempo de duracion de la tarea
 	-- ------------------------------------------------
 	SELECT @Tiempo = CONVERT(VARCHAR(8), CONVERT(datetime, @Det_Fch_RegDetalleFin, 120) - CAST(CONVERT(VARCHAR(8), CONVERT(datetime, @Det_Fch_RegDetalleFin, 120), 112) + ' ' + CONVERT(VARCHAR(8), CONVERT(datetime, @Det_Fch_RegDetalleIni, 120), 108) AS DATETIME), 108)
 
@@ -364,8 +364,7 @@ BEGIN
 					   ,[Det_Id_CompAranda]
 					   ,[Det_Fch_RegDetalleIni]
 					   ,[Det_Fch_RegDetalleFin]
-					   ,[Det_EstadoI
-ni]
+					   ,[Det_EstadoIni]
 					   ,[Det_EstadoFin]
 					   ,[Det_Tiempo]
 					   ,[Det_Nom_Empresa]
@@ -467,8 +466,7 @@ ni]
 				Det_Fecha_Modificacion = GETDATE(),
 				Cod_CatalogoTareaSap = @Cod_CatalogoTareaSap,
 				IdTipoGasto=@IdTipoGasto
-			where Id_RegDetTareas = @Id_RegDetTarea
-s
+			where Id_RegDetTareas = @Id_RegDetTareas
 		END
 	IF(@@ROWCOUNT>=1)
 		BEGIN

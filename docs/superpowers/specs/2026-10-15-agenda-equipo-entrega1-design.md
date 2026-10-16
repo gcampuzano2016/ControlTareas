@@ -264,14 +264,14 @@ Se usan jQuery y tablas HTML simples, como Tablero y Curva. **No se usa DataTabl
 
 En `docs/sql/`, re-ejecutables, cada uno termina en `VEREDICTO: OK`:
 
-1. `2026-10-15-agenda-esquema.sql`: las tablas `AG_*`, los `Sp_RTA_Agenda*`, y la acción `Agenda.VerTodos` en `RTA_Accion`
-   ligada al `Id_Menu` de la agenda.
+1. `2026-10-15-agenda-esquema.sql`: las tablas `AG_*`, y los `Sp_RTA_Agenda*`.
 2. `2026-10-15-agenda-precarga.sql`: un área por cada `Departamento` distinto entre los activos, con `ADMINISTRACION` y
    `ADMINISTRACIÓN` unificados y colores por defecto; la fila «Sin área»; y el área de cada persona. No pisa lo que ya
    esté cargado si se corre de nuevo.
 3. `2026-10-15-agenda-menu.sql`: «Equipo y agenda» en `PerfilMenu` para todos los perfiles con usuarios internos activos;
    «Áreas de la agenda» para 14 y 18; `Agenda.VerTodos` para el perfil 10 «Gerencia». Trae la
-   reversa comentada.
+   reversa comentada. Crea además la acción `Agenda.VerTodos` en `RTA_Accion`, ligada al `Id_Menu` de `Agenda.aspx`,
+   porque necesita ese id. Se corre al desplegar, con los binarios.
 4. `2026-10-15-agenda-verificacion.sql`: todas las personas activas tienen área o caen en «Sin área»; hay una sola fila
    «Sin área»; no hay ciclos de jefes; el menú y la acción quedaron como se esperaba; y lista a las personas cuyo jefe
    no está entre los activos.

@@ -1342,6 +1342,7 @@
     <Content Include="Formulario\AdministrarParametrosHE.ashx" />
     <Content Include="Formulario\DescargarHorasExtras.ashx" />
     <Content Include="Formulario\TableroCostos.aspx" />
+    <Content Include="Formulario\Agenda.aspx" />
     <Content Include="Formulario\AdministrarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarAgenda.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
@@ -1424,6 +1425,7 @@
     <Content Include="js\aprobacionTareasJefatura.js" />
     <Content Include="js\dashboardAprobacion.js" />
     <Content Include="js\tableroCostos.js" />
+    <Content Include="js\agenda.js" />
     <Content Include="js\reporteGastos.js" />
     <Content Include="js\ReportesGPF.js" />
     <Content Include="js\reporteTareas.js" />
@@ -1895,6 +1897,13 @@
     </Compile>
     <Compile Include="Formulario\TableroCostos.aspx.designer.cs">
       <DependentUpon>TableroCostos.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\Agenda.aspx.cs">
+      <DependentUpon>Agenda.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\Agenda.aspx.designer.cs">
+      <DependentUpon>Agenda.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ParametrizacionHorasExtras.aspx.cs">
       <DependentUpon>ParametrizacionHorasExtras.aspx</DependentUpon>

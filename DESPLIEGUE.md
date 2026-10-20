@@ -1176,3 +1176,32 @@ Ahora `Sp_RTAActualizaDetalleTarea` clasifica según el horario del responsable,
 ### 20.4 Reversa
 
 `Actualizacion/rollback-Sp_RTAActualizaDetalleTarea-2023.sql` (cambiar `CREATE` por `ALTER`). Vuelve a perder el tipo al editar.
+
+## 21. Dashboard de Contratos (sexta pestaña de Registro de Contratos)
+
+### 21.1 Qué es
+
+Pestaña *Dashboard* en `RegistrarContrato.aspx`: indicadores de horas y costos, alertas de los contratos en ejecución (horas o
+costo excedidos, cierre vencido o en 30 días o menos, consumo sin horas contratadas) y cuatro gráficos. Reutiliza la acción
+`ReporteListaContratos` de la pestaña *Listas de Contratos* y filtra en el navegador. **Sin SQL, sin menú y sin binarios.**
+La ve quien ya tiene acceso a Registro de Contratos.
+
+### 21.2 Archivos a publicar
+
+- `Formulario\RegistrarContrato.aspx`
+- `js\dashboardContratos.js` (nuevo)
+- `js\chart.umd.js` ya está en el servidor desde el §16; copiarlo solo si faltara.
+
+El `ReporteTareas.dll` del paquete se regeneró pero no trae cambios de código para esto: no hace falta publicarlo.
+
+### 21.3 Lista para probar en producción
+
+- Abrir *Registro de Contratos → Dashboard*: con el estado *EN EJECUCION* debe mostrar la misma cantidad de contratos que
+  `SELECT COUNT(*) FROM OrdenServicio WHERE Estado = 1 AND ESTATUS = 'EN EJECUCION'` (513 el 2026-10-19).
+- Clic en una orden de la tabla de alertas: abre ese contrato en la pestaña *Registro de Contratos*.
+- Si no aparece la pestaña o los gráficos salen vacíos, revisar que `dashboardContratos.js` y `chart.umd.js` estén en `js\`
+  (un 404 en la consola del navegador).
+
+### 21.4 Reversa
+
+Reponer el `RegistrarContrato.aspx` anterior. `dashboardContratos.js` puede quedar: nadie más lo carga.

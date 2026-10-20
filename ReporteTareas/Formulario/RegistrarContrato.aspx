@@ -9,6 +9,23 @@
     <link href="../bower_components/sweetalert/css/sweetalert.css" rel="stylesheet" />
     <script src="../bower_components/sweetalert/js/sweetalert.min.js"></script>
     <script src="../bower_components/sweetalert/js/sweetalert.init.js"></script>
+    <script src="../js/chart.umd.js" type="text/javascript"></script>
+    <script src="../js/dashboardContratos.js?v=1" type="text/javascript"></script>
+    <style>
+        .dc-tarjeta { border: 1px solid #ddd; border-radius: 4px; padding: 10px; text-align: center; margin-bottom: 10px; border-top: 4px solid #555; min-height: 96px; }
+        .dc-tarjeta .dc-titulo { font-weight: bold; color: #555; }
+        .dc-tarjeta .dc-valor { font-size: 20px; font-weight: bold; }
+        .dc-tarjeta .dc-sub { font-size: 12px; color: #777; }
+        .dc-horas { border-top-color: #2F6DB5; }
+        .dc-costos { border-top-color: #E07B24; }
+        .dc-negativo { color: #c9302c; }
+        .dc-grafico { position: relative; height: 300px; }
+        .dc-tabla { font-size: 12px; }
+        .dc-tabla td.text-right, .dc-tabla th { white-space: nowrap; }
+        .dc-tabla .label { display: inline-block; margin: 1px; }
+        .dc-filtro-alerta { cursor: pointer; margin: 0 4px 6px 0; }
+        .dc-filtro-alerta.dc-apagada { opacity: .45; }
+    </style>
     <%--    <script src="../bower_components/Excel/xlsx.full.min.js"></script>
     <script src="../bower_components/Excel/excel.js"></script>--%>
 </asp:Content>
@@ -45,6 +62,8 @@
                             <li><a href="#Total-pills" data-toggle="tab">Total de Horas por Número de OS</a>
                             </li>
                             <li><a href="#Costo-pills" data-toggle="tab">Cargar Costos de Contratos</a>
+                            </li>
+                            <li><a href="#Dashboard-pills" data-toggle="tab">Dashboard</a>
                             </li>
                         </ul>
                         <!-- Tab panes -->
@@ -816,6 +835,105 @@
                                                     </div>
                                                 </div>
                                             </asp:Panel>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="tab-pane fade" id="Dashboard-pills">
+                                <div class="row">
+                                    <div class="col-lg-12" style="padding: 20px">
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading">Filtros</div>
+                                            <div class="panel-body">
+                                                <div class="row">
+                                                    <div class="form-group col-lg-2">
+                                                        <label>Estado</label>
+                                                        <select id="dcEstado" class="form-control dc-filtro">
+                                                            <option value="">TODOS</option>
+                                                            <option value="EN EJECUCION" selected>EN EJECUCION</option>
+                                                            <option value="CERRADA">CERRADA</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group col-lg-2">
+                                                        <label>Área</label>
+                                                        <select id="dcArea" class="form-control dc-filtro"></select>
+                                                    </div>
+                                                    <div class="form-group col-lg-2">
+                                                        <label>Sucursal</label>
+                                                        <select id="dcSucursal" class="form-control dc-filtro"></select>
+                                                    </div>
+                                                    <div class="form-group col-lg-2">
+                                                        <label>Gerente Cuenta</label>
+                                                        <select id="dcGerente" class="form-control dc-filtro"></select>
+                                                    </div>
+                                                    <div class="form-group col-lg-2">
+                                                        <label>Gestor Responsable</label>
+                                                        <select id="dcGestor" class="form-control dc-filtro"></select>
+                                                    </div>
+                                                    <div class="form-group col-lg-1">
+                                                        <label>Año registro</label>
+                                                        <select id="dcAnio" class="form-control dc-filtro"></select>
+                                                    </div>
+                                                    <div class="form-group col-lg-1">
+                                                        <label>&nbsp;</label>
+                                                        <button id="dcActualizar" type="button" class="btn btn-primary btn-block" title="Vuelve a leer los contratos de la base">Actualizar</button>
+                                                    </div>
+                                                </div>
+                                                <div id="dcMensaje" class="text-muted"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta"><div class="dc-titulo">Contratos</div><div class="dc-valor" id="dcKpiContratos">-</div><div class="dc-sub" id="dcKpiContratosSub"></div></div></div>
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta dc-horas"><div class="dc-titulo">Horas contratadas</div><div class="dc-valor" id="dcKpiHorasC">-</div><div class="dc-sub" id="dcKpiHorasCSub"></div></div></div>
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta dc-horas"><div class="dc-titulo">Horas entregadas</div><div class="dc-valor" id="dcKpiHorasE">-</div><div class="dc-sub" id="dcKpiHorasESub"></div></div></div>
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta dc-costos"><div class="dc-titulo">Costo plan</div><div class="dc-valor" id="dcKpiCostoP">-</div><div class="dc-sub" id="dcKpiCostoPSub"></div></div></div>
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta dc-costos"><div class="dc-titulo">Costo real</div><div class="dc-valor" id="dcKpiCostoR">-</div><div class="dc-sub" id="dcKpiCostoRSub"></div></div></div>
+                                            <div class="col-md-2 col-sm-4"><div class="dc-tarjeta dc-costos"><div class="dc-titulo">Saldo de costos</div><div class="dc-valor" id="dcKpiSaldo">-</div><div class="dc-sub" id="dcKpiSaldoSub"></div></div></div>
+                                        </div>
+
+                                        <div class="panel panel-default">
+                                            <div class="panel-heading"><strong>Contratos en ejecución que requieren atención</strong> <span class="text-muted">(clic en la orden para abrir el contrato)</span></div>
+                                            <div class="panel-body">
+                                                <div id="dcAlertasResumen"></div>
+                                                <div style="max-height: 420px; overflow: auto;">
+                                                    <table class="table table-striped table-condensed dc-tabla">
+                                                        <thead>
+                                                            <tr><th>Orden</th><th>Cliente</th><th>Gerente</th><th>Área</th><th class="text-right">H. contratadas</th><th class="text-right">H. entregadas</th><th class="text-right">% horas</th><th class="text-right">Saldo $</th><th>Cierre estimado</th><th>Alertas</th></tr>
+                                                        </thead>
+                                                        <tbody id="dcAlertasCuerpo"></tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">Horas contratadas vs entregadas por área</div>
+                                                    <div class="panel-body"><div class="dc-grafico"><canvas id="dcGrfHorasArea"></canvas></div></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">Costo plan vs real por gerente de cuenta (10 mayores)</div>
+                                                    <div class="panel-body"><div class="dc-grafico"><canvas id="dcGrfCostoGerente"></canvas></div></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">Clientes con mayor costo real (10 mayores)</div>
+                                                    <div class="panel-body"><div class="dc-grafico"><canvas id="dcGrfClientes"></canvas></div></div>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="panel panel-default">
+                                                    <div class="panel-heading">Contratos por año de registro</div>
+                                                    <div class="panel-body"><div class="dc-grafico"><canvas id="dcGrfAnios"></canvas></div></div>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

@@ -266,8 +266,7 @@ function AbrirPlazo(p, s) {
 
 /* El SP de activacion trunca en silencio las lineas de entregables de mas de 200 caracteres. */
 function LineaEntregableLarga(texto) {
-    var l = String(texto || '').split(/?
-/);
+    var l = String(texto || '').split(/\r?\n/);
     for (var i = 0; i < l.length; i++) { if (l[i].length > 200) { return i + 1; } }
     return 0;
 }

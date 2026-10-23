@@ -16,6 +16,23 @@ SET QUOTED_IDENTIFIER ON;
 SET ANSI_NULLS ON;
 GO
 
+/* ----------------------------------------------------------- GUARD -------- */
+/* (Agregado el 2026-10-23.) Si la Entrega 2 (procesos,
+   2026-10-23-procesos-esquema.sql) ya esta aplicada, este script NO debe
+   volver a correr: sus ALTER devolverian Sp_RTA_AgendaMarcarEntregable,
+   MarcarCompleta, GuardarActividad y las consultas a la version sin procesos,
+   y marcar la actividad de un paso dejaria de avanzar el proceso, sin aviso.
+   Todo lo que este script crea ya existe en ese caso. */
+IF COL_LENGTH('dbo.AG_Actividad', 'IdProcesoPaso') IS NOT NULL
+   OR EXISTS (SELECT 1 FROM sys.extended_properties
+               WHERE class = 1 AND minor_id = 0 AND major_id = OBJECT_ID('dbo.AG_Actividad')
+                 AND name = 'AG_VersionEsquema' AND CONVERT(INT, value) >= 2)
+BEGIN
+    PRINT 'La Entrega 2 de la agenda ya esta aplicada. Este script NO se ejecuta.';
+    SET NOEXEC ON;
+END
+GO
+
 /* ------------------------------------------------------- 1. tablas -------- */
 IF OBJECT_ID('dbo.AG_Area', 'U') IS NULL
 BEGIN
@@ -501,4 +518,8 @@ DECLARE @Faltan INT =
 DECLARE @SinArea INT = (SELECT COUNT(*) FROM dbo.AG_Area WHERE EsSinArea = 1 AND Activa = 1);
 SELECT ObjetosFaltantes = @Faltan, FilasSinArea = @SinArea;
 SELECT Veredicto = CASE WHEN @Faltan = 0 AND @SinArea = 1 THEN 'VEREDICTO: OK' ELSE 'VEREDICTO: FALLA' END;
+GO
+
+/* Deshace el guard de la cabecera. */
+SET NOEXEC OFF;
 GO

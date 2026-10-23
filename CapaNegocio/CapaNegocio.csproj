@@ -232,6 +232,7 @@
     <Compile Include="NegAgendaCorreo.cs" />
     <Compile Include="NegAgendaAreas.cs" />
     <Compile Include="NegAgenda.Datos.cs" />
+    <Compile Include="NegBonoFechas.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

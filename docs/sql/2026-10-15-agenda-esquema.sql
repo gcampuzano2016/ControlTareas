@@ -26,7 +26,7 @@ GO
 IF COL_LENGTH('dbo.AG_Actividad', 'IdProcesoPaso') IS NOT NULL
    OR EXISTS (SELECT 1 FROM sys.extended_properties
                WHERE class = 1 AND minor_id = 0 AND major_id = OBJECT_ID('dbo.AG_Actividad')
-                 AND name = 'AG_VersionEsquema' AND CONVERT(INT, value) >= 2)
+                 AND name = 'AG_VersionEsquema' AND TRY_CONVERT(INT, value) >= 2)
 BEGIN
     PRINT 'La Entrega 2 de la agenda ya esta aplicada. Este script NO se ejecuta.';
     SET NOEXEC ON;

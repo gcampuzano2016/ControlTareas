@@ -522,6 +522,18 @@ SET @Xml = CONVERT(XML, N'<ps><p o="1" a="' + CONVERT(NVARCHAR(10), @Ar1) + N'" 
 INSERT INTO @I EXEC dbo.Sp_RTA_AgendaIniciarProceso @Nombre = N'ZZ Malo', @IdPlantilla = @Pl, @Pasos = @Xml,
      @FechaEntregaPrimero = '20301111', @Usuario = 'ZZINI';
 INSERT INTO @R (Caso, Ok) VALUES ('P17 sin responsable: -2', IIF((SELECT IdProceso FROM @I) = -2, 1, 0));
+DELETE FROM @I;
+SET @Xml = CONVERT(XML, N'<ps><p o="1" a="' + CONVERT(NVARCHAR(10), (SELECT TOP 1 IdArea FROM dbo.AG_Area WHERE EsSinArea = 1)) + N'" t="x" d="3" r="ZZR1"/></ps>');
+INSERT INTO @I EXEC dbo.Sp_RTA_AgendaIniciarProceso @Nombre = N'ZZ Malo', @IdPlantilla = @Pl, @Pasos = @Xml,
+     @FechaEntregaPrimero = '20301111', @Usuario = 'ZZINI';
+INSERT INTO @R (Caso, Ok) VALUES ('P17 paso en "Sin area": -2', IIF((SELECT IdProceso FROM @I) = -2, 1, 0));
+UPDATE dbo.AG_Area SET Activa = 0 WHERE IdArea = @Ar3;
+DELETE FROM @I;
+SET @Xml = CONVERT(XML, N'<ps><p o="1" a="' + CONVERT(NVARCHAR(10), @Ar3) + N'" t="x" d="3" r="ZZR1"/></ps>');
+INSERT INTO @I EXEC dbo.Sp_RTA_AgendaIniciarProceso @Nombre = N'ZZ Malo', @IdPlantilla = @Pl, @Pasos = @Xml,
+     @FechaEntregaPrimero = '20301111', @Usuario = 'ZZINI';
+INSERT INTO @R (Caso, Ok) VALUES ('P17 paso en area inactiva: -2', IIF((SELECT IdProceso FROM @I) = -2, 1, 0));
+UPDATE dbo.AG_Area SET Activa = 1 WHERE IdArea = @Ar3;
 UPDATE dbo.AG_Plantilla SET Activa = 0 WHERE IdPlantilla = @Pl;
 SET @Xml = CONVERT(XML, N'<ps><p o="1" a="' + CONVERT(NVARCHAR(10), @Ar1) + N'" t="x" d="3" r="ZZR1"/></ps>');
 DELETE FROM @I;

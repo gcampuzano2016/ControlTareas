@@ -55,7 +55,7 @@ IF EXISTS (SELECT 1 FROM sys.extended_properties
             WHERE class = 1 AND minor_id = 0
               AND major_id = OBJECT_ID('dbo.AG_Actividad')
               AND name = 'AG_VersionEsquema'
-              AND CONVERT(INT, value) > 2)
+              AND TRY_CONVERT(INT, value) > 2)
 BEGIN
     PRINT 'La base tiene una version de esquema de agenda posterior a la 2.';
     PRINT 'Este script NO se ejecuta: devolveria los procedimientos a la version 2.';
@@ -541,8 +541,9 @@ GO
    @Pasos: <ps><p o="1" a="3" t="titulo" d="5" e="uno&#xA;dos" r="COD"/>...</ps>
    (r = Cod_Usuario del responsable; el resto como en GuardarPlantilla).
    Devuelve IdProceso e IdProcesoPasoActivado; si no inicia, IdProceso es
-   -2 datos invalidos (respaldo de NegAgendaProceso) o -3 la plantilla no
-   existe o esta inactiva, e IdProcesoPasoActivado NULL. */
+   -2 datos invalidos (respaldo de NegAgendaProceso; incluye un area
+   inexistente, inactiva o "Sin area", como en GuardarPlantilla) o -3 la
+   plantilla no existe o esta inactiva, e IdProcesoPasoActivado NULL. */
 ALTER PROCEDURE dbo.Sp_RTA_AgendaIniciarProceso
     @Nombre              NVARCHAR(200),
     @IdPlantilla         INT,
@@ -572,7 +573,9 @@ BEGIN
        OR (SELECT COUNT(DISTINCT Orden) FROM @P) <> @N
        OR (SELECT MIN(Orden) FROM @P) <> 1
        OR (SELECT MAX(Orden) FROM @P) <> @N
-       OR EXISTS (SELECT 1 FROM @P AS x WHERE NOT EXISTS (SELECT 1 FROM dbo.AG_Area AS a WHERE a.IdArea = x.IdArea))
+       OR EXISTS (SELECT 1 FROM @P AS x
+                   WHERE NOT EXISTS (SELECT 1 FROM dbo.AG_Area AS a
+                                      WHERE a.IdArea = x.IdArea AND a.Activa = 1 AND a.EsSinArea = 0))
     BEGIN
         SELECT IdProceso = -2, IdProcesoPasoActivado = CONVERT(INT, NULL);
         RETURN;
@@ -1179,7 +1182,7 @@ BEGIN
 END
 
 DECLARE @Version INT =
-    (SELECT CONVERT(INT, value) FROM sys.extended_properties
+    (SELECT TRY_CONVERT(INT, value) FROM sys.extended_properties
       WHERE class = 1 AND minor_id = 0 AND major_id = OBJECT_ID('dbo.AG_Actividad') AND name = 'AG_VersionEsquema');
 IF ISNULL(@Version, 0) < 2
 BEGIN
@@ -1214,11 +1217,14 @@ GO
    (el DAO nuevo lee la fila de Marcar*). Las tablas y columnas nuevas quedan:
    son NULL-ables y la version anterior las ignora. Ojo: tras la reversa,
    marcar la actividad de un paso ya no avanza el proceso.
-   Despues de la reversa, quitar la marca de version para que el esquema de
-   la Entrega 1 vuelva a poder correrse:
-       EXEC sys.sp_dropextendedproperty @name = N'AG_VersionEsquema',
-            @level0type = N'SCHEMA', @level0name = N'dbo',
-            @level1type = N'TABLE', @level1name = N'AG_Actividad';
+   Despues de la reversa NO se quita nada mas: la marca AG_VersionEsquema y
+   la columna AG_Actividad.IdProcesoPaso quedan. Por la columna, el guard de
+   2026-10-15-agenda-esquema.sql seguira negandose a correr (aunque se
+   borrara la marca), y esta bien: todo lo que ese script crea ya existe.
+   Si hiciera falta volver a poner la version de la Entrega 1 de estos 6
+   procedimientos, se usan los cuerpos de esta reversa, no aquel script. Para
+   volver a la Entrega 2, se corre otra vez este script (con la marca en 2,
+   el guard de la cabecera lo deja correr).
    Cada ALTER PROCEDURE tiene que ir en su propio lote: copiar uno por vez, o
    poner una linea GO entre ellos. Y ANTES del primero, en la misma sesion:
        SET QUOTED_IDENTIFIER ON;

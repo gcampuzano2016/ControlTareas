@@ -257,10 +257,21 @@ function AbrirPlazo(p, s) {
             var plazo = parseInt($pl.val(), 10);
             if (!$.trim($tit.val())) { ErrorDialogo('El título es obligatorio.'); return; }
             if (isNaN(plazo) || plazo < 1 || plazo > 60) { ErrorDialogo('El plazo tiene que estar entre 1 y 60 días hábiles.'); return; }
+            var lp = LineaEntregableLarga($ent.val());
+            if (lp) { ErrorDialogo(MSG_LINEA_LARGA + lp + '.'); return; }
             Enviar('CambiarPasoPendiente', { idPaso: s.IdProcesoPaso, titulo: $.trim($tit.val()), plazoDias: plazo, entregables: $ent.val() });
         }
     });
 }
+
+/* El SP de activacion trunca en silencio las lineas de entregables de mas de 200 caracteres. */
+function LineaEntregableLarga(texto) {
+    var l = String(texto || '').split(/?
+/);
+    for (var i = 0; i < l.length; i++) { if (l[i].length > 200) { return i + 1; } }
+    return 0;
+}
+var MSG_LINEA_LARGA = 'Cada entregable (una línea) admite hasta 200 caracteres. Acorte la línea ';
 
 /* ---------- Cambiar fecha (paso en curso) ---------- */
 
@@ -322,7 +333,7 @@ function PersonasDeArea(d, idArea) {
 function MostrarIniciar(d, plantillas) {
     var $plantilla = $('<select class="form-control"></select>');
     $.each(plantillas, function (i, p) { $plantilla.append($('<option></option>').val(String(i)).text(p.Nombre)); });
-    var $nombre = $('<input type="text" class="form-control" maxlength="150" />').on('keydown', SinEnter);
+    var $nombre = $('<input type="text" class="form-control" maxlength="200" />').on('keydown', SinEnter);
     var $desc = $('<p class="text-muted"></p>');
     var $filas = $('<div></div>');
     var actual = null;
@@ -375,6 +386,8 @@ function MostrarIniciar(d, plantillas) {
                 if (!$f.find('.pr-resp').val()) { mal = mal || ('Paso ' + orden + ': elija un responsable.'); }
                 if (!titulo) { mal = mal || ('Paso ' + orden + ': el título es obligatorio.'); }
                 if (isNaN(plazo) || plazo < 1 || plazo > 60) { mal = mal || ('Paso ' + orden + ': el plazo va de 1 a 60 días hábiles.'); }
+                var lp = LineaEntregableLarga($f.find('.pr-ent').val());
+                if (lp) { mal = mal || ('Paso ' + orden + ': ' + MSG_LINEA_LARGA + lp + '.'); }
                 pasos.push({ orden: orden, codResponsable: $f.find('.pr-resp').val(), titulo: titulo, plazoDias: plazo, entregables: $f.find('.pr-ent').val() || '' });
             });
             if (mal) { ErrorDialogo(mal); return; }

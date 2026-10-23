@@ -47,7 +47,7 @@
                     <div class="row">
                         <div class="col-lg-6 form-group">
                             <label for="ppNombre">Nombre</label>
-                            <input type="text" id="ppNombre" class="form-control" maxlength="100" />
+                            <input type="text" id="ppNombre" class="form-control" maxlength="150" />
                         </div>
                         <div class="col-lg-2 form-group">
                             <label for="ppActiva">Activa</label><br />

@@ -134,8 +134,10 @@ BEGIN
     IF (SELECT COUNT(*) FROM dbo.MenuDos WHERE Id_Menu IN (@IdProc, @IdPlan) AND Id_MenuPadre = @IdGrupo) <> 2
         INSERT INTO @Dif VALUES ('hoja fuera del grupo', @IdProc, NULL);
 
-    SET @Estado6 = CASE WHEN EXISTS (SELECT 1 FROM @Dif) THEN 'FALLA' ELSE 'OK' END;
-    SET @Detalle6 = 'diferencias: ' + CONVERT(VARCHAR(10), (SELECT COUNT(*) FROM @Dif));
+    /* SOBRA en el menu es informativo: un perfil que perdio su ultimo usuario activo conserva legitimamente su fila */
+    SET @Estado6 = CASE WHEN EXISTS (SELECT 1 FROM @Dif WHERE Diferencia <> 'SOBRA en el menu') THEN 'FALLA' ELSE 'OK' END;
+    SET @Detalle6 = 'diferencias: ' + CONVERT(VARCHAR(10), (SELECT COUNT(*) FROM @Dif WHERE Diferencia <> 'SOBRA en el menu'))
+                  + '; informativas (SOBRA): ' + CONVERT(VARCHAR(10), (SELECT COUNT(*) FROM @Dif WHERE Diferencia = 'SOBRA en el menu'));
 END
 INSERT INTO @R (Chequeo, Resultado, Detalle)
 VALUES ('6. menu: Procesos (todo perfil activo y 18), Plantillas (10 y 18)', @Estado6, @Detalle6);

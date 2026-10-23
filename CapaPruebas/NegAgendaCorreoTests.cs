@@ -120,6 +120,16 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void CuerpoPaso_EntregablesMultilinea_UnoPorLinea()
+        {
+            EntAgendaProcesoPaso paso = Paso("RESP9");
+            paso.Entregables = "Uno <b>\r\nDos\nTres";
+            string c = NegAgendaCorreo.CuerpoPaso(Proc(), paso, "Ana", "Luis", new DateTime(2026, 10, 30), "");
+            StringAssert.Contains(c, "Uno &lt;b&gt;<br>Dos<br>Tres");
+            Assert.IsFalse(c.Contains("<b><br>"));
+        }
+
+        [TestMethod]
         public void CuerpoPaso_EscapaHtmlYTildes()
         {
             EntAgendaProcesoPaso paso = Paso("RESP9");

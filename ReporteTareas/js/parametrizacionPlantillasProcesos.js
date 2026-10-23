@@ -187,6 +187,11 @@ function Guardar() {
         if (!s.idArea) { Mostrar('#ppError', 'Paso ' + (i + 1) + ': elija un área.'); return; }
         if (!$.trim(s.titulo)) { Mostrar('#ppError', 'Paso ' + (i + 1) + ': el título es obligatorio.'); return; }
         if (isNaN(plazo) || plazo < 1 || plazo > 60) { Mostrar('#ppError', 'Paso ' + (i + 1) + ': el plazo va de 1 a 60 días hábiles.'); return; }
+        var lineas = String(s.entregables || '').split(/?
+/);
+        for (var k = 0; k < lineas.length; k++) {
+            if (lineas[k].length > 200) { Mostrar('#ppError', 'Paso ' + (i + 1) + ': cada entregable (una línea) admite hasta 200 caracteres. Acorte la línea ' + (k + 1) + '.'); return; }
+        }
         pasos.push({ idArea: s.idArea, titulo: $.trim(s.titulo), plazoDias: plazo, entregables: s.entregables });
     }
     var $g = $('#ppGuardar').prop('disabled', true);

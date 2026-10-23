@@ -4,7 +4,7 @@
    Se corre AL DESPLEGAR, justo despues de los binarios y las paginas: antes, la
    opcion de menu llevaria a paginas que todavia no existen en el servidor.
    Agrega dos hojas al grupo "Equipo y agenda" que ya existe (Entrega 1):
-     1. Procesos.aspx "Procesos" (orden 3, despues de "Equipo y agenda")
+     1. Procesos.aspx "Procesos" (orden 3 dentro del grupo)
         -> todo perfil con usuarios internos activos, y el 18
      2. ParametrizacionPlantillasProcesos.aspx "Plantillas de procesos" (orden 4)
         -> perfiles 10 (Gerencia) y 18
@@ -109,9 +109,10 @@ IF NOT EXISTS (SELECT 1 FROM @Todos WHERE IdPerfil = 18) INSERT INTO @Todos (IdP
 
 DECLARE @Vis TABLE (IdMenu INT, IdPerfil INT, PRIMARY KEY (IdMenu, IdPerfil));
 INSERT INTO @Vis (IdMenu, IdPerfil) SELECT @IdProc, IdPerfil FROM @Todos;
-INSERT INTO @Vis (IdMenu, IdPerfil) VALUES (@IdPlan, 10), (@IdPlan, 18), (@IdGrupo, 10), (@IdGrupo, 18)
-;
-/* el grupo ya es visible para @Todos desde la Entrega 1; 10 y 18 se aseguran arriba */
+INSERT INTO @Vis (IdMenu, IdPerfil) VALUES (@IdPlan, 10), (@IdPlan, 18), (@IdGrupo, 10), (@IdGrupo, 18);
+/* el grupo debe verse para todo perfil que vera Procesos.aspx */
+INSERT INTO @Vis (IdMenu, IdPerfil) SELECT @IdGrupo, IdPerfil FROM @Todos WHERE IdPerfil NOT IN (10, 18);
+/* los perfiles de @Todos, 10 y 18 quedan con el grupo visible (re-ejecutable: el UPDATE/INSERT siguientes son idempotentes) */
 
 UPDATE pm SET Estado = '0'
   FROM dbo.PerfilMenu AS pm

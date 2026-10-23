@@ -1368,6 +1368,8 @@ claro de prueba, y cancelarlo al terminar.
 - **Cancelar** otro proceso a mitad: los pasos pendientes y la actividad en curso dejan de aparecer.
 - **Permisos:** un jefe sin `Agenda.VerTodos` no gestiona procesos ajenos; Gerencia sí.
 - **Plazos:** un paso cuyo plazo cae en feriado o fin de semana vence el siguiente día hábil.
+- **Feriados de 2027:** cargar los feriados de 2027 en la tabla `Feriado` antes de usar procesos con plazos largos: hoy el
+  último feriado activo es el 25-12-2026.
 - **Regresión de la Entrega 1:** una actividad normal de la agenda (sin proceso) se crea, se edita, marca sus entregables y se
   completa exactamente como antes: sin etiqueta de proceso, sin confirmación extra, sin correos nuevos.
 - **Correo real:** si no llega, mirar `AG_CorreoBitacora.Error` de esa actividad (o del proceso, para «Proceso terminado») y
@@ -1383,6 +1385,8 @@ claro de prueba, y cancelarlo al terminar.
    `2026-10-23-procesos-esquema.sql`: copiar cada `ALTER PROCEDURE` en su propio lote. Con los binarios anteriores no hace
    falta: las versiones nuevas dan el mismo resultado para una actividad sin proceso, y el código viejo no lee la fila extra.
    Si hay procesos en curso, sus actividades quedan en la agenda pero ya no avanzan solas.
+4. (Hacerlo antes del paso 1.) Antes de reponer los binarios anteriores, cancelar o terminar los procesos en curso: los binarios viejos permiten anular la
+   actividad de un paso y ese paso ya no podría completarse.
 
 Las tablas `AG_*` nuevas pueden quedar: no las usa nada más. Revertir los binarios también deshace lo de §18 a §22 si se
 publicaron en la misma entrega.

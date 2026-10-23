@@ -103,7 +103,7 @@ namespace CapaNegocio
             sb.Append("<p>Fecha de entrega: <b>").Append(H(fechaEntrega.ToString("dddd d 'de' MMMM 'de' yyyy", Es))).Append("</b></p>");
             if (!string.IsNullOrWhiteSpace(paso.Entregables))
             {
-                sb.Append("<p>Entregables:</p><p>").Append(H(paso.Entregables)).Append("</p>");
+                sb.Append("<p>Entregables:</p><p>").Append(H(paso.Entregables).Replace("\r\n", "\n").Replace("\r", "\n").Replace("\n", "<br>")).Append("</p>");
             }
             AgregarBoton(sb, urlSitio, "Ver en mi agenda");
             AgregarPie(sb);

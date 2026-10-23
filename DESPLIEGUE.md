@@ -1232,7 +1232,7 @@ Seis tablas `Bono_*` y doce procedimientos `Sp_RTA_Bono*`. Ninguna tabla existen
    repositorio es público y no versiona nombres, cédulas ni montos):
    ```
    python -I docs/sql/generar-migracion-bonos.py
-   sqlcmd -S 192.168.11.14 -d ReporTarea -U sa -P <clave> -b -i docs/sql/carga-generada/bonos-migracion.sql
+   sqlcmd -S <servidor> -d ReporTarea -U <usuario> -P <clave> -b -i docs/sql/carga-generada/bonos-migracion.sql
    ```
    Correr el script generado **dos veces**: las dos terminan en `VEREDICTO: OK`, y la segunda no inserta nada. Revisar la lista
    de ajustes y omisiones que imprime (semanas escritas a mano ajustadas a su lunes; la fila de $0 no se migra). Septiembre debe

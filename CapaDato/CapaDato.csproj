@@ -61,6 +61,7 @@
     <Compile Include="DaoTableroCostos.cs" />
     <Compile Include="DaoPermisos.cs" />
     <Compile Include="DaoAgenda.cs" />
+    <Compile Include="DaoBono.cs" />
     <Compile Include="DaoCalificacionForeCast.cs" />
     <Compile Include="DaoEgresoInventario.cs" />
     <Compile Include="DaoEmpleado.cs" />

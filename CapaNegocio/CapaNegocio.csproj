@@ -236,6 +236,10 @@
     <Compile Include="NegBonoReglas.cs" />
     <Compile Include="NegBonoCorreo.cs" />
     <Compile Include="NegBonoExportacion.cs" />
+    <Compile Include="NegBono.cs" />
+    <Compile Include="NegBono.Datos.cs" />
+    <Compile Include="NegBono.Jefe.cs" />
+    <Compile Include="NegBono.TalentoHumano.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

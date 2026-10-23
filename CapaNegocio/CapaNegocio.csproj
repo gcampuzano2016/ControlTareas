@@ -234,6 +234,7 @@
     <Compile Include="NegAgenda.Datos.cs" />
     <Compile Include="NegBonoFechas.cs" />
     <Compile Include="NegBonoReglas.cs" />
+    <Compile Include="NegBonoExportacion.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

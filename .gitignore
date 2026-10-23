@@ -60,6 +60,11 @@ CapaPruebas/obj/
 # Los archivos entran por aqui, se procesan, y nunca se versionan.
 Actualizacion/
 
+# Excels de bonos (el de septiembre 2026 trae nombres, codigos SAP, cedulas y
+# montos por persona). Se leen con docs/sql/generar-migracion-bonos.py y
+# nunca se versionan.
+RevisionBonos/
+
 # Exports del sistema original de Curva de Aprendizaje (evaluaciones de RRHH
 # de personas reales). Se leen con docs/sql/generar-carga-curva-aprendizaje.py.
 curva_aprendizaje*.sql

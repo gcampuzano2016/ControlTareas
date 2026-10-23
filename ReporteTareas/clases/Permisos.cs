@@ -101,6 +101,10 @@ namespace ReporteTareas.clases
         /// <summary>Equipo y agenda: la abre cualquier usuario interno; lo que ve lo decide AdministrarAgenda.</summary>
         internal const string Agenda = "Agenda.aspx";
         internal const string ParametrizacionAreasAgenda = "ParametrizacionAreasAgenda.aspx";
+        /// <summary>Procesos entre areas: ver, iniciar y gestionar procesos (AdministrarAgenda).</summary>
+        internal const string Procesos = "Procesos.aspx";
+        /// <summary>Plantillas de procesos: alta y edicion (menu: perfiles 10 y 18).</summary>
+        internal const string ParametrizacionPlantillasProcesos = "ParametrizacionPlantillasProcesos.aspx";
         /// <summary>Bonos: el jefe propone el bono de su gente.</summary>
         internal const string BonosProponer = "BonosProponer.aspx";
         /// <summary>Bonos: Talento Humano revisa, registra, abre y cierra el mes.</summary>

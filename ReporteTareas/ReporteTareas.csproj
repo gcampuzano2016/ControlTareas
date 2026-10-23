@@ -1352,6 +1352,8 @@
     <Content Include="js\bonosCatalogo.js" />
     <Content Include="Formulario\BonosProponer.aspx" />
     <Content Include="js\bonosProponer.js" />
+    <Content Include="Formulario\BonosRevisar.aspx" />
+    <Content Include="js\bonosRevisar.js" />
     <Content Include="Formulario\DescargarBonos.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
@@ -1629,6 +1631,13 @@
     </Compile>
     <Compile Include="Formulario\BonosProponer.aspx.designer.cs">
       <DependentUpon>BonosProponer.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\BonosRevisar.aspx.cs">
+      <DependentUpon>BonosRevisar.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\BonosRevisar.aspx.designer.cs">
+      <DependentUpon>BonosRevisar.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\AdministrarBonos.ashx.cs">
       <DependentUpon>AdministrarBonos.ashx</DependentUpon>

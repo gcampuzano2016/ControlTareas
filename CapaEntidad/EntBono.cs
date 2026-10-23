@@ -72,6 +72,16 @@ namespace CapaEntidad
         public string Aviso { get; set; } = "";
     }
 
+    /// <summary>Lo que Talento Humano ve antes de cerrar el mes.</summary>
+    public class EntBonoCierre
+    {
+        public List<EntBono> QuedanFuera { get; set; } = new List<EntBono>();
+        /// <summary>"tipo (empresa)" de los aprobados cuyo concepto SAP falta.</summary>
+        public List<string> SinConcepto { get; set; } = new List<string>();
+        public bool PuedeCerrar { get; set; }
+        public decimal Total { get; set; }
+    }
+
     public static class BonoEstados
     {
         public const string Borrador = "Borrador";

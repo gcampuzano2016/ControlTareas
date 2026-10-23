@@ -85,6 +85,7 @@
     <Compile Include="NegAgendaCorreoTests.cs" />
     <Compile Include="NegAgendaAreasTests.cs" />
     <Compile Include="NegBonoFechasTests.cs" />
+    <Compile Include="NegBonoReglasTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

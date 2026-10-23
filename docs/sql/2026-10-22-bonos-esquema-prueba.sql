@@ -248,14 +248,20 @@ ELSE BEGIN PRINT 'FAIL 19: faltan filas en Bono_Bitacora.'; SET @Fallos += 1; EN
 DECLARE @Per TABLE (IdPeriodo INT, Anio INT, Mes INT, Estado VARCHAR(10), TotalHistorico DECIMAL(11,2),
                     FechaApertura DATETIME, FechaCierre DATETIME, UsuarioApertura VARCHAR(50),
                     UsuarioCierre VARCHAR(50), TotalAprobado DECIMAL(11,2));
+/* Un Historico de prueba (enero 1999, dentro de la transaccion): su
+   TotalAprobado debe ser su TotalHistorico. */
+INSERT INTO dbo.Bono_Periodo (Anio, Mes, Estado, TotalHistorico, Usuario_Registro)
+VALUES (1999, 1, 'Historico', 1234.50, 'prueba');
+DECLARE @IdHist INT = CONVERT(INT, SCOPE_IDENTITY());
 INSERT INTO @Per EXEC dbo.Sp_RTA_BonoPeriodos;
 DECLARE @Pers TABLE (CodUsuario VARCHAR(50), Nombre VARCHAR(100), Correo VARCHAR(100), CodJefe VARCHAR(100),
                      Empresa VARCHAR(50), CodSap VARCHAR(50), Cedula VARCHAR(32), IdPerfil INT);
 INSERT INTO @Pers EXEC dbo.Sp_RTA_BonoPersonasActivas;
 DECLARE @NPers INT = (SELECT COUNT(*) FROM @Pers);
 IF (SELECT TotalAprobado FROM @Per WHERE IdPeriodo = @IdPeriodo) >= 100
+   AND (SELECT TotalAprobado FROM @Per WHERE IdPeriodo = @IdHist) = 1234.50
    AND (SELECT COUNT(*) FROM @Pers) = (SELECT COUNT(DISTINCT CodUsuario) FROM @Pers)
-    PRINT 'PASS 20: Periodos trae TotalAprobado y PersonasActivas no repite CodUsuario ('
+    PRINT 'PASS 20: Periodos trae TotalAprobado (Historico = TotalHistorico) y PersonasActivas no repite CodUsuario ('
           + CONVERT(VARCHAR(12), @NPers) + ' personas).'
 ELSE BEGIN PRINT 'FAIL 20: Periodos o PersonasActivas no devolvieron lo esperado.'; SET @Fallos += 1; END
 

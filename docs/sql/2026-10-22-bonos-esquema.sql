@@ -328,8 +328,9 @@ BEGIN
            p.FechaApertura, p.FechaCierre,
            UsuarioApertura = ISNULL(p.UsuarioApertura, ''),
            UsuarioCierre   = ISNULL(p.UsuarioCierre, ''),
-           TotalAprobado   = ISNULL((SELECT SUM(d.Valor) FROM dbo.Bono_Detalle d
-                                      WHERE d.IdPeriodo = p.IdPeriodo AND d.Estado = 'Aprobado'), 0)
+           TotalAprobado   = CASE WHEN p.Estado = 'Historico' THEN ISNULL(p.TotalHistorico, 0)
+                                  ELSE ISNULL((SELECT SUM(d.Valor) FROM dbo.Bono_Detalle d
+                                                WHERE d.IdPeriodo = p.IdPeriodo AND d.Estado = 'Aprobado'), 0) END
       FROM dbo.Bono_Periodo AS p
      ORDER BY p.Anio DESC, p.Mes DESC;
 END
@@ -415,12 +416,25 @@ BEGIN
         RETURN;
     END
 
-    IF EXISTS (SELECT 1
-                 FROM dbo.Bono_Detalle AS d WITH (UPDLOCK, HOLDLOCK)
-                WHERE d.IdPeriodo = @IdPeriodo AND d.Estado = 'Aprobado'
-                  AND NOT EXISTS (SELECT 1 FROM dbo.Bono_TipoConcepto AS c
-                                   WHERE c.IdTipo = d.IdTipo
-                                     AND c.Empresa = UPPER(LTRIM(RTRIM(ISNULL(d.Empresa, ''))))))
+    /* Las copias se calculan ANTES de escribir, con Bono_Tipo y
+       Bono_TipoConcepto bloqueados (UPDLOCK, HOLDLOCK) hasta el COMMIT: un
+       GuardarTipo que quiera borrar o cambiar un concepto espera al cierre.
+       Si algun Aprobado no tiene su copia completa, -2 sin escribir nada. */
+    DECLARE @NAprobados INT =
+        (SELECT COUNT(*) FROM dbo.Bono_Detalle WITH (UPDLOCK, HOLDLOCK)
+          WHERE IdPeriodo = @IdPeriodo AND Estado = 'Aprobado');
+
+    DECLARE @Copia TABLE (IdBono INT NOT NULL PRIMARY KEY, NombreTipo NVARCHAR(150) NOT NULL,
+                          CodigoConcepto VARCHAR(10) NOT NULL);
+    INSERT INTO @Copia (IdBono, NombreTipo, CodigoConcepto)
+    SELECT d.IdBono, t.Nombre, c.CodigoConcepto
+      FROM dbo.Bono_Detalle AS d WITH (UPDLOCK, HOLDLOCK)
+      JOIN dbo.Bono_Tipo AS t WITH (UPDLOCK, HOLDLOCK) ON t.IdTipo = d.IdTipo
+      JOIN dbo.Bono_TipoConcepto AS c WITH (UPDLOCK, HOLDLOCK)
+        ON c.IdTipo = d.IdTipo AND c.Empresa = UPPER(LTRIM(RTRIM(ISNULL(d.Empresa, ''))))
+     WHERE d.IdPeriodo = @IdPeriodo AND d.Estado = 'Aprobado';
+
+    IF @@ROWCOUNT <> @NAprobados
     BEGIN
         COMMIT TRANSACTION;
         SELECT Respuestas = -2;
@@ -428,14 +442,20 @@ BEGIN
     END
 
     UPDATE d
-       SET NombreTipo = t.Nombre, CodigoConcepto = c.CodigoConcepto,
+       SET NombreTipo = x.NombreTipo, CodigoConcepto = x.CodigoConcepto,
            Usuario_Modificacion = @Usuario, Fecha_Modificacion = GETDATE()
       FROM dbo.Bono_Detalle AS d
-      JOIN dbo.Bono_Tipo AS t ON t.IdTipo = d.IdTipo
-      JOIN dbo.Bono_TipoConcepto AS c
-        ON c.IdTipo = d.IdTipo AND c.Empresa = UPPER(LTRIM(RTRIM(ISNULL(d.Empresa, ''))))
+      JOIN @Copia AS x ON x.IdBono = d.IdBono
      WHERE d.IdPeriodo = @IdPeriodo AND d.Estado = 'Aprobado';
     DECLARE @Aprobados INT = @@ROWCOUNT;
+
+    /* Respaldo: con los bloqueos de arriba no deberia pasar nunca. Se usa THROW
+       (no RAISERROR: XACT_ABORT solo corta con THROW) y no "ROLLBACK + -2", porque un ROLLBACK aqui romperia una
+       transaccion externa o un INSERT ... EXEC; XACT_ABORT deshace el cierre. */
+    IF @Aprobados <> @NAprobados
+    BEGIN
+        THROW 50002, 'Sp_RTA_BonoCerrarPeriodo: no todos los Aprobados recibieron su copia de tipo y concepto; cierre deshecho.', 1;
+    END
 
     UPDATE dbo.Bono_Detalle
        SET IdPeriodo = NULL, Usuario_Modificacion = @Usuario, Fecha_Modificacion = GETDATE()

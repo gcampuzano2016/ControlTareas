@@ -1205,3 +1205,76 @@ El `ReporteTareas.dll` del paquete se regeneró pero no trae cambios de código 
 ### 21.4 Reversa
 
 Reponer el `RegistrarContrato.aspx` anterior. `dashboardContratos.js` puede quedar: nadie más lo carga.
+
+## 22. Bonos de empleados
+
+Spec: `docs/superpowers/specs/2026-10-20-bonos-design.md`.
+
+### 22.1 Qué es
+
+Los jefes proponen los bonos mensuales de sus reportes directos, Talento Humano los revisa fila por fila y cierra el mes, y
+Nómina recibe el Excel de hoy con el concepto SAP. Una misma persona, tipo y semana no se paga dos veces. Cuatro pantallas en
+el grupo de menú «Bonos»:
+
+- **«Proponer bonos»** (`BonosProponer.aspx`): todo perfil con usuarios internos activos, y el 18.
+- **«Revisar y aprobar»** (`BonosRevisar.aspx`), **«Catálogo de bonos»** (`BonosCatalogo.aspx`) y **«Reporte mensual»**
+  (`BonosReporte.aspx`): perfiles 14 y 18.
+
+Seis tablas `Bono_*` y doce procedimientos `Sp_RTA_Bono*`. Ninguna tabla existente se modifica.
+
+### 22.2 Orden
+
+1. `docs/sql/2026-10-22-bonos-esquema.sql` — **ya aplicado en producción el 2026-10-22** (la base local es la de producción);
+   repetirlo no hace nada.
+2. **Antes de migrar:** cargar la cédula del usuario `3627051` en *Administración de Usuarios*. La migración identifica a cada
+   persona por cédula y por `Cod_Sap`; sin ella esa persona no se encuentra.
+3. **Migración**, en la máquina que tiene `RevisionBonos/9. Septiembre.xlsx` (el Excel y la salida no están en git: el
+   repositorio es público y no versiona nombres, cédulas ni montos):
+   ```
+   python -I docs/sql/generar-migracion-bonos.py
+   sqlcmd -S 192.168.11.14 -d ReporTarea -U sa -P <clave> -b -i docs/sql/carga-generada/bonos-migracion.sql
+   ```
+   Correr el script generado **dos veces**: las dos terminan en `VEREDICTO: OK`, y la segunda no inserta nada. Revisar la lista
+   de ajustes y omisiones que imprime (semanas escritas a mano ajustadas a su lunes; la fila de $0 no se migra). Septiembre debe
+   dar **3195,00** y debe haber **17** períodos históricos (abril 2025 a agosto 2026, solo con su total).
+4. `docs/sql/2026-10-22-bonos-menu.sql` — **recién ahora**: antes, la opción de menú llevaría a páginas que no existen.
+5. `docs/sql/2026-10-22-bonos-verificacion.sql` — debe dar `VEREDICTO: OK`. Imprime una línea por chequeo (`OK`, `FALLA` o
+   `PENDIENTE`); antes de la migración y del menú da `FALLA` a propósito, porque todo lo que no sea `OK` cuenta como falla.
+6. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más:
+   - `Formulario\BonosProponer.aspx`, `Formulario\BonosRevisar.aspx`, `Formulario\BonosCatalogo.aspx`, `Formulario\BonosReporte.aspx`
+   - `js\bonosProponer.js`, `js\bonosRevisar.js`, `js\bonosCatalogo.js`, `js\bonosReporte.js`
+   - `Formulario\AdministrarBonos.ashx` y `Formulario\DescargarBonos.ashx`
+
+   **Trampa:** publicar el `.dll` sin los tres `.exe` de capa rompe el envío de correos (pasó el 18-09: 0 correos desde entonces y
+   la bitácora no lo dijo). Los cuatro binarios se copian siempre juntos.
+
+   **No publicar `Web.config` en esta entrega** (ver §19.2: producción no lo recibe desde el 2026-09-23 y publicarlo es una
+   decisión aparte).
+7. `docs/sql/2026-10-22-bonos-verificacion.sql` otra vez — `VEREDICTO: OK`.
+
+### 22.3 Lista para probar en producción
+
+Es **obligatoria** antes de anunciar el módulo. Los roles de jefe y de Talento Humano solo se probaron en local.
+
+- **Un jefe** (p. ej. `222692` o `1051`): ve «Proponer bonos» y no ve las otras tres; propone un bono para un reporte directo,
+  con el calendario de semanas (las ya tomadas, tachadas); no puede proponer para un nieto ni para un inactivo; lo envía.
+- **Talento Humano** (perfil 14): le llega el correo «al enviar»; en «Revisar y aprobar» aprueba, ajusta con motivo y rechaza con
+  motivo; al jefe le llega el correo de rechazo, corrige y reenvía.
+- **Doble pago:** repetir la misma persona, tipo y semana es rechazado; el aviso de bono repetido pide confirmación.
+- **Dos usuarios sobre el mismo bono:** el segundo recibe «El bono cambió mientras lo revisaba; recargue la pantalla» y nada se pisa.
+- **Mes de septiembre:** «Reporte mensual» muestra septiembre cerrado con 3195,00; el Excel de Nómina descargado coincide con el
+  Excel original (con la columna de concepto SAP) y se puede descargar varias veces.
+- **Abrir mes y cerrar mes:** abrir el mes siguiente envía el correo de apertura a los jefes con bonos en los últimos 3 períodos
+  cerrados; cerrar muestra antes lo que queda fuera y bloquea si falta algún concepto.
+- **Catálogo:** un tipo con bonos no se borra, se desactiva; cambiar un concepto no altera el Excel de un mes ya cerrado.
+- **Tildes y símbolos** (`&`, `<`) en nota, motivo, lugar y nombre de tipo: llegan bien al Excel y al correo.
+- **Correo real:** que llegue con tildes. Si no llega, mirar la bitácora del módulo y comprobar que los cuatro binarios son de la
+  misma entrega.
+- **Menú:** un colaborador sin gente a cargo ve el aviso y nada más; escribir la dirección de las otras tres pantallas lo manda a
+  Principal.
+
+### 22.4 Reversa
+
+Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-22-bonos-menu.sql`. Las
+tablas `Bono_*` pueden quedar: no las usa nada más. Revertir los binarios también deshace el §18 y el §19 si se publicaron en la
+misma entrega.

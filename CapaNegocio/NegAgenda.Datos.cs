@@ -48,14 +48,14 @@ namespace CapaNegocio
             return DaoAgenda.GuardarActividad(idActividad, titulo, codResponsable, codAsignadoPor, fechaEntrega, entregables, usuario);
         }
 
-        public static void MarcarEntregable(int idEntregable, bool hecho, string usuario)
+        public static EntAgendaAvance MarcarEntregable(int idEntregable, bool hecho, string usuario, DateTime? fechaSiguiente = null)
         {
-            DaoAgenda.MarcarEntregable(idEntregable, hecho, usuario);
+            return DaoAgenda.MarcarEntregable(idEntregable, hecho, usuario, fechaSiguiente);
         }
 
-        public static void MarcarCompleta(int idActividad, bool completa, string usuario)
+        public static EntAgendaAvance MarcarCompleta(int idActividad, bool completa, string usuario, DateTime? fechaSiguiente = null)
         {
-            DaoAgenda.MarcarCompleta(idActividad, completa, usuario);
+            return DaoAgenda.MarcarCompleta(idActividad, completa, usuario, fechaSiguiente);
         }
 
         public static void Anular(int idActividad, string usuario)
@@ -63,9 +63,55 @@ namespace CapaNegocio
             DaoAgenda.Anular(idActividad, usuario);
         }
 
-        public static void RegistrarCorreo(int idActividad, string destinatario, string asunto, bool enviado, string error)
+        public static void RegistrarCorreo(int? idActividad, string destinatario, string asunto, bool enviado, string error, int? idProceso = null)
         {
-            DaoAgenda.RegistrarCorreo(idActividad, destinatario, asunto, enviado, error);
+            DaoAgenda.RegistrarCorreo(idActividad, destinatario, asunto, enviado, error, idProceso);
+        }
+
+        public static HashSet<DateTime> Feriados()
+        {
+            return DaoAgenda.Feriados();
+        }
+
+        public static List<EntAgendaPlantilla> Plantillas()
+        {
+            return DaoAgenda.Plantillas();
+        }
+
+        public static int GuardarPlantilla(EntAgendaPlantilla t, string usuario)
+        {
+            return DaoAgenda.GuardarPlantilla(t, usuario);
+        }
+
+        public static List<EntAgendaProceso> Procesos()
+        {
+            return DaoAgenda.Procesos();
+        }
+
+        public static int IniciarProceso(string nombre, int idPlantilla, IList<EntAgendaProcesoPaso> pasos,
+            DateTime fechaPrimero, string usuario, out int? idPasoActivado)
+        {
+            return DaoAgenda.IniciarProceso(nombre, idPlantilla, pasos, fechaPrimero, usuario, out idPasoActivado);
+        }
+
+        public static int ReasignarPaso(int idPaso, string estadoEsperado, string codResponsable, string usuario)
+        {
+            return DaoAgenda.ReasignarPaso(idPaso, estadoEsperado, codResponsable, usuario);
+        }
+
+        public static int CambiarPasoPendiente(EntAgendaProcesoPaso paso, string usuario)
+        {
+            return DaoAgenda.CambiarPasoPendiente(paso, usuario);
+        }
+
+        public static int CambiarFechaPaso(int idPaso, DateTime fecha, string usuario)
+        {
+            return DaoAgenda.CambiarFechaPaso(idPaso, fecha, usuario);
+        }
+
+        public static int CancelarProceso(int idProceso, string motivo, string usuario)
+        {
+            return DaoAgenda.CancelarProceso(idProceso, motivo, usuario);
         }
     }
 }

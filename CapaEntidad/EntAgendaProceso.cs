@@ -77,6 +77,8 @@ namespace CapaEntidad
     /// <summary>Lo que devuelve un marcado que hizo avanzar un proceso.</summary>
     public class EntAgendaAvance
     {
+        /// <summary>0 = marcado; -8 falta la fecha del paso siguiente; -9 el paso ya no admite cambios.</summary>
+        public int Respuestas { get; set; }
         public int? IdProcesoPasoActivado { get; set; }
         public int? IdProcesoTerminado { get; set; }
     }

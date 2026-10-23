@@ -54,6 +54,7 @@ namespace CapaEntidad
         public bool Anulada { get; set; }
         /// <summary>null si la actividad no es el paso de un proceso.</summary>
         public int? IdProcesoPaso { get; set; }
+        public int? IdProceso { get; set; }
         public string NombreProceso { get; set; } = "";
         public string EstadoPaso { get; set; } = "";
         public List<EntAgendaEntregable> Entregables { get; set; } = new List<EntAgendaEntregable>();

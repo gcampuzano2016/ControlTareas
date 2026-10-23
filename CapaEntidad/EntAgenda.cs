@@ -52,6 +52,10 @@ namespace CapaEntidad
         public bool CompletadaManual { get; set; }
         public DateTime? FechaCompletada { get; set; }
         public bool Anulada { get; set; }
+        /// <summary>null si la actividad no es el paso de un proceso.</summary>
+        public int? IdProcesoPaso { get; set; }
+        public string NombreProceso { get; set; } = "";
+        public string EstadoPaso { get; set; } = "";
         public List<EntAgendaEntregable> Entregables { get; set; } = new List<EntAgendaEntregable>();
     }
 
@@ -107,6 +111,11 @@ namespace CapaEntidad
         public bool Atrasada { get; set; }
         public bool PuedeEditar { get; set; }
         public bool PuedeMarcar { get; set; }
+        public int? IdProceso { get; set; }
+        public string NombreProceso { get; set; } = "";
+        public bool EsPasoDeProceso { get; set; }
+        /// <summary>Aviso a mostrar antes de completar; vacio si no hay.</summary>
+        public string AvisoAlCompletar { get; set; } = "";
         public List<EntAgendaItemEntregable> Entregables { get; set; } = new List<EntAgendaItemEntregable>();
     }
 

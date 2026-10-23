@@ -106,7 +106,7 @@
                             <div class="col-md-8 form-group">
                                 <label>Semanas (lunes a domingo)</label>
                                 <div id="brSemanas" class="br-semanas"></div>
-                                <span class="help-block">Tachada = ya tomada por un bono de esta persona y tipo en este período (el servidor revisa también los otros períodos).</span>
+                                <span class="help-block">Tachada = ya tomada por un bono de esta persona y tipo.</span>
                             </div>
                         </div>
                         <div class="row">

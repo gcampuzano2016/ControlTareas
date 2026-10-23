@@ -101,6 +101,21 @@ namespace CapaNegocio
             return p;
         }
 
+        /// <summary>Lunes marcables hoy (misma regla que la pantalla del jefe).</summary>
+        public static List<DateTime> SemanasMarcables(DateTime hoy)
+        {
+            return Marcables(hoy);
+        }
+
+        /// <summary>Semanas ya tomadas por la persona en cualquier periodo (bonos no rechazados), para tachar en el calendario.</summary>
+        public static List<EntBonoSemanasTomadas> SemanasTomadasDe(string codUsuario)
+        {
+            return LeerDePersona(NegBonoReglas.Normalizar(codUsuario))
+                .Where(b => b.Estado != BonoEstados.Rechazado && b.Lunes != null && b.Lunes.Count > 0)
+                .Select(b => new EntBonoSemanasTomadas { IdBono = b.IdBono, CodUsuario = b.CodUsuario, IdTipo = b.IdTipo, Lunes = b.Lunes.ToList() })
+                .ToList();
+        }
+
         /// <summary>Todo el catalogo, activos e inactivos.</summary>
         public static List<EntBonoTipo> Catalogo()
         {

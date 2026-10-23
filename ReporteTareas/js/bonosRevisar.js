@@ -14,12 +14,12 @@ var brSel = {};              /* idBono -> true (solo Enviado) */
 var brValorManual = false;
 var brLugarManual = false;
 var brSemanasSel = {};
+var brTomadas = [];          /* SemanasTomadas de la persona elegida en el bono directo (todos los periodos) */
 var brLote = 100;            /* AprobarVarios: el servidor revisa uno por uno, se manda por tandas */
-var brPrimerLunes = '2026-08-03';
 var brMeses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
 $(document).ready(function () {
-    $('#brFiltroEstado, #brFiltroJefe').on('change', DibujarTabla);
+    $('#brFiltroEstado, #brFiltroJefe').on('change', function () { brSel = {}; DibujarTabla(); });
     $('#brSelTodos').on('change', MarcarTodos);
     $('#brAprobarSel').on('click', AprobarSeleccionados);
     $('#brDirecto').on('click', AbrirDirecto);
@@ -52,7 +52,7 @@ function Aviso(texto, tipo) {
 
 function Ocupado(si) {
     brOcupado = si;
-    $('#brGuardar, #brAprobarSel, #brAbrirMes, #brCerrarMes, #brDirecto, #brDialogoSi, .br-fila').prop('disabled', si);
+    $('#brGuardar, #brAprobarSel, #brAbrirMes, #brCerrarMes, #brDirecto, #brDialogoSi, #brDialogoNo, .br-fila').prop('disabled', si);
 }
 
 /* Llamada de bajo nivel: fin(r, errorDeRed). r es la respuesta completa del handler. */
@@ -100,11 +100,6 @@ function Fecha(iso) { /* 'yyyy-MM-dd' -> Date en UTC */
     return new Date(Date.UTC(+p[0], +p[1] - 1, +p[2]));
 }
 
-function ISO(d) { /* Date UTC -> 'yyyy-MM-dd' */
-    function dos(n) { return (n < 10 ? '0' : '') + n; }
-    return d.getUTCFullYear() + '-' + dos(d.getUTCMonth() + 1) + '-' + dos(d.getUTCDate());
-}
-
 function EtiquetaSemana(iso) {
     var a = Fecha(iso), b = new Date(a.getTime() + 6 * 86400000);
     if (a.getUTCMonth() === b.getUTCMonth()) {
@@ -138,18 +133,23 @@ function NombreJefe(cod) {
 
 /* ---------- carga y tabla ---------- */
 
-function Cargar() {
+/* mensaje: error que debe sobrevivir a la recarga (p. ej. «El bono cambió…»). */
+function Cargar(mensaje) {
     Llamar('CargarRevisar', {}, function (r) {
         brDatos = r || {};
         brDatos.bonos = brDatos.bonos || [];
         brDatos.personas = brDatos.personas || [];
         brDatos.tipos = brDatos.tipos || [];
         brDatos.resumen = brDatos.resumen || {};
+        brDatos.semanasMarcables = brDatos.semanasMarcables || [];
         /* Lo marcado que ya no sigue Enviado deja de estar marcado. */
         var vivos = {};
         $.each(brDatos.bonos, function (i, b) { if (b.estado === 'Enviado') { vivos[b.idBono] = true; } });
         $.each(brSel, function (id) { if (!vivos[id]) { delete brSel[id]; } });
         Dibujar();
+        if (mensaje) { Mostrar('#brError', mensaje); }
+    }, function (m) {
+        Mostrar('#brError', mensaje ? mensaje + ' ' + m : m);
     });
 }
 
@@ -264,8 +264,7 @@ function MarcarTodos() {
 
 function TerminarFila(fallo) {
     Ocupado(false);
-    if (fallo) { Mostrar('#brError', fallo); }
-    Cargar();
+    Cargar(fallo);
 }
 
 function Aprobar(b) {
@@ -310,12 +309,23 @@ function Rechazar(b) {
 
 function AprobarSeleccionados() {
     if (brOcupado) { return; }
+    /* Solo lo que se ve con el filtro actual: lo oculto no se paga por accidente. */
     var items = [];
-    $.each(brDatos.bonos, function (i, b) {
+    $.each(Filtrados(), function (i, b) {
         if (b.estado === 'Enviado' && brSel[b.idBono]) { items.push({ idBono: b.idBono, estado: b.estado }); }
     });
     if (!items.length) { Mostrar('#brError', 'Marque al menos un bono enviado.'); return; }
     Mostrar('#brError', '');
+    AbrirDialogo({
+        titulo: 'Aprobar seleccionados',
+        texto: 'Se aprobarán ' + items.length + ' bono(s).',
+        si: 'Aprobar',
+        enSi: function (v, fin) { fin(null); AprobarLotes(items); }
+    });
+}
+
+function AprobarLotes(items) {
+    if (brOcupado) { return; }
     Ocupado(true);
     var aprobados = 0, fallidos = [], errorTanda = '';
     var tandas = [];
@@ -380,7 +390,7 @@ function AbrirDialogo(op) {
     $l.toggle(!!(op.lista && op.lista.length));
     if (op.extra) { op.extra($l); $l.show(); }
     Mostrar('#brDialogoError', '');
-    $('#brDialogoNo').text(op.no || 'Cancelar').off('click').on('click', function () { $('#brOverlay').hide(); });
+    $('#brDialogoNo').text(op.no || 'Cancelar').off('click').on('click', function () { if (!brOcupado) { $('#brOverlay').hide(); } });
     var $si = $('#brDialogoSi');
     $si.toggle(!!op.si).text(op.si || '').prop('disabled', brOcupado).off('click');
     if (op.si) {
@@ -406,17 +416,10 @@ function LeerNumero(texto) {
 
 /* ---------- registrar bono directo ---------- */
 
-function SemanasMarcables() { /* lunes desde el primero cuyo domingo ya pasó; el servidor valida igual */
-    var hoy = new Date();
-    var h = Date.UTC(hoy.getFullYear(), hoy.getMonth(), hoy.getDate());
-    var out = [], d = Fecha(brPrimerLunes);
-    while (d.getTime() + 6 * 86400000 < h) { out.push(ISO(d)); d = new Date(d.getTime() + 7 * 86400000); }
-    return out;
-}
-
 function AbrirDirecto() {
     if (brOcupado || !brDatos.periodo) { return; }
     brSemanasSel = {};
+    brTomadas = [];
     brValorManual = false;
     brLugarManual = false;
     var $p = $('#brPersona').empty();
@@ -429,25 +432,38 @@ function AbrirDirecto() {
     $('#brMotivo').val('');
     $('#brObservacion').val('');
     Mostrar('#brError', '');
-    DibujarSemanas();
-    ActualizarSugerido(true);
     $('#brPanelForm').show();
     $('#brPersona').focus();
+    CambioPersona();
 }
 
+/* Las semanas ya tomadas de la persona (todos los periodos) las da el servidor. */
+var brPedidoPersona = 0;
 function CambioPersona() {
+    var cod = $('#brPersona').val(), mio = ++brPedidoPersona;
+    brTomadas = [];
+    brSemanasSel = {};
     DibujarSemanas();
     ActualizarSugerido(true);
+    if (!cod) { return; }
+    Llamar('SemanasTomadas', { codUsuario: cod }, function (r) {
+        if (mio !== brPedidoPersona) { return; }
+        brTomadas = r || [];
+        DibujarSemanas();
+        ActualizarSugerido(true);
+    }, function (m) {
+        if (mio === brPedidoPersona) { Mostrar('#brError', m); }
+    });
 }
 
 function TipoActual() { return TipoPorId($('#brTipo').val()); }
 
-/* Semanas ya tomadas que se ven en este período (no rechazadas); los otros períodos los revisa el servidor. */
+/* Semanas que ya tomó la persona elegida para el tipo elegido (en cualquier período). */
 function Tomadas() {
-    var cod = String($('#brPersona').val()), tipo = Number($('#brTipo').val()), set = {};
-    $.each(brDatos.bonos, function (i, b) {
-        if (b.estado === 'Rechazado' || String(b.codUsuario) !== cod || Number(b.idTipo) !== tipo) { return; }
-        $.each(b.lunes || [], function (j, l) { set[l] = true; });
+    var tipo = Number($('#brTipo').val()), set = {};
+    $.each(brTomadas, function (i, s) {
+        if (Number(s.idTipo) !== tipo) { return; }
+        $.each(s.lunes || [], function (j, l) { set[l] = true; });
     });
     return set;
 }
@@ -459,7 +475,7 @@ function DibujarSemanas() {
     var $c = $('#brSemanas').empty();
     if (!porSemana) { brSemanasSel = {}; return; }
     var tomadas = Tomadas();
-    var lunes = SemanasMarcables().reverse();
+    var lunes = brDatos.semanasMarcables.slice().sort().reverse();
     if (!lunes.length) { $('<span class="text-muted">No hay semanas terminadas para marcar.</span>').appendTo($c); }
     $.each(lunes, function (i, l) {
         var tomada = !!tomadas[l];

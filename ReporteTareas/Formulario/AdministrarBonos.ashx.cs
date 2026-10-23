@@ -39,7 +39,7 @@ namespace JsonJQueryNetBonos
         private static readonly string[] AccionesRevisar =
         {
             "CargarRevisar", "Aprobar", "Ajustar", "Rechazar", "AprobarVarios",
-            "RegistrarDirecto", "AbrirMes", "PrevioCierre", "CerrarMes"
+            "RegistrarDirecto", "AbrirMes", "PrevioCierre", "CerrarMes", "SemanasTomadas"
         };
         private static readonly string[] AccionesCatalogo = { "ListarTipos", "GuardarTipo" };
         private static readonly string[] AccionesReporte = { "ListarMeses" };
@@ -133,6 +133,7 @@ namespace JsonJQueryNetBonos
                     case "Aprobar":
                     case "Ajustar":
                     case "Rechazar": return Revisar(context, p, accion);
+                    case "SemanasTomadas": return SemanasTomadas(p);
                     case "AprobarVarios": return AprobarVarios(context, p);
                     case "RegistrarDirecto": return RegistrarDirecto(context, p);
                     case "AbrirMes": return AbrirMes(context);
@@ -222,8 +223,18 @@ namespace JsonJQueryNetBonos
                     totalAprobado = p.Resumen.TotalAprobado
                 },
                 personas = p.Personas.Select(x => new { codUsuario = x.CodUsuario, nombre = x.Nombre, empresa = NegBonoReglas.EmpresaNormalizada(x.Empresa), codJefe = x.CodJefe }).ToList(),
-                tipos = p.Tipos.Select(ProyTipo).ToList()
+                tipos = p.Tipos.Select(ProyTipo).ToList(),
+                semanasMarcables = Isos(NegBono.SemanasMarcables(DateTime.Today))
             });
+        }
+
+        /// <summary>Lectura: semanas ya tomadas por una persona en todos los periodos (calendario del bono directo).</summary>
+        private string SemanasTomadas(object p)
+        {
+            string cod = Campo(p, "codUsuario");
+            if (cod == "") { return Mensaje("0", "Falta la persona.", "warning"); }
+            return Ok(NegBono.SemanasTomadasDe(cod)
+                .Select(s => new { idBono = s.IdBono, codUsuario = s.CodUsuario, idTipo = s.IdTipo, lunes = Isos(s.Lunes) }).ToList());
         }
 
         private string Revisar(HttpContext context, object p, string accion)

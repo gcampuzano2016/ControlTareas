@@ -1289,3 +1289,100 @@ Es **obligatoria** antes de anunciar el módulo. Los roles de jefe y de Talento 
 Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-22-bonos-menu.sql`. Las
 tablas `Bono_*` pueden quedar: no las usa nada más. Revertir los binarios también deshace el §18 y el §19 si se publicaron en la
 misma entrega.
+
+## 23. Procesos entre áreas (Entrega 2 de «Equipo, Calendario y Procesos»)
+
+Spec: `docs/superpowers/specs/2026-10-23-procesos-entrega2-design.md`.
+
+### 23.1 Qué es
+
+Un trabajo que cruza áreas se lleva como un **proceso** de pasos en orden que avanza solo: al completarse la actividad de un
+paso, el siguiente aparece en la agenda de su responsable (con correo «Te toca un paso»), y al terminar el último se avisa a
+quien inició el proceso. Dos pantallas nuevas en el grupo de menú «Equipo y agenda» (el de §19):
+
+- **«Procesos»** (`Procesos.aspx`): todo perfil con usuarios internos activos, y el 18. Cada uno ve y gestiona los procesos que
+  inició; quien tiene la acción `Agenda.VerTodos` (perfil 10; el 18 siempre) gestiona cualquiera.
+- **«Plantillas de procesos»** (`ParametrizacionPlantillasProcesos.aspx`): perfiles 10 y 18.
+
+Plazo de un paso: de 1 a 60 días hábiles (lunes a viernes que no están en `Feriado` con `Activo = 1`), contados desde el día
+siguiente a la activación. Las actividades de la agenda que no son de un proceso (§19) se comportan igual que antes. Tablas
+nuevas `AG_Plantilla`, `AG_PlantillaPaso`, `AG_Proceso`, `AG_ProcesoPaso`, más `AG_Actividad.IdProcesoPaso` y
+`AG_CorreoBitacora.IdProceso`; ninguna tabla fuera de `AG_*` se modifica.
+
+### 23.2 Orden
+
+1. `docs/sql/2026-10-23-procesos-esquema.sql` — **ya aplicado en producción el 2026-10-23** (la base local es la de producción;
+   se corrió dos veces, la segunda sin cambios, y `2026-10-23-procesos-prueba.sql` dio 91/91). Repetirlo es inofensivo; si una
+   entrega posterior sube la marca `AG_VersionEsquema` por encima de 2, el script se salta solo para no devolver los
+   procedimientos a esta versión.
+2. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más:
+   - `Formulario\Procesos.aspx` y `Formulario\ParametrizacionPlantillasProcesos.aspx`
+   - `js\procesos.js` y `js\parametrizacionPlantillasProcesos.js`
+   - `Formulario\Agenda.aspx` y `js\agenda.js` (actualizados: etiqueta del proceso y confirmación al completar; `agenda.js`
+     se carga con `?v=2`, para que los navegadores no sigan con la copia vieja)
+
+   **Trampa:** publicar el `.dll` sin los tres `.exe` de capa rompe el envío de correos (pasó el 18-09: 0 correos desde entonces
+   y la bitácora no lo dijo). Los cuatro binarios se copian siempre juntos.
+
+   **No publicar `Web.config` en esta entrega** (ver §19.2: producción no lo recibe desde el 2026-09-23 y publicarlo es una
+   decisión aparte).
+3. `docs/sql/2026-10-23-procesos-menu.sql` — **recién ahora, justo después de los binarios**: antes, la opción de menú llevaría
+   a páginas que todavía no existen en el servidor. Agrega las dos hojas al grupo «Equipo y agenda» que ya existe; no crea
+   ninguna acción nueva.
+4. `docs/sql/2026-10-23-procesos-verificacion.sql` — debe dar `VEREDICTO: OK`. Imprime una línea por chequeo (`OK`, `FALLA` o
+   `PENDIENTE`); antes del menú da `FALLA` a propósito (el chequeo 6 queda `PENDIENTE`), porque todo lo que no sea `OK` cuenta
+   como falla.
+
+**Nota para quien toque `AG_Actividad` a mano:** la tabla tiene un índice filtrado (`UX_AG_Actividad_ProcesoPaso`), así que
+cualquier `INSERT`, `UPDATE` o `DELETE` suelto debe correr con `SET QUOTED_IDENTIFIER ON` (con `sqlcmd`, la opción `-I`); sin
+eso falla con el error 1934. Los procedimientos `Sp_RTA_Agenda*` ya se crean así.
+
+### 23.3 Plantillas de ejemplo (sugerencia)
+
+No se precarga ninguna plantilla: Gerencia las crea desde «Plantillas de procesos» si le sirven. Las tres de la maqueta, solo
+nombre y pasos (el área de cada paso es ilustrativa: **hay que ponerla según el catálogo real de «Áreas de la agenda»**, que
+no coincide con los nombres de la maqueta; y cada paso necesita un plazo en días hábiles):
+
+- **Nuevo contrato con cliente:** 1) Firma de contrato y condiciones (Comercial), 2) Registro y facturación inicial
+  (Finanzas), 3) Orden de compra de equipos (Compras), 4) Verificar si requiere contratación de personal (Talento Humano).
+- **Contratación de personal:** 1) Publicar vacante y filtrar candidatos (Talento Humano), 2) Entrevistas y selección final
+  (Talento Humano), 3) Aprobación de banda salarial (Finanzas), 4) Onboarding e inducción (Talento Humano).
+- **Compra de equipos:** 1) Cotización con proveedores (Compras), 2) Aprobación de presupuesto (Finanzas), 3) Orden de compra
+  y seguimiento (Compras), 4) Recepción y configuración (Hybrid Cloud).
+
+### 23.4 Lista para probar en producción
+
+Es **obligatoria** antes de anunciar el módulo. Las pruebas en el navegador no se pudieron hacer en local (el ingreso es por
+Active Directory): estas son las primeras de punta a punta. Usar personas reales del equipo de pruebas y un proceso con nombre
+claro de prueba, y cancelarlo al terminar.
+
+- **Plantilla:** Gerencia (perfil 10) crea una plantilla de 3 pasos en áreas distintas; un colaborador no ve «Plantillas de
+  procesos» y escribir la dirección lo manda a Principal.
+- **Iniciar:** desde «Procesos», iniciar el proceso con esa plantilla. El primer paso aparece en la agenda de su responsable y
+  los otros dos **no**; a ese responsable le llega el correo «Te toca un paso» (con tildes), salvo que sea quien inició.
+- **Un área sin personas activas** se rechaza nombrando el área, sin crear nada.
+- **Completar:** el responsable completa su actividad (o marca todos sus entregables). El segundo paso aparece en la agenda de
+  su responsable y le llega el correo. Marcar dos veces seguidas el último entregable activa el siguiente **una sola vez**.
+- **Reasignar** el segundo paso a otra persona: la actividad pasa a su agenda y conserva los entregables.
+- **Terminar:** completar el último paso; a quien inició le llega el correo «Proceso terminado» y el proceso queda Terminado.
+- **Cancelar** otro proceso a mitad: los pasos pendientes y la actividad en curso dejan de aparecer.
+- **Permisos:** un jefe sin `Agenda.VerTodos` no gestiona procesos ajenos; Gerencia sí.
+- **Plazos:** un paso cuyo plazo cae en feriado o fin de semana vence el siguiente día hábil.
+- **Regresión de la Entrega 1:** una actividad normal de la agenda (sin proceso) se crea, se edita, marca sus entregables y se
+  completa exactamente como antes: sin etiqueta de proceso, sin confirmación extra, sin correos nuevos.
+- **Correo real:** si no llega, mirar `AG_CorreoBitacora.Error` de esa actividad (o del proceso, para «Proceso terminado») y
+  comprobar que los cuatro binarios son de la misma entrega.
+
+### 23.5 Reversa
+
+1. Reponer los binarios anteriores, **todos juntos** (`ReporteTareas.dll` y los tres `.exe`), y las `.aspx`/`.js` anteriores
+   (`Agenda.aspx` y `agenda.js` incluidos; las dos pantallas nuevas pueden quedar sin menú).
+2. Correr la reversa comentada al final de `2026-10-23-procesos-menu.sql` (quita solo las dos hojas).
+3. Los procedimientos de la Entrega 1 que este script cambió (`Actividades`, `Actividad`, `GuardarActividad`,
+   `MarcarEntregable`, `MarcarCompleta`, `RegistrarCorreo`) tienen su cuerpo anterior comentado al final de
+   `2026-10-23-procesos-esquema.sql`: copiar cada `ALTER PROCEDURE` en su propio lote. Con los binarios anteriores no hace
+   falta: las versiones nuevas dan el mismo resultado para una actividad sin proceso, y el código viejo no lee la fila extra.
+   Si hay procesos en curso, sus actividades quedan en la agenda pero ya no avanzan solas.
+
+Las tablas `AG_*` nuevas pueden quedar: no las usa nada más. Revertir los binarios también deshace lo de §18 a §22 si se
+publicaron en la misma entrega.

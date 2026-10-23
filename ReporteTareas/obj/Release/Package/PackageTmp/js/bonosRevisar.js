@@ -125,6 +125,12 @@ function PersonaPorCod(cod) {
     return p;
 }
 
+/* Borrador cuyo jefe ya no puede tocarlo: la persona no está activa o ya tiene otro jefe. */
+function Huerfano(b) {
+    var p = PersonaPorCod(b.codUsuario);
+    return !p || String(p.codJefe || '').toUpperCase().trim() !== String(b.codJefe || '').toUpperCase().trim();
+}
+
 function NombreJefe(cod) {
     if (cod === null || cod === undefined || cod === '') { return '—'; }
     var p = PersonaPorCod(cod);
@@ -193,6 +199,8 @@ function Filtrados() {
     var est = $('#brFiltroEstado').val(), jefe = $('#brFiltroJefe').val();
     return $.grep(brDatos.bonos, function (b) {
         if (est && b.estado !== est) { return false; }
+        /* Los borradores solo con su filtro: sirven para rechazar uno huérfano y liberar sus semanas. */
+        if (!est && b.estado === 'Borrador') { return false; }
         if (jefe && String(b.codJefe) !== jefe) { return false; }
         return true;
     });
@@ -229,6 +237,7 @@ function DibujarTabla() {
         $val.appendTo($tr);
         var $est = $('<td></td>').append($('<span class="label"></span>').addClass(clases[b.estado] || 'label-default').text(b.estado));
         if (b.estado === 'Rechazado' && b.motivoRechazo) { $('<span class="br-rechazo"></span>').text('Motivo: ' + b.motivoRechazo).appendTo($est); }
+        if (b.estado === 'Borrador' && Huerfano(b)) { $('<span class="br-rechazo"></span>').text('La persona ya no está a cargo de este jefe').appendTo($est); }
         $est.appendTo($tr);
         var $acc = $('<td style="white-space:nowrap"></td>');
         if (abierto && b.estado === 'Enviado') {
@@ -238,6 +247,10 @@ function DibujarTabla() {
         if (abierto && (b.estado === 'Enviado' || b.estado === 'Aprobado')) {
             Boton('Ajustar', 'btn-default', function () { Ajustar(b); }).appendTo($acc);
             $acc.append(' ');
+            Boton('Rechazar', 'btn-danger', function () { Rechazar(b); }).appendTo($acc);
+        }
+        if (abierto && b.estado === 'Borrador') {
+            /* Solo rechazar: libera las semanas; aprobar o ajustar un borrador no se puede. */
             Boton('Rechazar', 'btn-danger', function () { Rechazar(b); }).appendTo($acc);
         }
         $acc.appendTo($tr);

@@ -18,6 +18,7 @@ $(document).ready(function () {
     $('#bpCancelar').on('click', CerrarFormulario);
     $('#bpGuardar').on('click', function () { Guardar(false); });
     $('#bpEnviar').on('click', EnviarTodo);
+    $('#bpAviso').attr('title', 'Clic para cerrar').css('cursor', 'pointer').on('click', function () { $(this).hide(); });
     $('#bpPersona').on('change', function () { CambioPersona(); });
     $('#bpTipo').on('change', function () { DibujarSemanas(); ActualizarSugerido(true); });
     $('#bpValor').on('input', function () { bpValorManual = true; ActualizarSugerido(false); });
@@ -38,7 +39,8 @@ function Aviso(texto, tipo) {
     var clase = (tipo === 'warning') ? 'alert-warning' : 'alert-success';
     $('#bpAviso').removeClass('alert-success alert-warning alert-info').addClass(clase).text(texto).show();
     clearTimeout(bpAvisoTimer);
-    bpAvisoTimer = setTimeout(function () { $('#bpAviso').hide(); }, 8000);
+    /* Una advertencia (p. ej. bonos que no se enviaron) queda a la vista hasta la próxima acción. */
+    if (tipo !== 'warning') { bpAvisoTimer = setTimeout(function () { $('#bpAviso').hide(); }, 8000); }
 }
 
 function Ocupado(si) {
@@ -125,7 +127,8 @@ function Cargar() {
 }
 
 function Dibujar() {
-    if (!bpDatos.gente.length) {
+    /* Sin gente pero con bonos propios (la persona cambió de jefe): se muestran para poder borrarlos. */
+    if (!bpDatos.gente.length && !bpDatos.bonos.length) {
         $('#bpContenido').hide();
         Mostrar('#bpSinGente', 'No tienes personas a cargo para proponer bonos.');
         return;
@@ -140,7 +143,7 @@ function Dibujar() {
         $('#bpBarra').text('No hay un mes de bonos abierto.');
         $('#bpPanelForm').hide();
     }
-    $('#bpNuevo').toggle(abierto);
+    $('#bpNuevo').toggle(abierto && bpDatos.gente.length > 0);
     var hayBorrador = false;
     $.each(bpDatos.bonos, function (i, b) { if (b.estado === 'Borrador') { hayBorrador = true; } });
     $('#bpEnviar').toggle(abierto).prop('disabled', bpOcupado || !hayBorrador);
@@ -168,8 +171,13 @@ function DibujarBonos(abierto) {
         $est.appendTo($tr);
         var $acc = $('<td></td>');
         if (abierto && (b.estado === 'Borrador' || b.estado === 'Rechazado')) {
-            $('<button type="button" class="btn btn-default btn-sm">Editar</button>').on('click', function () { AbrirFormulario(b); }).appendTo($acc);
-            $acc.append(' ');
+            if (PersonaPorCod(b.codUsuario)) {
+                $('<button type="button" class="btn btn-default btn-sm">Editar</button>').on('click', function () { AbrirFormulario(b); }).appendTo($acc);
+                $acc.append(' ');
+            } else {
+                /* Ya no está a mi cargo: no se edita ni se envía, pero bloquea sus semanas hasta que se borre. */
+                $('<span class="bp-rechazo"></span>').text('Ya no está a su cargo: solo puede borrarlo.').appendTo($est);
+            }
             $('<button type="button" class="btn btn-danger btn-sm">Borrar</button>').on('click', function () { Borrar(b); }).appendTo($acc);
         }
         $acc.appendTo($tr);
@@ -196,8 +204,11 @@ function AbrirFormulario(b) {
     var $ti = $('#bpTipo').empty();
     var hayTipo = false;
     $.each(bpDatos.tipos, function (i, t) {
-        $('<option></option>').val(t.idTipo).text(t.nombre).appendTo($ti);
-        if (b && Number(t.idTipo) === Number(b.idTipo)) { hayTipo = true; }
+        var suyo = b && Number(t.idTipo) === Number(b.idTipo);
+        /* Un tipo desactivado solo llega si es de un bono mío, y solo se ofrece al editar ese bono. */
+        if (t.activo === false && !suyo) { return; }
+        $('<option></option>').val(t.idTipo).text(t.nombre + (t.activo === false ? ' (desactivado)' : '')).appendTo($ti);
+        if (suyo) { hayTipo = true; }
     });
     if (b && !hayTipo) { $('<option></option>').val(b.idTipo).text(b.nombreTipo).appendTo($ti); }
 

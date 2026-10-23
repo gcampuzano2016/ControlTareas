@@ -55,10 +55,11 @@
                             <div class="col-md-3 form-group">
                                 <label for="brFiltroEstado">Estado</label>
                                 <select id="brFiltroEstado" class="form-control">
-                                    <option value="">Todos</option>
+                                    <option value="">Todos (sin borradores)</option>
                                     <option value="Enviado">Enviado</option>
                                     <option value="Aprobado">Aprobado</option>
                                     <option value="Rechazado">Rechazado</option>
+                                    <option value="Borrador">Borrador (sin enviar)</option>
                                 </select>
                             </div>
                             <div class="col-md-4 form-group">

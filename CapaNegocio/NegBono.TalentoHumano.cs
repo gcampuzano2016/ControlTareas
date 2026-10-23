@@ -170,6 +170,14 @@ namespace CapaNegocio
             error = Largo(dos, 10, "Concepto SAP DOS") ?? Largo(agility, 10, "Concepto SAP AGILITY");
             if (error != null) return Error(error);
 
+            if (t.IdTipo != 0)
+            {
+                EntBonoTipo antes = Tipo(LeerTipos(), t.IdTipo);
+                if (antes == null) return Error("El tipo ya no existe; recargue la pantalla.");
+                if (antes.PorSemana != t.PorSemana && TipoTieneBonos(t.IdTipo))
+                    return Error("No se puede cambiar «por semana» de un tipo que ya tiene bonos; cree un tipo nuevo.");
+            }
+
             int r = GuardarTipoEnBase(t.IdTipo, nombre, familia, sugerido, t.PorSemana, t.Activo, dos, agility, yo);
             if (r == -1) return Error("Ya existe un tipo con ese nombre.");
             if (r == -2) return Error("El tipo ya no existe; recargue la pantalla.");
@@ -204,31 +212,76 @@ namespace CapaNegocio
                 .Take(3)
                 .SelectMany(p => LeerDetalles(p.IdPeriodo))
                 .ToList();
+            // Todo lo que se pueda leer va antes de abrir: despues de abrir, nada debe lanzar.
+            List<EntBonoPersona> activas = LeerPersonasActivas();
+            List<string> jefes = NegBonoCorreo.JefesApertura(periodos, recientes, pendientes);
+            DateTime previsto = MesSiguiente(periodos);
 
             int idPeriodo = AbrirPeriodoEnBase(yo);
             if (idPeriodo == -1) return Error("Ya hay un mes de bonos abierto.");
             if (idPeriodo <= 0) return Error(MensajeCodigo(idPeriodo, new EntBono()));
 
-            EntBonoPeriodo nuevo = LeerPeriodos().FirstOrDefault(p => p.IdPeriodo == idPeriodo);
-            if (nuevo == null) return Bien("Se abrió el mes de bonos.", new[] { "No se pudo leer el mes nuevo: no se avisó a los jefes." });
-
             List<string> avisos = new List<string>();
-            List<EntBonoPersona> activas = LeerPersonasActivas();
-            List<string> jefes = NegBonoCorreo.JefesApertura(periodos, recientes, pendientes);
-            string asunto = NegBonoCorreo.AsuntoApertura(nuevo.Anio, nuevo.Mes);
-            string cuerpo = NegBonoCorreo.CuerpoApertura(nuevo.Anio, nuevo.Mes, urlProponer);
-            foreach (string cod in jefes)
+            int anio = previsto.Year, mes = previsto.Month;
+            try
             {
-                EntBonoPersona jefe = Persona(activas, cod);
-                EnviarYAnotar(enviarCorreo, jefe == null ? "" : jefe.Correo, "el jefe " + cod, asunto, cuerpo,
-                    null, idPeriodo, yo, avisos);
+                EntBonoPeriodo nuevo = LeerPeriodos().FirstOrDefault(p => p.IdPeriodo == idPeriodo);
+                if (nuevo != null) { anio = nuevo.Anio; mes = nuevo.Mes; }
+            }
+            catch (Exception)
+            {
+                // Se usa el mes previsto (mismo calculo que Sp_RTA_BonoAbrirPeriodo).
             }
 
-            string mensaje = "Se abrió el mes de bonos de " + MesTexto(nuevo.Anio, nuevo.Mes) + ".";
+            try
+            {
+                string asunto = NegBonoCorreo.AsuntoApertura(anio, mes);
+                string cuerpo = NegBonoCorreo.CuerpoApertura(anio, mes, urlProponer);
+                foreach (string cod in jefes)
+                {
+                    EntBonoPersona jefe = Persona(activas, cod);
+                    EnviarYAnotar(enviarCorreo, jefe == null ? "" : jefe.Correo, "el jefe " + cod, asunto, cuerpo,
+                        null, idPeriodo, yo, avisos);
+                }
+            }
+            catch (Exception ex)
+            {
+                avisos.Add("El mes se abrió, pero no se pudo avisar a los jefes.");
+                try
+                {
+                    BitacoraEnBase(null, idPeriodo, "Correo", null, "Fallido",
+                        "Aviso de apertura a los jefes no enviado; error: " + ex.Message, yo);
+                }
+                catch (Exception)
+                {
+                    avisos.Add("Tampoco se pudo anotar en la bitácora.");
+                }
+            }
+
+            string mensaje = "Se abrió el mes de bonos de " + MesTexto(anio, mes) + ".";
             if (pendientes.Count > 0)
                 mensaje += " Entraron " + pendientes.Count.ToString(CultureInfo.InvariantCulture) + " bono(s) pendiente(s).";
-            mensaje += " Se avisó a " + jefes.Count.ToString(CultureInfo.InvariantCulture) + " jefe(s).";
+            mensaje += " Jefes a avisar: " + jefes.Count.ToString(CultureInfo.InvariantCulture) + ".";
             return Bien(mensaje, avisos);
+        }
+
+        /// <summary>El mes que abriria Sp_RTA_BonoAbrirPeriodo: el siguiente al ultimo existente, o el actual si no hay ninguno.</summary>
+        private static DateTime MesSiguiente(IEnumerable<EntBonoPeriodo> periodos)
+        {
+            EntBonoPeriodo ultimo = periodos.OrderByDescending(p => p.Anio).ThenByDescending(p => p.Mes).FirstOrDefault();
+            DateTime hoy = DateTime.Today;
+            return ultimo == null ? new DateTime(hoy.Year, hoy.Month, 1) : new DateTime(ultimo.Anio, ultimo.Mes, 1).AddMonths(1);
+        }
+
+        /// <summary>Si el tipo tiene algun bono no rechazado, en cualquier periodo o pendiente (solo lectura).</summary>
+        private static bool TipoTieneBonos(int idTipo)
+        {
+            if (LeerDetalles(null).Any(b => b.IdTipo == idTipo && b.Estado != BonoEstados.Rechazado)) return true;
+            foreach (EntBonoPeriodo p in LeerPeriodos())
+            {
+                if (LeerDetalles(p.IdPeriodo).Any(b => b.IdTipo == idTipo && b.Estado != BonoEstados.Rechazado)) return true;
+            }
+            return false;
         }
 
         /// <summary>

@@ -35,6 +35,8 @@ namespace CapaNegocio
             {
                 actual = BonoVivo(b.IdBono);
                 if (actual == null || actual.Estado != (b.Estado ?? "")) return Error(MsgCambio);
+                if (NegBonoReglas.Normalizar(b.CodUsuario) != NegBonoReglas.Normalizar(actual.CodUsuario))
+                    return Error("No se puede cambiar la persona de un bono; bórrelo y cree uno nuevo.");
                 error = NegBonoReglas.PuedeEditar(actual, periodo, yo, miGente);
                 if (error != null) return Error(error);
                 estadoEsperado = actual.Estado;
@@ -115,33 +117,16 @@ namespace CapaNegocio
             decimal total = 0m;
             foreach (EntBono b in borradores)
             {
-                string error = NegBonoReglas.PuedeEnviar(b, periodo, yo, miGente);
-                EntBonoPersona persona = Persona(activas, b.CodUsuario);
                 EntBonoTipo tipo = Tipo(tipos, b.IdTipo);
-                string ident = "";
-                if (error == null && tipo == null) error = "su tipo de bono ya no existe.";
-                if (error == null) error = NegBonoFechas.ValidarSemanas(b.Lunes, tipo.PorSemana, hoy);
-                // Contra el sugerido guardado: un cambio de tarifa en el catalogo no invalida lo ya propuesto.
-                if (error == null)
-                    error = NegBonoReglas.ValidarValor(new EntBonoTipo { ValorSugerido = b.ValorSugerido }, b.Semanas, b.Valor, b.MotivoAjuste);
-                if (error == null) ident = NegBonoReglas.Identificacion(persona, out error);
-                if (error == null)
+                string error;
+                try
                 {
-                    string clave = NegBonoReglas.Normalizar(b.CodUsuario);
-                    List<EntBono> suyos;
-                    if (!dePersona.TryGetValue(clave, out suyos))
-                    {
-                        suyos = LeerDePersona(b.CodUsuario);
-                        dePersona[clave] = suyos;
-                    }
-                    List<DateTime> choques = NegBonoReglas.ChocaDoblePago(b, suyos);
-                    if (choques.Count > 0) error = NegBonoReglas.MensajeDoblePago(choques);
+                    error = EnviarUno(b, tipo, periodo, yo, hoy, miGente, activas, dePersona);
                 }
-                if (error == null)
+                catch (Exception)
                 {
-                    int r = CambiarEstadoEnBase(b.IdBono, BonoEstados.Borrador, BonoEstados.Enviado, null, null,
-                        NegBonoReglas.EmpresaNormalizada(persona.Empresa), (persona.Nombre ?? "").Trim(), ident, yo);
-                    if (r != 0) error = MensajeCodigo(r, b);
+                    // Uno que falla en la base no deja a medias el resumen: se nombra y se sigue.
+                    error = "falló la base de datos; recargue la pantalla para ver si quedó enviado.";
                 }
 
                 if (error != null)
@@ -171,6 +156,38 @@ namespace CapaNegocio
                            + " bono(s) a Talento Humano por " + Dinero(total) + ".";
             if (saltados.Count > 0) mensaje += " No se enviaron: " + string.Join(" ", saltados);
             return Bien(mensaje, avisos);
+        }
+
+        /// <summary>Reglas y envio de un borrador. null = enviado; si no, por que se salto. Lanza si falla la base.</summary>
+        private static string EnviarUno(EntBono b, EntBonoTipo tipo, EntBonoPeriodo periodo, string yo, DateTime hoy,
+            HashSet<string> miGente, List<EntBonoPersona> activas, Dictionary<string, List<EntBono>> dePersona)
+        {
+            string error = NegBonoReglas.PuedeEnviar(b, periodo, yo, miGente);
+            if (error != null) return error;
+            if (tipo == null) return "su tipo de bono ya no existe.";
+            error = NegBonoFechas.ValidarSemanas(b.Lunes, tipo.PorSemana, hoy);
+            if (error != null) return error;
+            // Contra el sugerido guardado: un cambio de tarifa en el catalogo no invalida lo ya propuesto.
+            error = NegBonoReglas.ValidarValor(new EntBonoTipo { ValorSugerido = b.ValorSugerido }, b.Semanas, b.Valor, b.MotivoAjuste);
+            if (error != null) return error;
+
+            EntBonoPersona persona = Persona(activas, b.CodUsuario);
+            string ident = NegBonoReglas.Identificacion(persona, out error);
+            if (error != null) return error;
+
+            string clave = NegBonoReglas.Normalizar(b.CodUsuario);
+            List<EntBono> suyos;
+            if (!dePersona.TryGetValue(clave, out suyos))
+            {
+                suyos = LeerDePersona(b.CodUsuario);
+                dePersona[clave] = suyos;
+            }
+            List<DateTime> choques = NegBonoReglas.ChocaDoblePago(b, suyos);
+            if (choques.Count > 0) return NegBonoReglas.MensajeDoblePago(choques);
+
+            int r = CambiarEstadoEnBase(b.IdBono, BonoEstados.Borrador, BonoEstados.Enviado, null, null,
+                NegBonoReglas.EmpresaNormalizada(persona.Empresa), (persona.Nombre ?? "").Trim(), ident, yo);
+            return r == 0 ? null : MensajeCodigo(r, b);
         }
 
         private static string NombreBono(EntBono b, EntBonoTipo tipo)

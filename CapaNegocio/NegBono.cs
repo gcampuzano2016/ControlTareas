@@ -44,6 +44,8 @@ namespace CapaNegocio
                 .OrderBy(b => b.Nombre ?? "", StringComparer.Create(Es, true))
                 .ThenBy(b => b.IdBono)
                 .ToList();
+            // El jefe no necesita la cedula ni el codigo SAP: no salen de aqui.
+            foreach (EntBono b in p.Bonos) b.Identificacion = "";
 
             foreach (EntBonoPersona persona in NegBonoReglas.MiGente(LeerPersonasActivas(), yo))
             {

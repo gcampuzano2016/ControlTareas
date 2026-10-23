@@ -1347,6 +1347,8 @@
     <Content Include="js\parametrizacionAreasAgenda.js" />
     <Content Include="Formulario\AdministrarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarAgenda.ashx" />
+    <Content Include="Formulario\AdministrarBonos.ashx" />
+    <Content Include="Formulario\DescargarBonos.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarMarcacion.ashx" />
     <Content Include="Formulario\AprobacionTareasJefatura.aspx" />
@@ -1609,6 +1611,12 @@
     </Compile>
     <Compile Include="Formulario\AdministrarAgenda.ashx.cs">
       <DependentUpon>AdministrarAgenda.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarBonos.ashx.cs">
+      <DependentUpon>AdministrarBonos.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarBonos.ashx.cs">
+      <DependentUpon>DescargarBonos.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\DescargarTableroCostos.ashx.cs">
       <DependentUpon>DescargarTableroCostos.ashx</DependentUpon>

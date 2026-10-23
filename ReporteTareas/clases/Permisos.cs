@@ -101,6 +101,12 @@ namespace ReporteTareas.clases
         /// <summary>Equipo y agenda: la abre cualquier usuario interno; lo que ve lo decide AdministrarAgenda.</summary>
         internal const string Agenda = "Agenda.aspx";
         internal const string ParametrizacionAreasAgenda = "ParametrizacionAreasAgenda.aspx";
+        /// <summary>Bonos: el jefe propone el bono de su gente.</summary>
+        internal const string BonosProponer = "BonosProponer.aspx";
+        /// <summary>Bonos: Talento Humano revisa, registra, abre y cierra el mes.</summary>
+        internal const string BonosRevisar = "BonosRevisar.aspx";
+        internal const string BonosCatalogo = "BonosCatalogo.aspx";
+        internal const string BonosReporte = "BonosReporte.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>

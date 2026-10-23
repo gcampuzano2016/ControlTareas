@@ -215,6 +215,26 @@ namespace CorreoHelper
         }
         #endregion
 
+        #region EnviarCorreoBonos
+        /// <summary>
+        /// Aviso de bonos: un destinatario y el cuerpo HTML ya armado por
+        /// NegBonoCorreo. Devuelve false si no salio; el motivo queda en
+        /// ErrorProceso. La bitacora de bonos la escribe NegBono.
+        /// </summary>
+        public bool EnviarCorreoBonos(string destinatario, string asunto, string cuerpoHtml)
+        {
+            EntParametrosCorreo parametros = new EntParametrosCorreo();
+            parametros.smtpAddress = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("smtpAddress");
+            parametros.emailFrom = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFrom");
+            parametros.emailFromName = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("emailFromName");
+            parametros.password = NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("password");
+            parametros.portNumber = Convert.ToInt32(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("portNumber"));
+            parametros.enableSSL = Convert.ToBoolean(NegParametrosConfiguracion.RTA_ValorParametroConfiguracion("enableSSL"));
+
+            return EnviarCorreoPermiso(destinatario, asunto, cuerpoHtml, parametros, "", "Bonos - Sistema de Tareas");
+        }
+        #endregion
+
         #region EnvioCorreoPoliza
         public bool EnvioCorreoPoliza(string correosDestinatarios, string correoTitulo, string estructuraContenidoCorreo, string body, Int32 idpoliza)
         {

@@ -1237,10 +1237,7 @@ Seis tablas `Bono_*` y doce procedimientos `Sp_RTA_Bono*`. Ninguna tabla existen
    Correr el script generado **dos veces**: las dos terminan en `VEREDICTO: OK`, y la segunda no inserta nada. Revisar la lista
    de ajustes y omisiones que imprime (semanas escritas a mano ajustadas a su lunes; la fila de $0 no se migra). Septiembre debe
    dar **3195,00** y debe haber **17** períodos históricos (abril 2025 a agosto 2026, solo con su total).
-4. `docs/sql/2026-10-22-bonos-menu.sql` — **recién ahora**: antes, la opción de menú llevaría a páginas que no existen.
-5. `docs/sql/2026-10-22-bonos-verificacion.sql` — debe dar `VEREDICTO: OK`. Imprime una línea por chequeo (`OK`, `FALLA` o
-   `PENDIENTE`); antes de la migración y del menú da `FALLA` a propósito, porque todo lo que no sea `OK` cuenta como falla.
-6. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más:
+4. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más:
    - `Formulario\BonosProponer.aspx`, `Formulario\BonosRevisar.aspx`, `Formulario\BonosCatalogo.aspx`, `Formulario\BonosReporte.aspx`
    - `js\bonosProponer.js`, `js\bonosRevisar.js`, `js\bonosCatalogo.js`, `js\bonosReporte.js`
    - `Formulario\AdministrarBonos.ashx` y `Formulario\DescargarBonos.ashx`
@@ -1250,7 +1247,10 @@ Seis tablas `Bono_*` y doce procedimientos `Sp_RTA_Bono*`. Ninguna tabla existen
 
    **No publicar `Web.config` en esta entrega** (ver §19.2: producción no lo recibe desde el 2026-09-23 y publicarlo es una
    decisión aparte).
-7. `docs/sql/2026-10-22-bonos-verificacion.sql` otra vez — `VEREDICTO: OK`.
+5. `docs/sql/2026-10-22-bonos-menu.sql` — **recién ahora, justo después de los binarios**: antes, la opción de menú llevaría a
+   páginas que todavía no existen en el servidor (lo mismo dice la cabecera del script).
+6. `docs/sql/2026-10-22-bonos-verificacion.sql` — debe dar `VEREDICTO: OK`. Imprime una línea por chequeo (`OK`, `FALLA` o
+   `PENDIENTE`); antes de la migración y del menú da `FALLA` a propósito, porque todo lo que no sea `OK` cuenta como falla.
 
 ### 22.3 Lista para probar en producción
 
@@ -1261,7 +1261,18 @@ Es **obligatoria** antes de anunciar el módulo. Los roles de jefe y de Talento 
 - **Talento Humano** (perfil 14): le llega el correo «al enviar»; en «Revisar y aprobar» aprueba, ajusta con motivo y rechaza con
   motivo; al jefe le llega el correo de rechazo, corrige y reenvía.
 - **Doble pago:** repetir la misma persona, tipo y semana es rechazado; el aviso de bono repetido pide confirmación.
-- **Dos usuarios sobre el mismo bono:** el segundo recibe «El bono cambió mientras lo revisaba; recargue la pantalla» y nada se pisa.
+- **Dos usuarios sobre el mismo bono** (dos sesiones a la vez, con la pantalla cargada en ambas antes de actuar): con un bono
+  **Enviado**, una sesión de Talento Humano lo aprueba y la otra lo rechaza; o el jefe abre un **Borrador** en «Editar» y,
+  antes de que guarde, Talento Humano lo rechaza desde el filtro «Borrador (sin enviar)». El segundo en guardar recibe «El
+  bono cambió mientras lo revisaba; recargue la pantalla» y nada se pisa. Ojo: **dos ajustes de un bono ya Aprobado no
+  chocan** (Aprobado → Aprobado: el estado esperado coincide en las dos): gana el último que guarda, y la bitácora del módulo
+  registra los dos.
+- **Borrador huérfano:** con un bono en Borrador, cambiar el jefe de la persona en *Administración de Usuarios*. El jefe viejo
+  sigue viendo el bono en «Proponer bonos», ya no lo puede editar ni enviar, pero sí borrar. Talento Humano lo encuentra en
+  «Revisar y aprobar» con el filtro «Borrador (sin enviar)», marcado «La persona ya no está a cargo de este jefe», y solo lo puede
+  rechazar (con motivo): rechazado, deja de contar para el doble pago y las semanas quedan libres para el jefe nuevo.
+- **Enviar con bonos que no salen:** si alguno se salta (falta la identificación, por ejemplo), el mensaje sale en amarillo y no
+  se borra solo.
 - **Mes de septiembre:** «Reporte mensual» muestra septiembre cerrado con 3195,00; el Excel de Nómina descargado coincide con el
   Excel original (con la columna de concepto SAP) y se puede descargar varias veces.
 - **Abrir mes y cerrar mes:** abrir el mes siguiente envía el correo de apertura a los jefes con bonos en los últimos 3 períodos

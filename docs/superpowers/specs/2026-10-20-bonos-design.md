@@ -126,9 +126,13 @@ si falló, el error.
   vive en `Bono_Detalle`). En el calendario, las semanas ya tomadas salen tachadas.
 - **Quién edita qué:**
   - Jefe: crea, edita y borra bonos de su gente en **Borrador** o **Rechazado**, y los envía. No toca Enviado ni
-    Aprobado.
+    Aprobado. Si la persona deja de estar a su cargo, ya no edita ni envía esos bonos, pero **sí puede borrar** los que
+    él propuso (en Borrador o Rechazado): si no, bloquearían sus semanas para siempre.
   - Talento Humano: aprueba, ajusta (con motivo) o rechaza (con motivo) lo **Enviado**; puede volver a ajustar o
-    rechazar lo **Aprobado** mientras el mes esté abierto; registra bonos directos (quedan Aprobados).
+    rechazar lo **Aprobado** mientras el mes esté abierto; puede **rechazar** (con motivo, nunca aprobar ni ajustar) un
+    **Borrador**, para liberar las semanas de uno que su jefe ya no puede tocar; registra bonos directos (quedan
+    Aprobados). Un bono directo que después rechaza no lo toca nadie más: no se paga, no cuenta para el doble pago y
+    sigue a la vista en «Revisar y aprobar» como Rechazado.
   - Nada se edita en un mes **Cerrado** o **Histórico**.
 - **Período:** a lo sumo **uno abierto** a la vez; se abre el mes siguiente al último existente. El jefe solo crea bonos
   si hay período abierto.

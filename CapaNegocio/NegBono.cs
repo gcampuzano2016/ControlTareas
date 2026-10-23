@@ -35,7 +35,8 @@ namespace CapaNegocio
             yo = NegBonoReglas.Normalizar(yo);
             EntBonoPantallaProponer p = new EntBonoPantallaProponer();
             p.Periodo = Abierto(LeerPeriodos());
-            p.Tipos = LeerTipos().Where(t => t.Activo).ToList();
+            List<EntBonoTipo> catalogo = LeerTipos();
+            p.Tipos = catalogo.Where(t => t.Activo).ToList();
             p.SemanasMarcables = Marcables(hoy);
             if (yo.Length == 0) return p;
 
@@ -44,6 +45,10 @@ namespace CapaNegocio
                 .OrderBy(b => b.Nombre ?? "", StringComparer.Create(Es, true))
                 .ThenBy(b => b.IdBono)
                 .ToList();
+            // Un rechazado cuyo tipo se desactivo se puede corregir (GuardarBorrador lo permite):
+            // va su tipo, con Activo = false, para que la pantalla lo ofrezca solo en ese bono.
+            HashSet<int> propios = new HashSet<int>(p.Bonos.Select(b => b.IdTipo));
+            p.Tipos.AddRange(catalogo.Where(t => !t.Activo && propios.Contains(t.IdTipo)));
             // El jefe no necesita la cedula ni el codigo SAP: no salen de aqui.
             foreach (EntBono b in p.Bonos) b.Identificacion = "";
 
@@ -77,14 +82,17 @@ namespace CapaNegocio
             return p;
         }
 
-        /// <summary>Pantalla de Talento Humano: mes abierto (o null), bonos no Borrador, resumen, personas activas y catalogo.</summary>
+        /// <summary>
+        /// Pantalla de Talento Humano: mes abierto (o null), todos los bonos (los
+        /// Borrador tambien, para poder rechazar uno huerfano y liberar sus
+        /// semanas), resumen, personas activas y catalogo.
+        /// </summary>
         public static EntBonoPantallaRevisar PantallaRevisar()
         {
             EntBonoPantallaRevisar p = new EntBonoPantallaRevisar();
             p.Periodo = Abierto(LeerPeriodos());
             List<EntBono> todos = LeerDetalles(null);
-            p.Bonos = todos.Where(b => b.Estado != BonoEstados.Borrador)
-                           .OrderBy(b => b.CodJefe ?? "", StringComparer.OrdinalIgnoreCase)
+            p.Bonos = todos.OrderBy(b => b.CodJefe ?? "", StringComparer.OrdinalIgnoreCase)
                            .ThenBy(b => b.Nombre ?? "", StringComparer.Create(Es, true))
                            .ThenBy(b => b.IdBono)
                            .ToList();

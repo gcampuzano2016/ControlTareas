@@ -161,7 +161,27 @@ namespace CapaNegocio
             return null;
         }
 
-        /// <summary>accion = Aprobar | Ajustar | Rechazar. Aprobar solo desde Enviado; las otras, desde Enviado o Aprobado.</summary>
+        /// <summary>
+        /// Borrar es solo de quien lo propuso (CodJefe), aunque la persona ya no
+        /// este a su cargo: un borrador huerfano bloquea sus semanas y nadie mas
+        /// lo veria. Editar y enviar siguen exigiendo que sea de mi gente.
+        /// </summary>
+        public static string PuedeBorrar(EntBono b, EntBonoPeriodo p, string yo)
+        {
+            if (!EstaAbierto(p)) return SinMesAbierto;
+            if (b.IdPeriodo.HasValue && b.IdPeriodo.Value != p.IdPeriodo) return "El bono no pertenece al mes abierto.";
+            if (Normalizar(yo).Length == 0 || Normalizar(b.CodJefe) != Normalizar(yo))
+                return "Este bono no lo propuso usted.";
+            if (b.Estado != BonoEstados.Borrador && b.Estado != BonoEstados.Rechazado)
+                return "Solo se pueden borrar bonos en borrador o rechazados.";
+            return null;
+        }
+
+        /// <summary>
+        /// accion = Aprobar | Ajustar | Rechazar. Aprobar solo desde Enviado; Ajustar,
+        /// desde Enviado o Aprobado; Rechazar, tambien desde Borrador (libera las
+        /// semanas de un borrador que su jefe ya no puede tocar).
+        /// </summary>
         public static string PuedeRevisar(EntBono b, EntBonoPeriodo p, string accion)
         {
             if (!EstaAbierto(p)) return SinMesAbierto;
@@ -170,10 +190,13 @@ namespace CapaNegocio
                 case "Aprobar":
                     return b.Estado == BonoEstados.Enviado ? null : "Solo se pueden aprobar bonos enviados.";
                 case "Ajustar":
-                case "Rechazar":
                     return b.Estado == BonoEstados.Enviado || b.Estado == BonoEstados.Aprobado
                         ? null
-                        : "Solo se pueden " + (accion == "Ajustar" ? "ajustar" : "rechazar") + " bonos enviados o aprobados.";
+                        : "Solo se pueden ajustar bonos enviados o aprobados.";
+                case "Rechazar":
+                    return b.Estado == BonoEstados.Enviado || b.Estado == BonoEstados.Aprobado || b.Estado == BonoEstados.Borrador
+                        ? null
+                        : "Solo se pueden rechazar bonos en borrador, enviados o aprobados.";
                 default:
                     return "Acción no válida.";
             }

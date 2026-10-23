@@ -567,15 +567,16 @@ namespace JsonJQueryNetBonos
         }
 
         /// <summary>
-        /// Ok = true: estado "1" (con aviso si lo hay). Ok = false con Mensaje:
+        /// Ok = true: estado "1" (con aviso si lo hay; "warning" si hay aviso o
+        /// quedo incompleto, p. ej. Enviar salto algun bono). Ok = false con Mensaje:
         /// "0". Ok = false sin Mensaje y con Aviso: "2", pide confirmar.
         /// </summary>
         private static string Responder(EntBonoResultado r)
         {
             if (r.Ok)
             {
-                bool hayAviso = !string.IsNullOrWhiteSpace(r.Aviso);
-                return Serializar(new Respuesta { estado = "1", mensaje = r.Mensaje ?? "", aviso = r.Aviso ?? "", tipoMensaje = hayAviso ? "warning" : "success", resultado = "" });
+                bool advertir = !string.IsNullOrWhiteSpace(r.Aviso) || r.Incompleto;
+                return Serializar(new Respuesta { estado = "1", mensaje = r.Mensaje ?? "", aviso = r.Aviso ?? "", tipoMensaje = advertir ? "warning" : "success", resultado = "" });
             }
             if (string.IsNullOrWhiteSpace(r.Mensaje) && !string.IsNullOrWhiteSpace(r.Aviso))
             {

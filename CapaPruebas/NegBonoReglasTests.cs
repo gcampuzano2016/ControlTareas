@@ -300,9 +300,61 @@ namespace CapaPruebas
             {
                 Assert.IsNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Aprobado), ab, accion));
                 Assert.IsNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Enviado), ab, accion));
-                Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), ab, accion));
                 Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Rechazado), ab, accion));
             }
+        }
+
+        [TestMethod]
+        public void PuedeRevisar_RechazarBorrador_Si_AjustarBorrador_No()
+        {
+            // Un borrador huerfano (la persona cambio de jefe o el jefe se fue) bloquea sus
+            // semanas; Talento Humano lo rechaza para liberarlas. Ajustar y aprobar, no.
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            Assert.IsNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), ab, "Rechazar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), ab, "Ajustar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), ab, "Aprobar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), Per(BonoPeriodoEstados.Cerrado), "Rechazar"));
+        }
+
+        [TestMethod]
+        public void PuedeBorrar_MiBorradorORechazado_AunqueYaNoSeaMiGente_Si()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            Assert.IsNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), ab, "J"));
+            Assert.IsNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Rechazado), ab, " j "));
+        }
+
+        [TestMethod]
+        public void PuedeBorrar_BonoDeOtroJefe_No()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            // El jefe nuevo no borra lo que propuso el viejo.
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), ab, "NUEVO"));
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), ab, ""));
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), ab, null));
+            // Un bono directo de Talento Humano (sin jefe) no lo borra nadie desde Proponer.
+            var directo = B(1, "U1", 5, BonoEstados.Rechazado);
+            directo.CodJefe = "";
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(directo, ab, ""));
+        }
+
+        [TestMethod]
+        public void PuedeBorrar_EnviadoOAprobado_No()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Enviado), ab, "J"));
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Aprobado), ab, "J"));
+        }
+
+        [TestMethod]
+        public void PuedeBorrar_SinMesAbiertoOOtroPeriodo_No()
+        {
+            Assert.AreEqual("No hay un mes de bonos abierto.", NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), null, "J"));
+            Assert.AreEqual("No hay un mes de bonos abierto.", NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), Per(BonoPeriodoEstados.Cerrado), "J"));
+            Assert.IsNotNull(NegBonoReglas.PuedeBorrar(B(1, "U1", 5, BonoEstados.Borrador), Per(BonoPeriodoEstados.Abierto, 6), "J"));
+            var pendiente = B(1, "U1", 5, BonoEstados.Borrador);
+            pendiente.IdPeriodo = null;
+            Assert.IsNull(NegBonoReglas.PuedeBorrar(pendiente, Per(BonoPeriodoEstados.Abierto), "J"));
         }
 
         [TestMethod]

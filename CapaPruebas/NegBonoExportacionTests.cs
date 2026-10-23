@@ -135,6 +135,22 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void Ordenar_NombresConTildeEnEspanol()
+        {
+            // Ordinal pondria "Ángel" y "Óscar" despues de "Zoe".
+            List<EntBono> lista = new List<EntBono>
+            {
+                Bono("Zoe", "DOS", 1, 1m),
+                Bono("Óscar", "DOS", 1, 1m),
+                Bono("beto", "DOS", 1, 1m),
+                Bono("Ángel", "DOS", 1, 1m),
+                Bono("Andrés", "DOS", 1, 1m)
+            };
+            string[] orden = NegBonoExportacion.Ordenar(lista, Catalogo()).Select(b => b.Nombre).ToArray();
+            CollectionAssert.AreEqual(new[] { "Andrés", "Ángel", "beto", "Óscar", "Zoe" }, orden);
+        }
+
+        [TestMethod]
         public void Construir_FilaTotalSinSubtotales()
         {
             List<EntBono> lista = new List<EntBono> { Bono("A", "DOS", 4, 10.50m), Bono("B", "DOS", 3, 20m), Bono("C", "AGILITY", 1, 5.25m) };

@@ -72,6 +72,8 @@ namespace CapaEntidad
         public bool Ok { get; set; }
         public string Mensaje { get; set; } = "";
         public string Aviso { get; set; } = "";
+        /// <summary>Ok, pero una parte no se hizo (p. ej. Enviar salto algun bono): la pantalla lo muestra como advertencia.</summary>
+        public bool Incompleto { get; set; }
     }
 
     /// <summary>Lo que Talento Humano ve antes de cerrar el mes.</summary>

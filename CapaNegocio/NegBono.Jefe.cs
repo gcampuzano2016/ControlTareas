@@ -69,7 +69,10 @@ namespace CapaNegocio
                 new[] { falta == null ? null : falta + " Sin ese dato el bono no se puede enviar." });
         }
 
-        /// <summary>Borra un bono de mi gente en Borrador o Rechazado del mes abierto.</summary>
+        /// <summary>
+        /// Borra un bono que yo propuse, en Borrador o Rechazado del mes abierto,
+        /// aunque la persona ya no este a mi cargo (NegBonoReglas.PuedeBorrar).
+        /// </summary>
         public static EntBonoResultado Borrar(int idBono, string estadoEsperado, string yo)
         {
             yo = NegBonoReglas.Normalizar(yo);
@@ -79,7 +82,7 @@ namespace CapaNegocio
             EntBono actual = BonoVivo(idBono);
             if (actual == null || actual.Estado != (estadoEsperado ?? "")) return Error(MsgCambio);
 
-            string error = NegBonoReglas.PuedeEditar(actual, periodo, yo, CodigosMiGente(LeerPersonasActivas(), yo));
+            string error = NegBonoReglas.PuedeBorrar(actual, periodo, yo);
             if (error != null) return Error(error);
 
             int r = BorrarEnBase(idBono, actual.Estado, yo);
@@ -155,7 +158,9 @@ namespace CapaNegocio
             string mensaje = "Se enviaron " + enviados.ToString(CultureInfo.InvariantCulture)
                            + " bono(s) a Talento Humano por " + Dinero(total) + ".";
             if (saltados.Count > 0) mensaje += " No se enviaron: " + string.Join(" ", saltados);
-            return Bien(mensaje, avisos);
+            EntBonoResultado resultado = Bien(mensaje, avisos);
+            resultado.Incompleto = saltados.Count > 0;
+            return resultado;
         }
 
         /// <summary>Reglas y envio de un borrador. null = enviado; si no, por que se salto. Lanza si falla la base.</summary>

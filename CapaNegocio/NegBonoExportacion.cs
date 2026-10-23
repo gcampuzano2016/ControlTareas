@@ -36,7 +36,7 @@ namespace CapaNegocio
             return bonos
                 .OrderBy(b => RangoEmpresa(b.Empresa))
                 .ThenBy(b => RangoFamilia(Familia(b, tipos)))
-                .ThenBy(b => b.Nombre ?? "", StringComparer.OrdinalIgnoreCase)
+                .ThenBy(b => b.Nombre ?? "", StringComparer.Create(new CultureInfo("es-EC"), true))
                 .ToList();
         }
 

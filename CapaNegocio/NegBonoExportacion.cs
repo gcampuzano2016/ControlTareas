@@ -79,7 +79,9 @@ namespace CapaNegocio
                         concepto = b.CodigoConcepto ?? "";
                     }
 
-                    bool porSemana = t != null && t.PorSemana;
+                    // Mes cerrado: las semanas del propio bono mandan, no el catalogo (un mes cerrado no cambia nunca).
+                    // El orden por familia de un mes cerrado si sale del catalogo vivo: aceptado, no se corrige.
+                    bool porSemana = abierto ? (t != null && t.PorSemana) : (b.Lunes != null && b.Lunes.Count > 0);
                     EntBonoTipo paraTexto = new EntBonoTipo { Nombre = nombreTipo, PorSemana = porSemana };
 
                     hoja.Cells[fila, 1].Value = b.Empresa;

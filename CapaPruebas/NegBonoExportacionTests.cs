@@ -202,6 +202,29 @@ namespace CapaPruebas
         }
 
         [TestMethod]
+        public void Construir_MesCerrado_SemanasDelBono_SinDependerDelCatalogo()
+        {
+            Dictionary<int, EntBonoTipo> cat = Catalogo();
+            cat[2].PorSemana = false;
+            EntBono sinTipo = Bono("A", "DOS", 99, 40m, "1", new DateTime(2026, 8, 3), new DateTime(2026, 8, 10));
+            sinTipo.NombreTipo = "Standby X";
+            EntBono tipoCambiado = Bono("B", "DOS", 2, 40m, "1", new DateTime(2026, 8, 3));
+            tipoCambiado.NombreTipo = "Standby GPF";
+            byte[] bytes = NegBonoExportacion.Construir(Periodo(BonoPeriodoEstados.Cerrado), new List<EntBono> { sinTipo, tipoCambiado }, cat);
+            ExcelPackage p;
+            ExcelWorksheet h = Leer(bytes, out p);
+            using (p)
+            {
+                // Standby (tipo 2) va antes que el tipo faltante (familia desconocida, al final).
+                Assert.AreEqual("B", Texto(h, PrimeraFila, 2));
+                Assert.AreEqual("1 semana Standby GPF", Texto(h, PrimeraFila, 5));
+                Assert.AreEqual("Del 3 al 9 de agosto", Texto(h, PrimeraFila, 6));
+                Assert.AreEqual("2 semanas Standby X", Texto(h, PrimeraFila + 1, 5));
+                Assert.AreEqual("Del 3 al 16 de agosto", Texto(h, PrimeraFila + 1, 6));
+            }
+        }
+
+        [TestMethod]
         public void Construir_Fechas_YLugar()
         {
             EntBono b = Bono("A", "DOS", 1, 40m, "1", new DateTime(2026, 8, 3), new DateTime(2026, 8, 10));

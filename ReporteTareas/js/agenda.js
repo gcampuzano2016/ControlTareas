@@ -241,6 +241,7 @@ function TarjetaActividad(it, conFecha) {
         html += '<div class="ag-progreso"><div class="ag-barra"><div style="width:' + pct + '%"></div></div><span>' + hechos + '/' + total + '</span></div>';
     }
     if (it.AsignadoPor) { html += '<div class="ag-meta">Asignó: ' + Html(it.AsignadoPor) + '</div>'; }
+    if (it.EsPasoDeProceso) { html += '<div class="ag-meta"><span class="ag-proceso">Proceso: ' + Html(it.NombreProceso) + '</span></div>'; }
     var clase = 'ag-act' + (it.Completa ? ' ag-completa' : '') + (it.Atrasada ? ' ag-atrasada' : '');
     var $t = $('<div></div>').addClass(clase).html(html);
     $t.on('click', function () { AbrirDetalle(it.IdActividad); });
@@ -271,6 +272,10 @@ function AbrirDetalle(id) {
     $('#agDetTitulo').text(it.Titulo);
     var estado = it.Completa ? 'Completa' : (it.Atrasada ? 'Atrasada' : 'Pendiente');
     $('#agDetMeta').text('Entrega: ' + FechaCorta(it.FechaEntrega) + ' · ' + estado + (it.AsignadoPor ? ' · Asignó: ' + it.AsignadoPor : ''));
+    if (it.EsPasoDeProceso) {
+        /* Paso de un proceso: se gestiona desde Procesos (el servidor ya manda PuedeEditar = false). */
+        $('#agDetMeta').append(' · ').append($('<a class="ag-proceso"></a>').attr('href', 'Procesos.aspx').text('Proceso: ' + it.NombreProceso));
+    }
 
     var $l = $('#agDetEntregables').empty();
     if (!it.Entregables.length) { $l.append('<div class="ag-meta">Sin entregables.</div>'); }
@@ -279,9 +284,17 @@ function AbrirDetalle(id) {
         $chk.on('change', function () {
             var marcar = $chk.prop('checked');
             $chk.prop('disabled', true);
-            Llamar('MarcarEntregable', { idActividad: it.IdActividad, idEntregable: e.IdEntregable, hecho: marcar ? '1' : '0' },
-                function () { RefrescarDetalle(id); },
-                function (m) { $chk.prop('checked', !marcar).prop('disabled', false); Mostrar('#agDetError', m); });
+            var enviar = function () {
+                Llamar('MarcarEntregable', { idActividad: it.IdActividad, idEntregable: e.IdEntregable, hecho: marcar ? '1' : '0' },
+                    function () { RefrescarDetalle(id); },
+                    function (m) { $chk.prop('checked', !marcar).prop('disabled', false); Mostrar('#agDetError', m); });
+            };
+            if (it.EsPasoDeProceso && it.AvisoAlCompletar && marcar && PendientesDe(it) === 1) {
+                /* Es el ultimo entregable: completa el paso. */
+                ConfirmarPaso(it.AvisoAlCompletar, enviar, function () { $chk.prop('checked', !marcar).prop('disabled', false); });
+                return;
+            }
+            enviar();
         });
         $l.append($('<label class="ag-entregable"></label>').append($chk).append(' ').append($('<span></span>').text(e.Descripcion)));
     });
@@ -292,9 +305,16 @@ function AbrirDetalle(id) {
             .text(it.Completa ? 'Marcar como pendiente' : 'Marcar como completa')
             .on('click', function () {
                 var $btn = $(this).prop('disabled', true);
-                Llamar('MarcarCompleta', { id: it.IdActividad, completa: it.Completa ? '0' : '1' },
-                    function () { RefrescarDetalle(id); },
-                    function (m) { $btn.prop('disabled', false); Mostrar('#agDetError', m); });
+                var enviar = function () {
+                    Llamar('MarcarCompleta', { id: it.IdActividad, completa: it.Completa ? '0' : '1' },
+                        function () { RefrescarDetalle(id); },
+                        function (m) { $btn.prop('disabled', false); Mostrar('#agDetError', m); });
+                };
+                if (it.EsPasoDeProceso && it.AvisoAlCompletar && !it.Completa) {
+                    ConfirmarPaso(it.AvisoAlCompletar, enviar, function () { $btn.prop('disabled', false); });
+                    return;
+                }
+                enviar();
             }).appendTo($b);
     }
     if (it.PuedeEditar) {
@@ -312,6 +332,23 @@ function AbrirDetalle(id) {
             }).appendTo($b);
     }
     Abrir($('#agModalDetalle'));
+}
+
+/* ------------------------------------------------------------ pasos de procesos */
+
+/* Entregables sin hacer de una actividad. */
+function PendientesDe(it) {
+    var n = 0;
+    $.each(it.Entregables, function (i, e) { if (!e.Hecho) { n++; } });
+    return n;
+}
+
+/* Dialogo propio antes de completar un paso. Nada se envia hasta Aceptar. */
+function ConfirmarPaso(texto, siAcepta, siCancela) {
+    $('#agConfTexto').text(texto);
+    $('#agConfAceptar').off('click').on('click', function () { Cerrar($('#agModalConfirmar')); siAcepta(); });
+    $('#agConfCancelar').off('click').on('click', function () { Cerrar($('#agModalConfirmar')); siCancela(); });
+    Abrir($('#agModalConfirmar'));
 }
 
 /* ------------------------------------------------------------ formulario */

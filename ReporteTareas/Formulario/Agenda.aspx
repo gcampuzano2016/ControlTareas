@@ -52,9 +52,11 @@
         .ag-modal-titulo { font-size: 16px; font-weight: 700; }
         .ag-punto { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
         .ag-entregable { display: block; font-weight: normal; margin: 4px 0; }
+        .ag-proceso { display: inline-block; background: #E8F0FA; color: #1F4E8C; font-size: 11px; padding: 1px 8px; border-radius: 10px; }
+        a.ag-proceso:hover { text-decoration: underline; }
         .ag-botones { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
     </style>
-    <script src="../js/agenda.js?v=1" type="text/javascript"></script>
+    <script src="../js/agenda.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -155,6 +157,19 @@
             <div class="ag-botones">
                 <button type="button" class="btn btn-default" data-cerrar="1">Cancelar</button>
                 <button type="button" id="agFormGuardar" class="btn btn-primary">Guardar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="agModalConfirmar" class="ag-modal">
+        <div class="ag-modal-caja">
+            <div class="ag-modal-cab">
+                <span class="ag-modal-titulo">Completar paso</span>
+            </div>
+            <div id="agConfTexto"></div>
+            <div class="ag-botones">
+                <button type="button" id="agConfCancelar" class="btn btn-default">Cancelar</button>
+                <button type="button" id="agConfAceptar" class="btn btn-primary">Aceptar</button>
             </div>
         </div>
     </div>

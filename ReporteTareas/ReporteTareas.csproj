@@ -1345,6 +1345,8 @@
     <Content Include="Formulario\Agenda.aspx" />
     <Content Include="Formulario\ParametrizacionAreasAgenda.aspx" />
     <Content Include="js\parametrizacionAreasAgenda.js" />
+    <Content Include="Formulario\ParametrizacionPlantillasProcesos.aspx" />
+    <Content Include="js\parametrizacionPlantillasProcesos.js" />
     <Content Include="Formulario\AdministrarTableroCostos.ashx" />
     <Content Include="Formulario\AdministrarAgenda.ashx" />
     <Content Include="Formulario\AdministrarBonos.ashx" />
@@ -1958,6 +1960,13 @@
     </Compile>
     <Compile Include="Formulario\ParametrizacionAreasAgenda.aspx.designer.cs">
       <DependentUpon>ParametrizacionAreasAgenda.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPlantillasProcesos.aspx.cs">
+      <DependentUpon>ParametrizacionPlantillasProcesos.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\ParametrizacionPlantillasProcesos.aspx.designer.cs">
+      <DependentUpon>ParametrizacionPlantillasProcesos.aspx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\ParametrizacionHorasExtras.aspx.cs">
       <DependentUpon>ParametrizacionHorasExtras.aspx</DependentUpon>

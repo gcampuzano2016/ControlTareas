@@ -81,7 +81,7 @@
             <div id="prModalError" class="alert alert-danger" style="display: none"></div>
             <div id="prModalCuerpo"></div>
             <div class="pr-caja-pie">
-                <button type="button" id="prModalCancelar" class="btn btn-default">Cancelar</button>
+                <button type="button" id="prModalCancelar" class="btn btn-default">Volver</button>
                 <button type="button" id="prModalOk" class="btn btn-primary">Aceptar</button>
             </div>
         </div>

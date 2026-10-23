@@ -626,10 +626,12 @@ namespace JsonJQueryNetAgenda
             string estado = Campo(p, "estado");
 
             List<object> lista = new List<object>();
+            bool gestionaAlguno = false;
             foreach (EntAgendaProceso x in NegAgenda.Procesos())
             {
                 if (estado != "" && x.Estado != estado) { continue; }
                 if (!NegAgendaProceso.PuedeVer(q.Yo, x, q.Cadena, q.VerTodos)) { continue; }
+                if (NegAgendaProceso.PuedeGestionar(q.Yo, x, q.VerTodos)) { gestionaAlguno = true; }
                 lista.Add(Proceso(q, x, hoy));
             }
 
@@ -643,6 +645,8 @@ namespace JsonJQueryNetAgenda
                     .Where(a => !a.EsSinArea)
                     .Select(a => new { a.IdArea, a.Nombre, a.Color, a.Activa })
                     .ToList(),
+                // Para reasignar: no exige que quien gestiona este entre los activos (caso del responsable inactivo).
+                PersonasPorArea = gestionaAlguno ? PersonasPorArea(q) : new object[0],
                 Procesos = lista
             });
         }
@@ -708,7 +712,13 @@ namespace JsonJQueryNetAgenda
                 })
                 .ToList();
 
-            var areas = q.Personas
+            return Ok(new { Hoy = Iso(DateTime.Today), Plantillas = plantillas, PersonasPorArea = PersonasPorArea(q) });
+        }
+
+        /// <summary>Personas activas por area (sin «Sin area»), para elegir responsables.</summary>
+        private static object PersonasPorArea(Quien q)
+        {
+            return q.Personas
                 .Where(x => !x.SinArea)
                 .GroupBy(x => x.IdArea)
                 .Select(g => new
@@ -719,8 +729,6 @@ namespace JsonJQueryNetAgenda
                 })
                 .OrderBy(a => a.Area)
                 .ToList();
-
-            return Ok(new { Hoy = Iso(DateTime.Today), Plantillas = plantillas, PersonasPorArea = areas });
         }
 
         private string IniciarProceso(HttpContext context, object p)

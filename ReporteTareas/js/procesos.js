@@ -147,7 +147,7 @@ function Chip(p, s) {
         $('<span class="pr-a"></span>').text(s.Responsable));
     if (s.Estado === 'Completo') {
         $c.append($('<span class="pr-a"></span>').text('Completo el ' + Fecha(s.FechaCompletado)));
-    } else if (s.FechaEntrega) {
+    } else if (s.FechaEntrega && s.Estado !== 'Cancelado') {
         $c.append($('<span class="pr-a"></span>').text((atrasado ? 'Atrasado — entrega: ' : 'Entrega: ') + Fecha(s.FechaEntrega)));
     } else if (s.Estado === 'Pendiente') {
         $c.append($('<span class="pr-a"></span>').text('Plazo: ' + s.PlazoDias + ' días hábiles'));
@@ -182,12 +182,14 @@ function Dialogo(cfg) {
     $('#prModalCancelar').prop('disabled', false);
     prOkAccion = cfg.onOk;
     prEnVuelo = false;
+    $('#prLista button, #prIniciar').prop('disabled', true);
     $('#prModal').addClass('pr-abierto');
 }
 
 function CerrarDialogo() {
     if (prEnVuelo) { return; }
     $('#prModal').removeClass('pr-abierto');
+    $('#prLista button, #prIniciar').prop('disabled', false);
     $('#prModalCuerpo').empty();
     prOkAccion = null;
 }
@@ -222,8 +224,9 @@ function Contexto(p, s) {
 /* ---------- Reasignar ---------- */
 
 function AbrirReasignar(p, s) {
-    Llamar('DatosIniciar', {}, function (d) {
-        var personas = PersonasDeArea(d, s.IdArea);
+    {
+        /* Las personas vienen en ListarProcesos: no exige que quien gestiona este activo. */
+        var personas = PersonasDeArea(prDatos, s.IdArea);
         var $sel = $('<select class="form-control"></select>').append($('<option value="">— Elija una persona —</option>'));
         $.each(personas, function (i, x) {
             if (x.CodUsuario !== s.CodResponsable) { $sel.append($('<option></option>').val(x.CodUsuario).text(x.Nombre)); }
@@ -237,7 +240,7 @@ function AbrirReasignar(p, s) {
                 Enviar('ReasignarPaso', { idPaso: s.IdProcesoPaso, codResponsable: $sel.val(), estado: s.Estado });
             }
         });
-    });
+    }
 }
 
 /* ---------- Cambiar plazo (paso pendiente) ---------- */
@@ -333,7 +336,7 @@ function MostrarIniciar(d, plantillas) {
         bloqueado = false;
         $.each(actual.Pasos, function (i, s) {
             var personas = PersonasDeArea(d, s.IdArea);
-            var $resp = $('<select class="form-control input-sm pr-resp"></select>');
+            var $resp = $('<select class="form-control input-sm pr-resp"></select>').append($('<option value="">Elija…</option>'));
             $.each(personas, function (j, x) { $resp.append($('<option></option>').val(x.CodUsuario).text(x.Nombre)); });
             var $tit = $('<input type="text" class="form-control input-sm pr-tit" maxlength="200" />').val(s.Titulo).on('keydown', SinEnter);
             var $pl = $('<input type="number" class="form-control input-sm pr-pl" min="1" max="60" step="1" />').val(s.PlazoDias).on('keydown', SinEnter);

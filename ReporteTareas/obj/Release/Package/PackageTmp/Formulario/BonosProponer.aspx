@@ -11,7 +11,7 @@
         .bp-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 2000; display: none; }
         .bp-dialogo { background: #fff; max-width: 460px; margin: 15vh auto 0; padding: 20px; border-radius: 4px; }
     </style>
-    <script src="../js/bonosProponer.js?v=1" type="text/javascript"></script>
+    <script src="../js/bonosProponer.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -65,7 +65,13 @@
                             </div>
                             <div class="col-md-4 form-group">
                                 <label for="bpLugar">Lugar</label>
-                                <input type="text" id="bpLugar" class="form-control" maxlength="100" />
+                                <select id="bpLugar" class="form-control">
+                                    <option value="">-- Seleccione --</option>
+                                    <option value="Guayaquil">GUAYAQUIL</option>
+                                    <option value="Quito">QUITO</option>
+                                    <option value="Cuenca">CUENCA</option>
+                                    <option value="Ambato">AMBATO</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row" id="bpFilaSemanas" style="display: none">

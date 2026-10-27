@@ -16,11 +16,15 @@ El Excel se espera en RevisionBonos/9. Septiembre.xlsx, que tambien esta
 ignorado. Spec: docs/superpowers/specs/2026-10-20-bonos-design.md, seccion 7.
 
 Que migra:
-  1. El catalogo inicial (Bono_Tipo + Bono_TipoConcepto). Solo agrega lo que
-     falta: si Talento Humano ya corrigio un valor o un concepto en el
-     Catalogo, volver a correr el script no se lo pisa.
+  1. Casi nada del catalogo: Talento Humano lo armo a mano en produccion desde
+     el 2026-10-23, con otros nombres. Cada tipo del Excel va al tipo de
+     produccion de DESTINO; solo se crean los de NUEVOS y se marcan por semana
+     los de SEMANALES. Nombres, valores y conceptos del catalogo no se tocan.
   2. Septiembre 2026 como periodo Cerrado, con un bono Aprobado de
-     Origen = Migracion por cada fila del Excel (salvo la de $0).
+     Origen = Migracion por cada fila del Excel (salvo la de $0). Su concepto
+     es el que se pago en septiembre (CONCEPTO), no el del catalogo.
+     Si falta un tipo de destino, si no coincide en "por semana" o si una
+     semana ya la paga otro bono de la misma persona y tipo, no migra nada.
   3. Abril 2025 - agosto 2026 como periodos Historico con su total.
 
 Que NO hace el generador y si el script: encontrar a la persona. El Excel
@@ -96,6 +100,42 @@ CATALOGO = [
 ]
 TIPOS = {t[0]: t for t in CATALOGO}
 
+# CATALOGO solo sirve para leer el Excel (sugerido, si es por semana). Los
+# tipos de verdad son los del catalogo de produccion, que Talento Humano armo a
+# mano desde el 2026-10-23 con otros nombres: cada tipo del Excel va al suyo,
+# para no duplicar el catalogo. Donde el nombre de produccion lleva el monto, se
+# elige por el valor de la fila; un monto sin destino detiene el generador.
+# Correspondencia confirmada por el usuario el 2026-10-27.
+DESTINO = {
+    'Standby Cisco UIO': 'Bono Standby Networking',
+    'Standby Cisco GYE': 'Bono Standby Networking',
+    'Standby F5 UIO': 'Bono Standby F5',
+    'Standby F5 GYE': 'Bono Standby F5',
+    'Standby Data Center UIO': 'Bono Standby Data Center',
+    'Standby Data Center GYE': 'Bono Standby Data Center',
+    'Standby Microsoft': 'Bono Standby Software',
+    'Standby GPF': 'Bono Standby GPF',
+    'Standby GPF fijo': 'Bono Administrativo GPF',
+    'Standby Difare fijo': 'Bono de standby Difare 50',
+    'Contrato ESPOL': 'Bono Contrato ESPOL 100',
+    'Contrato GPF': 'Bono Contrato GPF 60',
+    'Contrato Belcorp': 'Bono Contrato Belcorp 50',
+    u'Contrato Nestlé': {Decimal('200.00'): u'Bono Contrato Nestlé 200',
+                         Decimal('60.00'): u'Bono Contrato Nestlé 60'},
+    'Contrato Linde': {Decimal('70.00'): 'Bono Contrato Linde 70',
+                       Decimal('100.00'): 'Bono Contrato Linde 100'},
+    'Cumplimiento': {Decimal('230.00'): 'Bono Cumplimiento 230'},
+    'Nuevo cargo': 'Bono Nuevo cargo',
+}
+
+# Los unicos tipos que crea la migracion, con los conceptos de CONCEPTO:
+# (Nombre, Familia, ValorSugerido o None, PorSemana).
+NUEVOS = [('Bono Nuevo cargo', 'Otro', None, False)]
+
+# Tipos de produccion que quedaron como no semanales y se pagan por semana
+# (sus filas de septiembre traen semanas): la migracion los marca semanales.
+SEMANALES = ['Bono Standby Networking']
+
 
 class Detener(Exception):
     """Un dato que no se puede interpretar con seguridad. No se genera nada."""
@@ -149,6 +189,18 @@ def tipo_de(observacion):
     if 'nuevo cargo' in t:
         return 'Nuevo cargo'
     return None
+
+
+def destino_de(tipo, valor, fila):
+    """El tipo de produccion de una fila: por nombre, o por monto si el nombre
+    de produccion lo lleva."""
+    d = DESTINO.get(tipo)
+    if isinstance(d, dict):
+        d = d.get(valor)
+    if d is None:
+        raise Detener('fila %d: el tipo %s con valor %s no tiene tipo de produccion asignado.'
+                      % (fila, plano(tipo), valor))
+    return d
 
 
 def mes_de(palabra, fila, avisos):
@@ -316,10 +368,12 @@ def leer_septiembre(wb, avisos, omitidas):
         if valor_sugerido is not None and valor != valor_sugerido:
             motivo = MOTIVO_AJUSTE
             avisos.append('fila %d: el valor difiere del sugerido del tipo; lleva motivo de ajuste.' % r)
+        conceptos = CONCEPTO_CUMPLIMIENTO if tipo == 'Cumplimiento' else CONCEPTO
         filas.append({
             'fila': r, 'empresa': empresa,
             'ident': identificacion(empresa, ws.cell(r, 3).value, r),
-            'tipo': tipo, 'semanas': len(lunes), 'lunes': lunes,
+            'tipo_excel': tipo, 'tipo': destino_de(tipo, valor, r), 'concepto': conceptos[empresa],
+            'semanas': len(lunes), 'lunes': lunes,
             'sugerido': valor_sugerido, 'valor': valor, 'motivo': motivo, 'lugar': lugar or None,
         })
     return filas
@@ -355,7 +409,9 @@ def armar_sql(filas, historico):
     a('   CONTIENE DATOS PERSONALES: codigos SAP, cedulas y montos. NO SE COMMITEA.')
     a('')
     a('   Generado el %s.' % datetime.datetime.now().strftime('%Y-%m-%d %H:%M'))
-    a('   Re-ejecutable: el catalogo solo agrega lo que falta, septiembre se')
+    a('   Usa los tipos que Talento Humano ya cargo en produccion (solo crea')
+    a('   los que no existen y marca por semana los que hace falta).')
+    a('   Re-ejecutable: el catalogo solo cambia lo que falta, septiembre se')
     a('   salta si ya tiene bonos de Origen = Migracion, y los historicos se')
     a('   insertan solo si falta su (Anio, Mes). Termina en VEREDICTO: OK.')
     a('   Si alguna fila no encuentra a su persona activa, NO migra nada y lista')
@@ -367,25 +423,32 @@ def armar_sql(filas, historico):
     a('SET XACT_ABORT ON;')
     a('GO')
     a('')
-    a('CREATE TABLE #Tipo (Nombre NVARCHAR(150) NOT NULL, Familia VARCHAR(20) NOT NULL,')
-    a('                    ValorSugerido DECIMAL(9,2) NULL, PorSemana BIT NOT NULL,')
-    a('                    ConceptoDos VARCHAR(10) NOT NULL, ConceptoAgility VARCHAR(10) NOT NULL);')
-    for nombre, familia, sugerido, por_semana in CATALOGO:
-        conceptos = CONCEPTO_CUMPLIMIENTO if nombre == 'Cumplimiento' else CONCEPTO
-        a("INSERT INTO #Tipo VALUES (%s, '%s', %s, %d, '%s', '%s');"
+    a('/* Los unicos tipos que crea la migracion; el resto ya existe en produccion. */')
+    a('CREATE TABLE #Nuevo (Nombre NVARCHAR(150) NOT NULL, Familia VARCHAR(20) NOT NULL,')
+    a('                     ValorSugerido DECIMAL(9,2) NULL, PorSemana BIT NOT NULL,')
+    a('                     ConceptoDos VARCHAR(10) NOT NULL, ConceptoAgility VARCHAR(10) NOT NULL);')
+    for nombre, familia, sugerido, por_semana in NUEVOS:
+        a("INSERT INTO #Nuevo VALUES (%s, '%s', %s, %d, '%s', '%s');"
           % (n(nombre), familia, dec(sugerido), 1 if por_semana else 0,
-             conceptos['DOS'], conceptos['AGILITY']))
+             CONCEPTO['DOS'], CONCEPTO['AGILITY']))
+    a('')
+    a('/* Tipos de produccion no semanales que se pagan por semana. */')
+    a('CREATE TABLE #Semanal (Nombre NVARCHAR(150) NOT NULL PRIMARY KEY);')
+    for nombre in SEMANALES:
+        a('INSERT INTO #Semanal VALUES (%s);' % n(nombre))
     a('')
     a('/* Una fila por fila del Excel (sin la de $0). Ident: DOS = Cod_Sap,')
-    a('   AGILITY = cedula rellenada a 10. */')
+    a('   AGILITY = cedula rellenada a 10. Tipo = el de produccion; TipoExcel =')
+    a('   como lo llamaba el Excel. Concepto = el que se pago en septiembre. */')
     a('CREATE TABLE #X (Fila INT NOT NULL PRIMARY KEY, Empresa VARCHAR(10) NOT NULL,')
-    a('                 Ident VARCHAR(32) NOT NULL, Tipo NVARCHAR(150) NOT NULL, Semanas INT NOT NULL,')
+    a('                 Ident VARCHAR(32) NOT NULL, Tipo NVARCHAR(150) NOT NULL,')
+    a('                 TipoExcel NVARCHAR(150) NOT NULL, Concepto VARCHAR(10) NOT NULL, Semanas INT NOT NULL,')
     a('                 ValorSugerido DECIMAL(9,2) NULL, Valor DECIMAL(9,2) NOT NULL,')
     a('                 MotivoAjuste NVARCHAR(500) NULL, Lugar NVARCHAR(100) NULL);')
     for f in filas:
-        a("INSERT INTO #X VALUES (%d, '%s', '%s', %s, %d, %s, %s, %s, %s);"
-          % (f['fila'], f['empresa'], f['ident'], n(f['tipo']), f['semanas'], dec(f['sugerido']),
-             dec(f['valor']), n(f['motivo']), n(f['lugar'])))
+        a("INSERT INTO #X VALUES (%d, '%s', '%s', %s, %s, '%s', %d, %s, %s, %s, %s);"
+          % (f['fila'], f['empresa'], f['ident'], n(f['tipo']), n(f['tipo_excel']), f['concepto'],
+             f['semanas'], dec(f['sugerido']), dec(f['valor']), n(f['motivo']), n(f['lugar'])))
     a('')
     a('CREATE TABLE #W (Fila INT NOT NULL, Lunes DATE NOT NULL, PRIMARY KEY (Fila, Lunes));')
     for f in filas:
@@ -448,21 +511,69 @@ def armar_sql(filas, historico):
     a('END')
     a('')
     a('/* ---------------------------------------------- 1. catalogo ----------- */')
-    a('MERGE dbo.Bono_Tipo AS d')
-    a('USING #Tipo AS o ON d.Nombre = o.Nombre')
-    a(' WHEN NOT MATCHED THEN INSERT (Nombre, Familia, ValorSugerido, PorSemana, Activo, Usuario_Registro)')
-    a("                       VALUES (o.Nombre, o.Familia, o.ValorSugerido, o.PorSemana, 1, '%s');" % USUARIO)
+    a('/* El catalogo es de Talento Humano: no se cambian nombres, valores ni')
+    a('   conceptos. Solo se crean los tipos de #Nuevo y se marcan semanales los')
+    a('   de #Semanal; cada cambio queda en la bitacora como los del Catalogo. */')
+    a('DECLARE @Creados TABLE (IdTipo INT NOT NULL, Nombre NVARCHAR(150) NOT NULL);')
+    a('INSERT INTO dbo.Bono_Tipo (Nombre, Familia, ValorSugerido, PorSemana, Activo, Usuario_Registro)')
+    a('OUTPUT inserted.IdTipo, inserted.Nombre INTO @Creados (IdTipo, Nombre)')
+    a("SELECT o.Nombre, o.Familia, o.ValorSugerido, o.PorSemana, 1, '%s'" % USUARIO)
+    a('  FROM #Nuevo o')
+    a(' WHERE NOT EXISTS (SELECT 1 FROM dbo.Bono_Tipo t WHERE t.Nombre = o.Nombre);')
     a('')
     a('INSERT INTO dbo.Bono_TipoConcepto (IdTipo, Empresa, CodigoConcepto, Usuario_Registro)')
     a("SELECT t.IdTipo, c.Empresa, c.CodigoConcepto, '%s'" % USUARIO)
-    a('  FROM #Tipo o')
-    a('  JOIN dbo.Bono_Tipo t ON t.Nombre = o.Nombre')
-    a("  CROSS APPLY (VALUES ('DOS', o.ConceptoDos), ('AGILITY', o.ConceptoAgility)) AS c (Empresa, CodigoConcepto)")
-    a(' WHERE NOT EXISTS (SELECT 1 FROM dbo.Bono_TipoConcepto k WHERE k.IdTipo = t.IdTipo AND k.Empresa = c.Empresa);')
+    a('  FROM #Nuevo o')
+    a('  JOIN @Creados t ON t.Nombre = o.Nombre')
+    a("  CROSS APPLY (VALUES ('DOS', o.ConceptoDos), ('AGILITY', o.ConceptoAgility)) AS c (Empresa, CodigoConcepto);")
+    a('')
+    a('INSERT INTO dbo.Bono_Bitacora (IdBono, IdPeriodo, Accion, ValorAnterior, ValorNuevo, Detalle, Usuario)')
+    a("SELECT NULL, NULL, 'Catalogo', NULL, LEFT(c.Nombre, 200),")
+    a("       N'Crear tipo ' + CONVERT(NVARCHAR(12), c.IdTipo) + N' desde la migracion de septiembre', '%s'" % USUARIO)
+    a('  FROM @Creados c;')
+    a('')
+    a('DECLARE @Marcados TABLE (IdTipo INT NOT NULL, Nombre NVARCHAR(150) NOT NULL);')
+    a("UPDATE t SET PorSemana = 1, Usuario_Modificacion = '%s', Fecha_Modificacion = GETDATE()" % USUARIO)
+    a('OUTPUT inserted.IdTipo, inserted.Nombre INTO @Marcados (IdTipo, Nombre)')
+    a('  FROM dbo.Bono_Tipo t')
+    a('  JOIN #Semanal s ON s.Nombre = t.Nombre')
+    a(' WHERE t.PorSemana = 0;')
+    a('')
+    a('INSERT INTO dbo.Bono_Bitacora (IdBono, IdPeriodo, Accion, ValorAnterior, ValorNuevo, Detalle, Usuario)')
+    a("SELECT NULL, NULL, 'Catalogo', N'no semanal', N'por semana',")
+    a("       N'Tipo ' + CONVERT(NVARCHAR(12), m.IdTipo) + N' (' + LEFT(m.Nombre, 150)")
+    a("       + N') pasa a por semana: sus bonos de septiembre traen semanas', '%s'" % USUARIO)
+    a('  FROM @Marcados m;')
     a('')
     a('/* ---------------------------------------------- 2. septiembre --------- */')
     a('IF @Ya = 0')
     a('BEGIN')
+    a('    /* Cada tipo destino existe en produccion, una sola vez. */')
+    a('    IF EXISTS (SELECT 1 FROM (SELECT DISTINCT Tipo FROM #X) x')
+    a('                WHERE (SELECT COUNT(*) FROM dbo.Bono_Tipo t WHERE t.Nombre = x.Tipo) <> 1)')
+    a('    BEGIN')
+    a("        PRINT 'Tipos de destino que no existen (o estan repetidos) en el catalogo:';")
+    a('        DECLARE @Faltan NVARCHAR(MAX) = N\'\';')
+    a("        SELECT @Faltan = @Faltan + N'  ' + x.Tipo + NCHAR(10)")
+    a('          FROM (SELECT DISTINCT Tipo FROM #X) x')
+    a('         WHERE (SELECT COUNT(*) FROM dbo.Bono_Tipo t WHERE t.Nombre = x.Tipo) <> 1;')
+    a('        PRINT @Faltan;')
+    a("        RAISERROR('FALLO: falta un tipo de destino en el catalogo. No se migro nada.', 16, 1);")
+    a('    END')
+    a('')
+    a('    /* Una fila con semanas solo va a un tipo por semana, y al reves. */')
+    a('    IF EXISTS (SELECT 1 FROM #X x JOIN dbo.Bono_Tipo t ON t.Nombre = x.Tipo')
+    a('                WHERE t.PorSemana <> CASE WHEN x.Semanas > 0 THEN 1 ELSE 0 END)')
+    a('    BEGIN')
+    a("        PRINT 'Filas cuyo tipo de destino no coincide en por semana (fila, tipo):';")
+    a('        DECLARE @NoCoinciden NVARCHAR(MAX) = N\'\';')
+    a("        SELECT @NoCoinciden = @NoCoinciden + N'  fila ' + CONVERT(NVARCHAR(10), x.Fila) + N': ' + x.Tipo + NCHAR(10)")
+    a('          FROM #X x JOIN dbo.Bono_Tipo t ON t.Nombre = x.Tipo')
+    a('         WHERE t.PorSemana <> CASE WHEN x.Semanas > 0 THEN 1 ELSE 0 END ORDER BY x.Fila;')
+    a('        PRINT @NoCoinciden;')
+    a("        RAISERROR('FALLO: hay filas con un tipo de destino que no coincide en por semana. No se migro nada.', 16, 1);")
+    a('    END')
+    a('')
     a('    INSERT INTO dbo.Bono_Periodo (Anio, Mes, Estado, FechaApertura, UsuarioApertura,')
     a('                                  FechaCierre, UsuarioCierre, Usuario_Registro)')
     a("    VALUES (%d, %d, 'Cerrado', GETDATE(), '%s', GETDATE(), '%s', '%s');" % (ANIO, MES, USUARIO, USUARIO, USUARIO))
@@ -477,13 +588,12 @@ def armar_sql(filas, historico):
     a("                  Identificacion = CASE WHEN x.Empresa = 'DOS' THEN p.CodSap")
     a("                                        ELSE RIGHT('0000000000' + p.Cedula, 10) END,")
     a('                  x.Lugar, t.IdTipo, x.Semanas, x.ValorSugerido, x.Valor, x.MotivoAjuste,')
-    a("                  CodJefe = NULLIF(p.CodJefe, ''), NombreTipo = t.Nombre, k.CodigoConcepto")
+    a("                  CodJefe = NULLIF(p.CodJefe, ''), NombreTipo = t.Nombre, CodigoConcepto = x.Concepto")
     a('             FROM #X x')
     a("             JOIN #P p ON (x.Empresa = 'DOS' AND p.CodSap = x.Ident)")
     a("                       OR (x.Empresa = 'AGILITY' AND p.Cedula <> ''")
     a("                           AND RIGHT('0000000000' + p.Cedula, 10) = x.Ident)")
-    a('             JOIN dbo.Bono_Tipo t ON t.Nombre = x.Tipo')
-    a('             JOIN dbo.Bono_TipoConcepto k ON k.IdTipo = t.IdTipo AND k.Empresa = x.Empresa) AS o')
+    a('             JOIN dbo.Bono_Tipo t ON t.Nombre = x.Tipo) AS o')
     a('       ON 1 = 0')
     a('     WHEN NOT MATCHED THEN')
     a('        INSERT (IdPeriodo, CodUsuario, Empresa, Nombre, Identificacion, Lugar, IdTipo, Semanas,')
@@ -500,10 +610,19 @@ def armar_sql(filas, historico):
     a('    INSERT INTO dbo.Bono_DetalleSemana (IdBono, Lunes, Usuario_Registro)')
     a("    SELECT m.IdBono, w.Lunes, '%s' FROM #W w JOIN #Mapa m ON m.Fila = w.Fila;" % USUARIO)
     a('')
+    a('    /* Ya hay bonos cargados desde la pantalla: una semana de septiembre que')
+    a('       tambien pague uno de ellos (misma persona y tipo) revierte todo. */')
+    a('    IF EXISTS (SELECT 1 FROM dbo.Bono_DetalleSemana s')
+    a('                 JOIN dbo.Bono_Detalle d ON d.IdBono = s.IdBono')
+    a("                WHERE d.Estado <> 'Rechazado'")
+    a('                GROUP BY d.CodUsuario, d.IdTipo, s.Lunes HAVING COUNT(*) > 1)')
+    a("        RAISERROR('FALLO: una semana de septiembre ya la paga otro bono de la misma persona y tipo. No se migro nada.', 16, 1);")
+    a('')
     a('    INSERT INTO dbo.Bono_Bitacora (IdBono, IdPeriodo, Accion, ValorNuevo, Detalle, Usuario)')
     a("    SELECT m.IdBono, @IdPeriodo, 'Crear', 'Aprobado',")
-    a("           N'Migracion desde el Excel de septiembre, fila ' + CONVERT(NVARCHAR(10), m.Fila), '%s'" % USUARIO)
-    a('      FROM #Mapa m;')
+    a("           N'Migracion desde el Excel de septiembre, fila ' + CONVERT(NVARCHAR(10), m.Fila)")
+    a("           + N' (en el Excel: ' + x.TipoExcel + N')', '%s'" % USUARIO)
+    a('      FROM #Mapa m JOIN #X x ON x.Fila = m.Fila;')
     a('    INSERT INTO dbo.Bono_Bitacora (IdPeriodo, Accion, ValorNuevo, Detalle, Usuario)')
     a("    VALUES (@IdPeriodo, 'Cerrar', 'Cerrado', N'Migracion desde el Excel de septiembre', '%s');" % USUARIO)
     a('    DECLARE @Migrados INT = (SELECT COUNT(*) FROM #Mapa);')
@@ -607,23 +726,33 @@ def armar_sql(filas, historico):
     a('    SET @Fallos += 1;')
     a('END')
     a('')
-    a('/* Cada tipo activo tiene concepto DOS y AGILITY. */')
+    a('/* Cada bono migrado va al tipo de produccion que le toca. */')
+    a('DECLARE @MalTipo INT = (SELECT COUNT(*) FROM dbo.Bono_Detalle d')
+    a('                          JOIN dbo.Bono_Periodo p ON p.IdPeriodo = d.IdPeriodo')
+    a('                          JOIN dbo.Bono_Tipo t ON t.IdTipo = d.IdTipo')
+    a("                         WHERE p.Anio = %d AND p.Mes = %d AND d.Origen = 'Migracion'" % (ANIO, MES))
+    a('                           AND t.Nombre NOT IN (SELECT Tipo FROM #X));')
+    a('IF @MalTipo <> 0')
+    a('BEGIN')
+    a("    PRINT 'FALLO: ' + CONVERT(VARCHAR(10), @MalTipo) + ' bonos migrados con un tipo fuera de la correspondencia.';")
+    a('    SET @Fallos += 1;')
+    a('END')
+    a('')
+    a('DECLARE @NoSemanal INT = (SELECT COUNT(*) FROM #Semanal s')
+    a('                           WHERE NOT EXISTS (SELECT 1 FROM dbo.Bono_Tipo t WHERE t.Nombre = s.Nombre AND t.PorSemana = 1));')
+    a('IF @NoSemanal <> 0')
+    a('BEGIN')
+    a("    PRINT 'FALLO: ' + CONVERT(VARCHAR(10), @NoSemanal) + ' tipos que debian quedar por semana no lo estan.';")
+    a('    SET @Fallos += 1;')
+    a('END')
+    a('')
+    a('/* Aviso, no falla: los conceptos del catalogo los completa Talento Humano. */')
     a('DECLARE @SinConcepto INT = (SELECT COUNT(*) FROM dbo.Bono_Tipo t')
     a('                              WHERE t.Activo = 1')
     a("                                AND (SELECT COUNT(*) FROM dbo.Bono_TipoConcepto k WHERE k.IdTipo = t.IdTipo")
     a("                                        AND k.Empresa IN ('DOS', 'AGILITY')) <> 2);")
     a('IF @SinConcepto <> 0')
-    a('BEGIN')
-    a("    PRINT 'FALLO: ' + CONVERT(VARCHAR(10), @SinConcepto) + ' tipos activos sin concepto DOS o AGILITY.';")
-    a('    SET @Fallos += 1;')
-    a('END')
-    a('')
-    a('DECLARE @Faltan INT = (SELECT COUNT(*) FROM #Tipo o WHERE NOT EXISTS (SELECT 1 FROM dbo.Bono_Tipo t WHERE t.Nombre = o.Nombre));')
-    a('IF @Faltan <> 0')
-    a('BEGIN')
-    a("    PRINT 'FALLO: faltan ' + CONVERT(VARCHAR(10), @Faltan) + ' tipos del catalogo inicial.';")
-    a('    SET @Fallos += 1;')
-    a('END')
+    a("    PRINT 'AVISO: ' + CONVERT(VARCHAR(10), @SinConcepto) + ' tipos activos sin concepto DOS o AGILITY (los completa Talento Humano en el Catalogo).';")
     a('')
     a('SELECT TotalSeptiembre = @Sep, BonosSeptiembre = @BonosSep, Historicos = @Hist,')
     a('       DoblePago = @Doble, Fallos = @Fallos;')
@@ -683,7 +812,11 @@ def main():
     print('  bonos de septiembre: %d (suman %s)' % (len(filas), total))
     print('  semanas:             %d' % sum(f['semanas'] for f in filas))
     print('  historicos:          %d' % len(historico))
-    print('  tipos del catalogo:  %d' % len(CATALOGO))
+    print('  tipos de destino:    %d (crea %d, marca por semana %d)'
+          % (len(set(f['tipo'] for f in filas)), len(NUEVOS), len(SEMANALES)))
+    print('Correspondencia (Excel -> produccion: filas):')
+    for (excel, prod), veces in sorted(Counter((f['tipo_excel'], f['tipo']) for f in filas).items()):
+        print('  %s -> %s: %d' % (plano(excel), plano(prod), veces))
     print('Omitidas (%d):' % len(omitidas))
     for x in omitidas:
         print('  - %s' % x)

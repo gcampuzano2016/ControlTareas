@@ -1222,35 +1222,54 @@ el grupo de menú «Bonos»:
 
 Seis tablas `Bono_*` y doce procedimientos `Sp_RTA_Bono*`. Ninguna tabla existente se modifica.
 
-### 22.2 Orden
+### 22.2 Estado y orden
 
-1. `docs/sql/2026-10-22-bonos-esquema.sql` — **ya aplicado en producción el 2026-10-22** (la base local es la de producción);
-   repetirlo no hace nada.
-2. **Antes de migrar:** cargar la cédula del usuario `3627051` en *Administración de Usuarios*. La migración identifica a cada
-   persona por cédula y por `Cod_Sap`; sin ella esa persona no se encuentra.
-3. **Migración**, en la máquina que tiene `RevisionBonos/9. Septiembre.xlsx` (el Excel y la salida no están en git: el
+**El módulo está en uso en producción desde el 2026-10-23** (comprobado en la base el 2026-10-27): el menú existe, Talento
+Humano armó el catálogo a mano (16 tipos, con otros nombres que los del Excel), octubre 2026 quedó **cerrado** con un bono y
+noviembre 2026 está **abierto**. El orden original de esta sección suponía un módulo sin estrenar y ya no aplica.
+
+| Paso | Estado |
+|---|---|
+| Esquema (`2026-10-22-bonos-esquema.sql`) | Aplicado el 2026-10-22; repetirlo no hace nada |
+| Binarios y páginas | Publicados; la última entrega (Lugar como combo y «valor por semana × semanas») se copió el 2026-10-27 |
+| Menú (`2026-10-22-bonos-menu.sql`) | **NO CORRER.** El menú ya existe y su visibilidad se restringió a mano: hoy solo lo ven los perfiles 4, 18, 21 y 41. El script la devolvería a «todos los perfiles» |
+| Migración de septiembre e históricos | **Pendiente**: espera la cédula de una persona de AGILITY (paso 1 abajo) |
+
+**Publicar una entrega nueva** del módulo: binarios **juntos** (`bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` +
+`bin\CapaNegocio.exe` + `bin\CapaDato.exe`) más las páginas y `.js` que cambien (`Formulario\Bonos*.aspx`,
+`Formulario\AdministrarBonos.ashx`, `Formulario\DescargarBonos.ashx`, `js\bonos*.js`), sin ningún script de base.
+
+**Trampa:** publicar el `.dll` sin los tres `.exe` de capa rompe el envío de correos (pasó el 18-09: 0 correos desde entonces y
+la bitácora no lo dijo). Los cuatro binarios se copian siempre juntos. **No publicar `Web.config`** (ver §19.2: producción no lo
+recibe desde el 2026-09-23 y publicarlo es una decisión aparte).
+
+**Migración, cuando se pueda:**
+
+1. **Antes:** Talento Humano carga la cédula del usuario `3627051` en *Administración de Usuarios*. La migración identifica a
+   cada persona por cédula y por `Cod_Sap`; sin ella esa fila no aparece y el script no migra nada (lo dice y se detiene).
+2. **Generar**, en la máquina que tiene `RevisionBonos/9. Septiembre.xlsx` (el Excel y la salida no están en git: el
    repositorio es público y no versiona nombres, cédulas ni montos):
    ```
    python -I docs/sql/generar-migracion-bonos.py
-   sqlcmd -S <servidor> -d ReporTarea -U <usuario> -P <clave> -b -i docs/sql/carga-generada/bonos-migracion.sql
    ```
-   Correr el script generado **dos veces**: las dos terminan en `VEREDICTO: OK`, y la segunda no inserta nada. Revisar la lista
-   de ajustes y omisiones que imprime (semanas escritas a mano ajustadas a su lunes; la fila de $0 no se migra). Septiembre debe
-   dar **3195,00** y debe haber **17** períodos históricos (abril 2025 a agosto 2026, solo con su total).
-4. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más:
-   - `Formulario\BonosProponer.aspx`, `Formulario\BonosRevisar.aspx`, `Formulario\BonosCatalogo.aspx`, `Formulario\BonosReporte.aspx`
-   - `js\bonosProponer.js`, `js\bonosRevisar.js`, `js\bonosCatalogo.js`, `js\bonosReporte.js`
-   - `Formulario\AdministrarBonos.ashx` y `Formulario\DescargarBonos.ashx`
-
-   **Trampa:** publicar el `.dll` sin los tres `.exe` de capa rompe el envío de correos (pasó el 18-09: 0 correos desde entonces y
-   la bitácora no lo dijo). Los cuatro binarios se copian siempre juntos.
-
-   **No publicar `Web.config` en esta entrega** (ver §19.2: producción no lo recibe desde el 2026-09-23 y publicarlo es una
-   decisión aparte).
-5. `docs/sql/2026-10-22-bonos-menu.sql` — **recién ahora, justo después de los binarios**: antes, la opción de menú llevaría a
-   páginas que todavía no existen en el servidor (lo mismo dice la cabecera del script).
-6. `docs/sql/2026-10-22-bonos-verificacion.sql` — debe dar `VEREDICTO: OK`. Imprime una línea por chequeo (`OK`, `FALLA` o
-   `PENDIENTE`); antes de la migración y del menú da `FALLA` a propósito, porque todo lo que no sea `OK` cuenta como falla.
+   Imprime la correspondencia de cada tipo del Excel con el tipo de producción (`DESTINO` en el generador, confirmada el
+   2026-10-27: por ejemplo «Standby F5 UIO» y «Standby F5 GYE» → «Bono Standby F5»; Nestlé y Linde por monto). La migración
+   **no duplica el catálogo**: solo crea «Bono Nuevo cargo» y marca «Bono Standby Networking» por semana. Si Talento Humano
+   renombra un tipo de destino antes de migrar, el script se detiene; hay que ajustar `DESTINO` y volver a generar.
+3. **Probar con ROLLBACK:** una copia del script generado con su `COMMIT TRANSACTION;` cambiado por
+   `ROLLBACK TRANSACTION;`. Debe llegar hasta el final sin `FALLO:` (la verificación de esa corrida da `FALLA` porque no quedó
+   nada: es lo esperado).
+4. **Correr de verdad dos veces:**
+   ```
+   sqlcmd -S <servidor> -d ReporTarea -U <usuario> -P <clave> -b -I -i docs/sql/carga-generada/bonos-migracion.sql
+   ```
+   Las dos terminan en `VEREDICTO: OK` y la segunda no inserta nada. Septiembre debe dar **3195,00** con **42** bonos, y debe
+   haber **17** períodos históricos (abril 2025 a agosto 2026, solo con su total). Se revierte entero si falta un tipo de
+   destino, si un tipo no coincide en «por semana» o si una semana de septiembre ya la paga otro bono de la misma persona y tipo.
+5. `docs/sql/2026-10-22-bonos-verificacion.sql`. Con el módulo en uso **no llega a `VEREDICTO: OK`** y no hace falta que llegue:
+   el chequeo 8 (menú) falla a propósito por la visibilidad restringida a mano, y el 6 (tipos sin concepto DOS y AGILITY) falla
+   hasta que Talento Humano complete los conceptos en el Catálogo. Los que sí deben dar `OK` después de migrar son el 1 a 5 y
+   el 7.
 
 ### 22.3 Lista para probar en producción
 
@@ -1283,12 +1302,24 @@ Es **obligatoria** antes de anunciar el módulo. Los roles de jefe y de Talento 
   misma entrega.
 - **Menú:** un colaborador sin gente a cargo ve el aviso y nada más; escribir la dirección de las otras tres pantallas lo manda a
   Principal.
+- **Entrega del 2026-10-27** (en Proponer y en Revisar; recargar con Ctrl+F5 la primera vez):
+  - **Lugar** es un combo con GUAYAQUIL, QUITO, CUENCA y AMBATO; el servidor rechaza cualquier otro valor.
+  - **Tipo por semana:** al marcar semanas, «N.º de semanas» se llena solo (no se edita) y Total = valor por semana × semanas.
+  - **Tipo no semanal:** «N.º de semanas» se escribe (1 a 52) y multiplica el Total y el sugerido; 0 o 53 da error.
+  - **Editar en Proponer:** abrir un bono y guardarlo sin tocar nada no cambia su Total (un total que no divide exacto se
+    muestra por semana con 4 decimales).
 
 ### 22.4 Reversa
 
-Reponer los binarios anteriores, todos juntos, y correr la reversa comentada al final de `2026-10-22-bonos-menu.sql`. Las
-tablas `Bono_*` pueden quedar: no las usa nada más. Revertir los binarios también deshace el §18 y el §19 si se publicaron en la
-misma entrega.
+**Una entrega del código:** reponer los binarios anteriores, todos juntos, con sus páginas y `.js`. No hace falta ningún script.
+
+**Sacar el módulo entero:** además, la reversa comentada al final de `2026-10-22-bonos-menu.sql`. Con el módulo en uso eso
+borra el menú y su visibilidad restringida a mano, así que es una decisión aparte. Las tablas `Bono_*` pueden quedar: no las usa
+nada más.
+
+**La migración:** no tiene reversa automática. Si hiciera falta, se borran los bonos `Origen = 'Migracion'` (con sus semanas y su
+bitácora) y los períodos de septiembre 2026 e históricos; «Bono Nuevo cargo» y el cambio a «por semana» de «Bono Standby
+Networking» se deshacen desde el Catálogo.
 
 ## 23. Procesos entre áreas (Entrega 2 de «Equipo, Calendario y Procesos»)
 

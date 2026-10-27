@@ -30,7 +30,7 @@ $(document).ready(function () {
     $('#brPersona').on('change', CambioPersona);
     $('#brTipo').on('change', function () { DibujarSemanas(); ActualizarSugerido(true); });
     $('#brValor').on('input', function () { brValorManual = true; ActualizarSugerido(false); });
-    $('#brLugar').on('input', function () { brLugarManual = true; });
+    $('#brLugar').on('change', function () { brLugarManual = true; });
     /* La pagina vive dentro del <form> de la maestra: Enter haria un postback. */
     $('#brPanelForm input, #brOverlay input').on('keydown', function (e) { if (e.which === 13) { e.preventDefault(); } });
     Cargar();

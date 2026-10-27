@@ -297,13 +297,15 @@ namespace CapaNegocio
             };
         }
 
-        /// <summary>Semanas, valor y largos. null = valido. Deja los lunes sin repetidos y ordenados.</summary>
+        /// <summary>Semanas, valor, lugar y largos. null = valido. Deja los lunes sin repetidos y ordenados y el lugar como en el combo.</summary>
         private static string ValidarContenido(EntBono b, EntBonoTipo tipo, DateTime hoy)
         {
+            string lugar = NegBonoReglas.LugarNormalizado(b.Lugar);
+            if (lugar != null) b.Lugar = lugar;
             string error = NegBonoFechas.ValidarSemanas(b.Lunes, tipo.PorSemana, hoy)
                         ?? NegBonoReglas.ValidarValor(tipo, b.Semanas, b.Valor, b.MotivoAjuste)
                         ?? (b.Valor > ValorMaximo ? "El valor es demasiado grande." : null)
-                        ?? Largo(b.Lugar, 100, "Lugar")
+                        ?? (lugar == null ? "El lugar debe ser Guayaquil, Quito, Cuenca o Ambato." : null)
                         ?? Largo(b.Observacion, 500, "Observación")
                         ?? Largo(b.MotivoAjuste, 500, "Motivo del ajuste");
             b.Lunes = b.Lunes.Distinct().OrderBy(l => l).ToList();

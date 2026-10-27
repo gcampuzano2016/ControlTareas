@@ -22,7 +22,7 @@ $(document).ready(function () {
     $('#bpPersona').on('change', function () { CambioPersona(); });
     $('#bpTipo').on('change', function () { DibujarSemanas(); ActualizarSugerido(true); });
     $('#bpValor').on('input', function () { bpValorManual = true; ActualizarSugerido(false); });
-    $('#bpLugar').on('input', function () { bpLugarManual = true; });
+    $('#bpLugar').on('change', function () { bpLugarManual = true; });
     /* La pagina vive dentro del <form> de la maestra: Enter haria un postback. */
     $('#bpPanelForm input').on('keydown', function (e) { if (e.which === 13) { e.preventDefault(); } });
     Cargar();
@@ -216,14 +216,14 @@ function AbrirFormulario(b) {
         $p.val(String(b.codUsuario));
         $ti.val(String(b.idTipo));
         $.each(b.lunes || [], function (i, l) { bpSemanasSel[l] = true; });
-        $('#bpLugar').val(b.lugar || '');
+        PonerLugar(b.lugar, true);
         $('#bpValor').val(Dinero(b.valor));
         $('#bpMotivo').val(b.motivoAjuste || '');
         $('#bpObservacion').val(b.observacion || '');
         var sug = Sugerido();
         bpValorManual = !(sug !== null && Math.abs(sug - Number(b.valor)) < 0.005);
     } else {
-        $('#bpLugar').val('');
+        PonerLugar('', false);
         $('#bpValor').val('');
         $('#bpMotivo').val('');
         $('#bpObservacion').val('');
@@ -251,9 +251,24 @@ function MostrarAvisoId() {
 function CambioPersona() {
     MostrarAvisoId();
     var g = PersonaPorCod($('#bpPersona').val());
-    if (!bpLugarManual) { $('#bpLugar').val(g ? (g.lugarSugerido || '') : ''); }
+    if (!bpLugarManual) { PonerLugar(g ? g.lugarSugerido : '', false); }
     DibujarSemanas();
     ActualizarSugerido(true);
+}
+
+/* Lugar es un combo de sucursales: el valor guardado se busca sin importar
+   mayusculas. Uno que no esta en la lista solo se conserva al editar ese bono. */
+function PonerLugar(valor, conservar) {
+    var $l = $('#bpLugar'), v = $.trim(valor || ''), hallado = '';
+    $l.find('option.bp-lugar-extra').remove();
+    $l.find('option').each(function () {
+        if (v !== '' && this.value.toLowerCase() === v.toLowerCase()) { hallado = this.value; }
+    });
+    if (hallado === '' && v !== '' && conservar) {
+        $('<option class="bp-lugar-extra"></option>').val(v).text(v).appendTo($l);
+        hallado = v;
+    }
+    $l.val(hallado);
 }
 
 function TipoActual() { return TipoPorId($('#bpTipo').val()); }

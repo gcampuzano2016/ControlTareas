@@ -70,6 +70,20 @@ namespace CapaPruebas
             Assert.AreEqual("", NegBonoReglas.EmpresaNormalizada(null));
         }
 
+        // ---------- Lugar ----------
+        [TestMethod]
+        public void LugarNormalizado_SucursalesVacioYOtros()
+        {
+            Assert.AreEqual("Guayaquil", NegBonoReglas.LugarNormalizado(" GUAYAQUIL "));
+            Assert.AreEqual("Quito", NegBonoReglas.LugarNormalizado("quito"));
+            Assert.AreEqual("Cuenca", NegBonoReglas.LugarNormalizado("Cuenca"));
+            Assert.AreEqual("Ambato", NegBonoReglas.LugarNormalizado("aMbAtO"));
+            Assert.AreEqual("", NegBonoReglas.LugarNormalizado(null));
+            Assert.AreEqual("", NegBonoReglas.LugarNormalizado("  "));
+            Assert.IsNull(NegBonoReglas.LugarNormalizado("Manta"));
+            Assert.IsNull(NegBonoReglas.LugarNormalizado("Quito & Guayaquil"));
+        }
+
         [TestMethod] public void Identificacion_Dos_UsaCodSap() => Assert.AreEqual("793", NegBonoReglas.Identificacion(P("1", "J", "DOS", " 793 ", null), out _));
         [TestMethod] public void Identificacion_Agility_RellenaCedula() => Assert.AreEqual("0912345678", NegBonoReglas.Identificacion(P("1", "J", "Agility", null, "912345678"), out _));
 

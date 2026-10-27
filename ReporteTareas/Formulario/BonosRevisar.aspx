@@ -15,7 +15,7 @@
         .br-dialogo { background: #fff; max-width: 560px; margin: 10vh auto 30px; padding: 20px; border-radius: 4px; }
         .br-lista { max-height: 260px; overflow-y: auto; margin: 6px 0 10px; }
     </style>
-    <script src="../js/bonosRevisar.js?v=1" type="text/javascript"></script>
+    <script src="../js/bonosRevisar.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -100,7 +100,13 @@
                             </div>
                             <div class="col-md-4 form-group">
                                 <label for="brLugar">Lugar</label>
-                                <input type="text" id="brLugar" class="form-control" maxlength="100" />
+                                <select id="brLugar" class="form-control">
+                                    <option value="">-- Seleccione --</option>
+                                    <option value="Guayaquil">GUAYAQUIL</option>
+                                    <option value="Quito">QUITO</option>
+                                    <option value="Cuenca">CUENCA</option>
+                                    <option value="Ambato">AMBATO</option>
+                                </select>
                             </div>
                         </div>
                         <div class="row" id="brFilaSemanas" style="display: none">

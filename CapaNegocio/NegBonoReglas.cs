@@ -36,6 +36,17 @@ namespace CapaNegocio
             return e == "DOS" || e == "AGILITY" ? e : "";
         }
 
+        /// <summary>Las sucursales del combo Lugar, escritas como en los bonos migrados.</summary>
+        public static readonly string[] Lugares = { "Guayaquil", "Quito", "Cuenca", "Ambato" };
+
+        /// <summary>La sucursal escrita como en <see cref="Lugares"/>; "" si viene vacio; null si no es una sucursal.</summary>
+        public static string LugarNormalizado(string lugar)
+        {
+            string l = (lugar ?? "").Trim();
+            if (l.Length == 0) return "";
+            return Lugares.FirstOrDefault(s => string.Equals(s, l, StringComparison.OrdinalIgnoreCase));
+        }
+
         /// <summary>Codigo SAP (DOS) o cedula de 10 digitos (AGILITY). Vacio y <paramref name="error"/> si falta el dato.</summary>
         public static string Identificacion(EntBonoPersona p, out string error)
         {

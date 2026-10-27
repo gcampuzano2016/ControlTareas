@@ -11,7 +11,7 @@
         .bp-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,.45); z-index: 2000; display: none; }
         .bp-dialogo { background: #fff; max-width: 460px; margin: 15vh auto 0; padding: 20px; border-radius: 4px; }
     </style>
-    <script src="../js/bonosProponer.js?v=2" type="text/javascript"></script>
+    <script src="../js/bonosProponer.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -82,12 +82,20 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-3 form-group">
-                                <label for="bpValor">Valor</label>
+                            <div class="col-md-2 form-group">
+                                <label for="bpValor">Valor por semana</label>
                                 <input type="text" id="bpValor" class="form-control" placeholder="0.00" />
                                 <span class="help-block" id="bpSugerido"></span>
                             </div>
-                            <div class="col-md-9 form-group">
+                            <div class="col-md-2 form-group">
+                                <label for="bpNumSemanas">N.º de semanas</label>
+                                <input type="number" id="bpNumSemanas" class="form-control" min="1" max="52" step="1" />
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label for="bpTotal">Total</label>
+                                <input type="text" id="bpTotal" class="form-control" readonly="readonly" tabindex="-1" />
+                            </div>
+                            <div class="col-md-6 form-group">
                                 <label for="bpMotivo">Motivo del ajuste <span id="bpMotivoReq" class="text-danger" style="display: none">(obligatorio: el valor difiere del sugerido)</span></label>
                                 <input type="text" id="bpMotivo" class="form-control" maxlength="300" />
                             </div>

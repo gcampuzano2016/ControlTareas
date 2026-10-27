@@ -22,6 +22,7 @@ $(document).ready(function () {
     $('#bpPersona').on('change', function () { CambioPersona(); });
     $('#bpTipo').on('change', function () { DibujarSemanas(); ActualizarSugerido(true); });
     $('#bpValor').on('input', function () { bpValorManual = true; ActualizarSugerido(false); });
+    $('#bpNumSemanas').on('input', function () { ActualizarSugerido(false); });
     $('#bpLugar').on('change', function () { bpLugarManual = true; });
     /* La pagina vive dentro del <form> de la maestra: Enter haria un postback. */
     $('#bpPanelForm input').on('keydown', function (e) { if (e.which === 13) { e.preventDefault(); } });
@@ -217,7 +218,10 @@ function AbrirFormulario(b) {
         $ti.val(String(b.idTipo));
         $.each(b.lunes || [], function (i, l) { bpSemanasSel[l] = true; });
         PonerLugar(b.lugar, true);
-        $('#bpValor').val(Dinero(b.valor));
+        var tipoB = TipoPorId(b.idTipo);
+        var n = tipoB && tipoB.porSemana ? NumSemanas() : (Number(b.semanas) >= 1 ? Number(b.semanas) : 1);
+        $('#bpNumSemanas').val(String(n));
+        $('#bpValor').val(PorSemanaDeTotal(Number(b.valor), n));
         $('#bpMotivo').val(b.motivoAjuste || '');
         $('#bpObservacion').val(b.observacion || '');
         var sug = Sugerido();
@@ -225,6 +229,7 @@ function AbrirFormulario(b) {
     } else {
         PonerLugar('', false);
         $('#bpValor').val('');
+        $('#bpNumSemanas').val('1');
         $('#bpMotivo').val('');
         $('#bpObservacion').val('');
     }
@@ -288,6 +293,9 @@ function DibujarSemanas() {
     var t = TipoActual();
     var porSemana = !!(t && t.porSemana);
     $('#bpFilaSemanas').toggle(porSemana);
+    /* Por semana el número sale de las marcadas; si no, se escribe (desde 1). */
+    var $n = $('#bpNumSemanas').prop('readonly', porSemana);
+    if (!porSemana && !(Number($n.val()) >= 1)) { $n.val('1'); }
     var $c = $('#bpSemanas').empty();
     if (!porSemana) { bpSemanasSel = {}; return; }
     var tomadas = Tomadas();
@@ -308,13 +316,41 @@ function DibujarSemanas() {
 
 function NumSemanas() { var n = 0; $.each(bpSemanasSel, function () { n++; }); return n; }
 
-/* null = sin sugerido (libre) */
-function Sugerido() {
+/* Semanas del bono: las marcadas si el tipo es por semana; si no, las escritas. NaN si no son un entero de 1 a 52. */
+function SemanasDelBono() {
+    var t = TipoActual();
+    if (t && t.porSemana) { return NumSemanas(); }
+    var s = $.trim($('#bpNumSemanas').val() || '');
+    var n = /^\d+$/.test(s) ? Number(s) : NaN;
+    return n >= 1 && n <= 52 ? n : NaN;
+}
+
+/* Sugerido por semana; null = sin sugerido (libre) */
+function SugeridoSemana() {
     var t = TipoActual();
     if (!t || t.valorSugerido === null || t.valorSugerido === undefined || t.valorSugerido === '') { return null; }
     var v = Number(t.valorSugerido);
-    if (isNaN(v)) { return null; }
-    return t.porSemana ? Math.round(v * NumSemanas() * 100) / 100 : v;
+    return isNaN(v) ? null : v;
+}
+
+/* Sugerido del bono entero (el que compara el servidor); null = libre */
+function Sugerido() {
+    var v = SugeridoSemana(), n = SemanasDelBono();
+    return v === null || isNaN(n) ? null : Math.round(v * n * 100) / 100;
+}
+
+/* Valor por semana x semanas; NaN si alguno no es válido */
+function Total() {
+    var v = LeerValor(), n = SemanasDelBono();
+    return isNaN(v) || isNaN(n) ? NaN : Math.round(v * n * 100) / 100;
+}
+
+/* Valor por semana de un total guardado. Si no divide exacto va con 4 decimales:
+   así x semanas (hasta 52) vuelve al mismo total al redondear a centavos. */
+function PorSemanaDeTotal(total, n) {
+    if (isNaN(total) || !(n >= 1)) { return Dinero(total); }
+    var dos = Math.round(total / n * 100) / 100;
+    return Math.abs(dos * n - total) < 0.005 ? Dinero(dos) : (total / n).toFixed(4);
 }
 
 function LeerValor() {
@@ -326,11 +362,14 @@ function LeerValor() {
 
 /* sigueSugerido = true: si el jefe no escribio el valor, el campo toma el sugerido. */
 function ActualizarSugerido(sigueSugerido) {
-    var sug = Sugerido();
-    if (sigueSugerido && !bpValorManual) { $('#bpValor').val(sug === null ? '' : Dinero(sug)); }
-    $('#bpSugerido').text(sug === null ? 'Sugerido: (libre)' : 'Sugerido: $' + Dinero(sug));
-    var v = LeerValor();
-    var difiere = sug !== null && (isNaN(v) || Math.abs(v - sug) >= 0.005);
+    var t = TipoActual();
+    if (t && t.porSemana) { $('#bpNumSemanas').val(String(NumSemanas())); }
+    var sugSemana = SugeridoSemana();
+    if (sigueSugerido && !bpValorManual) { $('#bpValor').val(sugSemana === null ? '' : Dinero(sugSemana)); }
+    $('#bpSugerido').text(sugSemana === null ? 'Sugerido: (libre)' : 'Sugerido: $' + Dinero(sugSemana) + ' por semana');
+    var total = Total(), sug = Sugerido();
+    $('#bpTotal').val(isNaN(total) ? '' : '$' + Dinero(total));
+    var difiere = sug !== null && (isNaN(total) || Math.abs(total - sug) >= 0.005);
     $('#bpMotivoReq').toggle(difiere);
 }
 
@@ -344,8 +383,11 @@ function Guardar(confirmarRepetido) {
     if (!t) { Mostrar('#bpError', 'Elija el tipo de bono.'); return; }
     var lunes = $.map(bpSemanasSel, function (v, k) { return k; }).sort();
     if (t.porSemana && !lunes.length) { Mostrar('#bpError', 'Marque al menos una semana.'); return; }
-    var valor = LeerValor();
-    if (isNaN(valor) || valor <= 0) { Mostrar('#bpError', 'El valor debe ser un número mayor que cero.'); return; }
+    var semanas = SemanasDelBono();
+    if (isNaN(semanas)) { Mostrar('#bpError', 'El número de semanas debe ser un entero entre 1 y 52.'); return; }
+    var porSemana = LeerValor();
+    if (isNaN(porSemana) || porSemana <= 0) { Mostrar('#bpError', 'El valor por semana debe ser un número mayor que cero.'); return; }
+    var valor = Total();
     var sug = Sugerido();
     var motivo = $.trim($('#bpMotivo').val() || '');
     if (sug !== null && Math.abs(valor - sug) >= 0.005 && !motivo) {
@@ -361,6 +403,7 @@ function Guardar(confirmarRepetido) {
         idTipo: Number(t.idTipo),
         lugar: $.trim($('#bpLugar').val() || ''),
         valor: String(valor),
+        semanas: t.porSemana ? 0 : semanas,
         motivoAjuste: motivo,
         observacion: $.trim($('#bpObservacion').val() || ''),
         lunes: t.porSemana ? lunes : [],

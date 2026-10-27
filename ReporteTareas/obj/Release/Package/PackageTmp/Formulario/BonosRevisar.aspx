@@ -15,7 +15,7 @@
         .br-dialogo { background: #fff; max-width: 560px; margin: 10vh auto 30px; padding: 20px; border-radius: 4px; }
         .br-lista { max-height: 260px; overflow-y: auto; margin: 6px 0 10px; }
     </style>
-    <script src="../js/bonosRevisar.js?v=2" type="text/javascript"></script>
+    <script src="../js/bonosRevisar.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -117,12 +117,20 @@
                             </div>
                         </div>
                         <div class="row">
-                            <div class="col-md-3 form-group">
-                                <label for="brValor">Valor</label>
+                            <div class="col-md-2 form-group">
+                                <label for="brValor">Valor por semana</label>
                                 <input type="text" id="brValor" class="form-control" placeholder="0.00" />
                                 <span class="help-block" id="brSugerido"></span>
                             </div>
-                            <div class="col-md-9 form-group">
+                            <div class="col-md-2 form-group">
+                                <label for="brNumSemanas">N.º de semanas</label>
+                                <input type="number" id="brNumSemanas" class="form-control" min="1" max="52" step="1" />
+                            </div>
+                            <div class="col-md-2 form-group">
+                                <label for="brTotal">Total</label>
+                                <input type="text" id="brTotal" class="form-control" readonly="readonly" tabindex="-1" />
+                            </div>
+                            <div class="col-md-6 form-group">
                                 <label for="brMotivo">Motivo del ajuste <span id="brMotivoReq" class="text-danger" style="display: none">(obligatorio: el valor difiere del sugerido)</span></label>
                                 <input type="text" id="brMotivo" class="form-control" maxlength="300" />
                             </div>

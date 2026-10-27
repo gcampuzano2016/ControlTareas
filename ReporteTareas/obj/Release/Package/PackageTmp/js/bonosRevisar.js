@@ -1,9 +1,10 @@
 ﻿/* ==========================================================================
    Revisar y aprobar bonos (Talento Humano) — BonosRevisar.aspx
-   Handler: AdministrarBonos.ashx (CargarRevisar, Aprobar, Ajustar, Rechazar,
-   AprobarVarios, RegistrarDirecto, AbrirMes, PrevioCierre, CerrarMes).
+   Handler: AdministrarBonos.ashx (CargarRevisar, Aprobar, Rechazar, Desactivar,
+   AprobarVarios, RegistrarDirecto, EditarBono, EliminarBono, AbrirMes,
+   PrevioCierre, CerrarMes).
    Secciones: utilidades · carga y tabla · filas y aprobación · diálogo ·
-   bono directo · cierre del mes.
+   bono directo y edición · cierre del mes.
    El sugerido y los filtros son ayudas del navegador; el servidor decide.
    ========================================================================== */
 
@@ -15,6 +16,7 @@ var brValorManual = false;
 var brLugarManual = false;
 var brSemanasSel = {};
 var brTomadas = [];          /* SemanasTomadas de la persona elegida en el bono directo (todos los periodos) */
+var brEditando = null;       /* bono que se edita en el formulario; null = bono directo nuevo */
 var brLote = 100;            /* AprobarVarios: el servidor revisa uno por uno, se manda por tandas */
 var brMeses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
@@ -22,12 +24,12 @@ $(document).ready(function () {
     $('#brFiltroEstado, #brFiltroJefe').on('change', function () { brSel = {}; DibujarTabla(); });
     $('#brSelTodos').on('change', MarcarTodos);
     $('#brAprobarSel').on('click', AprobarSeleccionados);
-    $('#brDirecto').on('click', AbrirDirecto);
-    $('#brCancelar').on('click', function () { $('#brPanelForm').hide(); });
+    $('#brDirecto').on('click', function () { AbrirFormulario(null); });
+    $('#brCancelar').on('click', function () { brEditando = null; $('#brPanelForm').hide(); });
     $('#brGuardar').on('click', function () { GuardarDirecto(false); });
     $('#brAbrirMes').on('click', AbrirMes);
     $('#brCerrarMes').on('click', CerrarMes);
-    $('#brPersona').on('change', CambioPersona);
+    $('#brPersona').on('change', function () { CambioPersona(false); });
     $('#brTipo').on('change', function () { DibujarSemanas(); ActualizarSugerido(true); });
     $('#brValor').on('input', function () { brValorManual = true; ActualizarSugerido(false); });
     $('#brNumSemanas').on('input', function () { ActualizarSugerido(false); });
@@ -236,7 +238,10 @@ function DibujarTabla() {
         if (b.motivoAjuste) { $('<span class="br-nota"></span>').text('Motivo: ' + b.motivoAjuste).appendTo($val); }
         if (b.observacion) { $('<span class="br-nota"></span>').text(b.observacion).appendTo($val); }
         $val.appendTo($tr);
-        var $est = $('<td></td>').append($('<span class="label"></span>').addClass(clases[b.estado] || 'label-default').text(b.estado));
+        var desactivado = b.estado === 'Rechazado' && b.origen === 'TalentoHumano';
+        var $est = $('<td></td>').append($('<span class="label"></span>')
+            .addClass(desactivado ? 'label-default' : (clases[b.estado] || 'label-default'))
+            .text(desactivado ? 'Desactivado' : b.estado));
         if (b.estado === 'Rechazado' && b.motivoRechazo) { $('<span class="br-rechazo"></span>').text('Motivo: ' + b.motivoRechazo).appendTo($est); }
         if (b.estado === 'Borrador' && Huerfano(b)) { $('<span class="br-rechazo"></span>').text('La persona ya no está a cargo de este jefe').appendTo($est); }
         $est.appendTo($tr);
@@ -245,14 +250,27 @@ function DibujarTabla() {
             Boton('Aprobar', 'btn-success', function () { Aprobar(b); }).appendTo($acc);
             $acc.append(' ');
         }
-        if (abierto && (b.estado === 'Enviado' || b.estado === 'Aprobado')) {
-            Boton('Ajustar', 'btn-default', function () { Ajustar(b); }).appendTo($acc);
+        if (abierto && b.estado !== 'Borrador' && b.idPeriodo === brDatos.periodo.idPeriodo) {
+            /* Editar deja el bono Aprobado: uno rechazado o desactivado vuelve a pagarse. */
+            Boton('Editar', 'btn-default', function () { AbrirFormulario(b); }).appendTo($acc);
             $acc.append(' ');
-            Boton('Rechazar', 'btn-danger', function () { Rechazar(b); }).appendTo($acc);
+        }
+        if (abierto && (b.estado === 'Enviado' || b.estado === 'Aprobado')) {
+            /* Un registro directo no tiene jefe a quien avisar: se desactiva. */
+            if (b.origen === 'TalentoHumano') {
+                Boton('Desactivar', 'btn-warning', function () { Desactivar(b); }).appendTo($acc);
+            } else {
+                Boton('Rechazar', 'btn-danger', function () { Rechazar(b); }).appendTo($acc);
+            }
+            $acc.append(' ');
         }
         if (abierto && b.estado === 'Borrador') {
-            /* Solo rechazar: libera las semanas; aprobar o ajustar un borrador no se puede. */
+            /* Rechazar libera las semanas; aprobar o editar un borrador no se puede (es del jefe). */
             Boton('Rechazar', 'btn-danger', function () { Rechazar(b); }).appendTo($acc);
+            $acc.append(' ');
+        }
+        if (abierto) {
+            Boton('Eliminar', 'btn-danger', function () { Eliminar(b); }).appendTo($acc);
         }
         $acc.appendTo($tr);
         $tr.appendTo($t);
@@ -287,20 +305,36 @@ function Aprobar(b) {
     Llamar('Aprobar', { idBono: b.idBono, estado: b.estado }, function () { TerminarFila(); }, TerminarFila);
 }
 
-function Ajustar(b) {
+function Desactivar(b) {
     if (brOcupado) { return; }
     AbrirDialogo({
-        titulo: 'Ajustar bono',
-        texto: (b.nombre || '') + ' · ' + (b.nombreTipo || '') + ' · valor actual $' + Dinero(b.valor),
-        valor: Dinero(b.valor), motivo: true, si: 'Ajustar',
+        titulo: 'Desactivar bono',
+        texto: (b.nombre || '') + ' · ' + (b.nombreTipo || '') + ' · $' + Dinero(b.valor)
+            + '. No se pagará y sus semanas quedan libres; con Editar se vuelve a activar.',
+        valor: null, motivo: true, motivoOpcional: true, si: 'Desactivar',
         enSi: function (v, fin) {
-            var n = LeerNumero(v.valor);
-            if (isNaN(n) || n <= 0) { fin('El valor debe ser un número mayor que cero.'); return; }
-            if (!v.motivo) { fin('El motivo es obligatorio.'); return; }
             Ocupado(true);
-            Llamar('Ajustar', { idBono: b.idBono, estado: b.estado, valor: String(n), motivo: v.motivo },
+            Llamar('Desactivar', { idBono: b.idBono, estado: b.estado, motivo: v.motivo },
                 function () { fin(null); TerminarFila(); },
                 function (m) { fin(m); Cargar(); Ocupado(false); });
+        }
+    });
+}
+
+function Eliminar(b) {
+    if (brOcupado) { return; }
+    AbrirDialogo({
+        titulo: 'Eliminar bono',
+        texto: (b.nombre || '') + ' · ' + (b.nombreTipo || '') + ' · $' + Dinero(b.valor) + ' (' + b.estado
+            + '). Se borra de forma definitiva; solo queda el registro en la bitácora.',
+        valor: null, motivo: false, si: 'Eliminar',
+        enSi: function (v, fin) {
+            Ocupado(true);
+            Llamar('EliminarBono', { idBono: b.idBono, estado: b.estado }, function () {
+                fin(null);
+                if (brEditando && brEditando.idBono === b.idBono) { brEditando = null; $('#brPanelForm').hide(); }
+                TerminarFila();
+            }, function (m) { fin(m); Cargar(); Ocupado(false); });
         }
     });
 }
@@ -383,7 +417,7 @@ function TerminarLote(aprobados, total, fallidos, errorTanda) {
 }
 
 /* ---------- diálogo único ---------- */
-/* op: {titulo, texto, valor (texto inicial o null = sin campo), motivo (bool), lista ([texto]),
+/* op: {titulo, texto, valor (texto inicial o null = sin campo), motivo (bool), motivoOpcional (bool), lista ([texto]),
         si (rótulo o null = sin botón), no (rótulo), enSi(vals, fin)}
    fin(null) cierra; fin('mensaje') lo muestra dentro y deja reintentar. */
 
@@ -394,6 +428,7 @@ function AbrirDialogo(op) {
     $('#brDialogoCampos').toggle(hayCampos);
     $('#brGrupoValor').toggle(op.valor !== null && op.valor !== undefined);
     $('#brGrupoMotivo').toggle(!!op.motivo);
+    $('#brMotivoOblig').text(op.motivoOpcional ? '(opcional)' : '(obligatorio)').toggleClass('text-danger', !op.motivoOpcional);
     $('#brDialogoValor').val(op.valor || '');
     $('#brDialogoMotivo').val('');
     var $l = $('#brDialogoLista').empty();
@@ -428,44 +463,75 @@ function LeerNumero(texto) {
     return isNaN(n) ? NaN : n;
 }
 
-/* ---------- registrar bono directo ---------- */
+/* ---------- registrar bono directo y editar ---------- */
 
-function AbrirDirecto() {
+/* b = null: bono directo nuevo. b = un bono de la tabla: el mismo formulario con sus datos (la persona no cambia). */
+function AbrirFormulario(b) {
     if (brOcupado || !brDatos.periodo) { return; }
+    brEditando = b;
     brSemanasSel = {};
     brTomadas = [];
-    brValorManual = false;
-    brLugarManual = false;
+    brValorManual = !!b;
+    brLugarManual = !!b;
     var $p = $('#brPersona').empty();
-    var personas = brDatos.personas.slice().sort(function (a, b) { return String(a.nombre).localeCompare(String(b.nombre)); });
+    var personas = brDatos.personas.slice().sort(function (x, y) { return String(x.nombre).localeCompare(String(y.nombre)); });
     $.each(personas, function (i, g) { $('<option></option>').val(g.codUsuario).text(g.nombre + ' (' + g.empresa + ')').appendTo($p); });
+    if (b && !PersonaPorCod(b.codUsuario)) { $('<option></option>').val(b.codUsuario).text(b.nombre || b.codUsuario).appendTo($p); }
+    $p.prop('disabled', !!b);
     var $ti = $('#brTipo').empty();
-    $.each(brDatos.tipos, function (i, t) { if (t.activo) { $('<option></option>').val(t.idTipo).text(t.nombre).appendTo($ti); } });
-    $('#brLugar').val('');
-    $('#brValor').val('');
-    $('#brNumSemanas').val('1');
-    $('#brMotivo').val('');
-    $('#brObservacion').val('');
+    $.each(brDatos.tipos, function (i, t) {
+        if (t.activo || (b && Number(t.idTipo) === Number(b.idTipo))) { $('<option></option>').val(t.idTipo).text(t.nombre).appendTo($ti); }
+    });
+    $('#brTituloForm').text(b ? 'Editar bono (queda Aprobado)' : 'Registrar bono directo (queda Aprobado)');
+    $('#brGuardar').text(b ? 'Guardar cambios' : 'Registrar');
+    if (b) {
+        $p.val(b.codUsuario);
+        $ti.val(String(b.idTipo));
+        $('#brLugar').val($('#brLugar option').filter(function () { return this.value === b.lugar; }).length ? b.lugar : '');
+        $.each(b.lunes || [], function (i, l) { brSemanasSel[l] = true; });
+        var t = TipoPorId(b.idTipo);
+        var n = t && t.porSemana ? (b.lunes || []).length : Number(b.semanas);
+        if (!(n >= 1)) { n = 1; }
+        $('#brNumSemanas').val(String(n));
+        $('#brValor').val(PorSemanaDeTotal(b.valor, n));
+        $('#brMotivo').val(b.motivoAjuste || '');
+        $('#brObservacion').val(b.observacion || '');
+    } else {
+        $('#brLugar').val('');
+        $('#brValor').val('');
+        $('#brNumSemanas').val('1');
+        $('#brMotivo').val('');
+        $('#brObservacion').val('');
+    }
     Mostrar('#brError', '');
     $('#brPanelForm').show();
-    $('#brPersona').focus();
-    CambioPersona();
+    (b ? $('#brTipo') : $('#brPersona')).focus();
+    CambioPersona(!!b);
 }
 
-/* Las semanas ya tomadas de la persona (todos los periodos) las da el servidor. */
+/* Valor por semana a partir del total guardado: 2 decimales si la división es exacta. */
+function PorSemanaDeTotal(total, n) {
+    var t = Number(total);
+    if (isNaN(t) || !(n >= 1)) { return ''; }
+    var v = t / n;
+    return Math.abs(Math.round(v * 100) / 100 * n - t) < 0.005 ? v.toFixed(2) : v.toFixed(4);
+}
+
+/* Las semanas ya tomadas de la persona (todos los periodos) las da el servidor.
+   conservar: al abrir la edición se quedan las semanas y el valor del bono. */
 var brPedidoPersona = 0;
-function CambioPersona() {
+function CambioPersona(conservar) {
     var cod = $('#brPersona').val(), mio = ++brPedidoPersona;
     brTomadas = [];
-    brSemanasSel = {};
+    if (!conservar) { brSemanasSel = {}; }
     DibujarSemanas();
-    ActualizarSugerido(true);
+    ActualizarSugerido(!conservar);
     if (!cod) { return; }
     Llamar('SemanasTomadas', { codUsuario: cod }, function (r) {
         if (mio !== brPedidoPersona) { return; }
         brTomadas = r || [];
         DibujarSemanas();
-        ActualizarSugerido(true);
+        ActualizarSugerido(!conservar);
     }, function (m) {
         if (mio === brPedidoPersona) { Mostrar('#brError', m); }
     });
@@ -478,6 +544,7 @@ function Tomadas() {
     var tipo = Number($('#brTipo').val()), set = {};
     $.each(brTomadas, function (i, s) {
         if (Number(s.idTipo) !== tipo) { return; }
+        if (brEditando && Number(s.idBono) === Number(brEditando.idBono)) { return; } /* las del propio bono no están tomadas */
         $.each(s.lunes || [], function (j, l) { set[l] = true; });
     });
     return set;
@@ -571,9 +638,10 @@ function GuardarDirecto(confirmarRepetido) {
     }
     Mostrar('#brError', '');
     Ocupado(true);
-    Llamar('RegistrarDirecto', {
-        idBono: 0,
-        estado: '',
+    var ed = brEditando;
+    Llamar(ed ? 'EditarBono' : 'RegistrarDirecto', {
+        idBono: ed ? ed.idBono : 0,
+        estado: ed ? ed.estado : '',
         codUsuario: cod,
         idTipo: Number(t.idTipo),
         lugar: $.trim($('#brLugar').val() || ''),
@@ -585,6 +653,7 @@ function GuardarDirecto(confirmarRepetido) {
         confirmarRepetido: !!confirmarRepetido
     }, function () {
         Ocupado(false);
+        brEditando = null;
         $('#brPanelForm').hide();
         Cargar();
     }, function (m) {
@@ -593,7 +662,7 @@ function GuardarDirecto(confirmarRepetido) {
     }, function (aviso) {
         Ocupado(false);
         AbrirDialogo({
-            titulo: 'Bono repetido', texto: aviso, si: 'Registrar de todos modos',
+            titulo: 'Bono repetido', texto: aviso, si: ed ? 'Guardar de todos modos' : 'Registrar de todos modos',
             enSi: function (v, fin) { fin(null); GuardarDirecto(true); }
         });
     });

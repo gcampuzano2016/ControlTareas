@@ -391,6 +391,7 @@ namespace JsonJQueryNetBonos
                 Estado = Campo(p, "estado"),
                 CodUsuario = Campo(p, "codUsuario"),
                 IdTipo = Entero(Campo(p, "idTipo")),
+                Semanas = Entero(Campo(p, "semanas")),
                 Lugar = Campo(p, "lugar"),
                 MotivoAjuste = Campo(p, "motivoAjuste"),
                 Observacion = Campo(p, "observacion")

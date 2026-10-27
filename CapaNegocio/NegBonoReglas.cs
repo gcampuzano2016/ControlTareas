@@ -76,11 +76,20 @@ namespace CapaNegocio
             return "";
         }
 
-        /// <summary>Por semana: tarifa x semanas; si no, el sugerido del tipo. Null si el tipo no tiene sugerido.</summary>
+        /// <summary>
+        /// Tarifa x semanas. En un tipo no semanal las semanas son las escritas a
+        /// mano (0 = no se escribieron, cuenta como 1). Null si el tipo no tiene sugerido.
+        /// </summary>
         public static decimal? Sugerido(EntBonoTipo t, int semanas)
         {
             if (t == null || !t.ValorSugerido.HasValue) return null;
-            return t.PorSemana ? t.ValorSugerido.Value * semanas : t.ValorSugerido.Value;
+            return t.ValorSugerido.Value * (t.PorSemana ? semanas : Math.Max(semanas, 1));
+        }
+
+        /// <summary>Semanas escritas a mano en un tipo no semanal: 0 (no se escribieron) a 52. null = valido.</summary>
+        public static string ValidarSemanasEscritas(int semanas)
+        {
+            return semanas < 0 || semanas > 52 ? "El número de semanas debe estar entre 1 y 52." : null;
         }
 
         /// <summary>null = valido; si no, el mensaje. Valor &gt; 0; si difiere del sugerido, el motivo es obligatorio.</summary>

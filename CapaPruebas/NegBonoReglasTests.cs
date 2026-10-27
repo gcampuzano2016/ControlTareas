@@ -122,6 +122,19 @@ namespace CapaPruebas
         [TestMethod] public void Sugerido_PorSemana_TarifaPorSemanas() => Assert.AreEqual(112.50m, NegBonoReglas.Sugerido(T(1, true, 37.50m), 3));
         [TestMethod] public void Sugerido_SinSugerido_Null() => Assert.IsNull(NegBonoReglas.Sugerido(T(1, false, null), 0));
         [TestMethod] public void Sugerido_NoSemanal_EsElSugerido() => Assert.AreEqual(50m, NegBonoReglas.Sugerido(T(1, false, 50m), 0));
+        [TestMethod] public void Sugerido_NoSemanal_UnaSemana_EsElSugerido() => Assert.AreEqual(50m, NegBonoReglas.Sugerido(T(1, false, 50m), 1));
+        [TestMethod] public void Sugerido_NoSemanal_ConSemanas_Multiplica() => Assert.AreEqual(150m, NegBonoReglas.Sugerido(T(1, false, 50m), 3));
+        [TestMethod] public void Valor_NoSemanal_TotalDeLasSemanas_NoPideMotivo() => Assert.IsNull(NegBonoReglas.ValidarValor(T(1, false, 50m), 3, 150m, ""));
+
+        [TestMethod]
+        public void ValidarSemanasEscritas_Rango()
+        {
+            Assert.IsNull(NegBonoReglas.ValidarSemanasEscritas(0));
+            Assert.IsNull(NegBonoReglas.ValidarSemanasEscritas(1));
+            Assert.IsNull(NegBonoReglas.ValidarSemanasEscritas(52));
+            Assert.IsNotNull(NegBonoReglas.ValidarSemanasEscritas(-1));
+            Assert.IsNotNull(NegBonoReglas.ValidarSemanasEscritas(53));
+        }
         [TestMethod] public void Valor_DistintoDelSugeridoSinMotivo_Error() => Assert.IsNotNull(NegBonoReglas.ValidarValor(T(1, true, 37.50m), 2, 70m, ""));
         [TestMethod] public void Valor_DistintoDelSugeridoConMotivo_Vale() => Assert.IsNull(NegBonoReglas.ValidarValor(T(1, true, 37.50m), 2, 70m, "Una guardia parcial"));
         [TestMethod] public void Valor_IgualAlSugerido_NoPideMotivo() => Assert.IsNull(NegBonoReglas.ValidarValor(T(1, true, 37.50m), 2, 75m, ""));

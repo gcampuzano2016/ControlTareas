@@ -277,7 +277,8 @@ namespace CapaNegocio
         private static EntBono Preparar(EntBono b, EntBonoPersona persona, EntBonoTipo tipo, EntBonoPeriodo periodo)
         {
             List<DateTime> lunes = (b.Lunes ?? new List<DateTime>()).Select(l => l.Date).ToList();
-            int semanas = lunes.Distinct().Count();
+            // Por semana cuentan las marcadas; si no, las que se escribieron a mano (0 = ninguna).
+            int semanas = tipo.PorSemana ? lunes.Distinct().Count() : b.Semanas;
             return new EntBono
             {
                 IdBono = b.IdBono,
@@ -303,6 +304,7 @@ namespace CapaNegocio
             string lugar = NegBonoReglas.LugarNormalizado(b.Lugar);
             if (lugar != null) b.Lugar = lugar;
             string error = NegBonoFechas.ValidarSemanas(b.Lunes, tipo.PorSemana, hoy)
+                        ?? (tipo.PorSemana ? null : NegBonoReglas.ValidarSemanasEscritas(b.Semanas))
                         ?? NegBonoReglas.ValidarValor(tipo, b.Semanas, b.Valor, b.MotivoAjuste)
                         ?? (b.Valor > ValorMaximo ? "El valor es demasiado grande." : null)
                         ?? (lugar == null ? "El lugar debe ser Guayaquil, Quito, Cuenca o Ambato." : null)

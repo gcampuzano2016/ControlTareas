@@ -217,9 +217,35 @@ namespace CapaNegocio
                     return b.Estado == BonoEstados.Enviado || b.Estado == BonoEstados.Aprobado || b.Estado == BonoEstados.Borrador
                         ? null
                         : "Solo se pueden rechazar bonos en borrador, enviados o aprobados.";
+                case "Desactivar":
+                    return b.Estado == BonoEstados.Enviado || b.Estado == BonoEstados.Aprobado
+                        ? null
+                        : "Solo se pueden desactivar bonos enviados o aprobados.";
                 default:
                     return "Acción no válida.";
             }
+        }
+
+        /// <summary>
+        /// Talento Humano edita todos los campos (menos la persona) de un bono
+        /// enviado, aprobado o rechazado del mes abierto; al guardar queda
+        /// Aprobado. Un borrador sigue siendo del jefe.
+        /// </summary>
+        public static string PuedeEditarRevisando(EntBono b, EntBonoPeriodo p)
+        {
+            if (!EstaAbierto(p)) return SinMesAbierto;
+            if (b.IdPeriodo != p.IdPeriodo) return "El bono no pertenece al mes abierto.";
+            if (b.Estado != BonoEstados.Enviado && b.Estado != BonoEstados.Aprobado && b.Estado != BonoEstados.Rechazado)
+                return "Solo se pueden editar bonos enviados, aprobados, rechazados o desactivados.";
+            return null;
+        }
+
+        /// <summary>Talento Humano elimina cualquier bono del mes abierto o pendiente; lo cerrado no se toca.</summary>
+        public static string PuedeEliminarRevisando(EntBono b, EntBonoPeriodo p)
+        {
+            if (!EstaAbierto(p)) return SinMesAbierto;
+            if (b.IdPeriodo.HasValue && b.IdPeriodo.Value != p.IdPeriodo) return "El bono no pertenece al mes abierto.";
+            return null;
         }
 
         /// <summary>Editar un rechazado lo devuelve a Borrador; los demas conservan su estado.</summary>

@@ -15,7 +15,7 @@
         .br-dialogo { background: #fff; max-width: 560px; margin: 10vh auto 30px; padding: 20px; border-radius: 4px; }
         .br-lista { max-height: 260px; overflow-y: auto; margin: 6px 0 10px; }
     </style>
-    <script src="../js/bonosRevisar.js?v=3" type="text/javascript"></script>
+    <script src="../js/bonosRevisar.js?v=4" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -58,7 +58,7 @@
                                     <option value="">Todos (sin borradores)</option>
                                     <option value="Enviado">Enviado</option>
                                     <option value="Aprobado">Aprobado</option>
-                                    <option value="Rechazado">Rechazado</option>
+                                    <option value="Rechazado">Rechazado o desactivado</option>
                                     <option value="Borrador">Borrador (sin enviar)</option>
                                 </select>
                             </div>
@@ -87,7 +87,7 @@
                 </div>
 
                 <div class="panel panel-default" id="brPanelForm" style="display: none">
-                    <div class="panel-heading">Registrar bono directo (queda Aprobado)</div>
+                    <div class="panel-heading" id="brTituloForm">Registrar bono directo (queda Aprobado)</div>
                     <div class="panel-body">
                         <div class="row">
                             <div class="col-md-4 form-group">
@@ -148,7 +148,7 @@
             </div>
         </div>
 
-        <%-- Diálogo único: lo llenan Confirmar repetido, Ajustar, Rechazar y Cierre. --%>
+        <%-- Diálogo único: lo llenan Confirmar repetido, Rechazar, Desactivar, Eliminar y Cierre. --%>
         <div id="brOverlay" class="br-overlay">
             <div class="br-dialogo">
                 <h4 id="brDialogoTitulo" style="margin-top: 0"></h4>
@@ -159,7 +159,7 @@
                         <input type="text" id="brDialogoValor" class="form-control" placeholder="0.00" />
                     </div>
                     <div class="form-group" id="brGrupoMotivo">
-                        <label for="brDialogoMotivo">Motivo <span class="text-danger">(obligatorio)</span></label>
+                        <label for="brDialogoMotivo">Motivo <span id="brMotivoOblig" class="text-danger">(obligatorio)</span></label>
                         <input type="text" id="brDialogoMotivo" class="form-control" maxlength="300" />
                     </div>
                 </div>

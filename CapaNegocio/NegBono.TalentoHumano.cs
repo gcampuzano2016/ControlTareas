@@ -10,13 +10,15 @@ namespace CapaNegocio
     public static partial class NegBono
     {
         private static readonly string[] Familias = { "Standby", "Contrato", "Otro" };
+        private const string MotivoDesactivar = "Desactivado por Talento Humano.";
 
         /// <summary>
-        /// accion = Aprobar | Ajustar | Rechazar sobre un bono del mes abierto.
+        /// accion = Aprobar | Ajustar | Rechazar | Desactivar sobre un bono del mes abierto.
         /// Aprobar y Ajustar dejan Aprobado: vuelven a exigir identificacion y a
         /// chequear doble pago, y toman la copia de empresa, nombre e
         /// identificacion. Ajustar exige valor y motivo; Rechazar, motivo, y
-        /// avisa al jefe por correo. <paramref name="valor"/> solo cuenta al ajustar.
+        /// avisa al jefe por correo. Desactivar deja Rechazado sin correo y con
+        /// motivo opcional. <paramref name="valor"/> solo cuenta al ajustar.
         /// </summary>
         public static EntBonoResultado Revisar(int idBono, string estadoEsperado, string accion, decimal? valor, string motivo,
             string yo, Func<string, string, string, bool> enviarCorreo, string urlProponer)
@@ -41,7 +43,8 @@ namespace CapaNegocio
             string snapEmpresa = null, snapNombre = null, snapIdent = null;
             List<EntBonoPersona> activas = LeerPersonasActivas();
 
-            if (accion == "Rechazar")
+            if (accion == "Desactivar" && motivo.Length == 0) motivo = MotivoDesactivar;
+            if (accion == "Rechazar" || accion == "Desactivar")
             {
                 if (motivo.Length == 0) return Error("Escriba el motivo del rechazo.");
                 error = Largo(motivo, 500, "Motivo del rechazo");
@@ -98,6 +101,7 @@ namespace CapaNegocio
             }
 
             string mensaje = accion == "Rechazar" ? "Bono rechazado."
+                           : accion == "Desactivar" ? "Bono desactivado."
                            : accion == "Ajustar" ? "Bono ajustado a " + Dinero(nuevoValor.Value) + " y aprobado."
                            : "Bono aprobado.";
             return Bien(mensaje, avisos);
@@ -142,6 +146,72 @@ namespace CapaNegocio
             int r = GuardarEnBase(nuevo, "", BonoEstados.Aprobado, yo);
             if (r <= 0) return Error(MensajeCodigo(r, nuevo));
             return Bien("Bono registrado y aprobado.", null);
+        }
+
+        /// <summary>
+        /// Talento Humano corrige un bono enviado, aprobado o rechazado del mes
+        /// abierto: tipo, lugar, semanas, valor, motivo y observacion (la persona
+        /// no cambia). Queda Aprobado, con la copia de empresa, nombre e
+        /// identificacion de ahora; conserva su origen y su jefe.
+        /// </summary>
+        public static EntBonoResultado EditarRevisando(EntBono b, string yo, bool confirmarRepetido, DateTime hoy)
+        {
+            if (b == null) return Error("Faltan los datos del bono.");
+            yo = NegBonoReglas.Normalizar(yo);
+
+            EntBonoPeriodo periodo = Abierto(LeerPeriodos());
+            if (periodo == null) return Error(MsgSinMes);
+
+            EntBono actual = BonoVivo(b.IdBono);
+            if (actual == null || actual.Estado != (b.Estado ?? "")) return Error(MsgCambio);
+            string error = NegBonoReglas.PuedeEditarRevisando(actual, periodo);
+            if (error != null) return Error(error);
+            if (NegBonoReglas.Normalizar(b.CodUsuario) != NegBonoReglas.Normalizar(actual.CodUsuario))
+                return Error("No se puede cambiar la persona de un bono; elimínelo y registre uno nuevo.");
+
+            EntBonoPersona persona = Persona(LeerPersonasActivas(), actual.CodUsuario);
+            if (persona == null) return Error(NombreBono(actual, null) + " ya no está activo: el bono no se puede editar.");
+
+            EntBonoTipo tipo = Tipo(LeerTipos(), b.IdTipo);
+            if (tipo == null) return Error("El tipo de bono no existe.");
+            if (!tipo.Activo && actual.IdTipo != tipo.IdTipo) return Error("El tipo «" + tipo.Nombre + "» está desactivado.");
+
+            string ident = NegBonoReglas.Identificacion(persona, out error);
+            if (error != null) return Error(error);
+
+            EntBono nuevo = Preparar(b, persona, tipo, periodo);
+            nuevo.IdBono = actual.IdBono;
+            error = ValidarContenido(nuevo, tipo, hoy);
+            if (error != null) return Error(error);
+
+            EntBonoResultado repetido = ChequearRepeticiones(nuevo, tipo, confirmarRepetido);
+            if (repetido != null) return repetido;
+
+            nuevo.Identificacion = ident;
+            nuevo.Origen = actual.Origen;
+            nuevo.CodJefe = actual.CodJefe ?? "";
+
+            int r = GuardarEnBase(nuevo, actual.Estado, BonoEstados.Aprobado, yo);
+            if (r <= 0) return Error(MensajeCodigo(r, nuevo));
+            return Bien("Bono actualizado y aprobado.", null);
+        }
+
+        /// <summary>Talento Humano borra un bono del mes abierto (o pendiente) en cualquier estado; la bitacora lo conserva.</summary>
+        public static EntBonoResultado EliminarRevisando(int idBono, string estadoEsperado, string yo)
+        {
+            yo = NegBonoReglas.Normalizar(yo);
+            EntBonoPeriodo periodo = Abierto(LeerPeriodos());
+            if (periodo == null) return Error(MsgSinMes);
+
+            EntBono actual = BonoVivo(idBono);
+            if (actual == null || actual.Estado != (estadoEsperado ?? "")) return Error(MsgCambio);
+
+            string error = NegBonoReglas.PuedeEliminarRevisando(actual, periodo);
+            if (error != null) return Error(error);
+
+            int r = BorrarEnBase(idBono, actual.Estado, yo);
+            if (r != 0) return Error(MensajeCodigo(r, actual));
+            return Bien("Bono eliminado.", null);
         }
 
         /// <summary>

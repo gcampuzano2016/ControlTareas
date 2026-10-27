@@ -38,8 +38,8 @@ namespace JsonJQueryNetBonos
         private static readonly string[] AccionesProponer = { "CargarProponer", "GuardarBorrador", "Borrar", "Enviar" };
         private static readonly string[] AccionesRevisar =
         {
-            "CargarRevisar", "Aprobar", "Ajustar", "Rechazar", "AprobarVarios",
-            "RegistrarDirecto", "AbrirMes", "PrevioCierre", "CerrarMes", "SemanasTomadas"
+            "CargarRevisar", "Aprobar", "Ajustar", "Rechazar", "Desactivar", "AprobarVarios",
+            "RegistrarDirecto", "EditarBono", "EliminarBono", "AbrirMes", "PrevioCierre", "CerrarMes", "SemanasTomadas"
         };
         private static readonly string[] AccionesCatalogo = { "ListarTipos", "GuardarTipo" };
         private static readonly string[] AccionesReporte = { "ListarMeses" };
@@ -132,10 +132,14 @@ namespace JsonJQueryNetBonos
                     case "CargarRevisar": return CargarRevisar();
                     case "Aprobar":
                     case "Ajustar":
-                    case "Rechazar": return Revisar(context, p, accion);
+                    case "Rechazar":
+                    case "Desactivar": return Revisar(context, p, accion);
                     case "SemanasTomadas": return SemanasTomadas(p);
                     case "AprobarVarios": return AprobarVarios(context, p);
                     case "RegistrarDirecto": return RegistrarDirecto(context, p);
+                    case "EditarBono": return EditarBono(context, p);
+                    case "EliminarBono":
+                        return Responder(NegBono.EliminarRevisando(Entero(Campo(p, "idBono")), Campo(p, "estado"), Usuario(context)));
                     case "AbrirMes": return AbrirMes(context);
                     case "PrevioCierre": return PrevioCierre();
                     case "CerrarMes": return Responder(NegBono.CerrarMes(Usuario(context)));
@@ -320,6 +324,15 @@ namespace JsonJQueryNetBonos
             EntBono b = LeerBono(p, out error);
             if (b == null) { return Mensaje("0", error, "warning"); }
             return Responder(NegBono.RegistrarDirecto(b, Usuario(context), Bool(Campo(p, "confirmarRepetido")), DateTime.Today));
+        }
+
+        private string EditarBono(HttpContext context, object p)
+        {
+            string error;
+            EntBono b = LeerBono(p, out error);
+            if (b == null) { return Mensaje("0", error, "warning"); }
+            if (b.IdBono <= 0) { return Mensaje("0", "Falta el bono a editar.", "warning"); }
+            return Responder(NegBono.EditarRevisando(b, Usuario(context), Bool(Campo(p, "confirmarRepetido")), DateTime.Today));
         }
 
         private string AbrirMes(HttpContext context)

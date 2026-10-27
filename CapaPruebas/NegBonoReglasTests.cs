@@ -486,5 +486,55 @@ namespace CapaPruebas
         [TestMethod] public void Variacion_AnteriorCero_Null() => Assert.IsNull(NegBonoReglas.Variacion(100m, 0m));
         [TestMethod] public void Variacion_AnteriorNull_Null() => Assert.IsNull(NegBonoReglas.Variacion(100m, null));
         [TestMethod] public void Variacion_Septiembre() => Assert.AreEqual(-147.5m / 3342.5m, NegBonoReglas.Variacion(3195m, 3342.5m));
+
+        // ---------- Editar, eliminar y desactivar desde Revisar ----------
+        [TestMethod]
+        public void PuedeEditarRevisando_EnviadoAprobadoRechazado_Si_Borrador_No()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            Assert.IsNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Enviado), ab));
+            Assert.IsNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Aprobado), ab));
+            Assert.IsNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Rechazado), ab));
+            Assert.IsNotNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Borrador), ab));
+        }
+
+        [TestMethod]
+        public void PuedeEditarRevisando_SinMesAbiertoOtroPeriodoOPendiente_No()
+        {
+            Assert.IsNotNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Aprobado), Per(BonoPeriodoEstados.Cerrado)));
+            Assert.IsNotNull(NegBonoReglas.PuedeEditarRevisando(B(1, "U1", 5, BonoEstados.Aprobado), Per(BonoPeriodoEstados.Abierto, 2)));
+            var pendiente = B(1, "U1", 5, BonoEstados.Aprobado);
+            pendiente.IdPeriodo = null;
+            Assert.IsNotNull(NegBonoReglas.PuedeEditarRevisando(pendiente, Per(BonoPeriodoEstados.Abierto)));
+        }
+
+        [TestMethod]
+        public void PuedeEliminarRevisando_CualquierEstadoDelMesAbiertoOPendiente_Si()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            foreach (string e in new[] { BonoEstados.Borrador, BonoEstados.Enviado, BonoEstados.Aprobado, BonoEstados.Rechazado })
+                Assert.IsNull(NegBonoReglas.PuedeEliminarRevisando(B(1, "U1", 5, e), ab));
+            var pendiente = B(1, "U1", 5, BonoEstados.Aprobado);
+            pendiente.IdPeriodo = null;
+            Assert.IsNull(NegBonoReglas.PuedeEliminarRevisando(pendiente, ab));
+        }
+
+        [TestMethod]
+        public void PuedeEliminarRevisando_SinMesAbiertoUOtroPeriodo_No()
+        {
+            Assert.IsNotNull(NegBonoReglas.PuedeEliminarRevisando(B(1, "U1", 5, BonoEstados.Aprobado), Per(BonoPeriodoEstados.Cerrado)));
+            Assert.IsNotNull(NegBonoReglas.PuedeEliminarRevisando(B(1, "U1", 5, BonoEstados.Aprobado), Per(BonoPeriodoEstados.Abierto, 2)));
+        }
+
+        [TestMethod]
+        public void PuedeRevisar_DesactivarEnviadoOAprobado_Si_RestoNo()
+        {
+            var ab = Per(BonoPeriodoEstados.Abierto);
+            Assert.IsNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Enviado), ab, "Desactivar"));
+            Assert.IsNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Aprobado), ab, "Desactivar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Borrador), ab, "Desactivar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Rechazado), ab, "Desactivar"));
+            Assert.IsNotNull(NegBonoReglas.PuedeRevisar(B(1, "U1", 5, BonoEstados.Aprobado), Per(BonoPeriodoEstados.Cerrado), "Desactivar"));
+        }
     }
 }

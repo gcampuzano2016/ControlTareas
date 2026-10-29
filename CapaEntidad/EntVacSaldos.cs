@@ -148,6 +148,52 @@ namespace CapaEntidad
         public string Aviso { get; set; } = "";
     }
 
+    /// <summary>Sp_RTA_VacSueldos: historiales por IdColaborador y el divisor del valor diario.</summary>
+    public class EntVacSueldos
+    {
+        /// <summary>HE_Salario: manda cuando la persona lo tiene.</summary>
+        public Dictionary<int, List<EntHeSalario>> HorasExtras { get; set; } = new Dictionary<int, List<EntHeSalario>>();
+        /// <summary>Vac_Sueldo: el de los que no estan en HE_Salario.</summary>
+        public Dictionary<int, List<EntHeSalario>> Vacaciones { get; set; } = new Dictionary<int, List<EntHeSalario>>();
+        public decimal DiasMes { get; set; } = 30m;
+    }
+
+    /// <summary>Una fila de la hoja NOMINA: dias pendientes y su valor.</summary>
+    public class EntVacNominaFila
+    {
+        public EntVacColaborador Colaborador { get; set; }
+        public EntVacSaldo Saldo { get; set; }
+        public decimal? Sueldo { get; set; }
+        /// <summary>"HE_Salario", "Excel de GTH", o "" sin sueldo.</summary>
+        public string FuenteSueldo { get; set; } = "";
+        public decimal? ValorDia { get; set; }
+        public decimal? Valor { get; set; }
+        public string Observacion { get; set; } = "";
+    }
+
+    public class EntVacNominaEmpresa
+    {
+        public string Empresa { get; set; } = "";
+        public int Personas { get; set; }
+        public decimal Dias { get; set; }
+        public decimal Valor { get; set; }
+        public int SinSueldo { get; set; }
+    }
+
+    /// <summary>La nomina completa. Los totales son de ACTIVOS, como NOMINA!N4:O4 del Excel.</summary>
+    public class EntVacNomina
+    {
+        public DateTime FechaCalculo { get; set; }
+        public List<EntVacNominaFila> Filas { get; set; } = new List<EntVacNominaFila>();
+        public List<EntVacNominaEmpresa> PorEmpresa { get; set; } = new List<EntVacNominaEmpresa>();
+        public int Activos { get; set; }
+        public decimal TotalDias { get; set; }
+        public decimal TotalValor { get; set; }
+        public int SinSueldo { get; set; }
+        public decimal ValorAnticipos { get; set; }
+        public List<string> Avisos { get; set; } = new List<string>();
+    }
+
     public class EntVacFicha
     {
         public DateTime FechaCalculo { get; set; }

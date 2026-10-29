@@ -18,6 +18,10 @@ Escribe en docs/sql/carga-generada/ (en .gitignore):
                              CALCULO_PERIODOS y REGISTRO) contra lo que
                              devuelve Sp_RTA_VacCalcular a la misma fecha.
                              Imprime PASS / FAIL y VEREDICTO.
+  vacaciones-sueldos.sql     Vac_Sueldo (Origen EXCEL), por cedula, desde
+                             COLABORADORES!J. Reemplaza los de Origen EXCEL;
+                             no toca los cargados desde el sistema. La nomina
+                             usa HE_Salario cuando la persona lo tiene.
 
 La prueba usa los valores que el Excel guardo la ultima vez que se calculo, asi
 que el archivo debe haberse abierto y guardado en Excel (no vale uno generado
@@ -125,6 +129,10 @@ def main():
          'SET NOCOUNT ON;', 'SET XACT_ABORT ON;', 'SET QUOTED_IDENTIFIER ON;',
          "IF EXISTS (SELECT 1 FROM dbo.Vac_Movimiento WHERE Origen = 'SISTEMA')",
          "BEGIN RAISERROR('Ya hay movimientos Origen SISTEMA: la carga no se puede reemplazar.', 16, 1); RETURN; END",
+         # Los folios guardan IdColaborador, y la carga vuelve a crear las personas con Id nuevos:
+         # un folio quedaria apuntando a otra persona.
+         "IF OBJECT_ID('dbo.Vac_EstadoEmitido', 'U') IS NOT NULL AND EXISTS (SELECT 1 FROM dbo.Vac_EstadoEmitido)",
+         "BEGIN RAISERROR('Ya hay estados individuales emitidos (folios): la carga no se puede reemplazar.', 16, 1); RETURN; END",
          'BEGIN TRANSACTION;',
          "DELETE FROM dbo.Vac_Movimiento WHERE Origen = 'EXCEL';",
          'DELETE FROM dbo.Vac_Colaborador;',
@@ -152,6 +160,25 @@ def main():
           " + CONVERT(VARCHAR(10), @H) + ' feriados historicos.';"]
     with open(os.path.join(salida, 'vacaciones-carga.sql'), 'w', encoding='utf-8') as fh:
         fh.write('\n'.join(c) + '\n')
+
+    # -------------------------------------------------------- sueldos.sql
+    sueldos = []
+    for i, r in enumerate(libro['COLABORADORES'].iter_rows(min_row=FILA_INICIO, values_only=True)):
+        if r[2] and r[9] not in (None, '') and float(r[9]) > 0:
+            sueldos.append((str(r[1]).strip(), r[9]))
+    u = ["/* Generado por docs/sql/generar-carga-vacaciones.py el %s. NO VERSIONAR: sueldos. */"
+         % datetime.date.today().isoformat(),
+         'SET NOCOUNT ON;', 'SET XACT_ABORT ON;', 'SET QUOTED_IDENTIFIER ON;',
+         'BEGIN TRANSACTION;',
+         "DELETE FROM dbo.Vac_Sueldo WHERE Origen = 'EXCEL';"]
+    for (ced, monto) in sueldos:
+        u.append("INSERT INTO dbo.Vac_Sueldo (Cedula, Monto, FechaVigenciaDesde, Origen, Usuario_Registro) "
+                 "VALUES (%s, %s, '19000101', 'EXCEL', 'CARGA_EXCEL');" % (txt(ced), num(monto)))
+    u += ['COMMIT;',
+          "DECLARE @S INT = (SELECT COUNT(*) FROM dbo.Vac_Sueldo WHERE Origen = 'EXCEL');",
+          "PRINT 'Sueldos: ' + CONVERT(VARCHAR(10), @S) + ' cargados desde el Excel.';"]
+    with open(os.path.join(salida, 'vacaciones-sueldos.sql'), 'w', encoding='utf-8') as fh:
+        fh.write('\n'.join(u) + '\n')
 
     # ------------------------------------------------------- prueba-oro.sql
     p = ["/* Generado por docs/sql/generar-carga-vacaciones.py. NO VERSIONAR. Prueba de oro del motor. */",

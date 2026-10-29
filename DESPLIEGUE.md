@@ -1524,3 +1524,32 @@ cédula; GTH o Sistemas tienen que completar ese dato para que lo vean.
 
 Para comprobar: con un usuario común, «Vacaciones & Permisos → Mis vacaciones» muestra su nombre y su saldo; con un usuario
 sin registro, el aviso de escribir a Talento Humano.
+
+## 28. Nómina y provisión de vacaciones (GTH)
+
+### 28.1 Qué es
+
+Pantalla «Nómina de vacaciones» (`VacacionesNomina.aspx`) en el grupo «Vacaciones & Permisos», **solo perfiles 14 y 18**:
+muestra sueldos. Es la hoja NOMINA del Excel de GTH: por persona, sueldo, valor día, días a liquidar (el saldo del motor) y
+valor = días × sueldo ÷ 30; tarjetas y resumen por empresa de los activos; filtros y CSV. Para inactivos, a la fecha de salida.
+
+**De dónde sale el sueldo:** el vigente en `HE_Salario` (misma regla que horas extras y el certificado); si la persona no está
+ahí, el de `Vac_Sueldo`, una tabla nueva **solo para vacaciones**, guardada por cédula y cargada desde el Excel. No se cargó
+nada en `HE_Salario` a propósito: lo leen también el Tablero de Costos y horas extras. Al 2026-10-29: 61 activos con
+`HE_Salario` (todos iguales al Excel) y 34 con el del Excel.
+
+**Cuadre (2026-10-28):** 95 activos, 2.326,41 días y **$113.257,39**, igual que NOMINA!N4:O4; días y valor iguales al Excel
+en las 106 personas.
+
+### 28.2 Orden
+
+1. SQL **ya aplicado el 2026-10-29**: `docs/sql/2026-10-29-vacaciones-nomina.sql` (`Vac_Sueldo`, `Sp_RTA_VacSueldos`) y la
+   carga de sueldos `docs/sql/carga-generada/vacaciones-sueldos.sql` (96 sueldos; generada por `generar-carga-vacaciones.py`,
+   fuera de git porque son sueldos).
+2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\VacacionesNomina.aspx`,
+   `Formulario\AdministrarVacNomina.ashx` y `js\vacacionesNomina.js`.
+3. `docs/sql/2026-10-29-vacaciones-nomina-menu.sql` — **después de los binarios**. Hoja visible para 14 y 18.
+
+**Recarga desde un Excel nuevo:** `vacaciones-sueldos.sql` reemplaza solo los sueldos de origen EXCEL. La carga completa
+(`vacaciones-carga.sql`) ahora **se niega si ya hay folios emitidos** (§26): recrea las personas con Id nuevos y los folios
+quedarían apuntando a otra persona.

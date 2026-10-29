@@ -246,6 +246,7 @@
     <Compile Include="NegVacSaldos.cs" />
     <Compile Include="NegVacEstado.cs" />
     <Compile Include="NegVacMias.cs" />
+    <Compile Include="NegVacNomina.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />

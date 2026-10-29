@@ -71,6 +71,47 @@ namespace CapaDato
             return ids;
         }
 
+        /// <summary>
+        /// Sp_RTA_VacSueldos: historial de HE_Salario, filas de Vac_Sueldo y
+        /// DIAS_MES. Lanza si falta un resultado: sin el, toda la nomina
+        /// saldria "sin sueldo" sin ningun error visible.
+        /// </summary>
+        public static EntVacSueldos Sueldos()
+        {
+            EntVacSueldos r = new EntVacSueldos();
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacSueldos"))
+            {
+                cnx.Open();
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    LeerHistorial(dr, r.HorasExtras);
+                    if (!dr.NextResult()) { throw new InvalidOperationException("Sp_RTA_VacSueldos no devolvió Vac_Sueldo."); }
+                    LeerHistorial(dr, r.Vacaciones);
+                    if (!dr.NextResult()) { throw new InvalidOperationException("Sp_RTA_VacSueldos no devolvió DIAS_MES."); }
+                    if (dr.Read()) { r.DiasMes = Numero(dr, "Valor"); }
+                }
+            }
+            if (r.DiasMes <= 0m) { throw new InvalidOperationException("DIAS_MES no es válido en Vac_Parametro."); }
+            return r;
+        }
+
+        private static void LeerHistorial(SqlDataReader dr, Dictionary<int, List<EntHeSalario>> destino)
+        {
+            while (dr.Read())
+            {
+                int id = Entero(dr, "IdColaborador");
+                List<EntHeSalario> lista;
+                if (!destino.TryGetValue(id, out lista)) { lista = new List<EntHeSalario>(); destino[id] = lista; }
+                lista.Add(new EntHeSalario
+                {
+                    Monto = Numero(dr, "Monto"),
+                    FechaVigenciaDesde = Convert.ToDateTime(dr["FechaVigenciaDesde"], CultureInfo.InvariantCulture),
+                    Origen = Texto(dr, "Origen")
+                });
+            }
+        }
+
         /// <summary>Registra un estado individual emitido y devuelve su folio.</summary>
         public static int RegistrarEstado(int idColaborador, EntVacSaldo s, string usuario, string ip)
         {

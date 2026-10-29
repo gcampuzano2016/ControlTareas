@@ -115,6 +115,8 @@ namespace ReporteTareas.clases
         internal const string VacacionesSaldos = "VacacionesSaldos.aspx";
         /// <summary>Mis vacaciones: cada uno ve solo su saldo (AdministrarMisVacaciones lo saca de la sesion).</summary>
         internal const string MisVacaciones = "MisVacaciones.aspx";
+        /// <summary>Nomina y provision de vacaciones: muestra el sueldo de todo el personal.</summary>
+        internal const string VacacionesNomina = "VacacionesNomina.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>

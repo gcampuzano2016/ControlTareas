@@ -7,7 +7,7 @@
      1. Hoja VacacionesSaldos.aspx "Saldos de vacaciones" dentro del grupo 5
         (Vacaciones & Permisos), clonada de TableroCostos.aspx.
      2. Visibilidad (PerfilMenu, Estado '0' = visible): 14 (Talento Humano) y
-        18 (Gerencia). El grupo 5 ya es visible para los dos; si no lo fuera,
+        18 (super admin, NegPermisos.PerfilSuperAdmin). El grupo 5 ya es visible para los dos; si no lo fuera,
         el script lo avisa y no lo toca, porque cambiaria el menu de otros.
    Quien mas la necesite se le da como extra desde Permisos, no aqui.
    Repetible. Reversa al final, comentada.

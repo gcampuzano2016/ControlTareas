@@ -111,6 +111,8 @@ No es una solicitud. Es el **libro mayor de vacaciones** que GTH lleva a mano. T
 - [ ] Liquidación por periodo para salidas.
 - [ ] Mantenimiento de saldo de corte y de compra de vacaciones, con bitácora.
 
+- [x] «Mis vacaciones»: cada colaborador ve su saldo (`MisVacaciones.aspx`, autorizado por GTH el 2026-10-29, DESPLIEGUE §27).
+
 ### F6 — Paralelo y corte
 - [ ] Un mes con el Excel y el sistema en paralelo. Conciliar cada semana con la prueba de oro.
 - [ ] GTH firma un saldo de corte por persona en el sistema.

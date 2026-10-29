@@ -1498,3 +1498,29 @@ Para comprobar: abrir la ficha de una persona, «PDF para firmar». La primera h
 **Trampa de HtmlRenderer:** el sitio usa `HtmlRenderer.PdfSharp` 1.5.0.6 con `HtmlRenderer` 1.5.0.5. Con esa pareja, dentro de una
 celda de tabla solo se dibuja un texto simple: un `<b>`, un segundo `<div>` o un `<br />` en la misma celda desaparecen sin
 error. El HTML del estado está armado con una línea por celda; lo mismo puede estar pasando en las tablas del CV.
+
+## 27. Mis vacaciones (cada colaborador ve su saldo)
+
+Autorizado por GTH el 2026-10-29.
+
+### 27.1 Qué es
+
+Página «Mis vacaciones» (`MisVacaciones.aspx`) en el grupo «Vacaciones & Permisos», visible para todo perfil que hoy ve ese
+grupo. Muestra el saldo propio con el mismo cálculo que GTH (§24): casillas, mensaje, periodos y solicitudes que descuentan con
+el periodo al que se carga cada una. **Cada uno ve solo lo suyo:** `AdministrarMisVacaciones.ashx` no acepta ningún parámetro
+de a quién consultar; usa el `Cod_Usuario` de la sesión y lo cruza por cédula (`R_Usuarios.Cedula` y `Empleados.Cedula`). Si
+no casa con nadie, o con más de una persona, muestra «Escribe a Talento Humano» y nada más.
+
+Al 2026-10-29 tienen saldo 93 de los 95 activos. Los 2 que no casan no tienen usuario en `R_Usuarios` ni en `Empleados` con su
+cédula; GTH o Sistemas tienen que completar ese dato para que lo vean.
+
+### 27.2 Orden
+
+1. `docs/sql/2026-10-29-vacaciones-mis-vacaciones.sql` — **ya aplicado el 2026-10-29** (`Sp_RTA_VacColaboradorDeUsuario`).
+2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\MisVacaciones.aspx`,
+   `Formulario\AdministrarMisVacaciones.ashx` y `js\misVacaciones.js`.
+3. `docs/sql/2026-10-29-vacaciones-mis-vacaciones-menu.sql` — **después de los binarios**. Crea la hoja y la hace visible a los
+   mismos perfiles que ven el grupo 5. Reversa al final del script.
+
+Para comprobar: con un usuario común, «Vacaciones & Permisos → Mis vacaciones» muestra su nombre y su saldo; con un usuario
+sin registro, el aviso de escribir a Talento Humano.

@@ -50,6 +50,27 @@ namespace CapaDato
             }
         }
 
+        /// <summary>
+        /// Los IdColaborador que casan con un usuario por la cedula de Empleados
+        /// (Sp_RTA_VacColaboradorDeUsuario). Normalmente uno; quien llama decide
+        /// que hacer con cero o con mas de uno.
+        /// </summary>
+        public static List<int> ColaboradoresDeUsuario(string codUsuario)
+        {
+            List<int> ids = new List<int>();
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacColaboradorDeUsuario"))
+            {
+                cmd.Parameters.Add("@CodUsuario", SqlDbType.VarChar, 50).Value = codUsuario ?? "";
+                cnx.Open();
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read()) { ids.Add(Entero(dr, "IdColaborador")); }
+                }
+            }
+            return ids;
+        }
+
         /// <summary>Registra un estado individual emitido y devuelve su folio.</summary>
         public static int RegistrarEstado(int idColaborador, EntVacSaldo s, string usuario, string ip)
         {

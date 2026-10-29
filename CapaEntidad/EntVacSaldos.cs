@@ -136,6 +136,18 @@ namespace CapaEntidad
         public EntVacFicha Ficha { get; set; }
     }
 
+    /// <summary>
+    /// Lo que ve un colaborador de si mismo en "Mis vacaciones". Si Ficha es
+    /// null, Aviso dice por que.
+    /// </summary>
+    public class EntVacMias
+    {
+        public EntVacFicha Ficha { get; set; }
+        /// <summary>IdMovimiento -> periodo al que se carga (solo las que descuentan).</summary>
+        public Dictionary<int, string> PeriodoDe { get; set; } = new Dictionary<int, string>();
+        public string Aviso { get; set; } = "";
+    }
+
     public class EntVacFicha
     {
         public DateTime FechaCalculo { get; set; }

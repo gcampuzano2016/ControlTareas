@@ -1374,6 +1374,9 @@
     <Content Include="Formulario\VacacionesLiquidacion.aspx" />
     <Content Include="Formulario\AdministrarVacLiquidacion.ashx" />
     <Content Include="js\vacacionesLiquidacion.js" />
+    <Content Include="Formulario\VacacionesAjustes.aspx" />
+    <Content Include="Formulario\AdministrarVacAjustes.ashx" />
+    <Content Include="js\vacacionesAjustes.js" />
     <Content Include="js\vacacionesSaldos.js" />
     <Content Include="Formulario\DescargarBonos.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
@@ -1689,6 +1692,16 @@
     </Compile>
     <Compile Include="Formulario\AdministrarVacLiquidacion.ashx.cs">
       <DependentUpon>AdministrarVacLiquidacion.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\VacacionesAjustes.aspx.cs">
+      <DependentUpon>VacacionesAjustes.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Formulario\VacacionesAjustes.aspx.designer.cs">
+      <DependentUpon>VacacionesAjustes.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\AdministrarVacAjustes.ashx.cs">
+      <DependentUpon>AdministrarVacAjustes.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\BonosCatalogo.aspx.cs">
       <DependentUpon>BonosCatalogo.aspx</DependentUpon>

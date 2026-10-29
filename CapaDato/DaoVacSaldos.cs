@@ -11,7 +11,8 @@ namespace CapaDato
     /// Lecturas de la pantalla de saldos de vacaciones. El calculo es todo de
     /// Sp_RTA_VacCalcular (docs/sql/2026-10-28-vacaciones-motor.sql); aqui solo
     /// se lee. El maestro y lo cargado de cada movimiento salen de
-    /// docs/sql/2026-10-28-vacaciones-saldos-pantalla.sql.
+    /// docs/sql/2026-10-28-vacaciones-saldos-pantalla.sql. Las unicas
+    /// escrituras son el folio del estado individual y los ajustes de GTH.
     /// </summary>
     public class DaoVacSaldos
     {
@@ -34,6 +35,17 @@ namespace CapaDato
             {
                 cnx.Open();
                 return Colaboradores(cnx, null);
+            }
+        }
+
+        /// <summary>Null si la persona no esta en Vac_Colaborador.</summary>
+        public static EntVacColaborador Colaborador(int idColaborador)
+        {
+            using (SqlConnection cnx = Conexion())
+            {
+                cnx.Open();
+                List<EntVacColaborador> col = Colaboradores(cnx, idColaborador);
+                return col.Count > 0 ? col[0] : null;
             }
         }
 
@@ -153,6 +165,128 @@ namespace CapaDato
             }
         }
 
+        // ------------------------------------------------- ajustes de GTH
+        // docs/sql/2026-10-29-vacaciones-ajustes.sql. Cada escritura deja su
+        // fila en Vac_Bitacora en la misma transaccion y devuelve un Resultado
+        // (OK, NO EXISTE, CAMBIADO, SIN CAMBIOS, NO ES COMPRA, YA ANULADA).
+
+        /// <summary>La bitacora de la persona y cuantos folios tiene emitidos.</summary>
+        public static void Historial(int idColaborador, EntVacAjustes destino)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacAjustesHistorial"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cnx.Open();
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    while (dr.Read())
+                    {
+                        destino.Bitacora.Add(new EntVacBitacora
+                        {
+                            IdBitacora = Entero(dr, "IdBitacora"),
+                            Tipo = Texto(dr, "Tipo"),
+                            Accion = Texto(dr, "Accion"),
+                            IdMovimiento = EnteroNulo(dr, "IdMovimiento"),
+                            FechaAntes = FechaNula(dr, "FechaAntes"),
+                            DiasAntes = DecimalNulo(dr, "DiasAntes"),
+                            FechaDespues = FechaNula(dr, "FechaDespues"),
+                            DiasDespues = DecimalNulo(dr, "DiasDespues"),
+                            Motivo = Texto(dr, "Motivo"),
+                            Usuario = Texto(dr, "Usuario_Registro"),
+                            Fecha = Convert.ToDateTime(dr["Fecha_Registro"], CultureInfo.InvariantCulture)
+                        });
+                    }
+                    if (!dr.NextResult()) { throw new InvalidOperationException("Sp_RTA_VacAjustesHistorial no devolvió los folios."); }
+                    if (dr.Read())
+                    {
+                        destino.Emitidos = Entero(dr, "Emitidos");
+                        destino.UltimoEmitido = FechaNula(dr, "UltimoEmitido");
+                    }
+                }
+            }
+        }
+
+        /// <summary>fechaCorte y saldoCorte null = quitar el corte. anterior = el que mostraba la pantalla.</summary>
+        public static string GuardarCorte(int idColaborador, DateTime? fechaCorte, decimal? saldoCorte,
+                                          DateTime? fechaAnterior, decimal? saldoAnterior, string motivo, string usuario, string ip)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCorteGuardar"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@FechaCorte", SqlDbType.Date).Value = FechaONulo(fechaCorte);
+                cmd.Parameters.Add(Dias("@SaldoCorte", saldoCorte));
+                cmd.Parameters.Add("@FechaAnterior", SqlDbType.Date).Value = FechaONulo(fechaAnterior);
+                cmd.Parameters.Add(Dias("@SaldoAnterior", saldoAnterior));
+                Auditoria(cmd, motivo, usuario, ip);
+                cnx.Open();
+                return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>El saldo como quedaria con ese corte. No guarda nada.</summary>
+        public static EntVacSaldo SimularCorte(int idColaborador, DateTime? fechaCorte, decimal? saldoCorte, DateTime fechaCalculo)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCorteSimular"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@FechaCorte", SqlDbType.Date).Value = FechaONulo(fechaCorte);
+                cmd.Parameters.Add(Dias("@SaldoCorte", saldoCorte));
+                cmd.Parameters.Add("@FechaCalculo", SqlDbType.Date).Value = fechaCalculo.Date;
+                cnx.Open();
+                List<EntVacSaldo> s = LeerSaldos(cmd);
+                return s.Count > 0 ? s[0] : null;
+            }
+        }
+
+        public static string RegistrarCompra(int idColaborador, DateTime fecha, decimal dias, string motivo, string usuario, string ip)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCompraRegistrar"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@Fecha", SqlDbType.Date).Value = fecha.Date;
+                cmd.Parameters.Add(Dias("@Dias", dias));
+                Auditoria(cmd, motivo, usuario, ip);
+                cnx.Open();
+                return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
+        public static string AnularCompra(int idColaborador, int idMovimiento, string motivo, string usuario, string ip)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCompraAnular"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@IdMovimiento", SqlDbType.Int).Value = idMovimiento;
+                Auditoria(cmd, motivo, usuario, ip);
+                cnx.Open();
+                return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
+        private static SqlParameter Dias(string nombre, decimal? valor)
+        {
+            SqlParameter p = new SqlParameter(nombre, SqlDbType.Decimal) { Precision = 9, Scale = 2 };
+            p.Value = valor.HasValue ? (object)valor.Value : DBNull.Value;
+            return p;
+        }
+
+        private static void Auditoria(SqlCommand cmd, string motivo, string usuario, string ip)
+        {
+            cmd.Parameters.Add("@Motivo", SqlDbType.NVarChar, 1000).Value = motivo;
+            cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario;
+            cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 45).Value = string.IsNullOrEmpty(ip) ? (object)DBNull.Value : ip;
+        }
+
+        private static object FechaONulo(DateTime? d)
+        {
+            return d.HasValue ? (object)d.Value.Date : DBNull.Value;
+        }
+
         // ------------------------------------------------------- lecturas
 
         private static List<EntVacColaborador> Colaboradores(SqlConnection cnx, int? idColaborador)
@@ -188,8 +322,15 @@ namespace CapaDato
 
         private static List<EntVacSaldo> Saldos(SqlConnection cnx, DateTime fechaCalculo, int? idColaborador, bool liquidacion)
         {
-            List<EntVacSaldo> lista = new List<EntVacSaldo>();
             using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "SALDOS", liquidacion))
+            {
+                return LeerSaldos(cmd);
+            }
+        }
+
+        private static List<EntVacSaldo> LeerSaldos(SqlCommand cmd)
+        {
+            List<EntVacSaldo> lista = new List<EntVacSaldo>();
             using (SqlDataReader dr = cmd.ExecuteReader())
             {
                 while (dr.Read())

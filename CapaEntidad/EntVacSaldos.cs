@@ -224,4 +224,32 @@ namespace CapaEntidad
         public List<EntVacPeriodo> Periodos { get; set; } = new List<EntVacPeriodo>();
         public List<EntVacMovimiento> Movimientos { get; set; } = new List<EntVacMovimiento>();
     }
+
+    /// <summary>Una fila de Vac_Bitacora: un cambio de corte o de compra.</summary>
+    public class EntVacBitacora
+    {
+        public int IdBitacora { get; set; }
+        /// <summary>CORTE o COMPRA.</summary>
+        public string Tipo { get; set; } = "";
+        /// <summary>REGISTRA, CAMBIA, QUITA o ANULA.</summary>
+        public string Accion { get; set; } = "";
+        public int? IdMovimiento { get; set; }
+        public DateTime? FechaAntes { get; set; }
+        public decimal? DiasAntes { get; set; }
+        public DateTime? FechaDespues { get; set; }
+        public decimal? DiasDespues { get; set; }
+        public string Motivo { get; set; } = "";
+        public string Usuario { get; set; } = "";
+        public DateTime Fecha { get; set; }
+    }
+
+    /// <summary>Lo que muestra la pantalla de ajustes de una persona.</summary>
+    public class EntVacAjustes
+    {
+        public EntVacFicha Ficha { get; set; }
+        public List<EntVacBitacora> Bitacora { get; set; } = new List<EntVacBitacora>();
+        /// <summary>Estados individuales (folios) ya emitidos: quedan desactualizados con cada ajuste.</summary>
+        public int Emitidos { get; set; }
+        public DateTime? UltimoEmitido { get; set; }
+    }
 }

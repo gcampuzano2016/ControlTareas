@@ -119,6 +119,8 @@ namespace ReporteTareas.clases
         internal const string VacacionesNomina = "VacacionesNomina.aspx";
         /// <summary>Liquidacion de vacaciones para salidas: muestra sueldos.</summary>
         internal const string VacacionesLiquidacion = "VacacionesLiquidacion.aspx";
+        /// <summary>Ajustes de vacaciones (GTH): saldo de corte y compra, con bitacora. Escribe.</summary>
+        internal const string VacacionesAjustes = "VacacionesAjustes.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>

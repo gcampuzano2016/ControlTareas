@@ -133,6 +133,9 @@ def main():
          # un folio quedaria apuntando a otra persona.
          "IF OBJECT_ID('dbo.Vac_EstadoEmitido', 'U') IS NOT NULL AND EXISTS (SELECT 1 FROM dbo.Vac_EstadoEmitido)",
          "BEGIN RAISERROR('Ya hay estados individuales emitidos (folios): la carga no se puede reemplazar.', 16, 1); RETURN; END",
+         # GTH ya corrigio cortes desde la pantalla de ajustes: la carga los pisaria con los del Excel.
+         "IF OBJECT_ID('dbo.Vac_Bitacora', 'U') IS NOT NULL AND EXISTS (SELECT 1 FROM dbo.Vac_Bitacora)",
+         "BEGIN RAISERROR('Ya hay ajustes de GTH en Vac_Bitacora: la carga no se puede reemplazar.', 16, 1); RETURN; END",
          'BEGIN TRANSACTION;',
          "DELETE FROM dbo.Vac_Movimiento WHERE Origen = 'EXCEL';",
          'DELETE FROM dbo.Vac_Colaborador;',

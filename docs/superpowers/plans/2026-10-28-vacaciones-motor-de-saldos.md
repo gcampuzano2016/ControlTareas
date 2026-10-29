@@ -109,7 +109,7 @@ No es una solicitud. Es el **libro mayor de vacaciones** que GTH lleva a mano. T
 - [x] Dashboard de saldos, alertas y anticipos: `VacacionesSaldos.aspx` (2026-10-28). Construida y probada con datos reales; falta publicar binarios y correr `2026-10-28-vacaciones-saldos-menu.sql` (DESPLIEGUE §24).
 - [x] Nómina y provisión: `VacacionesNomina.aspx`, sueldo de `HE_Salario` o `Vac_Sueldo`; cuadra con NOMINA al centavo ($113.257,39 al 28-10). DESPLIEGUE §28.
 - [x] Liquidación por periodo para salidas: `VacacionesLiquidacion.aspx` con `@Liquidacion` en el motor; cuadra con el ejemplo del Excel (14,14 días). DESPLIEGUE §29.
-- [ ] Mantenimiento de saldo de corte y de compra de vacaciones, con bitácora.
+- [x] Mantenimiento de saldo de corte y de compra de vacaciones, con bitácora.
 
 - [x] «Mis vacaciones»: cada colaborador ve su saldo (`MisVacaciones.aspx`, autorizado por GTH el 2026-10-29, DESPLIEGUE §27).
 

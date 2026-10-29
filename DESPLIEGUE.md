@@ -1577,3 +1577,35 @@ fecha exacta, sin solicitudes posteriores). Con 0, que es el valor por omisión,
    `Formulario\AdministrarVacLiquidacion.ashx` y `js\vacacionesLiquidacion.js`.
 3. `docs/sql/2026-10-29-vacaciones-liquidacion-menu.sql` — **después de los binarios**. Hoja visible para 14 y 18 (título con
    tilde vía `NCHAR`).
+
+## 30. Ajustes de vacaciones: saldo de corte y compra (GTH)
+
+### 30.1 Qué es
+
+Pantalla «Ajustes de vacaciones» (`VacacionesAjustes.aspx`) en el grupo «Vacaciones & Permisos», **solo perfiles 14 y 18**.
+**Es la primera pantalla del módulo que escribe saldos.** Por persona:
+
+- **Saldo de corte:** ponerlo, cambiarlo o quitarlo. «Ver cómo queda» calcula el saldo con el corte nuevo usando el mismo
+  motor (`Sp_RTA_VacCorteSimular` cambia, calcula y deshace), sin guardar nada.
+- **Compra de vacaciones:** se registra como un movimiento `COMPRA DE VACACIONES`, `Origen SISTEMA`, que el motor ya descuenta
+  (sin cargo de fin de semana). No se borra: se anula (`DADA BAJA`).
+- **Bitácora** (`Vac_Bitacora`): cada cambio con antes, después, motivo obligatorio, usuario de la sesión, fecha e IP. El cambio y
+  su fila de bitácora van en la misma transacción.
+
+Reglas: el corte no puede ser anterior al ingreso, posterior a hoy ni posterior a la salida; el saldo va de 0 a 120 con 2
+decimales. La compra no puede ser anterior al corte (el motor no la descontaría) ni pasar del saldo de hoy. Si dos personas de
+GTH editan el corte a la vez, la segunda recibe «alguien más cambió el saldo de corte» y no pisa a la primera. Si la persona
+tiene estados individuales emitidos (§26), la pantalla avisa que el papel firmado queda desactualizado.
+
+**Consecuencias:**
+- Con un ajuste hecho, la carga del Excel (`generar-carga-vacaciones.py`) **se niega a correr**: pisaría los cortes de GTH.
+  Una compra registrada ya la bloqueaba por ser `Origen SISTEMA`.
+- La prueba de oro (motor contra el Excel) deja de cuadrar para quien tenga un ajuste: es lo esperado, el sistema pasa a mandar.
+
+### 30.2 Orden
+
+1. `docs/sql/2026-10-29-vacaciones-ajustes.sql` — crea `Vac_Bitacora` y 5 procedimientos. Repetible; no toca nada existente.
+   Puede ir antes que los binarios.
+2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\VacacionesAjustes.aspx`,
+   `Formulario\AdministrarVacAjustes.ashx` y `js\vacacionesAjustes.js`.
+3. `docs/sql/2026-10-29-vacaciones-ajustes-menu.sql` — **después de los binarios**. Hoja visible para 14 y 18.

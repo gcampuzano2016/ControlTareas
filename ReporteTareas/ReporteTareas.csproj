@@ -1143,6 +1143,8 @@
     <Content Include="Formulario\ReportesSap.aspx" />
     <Content Include="Formulario\RRHHEmpleados.aspx" />
     <Content Include="Formulario\SolicitarVacacionesPermisoDesa.aspx" />
+    <Content Include="Img\certificado\logo-agility.jpg" />
+    <Content Include="Img\certificado\membrete-dos.png" />
     <Content Include="Img\image005.jpg" />
     <Content Include="Img\image006.jpg" />
     <Content Include="Img\imagesCorreo\3_Green_Sparkles.png" />
@@ -1493,6 +1495,7 @@
     <Compile Include="clases\HtmlSolicitud.cs" />
     <Compile Include="clases\PDF.cs" />
     <Compile Include="clases\PdfLista.cs" />
+    <Compile Include="clases\CertificadoImagenes.cs" />
     <Compile Include="clases\PdfHojaVida.cs" />
     <Compile Include="clases\PerfilIdentidad.cs" />
     <Compile Include="clases\Permisos.cs" />

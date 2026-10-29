@@ -179,6 +179,30 @@ namespace JsonJQueryNetPerfil
                     responseAction.Append(ListaPersonal(context, parametrosAccion));
                 }
 
+                if (Action == "CertificadoVistaPrevia")
+                {
+                    existAction = true;
+                    responseAction.Append(CertificadoVistaPrevia(context, parametrosAccion));
+                }
+
+                if (Action == "GenerarCertificado")
+                {
+                    existAction = true;
+                    responseAction.Append(GenerarCertificado(context, parametrosAccion));
+                }
+
+                if (Action == "ListaCertificados")
+                {
+                    existAction = true;
+                    responseAction.Append(ListaCertificados(context, parametrosAccion));
+                }
+
+                if (Action == "HistorialCertificados")
+                {
+                    existAction = true;
+                    responseAction.Append(HistorialCertificados(context));
+                }
+
                 if (!existAction)
                 {
                     responseAction.Append(responseMessage("0", "No existe la acción solicitada.", "danger"));
@@ -1070,6 +1094,172 @@ namespace JsonJQueryNetPerfil
             if (!int.TryParse(texto, out valor)) { return null; }
 
             return valor;
+        }
+
+        /* --------------------------------------------- certificado laboral -- */
+
+        /// <summary>
+        /// Los datos que van al certificado y su HTML, sin guardar nada. Es el
+        /// mismo HTML del PDF: lo que se ve antes de generar es lo que se imprime.
+        /// </summary>
+        private string CertificadoVistaPrevia(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
+                {
+                    return responseMessage("0", objetivo.Mensaje, "danger");
+                }
+
+                string error;
+                EntCertificadoLaboral c = NegCertificadoLaboral.Preparar(
+                    objetivo.CodUsuario, Texto(campos, "tipo", ""), PerfilIdentidad.Autor(context),
+                    DateTime.Now, out error);
+
+                if (c == null) { return responseMessage("0", error, "warning"); }
+
+                EntRespuesta respuesta = new EntRespuesta
+                {
+                    estado = "1",
+                    mensaje = "",
+                    tipoMensaje = "success",
+                    resultado = new
+                    {
+                        Html    = NegCertificadoLaboral.Html(c, CertificadoImagenes.MembreteDos(context),
+                                                             CertificadoImagenes.LogoAgility(context)),
+                        Empresa = c.Empresa,
+                        Nombre  = c.Nombre,
+                        Cedula  = c.Cedula,
+                        Cargo   = c.Cargo,
+                        Ingreso = NegCertificadoLaboral.FechaLarga(c.FechaIngreso.Value),
+                        Firma   = NegCertificadoLaboral.FirmaCorta(c.Empresa)
+                    }
+                };
+
+                return ToJson(respuesta);
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al preparar el certificado. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Guarda la foto del certificado y devuelve su Id en resultado. El PDF lo
+        /// entrega DescargarPerfil.ashx?cert=Id: este handler responde JSON.
+        ///
+        /// Los datos se vuelven a leer aqui y no se aceptan del cliente: lo que
+        /// se guarda lo decide la base, no lo que mande el navegador.
+        /// </summary>
+        private string GenerarCertificado(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
+                {
+                    return responseMessage("0", objetivo.Mensaje, "danger");
+                }
+
+                string error;
+                EntCertificadoLaboral c = NegCertificadoLaboral.Preparar(
+                    objetivo.CodUsuario, Texto(campos, "tipo", ""), PerfilIdentidad.Autor(context),
+                    DateTime.Now, out error);
+
+                if (c == null) { return responseMessage("0", error, "warning"); }
+
+                int id = NegCertificadoLaboral.Registrar(c, context.Request.UserHostAddress);
+                if (id <= 0)
+                {
+                    return responseMessage("0", "No se pudo registrar el certificado. Intente nuevamente.", "danger");
+                }
+
+                return responseMessage("1", "Certificado generado y guardado en el historial.", "success",
+                                       id.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al generar el certificado. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>Los certificados de una persona: la propia, o la que mira Talento Humano.</summary>
+        private string ListaCertificados(HttpContext context, dynamic campos)
+        {
+            try
+            {
+                EntPerfilObjetivo objetivo =
+                    PerfilIdentidad.Objetivo(context, PerfilIdentidad.CodigoPedidoJson(campos));
+
+                if (!objetivo.Permitido)
+                {
+                    return responseMessage("0", objetivo.Mensaje, "danger");
+                }
+
+                return ToJson(FilasCertificados(NegCertificadoLaboral.Listar(objetivo.CodUsuario)));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al consultar los certificados. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// Todos los certificados de todos. Solo Talento Humano: el mismo permiso
+        /// que deja ver perfiles ajenos.
+        /// </summary>
+        private string HistorialCertificados(HttpContext context)
+        {
+            try
+            {
+                if (!PerfilIdentidad.VeAjenos(context))
+                {
+                    return responseMessage("0", "No tiene permiso para ver el historial de certificados.", "danger");
+                }
+
+                return ToJson(FilasCertificados(NegCertificadoLaboral.Listar("")));
+            }
+            catch (Exception ex)
+            {
+                return responseMessage("0", "Error al consultar el historial. " + ex.Message, "danger");
+            }
+        }
+
+        /// <summary>
+        /// La fecha va ya formateada: JavaScriptSerializer manda las fechas como
+        /// "/Date(...)/" y la pantalla no tiene por que saber desarmarlas. Ts va
+        /// ordenable para el CSV y los filtros.
+        /// </summary>
+        private static object FilasCertificados(System.Collections.Generic.List<EntCertificadoLaboral> lista)
+        {
+            System.Globalization.CultureInfo inv = System.Globalization.CultureInfo.InvariantCulture;
+            System.Collections.Generic.List<object> filas = new System.Collections.Generic.List<object>();
+
+            foreach (EntCertificadoLaboral c in lista)
+            {
+                filas.Add(new
+                {
+                    c.IdCertificado,
+                    c.CodUsuario,
+                    c.Tipo,
+                    c.Empresa,
+                    c.Nombre,
+                    c.Cedula,
+                    c.Cargo,
+                    Fecha = c.FechaSolicitud.ToString("dd/MM/yyyy", inv),
+                    Hora  = c.FechaSolicitud.ToString("HH:mm", inv),
+                    Ts    = c.FechaSolicitud.ToString("yyyy-MM-ddTHH:mm", inv),
+                    Firma = NegCertificadoLaboral.FirmaCorta(c.Empresa),
+                    c.UsuSolicita
+                });
+            }
+
+            return filas;
         }
 
         /// <summary>Lee una clave del payload dinamico, con valor por omision.</summary>

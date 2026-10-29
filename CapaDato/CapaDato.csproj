@@ -92,6 +92,7 @@
     <Compile Include="DaoCurva.cs" />
     <Compile Include="DaoCurvaUnidad.cs" />
     <Compile Include="DaoPerfil.cs" />
+    <Compile Include="DaoCertificadoLaboral.cs" />
     <Compile Include="DaoPerfilInicio.cs" />
     <Compile Include="DaoPlanRecuperacion.cs" />
     <Compile Include="DaoPerfiles.cs" />

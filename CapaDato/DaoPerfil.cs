@@ -579,7 +579,8 @@ namespace CapaDato
         public static EntRespuesta GuardarCargaFamiliar(string codUsuario, string codAutor,
                                                         EntPerfilCargaFamiliar c, string ip)
         {
-            int r = EjecutarEscritura("Sp_RTA_PerfilGuardarCargaFamiliar", cmd =>
+            int idCargaFam;
+            int r = EjecutarEscrituraConId("Sp_RTA_PerfilGuardarCargaFamiliar", cmd =>
             {
                 cmd.Parameters.Add("@Cod_Usuario",     SqlDbType.VarChar,  50).Value = codUsuario;
                 cmd.Parameters.Add("@IdCargaFam",      SqlDbType.Int).Value          = c.IdCargaFam;
@@ -588,9 +589,14 @@ namespace CapaDato
                 cmd.Parameters.Add("@FechaNacimiento", SqlDbType.VarChar,  10).Value = c.FechaNacimiento ?? "";
                 cmd.Parameters.Add("@Ip",              SqlDbType.VarChar,  64).Value = ip ?? "";
                 cmd.Parameters.Add("@Usu_Accion",      SqlDbType.VarChar,  50).Value = codAutor ?? "";
-            });
+            }, "IdCargaFam", out idCargaFam);
 
-            return RespuestaDe(r, "Carga familiar guardada.", "No se encontró esa carga familiar.");
+            /* El procedimiento ya devolvia el Id de la fila (SCOPE_IDENTITY en el
+               alta); ahora viaja al cliente para que el formulario de alta pueda
+               colgarle el respaldo en el mismo paso. */
+            EntRespuesta respuesta = RespuestaDe(r, "Carga familiar guardada.", "No se encontró esa carga familiar.");
+            respuesta.resultado = idCargaFam;
+            return respuesta;
         }
 
         public static EntRespuesta EliminarCargaFamiliar(string codUsuario, string codAutor, int idCargaFam, string ip)

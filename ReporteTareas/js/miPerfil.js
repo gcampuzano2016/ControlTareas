@@ -142,6 +142,10 @@ function CargarPerfil() {
         PintarCargasFamiliares(respuesta.CargasFamiliares);
         PintarFoto(respuesta.Foto);
         MostrarPestanaEquipo(respuesta.Cabecera.EsJefe);
+
+        /* En "Perfiles del personal" se cambia de persona con la pestana del
+           certificado abierta: sin esto seguiria mostrando el de la anterior. */
+        if ($("#tabCertificado").hasClass("active")) { CargarCertificado(); }
     });
 }
 
@@ -613,6 +617,17 @@ function AgregarCargaFamiliar() {
         return;
     }
 
+    /* El respaldo es opcional. El tamano se revisa ANTES de guardar: si no,
+       la carga quedaria guardada y el archivo rechazado, y la persona veria un
+       error sobre algo que en parte si se hizo. */
+    var input = document.getElementById("cfArchivo");
+    var archivo = input && input.files && input.files[0];
+
+    if (archivo && archivo.size > 5242880) {
+        MostrarMensaje("El documento no puede pesar más de 5 MB.", "warning");
+        return;
+    }
+
     var datos = {
         idCargaFam:      0,
         nombre:          $("#cfNombre").val(),
@@ -621,12 +636,33 @@ function AgregarCargaFamiliar() {
     };
 
     PostPerfil("GuardarCargaFamiliar", datos, function (respuesta) {
-        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
-        if (respuesta.estado === "1") {
-            $("#cfNombre, #cfFecha").val("");
-            $("#cfParentesco").val("");
-            CargarPerfil();
+        if (respuesta.estado !== "1") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
         }
+
+        $("#cfNombre, #cfFecha, #cfArchivo").val("");
+        $("#cfParentesco").val("");
+
+        /* Son dos llamadas -la carga es JSON y el archivo multipart- y no una
+           transaccion: si la subida falla, la carga ya esta guardada y se le
+           dice a la persona que adjunte desde la fila, sin repetir el alta. */
+        if (!archivo || !respuesta.resultado) {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            CargarPerfil();
+            return;
+        }
+
+        SubirDocumento("CARGAFAMILIAR", respuesta.resultado, archivo, function (subida) {
+            if (subida && subida.estado === "1") {
+                MostrarMensaje("Carga familiar guardada con su respaldo.", "success");
+            } else {
+                MostrarMensaje("La carga familiar se guardó, pero el respaldo no se pudo adjuntar" +
+                               (subida ? ": " + subida.mensaje : ".") +
+                               " Puede adjuntarlo desde la columna Respaldo.", "warning");
+            }
+            CargarPerfil();
+        });
     });
 }
 
@@ -815,6 +851,20 @@ $(document).on("change", "#inDocumento", function () {
         return;
     }
 
+    SubirDocumento(origen, idOrigen, archivo, function (respuesta) {
+        if (respuesta) {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            if (respuesta.estado === "1") { CargarPerfil(); }
+        } else {
+            MostrarMensaje("No pudimos subir el archivo. Intente nuevamente.", "danger");
+        }
+    });
+});
+
+/* Sube un respaldo y le entrega a alTerminar la respuesta del handler, o null
+   si la llamada no llego a responder. La comparten el enlace "Adjuntar" de
+   cada fila y el formulario de alta de cargas familiares. */
+function SubirDocumento(origen, idOrigen, archivo, alTerminar) {
     var datos = new FormData();
     datos.append("origen", origen);
     datos.append("idOrigen", idOrigen);
@@ -833,21 +883,141 @@ $(document).on("change", "#inDocumento", function () {
         processData: false,
         contentType: false,
         dataType: "json",
-        success: function (respuesta) {
-            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
-            if (respuesta.estado === "1") { CargarPerfil(); }
-        },
-        error: function () {
-            MostrarMensaje("No pudimos subir el archivo. Intente nuevamente.", "danger");
-        }
+        success: function (respuesta) { alTerminar(respuesta); },
+        error: function () { alTerminar(null); }
     });
-});
+}
 
 function EliminarDocumento(idDocumento) {
     PostPerfil("EliminarDocumento", { idDocumento: idDocumento }, function (respuesta) {
         MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
         if (respuesta.estado === "1") { CargarPerfil(); }
     });
+}
+
+/* --------------------------------------------------- certificado laboral -- */
+
+var _tipoCertificado = "SIN";
+
+/* Se carga al abrir la pestana y no con el perfil: el HTML trae dos imagenes
+   y casi nadie entra aqui. */
+$(document).on("shown.bs.tab", "#lnkTabCertificado", function () {
+    CargarCertificado();
+});
+
+$(window).on("resize", function () { EscalarHojaCertificado(); });
+
+function CargarCertificado() {
+    VistaPreviaCertificado();
+    ListarCertificadosPropios();
+}
+
+function ElegirTipoCertificado(tipo) {
+    _tipoCertificado = tipo;
+    $("#btnCertSin").toggleClass("btn-primary", tipo === "SIN").toggleClass("btn-default", tipo !== "SIN");
+    $("#btnCertCon").toggleClass("btn-primary", tipo === "CON").toggleClass("btn-default", tipo !== "CON");
+    VistaPreviaCertificado();
+}
+
+function VistaPreviaCertificado() {
+    PostPerfil("CertificadoVistaPrevia", { tipo: _tipoCertificado }, function (respuesta) {
+        /* Sin datos suficientes no se puede emitir: el aviso ocupa el lugar de
+           la hoja y el boton se apaga, en vez de dejar generar algo incompleto. */
+        if (!respuesta || respuesta.estado !== "1") {
+            $("#ctHojaMarco").hide();
+            $("#ctAviso").text(respuesta ? respuesta.mensaje : "No se pudo preparar el certificado.").show();
+            $("#btnGenerarCertificado").prop("disabled", true);
+            $("#ctFirma").text("");
+            return;
+        }
+
+        var c = respuesta.resultado;
+        $("#ctEmpresa").text(c.Empresa === "AGILITY" ? "AGILITY" : "COMPUEQUIP DOS");
+        $("#ctNombre").text(c.Nombre);
+        $("#ctCedula").text(c.Cedula);
+        $("#ctCargo").text(c.Cargo);
+        $("#ctIngreso").text(c.Ingreso);
+        $("#ctFirma").text("· firma: " + c.Firma);
+
+        /* El servidor manda un documento completo. Al ponerlo dentro de un div
+           el navegador descarta <html> y <body>, y con el body se perderia su
+           estilo (letra y tamano): se rescata y se aplica a la hoja. */
+        var doc = new DOMParser().parseFromString(c.Html, "text/html");
+        $("#ctHoja").attr("style", "width: 595px; height: 842px; transform-origin: top left; " +
+                                   (doc.body.getAttribute("style") || ""))
+                    .html(doc.body.innerHTML);
+
+        $("#ctAviso").hide();
+        $("#ctHojaMarco").show();
+        $("#btnGenerarCertificado").prop("disabled", false);
+        EscalarHojaCertificado();
+    });
+}
+
+/* La hoja mide lo mismo que el PDF (595 x 842) y se achica al ancho del panel. */
+function EscalarHojaCertificado() {
+    var $marco = $("#ctHojaMarco");
+    var ancho = $marco.width();
+    if (!ancho) { return; }
+
+    var escala = ancho / 595;
+    $("#ctHoja").css("transform", "scale(" + escala + ")");
+    $marco.css("height", Math.round(842 * escala) + "px");
+}
+
+function GenerarCertificado() {
+    var $boton = $("#btnGenerarCertificado").prop("disabled", true);
+
+    PostPerfil("GenerarCertificado", { tipo: _tipoCertificado }, function (respuesta) {
+        $boton.prop("disabled", false);
+        MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+
+        if (respuesta.estado === "1") {
+            window.location.href = UrlCertificado(respuesta.resultado);
+            ListarCertificadosPropios();
+        }
+    });
+}
+
+function UrlCertificado(idCertificado) {
+    return "DescargarPerfil.ashx?cert=" + encodeURIComponent(idCertificado) +
+           (_codObjetivo === "" ? "" : "&u=" + encodeURIComponent(_codObjetivo));
+}
+
+function ListarCertificadosPropios() {
+    PostPerfil("ListaCertificados", {}, function (respuesta) {
+        var $cuerpo = $("#cuerpoCertificadosPropios").empty();
+
+        // Un objeto con "estado" es un EntRespuesta, es decir, un error.
+        if (respuesta != null && typeof respuesta.estado != "undefined") {
+            MostrarMensaje(respuesta.mensaje, respuesta.tipoMensaje);
+            return;
+        }
+
+        if (!respuesta || respuesta.length === 0) {
+            $cuerpo.append('<tr><td colspan="4" class="text-center text-muted">' +
+                           'Todavía no ha solicitado ningún certificado.</td></tr>');
+            return;
+        }
+
+        $.each(respuesta, function (i, c) {
+            var $fila = $("<tr></tr>");
+            $fila.append($("<td></td>").append($("<b></b>").text(c.Fecha))
+                                       .append($('<small class="text-muted"></small>').text(" " + c.Hora)));
+            $fila.append($("<td></td>").append(EtiquetaTipoCertificado(c.Tipo)));
+            $fila.append($("<td></td>").text(c.Empresa === "AGILITY" ? "AGILITY" : "COMPUEQUIP DOS"));
+            $fila.append($('<td class="text-center"></td>').append(
+                $('<a class="btn btn-default btn-xs"><i class="fa fa-download"></i> Descargar PDF</a>')
+                    .attr("href", UrlCertificado(c.IdCertificado))));
+            $cuerpo.append($fila);
+        });
+    });
+}
+
+function EtiquetaTipoCertificado(tipo) {
+    return tipo === "CON"
+        ? $('<span class="label label-warning">Con salario</span>')
+        : $('<span class="label label-default">Sin salario</span>');
 }
 
 /* ---------------------------------------------------------------- equipo -- */

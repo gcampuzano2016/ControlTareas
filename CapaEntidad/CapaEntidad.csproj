@@ -103,6 +103,7 @@
     <Compile Include="EntPerfilCargaFamiliar.cs" />
     <Compile Include="EntPerfilDocumento.cs" />
     <Compile Include="EntPerfilFoto.cs" />
+    <Compile Include="EntCertificadoLaboral.cs" />
     <Compile Include="EntPerfilEquipo.cs" />
     <Compile Include="EntPerfilEquipoCabecera.cs" />
     <Compile Include="EntPerfilEquipoItem.cs" />

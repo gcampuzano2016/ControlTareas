@@ -55,6 +55,12 @@ namespace JsonJQueryNetPerfil
                 return;
             }
 
+            if (context.Request.QueryString["cert"] != null)
+            {
+                EntregarCertificado(context, codUsuario);
+                return;
+            }
+
             int idDocumento;
             if (!int.TryParse(context.Request.QueryString["doc"], out idDocumento) || idDocumento <= 0)
             {
@@ -127,6 +133,49 @@ namespace JsonJQueryNetPerfil
                cabecera HTTP: se deja solo lo alfanumerico. */
             string nombre = "CV_" + SoloAlfanumerico(codUsuario) + "_" +
                             DateTime.Now.ToString("yyyyMMdd_HHmmss",
+                                System.Globalization.CultureInfo.InvariantCulture) + ".pdf";
+
+            context.Response.Clear();
+            context.Response.Buffer = true;
+            context.Response.ContentType = "application/pdf";
+            context.Response.AddHeader("Content-Disposition", "attachment;filename=\"" + nombre + "\"");
+            context.Response.BinaryWrite(pdf);
+            context.Response.End();
+        }
+
+        /// <summary>
+        /// Vuelve a armar el PDF de un certificado ya generado, desde la foto que
+        /// se guardo: sale identico al que se entrego, aunque la persona haya
+        /// cambiado de cargo o de sueldo despues.
+        ///
+        /// Talento Humano descarga cualquiera (es su historial); cualquier otra
+        /// persona solo los de su perfil: con codigo, un Id ajeno no devuelve
+        /// nada y da el mismo mensaje que uno inexistente.
+        /// </summary>
+        private void EntregarCertificado(HttpContext context, string codUsuario)
+        {
+            int idCertificado;
+            if (!int.TryParse(context.Request.QueryString["cert"], out idCertificado) || idCertificado <= 0)
+            {
+                NoDisponible(context, "No se indicó qué certificado descargar.");
+                return;
+            }
+
+            string dueno = PerfilIdentidad.VeAjenos(context) ? "" : codUsuario;
+            EntCertificadoLaboral c = NegCertificadoLaboral.Obtener(idCertificado, dueno);
+
+            if (c == null)
+            {
+                NoDisponible(context, "No se encontró ese certificado.");
+                return;
+            }
+
+            string html = NegCertificadoLaboral.Html(c, CertificadoImagenes.MembreteDos(context),
+                                                     CertificadoImagenes.LogoAgility(context));
+            byte[] pdf = PdfHojaVida.Generar(html, 0);
+
+            string nombre = "Certificado_Laboral_" + SoloAlfanumerico(c.CodUsuario) + "_" +
+                            c.FechaSolicitud.ToString("yyyyMMdd_HHmm",
                                 System.Globalization.CultureInfo.InvariantCulture) + ".pdf";
 
             context.Response.Clear();

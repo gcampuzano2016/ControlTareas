@@ -28,9 +28,19 @@ namespace ReporteTareas.clases
         /// </summary>
         public static byte[] Generar(string html)
         {
+            return Generar(html, 20);
+        }
+
+        /// <summary>
+        /// Con el margen explicito. El certificado laboral va con 0: su membrete
+        /// va de borde a borde y los margenes los pone su propio HTML. 20 es el
+        /// valor por omision de HtmlRenderer, el que siempre uso el CV.
+        /// </summary>
+        public static byte[] Generar(string html, int margen)
+        {
             using (MemoryStream memoria = new MemoryStream())
             {
-                PdfDocument documento = PdfGenerator.GeneratePdf(html, PageSize.A4);
+                PdfDocument documento = PdfGenerator.GeneratePdf(html, PageSize.A4, margen);
 
                 /* false: que no cierre el stream, que lo cierra el using y de el
                    todavia hay que sacar los bytes. */

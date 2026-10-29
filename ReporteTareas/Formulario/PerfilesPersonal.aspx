@@ -15,8 +15,8 @@
            evita que "Mi perfil" cambie para las 228 personas que la usan. */
         var PERFIL_DATOS_EDITABLES = true;
     </script>
-    <script src="../js/miPerfil.js?v=10" type="text/javascript"></script>
-    <script src="../js/perfilesPersonal.js?v=2" type="text/javascript"></script>
+    <script src="../js/miPerfil.js?v=12" type="text/javascript"></script>
+    <script src="../js/perfilesPersonal.js?v=3" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -66,6 +66,67 @@
                         </table>
                     </div>
 
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <%-- Historial de certificados laborales de todo el personal. Lo pide el
+         handler solo con el permiso de esta pantalla. Arranca plegado: el uso
+         principal de la pantalla sigue siendo buscar a una persona. --%>
+    <div class="row">
+        <div class="col-lg-12" style="padding: 0 20px 20px 20px">
+            <div class="panel panel-default" style="margin: 0">
+                <div class="panel-heading">
+                    <a href="javascript:void(0)" id="lnkHistorialCertificados">
+                        <i class="fa fa-file-text-o"></i> Historial de certificados laborales
+                        <i class="fa fa-chevron-down" id="icoHistorialCertificados"></i>
+                    </a>
+                    <span class="text-muted pull-right" style="font-size: 12px" id="resumenCertificados"></span>
+                </div>
+                <div class="panel-body" id="cuerpoHistorialCertificados" style="display: none">
+                    <div class="row" id="kpisCertificados" style="margin-bottom: 12px"></div>
+
+                    <div class="row">
+                        <div class="form-group col-md-4">
+                            <input type="search" class="form-control" id="fCertTexto" placeholder="Buscar por nombre o cédula…" />
+                        </div>
+                        <div class="form-group col-md-3">
+                            <select class="form-control" id="fCertEmpresa">
+                                <option value="">Todas las empresas</option>
+                                <option value="DOS">COMPUEQUIP DOS</option>
+                                <option value="AGILITY">AGILITY</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-3">
+                            <select class="form-control" id="fCertTipo">
+                                <option value="">Con y sin salario</option>
+                                <option value="CON">Con salario</option>
+                                <option value="SIN">Sin salario</option>
+                            </select>
+                        </div>
+                        <div class="form-group col-md-2">
+                            <button type="button" class="btn btn-default btn-block" id="btnCertCsv">
+                                <i class="fa fa-download"></i> Exportar CSV
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover table-condensed">
+                            <thead>
+                                <tr>
+                                    <th style="width: 130px">Fecha y hora</th>
+                                    <th>Colaborador</th>
+                                    <th>Empresa</th>
+                                    <th>Tipo</th>
+                                    <th>Firma</th>
+                                    <th style="width: 70px"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="cuerpoCertificadosTodos"></tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

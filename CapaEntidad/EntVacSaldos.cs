@@ -124,6 +124,18 @@ namespace CapaEntidad
         public List<string> Avisos { get; set; } = new List<string>();
     }
 
+    /// <summary>
+    /// Un estado individual ya emitido: la ficha que se imprimio, el folio con
+    /// el que quedo registrado y quien lo genero.
+    /// </summary>
+    public class EntVacEstado
+    {
+        public int Folio { get; set; }
+        public DateTime Emitido { get; set; }
+        public string Usuario { get; set; } = "";
+        public EntVacFicha Ficha { get; set; }
+    }
+
     public class EntVacFicha
     {
         public DateTime FechaCalculo { get; set; }

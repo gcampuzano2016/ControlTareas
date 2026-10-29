@@ -91,6 +91,7 @@
     <Compile Include="NegBonoCorreoTests.cs" />
     <Compile Include="NegBonoExportacionTests.cs" />
     <Compile Include="NegVacSaldosTests.cs" />
+    <Compile Include="NegVacEstadoTests.cs" />
     <Compile Include="NegCertificadoLaboralTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

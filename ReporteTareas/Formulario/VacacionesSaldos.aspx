@@ -32,7 +32,7 @@
         .vs-dato { margin-bottom: 6px; }
         .vs-dato b { display: inline-block; min-width: 150px; }
     </style>
-    <script src="../js/vacacionesSaldos.js?v=1" type="text/javascript"></script>
+    <script src="../js/vacacionesSaldos.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -122,6 +122,7 @@
             <div id="vsFicha" class="panel panel-primary vs-oculto">
                 <div class="panel-heading">
                     <button type="button" class="close" id="btnCerrarFicha" aria-label="Cerrar">&times;</button>
+                    <a id="btnPdfEstado" class="btn btn-default btn-sm" style="float: right; margin: -4px 15px 0 0" href="#" title="Estado individual con folio, para imprimir y firmar"><i class="fa fa-file-pdf-o"></i> PDF para firmar</a>
                     <span id="fichaTitulo"></span>
                 </div>
                 <div class="panel-body">

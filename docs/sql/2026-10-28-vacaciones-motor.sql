@@ -217,10 +217,11 @@ BEGIN
     BEGIN
         SELECT m.IdMovimiento, m.IdColaborador, m.Tipo, m.Estado, m.Desde, m.Hasta, m.Situacion,
                m.AnioServicio,
-               CAST(ROUND(m.Equivalentes, 4) AS DECIMAL(12,4))                    AS DiasEquivalentes,
-               CAST(ROUND(m.Base, 4) AS DECIMAL(12,4))                            AS DiasBase,
+               /* 8 decimales, como DiasTomados: el estado individual las acumula. */
+               CAST(ROUND(m.Equivalentes, 8) AS DECIMAL(18,8))                    AS DiasEquivalentes,
+               CAST(ROUND(m.Base, 8) AS DECIMAL(18,8))                            AS DiasBase,
                CAST(@DiasFinde * m.Findes AS DECIMAL(12,4))                       AS DiasFinDeSemana,
-               CAST(ROUND(m.Base + @DiasFinde * m.Findes, 4) AS DECIMAL(12,4))    AS DiasDescuenta,
+               CAST(ROUND(m.Base + @DiasFinde * m.Findes, 8) AS DECIMAL(18,8))    AS DiasDescuenta,
                /* [Z] otras solicitudes vigentes de la misma persona que se cruzan en fechas */
                CASE WHEN m.Desde IS NULL OR m.Hasta IS NULL OR m.Estado = 'DADA BAJA' THEN 0
                     ELSE (SELECT COUNT(*) FROM #Mov o
@@ -289,7 +290,9 @@ BEGIN
                CONVERT(VARCHAR(4), YEAR(Inicio)) + '-' + CONVERT(VARCHAR(4), YEAR(Inicio) + 1) AS Periodo,
                Inicio, Fin,
                CAST(Dias AS DECIMAL(12,4))                                                   AS DiasGanados,
-               CAST(ROUND(Consumido, 4) AS DECIMAL(12,4))                                    AS DiasTomados,
+               /* 8 decimales: el estado individual suma estos valores para saber a que periodo
+                  se carga cada solicitud, y con 4 un limite exacto (530.13125) quedaba corrido. */
+               CAST(ROUND(Consumido, 8) AS DECIMAL(18,8))                                    AS DiasTomados,
                CAST(ROUND(CASE WHEN Estado = 'VENCIDO' THEN Dias - Consumido ELSE 0 END, 4) AS DECIMAL(12,4)) AS DiasVencidos,
                CAST(ROUND(CASE WHEN Estado = 'VIGENTE' THEN Dias - Consumido ELSE 0 END, 4) AS DECIMAL(12,4)) AS Saldo,
                Vence, Estado

@@ -50,6 +50,27 @@ namespace CapaDato
             }
         }
 
+        /// <summary>Registra un estado individual emitido y devuelve su folio.</summary>
+        public static int RegistrarEstado(int idColaborador, EntVacSaldo s, string usuario, string ip)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacEstadoRegistrar"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@FechaCalculo", SqlDbType.Date).Value = s.FechaCalculo.Date;
+                cmd.Parameters.Add("@Disponible", SqlDbType.Decimal).Value = s.Disponible;
+                cmd.Parameters.Add("@Proporcional", SqlDbType.Decimal).Value = s.Proporcional;
+                cmd.Parameters.Add("@UsadoEnCurso", SqlDbType.Decimal).Value = s.UsadoEnCurso;
+                cmd.Parameters.Add("@Saldo", SqlDbType.Decimal).Value = s.Saldo;
+                cmd.Parameters.Add("@PorVencer", SqlDbType.Decimal).Value = s.PorVencer;
+                cmd.Parameters.Add("@EstadoSaldo", SqlDbType.VarChar, 12).Value = s.Estado;
+                cmd.Parameters.Add("@Usuario", SqlDbType.VarChar, 50).Value = usuario;
+                cmd.Parameters.Add("@Ip", SqlDbType.VarChar, 45).Value = string.IsNullOrEmpty(ip) ? (object)DBNull.Value : ip;
+                cnx.Open();
+                return Convert.ToInt32(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
         // ------------------------------------------------------- lecturas
 
         private static List<EntVacColaborador> Colaboradores(SqlConnection cnx, int? idColaborador)

@@ -1470,3 +1470,31 @@ vez; el script de menú de la 24 sigue yendo después.
 Para comprobar: Mi perfil → Certificado laboral de alguien del maestro; generar uno con salario y uno sin, que bajen en una
 página con el membrete de su empresa y que aparezcan en «Mis certificados» y en el historial de Perfiles del personal.
 Quien no está en `Vac_Colaborador` debe ver el aviso de escribir a Talento Humano.
+
+## 26. Estado individual de vacaciones en PDF (para firmar)
+
+Plan: `docs/superpowers/plans/2026-10-28-vacaciones-motor-de-saldos.md` (F5).
+
+### 26.1 Qué es
+
+Botón «PDF para firmar» en la ficha de una persona, dentro de «Saldos de vacaciones» (§24); mismo permiso que esa pantalla.
+Genera la hoja ESTADO INDIVIDUAL del Excel de GTH: datos, casillas del saldo, mensaje, firmas del colaborador y de Talento
+Humano y, como anexo, el detalle por periodo y las solicitudes que descuentan con el periodo al que se carga cada una (misma
+regla que la columna O de REGISTRO; cuadra con el Excel en las 1.386 solicitudes). Cada PDF lleva un **folio** y queda
+registrado en `Vac_EstadoEmitido` con los números impresos, quién lo generó y desde qué IP.
+
+### 26.2 Orden
+
+1. `docs/sql/2026-10-28-vacaciones-motor.sql` — **ya reinstalado el 2026-10-29**: `DiasTomados`, `DiasBase`, `DiasEquivalentes`
+   y `DiasDescuenta` salen con 8 decimales (antes 4); los saldos no cambian. La prueba de reglas y la de oro siguen en OK.
+2. `docs/sql/2026-10-29-vacaciones-estado-individual.sql` — crea `Vac_EstadoEmitido` y `Sp_RTA_VacEstadoRegistrar`. Sin esto el
+   botón responde «No se pudo generar el estado de vacaciones». Repetible.
+3. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\DescargarVacEstado.ashx`,
+   `Formulario\VacacionesSaldos.aspx` y `js\vacacionesSaldos.js` (se carga con `?v=2`).
+
+Para comprobar: abrir la ficha de una persona, «PDF para firmar». La primera hoja trae folio, casillas y firmas; en
+`Vac_EstadoEmitido` aparece una fila con ese folio y el saldo impreso.
+
+**Trampa de HtmlRenderer:** el sitio usa `HtmlRenderer.PdfSharp` 1.5.0.6 con `HtmlRenderer` 1.5.0.5. Con esa pareja, dentro de una
+celda de tabla solo se dibuja un texto simple: un `<b>`, un segundo `<div>` o un `<br />` en la misma celda desaparecen sin
+error. El HTML del estado está armado con una línea por celda; lo mismo puede estar pasando en las tablas del CV.

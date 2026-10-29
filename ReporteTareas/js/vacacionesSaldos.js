@@ -1,6 +1,7 @@
 ﻿/* ==========================================================================
    Saldos de vacaciones (GTH) — VacacionesSaldos.aspx
    Handler: AdministrarVacSaldos.ashx (ConsultarSaldos, ConsultarFicha).
+   PDF del estado individual: DescargarVacEstado.ashx.
    El calculo es de Sp_RTA_VacCalcular; aqui solo se filtra, ordena y pinta.
    Los filtros (colaboradores, estado, area, buscar) no vuelven al servidor:
    solo la fecha de calculo.
@@ -265,6 +266,9 @@ function Dato($c, etiqueta, valor) {
 
 function PintarFicha(r) {
     var p = r.persona;
+    /* Cada clic genera un folio nuevo en Vac_EstadoEmitido: es el documento que se imprime y firma. */
+    $('#btnPdfEstado').attr('href', 'DescargarVacEstado.ashx?id=' + encodeURIComponent(p.IdColaborador) +
+        '&fecha=' + encodeURIComponent(r.fechaCalculo));
     $('#fichaTitulo').text(p.Nombre + ' — ' + p.Cedula);
 
     var $per = $('#fichaPersona').empty();

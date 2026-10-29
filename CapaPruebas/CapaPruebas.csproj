@@ -94,6 +94,7 @@
     <Compile Include="NegVacEstadoTests.cs" />
     <Compile Include="NegVacMiasTests.cs" />
     <Compile Include="NegVacNominaTests.cs" />
+    <Compile Include="NegVacLiquidacionTests.cs" />
     <Compile Include="NegCertificadoLaboralTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

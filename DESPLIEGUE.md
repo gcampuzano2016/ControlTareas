@@ -1553,3 +1553,27 @@ en las 106 personas.
 **Recarga desde un Excel nuevo:** `vacaciones-sueldos.sql` reemplaza solo los sueldos de origen EXCEL. La carga completa
 (`vacaciones-carga.sql`) ahora **se niega si ya hay folios emitidos** (§26): recrea las personas con Id nuevos y los folios
 quedarían apuntando a otra persona.
+
+## 29. Liquidación de vacaciones para salidas (GTH)
+
+### 29.1 Qué es
+
+Pantalla «Liquidación de vacaciones» (`VacacionesLiquidacion.aspx`) en el grupo «Vacaciones & Permisos», **solo perfiles 14 y
+18** (muestra sueldos). Es la hoja LIQUIDACION del Excel de GTH: se elige a la persona y la fecha de salida (por omisión, la
+registrada; si no tiene, hoy) y muestra el proporcional del periodo en curso con su fórmula, los días a liquidar (cumplidos +
+proporcional − usado), el valor referencial (sueldo ÷ 30, el mismo sueldo de la nómina §28), el valor del Art. 71 si se ingresa
+lo ganado en los últimos 12 meses, el detalle por periodo y las solicitudes consideradas. **Solo simula: no registra nada.**
+
+**Solo cuenta lo tomado hasta la fecha de salida:** para eso `Sp_RTA_VacCalcular` tiene el parámetro `@Liquidacion` (1 = a esa
+fecha exacta, sin solicitudes posteriores). Con 0, que es el valor por omisión, el cálculo es el de siempre.
+
+**Cuadre:** el ejemplo del Excel (salida 28/10/2026) da 14,14 días, el mismo valor referencial y los mismos 3 periodos.
+
+### 29.2 Orden
+
+1. `docs/sql/2026-10-28-vacaciones-motor.sql` — **ya reinstalado el 2026-10-29** con `@Liquidacion`; la prueba de reglas y la de
+   oro siguen en OK.
+2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\VacacionesLiquidacion.aspx`,
+   `Formulario\AdministrarVacLiquidacion.ashx` y `js\vacacionesLiquidacion.js`.
+3. `docs/sql/2026-10-29-vacaciones-liquidacion-menu.sql` — **después de los binarios**. Hoja visible para 14 y 18 (título con
+   tilde vía `NCHAR`).

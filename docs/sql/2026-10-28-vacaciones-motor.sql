@@ -4,12 +4,17 @@
    Plan: docs/superpowers/plans/2026-10-28-vacaciones-motor-de-saldos.md (F2)
    Requiere 2026-10-28-vacaciones-esquema.sql.
 
-   dbo.Sp_RTA_VacCalcular @FechaCalculo, @IdColaborador, @Salida
-     @FechaCalculo   NULL = hoy. Si la persona tiene FechaSalida, se usa esa.
+   dbo.Sp_RTA_VacCalcular @FechaCalculo, @IdColaborador, @Salida, @Liquidacion
+     @FechaCalculo   NULL = hoy. Si la persona tiene FechaSalida, se usa esa
+                     (salvo con @Liquidacion = 1).
      @IdColaborador  NULL = todos.
      @Salida         'SALDOS' (una fila por persona), 'PERIODOS' (una por
                      periodo de aniversario) o 'MOVIMIENTOS' (una por
                      solicitud, con lo que descuenta).
+     @Liquidacion    1 = hoja LIQUIDACION del Excel: se calcula EXACTAMENTE a
+                     @FechaCalculo (aunque haya FechaSalida) y solo cuenta lo
+                     tomado hasta esa fecha (como FUTURAS = 0). Agregado el
+                     2026-10-29; con 0, todo sigue igual.
    Solo lee: no escribe en ninguna tabla.
 
    Replica las formulas del Excel de GTH (SISTEMA_VACACIONES_DOS), hoja por
@@ -46,7 +51,8 @@ GO
 ALTER PROCEDURE dbo.Sp_RTA_VacCalcular
     @FechaCalculo  DATE        = NULL,
     @IdColaborador INT         = NULL,
-    @Salida        VARCHAR(12) = 'SALDOS'
+    @Salida        VARCHAR(12) = 'SALDOS',
+    @Liquidacion   BIT         = 0
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -70,6 +76,7 @@ BEGIN
            @FindeHoras  = MAX(CASE WHEN Clave = 'FINDE_HORAS'  THEN Valor END),
            @Futuras     = MAX(CASE WHEN Clave = 'FUTURAS'      THEN Valor END)
     FROM dbo.Vac_Parametro;
+    IF @Liquidacion = 1 SET @Futuras = 0;
 
     /* Dias de cada anio de servicio y lo acumulado hasta el (PARAMETROS A20:C59). */
     CREATE TABLE #Anio (N INT PRIMARY KEY, Dias FLOAT NOT NULL, Acumulado FLOAT NOT NULL);
@@ -113,7 +120,7 @@ BEGIN
                      - c.SaldoCorte
            END
     FROM dbo.Vac_Colaborador c
-    CROSS APPLY (SELECT ISNULL(c.FechaSalida, @Hoy) AS Calculo) g
+    CROSS APPLY (SELECT CASE WHEN @Liquidacion = 1 THEN @Hoy ELSE ISNULL(c.FechaSalida, @Hoy) END AS Calculo) g
     WHERE @IdColaborador IS NULL OR c.IdColaborador = @IdColaborador;
 
     /* -------------------------------------------------- movimientos ------- */

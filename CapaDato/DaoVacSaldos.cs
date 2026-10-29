@@ -22,13 +22,33 @@ namespace CapaDato
             {
                 cnx.Open();
                 d.Colaboradores = Colaboradores(cnx, null);
-                d.Saldos = Saldos(cnx, fechaCalculo, null);
+                d.Saldos = Saldos(cnx, fechaCalculo, null, false);
             }
             return d;
         }
 
+        /// <summary>Todo el maestro (Sp_RTA_VacColaboradores), para elegir a quien liquidar.</summary>
+        public static List<EntVacColaborador> ListaColaboradores()
+        {
+            using (SqlConnection cnx = Conexion())
+            {
+                cnx.Open();
+                return Colaboradores(cnx, null);
+            }
+        }
+
         /// <summary>Null si la persona no esta en Vac_Colaborador.</summary>
         public static EntVacFicha Ficha(DateTime fechaCalculo, int idColaborador)
+        {
+            return Ficha(fechaCalculo, idColaborador, false);
+        }
+
+        /// <summary>
+        /// liquidacion = true: Sp_RTA_VacCalcular @Liquidacion = 1, la hoja
+        /// LIQUIDACION del Excel: exactamente a esa fecha y solo con lo tomado
+        /// hasta ella.
+        /// </summary>
+        public static EntVacFicha Ficha(DateTime fechaCalculo, int idColaborador, bool liquidacion)
         {
             using (SqlConnection cnx = Conexion())
             {
@@ -36,14 +56,14 @@ namespace CapaDato
                 List<EntVacColaborador> col = Colaboradores(cnx, idColaborador);
                 if (col.Count == 0) { return null; }
 
-                List<EntVacSaldo> saldo = Saldos(cnx, fechaCalculo, idColaborador);
+                List<EntVacSaldo> saldo = Saldos(cnx, fechaCalculo, idColaborador, liquidacion);
                 EntVacFicha f = new EntVacFicha
                 {
                     FechaCalculo = fechaCalculo.Date,
                     Colaborador = col[0],
                     Saldo = saldo.Count > 0 ? saldo[0] : null,
-                    Periodos = Periodos(cnx, fechaCalculo, idColaborador),
-                    Movimientos = Movimientos(cnx, fechaCalculo, idColaborador)
+                    Periodos = Periodos(cnx, fechaCalculo, idColaborador, liquidacion),
+                    Movimientos = Movimientos(cnx, fechaCalculo, idColaborador, liquidacion)
                 };
                 CompletarOrigen(cnx, idColaborador, f.Movimientos);
                 return f;
@@ -166,10 +186,10 @@ namespace CapaDato
             return lista;
         }
 
-        private static List<EntVacSaldo> Saldos(SqlConnection cnx, DateTime fechaCalculo, int? idColaborador)
+        private static List<EntVacSaldo> Saldos(SqlConnection cnx, DateTime fechaCalculo, int? idColaborador, bool liquidacion)
         {
             List<EntVacSaldo> lista = new List<EntVacSaldo>();
-            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "SALDOS"))
+            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "SALDOS", liquidacion))
             using (SqlDataReader dr = cmd.ExecuteReader())
             {
                 while (dr.Read())
@@ -198,10 +218,10 @@ namespace CapaDato
             return lista;
         }
 
-        private static List<EntVacPeriodo> Periodos(SqlConnection cnx, DateTime fechaCalculo, int idColaborador)
+        private static List<EntVacPeriodo> Periodos(SqlConnection cnx, DateTime fechaCalculo, int idColaborador, bool liquidacion)
         {
             List<EntVacPeriodo> lista = new List<EntVacPeriodo>();
-            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "PERIODOS"))
+            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "PERIODOS", liquidacion))
             using (SqlDataReader dr = cmd.ExecuteReader())
             {
                 while (dr.Read())
@@ -224,10 +244,10 @@ namespace CapaDato
             return lista;
         }
 
-        private static List<EntVacMovimiento> Movimientos(SqlConnection cnx, DateTime fechaCalculo, int idColaborador)
+        private static List<EntVacMovimiento> Movimientos(SqlConnection cnx, DateTime fechaCalculo, int idColaborador, bool liquidacion)
         {
             List<EntVacMovimiento> lista = new List<EntVacMovimiento>();
-            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "MOVIMIENTOS"))
+            using (SqlCommand cmd = Motor(cnx, fechaCalculo, idColaborador, "MOVIMIENTOS", liquidacion))
             using (SqlDataReader dr = cmd.ExecuteReader())
             {
                 while (dr.Read())
@@ -291,12 +311,15 @@ namespace CapaDato
             return cmd;
         }
 
-        private static SqlCommand Motor(SqlConnection cnx, DateTime fechaCalculo, int? idColaborador, string salida)
+        private static SqlCommand Motor(SqlConnection cnx, DateTime fechaCalculo, int? idColaborador, string salida, bool liquidacion)
         {
             SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCalcular");
             cmd.Parameters.Add("@FechaCalculo", SqlDbType.Date).Value = fechaCalculo.Date;
             cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = Nulo(idColaborador);
             cmd.Parameters.Add("@Salida", SqlDbType.VarChar, 12).Value = salida;
+            /* Solo se manda cuando vale 1: asi la pantalla de saldos sigue andando
+               aunque el motor publicado todavia no tenga el parametro. */
+            if (liquidacion) { cmd.Parameters.Add("@Liquidacion", SqlDbType.Bit).Value = true; }
             return cmd;
         }
 

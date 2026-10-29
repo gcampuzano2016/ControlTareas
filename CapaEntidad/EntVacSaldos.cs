@@ -194,6 +194,28 @@ namespace CapaEntidad
         public List<string> Avisos { get; set; } = new List<string>();
     }
 
+    /// <summary>La hoja LIQUIDACION del Excel: dias y valor a liquidar a una fecha de salida.</summary>
+    public class EntVacLiquidacion
+    {
+        /// <summary>Calculada con Sp_RTA_VacCalcular @Liquidacion = 1.</summary>
+        public EntVacFicha Ficha { get; set; }
+        public DateTime FechaSalida { get; set; }
+        public string Antiguedad { get; set; } = "";
+        public int DiasTranscurridos { get; set; }
+        public int DiasDelPeriodo { get; set; }
+        public decimal? Sueldo { get; set; }
+        public string FuenteSueldo { get; set; } = "";
+        /// <summary>Dias a liquidar x sueldo / DIAS_MES.</summary>
+        public decimal? ValorReferencial { get; set; }
+        /// <summary>Lo que ingreso GTH: total ganado en los ultimos 12 meses.</summary>
+        public decimal? GanadoUltimoAnio { get; set; }
+        /// <summary>Art. 71 CT: ganado / 360 x dias a liquidar.</summary>
+        public decimal? ValorArt71 { get; set; }
+        public Dictionary<int, string> PeriodoDe { get; set; } = new Dictionary<int, string>();
+        /// <summary>Solicitudes con fecha posterior a la salida: no se cuentan.</summary>
+        public int Posteriores { get; set; }
+    }
+
     public class EntVacFicha
     {
         public DateTime FechaCalculo { get; set; }

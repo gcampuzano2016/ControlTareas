@@ -115,6 +115,7 @@
                     <li><a href="#tabFormacion" data-toggle="tab"><i class="fa fa-graduation-cap"></i> Formación</a></li>
                     <li><a href="#tabExperiencia" data-toggle="tab"><i class="fa fa-briefcase"></i> Experiencia</a></li>
                     <li><a href="#tabCargas" data-toggle="tab"><i class="fa fa-users"></i> Cargas familiares</a></li>
+                    <li><a href="#tabCertificado" data-toggle="tab" id="lnkTabCertificado"><i class="fa fa-file-text-o"></i> Certificado laboral</a></li>
                     <!-- Aparece sola: se muestra desde el JavaScript si la
                          cabecera dice EsJefe. No la enciende ningun perfil ni
                          ninguna fila de menu, asi que no hay una lista de jefes
@@ -423,9 +424,9 @@
                                 </div>
                                 <hr />
                                 <div class="row">
-                                    <div class="form-group col-lg-5"><label>Nombre completo</label>
+                                    <div class="form-group col-lg-3"><label>Nombre completo</label>
                                         <input type="text" class="form-control" id="cfNombre" maxlength="150" /></div>
-                                    <div class="form-group col-lg-3"><label>Parentesco</label>
+                                    <div class="form-group col-lg-2"><label>Parentesco</label>
                                         <select class="form-control" id="cfParentesco">
                                             <option value="">Seleccione…</option>
                                             <option>Hijo/a</option><option>Cónyuge</option>
@@ -433,11 +434,87 @@
                                         </select></div>
                                     <div class="form-group col-lg-2"><label>Fecha de nacimiento</label>
                                         <input type="date" class="form-control" id="cfFecha" /></div>
+                                    <div class="form-group col-lg-3"><label>Respaldo <small class="text-muted">(opcional)</small></label>
+                                        <input type="file" class="form-control" id="cfArchivo" accept=".pdf,.jpg,.jpeg,.png"
+                                               title="Partida de nacimiento, cédula u otro documento. PDF, JPG o PNG de hasta 5 MB." /></div>
                                     <div class="form-group col-lg-2" style="padding-top: 25px">
                                         <button type="button" class="btn btn-primary btn-block" onclick="AgregarCargaFamiliar()">
                                             <i class="fa fa-plus"></i> Agregar
                                         </button>
                                     </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certificado laboral. La vista previa es el mismo HTML que
+                         el servidor convierte en PDF: lo que se ve es lo que sale.
+                         Se carga al abrir la pestana, no con el perfil: arma HTML
+                         con dos imagenes y casi nadie entra aqui. -->
+                    <div class="tab-pane" id="tabCertificado">
+                        <div class="row">
+                            <div class="col-lg-5">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">
+                                        Nueva solicitud
+                                        <span class="label label-default pull-right"><i class="fa fa-lock"></i> Datos del sistema</span>
+                                    </div>
+                                    <div class="panel-body">
+                                        <table class="table table-condensed" style="font-size: 12px; margin-bottom: 12px">
+                                            <tbody>
+                                                <tr><td class="text-muted">Empresa</td><td class="text-right"><b id="ctEmpresa">–</b></td></tr>
+                                                <tr><td class="text-muted">Colaborador</td><td class="text-right"><b id="ctNombre">–</b></td></tr>
+                                                <tr><td class="text-muted">Cédula</td><td class="text-right"><b id="ctCedula">–</b></td></tr>
+                                                <tr><td class="text-muted">Cargo</td><td class="text-right"><b id="ctCargo">–</b></td></tr>
+                                                <tr><td class="text-muted">Ingreso</td><td class="text-right"><b id="ctIngreso">–</b></td></tr>
+                                            </tbody>
+                                        </table>
+
+                                        <label>¿Qué tipo de certificado necesita?</label>
+                                        <div class="btn-group btn-group-justified" style="margin-bottom: 14px">
+                                            <a href="javascript:void(0)" class="btn btn-primary" id="btnCertSin" onclick="ElegirTipoCertificado('SIN')">
+                                                <b>Sin salario</b><br /><small>Cargo y fecha de ingreso</small></a>
+                                            <a href="javascript:void(0)" class="btn btn-default" id="btnCertCon" onclick="ElegirTipoCertificado('CON')">
+                                                <b>Con salario</b><br /><small>Incluye ingreso mensual</small></a>
+                                        </div>
+
+                                        <button type="button" class="btn btn-danger btn-block" id="btnGenerarCertificado" onclick="GenerarCertificado()">
+                                            <i class="fa fa-download"></i> Generar y descargar PDF
+                                        </button>
+                                        <p class="text-muted" style="font-size: 11px; margin-top: 10px">
+                                            Al generarlo queda registrado en su historial con la fecha de solicitud, y
+                                            Talento Humano lo ve en el suyo. Los datos salen del maestro de personal de
+                                            Talento Humano: si alguno está mal, escríbales.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-7">
+                                <div class="panel panel-default">
+                                    <div class="panel-heading">Vista previa <small class="text-muted" id="ctFirma"></small></div>
+                                    <div class="panel-body" style="background: #E9E7E8; padding: 12px">
+                                        <div id="ctAviso" class="alert alert-warning" style="display: none; margin: 0"></div>
+                                        <!-- La hoja mide 595 puntos de ancho -lo mismo que el PDF- y
+                                             se escala al ancho del panel desde el JavaScript. -->
+                                        <div id="ctHojaMarco" style="position: relative; overflow: hidden; background: #fff; box-shadow: 0 8px 22px -10px rgba(0,0,0,.4)">
+                                            <div id="ctHoja" style="width: 595px; height: 842px; transform-origin: top left"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="panel panel-default">
+                            <div class="panel-heading">Mis certificados solicitados</div>
+                            <div class="panel-body">
+                                <p class="text-muted" style="font-size: 12px">Puede volver a descargar cualquiera: sale idéntico al original.</p>
+                                <div class="table-responsive">
+                                    <table class="table table-bordered table-hover">
+                                        <thead>
+                                            <tr><th style="width:160px">Fecha de solicitud</th><th>Tipo</th><th>Empresa</th><th style="width:150px"></th></tr>
+                                        </thead>
+                                        <tbody id="cuerpoCertificadosPropios"></tbody>
+                                    </table>
                                 </div>
                             </div>
                         </div>

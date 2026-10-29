@@ -1445,3 +1445,27 @@ cada una. Muestra cédulas de todo el personal: el handler `AdministrarVacSaldos
    y 18; avisa si el grupo 5 no fuera visible para alguno de los dos. Reversa al final del script.
 
 Para comprobar: con «Activos» y la fecha 28/10/2026, la tarjeta «Saldo total» debe decir 2.326,41 días (95 activos).
+
+## 25. Certificado laboral y respaldo en el alta de cargas familiares
+
+### 25.1 Qué es
+
+Pestaña «Certificado laboral» en Mi perfil: con o sin salario, vista previa, «Generar y descargar PDF» e historial propio.
+En Perfiles del personal (14 y 18), el panel «Historial de certificados laborales» con indicadores, filtros, PDF por fila y
+CSV; desde la ficha de otra persona Talento Humano también puede generárselo. Datos de `Vac_Colaborador` (sección 24) y
+sueldo de `HE_Salario`. Además, el alta de una carga familiar acepta el respaldo en el mismo formulario.
+
+### 25.2 Orden
+
+1. SQL **ya aplicado el 2026-10-28**: `docs/sql/2026-10-28-certificado-laboral.sql` (tabla `Perfil_CertificadoLaboral` y
+   4 `Sp_RTA_PerfilCertificado*`). Repetible.
+2. Del paquete, **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`,
+   `Controles\PerfilFichas.ascx`, `Formulario\MiPerfil.aspx`, `Formulario\PerfilesPersonal.aspx`, `js\miPerfil.js`
+   (`?v=12`), `js\perfilesPersonal.js` (`?v=3`) y la carpeta nueva `Img\certificado\`. Sin ningún paso de menú.
+
+El mismo paquete trae la sección 24 (saldos de vacaciones): los binarios son compartidos, así que se publican las dos a la
+vez; el script de menú de la 24 sigue yendo después.
+
+Para comprobar: Mi perfil → Certificado laboral de alguien del maestro; generar uno con salario y uno sin, que bajen en una
+página con el membrete de su empresa y que aparezcan en «Mis certificados» y en el historial de Perfiles del personal.
+Quien no está en `Vac_Colaborador` debe ver el aviso de escribir a Talento Humano.

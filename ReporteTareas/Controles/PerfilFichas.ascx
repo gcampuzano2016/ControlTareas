@@ -472,9 +472,9 @@
 
                                         <label>¿Qué tipo de certificado necesita?</label>
                                         <div class="btn-group btn-group-justified" style="margin-bottom: 14px">
-                                            <a href="javascript:void(0)" class="btn btn-primary" id="btnCertSin" onclick="ElegirTipoCertificado('SIN')">
+                                            <a href="javascript:void(0)" class="btn btn-primary" id="btnCertSin" style="white-space: normal" onclick="ElegirTipoCertificado('SIN')">
                                                 <b>Sin salario</b><br /><small>Cargo y fecha de ingreso</small></a>
-                                            <a href="javascript:void(0)" class="btn btn-default" id="btnCertCon" onclick="ElegirTipoCertificado('CON')">
+                                            <a href="javascript:void(0)" class="btn btn-default" id="btnCertCon" style="white-space: normal" onclick="ElegirTipoCertificado('CON')">
                                                 <b>Con salario</b><br /><small>Incluye ingreso mensual</small></a>
                                         </div>
 

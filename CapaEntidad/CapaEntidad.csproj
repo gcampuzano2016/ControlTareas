@@ -58,6 +58,7 @@
     <Compile Include="EntAgenda.cs" />
     <Compile Include="EntAgendaProceso.cs" />
     <Compile Include="EntBono.cs" />
+    <Compile Include="EntVacSaldos.cs" />
     <Compile Include="EntCalificacionForeCast.cs" />
     <Compile Include="EntDatosMed.cs" />
     <Compile Include="EntDetalleInventario.cs" />

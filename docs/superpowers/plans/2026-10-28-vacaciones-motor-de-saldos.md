@@ -106,7 +106,7 @@ No es una solicitud. Es el **libro mayor de vacaciones** que GTH lleva a mano. T
 
 ### F5 — Pantallas de GTH (menú `MenuDos` + `PerfilMenu`, solo perfiles GTH)
 - [ ] Estado individual con PDF para firmar (ya existe `clases/PDF.cs` con PdfSharp).
-- [ ] Dashboard de saldos, alertas y anticipos.
+- [x] Dashboard de saldos, alertas y anticipos: `VacacionesSaldos.aspx` (2026-10-28). Construida y probada con datos reales; falta publicar binarios y correr `2026-10-28-vacaciones-saldos-menu.sql` (DESPLIEGUE §24).
 - [ ] Nómina y provisión. Es sensible porque muestra sueldos.
 - [ ] Liquidación por periodo para salidas.
 - [ ] Mantenimiento de saldo de corte y de compra de vacaciones, con bitácora.

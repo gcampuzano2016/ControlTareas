@@ -1421,3 +1421,27 @@ claro de prueba, y cancelarlo al terminar.
 
 Las tablas `AG_*` nuevas pueden quedar: no las usa nada más. Revertir los binarios también deshace lo de §18 a §22 si se
 publicaron en la misma entrega.
+
+## 24. Saldos de vacaciones (GTH)
+
+Plan: `docs/superpowers/plans/2026-10-28-vacaciones-motor-de-saldos.md` (F5, primera pantalla).
+
+### 24.1 Qué es
+
+Pantalla «Saldos de vacaciones» (`VacacionesSaldos.aspx`) en el grupo «Vacaciones & Permisos», visible para los perfiles 14
+(Talento Humano) y 18 (Gerencia); a otra persona se le da como extra desde Permisos. Solo lee: muestra el saldo de cada
+colaborador calculado por `Sp_RTA_VacCalcular` a la fecha que se elija, tarjetas de totales (solo activos, como el DASHBOARD
+del Excel de GTH), filtros, descarga CSV y, al hacer clic en una persona, sus periodos y sus solicitudes con lo que descuenta
+cada una. Muestra cédulas de todo el personal: el handler `AdministrarVacSaldos.ashx` comprueba el permiso en cada llamada.
+
+### 24.2 Orden
+
+1. SQL **ya aplicado el 2026-10-28** (la base local es la de producción): `2026-10-28-vacaciones-esquema.sql`,
+   `2026-10-28-vacaciones-motor.sql`, la carga generada desde el Excel (15) y `2026-10-28-vacaciones-saldos-pantalla.sql`
+   (`Sp_RTA_VacColaboradores` y `Sp_RTA_VacMovimientosOrigen`). Repetirlos es inofensivo, salvo la carga, que borra y recarga.
+2. Binarios **juntos**: `bin\ReporteTareas.dll` + `bin\CapaEntidad.exe` + `bin\CapaNegocio.exe` + `bin\CapaDato.exe`, más
+   `Formulario\VacacionesSaldos.aspx`, `Formulario\AdministrarVacSaldos.ashx` y `js\vacacionesSaldos.js`.
+3. `docs/sql/2026-10-28-vacaciones-saldos-menu.sql` — **recién después de los binarios**. Crea la hoja y la hace visible a 14
+   y 18; avisa si el grupo 5 no fuera visible para alguno de los dos. Reversa al final del script.
+
+Para comprobar: con «Activos» y la fecha 28/10/2026, la tarjeta «Saldo total» debe decir 2.326,41 días (95 activos).

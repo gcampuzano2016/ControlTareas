@@ -111,6 +111,8 @@ namespace ReporteTareas.clases
         internal const string BonosRevisar = "BonosRevisar.aspx";
         internal const string BonosCatalogo = "BonosCatalogo.aspx";
         internal const string BonosReporte = "BonosReporte.aspx";
+        /// <summary>Saldos de vacaciones de todo el personal (GTH): solo lectura.</summary>
+        internal const string VacacionesSaldos = "VacacionesSaldos.aspx";
     }
 
     /// <summary>Claves de RTA_Accion (docs/sql/2026-10-14-permisos-esquema.sql).</summary>

@@ -243,6 +243,7 @@
     <Compile Include="NegBono.Jefe.cs" />
     <Compile Include="NegBono.TalentoHumano.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
+    <Compile Include="NegVacSaldos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />
     <Compile Include="NegHeDecisiones.cs" />
     <Compile Include="NegHeDecisionesPantalla.cs" />

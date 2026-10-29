@@ -58,6 +58,8 @@ GO
 BEGIN TRANSACTION;
 
 DECLARE @Href         VARCHAR(128) = 'VacacionesNomina.aspx';
+/* "Nomina" con tilde via NCHAR(243): el archivo va sin tildes (ver 2026-10-22-bonos-menu.sql). */
+DECLARE @Titulo       VARCHAR(128) = CONVERT(VARCHAR(128), N'N' + NCHAR(243) + N'mina de vacaciones');
 DECLARE @IdGrupo      INT = 5;
 DECLARE @IdModeloHoja INT = (SELECT MIN(Id_Menu) FROM dbo.MenuDos WHERE LTRIM(RTRIM(Href)) = 'TableroCostos.aspx');
 DECLARE @IdHoja INT, @Orden INT;
@@ -77,11 +79,16 @@ BEGIN
     EXEC #ClonarMenu @IdModeloHoja, @IdHoja OUTPUT;
     SELECT @Orden = ISNULL(MAX(Orden_Opcion), 0) + 1 FROM dbo.MenuDos WHERE Id_MenuPadre = @IdGrupo AND Id_Menu <> @IdHoja;
     UPDATE dbo.MenuDos
-       SET Href = @Href, Titulo = 'Nomina de vacaciones', Descripcion = 'Dias y valor de vacaciones pendientes: provision y liquidacion (GTH)',
+       SET Href = @Href, Titulo = @Titulo, Descripcion = 'Dias y valor de vacaciones pendientes: provision y liquidacion (GTH)',
            Id_MenuPadre = @IdGrupo, Es_Opcion_de_Menu = 0, Orden_Opcion = @Orden
      WHERE Id_Menu = @IdHoja;
     PRINT 'Hoja creada: ' + @Href + ' = ' + CONVERT(VARCHAR(10), @IdHoja);
 END
+
+/* Si la hoja ya existia (corrida del 2026-10-29, sin tilde), se corrige el titulo. */
+UPDATE dbo.MenuDos SET Titulo = @Titulo
+ WHERE Id_Menu = @IdHoja AND Titulo COLLATE Latin1_General_BIN <> @Titulo COLLATE Latin1_General_BIN;   -- binaria: con _AI, 'Nomina' = 'Nomina con tilde'
+IF @@ROWCOUNT > 0 PRINT 'Titulo corregido.';
 
 /* 2. visibilidad */
 DECLARE @Vis TABLE (IdPerfil INT PRIMARY KEY);

@@ -55,6 +55,17 @@ No es una solicitud. Es el **libro mayor de vacaciones** que GTH lleva a mano. T
 
 ## 3. Decisiones que GTH debe tomar antes de codificar
 
+> **Respondidas por GTH el 2026-10-30.**
+> - **D1:** el feriado no descuenta del saldo. Es lo que ya hace la solicitud.
+> - **D2:** se acumulan 3 periodos y el más antiguo caduca cuando empieza uno nuevo. Es la fórmula actual.
+> - **D3:** solo descuentan las horas cargadas a vacaciones. El histórico del Excel ya era eso.
+> - **D4:** las reglas de fin de semana se mantienen. El Beneficio DOS fue algo de una sola vez (Navidad), aplica a AGILITY,
+>   lo marca GTH y descuenta sin cargo de fin de semana.
+> - **D5:** el saldo oficial es el que cargó GTH: manda el sistema.
+> - **D6:** se permiten anticipos con tope de un periodo; los aprueban el jefe inmediato y GTH.
+> - **D7:** la compra lleva motivo y documento, y se avisa a Nómina para el pago (con un PDF).
+> - **Además:** ya no se carga el Excel. Las solicitudes del sistema entran solas, solo las PROCESADAS (DESPLIEGUE §31).
+
 - **D1 Feriados dentro de vacaciones.** El sistema los descuenta y el Excel los marca como faltantes. Aun así, unas 30 filas dicen «Feriado(s) no descontado(s) … (antes N días)», o sea que GTH sí los descontó a mano. ¿Cuál es la regla?
 - **D2 Texto de vencimiento.** La hoja INICIO dice «vence cuando se cumple el siguiente», pero la fórmula vence a los 3 periodos. ¿Vale la fórmula?
 - **D3 Permisos por horas contra el saldo.** ¿Descuentan todas las horas, o solo el excedente sobre las 3 h/mes con `CargoVacaciones=1`?

@@ -16,6 +16,8 @@
                      tomado hasta esa fecha (como FUTURAS = 0). Agregado el
                      2026-10-29; con 0, todo sigue igual.
    Solo lee: no escribe en ninguna tabla.
+   Desde el 2026-10-30 lee Vw_RTA_VacMovimiento (Vac_Movimiento + solicitudes
+   procesadas del sistema): correr antes 2026-10-30-vacaciones-solicitudes-del-sistema.sql.
 
    Replica las formulas del Excel de GTH (SISTEMA_VACACIONES_DOS), hoja por
    hoja; los nombres entre corchetes son sus columnas:
@@ -155,7 +157,8 @@ BEGIN
                 WHEN m.Tipo = 'VACACIONES' THEN CASE WHEN nl.NoLaborables = 0 AND v.TerminaViernes = 0 THEN b.Base ELSE 0 END
                 WHEN m.Tipo = 'PERMISO POR HORAS' THEN CASE WHEN @FindeHoras = 1 THEN b.Base ELSE 0 END
                 ELSE 0 END
-    FROM dbo.Vac_Movimiento m
+    /* Vac_Movimiento + las solicitudes procesadas del sistema (2026-10-30-vacaciones-solicitudes-del-sistema.sql). */
+    FROM dbo.Vw_RTA_VacMovimiento m
     JOIN #Col c ON c.IdColaborador = m.IdColaborador
     CROSS APPLY (SELECT CASE WHEN ISNULL(m.Horas, 0) + ISNULL(m.Minutos, 0) > 0
                              THEN (ISNULL(CAST(m.Horas AS FLOAT), 0) + ISNULL(CAST(m.Minutos AS FLOAT), 0) / 60) / @HorasDia

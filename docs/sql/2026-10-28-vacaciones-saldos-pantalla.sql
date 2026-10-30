@@ -42,7 +42,7 @@ AS
 BEGIN
     SET NOCOUNT ON;
     SELECT IdMovimiento, Dias, Horas, Minutos, BeneficioDos, Observacion, Origen
-    FROM dbo.Vac_Movimiento
+    FROM dbo.Vw_RTA_VacMovimiento      -- incluye las solicitudes del sistema (2026-10-30)
     WHERE IdColaborador = @IdColaborador;
 END
 GO

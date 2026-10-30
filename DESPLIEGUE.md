@@ -1609,3 +1609,36 @@ tiene estados individuales emitidos (§26), la pantalla avisa que el papel firma
 2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\VacacionesAjustes.aspx`,
    `Formulario\AdministrarVacAjustes.ashx` y `js\vacacionesAjustes.js`.
 3. `docs/sql/2026-10-29-vacaciones-ajustes-menu.sql` — **después de los binarios**. Hoja visible para 14 y 18.
+
+## 31. Las solicitudes del sistema descuentan del saldo de vacaciones
+
+### 31.1 Qué es
+
+GTH decidió el 30-10 **no cargar más el Excel**. Hasta ahí, GTH pasaba a mano al Excel las solicitudes del sistema. Desde
+ahora el cálculo las toma solo, a través de la vista `Vw_RTA_VacMovimiento` (`Vac_Movimiento` + solicitudes). Como es una vista
+y no una copia, si una solicitud procesada se anula deja de descontar en ese momento.
+
+Qué entra (decisiones de GTH del 30-10):
+- Solo lo **PROCESADO**. Lo pendiente, rechazado o anulado no descuenta.
+- Lo registrado **después de la última carga del Excel** (28-10 16:21), o lo que GTH incluya a mano en `Vac_SolicitudIncluida`.
+- **Vacaciones:** `TotalDias`, que ya llega sin los feriados (el feriado no descuenta).
+- **Permisos:** solo con excedente tratado como «Vacaciones», y solo lo que pasa de la bolsa mensual. 8 horas = 1 día.
+- **Planificación:** nunca.
+
+`Sp_RTA_VacSolicitudesARevisar` lista las solicitudes de 2026 que el saldo no está contando, para que GTH decida. Al 30-10 hay 30.
+Lo que GTH apruebe se agrega con un INSERT en `Vac_SolicitudIncluida` (IdVacaciones, Motivo, Usuario_Registro).
+
+### 31.2 Orden
+
+Solo SQL, sin binarios. **Ya instalado el 2026-10-30.**
+1. `docs/sql/2026-10-30-vacaciones-solicitudes-del-sistema.sql`: tabla, vista y lista.
+2. `docs/sql/2026-10-28-vacaciones-motor.sql` y `docs/sql/2026-10-28-vacaciones-saldos-pantalla.sql`, que ahora leen la vista.
+
+Verificado después de instalar: la prueba de reglas (10/10) y la de oro contra el Excel (1.529 / 803 / 106) siguen dando OK.
+Además, se probó dentro de una transacción con ROLLBACK que una vacación incluida de 5 días baja el saldo en 5,00, y que un
+permiso de 2 h que usó 1 h de la bolsa baja 0,125.
+
+### 31.3 Volver atrás
+
+Volver a correr las versiones anteriores del motor y de la pantalla de saldos (git), que leen `Vac_Movimiento`. La vista y la
+tabla pueden quedar.

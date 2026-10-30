@@ -1642,3 +1642,40 @@ permiso de 2 h que usó 1 h de la bolsa baja 0,125.
 
 Volver a correr las versiones anteriores del motor y de la pantalla de saldos (git), que leen `Vac_Movimiento`. La vista y la
 tabla pueden quedar.
+
+## 32. Compra de vacaciones: documento firmado y aviso a Nómina en PDF
+
+### 32.1 Qué es
+
+Decisión 7 de GTH (30-10): la compra lleva motivo **y documento**, y hay que avisar a Nómina para el pago. En «Ajustes de
+vacaciones» (perfiles 14 y 18):
+- **Registrar compra** exige el documento firmado: PDF, JPG o PNG de hasta 5 MB. Se revisa el contenido, no solo el nombre.
+- **Adjuntar / Reemplazar documento** en cada compra, incluida la que vino del Excel. Reemplazar no borra el anterior. Queda en
+  la bitácora como `ADJUNTA`.
+- **Aviso a Nómina (PDF)** (`DescargarVacCompra.ashx?que=aviso`): persona, días, sueldo vigente a la fecha de la compra, valor
+  referencial (días × sueldo ÷ 30), saldo con y sin la compra, documento, quién la registró, y firmas de GTH, Nómina y
+  colaborador. Las compras anuladas no tienen aviso.
+- El documento se guarda **en la base** (`Vac_CompraDocumento`) y no en una carpeta del sitio: IIS no lo sirve y no termina
+  en el repo. Se descarga con `DescargarVacCompra.ashx?que=documento`, con el mismo permiso que la pantalla.
+
+### 32.2 Orden
+
+1. `docs/sql/2026-10-29-vacaciones-ajustes.sql`, que ahora también crea `Vac_CompraDocumento`, `Sp_RTA_VacCompraAdjuntar` y
+   `Sp_RTA_VacCompraDocumento`, y amplía el CHECK de la bitácora. **Ya instalado el 2026-10-30.** Es compatible con los
+   binarios anteriores: el documento es opcional en el procedimiento.
+2. Binarios **juntos** (`bin\ReporteTareas.dll` + los tres `.exe` de capa), más `Formulario\VacacionesAjustes.aspx`
+   (pasa a `vacacionesAjustes.js?v=2`), `Formulario\DescargarVacCompra.ashx` (nuevo) y `js\vacacionesAjustes.js`.
+
+No hay script de menú: es la misma pantalla.
+
+### 32.3 Verificar después de publicar
+
+1. En Ajustes, elegir a alguien: la tabla de compras muestra la columna «Documento». La compra del Excel dice «Sin documento».
+2. Registrar una compra sin archivo: tiene que pedir el documento.
+3. En una compra vigente, «Aviso a Nómina (PDF)» descarga el PDF con el valor. Si la persona no tiene sueldo cargado, el PDF lo dice
+   y no muestra valor.
+
+### 32.4 Volver atrás
+
+Reponer los binarios y los tres archivos anteriores (`DescargarVacCompra.ashx` se puede dejar). Las tablas y procedimientos pueden
+quedar en la base.

@@ -1,7 +1,8 @@
 ﻿/* ==========================================================================
    Ajustes de vacaciones (GTH) - VacacionesAjustes.aspx
    Handler: AdministrarVacAjustes.ashx (ListarColaboradores, Cargar,
-   SimularCorte, GuardarCorte, RegistrarCompra, AnularCompra).
+   SimularCorte, GuardarCorte, AnularCompra en JSON; RegistrarCompra y
+   AdjuntarDocumento con archivo). Descargas: DescargarVacCompra.ashx.
    Cada escritura pide motivo y queda en Vac_Bitacora. Sin alert/confirm:
    las confirmaciones van dentro de la pagina.
    ========================================================================== */
@@ -25,8 +26,10 @@ $(document).ready(function () {
     $('#txtCompraDias').on('input', PreviaCompra);
     $('#btnCompraRegistrar').on('click', RegistrarCompra);
     $('#tblCompras').on('click', '.va-anular', PedirAnular);
-    $('#tblCompras').on('click', '.va-anular-no', function () { $(this).closest('tr').remove(); });
+    $('#tblCompras').on('click', '.va-anular-no, .va-adjuntar-no', function () { $(this).closest('tr').remove(); });
     $('#tblCompras').on('click', '.va-anular-si', AnularCompra);
+    $('#tblCompras').on('click', '.va-adjuntar', PedirAdjuntar);
+    $('#tblCompras').on('click', '.va-adjuntar-si', AdjuntarDocumento);
 });
 
 function Mostrar(sel, texto) {
@@ -35,12 +38,26 @@ function Mostrar(sel, texto) {
 }
 
 function Llamar(accion, parametros, ok, fin) {
+    Enviar({
+        data: JSON.stringify([{ action: accion, parameters: parametros }]),
+        contentType: 'application/json; charset=utf-8'
+    }, ok, fin);
+}
+
+/* Lo mismo, pero como formulario con el archivo: el documento firmado viaja en multipart. */
+function LlamarConArchivo(accion, parametros, archivo, ok, fin) {
+    var fd = new FormData();
+    fd.append('action', accion);
+    $.each(parametros, function (k, v) { fd.append(k, v === null || v === undefined ? '' : v); });
+    if (archivo) { fd.append('documento', archivo, archivo.name); }
+    Enviar({ data: fd, contentType: false, processData: false }, ok, fin);
+}
+
+function Enviar(opciones, ok, fin) {
     Mostrar('#vaOk', '');
-    $.ajax({
+    $.ajax($.extend({
         type: 'POST',
         url: 'AdministrarVacAjustes.ashx',
-        data: JSON.stringify([{ action: accion, parameters: parametros }]),
-        contentType: 'application/json; charset=utf-8',
         dataType: 'json',
         success: function (r) {
             if (!r || r.estado !== '1') { Mostrar('#vaError', (r && r.mensaje) || 'No se pudo completar la operación.'); return; }
@@ -53,7 +70,24 @@ function Llamar(accion, parametros, ok, fin) {
             Mostrar('#vaError', (r && r.mensaje) || 'No se pudo comunicar con el servidor.');
         },
         complete: function () { if (fin) { fin(); } }
-    });
+    }, opciones));
+}
+
+/* Hasta 5 MB, como valida el servidor: se avisa antes de subir. */
+var vaDocumentoMaximo = 5 * 1024 * 1024;
+
+function ArchivoElegido(input) {
+    return input && input.files && input.files.length ? input.files[0] : null;
+}
+
+function ErrorArchivo(archivo) {
+    if (!archivo) { return 'Adjunte el documento firmado de la compra (PDF, JPG o PNG).'; }
+    if (archivo.size > vaDocumentoMaximo) { return 'El documento no puede pasar de 5 MB.'; }
+    return '';
+}
+
+function UrlCompra(idMovimiento, que) {
+    return 'DescargarVacCompra.ashx?id=' + encodeURIComponent(Id()) + '&mov=' + encodeURIComponent(idMovimiento) + '&que=' + que;
 }
 
 /* Deshabilita el boton mientras dura la llamada: evita guardar dos veces. */
@@ -158,10 +192,11 @@ function Pintar(r) {
     $('#txtCompraFecha').val('');
     $('#txtCompraDias').val('');
     $('#txtCompraMotivo').val('');
+    $('#filCompraDocumento').val('');
     PreviaCompra();
 
     var $bc = $('#tblCompras tbody').empty();
-    if (!r.compras.length) { $('<tr><td colspan="6" class="text-muted">Sin compras registradas.</td></tr>').appendTo($bc); }
+    if (!r.compras.length) { $('<tr><td colspan="7" class="text-muted">Sin compras registradas.</td></tr>').appendTo($bc); }
     $.each(r.compras, function (i, c) {
         var anulada = c.Estado === 'DADA BAJA';
         var $t = $('<tr/>').toggleClass('va-anulada', anulada).appendTo($bc);
@@ -170,8 +205,21 @@ function Pintar(r) {
         Celda($t, anulada ? 'ANULADA' : (c.Situacion === 'DESCUENTA' ? 'DESCUENTA' : c.Situacion), 'va-nowrap');
         Celda($t, c.Origen, 'va-nowrap');
         Celda($t, c.Observacion || '');
+        var $d = $('<td/>').appendTo($t);
+        if (c.documento) {
+            $('<a/>').attr('href', UrlCompra(c.IdMovimiento, 'documento')).text(c.documento).appendTo($d);
+        } else {
+            $('<span class="text-warning"/>').text('Sin documento').appendTo($d);
+        }
         var $a = $('<td class="va-acciones va-nowrap"/>').appendTo($t);
         if (!anulada) {
+            $('<a class="btn btn-default btn-xs"/>').attr('href', UrlCompra(c.IdMovimiento, 'aviso')).text('Aviso a Nómina (PDF)').appendTo($a);
+            $a.append(' ');
+        }
+        $('<button type="button" class="btn btn-default btn-xs va-adjuntar"/>')
+            .text(c.documento ? 'Reemplazar documento' : 'Adjuntar documento').attr('data-id', c.IdMovimiento).appendTo($a);
+        if (!anulada) {
+            $a.append(' ');
             $('<button type="button" class="btn btn-default btn-xs va-anular"/>').text('Anular').attr('data-id', c.IdMovimiento).appendTo($a);
         }
     });
@@ -237,14 +285,46 @@ function PreviaCompra() {
 
 function RegistrarCompra() {
     if (!vaActual) { return; }
+    var archivo = ArchivoElegido(document.getElementById('filCompraDocumento'));
+    var error = ErrorArchivo(archivo);
+    if (error) { Mostrar('#vaError', error); return; }
     var $b = $('#btnCompraRegistrar');
     Ocupado($b, true);
-    Llamar('RegistrarCompra', {
+    LlamarConArchivo('RegistrarCompra', {
         idColaborador: Id(),
         fecha: $('#txtCompraFecha').val(),
         dias: NumeroAlServidor($('#txtCompraDias').val()),
         motivo: $('#txtCompraMotivo').val()
-    }, function () { Cargar('Compra registrada.'); }, function () { Ocupado($b, false); });
+    }, archivo, function () { Cargar('Compra registrada. Descargue el «Aviso a Nómina (PDF)» de la tabla para enviarlo a Nómina.'); },
+    function () { Ocupado($b, false); });
+}
+
+/* Abre, debajo de la compra, una fila para elegir el documento y el motivo. */
+function PedirAdjuntar() {
+    var $tr = $(this).closest('tr');
+    if ($tr.next().hasClass('va-adjuntar-fila')) { return; }
+    var $f = $('<tr class="va-adjuntar-fila"/>').insertAfter($tr);
+    var $td = $('<td colspan="7"/>').appendTo($f);
+    $('<input type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png"/>').appendTo($td);
+    $('<textarea class="form-control va-motivo" maxlength="1000" style="margin-top: 6px"/>').attr('placeholder', 'Motivo (por ejemplo: acta firmada de la compra)').appendTo($td);
+    $('<div style="margin-top: 6px"/>')
+        .append($('<button type="button" class="btn btn-primary btn-xs va-adjuntar-si"/>').text('Subir documento').attr('data-id', $(this).attr('data-id')))
+        .append(' ')
+        .append($('<button type="button" class="btn btn-default btn-xs va-adjuntar-no"/>').text('Cancelar'))
+        .appendTo($td);
+}
+
+function AdjuntarDocumento() {
+    var $b = $(this), $f = $b.closest('tr');
+    var archivo = ArchivoElegido($f.find('input[type=file]')[0]);
+    var error = ErrorArchivo(archivo);
+    if (error) { Mostrar('#vaError', error); return; }
+    Ocupado($b, true);
+    LlamarConArchivo('AdjuntarDocumento', {
+        idColaborador: Id(),
+        idMovimiento: $b.attr('data-id'),
+        motivo: $f.find('textarea').val()
+    }, archivo, function () { Cargar('Documento guardado.'); }, function () { Ocupado($b, false); });
 }
 
 /* Abre, debajo de la compra, una fila para el motivo y la confirmacion. */
@@ -252,7 +332,7 @@ function PedirAnular() {
     var $tr = $(this).closest('tr');
     if ($tr.next().hasClass('va-anular-fila')) { return; }
     var $f = $('<tr class="va-anular-fila"/>').insertAfter($tr);
-    var $td = $('<td colspan="6"/>').appendTo($f);
+    var $td = $('<td colspan="7"/>').appendTo($f);
     $('<textarea class="form-control va-motivo" maxlength="1000"/>').attr('placeholder', 'Motivo de la anulación').appendTo($td);
     $('<div style="margin-top: 6px"/>')
         .append($('<button type="button" class="btn btn-danger btn-xs va-anular-si"/>').text('Anular compra').attr('data-id', $(this).attr('data-id')))

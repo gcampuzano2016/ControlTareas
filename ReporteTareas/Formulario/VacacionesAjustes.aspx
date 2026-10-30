@@ -15,7 +15,7 @@
         .va-simulacion { margin: 10px 0 0 0; }
         .va-motivo { min-height: 60px; }
     </style>
-    <script src="../js/vacacionesAjustes.js?v=1" type="text/javascript"></script>
+    <script src="../js/vacacionesAjustes.js?v=2" type="text/javascript"></script>
 </asp:Content>
 
 <asp:Content ID="Content2" ContentPlaceHolderID="ContentPlaceHolder1" runat="server">
@@ -79,18 +79,19 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Compras de vacaciones</div>
                 <div class="panel-body">
-                    <p class="text-muted">La compra descuenta sus días del saldo, sin cargo de fin de semana. No se borra: se anula, y queda en la bitácora.</p>
+                    <p class="text-muted">La compra descuenta sus días del saldo, sin cargo de fin de semana. Lleva el documento firmado, y con «Aviso a Nómina» se descarga el PDF para que Nómina la pague. No se borra: se anula, y queda en la bitácora.</p>
                     <div class="row">
                         <div class="form-group col-lg-2"><label>Fecha</label><input type="date" id="txtCompraFecha" class="form-control" /></div>
                         <div class="form-group col-lg-2"><label>Días comprados</label><input type="text" id="txtCompraDias" class="form-control" placeholder="0,00" /></div>
-                        <div class="form-group col-lg-8"><label>Motivo</label><textarea id="txtCompraMotivo" class="form-control va-motivo" maxlength="1000" placeholder="Quién la aprobó y en qué rol de pagos se pagó"></textarea></div>
+                        <div class="form-group col-lg-5"><label>Motivo</label><textarea id="txtCompraMotivo" class="form-control va-motivo" maxlength="1000" placeholder="Quién la aprobó"></textarea></div>
+                        <div class="form-group col-lg-3"><label>Documento firmado</label><input type="file" id="filCompraDocumento" class="form-control" accept=".pdf,.jpg,.jpeg,.png" /><span class="help-block">PDF, JPG o PNG, hasta 5 MB.</span></div>
                     </div>
                     <button type="button" class="btn btn-primary" id="btnCompraRegistrar">Registrar compra</button>
                     <span class="text-muted" id="vaCompraPrevia" style="margin-left: 10px"></span>
 
                     <div style="overflow-x: auto; margin-top: 15px">
                         <table id="tblCompras" class="table table-condensed table-bordered va-tabla">
-                            <thead><tr><th>Fecha</th><th class="va-num">Días</th><th>Estado</th><th>Origen</th><th>Motivo / observación</th><th></th></tr></thead>
+                            <thead><tr><th>Fecha</th><th class="va-num">Días</th><th>Estado</th><th>Origen</th><th>Motivo / observación</th><th>Documento</th><th></th></tr></thead>
                             <tbody></tbody>
                         </table>
                     </div>

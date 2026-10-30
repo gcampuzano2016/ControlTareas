@@ -271,7 +271,7 @@ namespace CapaNegocio
 
         // ------------------------------------------------------- utilidades
 
-        private static void Par(StringBuilder h, string e1, string v1, string e2, string v2)
+        internal static void Par(StringBuilder h, string e1, string v1, string e2, string v2)
         {
             h.Append("<tr>")
              .Append("<td style=\"width:105px; padding:2px 4px; font-weight:bold; vertical-align:top\">").Append(Escapar(e1)).Append("</td>")
@@ -314,12 +314,12 @@ namespace CapaNegocio
             return Math.Round(d, decimales, MidpointRounding.AwayFromZero).ToString("N" + decimales, Es);
         }
 
-        private static string Fecha(DateTime d)
+        internal static string Fecha(DateTime d)
         {
             return d.ToString("dd'/'MM'/'yyyy", CultureInfo.InvariantCulture);
         }
 
-        private static string Escapar(string texto)
+        internal static string Escapar(string texto)
         {
             return WebUtility.HtmlEncode(texto ?? "");
         }

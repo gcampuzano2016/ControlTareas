@@ -75,20 +75,10 @@ namespace CapaNegocio
         {
             EntVacNominaFila r = new EntVacNominaFila { Colaborador = f.Colaborador, Saldo = f.Saldo };
             DateTime corte = f.Saldo.FechaCalculo == DateTime.MinValue ? DateTime.Today : f.Saldo.FechaCalculo;
-            int id = f.Colaborador.IdColaborador;
 
-            List<EntHeSalario> historial;
-            decimal sueldo = 0m;
-            if (sueldos.HorasExtras.TryGetValue(id, out historial))
-            {
-                sueldo = NegHorasExtras.SalarioVigente(historial, corte);
-                if (sueldo > 0m) { r.FuenteSueldo = FuenteHorasExtras; }
-            }
-            if (sueldo <= 0m && sueldos.Vacaciones.TryGetValue(id, out historial))
-            {
-                sueldo = NegHorasExtras.SalarioVigente(historial, corte);
-                if (sueldo > 0m) { r.FuenteSueldo = FuenteVacaciones; }
-            }
+            string fuente;
+            decimal sueldo = SueldoVigente(f.Colaborador.IdColaborador, corte, sueldos, out fuente);
+            r.FuenteSueldo = fuente;
 
             if (sueldo > 0m)
             {
@@ -100,6 +90,28 @@ namespace CapaNegocio
             if (!r.Sueldo.HasValue) { r.Observacion = ObsSinSueldo; }
             else if (f.Saldo.Saldo < 0m) { r.Observacion = ObsAnticipo; }
             return r;
+        }
+
+        /// <summary>
+        /// El sueldo vigente a una fecha: HE_Salario y, si no, Vac_Sueldo. 0 si
+        /// no hay; fuente queda en "" en ese caso.
+        /// </summary>
+        public static decimal SueldoVigente(int idColaborador, DateTime fecha, EntVacSueldos sueldos, out string fuente)
+        {
+            fuente = "";
+            List<EntHeSalario> historial;
+            decimal sueldo = 0m;
+            if (sueldos.HorasExtras.TryGetValue(idColaborador, out historial))
+            {
+                sueldo = NegHorasExtras.SalarioVigente(historial, fecha);
+                if (sueldo > 0m) { fuente = FuenteHorasExtras; }
+            }
+            if (sueldo <= 0m && sueldos.Vacaciones.TryGetValue(idColaborador, out historial))
+            {
+                sueldo = NegHorasExtras.SalarioVigente(historial, fecha);
+                if (sueldo > 0m) { fuente = FuenteVacaciones; }
+            }
+            return sueldo;
         }
 
         /// <summary>

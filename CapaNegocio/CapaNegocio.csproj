@@ -248,6 +248,7 @@
     <Compile Include="NegVacMias.cs" />
     <Compile Include="NegVacNomina.cs" />
     <Compile Include="NegVacAjustes.cs" />
+    <Compile Include="NegVacCompra.cs" />
     <Compile Include="NegVacLiquidacion.cs" />
     <Compile Include="NegPermisos.Datos.cs" />
     <Compile Include="NegHeFueraDeHorario.cs" />

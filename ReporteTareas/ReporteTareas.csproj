@@ -1377,6 +1377,7 @@
     <Content Include="Formulario\VacacionesAjustes.aspx" />
     <Content Include="Formulario\AdministrarVacAjustes.ashx" />
     <Content Include="js\vacacionesAjustes.js" />
+    <Content Include="Formulario\DescargarVacCompra.ashx" />
     <Content Include="js\vacacionesSaldos.js" />
     <Content Include="Formulario\DescargarBonos.ashx" />
     <Content Include="Formulario\DescargarTableroCostos.ashx" />
@@ -1662,6 +1663,9 @@
     </Compile>
     <Compile Include="Formulario\DescargarVacEstado.ashx.cs">
       <DependentUpon>DescargarVacEstado.ashx</DependentUpon>
+    </Compile>
+    <Compile Include="Formulario\DescargarVacCompra.ashx.cs">
+      <DependentUpon>DescargarVacCompra.ashx</DependentUpon>
     </Compile>
     <Compile Include="Formulario\MisVacaciones.aspx.cs">
       <DependentUpon>MisVacaciones.aspx</DependentUpon>

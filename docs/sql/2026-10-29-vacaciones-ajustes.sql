@@ -11,7 +11,19 @@
      4. Sp_RTA_VacCompraRegistrar    registra una compra (Vac_Movimiento,
                                      Origen SISTEMA): el motor ya la descuenta.
      5. Sp_RTA_VacCompraAnular       la pasa a DADA BAJA; no se borra nada.
-     6. Sp_RTA_VacAjustesHistorial   la bitacora de una persona y sus folios.
+     6. Sp_RTA_VacAjustesHistorial   la bitacora de una persona, sus folios y
+                                     los documentos de sus compras.
+   Agregado el 2026-10-30 (decision 7 de GTH: la compra lleva su documento):
+     7. Vac_CompraDocumento          el documento firmado de cada compra, EN LA
+                                     BASE (no en una carpeta del sitio: no queda
+                                     expuesto por IIS ni termina en el repo).
+                                     Reemplazar uno agrega otra fila; vale el
+                                     ultimo.
+     8. Sp_RTA_VacCompraAdjuntar     adjunta el documento a una compra ya
+                                     registrada (bitacora: ADJUNTA).
+     9. Sp_RTA_VacCompraDocumento    el ultimo documento de una compra.
+   Sp_RTA_VacCompraRegistrar recibe el documento y lo guarda en la misma
+   transaccion; sin documento sigue funcionando (binarios anteriores).
    El cambio y su fila de bitacora van en la misma transaccion: o los dos o
    ninguno. Los de corte comprueban que el corte siga siendo el que vio la
    pantalla (dos personas de GTH editando a la vez).
@@ -48,6 +60,37 @@ BEGIN
     );
     CREATE INDEX IX_Vac_Bitacora_Colaborador ON dbo.Vac_Bitacora (IdColaborador, Fecha_Registro);
     PRINT 'Vac_Bitacora creada.';
+END
+GO
+
+/* 2026-10-30: ADJUNTA (documento de una compra). */
+IF NOT EXISTS (SELECT 1 FROM sys.check_constraints
+                WHERE name = 'CK_Vac_Bitacora_Accion' AND definition LIKE '%ADJUNTA%')
+BEGIN
+    ALTER TABLE dbo.Vac_Bitacora DROP CONSTRAINT CK_Vac_Bitacora_Accion;
+    ALTER TABLE dbo.Vac_Bitacora ADD CONSTRAINT CK_Vac_Bitacora_Accion
+        CHECK (Accion IN ('REGISTRA', 'CAMBIA', 'QUITA', 'ANULA', 'ADJUNTA'));
+    PRINT 'CK_Vac_Bitacora_Accion admite ADJUNTA.';
+END
+GO
+
+/* -------------------------------------------- 7. Vac_CompraDocumento ------- */
+IF OBJECT_ID('dbo.Vac_CompraDocumento', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Vac_CompraDocumento
+    (
+        IdDocumento      INT IDENTITY(1,1) NOT NULL CONSTRAINT PK_Vac_CompraDocumento PRIMARY KEY,
+        IdMovimiento     INT            NOT NULL,          -- la compra (Vac_Movimiento)
+        NombreArchivo    NVARCHAR(260)  NOT NULL,          -- como lo subio GTH, solo para mostrar
+        TipoContenido    VARCHAR(100)   NOT NULL,
+        Tamano           INT            NOT NULL,
+        Contenido        VARBINARY(MAX) NOT NULL,
+        Usuario_Registro VARCHAR(50)    NOT NULL,
+        Fecha_Registro   DATETIME       NOT NULL CONSTRAINT DF_Vac_CompraDocumento_Fecha DEFAULT GETDATE(),
+        Ip               VARCHAR(45)    NULL
+    );
+    CREATE INDEX IX_Vac_CompraDocumento_Movimiento ON dbo.Vac_CompraDocumento (IdMovimiento, IdDocumento);
+    PRINT 'Vac_CompraDocumento creada.';
 END
 GO
 
@@ -161,7 +204,11 @@ ALTER PROCEDURE dbo.Sp_RTA_VacCompraRegistrar
     @Dias           DECIMAL(9,2),
     @Motivo         NVARCHAR(1000),
     @Usuario        VARCHAR(50),
-    @Ip             VARCHAR(45) = NULL
+    @Ip             VARCHAR(45) = NULL,
+    /* El documento firmado (2026-10-30). NULL = sin documento. */
+    @NombreArchivo  NVARCHAR(260)  = NULL,
+    @TipoContenido  VARCHAR(100)   = NULL,
+    @Contenido      VARBINARY(MAX) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
@@ -189,6 +236,10 @@ BEGIN
         (IdColaborador, Tipo, Accion, IdMovimiento, FechaAntes, DiasAntes, FechaDespues, DiasDespues, Motivo, Usuario_Registro, Ip)
     VALUES
         (@IdColaborador, 'COMPRA', 'REGISTRA', @Id, NULL, NULL, @Fecha, @Dias, @Motivo, @Usuario, @Ip);
+
+    IF @Contenido IS NOT NULL
+        INSERT INTO dbo.Vac_CompraDocumento (IdMovimiento, NombreArchivo, TipoContenido, Tamano, Contenido, Usuario_Registro, Ip)
+        VALUES (@Id, @NombreArchivo, @TipoContenido, DATALENGTH(@Contenido), @Contenido, @Usuario, @Ip);
 
     COMMIT TRANSACTION;
     SELECT 'OK' AS Resultado, @Id AS IdMovimiento;
@@ -239,8 +290,9 @@ GO
 IF OBJECT_ID('dbo.Sp_RTA_VacAjustesHistorial', 'P') IS NULL
     EXEC ('CREATE PROCEDURE dbo.Sp_RTA_VacAjustesHistorial AS RETURN 0');
 GO
-/* Dos resultados: la bitacora (lo ultimo primero) y los folios emitidos, que
-   quedan desactualizados si cambia el corte o una compra. */
+/* Tres resultados: la bitacora (lo ultimo primero), los folios emitidos, que
+   quedan desactualizados si cambia el corte o una compra, y el ultimo
+   documento de cada compra (sin el contenido). */
 ALTER PROCEDURE dbo.Sp_RTA_VacAjustesHistorial
     @IdColaborador INT
 AS
@@ -255,6 +307,73 @@ BEGIN
     SELECT COUNT(*) AS Emitidos, MAX(Fecha_Registro) AS UltimoEmitido
     FROM dbo.Vac_EstadoEmitido
     WHERE IdColaborador = @IdColaborador;
+
+    SELECT d.IdMovimiento, d.NombreArchivo, d.Tamano, d.Usuario_Registro, d.Fecha_Registro
+    FROM dbo.Vac_CompraDocumento d
+    JOIN dbo.Vac_Movimiento m ON m.IdMovimiento = d.IdMovimiento
+    WHERE m.IdColaborador = @IdColaborador
+      AND d.IdDocumento = (SELECT MAX(x.IdDocumento) FROM dbo.Vac_CompraDocumento x WHERE x.IdMovimiento = d.IdMovimiento);
+END
+GO
+
+/* ---------------------------------------- 8. Sp_RTA_VacCompraAdjuntar ------- */
+IF OBJECT_ID('dbo.Sp_RTA_VacCompraAdjuntar', 'P') IS NULL
+    EXEC ('CREATE PROCEDURE dbo.Sp_RTA_VacCompraAdjuntar AS RETURN 0');
+GO
+/* Tambien a una compra anulada: el respaldo de por que se anulo sirve igual.
+   Reemplazar agrega otra fila: el anterior no se pierde. */
+ALTER PROCEDURE dbo.Sp_RTA_VacCompraAdjuntar
+    @IdColaborador  INT,
+    @IdMovimiento   INT,
+    @NombreArchivo  NVARCHAR(260),
+    @TipoContenido  VARCHAR(100),
+    @Contenido      VARBINARY(MAX),
+    @Motivo         NVARCHAR(1000),
+    @Usuario        VARCHAR(50),
+    @Ip             VARCHAR(45) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    DECLARE @Tipo VARCHAR(25), @Fecha DATE, @Dias DECIMAL(9,2);
+    SELECT @Tipo = Tipo, @Fecha = FechaDesde, @Dias = Dias
+    FROM dbo.Vac_Movimiento
+    WHERE IdMovimiento = @IdMovimiento AND IdColaborador = @IdColaborador;
+
+    IF @Tipo IS NULL                   BEGIN SELECT 'NO EXISTE' AS Resultado;    RETURN; END
+    IF @Tipo <> 'COMPRA DE VACACIONES' BEGIN SELECT 'NO ES COMPRA' AS Resultado; RETURN; END
+
+    BEGIN TRANSACTION;
+    INSERT INTO dbo.Vac_CompraDocumento (IdMovimiento, NombreArchivo, TipoContenido, Tamano, Contenido, Usuario_Registro, Ip)
+    VALUES (@IdMovimiento, @NombreArchivo, @TipoContenido, DATALENGTH(@Contenido), @Contenido, @Usuario, @Ip);
+
+    INSERT INTO dbo.Vac_Bitacora
+        (IdColaborador, Tipo, Accion, IdMovimiento, FechaAntes, DiasAntes, FechaDespues, DiasDespues, Motivo, Usuario_Registro, Ip)
+    VALUES
+        (@IdColaborador, 'COMPRA', 'ADJUNTA', @IdMovimiento, NULL, NULL, @Fecha, @Dias, @Motivo, @Usuario, @Ip);
+    COMMIT TRANSACTION;
+
+    SELECT 'OK' AS Resultado;
+END
+GO
+
+/* --------------------------------------- 9. Sp_RTA_VacCompraDocumento ------- */
+IF OBJECT_ID('dbo.Sp_RTA_VacCompraDocumento', 'P') IS NULL
+    EXEC ('CREATE PROCEDURE dbo.Sp_RTA_VacCompraDocumento AS RETURN 0');
+GO
+/* El colaborador va en el filtro: el IdMovimiento de otra persona no devuelve nada. */
+ALTER PROCEDURE dbo.Sp_RTA_VacCompraDocumento
+    @IdColaborador  INT,
+    @IdMovimiento   INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT TOP 1 d.NombreArchivo, d.TipoContenido, d.Contenido
+    FROM dbo.Vac_CompraDocumento d
+    JOIN dbo.Vac_Movimiento m ON m.IdMovimiento = d.IdMovimiento
+    WHERE d.IdMovimiento = @IdMovimiento AND m.IdColaborador = @IdColaborador
+    ORDER BY d.IdDocumento DESC;
 END
 GO
 

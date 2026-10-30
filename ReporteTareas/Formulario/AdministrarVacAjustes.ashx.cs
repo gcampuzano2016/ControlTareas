@@ -3,6 +3,7 @@ using CapaNegocio;
 using ReporteTareas.clases;
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Globalization;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,9 @@ using System.Web.Script.Serialization;
 namespace JsonJQueryNetVacSaldos
 {
     /// <summary>
-    /// Handler de VacacionesAjustes.aspx. Acciones: ListarColaboradores,
-    /// Cargar, SimularCorte, GuardarCorte, RegistrarCompra y AnularCompra.
+    /// Handler de VacacionesAjustes.aspx. Acciones JSON: ListarColaboradores,
+    /// Cargar, SimularCorte, GuardarCorte y AnularCompra. Con archivo
+    /// (multipart): RegistrarCompra y AdjuntarDocumento.
     ///
     /// Escribe saldos: el permiso (pantalla VacacionesAjustes.aspx) se
     /// comprueba en cada llamada, y cada escritura deja en la bitacora el
@@ -46,6 +48,11 @@ namespace JsonJQueryNetVacSaldos
             else if (context.Request.ContentType != null && context.Request.ContentType.Contains("json"))
             {
                 salida = Despachar(context);
+            }
+            else if (context.Request.ContentType != null && context.Request.ContentType.Contains("multipart/form-data"))
+            {
+                /* Lo que lleva el documento firmado: un archivo necesita multipart. */
+                salida = DespacharConArchivo(context);
             }
             else
             {
@@ -81,7 +88,6 @@ namespace JsonJQueryNetVacSaldos
                 if (accion == "Cargar") { return Cargar(id); }
                 if (accion == "SimularCorte") { return SimularCorte(id, p); }
                 if (accion == "GuardarCorte") { return GuardarCorte(id, p, usuario, ip); }
-                if (accion == "RegistrarCompra") { return RegistrarCompra(id, p, usuario, ip); }
                 if (accion == "AnularCompra") { return AnularCompra(id, p, usuario, ip); }
                 return Mensaje("0", "La acción solicitada no existe.", "danger");
             }
@@ -90,6 +96,54 @@ namespace JsonJQueryNetVacSaldos
                 System.Diagnostics.Trace.TraceError(ex.ToString());
                 return Mensaje("0", "No se pudo completar la operación. Intente nuevamente.", "danger");
             }
+        }
+
+        /// <summary>RegistrarCompra y AdjuntarDocumento: campos del formulario y un archivo.</summary>
+        private string DespacharConArchivo(HttpContext context)
+        {
+            try
+            {
+                NameValueCollection f = context.Request.Form;
+                int id;
+                if (!int.TryParse(f["idColaborador"], NumberStyles.None, CultureInfo.InvariantCulture, out id) || id <= 0)
+                {
+                    return Mensaje("0", "Elija un colaborador.", "warning");
+                }
+                string usuario = Convert.ToString(context.Session["Cod_Usuario"], CultureInfo.InvariantCulture).Trim();
+                string ip = context.Request.UserHostAddress;
+                EntVacArchivo documento = Archivo(context);
+                Dictionary<string, object> p = f.AllKeys.Where(k => k != null).ToDictionary(k => k, k => (object)f[k]);
+
+                string accion = (f["action"] ?? "").Trim();
+                if (accion == "RegistrarCompra") { return RegistrarCompra(id, p, documento, usuario, ip); }
+                if (accion == "AdjuntarDocumento") { return AdjuntarDocumento(id, p, documento, usuario, ip); }
+                return Mensaje("0", "La acción solicitada no existe.", "danger");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.TraceError(ex.ToString());
+                return Mensaje("0", "No se pudo completar la operación. Intente nuevamente.", "danger");
+            }
+        }
+
+        /// <summary>El primer archivo del formulario; null si no vino ninguno. Lo valida NegVacAjustes.</summary>
+        private static EntVacArchivo Archivo(HttpContext context)
+        {
+            if (context.Request.Files.Count == 0) { return null; }
+            HttpPostedFile archivo = context.Request.Files.Get(0);
+            if (archivo == null || archivo.ContentLength == 0) { return null; }
+            /* No se lee lo que pase del maximo: ValidarDocumento lo rechaza por tamano. */
+            int largo = Math.Min(archivo.ContentLength, NegVacAjustes.DocumentoMaximo + 1);
+            byte[] bytes = new byte[largo];
+            int leidos = 0;
+            while (leidos < largo)
+            {
+                int n = archivo.InputStream.Read(bytes, leidos, largo - leidos);
+                if (n <= 0) { break; }
+                leidos += n;
+            }
+            if (leidos < largo) { Array.Resize(ref bytes, leidos); }
+            return new EntVacArchivo { NombreArchivo = archivo.FileName ?? "", Contenido = bytes };
         }
 
         private static string Listar()
@@ -131,7 +185,8 @@ namespace JsonJQueryNetVacSaldos
                     m.Estado,
                     m.Situacion,
                     m.Observacion,
-                    m.Origen
+                    m.Origen,
+                    documento = a.Documentos.ContainsKey(m.IdMovimiento) ? a.Documentos[m.IdMovimiento].NombreArchivo : ""
                 }).ToList(),
                 bitacora = a.Bitacora.Select(b => new
                 {
@@ -181,7 +236,7 @@ namespace JsonJQueryNetVacSaldos
             return error == "" ? Exito("") : Mensaje("0", error, "warning");
         }
 
-        private static string RegistrarCompra(int id, object p, string usuario, string ip)
+        private static string RegistrarCompra(int id, object p, EntVacArchivo documento, string usuario, string ip)
         {
             DateTime? fecha;
             decimal? dias;
@@ -190,7 +245,18 @@ namespace JsonJQueryNetVacSaldos
             if (error == "" && (!fecha.HasValue || !dias.HasValue)) { error = "Indique la fecha y los días comprados."; }
             if (error != "") { return Mensaje("0", error, "warning"); }
 
-            error = NegVacAjustes.RegistrarCompra(id, fecha.Value, dias.Value, Campo(p, "motivo"), usuario, ip, DateTime.Today);
+            error = NegVacAjustes.RegistrarCompra(id, fecha.Value, dias.Value, documento, Campo(p, "motivo"), usuario, ip, DateTime.Today);
+            return error == "" ? Exito("") : Mensaje("0", error, "warning");
+        }
+
+        private static string AdjuntarDocumento(int id, object p, EntVacArchivo documento, string usuario, string ip)
+        {
+            int idMovimiento;
+            if (!int.TryParse(Campo(p, "idMovimiento"), NumberStyles.None, CultureInfo.InvariantCulture, out idMovimiento) || idMovimiento <= 0)
+            {
+                return Mensaje("0", "Elija la compra.", "warning");
+            }
+            string error = NegVacAjustes.AdjuntarDocumento(id, idMovimiento, documento, Campo(p, "motivo"), usuario, ip);
             return error == "" ? Exito("") : Mensaje("0", error, "warning");
         }
 

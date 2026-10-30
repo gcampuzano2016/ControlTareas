@@ -231,7 +231,7 @@ namespace CapaEntidad
         public int IdBitacora { get; set; }
         /// <summary>CORTE o COMPRA.</summary>
         public string Tipo { get; set; } = "";
-        /// <summary>REGISTRA, CAMBIA, QUITA o ANULA.</summary>
+        /// <summary>REGISTRA, CAMBIA, QUITA, ANULA o ADJUNTA.</summary>
         public string Accion { get; set; } = "";
         public int? IdMovimiento { get; set; }
         public DateTime? FechaAntes { get; set; }
@@ -251,5 +251,45 @@ namespace CapaEntidad
         /// <summary>Estados individuales (folios) ya emitidos: quedan desactualizados con cada ajuste.</summary>
         public int Emitidos { get; set; }
         public DateTime? UltimoEmitido { get; set; }
+        /// <summary>El ultimo documento de cada compra, por IdMovimiento.</summary>
+        public Dictionary<int, EntVacCompraDocumento> Documentos { get; set; } = new Dictionary<int, EntVacCompraDocumento>();
+    }
+
+    /// <summary>El documento firmado de una compra (Vac_CompraDocumento), sin el contenido.</summary>
+    public class EntVacCompraDocumento
+    {
+        public int IdMovimiento { get; set; }
+        public string NombreArchivo { get; set; } = "";
+        public int Tamano { get; set; }
+        public string Usuario { get; set; } = "";
+        public DateTime Fecha { get; set; }
+    }
+
+    /// <summary>Un archivo que sube GTH o que se descarga: nombre, tipo y bytes.</summary>
+    public class EntVacArchivo
+    {
+        public string NombreArchivo { get; set; } = "";
+        public string TipoContenido { get; set; } = "";
+        public byte[] Contenido { get; set; }
+    }
+
+    /// <summary>Lo que lleva el aviso de compra a Nomina (PDF).</summary>
+    public class EntVacCompraAviso
+    {
+        public EntVacColaborador Colaborador { get; set; }
+        public EntVacMovimiento Compra { get; set; }
+        /// <summary>Saldo de hoy, ya con la compra descontada.</summary>
+        public EntVacSaldo Saldo { get; set; }
+        /// <summary>Quien la registro y cuando (bitacora REGISTRA). Null si vino del Excel.</summary>
+        public EntVacBitacora Registro { get; set; }
+        public EntVacCompraDocumento Documento { get; set; }
+        /// <summary>Sueldo vigente a la fecha de la compra; null si no hay.</summary>
+        public decimal? Sueldo { get; set; }
+        public string FuenteSueldo { get; set; } = "";
+        public decimal DiasMes { get; set; } = 30m;
+        /// <summary>Dias x sueldo / DiasMes; null sin sueldo.</summary>
+        public decimal? Valor { get; set; }
+        public DateTime Emitido { get; set; }
+        public string Usuario { get; set; } = "";
     }
 }

@@ -203,6 +203,19 @@ namespace CapaDato
                         destino.Emitidos = Entero(dr, "Emitidos");
                         destino.UltimoEmitido = FechaNula(dr, "UltimoEmitido");
                     }
+                    if (!dr.NextResult()) { throw new InvalidOperationException("Sp_RTA_VacAjustesHistorial no devolvió los documentos: correr de nuevo 2026-10-29-vacaciones-ajustes.sql."); }
+                    while (dr.Read())
+                    {
+                        EntVacCompraDocumento d = new EntVacCompraDocumento
+                        {
+                            IdMovimiento = Entero(dr, "IdMovimiento"),
+                            NombreArchivo = Texto(dr, "NombreArchivo"),
+                            Tamano = Entero(dr, "Tamano"),
+                            Usuario = Texto(dr, "Usuario_Registro"),
+                            Fecha = Convert.ToDateTime(dr["Fecha_Registro"], CultureInfo.InvariantCulture)
+                        };
+                        destino.Documentos[d.IdMovimiento] = d;
+                    }
                 }
             }
         }
@@ -241,7 +254,9 @@ namespace CapaDato
             }
         }
 
-        public static string RegistrarCompra(int idColaborador, DateTime fecha, decimal dias, string motivo, string usuario, string ip)
+        /// <summary>La compra, su fila de bitacora y su documento, en una sola transaccion.</summary>
+        public static string RegistrarCompra(int idColaborador, DateTime fecha, decimal dias, EntVacArchivo documento,
+                                             string motivo, string usuario, string ip)
         {
             using (SqlConnection cnx = Conexion())
             using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCompraRegistrar"))
@@ -250,9 +265,55 @@ namespace CapaDato
                 cmd.Parameters.Add("@Fecha", SqlDbType.Date).Value = fecha.Date;
                 cmd.Parameters.Add(Dias("@Dias", dias));
                 Auditoria(cmd, motivo, usuario, ip);
+                Archivo(cmd, documento);
                 cnx.Open();
                 return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
             }
+        }
+
+        public static string AdjuntarDocumento(int idColaborador, int idMovimiento, EntVacArchivo documento,
+                                               string motivo, string usuario, string ip)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCompraAdjuntar"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@IdMovimiento", SqlDbType.Int).Value = idMovimiento;
+                Auditoria(cmd, motivo, usuario, ip);
+                Archivo(cmd, documento);
+                cnx.Open();
+                return Convert.ToString(cmd.ExecuteScalar(), CultureInfo.InvariantCulture);
+            }
+        }
+
+        /// <summary>El ultimo documento de una compra de esa persona; null si no tiene.</summary>
+        public static EntVacArchivo Documento(int idColaborador, int idMovimiento)
+        {
+            using (SqlConnection cnx = Conexion())
+            using (SqlCommand cmd = Comando(cnx, "Sp_RTA_VacCompraDocumento"))
+            {
+                cmd.Parameters.Add("@IdColaborador", SqlDbType.Int).Value = idColaborador;
+                cmd.Parameters.Add("@IdMovimiento", SqlDbType.Int).Value = idMovimiento;
+                cnx.Open();
+                using (SqlDataReader dr = cmd.ExecuteReader())
+                {
+                    if (!dr.Read()) { return null; }
+                    return new EntVacArchivo
+                    {
+                        NombreArchivo = Texto(dr, "NombreArchivo"),
+                        TipoContenido = Texto(dr, "TipoContenido"),
+                        Contenido = (byte[])dr["Contenido"]
+                    };
+                }
+            }
+        }
+
+        private static void Archivo(SqlCommand cmd, EntVacArchivo documento)
+        {
+            bool hay = documento != null && documento.Contenido != null;
+            cmd.Parameters.Add("@NombreArchivo", SqlDbType.NVarChar, 260).Value = hay ? (object)documento.NombreArchivo : DBNull.Value;
+            cmd.Parameters.Add("@TipoContenido", SqlDbType.VarChar, 100).Value = hay ? (object)documento.TipoContenido : DBNull.Value;
+            cmd.Parameters.Add("@Contenido", SqlDbType.VarBinary, -1).Value = hay ? (object)documento.Contenido : DBNull.Value;
         }
 
         public static string AnularCompra(int idColaborador, int idMovimiento, string motivo, string usuario, string ip)

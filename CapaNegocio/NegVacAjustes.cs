@@ -117,15 +117,85 @@ namespace CapaNegocio
             return DaoVacSaldos.SimularCorte(idColaborador, fecha, saldo, hoy.Date);
         }
 
-        public static string RegistrarCompra(int idColaborador, DateTime fecha, decimal dias, string motivo, string usuario, string ip, DateTime hoy)
+        /// <summary>
+        /// Decision 7 de GTH (2026-10-30): la compra lleva su documento firmado.
+        /// Sin documento no se registra.
+        /// </summary>
+        public static string RegistrarCompra(int idColaborador, DateTime fecha, decimal dias, EntVacArchivo documento,
+                                             string motivo, string usuario, string ip, DateTime hoy)
         {
             string error = ValidarMotivo(motivo);
+            if (error != "") { return error; }
+            error = ValidarDocumento(documento);
             if (error != "") { return error; }
             EntVacFicha f = DaoVacSaldos.Ficha(hoy.Date, idColaborador);
             if (f == null || f.Saldo == null) { return Mensaje("NO EXISTE"); }
             error = ValidarCompra(f.Colaborador, fecha, dias, f.Saldo.Saldo, hoy);
             if (error != "") { return error; }
-            return Mensaje(DaoVacSaldos.RegistrarCompra(idColaborador, fecha, dias, motivo.Trim(), usuario, ip));
+            return Mensaje(DaoVacSaldos.RegistrarCompra(idColaborador, fecha, dias, documento, motivo.Trim(), usuario, ip));
+        }
+
+        /// <summary>Adjunta o reemplaza el documento de una compra ya registrada (las del Excel no tienen).</summary>
+        public static string AdjuntarDocumento(int idColaborador, int idMovimiento, EntVacArchivo documento,
+                                               string motivo, string usuario, string ip)
+        {
+            string error = ValidarMotivo(motivo);
+            if (error != "") { return error; }
+            error = ValidarDocumento(documento);
+            if (error != "") { return error; }
+            return Mensaje(DaoVacSaldos.AdjuntarDocumento(idColaborador, idMovimiento, documento, motivo.Trim(), usuario, ip));
+        }
+
+        /// <summary>Null si la compra no es de esa persona o no tiene documento.</summary>
+        public static EntVacArchivo Documento(int idColaborador, int idMovimiento)
+        {
+            return DaoVacSaldos.Documento(idColaborador, idMovimiento);
+        }
+
+        public const int DocumentoMaximo = 5 * 1024 * 1024;
+
+        /// <summary>
+        /// PDF, JPG o PNG de hasta 5 MB. Se mira el contenido, no solo el
+        /// nombre: un "acta.pdf" que no empieza como PDF no entra. Si es valido,
+        /// deja en el documento el nombre limpio y el TipoContenido que manda.
+        /// </summary>
+        public static string ValidarDocumento(EntVacArchivo documento)
+        {
+            if (documento == null || documento.Contenido == null || documento.Contenido.Length == 0)
+            {
+                return "Adjunte el documento firmado de la compra (PDF, JPG o PNG).";
+            }
+            if (documento.Contenido.Length > DocumentoMaximo) { return "El documento no puede pasar de 5 MB."; }
+
+            string nombre = System.IO.Path.GetFileName((documento.NombreArchivo ?? "").Trim());
+            string extension = System.IO.Path.GetExtension(nombre).TrimStart('.').ToLowerInvariant();
+            byte[] b = documento.Contenido;
+            string tipo;
+            bool firma;
+            switch (extension)
+            {
+                case "pdf":
+                    tipo = "application/pdf";
+                    firma = b.Length >= 4 && b[0] == 0x25 && b[1] == 0x50 && b[2] == 0x44 && b[3] == 0x46;   // %PDF
+                    break;
+                case "jpg":
+                case "jpeg":
+                    tipo = "image/jpeg";
+                    firma = b.Length >= 3 && b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF;
+                    break;
+                case "png":
+                    tipo = "image/png";
+                    firma = b.Length >= 4 && b[0] == 0x89 && b[1] == 0x50 && b[2] == 0x4E && b[3] == 0x47;
+                    break;
+                default:
+                    return "El documento debe ser PDF, JPG o PNG.";
+            }
+            if (!firma) { return "El archivo no es un " + extension.ToUpperInvariant() + " válido."; }
+            if (nombre.Length > 200) { nombre = "documento." + extension; }
+
+            documento.NombreArchivo = nombre;
+            documento.TipoContenido = tipo;
+            return "";
         }
 
         public static string AnularCompra(int idColaborador, int idMovimiento, string motivo, string usuario, string ip)

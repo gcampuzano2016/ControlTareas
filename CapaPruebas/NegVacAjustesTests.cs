@@ -113,5 +113,45 @@ namespace CapaPruebas
             };
             CollectionAssert.AreEqual(new[] { 3, 1 }, NegVacAjustes.Compras(f).ConvertAll(m => m.IdMovimiento));
         }
+
+        static EntVacArchivo Archivo(string nombre, params byte[] inicio)
+        {
+            byte[] b = new byte[Math.Max(inicio.Length, 16)];
+            Array.Copy(inicio, b, inicio.Length);
+            return new EntVacArchivo { NombreArchivo = nombre, Contenido = b };
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_ExigeElDocumento()
+        {
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(null));
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(new EntVacArchivo { NombreArchivo = "acta.pdf", Contenido = new byte[0] }));
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_MiraElContenidoYNoSoloElNombre()
+        {
+            var pdf = Archivo("acta.pdf", 0x25, 0x50, 0x44, 0x46);
+            Assert.AreEqual("", NegVacAjustes.ValidarDocumento(pdf));
+            Assert.AreEqual("application/pdf", pdf.TipoContenido);
+            Assert.AreEqual("", NegVacAjustes.ValidarDocumento(Archivo("foto.JPG", 0xFF, 0xD8, 0xFF)));
+            Assert.AreEqual("", NegVacAjustes.ValidarDocumento(Archivo("foto.png", 0x89, 0x50, 0x4E, 0x47)));
+
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(Archivo("acta.pdf", 0x4D, 0x5A)), "un .exe renombrado");
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(Archivo("acta.docx", 0x50, 0x4B)), "otro formato");
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(Archivo("acta.pdf.aspx", 0x25, 0x50, 0x44, 0x46)), "vale la ultima extension");
+        }
+
+        [TestMethod]
+        public void ValidarDocumento_TopeDe5MB_YNombreSinRuta()
+        {
+            var grande = new EntVacArchivo { NombreArchivo = "acta.pdf", Contenido = new byte[NegVacAjustes.DocumentoMaximo + 1] };
+            grande.Contenido[0] = 0x25; grande.Contenido[1] = 0x50; grande.Contenido[2] = 0x44; grande.Contenido[3] = 0x46;
+            Assert.AreNotEqual("", NegVacAjustes.ValidarDocumento(grande));
+
+            var conRuta = Archivo(@"C:\Users\gth\Escritorio\acta.pdf", 0x25, 0x50, 0x44, 0x46);
+            Assert.AreEqual("", NegVacAjustes.ValidarDocumento(conRuta));
+            Assert.AreEqual("acta.pdf", conRuta.NombreArchivo);
+        }
     }
 }
